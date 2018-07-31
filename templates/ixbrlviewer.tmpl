@@ -25,8 +25,10 @@
             }
 
         </style>
-        <script type="application/json">{{ taxonomyData }}</script>
+        <script type="application/json" id="taxonomy-data" >{{ taxonomyData }}</script>
         <script type="text/javascript">
+
+            var taxonomy;
 
             function b64DecodeUnicode(str) {
                 return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
@@ -34,7 +36,17 @@
                 }).join(''))
             }
 
+            function selectElement(e) {
+                console.log(e.target.id);
+                var id = e.target.id;
+                console.log(n);
+                console.log(id);
+                console.log(taxonomy.facts[id].value);
+                console.log(taxonomy.facts[id].format);
+            }
+
             $(function () {
+                taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
                 var b64 = document.getElementById("ixbrl-data").innerHTML;
                 var html = b64DecodeUnicode(b64);
                 var iframe = document.createElement('iframe');
@@ -48,6 +60,7 @@
                         n = nn[i]
                         if (n.nodeName == 'IX:NONFRACTION' || n.nodeName == 'IX:NONNUMERIC') {
                             $(n).css("background-color", "yellow");
+                            $(n).click(selectElement);
                         }
 
                     }

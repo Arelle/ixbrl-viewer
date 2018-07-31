@@ -46,14 +46,18 @@ def saveViewer(dts, outFile):
     
         taxonomyData["concepts"].append(conceptData)
 
-    headElt = XmlUtil.descendants(dts.modelDocument.xmlRootElement,"*", "head")
-    XmlUtil.addChild(
-        headElt[0],    
-        XbrlConst.xhtml, 
-        "script", 
-        attributes = { "type": "application/json" },
-        text=json.dumps(taxonomyData, indent=1)
-    )
+    #headElt = XmlUtil.descendants(dts.modelDocument.xmlRootElement,"*", "head")
+    #XmlUtil.addChild(
+    #    headElt[0],    
+    #    XbrlConst.xhtml, 
+    #    "script", 
+    #    attributes = { "type": "application/json" },
+    #    text=json.dumps(taxonomyData, indent=1)
+    #)
+
+    #taxonomyDataJSON = json.dumps(taxonomyData, indent=1)
+    taxonomyDataJSON = json.dumps(taxonomyData, indent=None, separators=(",",":"))
+
     dts.info("viewer:info", "Saving iXBRL viewer to %s" % (outFile))
     xml = io.StringIO()
     XmlUtil.writexml(xml, dts.modelDocument.xmlDocument, encoding="utf-8")
@@ -66,7 +70,7 @@ def saveViewer(dts, outFile):
     )
     template = env.get_template("ixbrlviewer.tmpl")
     with open(outFile, "w") as fout:
-        fout.write(template.render(data=b64))
+        fout.write(template.render(data=b64, taxonomyData = taxonomyDataJSON))
 
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):

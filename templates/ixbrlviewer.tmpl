@@ -39,10 +39,7 @@
             function selectElement(e) {
                 console.log(e.target.id);
                 var id = e.target.id;
-                console.log(n);
-                console.log(id);
-                console.log(taxonomy.facts[id].value);
-                console.log(taxonomy.facts[id].format);
+                console.log(taxonomy.concepts[taxonomy.facts[id].concept].labels[0].text);
             }
 
             $(function () {

@@ -1,0 +1,6 @@
+{% set css %}
+.iv-ixbrl-fact {
+    background-color: yellow;
+    cursor: pointer;
+}
+{% endset %}

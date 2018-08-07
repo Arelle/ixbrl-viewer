@@ -1,4 +1,4 @@
-from arelle import ModelDtsObject, XbrlConst, XmlUtil, ModelValue, XmlUtil
+from arelle import ModelDtsObject, XbrlConst, XmlUtil, ModelValue 
 import json
 import base64
 import io
@@ -43,17 +43,19 @@ class NamespaceMap:
 def lineWrap(s, n = 80):
     return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
 
-'''
-
-'''
-
 def saveViewer(dts, outFile):
+    '''Save an iXBRL Viewer HTML file with iXBRL embedded as a base64 blob and taxonomy info as a JSON blob
+    '''
     idGen = 0
     taxonomyData = {
         "concepts": {},
         "facts": {},
     }
     nsmap = NamespaceMap()
+    roleMap = NamespaceMap()
+    roleMap.getPrefix(XbrlConst.standardLabel,"std")
+    roleMap.getPrefix(XbrlConst.documentationLabel,"doc")
+    
     for f in dts.facts:
         if f.id is None:
             f.set("id","ixv-%d" % (idGen))
@@ -70,20 +72,20 @@ def saveViewer(dts, outFile):
 
         if conceptName not in taxonomyData["concepts"]:
             conceptData = {
-                "labels": []
+                "labels": { "test": "</script>" }
             }
             for lr in labels:
                 l = lr.toModelObject
-                conceptData["labels"].append({
-                    "lang": l.xmlLang,
-                    "text": l.textValue,
-                    "role": l.role,
-                })
-        
+                conceptData["labels"].setdefault(roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+
             taxonomyData["concepts"][conceptName] = conceptData
 
     taxonomyData["prefixes"] = nsmap.prefixmap
-    taxonomyDataJSON = json.dumps(taxonomyData, indent=1)
+    taxonomyData["roles"] = roleMap.prefixmap
+
+    # Escape anything that looks like the start of a close element tag (i.e. </script>)
+    # The only place this can legally appear is inside a string literal.    
+    taxonomyDataJSON = json.dumps(taxonomyData, indent=1).replace("</",'<\/')
     #taxonomyDataJSON = json.dumps(taxonomyData, indent=None, separators=(",",":"))
 
     dts.info("viewer:info", "Saving iXBRL viewer to %s" % (outFile))

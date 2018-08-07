@@ -6,11 +6,14 @@
   integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
   crossorigin="anonymous"></script>
 
+<script
+  src="js/interact.min.js"></script>
+
         <title>iXBRL Viewer</title>
         <style>
             #iframe-container {
                 width: 80%;
-                height: 80%;
+                height: 100%;
                 box-sizing: border-box; 
             }
             #iframe-container > iframe {
@@ -22,58 +25,37 @@
                 width: 20%;
                 float: right;
                 box-sizing: border-box; 
+                font-family: sans-serif;
+            }
+            #std-label {
+                margin-top: 10px;
+                font-weight: bold;
+                font-size:  large;
+            }
+            #concept {
+                margin-top: 20px;
+                font-size:  small;
+            }
+            #documentation {
+                margin-top: 10px;
+                font-style: italic;
+                font-family: serif;
             }
 
         </style>
         <script type="application/json" id="taxonomy-data" >{{ taxonomyData }}</script>
         <script type="text/javascript">
-
-            var taxonomy;
-
-            function b64DecodeUnicode(str) {
-                return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-                }).join(''))
-            }
-
-            function selectElement(e) {
-                console.log(e.target.id);
-                var id = e.target.id;
-                console.log(taxonomy.concepts[taxonomy.facts[id].concept].labels[0].text);
-            }
-
-            $(function () {
-                taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
-                var b64 = document.getElementById("ixbrl-data").innerHTML;
-                var html = b64DecodeUnicode(b64);
-                var iframe = document.createElement('iframe');
-                document.getElementById('iframe-container').appendChild(iframe);
-                iframe.contentWindow.document.open();
-                iframe.contentWindow.document.write(html);
-                iframe.contentWindow.document.close();
-                iframe.contentWindow.addEventListener('load', function () {
-                    nn = $('iframe').contents().find(":root").get(0).getElementsByTagName("*");
-                    for (i=0; i < nn.length; i++) {
-                        n = nn[i]
-                        if (n.nodeName == 'IX:NONFRACTION' || n.nodeName == 'IX:NONNUMERIC') {
-                            $(n).css("background-color", "yellow");
-                            $(n).click(selectElement);
-                        }
-
-                    }
-
-                    $('#inspector-status').text("iXBRL loaded");
-                });
-                
-            });
+            {% include "ixbrlviewer.js" %}
         </script>
     
 
     </head>
     <body>
         <div id="inspector">
-            <h2>iXBRL Viewer</h2>
             <span id='inspector-status'>Loading...</span>
+            <div id='std-label'></div>
+            <div id='documentation'></div>
+            <div id='concept'></div>
         </div>
         <div id="iframe-container">
 

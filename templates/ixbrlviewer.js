@@ -19,10 +19,20 @@ function getLabel(c, rolePrefix) {
 function selectElement(e) {
     console.log(e.target.id);
     var id = e.target.id;
-    var concept = taxonomy.facts[id].concept;
+    var fact = taxonomy.facts[id];
+    var concept = fact.c;
     $('#std-label').text(getLabel(concept, "std") || concept);
     $('#documentation').text(getLabel(concept, "doc") || "");
     $('#concept').text(concept);
+    $('#dimensions').empty()
+    for (var d in fact.d) {
+        var x = $('<div class="dimension">').text(getLabel(d, "std") || d);
+        x.appendTo('#dimensions');
+        x = $('<div class="dimension-value">').text(getLabel(fact.d[d], "std") || fact.d[d]);
+        x.appendTo('#dimensions');
+        
+    }
+    
 }
 
 $(function () {

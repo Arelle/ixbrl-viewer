@@ -41,6 +41,12 @@
                 font-style: italic;
                 font-family: serif;
             }
+            #inspector .dimension {
+                margin-top: 10px;
+            }
+            #inspector .dimension-value {
+                padding-left: 10px;
+            }
 
         </style>
         <script type="application/json" id="taxonomy-data" >{{ taxonomyData }}</script>
@@ -55,6 +61,7 @@
             <span id='inspector-status'>Loading...</span>
             <div id='std-label'></div>
             <div id='documentation'></div>
+            <div id='dimensions'></div>
             <div id='concept'></div>
         </div>
         <div id="iframe-container">

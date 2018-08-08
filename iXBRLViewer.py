@@ -40,67 +40,90 @@ class NamespaceMap:
             self.nsmap[ns] = prefix
         return prefix
 
-def lineWrap(s, n = 80):
-    return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
+    def qname(self, qname):
+        return "%s:%s" % (self.getPrefix(qname.namespaceURI, qname.prefix), qname.localName)
 
-def saveViewer(dts, outFile):
-    '''Save an iXBRL Viewer HTML file with iXBRL embedded as a base64 blob and taxonomy info as a JSON blob
-    '''
-    idGen = 0
-    taxonomyData = {
-        "concepts": {},
-        "facts": {},
-    }
-    nsmap = NamespaceMap()
-    roleMap = NamespaceMap()
-    roleMap.getPrefix(XbrlConst.standardLabel,"std")
-    roleMap.getPrefix(XbrlConst.documentationLabel,"doc")
+
+class IXBRLViewerBuilder:
     
-    for f in dts.facts:
-        if f.id is None:
-            f.set("id","ixv-%d" % (idGen))
-        idGen += 1
-        conceptName = "%s:%s" % (nsmap.getPrefix(f.qname.namespaceURI, f.qname.prefix), f.qname.localName)
-        taxonomyData["facts"][f.id] = {
-            "format": str(f.format),
-            "value": f.value,
-            "concept": conceptName,
+    def __init__(self, dts):
+        self.nsmap = NamespaceMap()
+        self.roleMap = NamespaceMap()
+        self.dts = dts
+        self.taxonomyData = {
+            "concepts": {},
+            "facts": {},
         }
-        labelsRelationshipSet = dts.relationshipSet(XbrlConst.conceptLabel)
-        #dts.info("info:iXBRLViewer", "Fact: %s" % f.concept.qname)
-        labels = labelsRelationshipSet.fromModelObject(f.concept)
 
-        if conceptName not in taxonomyData["concepts"]:
+    def lineWrap(self, s, n = 80):
+        return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
+
+
+    def addConcept(self, concept):
+        labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
+        labels = labelsRelationshipSet.fromModelObject(concept)
+        conceptName = self.nsmap.qname(concept.qname)
+        if conceptName not in self.taxonomyData["concepts"]:
             conceptData = {
-                "labels": { "test": "</script>" }
+                "labels": {  }
             }
             for lr in labels:
                 l = lr.toModelObject
-                conceptData["labels"].setdefault(roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+                conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
 
-            taxonomyData["concepts"][conceptName] = conceptData
+            self.taxonomyData["concepts"][conceptName] = conceptData
 
-    taxonomyData["prefixes"] = nsmap.prefixmap
-    taxonomyData["roles"] = roleMap.prefixmap
+    def saveViewer(self, outFile):
+        '''Save an iXBRL Viewer HTML file with iXBRL embedded as a base64 blob and taxonomy info as a JSON blob
+        '''
 
-    # Escape anything that looks like the start of a close element tag (i.e. </script>)
-    # The only place this can legally appear is inside a string literal.    
-    taxonomyDataJSON = json.dumps(taxonomyData, indent=1).replace("</",'<\/')
-    #taxonomyDataJSON = json.dumps(taxonomyData, indent=None, separators=(",",":"))
+        dts = self.dts
+        idGen = 0
+        self.roleMap.getPrefix(XbrlConst.standardLabel,"std")
+        self.roleMap.getPrefix(XbrlConst.documentationLabel,"doc")
+        
+        for f in dts.facts:
+            if f.id is None:
+                f.set("id","ixv-%d" % (idGen))
+            idGen += 1
+            conceptName = self.nsmap.qname(f.qname)
+            dims = {}
+            
+            for d, v in f.context.qnameDims.items():
+                dims[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
+                self.addConcept(v.dimension)
+                self.addConcept(v.member)
 
-    dts.info("viewer:info", "Saving iXBRL viewer to %s" % (outFile))
-    xml = io.StringIO()
-    XmlUtil.writexml(xml, dts.modelDocument.xmlDocument, encoding="utf-8")
-    b64 = lineWrap(base64.b64encode(xml.getvalue().encode("utf-8")).decode('ascii'))
+            self.taxonomyData["facts"][f.id] = {
+                "f": str(f.format),
+                "v": f.value,
+                "c": conceptName,
+                "d": dims,
+            }
 
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(path),
-        autoescape=jinja2.select_autoescape(['html'])
-    )
-    template = env.get_template("ixbrlviewer.tmpl")
-    with open(outFile, "w") as fout:
-        fout.write(template.render(data=b64, taxonomyData = taxonomyDataJSON))
+            self.addConcept(f.concept)
+
+        self.taxonomyData["prefixes"] = self.nsmap.prefixmap
+        self.taxonomyData["roles"] = self.roleMap.prefixmap
+
+        # Escape anything that looks like the start of a close element tag (i.e. </script>)
+        # The only place this can legally appear is inside a string literal.    
+        taxonomyDataJSON = json.dumps(self.taxonomyData, indent=1).replace("</",'<\/')
+        #taxonomyDataJSON = json.dumps(taxonomyData, indent=None, separators=(",",":"))
+
+        dts.info("viewer:info", "Saving iXBRL viewer to %s" % (outFile))
+        xml = io.StringIO()
+        XmlUtil.writexml(xml, dts.modelDocument.xmlDocument, encoding="utf-8")
+        b64 = self.lineWrap(base64.b64encode(xml.getvalue().encode("utf-8")).decode('ascii'))
+
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(path),
+            autoescape=jinja2.select_autoescape(['html'])
+        )
+        template = env.get_template("ixbrlviewer.tmpl")
+        with open(outFile, "w") as fout:
+            fout.write(template.render(data=b64, taxonomyData = taxonomyDataJSON))
 
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
@@ -116,7 +139,8 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs):
         return
     outFile = getattr(options, 'saveViewerFile', False)
     if outFile:
-        saveViewer(cntlr.modelManager.modelXbrl, outFile)
+        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
+        viewerBuilder.saveViewer(outFile)
 
 
 __pluginInfo__ = {

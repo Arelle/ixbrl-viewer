@@ -44,39 +44,44 @@ $(function () {
     iframe.contentWindow.document.open();
     iframe.contentWindow.document.write(html);
     iframe.contentWindow.document.close();
-    iframe.contentWindow.addEventListener('load', function () {
-        nn = $('iframe').contents().find(":root").get(0).getElementsByTagName("*");
-        for (i=0; i < nn.length; i++) {
-            n = nn[i]
-            if (n.nodeName == 'IX:NONFRACTION' || n.nodeName == 'IX:NONNUMERIC') {
-                $(n).addClass("iv-ixbrl-fact");
-                $(n).click(selectElement);
+    var timer = setInterval(function () {
+        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
+            clearInterval(timer);
+            nn = $('iframe').contents().find(":root").get(0).getElementsByTagName("*");
+            for (i=0; i < nn.length; i++) {
+                n = nn[i]
+                if (n.nodeName == 'IX:NONFRACTION' || n.nodeName == 'IX:NONNUMERIC') {
+                    $(n).addClass("iv-ixbrl-fact");
+                    $(n).click(selectElement);
+                }
+
             }
+            {% import 'iframe-css.css' as css %}
+            $("<style>")
+                .prop("type", "text/css")
+                .html("{{ css.css | replace ("\n", "\\\n") | replace("\"", "\\\"") }}")
+                .appendTo($('iframe').contents().find('head'));
 
+            $('#inspector-status').hide();
+            $('#iframe-container > .loading-mask').hide();
+            interact("#iframe-container").resizable({
+                edges: { left: false, right: true, bottom: false, top: false},
+                restrictEdges: {
+                    outer: 'parent',
+                    endOnly: true,
+                },
+                restrictSize: {
+                    min: { width: 100 }
+                },
+            })
+            .on('resizemove', function (event) {
+                var target = event.target;
+                var w = 100 * event.rect.width / $(target).parent().width();
+                target.style.width = w + '%';
+                $('#inspector').css('width', (100 - w) + '%');
+            });
         }
-        {% import 'iframe-css.css' as css %}
-        $("<style>")
-            .prop("type", "text/css")
-            .html("{{ css.css | replace ("\n", "\\\n") | replace("\"", "\\\"") }}")
-            .appendTo($('iframe').contents().find('head'));
-
-        $('#inspector-status').hide();
-        interact("#iframe-container").resizable({
-            edges: { left: false, right: true, bottom: false, top: false},
-            restrictEdges: {
-                outer: 'parent',
-                endOnly: true,
-            },
-            restrictSize: {
-                min: { width: 100 }
-            },
-        })
-        .on('resizemove', function (event) {
-            var target = event.target;
-            var w = 100 * event.rect.width / $(target).parent().width();
-            target.style.width = w + '%';
-            $('#inspector').css('width', (100 - w) + '%');
-        });
     });
     
 });

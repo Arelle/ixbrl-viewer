@@ -36,7 +36,28 @@ function selectElement(e) {
 }
 
 $(function () {
+    console.log("Preparing iframe...")
+    var iframeContainer = $('<div id="iframe-container"></div>').appendTo('body');
+    var $frame = $('<iframe />').appendTo(iframeContainer);
+    var iframe = $frame[0]
+
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
+    doc.close();
+
+    $('head').children().not("script").appendTo($frame.contents().find('head'));
+    $('body').children().not(iframeContainer).appendTo($frame.contents().find('body'));
+    $('<div id="inspector"><span id="inspector-status">Loading...</span><div id="std-label"></div><div id="documentation"></div><div id="dimensions"></div><div id="concept"></div>').prependTo('body');
+
+            {% import 'inspector-css.css' as inspectorcss %}
+            $("<style>")
+                .prop("type", "text/css")
+                .html("{{ inspectorcss.css | replace ("\n", "\\\n") | replace("\"", "\\\"") }}")
+                .appendTo('head');
+
     taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
+/*
     var b64 = document.getElementById("ixbrl-data").innerHTML;
     var html = b64DecodeUnicode(b64);
     var iframe = document.createElement('iframe');
@@ -44,6 +65,7 @@ $(function () {
     iframe.contentWindow.document.open();
     iframe.contentWindow.document.write(html);
     iframe.contentWindow.document.close();
+*/
     var timer = setInterval(function () {
         var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
@@ -64,8 +86,8 @@ $(function () {
                 .appendTo($('iframe').contents().find('head'));
 
             $('#inspector-status').hide();
-            $('#iframe-container > .loading-mask').hide();
-            interact("#iframe-container").resizable({
+            //$('#iframe-container > .loading-mask').hide();
+            interact('#iframe-container').resizable({
                 edges: { left: false, right: true, bottom: false, top: false},
                 restrictEdges: {
                     outer: 'parent',
@@ -85,3 +107,4 @@ $(function () {
     });
     
 });
+

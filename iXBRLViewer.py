@@ -1,4 +1,5 @@
 from arelle import ModelDtsObject, XbrlConst, XmlUtil, ModelValue 
+from lxml import etree
 import json
 import base64
 import io
@@ -58,6 +59,24 @@ class IXBRLViewerBuilder:
     def lineWrap(self, s, n = 80):
         return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
 
+    def escapeJSONForScriptTag(self, s):
+        """JSON encodes XML special characters
+
+        XML and HTML apply difference escaping rules to content within script
+        tags and we need our output to be valid XML, but treated as HTML by browsers.
+    
+        If we allow XML escaping to occur in a script tag, browsers treating
+        the document as HTML won't unescape it.  If we don't escape XML special
+        characters, it won't be valid XML.  
+
+        We avoid this whole mess by escaping XML special characters using JSON
+        string escapes.  This is only safe to do because < > and & can't occur
+        outside a string in JSON.  It can't safely be used on JS.
+
+        """
+        return s.replace("<","\\u003C").replace(">","\\u003E").replace("&","\\u0026")
+        
+
 
     def addConcept(self, concept):
         labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
@@ -90,6 +109,9 @@ class IXBRLViewerBuilder:
             dims = {}
             
             for d, v in f.context.qnameDims.items():
+                if v.memberQname is None:
+                    # Typed dimension, not yet supported.
+                    continue
                 dims[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
                 self.addConcept(v.dimension)
                 self.addConcept(v.member)
@@ -106,25 +128,49 @@ class IXBRLViewerBuilder:
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
 
-        # Escape anything that looks like the start of a close element tag (i.e. </script>)
-        # The only place this can legally appear is inside a string literal.    
-        taxonomyDataJSON = json.dumps(self.taxonomyData, indent=1).replace("</",'<\/')
+        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1))
         #taxonomyDataJSON = json.dumps(taxonomyData, indent=None, separators=(",",":"))
 
         dts.info("viewer:info", "Saving iXBRL viewer to %s" % (outFile))
-        xml = io.StringIO()
-        XmlUtil.writexml(xml, dts.modelDocument.xmlDocument, encoding="utf-8")
-        b64 = self.lineWrap(base64.b64encode(xml.getvalue().encode("utf-8")).decode('ascii'))
 
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(path),
             autoescape=jinja2.select_autoescape(['html'])
         )
-        template = env.get_template("ixbrlviewer.tmpl")
-        with open(outFile, "w") as fout:
-            fout.write(template.render(data=b64, taxonomyData = taxonomyDataJSON))
 
+        template = env.get_template("ixbrlviewer.js")
+
+        for child in dts.modelDocument.xmlDocument.getroot():
+            if child.tag == '{http://www.w3.org/1999/xhtml}head':
+                child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
+            
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='https://code.jquery.com/jquery-3.3.1.slim.min.js' integrity='sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=' crossorigin='anonymous'></script>")
+                e.text = '' # Avoid self-closing script tag
+                child.append(e)
+
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='http://code.interactjs.io/v1.3.4/interact.min.js'  />")
+                e.text = ''
+                child.append(e)
+
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='ixbrlviewer.js'  />")
+                e.text = ''
+                child.append(e)
+
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' id='taxonomy-data' type='application/json'></script>")
+                e.text = taxonomyDataJSON 
+                child.append(e)
+
+                child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
+
+                break
+
+        with open("ixbrlviewer.js", "w", encoding="utf-8") as fout:
+            fout.write(template.render())
+
+        with open(outFile, "wb") as fout:
+            #XmlUtil.writexml(fout, dts.modelDocument.xmlDocument, encoding="utf-8", expandEmptyTags=True)
+            fout.write(etree.tostring(dts.modelDocument.xmlDocument, method="html", encoding="utf-8", xml_declaration=True))
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer", 

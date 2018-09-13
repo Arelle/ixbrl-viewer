@@ -142,7 +142,7 @@ class IXBRLViewerBuilder:
         template = env.get_template("ixbrlviewer.js")
 
         for child in dts.modelDocument.xmlDocument.getroot():
-            if child.tag == '{http://www.w3.org/1999/xhtml}head':
+            if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
             
                 e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='https://code.jquery.com/jquery-3.3.1.slim.min.js' integrity='sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=' crossorigin='anonymous'></script>")
@@ -157,6 +157,8 @@ class IXBRLViewerBuilder:
                 e.text = ''
                 child.append(e)
 
+                # Putting this in the header can interfere with character set
+                # auto detection 
                 e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' id='taxonomy-data' type='application/json'></script>")
                 e.text = taxonomyDataJSON 
                 child.append(e)
@@ -170,7 +172,9 @@ class IXBRLViewerBuilder:
 
         with open(outFile, "wb") as fout:
             #XmlUtil.writexml(fout, dts.modelDocument.xmlDocument, encoding="utf-8", expandEmptyTags=True)
-            fout.write(etree.tostring(dts.modelDocument.xmlDocument, method="html", encoding="utf-8", xml_declaration=True))
+
+            # Using "xml" permits self-closing tags which confuses an HTML DOM
+            fout.write(etree.tostring(dts.modelDocument.xmlDocument, method="xml", encoding="utf-8", xml_declaration=True))
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer", 

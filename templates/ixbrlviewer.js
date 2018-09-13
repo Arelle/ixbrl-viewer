@@ -47,8 +47,10 @@ $(function () {
     doc.close();
 
     $('head').children().not("script").appendTo($frame.contents().find('head'));
-    $('body').children().not(iframeContainer).appendTo($frame.contents().find('body'));
-    $('<div id="inspector"><span id="inspector-status">Loading...</span><div id="std-label"></div><div id="documentation"></div><div id="dimensions"></div><div id="concept"></div>').prependTo('body');
+    /* Self-closing tags may mean that the script tags are not considered direct children of body, so move them so that they are */
+    $('body script').appendTo($('body'));
+    $('body').children().not("script").not(iframeContainer).appendTo($frame.contents().find('body'));
+    $('<div id="inspector"><span id="inspector-status">Loading...</span><div id="std-label"></div><div id="documentation"></div><div id="dimensions"></div><div id="concept"></div><div><input id="ixbrl-show-all-tags" type="checkbox">Show all tags</input></div><button id="ixbrl-next-tag">Next tag</button>').prependTo('body');
 
             {% import 'inspector-css.css' as inspectorcss %}
             $("<style>")

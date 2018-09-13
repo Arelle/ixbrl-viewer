@@ -15,10 +15,18 @@ function getLabel(c, rolePrefix) {
         return labels["en"] || labels["en-us"]
     }
 }
+function selectNextTag(root) {
+    var current = root.find(".ixbrl-selected").first();
+    var elements = root.find(".ixbrl-element");
+    var next = elements.eq(elements.index(current) + 1);
+    root.scrollTop(next.offset().top - 50);
+    selectElement(next);
+}
 
 function selectElement(e) {
-    console.log(e.target.id);
-    var id = e.target.id;
+    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected");
+    e.addClass("ixbrl-selected");
+    var id = e.data('ivid');
     var fact = taxonomy.facts[id];
     var concept = fact.c;
     $('#std-label').text(getLabel(concept, "std") || concept);
@@ -32,8 +40,65 @@ function selectElement(e) {
         x.appendTo('#dimensions');
         
     }
-    
 }
+
+function localName(e) {
+    if (e.indexOf(':') == -1) {
+        return e
+    }
+    else {
+        return e.substring(e.indexOf(':') + 1)
+    }
+}
+
+function preProcessiXBRL(n, inHidden) {
+  // XXX ignore prefixes
+
+  if(n.nodeType == 1 && (localName(n.nodeName) == 'NONNUMERIC' || localName(n.nodeName) == 'NONFRACTION')) {
+    var wrapper = "span";
+    nn = n.getElementsByTagName("*");
+    for (i = 0; i < nn.length; i++) {
+      if($(nn[i]).css("display") === "block") {
+        wrapper = 'div';
+        break;
+      }
+    }
+    var elt;
+    if (localName(n.nodeName) == 'NONFRACTION') {
+      $(n).wrap('<' + wrapper + ' class="ixbrl-element ixbrl-element-nonfraction"></' + wrapper + '>');
+      $(n).parent().data('ivid', n.getAttribute("id"));
+      if(inHidden) {
+        console.log("cloning non fraction");
+        elt = $(n).parent().clone();
+      }
+    }
+    if (localName(n.nodeName) == 'NONNUMERIC') {
+      $(n).wrap('<' + wrapper + ' class="ixbrl-element ixbrl-element-nonnumeric"></' + wrapper + '>');
+      console.log(n.getAttribute("id"));
+      $(n).parent().data('ivid', n.getAttribute("id"));
+      if(inHidden) {
+        console.log("cloning non numeric");
+        elt = $(n).parent().clone();
+      }
+    }
+    if (elt) {
+      var concept = n.getAttribute("name");
+      if(elt.children().first().text() == "") {
+        elt.children().first().html("<i>no content</i>");
+      }
+      var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
+      $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
+    }
+  }
+  else if(n.nodeType == 1 && localName(n.nodeName) == 'HIDDEN') {
+    inHidden = true;
+  }
+  for (var i=0; i < n.childNodes.length; i++) {
+    preProcessiXBRL(n.childNodes[i], inHidden);
+  }
+
+}
+
 
 $(function () {
     console.log("Preparing iframe...")
@@ -72,6 +137,13 @@ $(function () {
         var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
             clearInterval(timer);
+            preProcessiXBRL(iframeDoc.body);
+            $('iframe').contents().find('.ixbrl-element').click(function (e) {
+                e.stopPropagation();
+                selectElement($(this));
+            });
+
+            /*
             nn = $('iframe').contents().find(":root").get(0).getElementsByTagName("*");
             for (i=0; i < nn.length; i++) {
                 n = nn[i]
@@ -81,6 +153,7 @@ $(function () {
                 }
 
             }
+            */
             {% import 'iframe-css.css' as css %}
             $("<style>")
                 .prop("type", "text/css")
@@ -105,6 +178,19 @@ $(function () {
                 target.style.width = w + '%';
                 $('#inspector').css('width', (100 - w) + '%');
             });
+
+            $('#ixbrl-show-all-tags').change(function(e){
+                if(this.checked) {
+                    $("iframe").contents().find(".ixbrl-element").addClass("ixbrl-highlight");
+                }
+                else {
+                    $("iframe").contents().find(".ixbrl-element").removeClass("ixbrl-highlight");
+                }
+            });
+            $('#ixbrl-next-tag').click(function(e) {
+                selectNextTag($("iframe").contents());
+            });
+
         }
     });
     

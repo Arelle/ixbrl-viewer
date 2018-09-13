@@ -3,4 +3,17 @@
     background-color: yellow;
     cursor: pointer;
 }
+
+.ixbrl-highlight, .ixbrl-selected {
+background-color: yellow;
+}
+
+.ixbrl-selected, .ixbrl-element:hover {
+    outline: dashed 1px black;
+}
+
+.ixbrl-element {
+cursor: pointer;
+        position: relative;
+}
 {% endset %}

@@ -5,6 +5,9 @@ import base64
 import io
 import os
 import jinja2
+import csscompressor
+import htmlmin
+import rjsmin
 
 class NamespaceMap:
     """Class for building a 1:1 map of prefixes to namespace URIs
@@ -138,6 +141,8 @@ class IXBRLViewerBuilder:
             loader=jinja2.FileSystemLoader(path),
             autoescape=jinja2.select_autoescape(['html'])
         )
+        env.filters["cssminify"] = csscompressor.compress
+        env.filters["htmlminify"] = htmlmin.minify
 
         template = env.get_template("ixbrlviewer.js")
 
@@ -168,6 +173,7 @@ class IXBRLViewerBuilder:
                 break
 
         with open("ixbrlviewer.js", "w", encoding="utf-8") as fout:
+            #fout.write(rjsmin.jsmin(template.render()))
             fout.write(template.render())
 
         with open(outFile, "wb") as fout:

@@ -112,27 +112,20 @@ $(function () {
     doc.close();
 
     $('head').children().not("script").appendTo($frame.contents().find('head'));
-    /* Self-closing tags may mean that the script tags are not considered direct children of body, so move them so that they are */
+    {# Self-closing tags may mean that the script tags are not considered direct children of body, so move them so that they are #}
     $('body script').appendTo($('body'));
     $('body').children().not("script").not(iframeContainer).appendTo($frame.contents().find('body'));
-    $('<div id="inspector"><span id="inspector-status">Loading...</span><div id="std-label"></div><div id="documentation"></div><div id="dimensions"></div><div id="concept"></div><div><input id="ixbrl-show-all-tags" type="checkbox">Show all tags</input></div><button id="ixbrl-next-tag">Next tag</button>').prependTo('body');
+    {% import 'inspector-html.tmpl' as inspectorhtml %}
+    $("{{ inspectorhtml.html | htmlminify }}").prependTo('body');
 
-            {% import 'inspector-css.css' as inspectorcss %}
-            $("<style>")
-                .prop("type", "text/css")
-                .html("{{ inspectorcss.css | replace ("\n", "\\\n") | replace("\"", "\\\"") }}")
-                .appendTo('head');
+    {% import 'inspector-css.css' as inspectorcss %}
+    $("<style>")
+        .prop("type", "text/css")
+        .html("{{ inspectorcss.css | cssminify }}")
+        .appendTo('head');
 
     taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
-/*
-    var b64 = document.getElementById("ixbrl-data").innerHTML;
-    var html = b64DecodeUnicode(b64);
-    var iframe = document.createElement('iframe');
-    document.getElementById('iframe-container').appendChild(iframe);
-    iframe.contentWindow.document.open();
-    iframe.contentWindow.document.write(html);
-    iframe.contentWindow.document.close();
-*/
+
     var timer = setInterval(function () {
         var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
@@ -143,25 +136,13 @@ $(function () {
                 selectElement($(this));
             });
 
-            /*
-            nn = $('iframe').contents().find(":root").get(0).getElementsByTagName("*");
-            for (i=0; i < nn.length; i++) {
-                n = nn[i]
-                if (n.nodeName == 'IX:NONFRACTION' || n.nodeName == 'IX:NONNUMERIC') {
-                    $(n).addClass("iv-ixbrl-fact");
-                    $(n).click(selectElement);
-                }
-
-            }
-            */
             {% import 'iframe-css.css' as css %}
             $("<style>")
                 .prop("type", "text/css")
-                .html("{{ css.css | replace ("\n", "\\\n") | replace("\"", "\\\"") }}")
+                .html("{{ css.css | cssminify }}")
                 .appendTo($('iframe').contents().find('head'));
 
             $('#inspector-status').hide();
-            //$('#iframe-container > .loading-mask').hide();
             interact('#iframe-container').resizable({
                 edges: { left: false, right: true, bottom: false, top: false},
                 restrictEdges: {

@@ -116,12 +116,12 @@ $(function () {
     $('body script').appendTo($('body'));
     $('body').children().not("script").not(iframeContainer).appendTo($frame.contents().find('body'));
     {% import 'inspector-html.tmpl' as inspectorhtml %}
-    $("{{ inspectorhtml.html | htmlminify }}").prependTo('body');
+    $("{{ inspectorhtml.html | htmlminify | replace('"','\\"') }}").prependTo('body');
 
     {% import 'inspector-css.css' as inspectorcss %}
     $("<style>")
         .prop("type", "text/css")
-        .html("{{ inspectorcss.css | cssminify }}")
+        .html("{{ inspectorcss.css | cssminify | replace('"','\\"') }}")
         .appendTo('head');
 
     taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
@@ -139,7 +139,7 @@ $(function () {
             {% import 'iframe-css.css' as css %}
             $("<style>")
                 .prop("type", "text/css")
-                .html("{{ css.css | cssminify }}")
+                .html("{{ css.css | cssminify | replace('"','\\"') }}")
                 .appendTo($('iframe').contents().find('head'));
 
             $('#inspector-status').hide();

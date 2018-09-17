@@ -154,10 +154,6 @@ class IXBRLViewerBuilder:
                 e.text = '' # Avoid self-closing script tag
                 child.append(e)
 
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='http://code.interactjs.io/v1.3.4/interact.min.js'  />")
-                e.text = ''
-                child.append(e)
-
                 e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='ixbrlviewer.js'  />")
                 e.text = ''
                 child.append(e)

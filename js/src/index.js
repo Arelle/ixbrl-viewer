@@ -157,9 +157,6 @@ $(function () {
         .text(inspector_css)
         .appendTo('head');
 
-    taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
-
-    buildSearchIndex(taxonomy);
 
     var timer = setInterval(function () {
         var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -176,6 +173,10 @@ $(function () {
                 .prop("type", "text/css")
                 .html(require('css-loader!less-loader!./iframe.less').toString())
                 .appendTo($('iframe').contents().find('head'));
+
+            taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
+
+            buildSearchIndex(taxonomy);
 
             $('#inspector-status').hide();
             interact('#iframe-container').resizable({

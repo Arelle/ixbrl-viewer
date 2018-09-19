@@ -144,25 +144,11 @@ class IXBRLViewerBuilder:
 
         dts.info("viewer:info", "Saving iXBRL viewer to %s" % (outFile))
 
-        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "templates")
-        env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(path),
-            autoescape=jinja2.select_autoescape(['html'])
-        )
-        env.filters["cssminify"] = csscompressor.compress
-        env.filters["htmlminify"] = htmlmin.minify
-
-        template = env.get_template("ixbrlviewer.js")
-
         for child in dts.modelDocument.xmlDocument.getroot():
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
-            
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='https://code.jquery.com/jquery-3.3.1.slim.min.js' integrity='sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=' crossorigin='anonymous'></script>")
-                e.text = '' # Avoid self-closing script tag
-                child.append(e)
 
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='ixbrlviewer.js'  />")
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='js/dist/ixbrlviewer.js'  />")
                 e.text = ''
                 child.append(e)
 
@@ -171,18 +157,10 @@ class IXBRLViewerBuilder:
                 e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' id='taxonomy-data' type='application/json'></script>")
                 e.text = taxonomyDataJSON 
                 child.append(e)
-
                 child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
-
                 break
 
-        with open("ixbrlviewer.js", "w", encoding="utf-8") as fout:
-            #fout.write(rjsmin.jsmin(template.render()))
-            fout.write(template.render())
-
         with open(outFile, "wb") as fout:
-            #XmlUtil.writexml(fout, dts.modelDocument.xmlDocument, encoding="utf-8", expandEmptyTags=True)
-
             # Using "xml" permits self-closing tags which confuses an HTML DOM
             fout.write(etree.tostring(dts.modelDocument.xmlDocument, method="xml", encoding="utf-8", xml_declaration=True))
 

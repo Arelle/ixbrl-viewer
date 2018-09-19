@@ -180,6 +180,8 @@ $(function () {
 
     $('head').children().not("script").appendTo($frame.contents().find('head'));
     
+    /* Due to self-closing tags, our script tags may not be a direct child of
+     * the body tag in an HTML DOM, so move them so that they are */
     $('body script').appendTo($('body'));
     $('body').children().not("script").not(iframeContainer).appendTo($frame.contents().find('body'));
     

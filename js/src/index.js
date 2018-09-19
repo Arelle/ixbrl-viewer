@@ -23,10 +23,20 @@ function getLabel(c, rolePrefix) {
 }
 
 
-function selectNextTag(iframe) {
-    var current = $(".ixbrl-selected", iframe.contents()).first();
+function selectAdjacentTag(iframe, offset) {
     var elements = $(".ixbrl-element", iframe.contents());
-    var next = elements.eq(elements.index(current) + 1);
+    var current = $(".ixbrl-selected", iframe.contents());
+    var next;
+    if (current.length == 1) {
+        next = elements.eq((elements.index(current.first()) + offset) % elements.length);
+    }
+    else if (offset > 0) {
+        next = elements.first();
+    } 
+    else {
+        next = elements.last();
+    }
+        
     showAndSelectElement(iframe, next);
 }
 
@@ -242,7 +252,10 @@ $(function () {
                 }
             });
             $('#ixbrl-next-tag').click(function(e) {
-                selectNextTag($("iframe"));
+                selectAdjacentTag($("iframe"), 1);
+            });
+            $('#ixbrl-prev-tag').click(function(e) {
+                selectAdjacentTag($("iframe"), -1);
             });
             $('#ixbrl-search').keyup(function () {
                 var s = $(this).val();

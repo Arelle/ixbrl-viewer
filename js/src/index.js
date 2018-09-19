@@ -1,5 +1,7 @@
 import interact from 'interactjs'
 import lunr from 'lunr'
+import $ from 'jquery'
+import dateFormat from "dateformat"
 
 var taxonomy;
 var searchIndex;
@@ -52,6 +54,7 @@ function selectElement(e) {
     $('#std-label').text(getLabel(concept, "std") || concept);
     $('#documentation').text(getLabel(concept, "doc") || "");
     $('#concept').text(concept);
+    $('#period').text(periodString(fact));
     $('#dimensions').empty()
     for (var d in fact.d) {
         var x = $('<div class="dimension">').text(getLabel(d, "std") || d);
@@ -71,6 +74,38 @@ function localName(e) {
     else {
         return e.substring(e.indexOf(':') + 1)
     }
+}
+
+function isodateToHuman(s, adjust) {
+    var d = new Date(s);
+    console.log(s);
+    console.log(d);
+    if (d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() == 0) { 
+        if (adjust) {
+            d.setDate(d.getDate() - 1);
+        }
+        return dateFormat(d,"d mmm yyyy");
+    }
+    else {
+        return dateFormat(d,"d mmm yyyy HH:MM:ss");
+    }
+}
+
+function periodString(f) {
+    var s;
+    if (!f.pt) {
+        /* forever */
+        s = "None";
+    }
+    else if (!f.pf) {
+        /* instant */
+        s = isodateToHuman(f.pt, true);
+    }
+    else {
+        console.log(f);
+        s = isodateToHuman(f.pf, false) + " to " + isodateToHuman(f.pt, true);
+    }
+    return s;
 }
 
 function preProcessiXBRL(n, inHidden) {

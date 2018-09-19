@@ -4,10 +4,7 @@ import json
 import base64
 import io
 import os
-import jinja2
-import csscompressor
-import htmlmin
-import rjsmin
+import re
 
 class NamespaceMap:
     """Class for building a 1:1 map of prefixes to namespace URIs
@@ -61,6 +58,10 @@ class IXBRLViewerBuilder:
 
     def lineWrap(self, s, n = 80):
         return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
+
+    def dateFormat(self, d):
+        """Strip the time component from an ISO date if it's zero"""
+        return re.sub("T00:00:00$", "", d)
 
     def escapeJSONForScriptTag(self, s):
         """JSON encodes XML special characters
@@ -119,12 +120,19 @@ class IXBRLViewerBuilder:
                 self.addConcept(v.dimension)
                 self.addConcept(v.member)
 
-            self.taxonomyData["facts"][f.id] = {
+            factData = {
                 "f": str(f.format),
                 "v": f.value,
                 "c": conceptName,
                 "d": dims,
             }
+            if f.context.isInstantPeriod:
+                factData["pt"] = self.dateFormat(f.context.instantDatetime.isoformat())
+            elif f.context.isStartEndPeriod:
+                factData["pf"] = self.dateFormat(f.context.startDatetime.isoformat())
+                factData["pt"] = self.dateFormat(f.context.endDatetime.isoformat())
+
+            self.taxonomyData["facts"][f.id] = factData
 
             self.addConcept(f.concept)
 

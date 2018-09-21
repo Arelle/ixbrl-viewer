@@ -180,6 +180,36 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs):
         viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
         viewerBuilder.saveViewer(outFile)
 
+def iXBRLViewerMenuCommand(cntlr):
+    if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
+        cntlr.addToLog("No document loaded.")
+        return
+
+        # get file name into which to save log file while in foreground thread
+    instanceFile = cntlr.uiFileDialog("save",
+            title=_("arelle - Save iXBRL Viewer Instance"),
+            initialdir=cntlr.config.setdefault("iXBRLViewerFileDir","."),
+            filetypes=[(_("iXBRL report .html"), "*.html")],
+            defaultextension=".html")
+
+    if not instanceFile:
+        return False
+
+    cntlr.config["iXBRLViewerFileDir"] = os.path.dirname(instanceFile)
+    cntlr.saveConfig()
+
+    viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
+    viewerBuilder.saveViewer(instanceFile)
+
+    return
+
+
+def iXBRLViewerMenuEntender(cntlr, menu, *args, **kwargs):
+    # Extend menu with an item for the savedts plugin
+    menu.add_command(label="Save iXBRL Viewer Instance",
+                     underline=0,
+                     command=lambda: iXBRLViewerMenuCommand(cntlr) )
+
 
 __pluginInfo__ = {
     'name': 'Create iXBRL Viewer',
@@ -190,4 +220,5 @@ __pluginInfo__ = {
     'copyright': '',
     'CntlrCmdLine.Options': iXBRLViewerCommandLineOptionExtender,
     'CntlrCmdLine.Xbrl.Run': iXBRLViewerCommandLineXbrlRun,
+    'CntlrWinMain.Menu.Tools': iXBRLViewerMenuEntender,
 }

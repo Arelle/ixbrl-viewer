@@ -164,12 +164,28 @@ function preProcessiXBRL(n, inHidden) {
 
 function buildSearchIndex(taxonomyData) {
     var docs = [];
+    var dims = {};
     $.each(taxonomyData.facts, function (id, f) {
-        docs.push({ "id": id, "label": getLabel(f.c, "std")});
+        var doc = { "id": id, "label": getLabel(f.c, "std")};
+        doc.date = f.pt;
+        doc.startDate = f.pf;
+        for (var d in f.d) {
+            var k = d.replace('-','').replace(':','');
+            doc[k] = getLabel(f.d[d],"std");
+            dims[k] = 1;
+        }
+        console.log(doc);
+        docs.push(doc);
     });
     searchIndex = lunr(function () {
       this.ref('id')
       this.field('label')
+      this.field('startDate')
+      this.field('date')
+      for (var d in dims) {
+        console.log("Adding dim: " + d);
+        this.field(d);
+      }
 
       docs.forEach(function (doc) {
         this.add(doc)

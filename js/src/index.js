@@ -163,29 +163,26 @@ function buildSearchIndex(taxonomyData) {
     var docs = [];
     var dims = {};
     $.each(taxonomyData.facts, function (id, f) {
-        var doc = { "id": id, "label": getLabel(f.c, "std")};
+        var doc = { "id": id };
+        var l = getLabel(f.c, "std");
+        doc.doc = getLabel(f.c,"doc")
         doc.date = f.pt;
         doc.startDate = f.pf;
         for (var d in f.d) {
-            var k = d.replace('-','').replace(':','');
-            doc[k] = getLabel(f.d[d],"std");
-            dims[k] = 1;
+            l += " " + getLabel(f.d[d],"std");
         }
-        console.log(doc);
+        doc.label = l;
         docs.push(doc);
     });
     searchIndex = lunr(function () {
-      this.ref('id')
-      this.field('label')
-      this.field('startDate')
-      this.field('date')
-      for (var d in dims) {
-        console.log("Adding dim: " + d);
-        this.field(d);
-      }
+      this.ref('id');
+      this.field('label');
+      this.field('startDate');
+      this.field('date');
+      this.field('doc');
 
       docs.forEach(function (doc) {
-        this.add(doc)
+        this.add(doc);
       }, this)
     })
 }

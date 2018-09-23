@@ -88,8 +88,6 @@ function localName(e) {
 
 function isodateToHuman(s, adjust) {
     var d = new Date(s);
-    console.log(s);
-    console.log(d);
     if (d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() == 0) { 
         if (adjust) {
             d.setDate(d.getDate() - 1);
@@ -112,7 +110,6 @@ function periodString(f) {
         s = isodateToHuman(f.pt, true);
     }
     else {
-        console.log(f);
         s = isodateToHuman(f.pf, false) + " to " + isodateToHuman(f.pt, true);
     }
     return s;

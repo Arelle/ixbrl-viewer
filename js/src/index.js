@@ -1,27 +1,18 @@
 import interact from 'interactjs'
 import lunr from 'lunr'
 import $ from 'jquery'
-import dateFormat from "dateformat"
+import { iXBRLReport } from "./report.js";
 
 var taxonomy;
 var searchIndex;
+var report;
+
 
 function b64DecodeUnicode(str) {
     return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
     }).join(''))
 }
-
-function getLabel(c, rolePrefix) {
-    var labels = taxonomy.concepts[c].labels[rolePrefix]
-    if (labels === undefined) {
-        return undefined;
-    }
-    else {
-        return labels["en"] || labels["en-us"]
-    }
-}
-
 
 function selectAdjacentTag(iframe, offset) {
     var elements = $(".ixbrl-element", iframe.contents());
@@ -59,17 +50,16 @@ function selectElement(e) {
     e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected");
     e.addClass("ixbrl-selected");
     var id = e.data('ivid');
-    var fact = taxonomy.facts[id];
-    var concept = fact.c;
-    $('#std-label').text(getLabel(concept, "std") || concept);
-    $('#documentation').text(getLabel(concept, "doc") || "");
-    $('#concept').text(concept);
-    $('#period').text(periodString(fact));
+    var fact = report.getFactById(id);
+    $('#std-label').text(fact.getLabel("std") || fact.conceptName());
+    $('#documentation').text(fact.getLabel("doc") || "");
+    $('#concept').text(fact.conceptName());
+    $('#period').text(fact.periodString());
     $('#dimensions').empty()
-    for (var d in fact.d) {
-        var x = $('<div class="dimension">').text(getLabel(d, "std") || d);
+    for (var d in fact.f.d) {
+        var x = $('<div class="dimension">').text(report.getLabel(d, "std") || d);
         x.appendTo('#dimensions');
-        x = $('<div class="dimension-value">').text(getLabel(fact.d[d], "std") || fact.d[d]);
+        x = $('<div class="dimension-value">').text(report.getLabel(fact.f.d[d], "std") || fact.f.d[d]);
         x.appendTo('#dimensions');
         
     }
@@ -84,35 +74,6 @@ function localName(e) {
     else {
         return e.substring(e.indexOf(':') + 1)
     }
-}
-
-function isodateToHuman(s, adjust) {
-    var d = new Date(s);
-    if (d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() == 0) { 
-        if (adjust) {
-            d.setDate(d.getDate() - 1);
-        }
-        return dateFormat(d,"d mmm yyyy");
-    }
-    else {
-        return dateFormat(d,"d mmm yyyy HH:MM:ss");
-    }
-}
-
-function periodString(f) {
-    var s;
-    if (!f.pt) {
-        /* forever */
-        s = "None";
-    }
-    else if (!f.pf) {
-        /* instant */
-        s = isodateToHuman(f.pt, true);
-    }
-    else {
-        s = isodateToHuman(f.pf, false) + " to " + isodateToHuman(f.pt, true);
-    }
-    return s;
 }
 
 function preProcessiXBRL(n, inHidden) {
@@ -164,12 +125,12 @@ function buildSearchIndex(taxonomyData) {
     var dims = {};
     $.each(taxonomyData.facts, function (id, f) {
         var doc = { "id": id };
-        var l = getLabel(f.c, "std");
-        doc.doc = getLabel(f.c,"doc")
+        var l = report.getLabel(f.c, "std");
+        doc.doc = report.getLabel(f.c,"doc")
         doc.date = f.pt;
         doc.startDate = f.pf;
         for (var d in f.d) {
-            l += " " + getLabel(f.d[d],"std");
+            l += " " + report.getLabel(f.d[d],"std");
         }
         doc.label = l;
         docs.push(doc);
@@ -189,101 +150,113 @@ function buildSearchIndex(taxonomyData) {
 
 
 $(function () {
-    var iframeContainer = $('<div id="iframe-container"></div>').appendTo('body');
-    var $frame = $('<iframe />').appendTo(iframeContainer);
-    var iframe = $frame[0]
-
-    var doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
-    doc.close();
-
-    $('head').children().not("script").appendTo($frame.contents().find('head'));
-    
-    /* Due to self-closing tags, our script tags may not be a direct child of
-     * the body tag in an HTML DOM, so move them so that they are */
-    $('body script').appendTo($('body'));
-    $('body').children().not("script").not(iframeContainer).appendTo($frame.contents().find('body'));
-    
-    $(require('html-loader!./inspector.html')).prependTo('body');
-
-    var inspector_css = require('css-loader!less-loader!./inspector.less').toString(); 
-    
-    $("<style>")
-        .prop("type", "text/css")
-        .text(inspector_css)
-        .appendTo('head');
+    $('<div id="ixv-loading-mask" style="position: fixed; top: 20px; left: 20px; width: 500px; height: 200px; background-color: #fff; border: solid #000 1px; text-align: center;">Loading iXBRL Viewer</div>').prependTo('body');
+    setTimeout(function(){
 
 
-    var timer = setInterval(function () {
-        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
-            clearInterval(timer);
-            preProcessiXBRL(iframeDoc.body);
-            $('.ixbrl-element', $('iframe').contents()).click(function (e) {
-                e.stopPropagation();
-                selectElement($(this));
-            });
+        var iframeContainer = $('<div id="iframe-container"></div>').appendTo('body');
+        
+        var $frame = $('<iframe />').appendTo(iframeContainer);
+        var iframe = $frame[0]
 
-            
-            $("<style>")
-                .prop("type", "text/css")
-                .html(require('css-loader!less-loader!./iframe.less').toString())
-                .appendTo($('iframe').contents().find('head'));
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
+        doc.close();
 
-            taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
+        $('head').children().not("script").appendTo($frame.contents().find('head'));
+        
+        /* Due to self-closing tags, our script tags may not be a direct child of
+         * the body tag in an HTML DOM, so move them so that they are */
+        $('body script').appendTo($('body'));
+        $('body').children().not("script").not('#ixv-loading-mask').not(iframeContainer).appendTo($frame.contents().find('body'));
+        
+        $(require('html-loader!./inspector.html')).prependTo('body');
 
-            buildSearchIndex(taxonomy);
+        var inspector_css = require('css-loader!less-loader!./inspector.less').toString(); 
+        
+        $("<style>")
+            .prop("type", "text/css")
+            .text(inspector_css)
+            .appendTo('head');
 
-            $('#inspector-status').hide();
-            interact('#iframe-container').resizable({
-                edges: { left: false, right: true, bottom: false, top: false},
-                restrictEdges: {
-                    outer: 'parent',
-                    endOnly: true,
-                },
-                restrictSize: {
-                    min: { width: 100 }
-                },
-            })
-            .on('resizemove', function (event) {
-                var target = event.target;
-                var w = 100 * event.rect.width / $(target).parent().width();
-                target.style.width = w + '%';
-                $('#inspector').css('width', (100 - w) + '%');
-            });
 
-            $('#ixbrl-show-all-tags').change(function(e){
-                if(this.checked) {
-                    $("iframe").contents().find(".ixbrl-element").addClass("ixbrl-highlight");
-                }
-                else {
-                    $("iframe").contents().find(".ixbrl-element").removeClass("ixbrl-highlight");
-                }
-            });
-            $('#ixbrl-next-tag').click(function(e) {
-                selectAdjacentTag($("iframe"), 1);
-            });
-            $('#ixbrl-prev-tag').click(function(e) {
-                selectAdjacentTag($("iframe"), -1);
-            });
-            $('#ixbrl-search').keyup(function () {
-                var s = $(this).val();
-                var rr = searchIndex.search(s);
-                $('#ixbrl-search-results tr').remove();
-                $.each(rr, function (i,r) {
-                    var row = $('<tr><td></td></tr>');
-                    row.find("td").text(getLabel(taxonomy.facts[r.ref].c, "std"));
-                    row.data('ivid', r.ref);
-                    row.appendTo('#ixbrl-search-results');
-                    row.click(function () {
-                        showAndSelectElement($('iframe'), $(".ixbrl-element", $('iframe').contents()).filter(function () { return $(this).data('ivid') == r.ref }).first());
-                    });
+        var timer = setInterval(function () {
+            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
+                clearInterval(timer);
+                preProcessiXBRL(iframeDoc.body);
+                $('.ixbrl-element', $('iframe').contents()).click(function (e) {
+                    e.stopPropagation();
+                    selectElement($(this));
                 });
-                
-            });
 
-        }
-    });
+                
+                $("<style>")
+                    .prop("type", "text/css")
+                    .html(require('css-loader!less-loader!./iframe.less').toString())
+                    .appendTo($('iframe').contents().find('head'));
+
+                taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
+                report = new iXBRLReport(document.getElementById('taxonomy-data'));
+
+                $('#ixv-loading-mask').text("Building search index");
+                setTimeout(function () {
+                    buildSearchIndex(taxonomy);
+
+                    $('#inspector-status').hide();
+                    interact('#iframe-container').resizable({
+                        edges: { left: false, right: true, bottom: false, top: false},
+                        restrictEdges: {
+                            outer: 'parent',
+                            endOnly: true,
+                        },
+                        restrictSize: {
+                            min: { width: 100 }
+                        },
+                    })
+                    .on('resizemove', function (event) {
+                        var target = event.target;
+                        var w = 100 * event.rect.width / $(target).parent().width();
+                        target.style.width = w + '%';
+                        $('#inspector').css('width', (100 - w) + '%');
+                    });
+
+                    $('#ixbrl-show-all-tags').change(function(e){
+                        if(this.checked) {
+                            $("iframe").contents().find(".ixbrl-element").addClass("ixbrl-highlight");
+                        }
+                        else {
+                            $("iframe").contents().find(".ixbrl-element").removeClass("ixbrl-highlight");
+                        }
+                    });
+                    $('#ixbrl-next-tag').click(function(e) {
+                        selectAdjacentTag($("iframe"), 1);
+                    });
+                    $('#ixbrl-prev-tag').click(function(e) {
+                        selectAdjacentTag($("iframe"), -1);
+                    });
+                    $('#ixbrl-search').keyup(function () {
+                        var s = $(this).val();
+                        var rr = searchIndex.search(s);
+                        $('#ixbrl-search-results tr').remove();
+                        $.each(rr, function (i,r) {
+                            var row = $('<tr><td></td></tr>');
+                            row.find("td").text(report.getFactById(r.ref).getLabel("std") + " (" + r.score + ")" );
+                            row.data('ivid', r.ref);
+                            row.appendTo('#ixbrl-search-results');
+                            row.click(function () {
+                                showAndSelectElement($('iframe'), $(".ixbrl-element", $('iframe').contents()).filter(function () { return $(this).data('ivid') == r.ref }).first());
+                            });
+                        });
+                        
+                    });
+                    $('#ixv-loading-mask').remove();
+                }, 0);
+
+            }
+        });
+        
+    }, 0);
     
 });

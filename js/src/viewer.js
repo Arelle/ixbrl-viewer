@@ -118,6 +118,13 @@ Viewer.prototype.selectElement = function (e) {
     });
 }
 
+Viewer.prototype.elementForFact = function (fact) {
+    return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == fact.id }).first();
+}
+
+Viewer.prototype.showAndSelectFact = function (fact) {
+    this.showAndSelectElement(this.elementForFact(fact));
+}
 
 Viewer.prototype.onSelect = function (f) {
     this._onSelectHandlers.push(f);

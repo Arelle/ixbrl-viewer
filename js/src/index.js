@@ -1,5 +1,4 @@
 import interact from 'interactjs'
-import lunr from 'lunr'
 import $ from 'jquery'
 import { iXBRLReport } from "./report.js";
 import { Viewer } from "./viewer.js";
@@ -9,37 +8,6 @@ var taxonomy;
 var searchIndex;
 var report;
 
-
-function buildSearchIndex(taxonomyData) {
-    var docs = [];
-    var dims = {};
-    var facts = report.facts();
-    for (var i = 0; i < facts.length; i++) {
-        var f = facts[i];
-        var doc = { "id": f.id };
-        var l = f.getLabel("std");
-        doc.doc = f.getLabel("doc");
-        doc.date = f.periodTo();
-        doc.startDate = f.periodFrom();
-        var dims = f.dimensions();
-        for (var d in dims) {
-            l += " " + report.getLabel(dims[d],"std");
-        }
-        doc.label = l;
-        docs.push(doc);
-    }
-    searchIndex = lunr(function () {
-      this.ref('id');
-      this.field('label');
-      this.field('startDate');
-      this.field('date');
-      this.field('doc');
-
-      docs.forEach(function (doc) {
-        this.add(doc);
-      }, this)
-    })
-}
 
 
 $(function () {
@@ -87,17 +55,13 @@ $(function () {
                     viewer.selectElement($(this));
                 });
 
-
-                taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
                 report = new iXBRLReport(document.getElementById('taxonomy-data'));
 
                 var inspector = new Inspector(report, viewer);
 
                 $('#ixv-loading-mask').text("Building search index");
                 setTimeout(function () {
-                    buildSearchIndex(taxonomy);
 
-                    $('#inspector-status').hide();
                     interact('#iframe-container').resizable({
                         edges: { left: false, right: true, bottom: false, top: false},
                         restrictEdges: {
@@ -116,21 +80,6 @@ $(function () {
                     });
 
 
-                    $('#ixbrl-search').keyup(function () {
-                        var s = $(this).val();
-                        var rr = searchIndex.search(s);
-                        $('#ixbrl-search-results tr').remove();
-                        $.each(rr, function (i,r) {
-                            var row = $('<tr><td></td></tr>');
-                            row.find("td").text(report.getFactById(r.ref).getLabel("std") + " (" + r.score + ")" );
-                            row.data('ivid', r.ref);
-                            row.appendTo('#ixbrl-search-results');
-                            row.click(function () {
-                                viewer.showAndSelectElement($(".ixbrl-element", $('iframe').contents()).filter(function () { return $(this).data('ivid') == r.ref }).first());
-                            });
-                        });
-                        
-                    });
                     $('#ixv-loading-mask').remove();
                 }, 0);
 

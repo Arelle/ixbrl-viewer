@@ -1,0 +1,123 @@
+            #iframe-container {
+                width: 75%;
+                height: 100%;
+                box-sizing: border-box; 
+            }
+            #iframe-container > iframe {
+                width: 100%;
+                height: 100%;
+            }
+            #iframe-container > .loading-mask {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                z-index: 10;
+                background-color: rgba(0,0,0,.85);
+            }
+
+.loading-mask .text {
+    padding-top: 80px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    color: #fff;
+    font-size: x-large;
+	font-family: sans-serif;
+
+}
+
+.loading-mask .text:after,
+.loading-mask .text:before {
+    margin: 0 0 0 -30px;
+    height: 60px;
+    width: 60px;
+    position: absolute;
+    content: '';
+    top: 0; 
+    left: 50%;  
+            
+    border-radius: 500rem;
+    border-style: solid;
+    border-width: 3px;
+    box-shadow: 0 0 0 1px transparent;
+
+}
+
+.loading-mask .text:before {
+    border: 3px solid rgba(255,255,255,.1)
+}
+
+.loading-mask .text:after {
+    -webkit-animation: loader .6s linear;
+    animation: loader .6s linear;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    border-color: #fff transparent transparent;
+}
+
+
+@keyframes loader {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+
+
+
+            #inspector {
+                padding: 0 20px 20px 20px;
+                width: 25%;
+                position: absolute;
+                top: 0; 
+                right: 0;
+                bottom: 0;
+                box-sizing: border-box; 
+                font-family: sans-serif;
+                height: 100%;
+            }
+            #std-label {
+                margin-top: 10px;
+                font-weight: bold;
+                font-size:  large;
+            }
+            #concept {
+                margin-top: 20px;
+                font-size:  small;
+            }
+            #documentation {
+                margin-top: 10px;
+                font-style: italic;
+                font-family: serif;
+            }
+            #inspector .dimension {
+                margin-top: 10px;
+            }
+            #inspector .dimension-value {
+                padding-left: 10px;
+            }
+
+#inspector #ixbrl-next-tag {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+
+}
+
+#inspector #ixbrl-search-results td {
+    padding: 7px 5px;
+    border-top: solid 1px #ccc;
+    cursor: pointer;
+}
+
+#inspector #ixbrl-search-results .selected td {
+    background-color: #77f;
+}
+
+#inspector #ixbrl-search-results td:first-child {
+    border-top: none;
+}
+
+
+

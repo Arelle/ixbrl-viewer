@@ -1,8 +1,11 @@
 import $ from 'jquery'
 
+import { ReportSearch } from "./search.js";
+
 export function Inspector(report, viewer) {
     this._report = report;
     this._viewer = viewer;
+    this._search = new ReportSearch(report);
     var inspector = this;
 
     viewer.onSelect(function (id) { inspector.selectFact(id) });
@@ -10,15 +13,23 @@ export function Inspector(report, viewer) {
     $('#ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 
     $('#ixbrl-show-all-tags').change(function(e){ viewer.highlightAllTags(this.checked) });
-
-        if(this.checked) {
-            $("iframe").contents().find(".ixbrl-element").addClass("ixbrl-highlight");
-        }
-        else {
-            $("iframe").contents().find(".ixbrl-element").removeClass("ixbrl-highlight");
-        }
+    $('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
 }
 
+
+Inspector.prototype.search = function (s) {
+    var results = this._search.search(s);
+    var viewer = this._viewer;
+    $('#ixbrl-search-results tr').remove();
+    $.each(results, function (i,r) {
+        var row = $('<tr><td></td></tr>');
+        row.find("td").text(r.fact.getLabel("std") + " (" + r.score + ")" );
+        row.data('ivid', r.fact.id);
+        row.appendTo('#ixbrl-search-results');
+        row.click(function () { viewer.showAndSelectFact(r.fact) });
+    });
+    
+}
 
 Inspector.prototype.selectFact = function (id) {
     var fact = this._report.getFactById(id);

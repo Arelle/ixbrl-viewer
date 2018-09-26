@@ -7,6 +7,7 @@ export function Viewer(iframe) {
 
     this._preProcessiXBRL($("body", iframe.contents()).get(0));
     this._applyStyles();
+    this._bindHandlers();
 }
 
 function localName(e) {
@@ -84,6 +85,14 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
     }
         
     this.showAndSelectElement(next);
+}
+
+Viewer.prototype._bindHandlers = function () {
+    var viewer = this;
+    $('.ixbrl-element', this._contents).click(function (e) {
+        e.stopPropagation();
+        viewer.selectElement($(this));
+    });
 }
 
 Viewer.prototype.selectNextTag = function () {

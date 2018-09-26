@@ -2,12 +2,24 @@ import $ from 'jquery'
 
 import { ReportSearch } from "./search.js";
 
-export function Inspector(report, viewer) {
-    this._report = report;
-    this._viewer = viewer;
-    this._search = new ReportSearch(report);
-    var inspector = this;
+export function Inspector() {
+    /* Insert HTML and CSS styles into body */
+    $(require('html-loader!./inspector.html')).prependTo('body');
+    var inspector_css = require('css-loader!less-loader!./inspector.less').toString(); 
+    $('<style id="ixv-style">')
+        .prop("type", "text/css")
+        .text(inspector_css)
+        .appendTo('head');
+}
 
+Inspector.prototype.setReport = function (report) {
+    this._report = report;
+    this._search = new ReportSearch(report);
+}
+
+Inspector.prototype.setViewer = function (viewer) {
+    this._viewer = viewer;
+    var inspector = this;
     viewer.onSelect(function (id) { inspector.selectFact(id) });
     $('#ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('#ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );

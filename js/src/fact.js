@@ -2,11 +2,12 @@ import { isodateToHuman } from "./util.js"
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
-    this.report = report;
+    this._report = report;
+    this.id = factId;
 }
 
 Fact.prototype.getLabel = function(rolePrefix) {
-    return this.report.getLabel(this.f.c, rolePrefix);
+    return this._report.getLabel(this.f.c, rolePrefix);
 }
 
 Fact.prototype.conceptName = function() {
@@ -29,4 +30,16 @@ Fact.prototype.periodString = function() {
     return s;
 }
 
+
+Fact.prototype.periodTo = function() {
+    return this.f.pt;
+}
+
+Fact.prototype.periodFrom = function() {
+    return this.f.pf;
+}
+
+Fact.prototype.dimensions = function() {
+    return this.f.d;
+}
 

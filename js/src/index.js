@@ -2,139 +2,32 @@ import interact from 'interactjs'
 import lunr from 'lunr'
 import $ from 'jquery'
 import { iXBRLReport } from "./report.js";
+import { Viewer } from "./viewer.js";
+import { Inspector } from "./inspector.js";
 
 var taxonomy;
 var searchIndex;
 var report;
 
 
-function b64DecodeUnicode(str) {
-    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-    }).join(''))
-}
-
-function selectAdjacentTag(iframe, offset) {
-    var elements = $(".ixbrl-element", iframe.contents());
-    var current = $(".ixbrl-selected", iframe.contents());
-    var next;
-    if (current.length == 1) {
-        next = elements.eq((elements.index(current.first()) + offset) % elements.length);
-    }
-    else if (offset > 0) {
-        next = elements.first();
-    } 
-    else {
-        next = elements.last();
-    }
-        
-    showAndSelectElement(iframe, next);
-}
-
-function scrollIfNotVisible(iframe, e) {
-    var viewTop = iframe.contents().scrollTop();
-    var viewBottom = viewTop + iframe.height();
-    var eTop = e.offset().top;
-    var eBottom = eTop + e.height();
-    if (eTop < viewTop || eBottom > viewBottom) {
-        iframe.contents().scrollTop(e.offset().top - 50);
-    }
-}
-
-function showAndSelectElement(iframe, e) {
-    scrollIfNotVisible(iframe, e);
-    selectElement(e);
-}
-
-function selectElement(e) {
-    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected");
-    e.addClass("ixbrl-selected");
-    var id = e.data('ivid');
-    var fact = report.getFactById(id);
-    $('#std-label').text(fact.getLabel("std") || fact.conceptName());
-    $('#documentation').text(fact.getLabel("doc") || "");
-    $('#concept').text(fact.conceptName());
-    $('#period').text(fact.periodString());
-    $('#dimensions').empty()
-    for (var d in fact.f.d) {
-        var x = $('<div class="dimension">').text(report.getLabel(d, "std") || d);
-        x.appendTo('#dimensions');
-        x = $('<div class="dimension-value">').text(report.getLabel(fact.f.d[d], "std") || fact.f.d[d]);
-        x.appendTo('#dimensions');
-        
-    }
-    $('#ixbrl-search-results tr').removeClass('selected');
-    $('#ixbrl-search-results tr').filter(function () { return $(this).data('ivid') == id }).addClass('selected');
-}
-
-function localName(e) {
-    if (e.indexOf(':') == -1) {
-        return e
-    }
-    else {
-        return e.substring(e.indexOf(':') + 1)
-    }
-}
-
-function preProcessiXBRL(n, inHidden) {
-  var elt;
-  if(n.nodeType == 1 && (localName(n.nodeName) == 'NONNUMERIC' || localName(n.nodeName) == 'NONFRACTION')) {
-    var wrapper = "span";
-    var nn = n.getElementsByTagName("*");
-    for (var i = 0; i < nn.length; i++) {
-      if($(nn[i]).css("display") === "block") {
-        wrapper = 'div';
-        break;
-      }
-    }
-    var elt;
-    if (localName(n.nodeName) == 'NONFRACTION') {
-      $(n).wrap('<' + wrapper + ' class="ixbrl-element ixbrl-element-nonfraction"></' + wrapper + '>');
-      $(n).parent().data('ivid', n.getAttribute("id"));
-      if(inHidden) {
-        elt = $(n).parent().clone();
-      }
-    }
-    if (localName(n.nodeName) == 'NONNUMERIC') {
-      $(n).wrap('<' + wrapper + ' class="ixbrl-element ixbrl-element-nonnumeric"></' + wrapper + '>');
-      $(n).parent().data('ivid', n.getAttribute("id"));
-      if(inHidden) {
-        elt = $(n).parent().clone();
-      }
-    }
-    if (elt) {
-      var concept = n.getAttribute("name");
-      if(elt.children().first().text() == "") {
-        elt.children().first().html("<i>no content</i>");
-      }
-      var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
-      $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
-    }
-  }
-  else if(n.nodeType == 1 && localName(n.nodeName) == 'HIDDEN') {
-    inHidden = true;
-  }
-  for (var i=0; i < n.childNodes.length; i++) {
-    preProcessiXBRL(n.childNodes[i], inHidden);
-  }
-
-}
-
 function buildSearchIndex(taxonomyData) {
     var docs = [];
     var dims = {};
-    $.each(taxonomyData.facts, function (id, f) {
-        var doc = { "id": id };
-        var l = report.getLabel(f.c, "std");
-        doc.doc = report.getLabel(f.c,"doc")
-        doc.date = f.pt;
-        doc.startDate = f.pf;
-        for (var d in f.d) {
-            l += " " + report.getLabel(f.d[d],"std");
+    var facts = report.facts();
+    for (var i = 0; i < facts.length; i++) {
+        var f = facts[i];
+        var doc = { "id": f.id };
+        var l = f.getLabel("std");
+        doc.doc = f.getLabel("doc");
+        doc.date = f.periodTo();
+        doc.startDate = f.periodFrom();
+        var dims = f.dimensions();
+        for (var d in dims) {
+            l += " " + report.getLabel(dims[d],"std");
         }
         doc.label = l;
         docs.push(doc);
-    });
+    }
     searchIndex = lunr(function () {
       this.ref('id');
       this.field('label');
@@ -185,20 +78,20 @@ $(function () {
             var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
             if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
                 clearInterval(timer);
-                preProcessiXBRL(iframeDoc.body);
+
+                var viewer = new Viewer($('iframe'));
+
+
                 $('.ixbrl-element', $('iframe').contents()).click(function (e) {
                     e.stopPropagation();
-                    selectElement($(this));
+                    viewer.selectElement($(this));
                 });
 
-                
-                $("<style>")
-                    .prop("type", "text/css")
-                    .html(require('css-loader!less-loader!./iframe.less').toString())
-                    .appendTo($('iframe').contents().find('head'));
 
                 taxonomy = JSON.parse(document.getElementById('taxonomy-data').innerHTML);
                 report = new iXBRLReport(document.getElementById('taxonomy-data'));
+
+                var inspector = new Inspector(report, viewer);
 
                 $('#ixv-loading-mask').text("Building search index");
                 setTimeout(function () {
@@ -222,20 +115,7 @@ $(function () {
                         $('#inspector').css('width', (100 - w) + '%');
                     });
 
-                    $('#ixbrl-show-all-tags').change(function(e){
-                        if(this.checked) {
-                            $("iframe").contents().find(".ixbrl-element").addClass("ixbrl-highlight");
-                        }
-                        else {
-                            $("iframe").contents().find(".ixbrl-element").removeClass("ixbrl-highlight");
-                        }
-                    });
-                    $('#ixbrl-next-tag').click(function(e) {
-                        selectAdjacentTag($("iframe"), 1);
-                    });
-                    $('#ixbrl-prev-tag').click(function(e) {
-                        selectAdjacentTag($("iframe"), -1);
-                    });
+
                     $('#ixbrl-search').keyup(function () {
                         var s = $(this).val();
                         var rr = searchIndex.search(s);
@@ -246,7 +126,7 @@ $(function () {
                             row.data('ivid', r.ref);
                             row.appendTo('#ixbrl-search-results');
                             row.click(function () {
-                                showAndSelectElement($('iframe'), $(".ixbrl-element", $('iframe').contents()).filter(function () { return $(this).data('ivid') == r.ref }).first());
+                                viewer.showAndSelectElement($(".ixbrl-element", $('iframe').contents()).filter(function () { return $(this).data('ivid') == r.ref }).first());
                             });
                         });
                         

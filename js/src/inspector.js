@@ -1,4 +1,5 @@
 import $ from 'jquery'
+import { formatNumber } from "./util.js";
 
 import { ReportSearch } from "./search.js";
 
@@ -49,6 +50,14 @@ Inspector.prototype.selectFact = function (id) {
     $('#documentation').text(fact.getLabel("doc") || "");
     $('#concept').text(fact.conceptName());
     $('#period').text(fact.periodString());
+    var v = fact.value();
+    if (fact.isMonetaryValue()) {
+        v = fact.unit().localname + " " + formatNumber(v,2);
+    }
+    else {
+        v = v + " " + fact.unit().qname;
+    }
+    $('#value').text(v);
     $('#dimensions').empty()
     for (var d in fact.f.d) {
         var x = $('<div class="dimension">').text(this._report.getLabel(d, "std") || d);

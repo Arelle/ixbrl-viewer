@@ -120,11 +120,17 @@ class IXBRLViewerBuilder:
                 self.addConcept(v.dimension)
                 self.addConcept(v.member)
 
+            unit = None;
+            if f.isNumeric:
+                # XXX does not support complex units
+                unit = self.nsmap.qname(f.unit.measures[0][0])
+
             factData = {
                 "f": str(f.format),
                 "v": f.value,
                 "c": conceptName,
                 "d": dims,
+                "u": unit,
             }
             if f.context.isInstantPeriod:
                 factData["pt"] = self.dateFormat(f.context.instantDatetime.isoformat())

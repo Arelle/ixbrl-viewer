@@ -1,4 +1,5 @@
 import { isodateToHuman } from "./util.js"
+import { QName } from "./qname.js"
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
@@ -43,3 +44,20 @@ Fact.prototype.dimensions = function() {
     return this.f.d;
 }
 
+Fact.prototype.value = function() {
+    return this.f.v;
+}
+
+Fact.prototype.unit = function() {
+    if (this.f.u) {
+        return new QName(this._report.prefixMap(), this.f.u);
+    }
+    else {
+        return undefined;
+    }
+}
+
+Fact.prototype.isMonetaryValue = function () {
+    var unit = this.unit();
+    return unit && unit.namespace == "http://www.xbrl.org/2003/iso4217";
+}

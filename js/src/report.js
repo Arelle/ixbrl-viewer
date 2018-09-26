@@ -31,3 +31,7 @@ iXBRLReport.prototype.facts = function() {
     });
     return allFacts;
 }
+
+iXBRLReport.prototype.prefixMap = function() {
+    return this.data.prefixes;
+}

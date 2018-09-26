@@ -12,3 +12,7 @@ export function isodateToHuman(s, adjust) {
         return dateFormat(d,"d mmm yyyy HH:MM:ss");
     }
 }
+
+export function formatNumber(v, d) {
+    return Number(v).toFixed(d).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+}

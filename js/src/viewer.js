@@ -9,6 +9,7 @@ export function Viewer(iframe) {
     this._applyStyles();
     this._bindHandlers();
     this.scale = 1;
+    
 }
 
 function localName(e) {

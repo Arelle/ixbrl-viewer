@@ -45,7 +45,7 @@ $(function () {
                     inspector.setViewer(viewer);
 
                     interact('#iframe-container').resizable({
-                        edges: { left: false, right: true, bottom: false, top: false},
+                        edges: { left: false, right: ".resize", bottom: false, top: false},
                         restrictEdges: {
                             outer: 'parent',
                             endOnly: true,
@@ -54,11 +54,20 @@ $(function () {
                             min: { width: 100 }
                         },
                     })
+                    .on('resizestart', function (event) {
+                        $('#iframe-container').css("pointer-events", "none");
+                        console.log("resize start");
+                    })
                     .on('resizemove', function (event) {
+                        console.log("resize move");
                         var target = event.target;
                         var w = 100 * event.rect.width / $(target).parent().width();
                         target.style.width = w + '%';
                         $('#inspector').css('width', (100 - w) + '%');
+                    })
+                    .on('resizeend', function (event) {
+                        console.log("resize end");
+                        $('#iframe-container').css("pointer-events", "auto");
                     });
                     $('#ixv .loader').remove();
                 },0);

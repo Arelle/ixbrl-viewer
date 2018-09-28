@@ -54,7 +54,7 @@ Inspector.prototype.selectFact = function (id) {
     if (fact.isMonetaryValue()) {
         v = fact.unit().localname + " " + formatNumber(v,2);
     }
-    else {
+    else if (fact.unit()) {
         v = v + " " + fact.unit().qname;
     }
     $('#value').text(v);

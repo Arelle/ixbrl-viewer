@@ -8,6 +8,7 @@ export function Viewer(iframe) {
     this._preProcessiXBRL($("body", iframe.contents()).get(0));
     this._applyStyles();
     this._bindHandlers();
+    this.scale = 1;
 }
 
 function localName(e) {
@@ -93,6 +94,8 @@ Viewer.prototype._bindHandlers = function () {
         e.stopPropagation();
         viewer.selectElement($(this));
     });
+    $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
+    $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
 }
 
 Viewer.prototype.selectNextTag = function () {
@@ -146,5 +149,25 @@ Viewer.prototype.highlightAllTags = function (on) {
     else {
         $(".ixbrl-element", this._contents).removeClass("ixbrl-highlight");
     }
+}
+
+Viewer.prototype._zoom = function () {
+    var viewTop = this._contents.scrollTop();
+    var height = $("html",this._contents).height();
+    $('body', this._contents).css('zoom',this.scale);
+
+    var newHeight = $("html", this._contents).height();
+    this._contents.scrollTop(newHeight * (viewTop)/height );
+    
+
+}
+
+Viewer.prototype.zoomIn = function () {
+    this.scale *= 1.1;
+    this._zoom();
+}
+Viewer.prototype.zoomOut = function () {
+    this.scale /= 1.1;
+    this._zoom();
 }
 

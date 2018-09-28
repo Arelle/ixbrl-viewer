@@ -26,10 +26,40 @@
         width: 75%;
         height: 100%;
         box-sizing: border-box; 
+        position: relative;
+
         & > iframe {
             width: 100%;
             height: 100%;
         }
+
+        .zoom-in, .zoom-out {
+            position: absolute;
+            right: 20px;
+            width: 20px;
+            height: 20px;
+            border: solid 1px #bbb;
+            background-color: rgba(225,225,225,0.7);
+            justify-content: center;
+            display: flex;
+            align-items: center;
+            color: #777;
+            cursor: pointer;
+        }
+        .zoom-in:hover,
+        .zoom-out:hover {
+            background-color: rgba(128,128,128,0.7);
+        }
+  
+        .zoom-in {
+            top: 15px;
+        }
+
+        .zoom-out {
+            top: 40px;
+        }
+
+        
     }
 
     #inspector {

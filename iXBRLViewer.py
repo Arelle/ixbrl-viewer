@@ -5,6 +5,7 @@ import base64
 import io
 import os
 import re
+from .ui import SaveViewerDialog
 
 class NamespaceMap:
     """Class for building a 1:1 map of prefixes to namespace URIs
@@ -96,7 +97,7 @@ class IXBRLViewerBuilder:
 
             self.taxonomyData["concepts"][conceptName] = conceptData
 
-    def saveViewer(self, outFile):
+    def saveViewer(self, outFile, scriptUrl = "js/dist/ixbrlviewer.js"):
         '''Save an iXBRL Viewer HTML file with iXBRL embedded as a base64 blob and taxonomy info as a JSON blob
         '''
 
@@ -154,7 +155,7 @@ class IXBRLViewerBuilder:
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='js/dist/ixbrlviewer.js'  />")
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='%s'  />" % scriptUrl)
                 e.text = ''
                 child.append(e)
 
@@ -191,40 +192,18 @@ def iXBRLViewerMenuCommand(cntlr):
         cntlr.addToLog("No document loaded.")
         return
 
-        # get file name into which to save log file while in foreground thread
-    instanceFile = cntlr.uiFileDialog("save",
-            title=_("arelle - Save iXBRL Viewer Instance"),
-            initialdir=cntlr.config.setdefault("iXBRLViewerFileDir","."),
-            filetypes=[(_("iXBRL report .html"), "*.html")],
-            defaultextension=".html")
-
-    if not instanceFile:
-        return False
-
-    cntlr.config["iXBRLViewerFileDir"] = os.path.dirname(instanceFile)
-    cntlr.saveConfig()
-
-    viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
-    viewerBuilder.saveViewer(instanceFile)
+    dialog = SaveViewerDialog(cntlr) 
+    if dialog.accepted and dialog.filename() != "":
+        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
+        viewerBuilder.saveViewer(dialog.filename(),scriptUrl=dialog.scriptUrl())
 
     return
 
 
-def iXBRLViewerMenuEntender(cntlr, menu, *args, **kwargs):
+def iXBRLViewerMenuExtender(cntlr, menu, *args, **kwargs):
     # Extend menu with an item for the savedts plugin
     menu.add_command(label="Save iXBRL Viewer Instance",
                      underline=0,
                      command=lambda: iXBRLViewerMenuCommand(cntlr) )
 
 
-__pluginInfo__ = {
-    'name': 'Create iXBRL Viewer',
-    'version': '0.1',
-    'description': "",
-    'license': '',
-    'author': 'Paul Warren',
-    'copyright': '',
-    'CntlrCmdLine.Options': iXBRLViewerCommandLineOptionExtender,
-    'CntlrCmdLine.Xbrl.Run': iXBRLViewerCommandLineXbrlRun,
-    'CntlrWinMain.Menu.Tools': iXBRLViewerMenuEntender,
-}

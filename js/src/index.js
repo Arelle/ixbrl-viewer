@@ -55,7 +55,7 @@ $(function () {
                         },
                     })
                     .on('resizestart', function (event) {
-                        $('#iframe-container').css("pointer-events", "none");
+                        $('#ixv').css("pointer-events", "none");
                         console.log("resize start");
                     })
                     .on('resizemove', function (event) {
@@ -67,7 +67,7 @@ $(function () {
                     })
                     .on('resizeend', function (event) {
                         console.log("resize end");
-                        $('#iframe-container').css("pointer-events", "auto");
+                        $('#ixv').css("pointer-events", "auto");
                     });
                     $('#ixv .loader').remove();
                 },0);

@@ -35,3 +35,18 @@ iXBRLReport.prototype.facts = function() {
 iXBRLReport.prototype.prefixMap = function() {
     return this.data.prefixes;
 }
+
+iXBRLReport.prototype.getChildConcepts = function(c,arcrole) {
+    
+    var rels = {}
+    if (this.data.rels.hasOwnProperty(arcrole)) {
+        $.each(this.data.rels[arcrole], function (elr, rr) {
+            console.log(rr);
+            if (rr.hasOwnProperty(c)) {
+                rels[elr] = rr[c]
+            }
+        })
+    }
+    return rels;
+
+}

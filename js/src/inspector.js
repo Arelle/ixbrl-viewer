@@ -44,12 +44,33 @@ Inspector.prototype.search = function (s) {
     
 }
 
+Inspector.prototype._calculationHTML = function (fact) {
+    var rels = this._report.getChildConcepts(fact.conceptName(), "calc")
+    var tree = $("<ul></ul>")
+    var report = this._report;
+    $.each(rels, function (elr, rr) {
+        var item =  $("<li></li>");
+        item.text(elr)
+        var list = $("<ul></ul>");
+        list.appendTo(item);
+        
+        $.each(rr, function (i,r) {
+            var i = $("<li></li>");
+            i.text(report.getLabel(r, "std"));
+            i.appendTo(list)
+        });
+        item.appendTo(tree);
+    });
+    return tree;
+}
+
 Inspector.prototype.selectFact = function (id) {
     var fact = this._report.getFactById(id);
     $('#std-label').text(fact.getLabel("std") || fact.conceptName());
     $('#documentation').text(fact.getLabel("doc") || "");
     $('#concept').text(fact.conceptName());
     $('#period').text(fact.periodString());
+    $('#calculation').html(this._calculationHTML(fact, "calc"));
     var v = fact.value();
     if (fact.isMonetaryValue()) {
         v = fact.unit().localname + " " + formatNumber(v,2);

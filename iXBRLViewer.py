@@ -97,14 +97,41 @@ class IXBRLViewerBuilder:
 
             self.taxonomyData["concepts"][conceptName] = conceptData
 
+    def treeWalk(self, rels, item, indent = 0):
+        for r in rels.fromModelObject(item):
+            self.treeWalk(rels, r.toModelObject, indent + 1)
+
+    def getRelationnShips(self):
+        rels = {}
+
+        for baseSetKey, baseSetModelLinks  in self.dts.baseSets.items():
+            arcrole, ELR, linkqname, arcqname = baseSetKey
+            if (arcrole == XbrlConst.parentChild or arcrole == XbrlConst.summationItem) and ELR is not None:
+                rr = dict()
+                relSet = self.dts.relationshipSet(arcrole, ELR)
+                for r in relSet.modelRelationships:
+                    fromKey = self.roleMap.qname(r.fromModelObject.qname)
+                    if fromKey not in rr:
+                        rr[fromKey] = []
+                    rr[fromKey].append(self.roleMap.qname(r.toModelObject.qname))
+                    self.addConcept(r.toModelObject)
+
+                rels.setdefault(self.roleMap.getPrefix(arcrole),{})[ELR] = rr
+        return rels
+        
+
+
     def saveViewer(self, outFile, scriptUrl = "js/dist/ixbrlviewer.js"):
-        '''Save an iXBRL Viewer HTML file with iXBRL embedded as a base64 blob and taxonomy info as a JSON blob
+        '''Save an iXBRL file with XBRL data as a JSON blob, and a script tag added
         '''
 
         dts = self.dts
         idGen = 0
         self.roleMap.getPrefix(XbrlConst.standardLabel,"std")
         self.roleMap.getPrefix(XbrlConst.documentationLabel,"doc")
+        self.roleMap.getPrefix(XbrlConst.summationItem,"calc")
+        self.roleMap.getPrefix(XbrlConst.parentChild,"pres")
+
         
         for f in dts.facts:
             if f.id is None:
@@ -145,6 +172,7 @@ class IXBRLViewerBuilder:
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
+        self.taxonomyData["rels"] = self.getRelationnShips()
 
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1))
         #taxonomyDataJSON = json.dumps(taxonomyData, indent=None, separators=(",",":"))

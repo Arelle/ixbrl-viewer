@@ -70,7 +70,7 @@ Inspector.prototype.selectFact = function (id) {
     $('#documentation').text(fact.getLabel("doc") || "");
     $('#concept').text(fact.conceptName());
     $('#period').text(fact.periodString());
-    $('#calculation').html(this._calculationHTML(fact, "calc"));
+    $('#calculation .tree').html(this._calculationHTML(fact, "calc"));
     var v = fact.value();
     if (fact.isMonetaryValue()) {
         v = fact.unit().localname + " " + formatNumber(v,2);
@@ -79,14 +79,40 @@ Inspector.prototype.selectFact = function (id) {
         v = v + " " + fact.unit().qname;
     }
     $('#value').text(v);
-    $('#dimensions').empty()
-    for (var d in fact.f.d) {
+    $('#dimensions').empty();
+    var dims = fact.dimensions();
+    for (var d in dims) {
         var x = $('<div class="dimension">').text(this._report.getLabel(d, "std") || d);
         x.appendTo('#dimensions');
-        x = $('<div class="dimension-value">').text(this._report.getLabel(fact.f.d[d], "std") || fact.f.d[d]);
+        x = $('<div class="dimension-value">').text(this._report.getLabel(dims[d], "std") || dims[d]);
         x.appendTo('#dimensions');
         
     }
     $('#ixbrl-search-results tr').removeClass('selected');
     $('#ixbrl-search-results tr').filter(function () { return $(this).data('ivid') == id }).addClass('selected');
+
+    var duplicates = fact.duplicates();
+    var n = 0;
+    var ndup = duplicates.length;
+    for (var i = 0; i < ndup; i++) {
+        if (fact.id == duplicates[i].id) {
+            n = i;
+        }
+    }
+    $('#duplicates .text').text((n + 1) + " of " + ndup);
+    var viewer = this._viewer;
+    $('#duplicates .prev').off().click(function () { viewer.showAndSelectFact(duplicates[(n+ndup-1) % ndup])});
+    $('#duplicates .next').off().click(function () { viewer.showAndSelectFact(duplicates[(n+1) % ndup])});
+
+
+    var rels = this._report.getChildConcepts(fact.conceptName(), "calc")
+    if (Object.keys(rels).length > 0) {
+        var elr = Object.keys(rels)[0];
+        var otherFacts = this._report.getAlignedFacts(fact, {"c": rels[elr] });
+        $.each(otherFacts, function (i,ff) {
+            viewer.highlightRelatedFact(ff);
+        });
+    }
+
+
 }

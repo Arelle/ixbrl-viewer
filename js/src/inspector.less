@@ -96,6 +96,7 @@ body {
         box-sizing: border-box; 
         font-family: sans-serif;
         height: 100%;
+        overflow-y: scroll;
     }
     #std-label {
         margin-top: 10px;
@@ -107,6 +108,11 @@ body {
         margin-top: 20px;
         font-size:  small;
         min-height: 25px;
+    }
+    #duplicates {
+        .next, .prev {
+            cursor: pointer;
+        }
     }
     #documentation {
         margin-top: 10px;
@@ -126,10 +132,10 @@ body {
         padding-left: 10px;
     }
 
-    #ixbrl-controls-bottom {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
+    #ixbrl-controls-top {
+        padding-top:10px;
+        padding-bottom:10px;
+        border-bottom: solid 1px #333;
     }
 
     #inspector {
@@ -157,7 +163,7 @@ body {
         tbody {
             width: 100%;
             display: block;
-            height: 400px;
+            height: 200px;
             overflow-y: scroll;
         }
     }

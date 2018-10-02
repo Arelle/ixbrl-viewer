@@ -138,33 +138,35 @@ class IXBRLViewerBuilder:
                 f.set("id","ixv-%d" % (idGen))
             idGen += 1
             conceptName = self.nsmap.qname(f.qname)
-            dims = {}
-            
-            for d, v in f.context.qnameDims.items():
-                if v.memberQname is None:
-                    # Typed dimension, not yet supported.
-                    continue
-                dims[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
-                self.addConcept(v.dimension)
-                self.addConcept(v.member)
-
             unit = None;
             if f.isNumeric:
                 # XXX does not support complex units
                 unit = self.nsmap.qname(f.unit.measures[0][0])
 
+            aspects = {
+                "c": conceptName,
+                "u": unit
+            }
+            
+            for d, v in f.context.qnameDims.items():
+                if v.memberQname is None:
+                    # Typed dimension, not yet supported.
+                    continue
+                aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
+                self.addConcept(v.dimension)
+                self.addConcept(v.member)
+
+            if f.context.isInstantPeriod:
+                aspects["pt"] = self.dateFormat(f.context.instantDatetime.isoformat())
+            elif f.context.isStartEndPeriod:
+                aspects["pf"] = self.dateFormat(f.context.startDatetime.isoformat())
+                aspects["pt"] = self.dateFormat(f.context.endDatetime.isoformat())
+
             factData = {
                 "f": str(f.format),
                 "v": f.value,
-                "c": conceptName,
-                "d": dims,
-                "u": unit,
+                "a": aspects,
             }
-            if f.context.isInstantPeriod:
-                factData["pt"] = self.dateFormat(f.context.instantDatetime.isoformat())
-            elif f.context.isStartEndPeriod:
-                factData["pf"] = self.dateFormat(f.context.startDatetime.isoformat())
-                factData["pt"] = self.dateFormat(f.context.endDatetime.isoformat())
 
             self.taxonomyData["facts"][f.id] = factData
 

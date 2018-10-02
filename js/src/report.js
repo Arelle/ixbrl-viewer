@@ -37,16 +37,31 @@ iXBRLReport.prototype.prefixMap = function() {
 }
 
 iXBRLReport.prototype.getChildConcepts = function(c,arcrole) {
-    
     var rels = {}
     if (this.data.rels.hasOwnProperty(arcrole)) {
         $.each(this.data.rels[arcrole], function (elr, rr) {
-            console.log(rr);
             if (rr.hasOwnProperty(c)) {
                 rels[elr] = rr[c]
             }
         })
     }
     return rels;
-
 }
+
+
+iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
+    var all = this.facts();
+    var aligned = [];
+    if (!coveredAspects) {
+        coveredAspects = {};
+    }
+    $.each(all, function (i, ff) {
+        if (ff.isAligned(f, coveredAspects)) {
+            aligned.push(ff);
+        }
+    });
+    return aligned; 
+}
+
+
+

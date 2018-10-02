@@ -113,7 +113,7 @@ Viewer.prototype.scrollIfNotVisible = function(e) {
     var eTop = e.offset().top;
     var eBottom = eTop + e.height();
     if (eTop < viewTop || eBottom > viewBottom) {
-        this._iframe.contents().scrollTop(e.offset().top - 50);
+        this._iframe.contents().scrollTop(e.offset().top - this._iframe.height()/2);
     }
 }
 
@@ -124,11 +124,17 @@ Viewer.prototype.showAndSelectElement = function(e) {
 
 Viewer.prototype.selectElement = function (e) {
     e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected");
+    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-related");
     e.addClass("ixbrl-selected");
     var id = e.data('ivid');
     $.each(this._onSelectHandlers, function (i, handler) {
         handler(id);
     });
+}
+
+Viewer.prototype.highlightRelatedFact = function (f) {
+    var e = this.elementForFact(f);
+    e.addClass("ixbrl-related");
 }
 
 Viewer.prototype.elementForFact = function (fact) {

@@ -3,13 +3,18 @@
        <span class="text">Loading iXBRL Viewer</span>
     </div>
     <div id="inspector">
+      <div id="ixbrl-controls-top">
+          <label><input id="ixbrl-show-all-tags" type="checkbox">Show all tags</label>
+          <button id="ixbrl-next-tag">Next tag</button>
+          <button id="ixbrl-prev-tag">Prev tag</button>
+      </div>
       <div id="std-label"></div>
       <div id="documentation"></div>
       <div id="period"></div>
       <div id="dimensions"></div>
       <div id="value"></div>
       <div id="concept"></div>
-      <div id="calculation"></div>
+      <div id="duplicates"><span class="prev">&lt;</span> <span class="text"></span> <span class="next">&gt;</span></div>
       <div>
         <input type="text" id="ixbrl-search">
         <table class="scrollable" id="ixbrl-search-results">
@@ -17,10 +22,9 @@
           </tbody>
         </table>
       </div>
-      <div id="ixbrl-controls-bottom">
-          <label><input id="ixbrl-show-all-tags" type="checkbox">Show all tags</label>
-          <button id="ixbrl-next-tag">Next tag</button>
-          <button id="ixbrl-prev-tag">Prev tag</button>
+      <div id="calculation">
+        <b>Calculations</b>
+        <div class="tree"></div>
       </div>
     </div>
     <div id="iframe-container" >

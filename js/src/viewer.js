@@ -1,4 +1,5 @@
 import $ from 'jquery'
+import FileSaver from 'file-saver'
 
 export function Viewer(iframe, report) {
     this._report = report;
@@ -140,7 +141,8 @@ Viewer.prototype.exportTable = function (table) {
         });
         s += "\n";
     });
-    console.log(s);
+    var file = new File([s],"table.csv", {type: "text/plain;charset=utf-8"});
+    FileSaver.saveAs(file);
 }
 
 Viewer.prototype.selectNextTag = function () {

@@ -1,9 +1,12 @@
 import $ from 'jquery'
 
-export function Viewer(iframe) {
+export function Viewer(iframe, report) {
+    this._report = report;
     this._iframe = iframe;
     this._contents = iframe.contents();
     this._onSelectHandlers = [];
+    this._onMouseEnterHandlers = [];
+    this._onMouseLeaveHandlers = [];
 
     this._preProcessiXBRL($("body", iframe.contents()).get(0));
     this._applyStyles();
@@ -91,12 +94,53 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
 
 Viewer.prototype._bindHandlers = function () {
     var viewer = this;
-    $('.ixbrl-element', this._contents).click(function (e) {
-        e.stopPropagation();
-        viewer.selectElement($(this));
-    });
+    $('.ixbrl-element', this._contents)
+        .click(function (e) {
+            e.stopPropagation();
+            viewer.selectElement($(this));
+        })
+        .mouseenter(function (e) { viewer._mouseEnter($(this)) })
+        .mouseleave(function (e) { viewer._mouseLeave($(this)) });
+    
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
+
+    $('table', this._contents).each(function () {
+        var table = $(this);
+        if (table.find(".ixbrl-element").length > 0) {
+            table.css("position", "relative");
+            $('<div class="ixbrl-table-handle"></div>').appendTo(table).click(function () { viewer.exportTable(table); });
+        }
+    });
+}
+
+Viewer.prototype.exportTable = function (table) {
+    var viewer = this;
+    var s = '';
+    table.find("tr").each(function () {
+        $(this).find("td, th").each(function () {
+            var colspan = $(this).attr("colspan");
+            if (colspan) {
+                for (var i=0; i < colspan-1; i++) {
+                    s += ",";
+                }
+            }
+            var v;
+            var facts = $(this).find('.ixbrl-element');
+            if (facts.length > 0) {
+                var id = facts.first().data('ivid');
+                var fact = viewer._report.getFactById(id);
+                v = fact.value();
+            }
+            else {
+                v = $(this).text();
+            }
+            s += '"' + v + '"';
+            s += ",";
+        });
+        s += "\n";
+    });
+    console.log(s);
 }
 
 Viewer.prototype.selectNextTag = function () {
@@ -123,11 +167,24 @@ Viewer.prototype.showAndSelectElement = function(e) {
 }
 
 Viewer.prototype.selectElement = function (e) {
-    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected");
-    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-related");
+    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
     e.addClass("ixbrl-selected");
     var id = e.data('ivid');
     $.each(this._onSelectHandlers, function (i, handler) {
+        handler(id);
+    });
+}
+
+Viewer.prototype._mouseEnter = function (e) {
+    var id = e.data('ivid');
+    $.each(this._onMouseEnterHandlers, function (i, handler) {
+        handler(id);
+    });
+}
+
+Viewer.prototype._mouseLeave = function (e) {
+    var id = e.data('ivid');
+    $.each(this._onMouseLeaveHandlers, function (i, handler) {
         handler(id);
     });
 }
@@ -149,6 +206,14 @@ Viewer.prototype.onSelect = function (f) {
     this._onSelectHandlers.push(f);
 }
 
+Viewer.prototype.onMouseEnter = function (f) {
+    this._onMouseEnterHandlers.push(f);
+}
+
+Viewer.prototype.onMouseLeave = function (f) {
+    this._onMouseLeaveHandlers.push(f);
+}
+
 Viewer.prototype.highlightAllTags = function (on) {
     if (on) {
         $(".ixbrl-element", this._contents).addClass("ixbrl-highlight");
@@ -165,16 +230,33 @@ Viewer.prototype._zoom = function () {
 
     var newHeight = $("html", this._contents).height();
     this._contents.scrollTop(newHeight * (viewTop)/height );
-    
-
 }
 
 Viewer.prototype.zoomIn = function () {
     this.scale *= 1.1;
     this._zoom();
 }
+
 Viewer.prototype.zoomOut = function () {
     this.scale /= 1.1;
     this._zoom();
 }
 
+Viewer.prototype.factsInSameTable = function (fact) {
+    var e = this.elementForFact(fact);
+    var facts = [];
+    e.closest("table").find(".ixbrl-element").each(function (i,e) {
+        facts.push($(this).data('ivid'));
+    });
+    return facts;
+}
+
+Viewer.prototype.linkedHighlightFact = function (f) {
+    var e = this.elementForFact(f);
+    e.addClass("ixbrl-linked-highlight");
+}
+
+Viewer.prototype.clearLinkedHighlightFact = function (f) {
+    var e = this.elementForFact(f);
+    e.removeClass("ixbrl-linked-highlight");
+}

@@ -1,3 +1,5 @@
+@import "colours.less";
+
 .iv-ixbrl-fact {
     background-color: yellow;
     cursor: pointer;
@@ -19,3 +21,18 @@
 .ixbrl-related {
     outline: dashed 1px blue;
 }
+
+.ixbrl-related.ixbrl-linked-highlight,
+.ixbrl-linked-highlight {
+    outline: solid 2px @linked-fact;
+}
+
+div.ixbrl-table-handle {
+    background-color: #ff0000;
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+

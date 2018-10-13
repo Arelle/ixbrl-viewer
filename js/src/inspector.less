@@ -1,3 +1,4 @@
+@import "colours.less";
 body {
     margin: 0;
 }
@@ -154,6 +155,29 @@ body {
                 background-color: #77f;
             }
         }
+
+        #calculation .tree {
+            li.concept {
+                margin: 3px;
+            }
+            li.concept:not(.fact-link) {
+                color: #777;
+            }
+
+            li.fact-link {
+                text-decoration: underline;
+                cursor: pointer;
+            }
+            li.linked-highlight {
+                outline: solid 2px @linked-fact;
+            }
+        }
+            .year-on-year-fact-link {
+                cursor: pointer;
+                &:hover {
+                    outline: solid 2px @linked-fact;
+                }
+            }
     }
 
 

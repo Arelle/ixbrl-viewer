@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import FileSaver from 'file-saver'
+import * as Excel from 'exceljs/dist/exceljs.min.js';
 
 export function TableExport(table, report) {
     this._table = table;
@@ -31,7 +32,7 @@ TableExport.prototype._getRawTable = function (table) {
             var colspan = $(this).attr("colspan");
             if (colspan) {
                 for (var i=0; i < colspan-1; i++) {
-                    row.push("");
+                    row.push({ type: "static", value: ""});
                 }
             }
             var v;
@@ -39,11 +40,33 @@ TableExport.prototype._getRawTable = function (table) {
             if (facts.length > 0) {
                 var id = facts.first().data('ivid');
                 var fact = report.getFactById(id);
-                row.push(fact);
+                var cell = { type: "fact", fact: fact};
+                
+                var td = $(this)[0];
+                var n = facts[0];
+                var s = '';
+                while (n !== td) {
+                    if (n.previousSibling !== null) {
+                        n = n.previousSibling;
+                    }
+                    else {
+                        n = n.parentNode;
+                    }
+                    if (n.nodeType == 3) {
+                        s = n.textContent + s;
+                    }
+                }
+                if (s.match(/[\(-]\s*$/) !== null) {
+                    cell.negative = true;
+                }
+                cell.topBorder = ($(this).css('border-top-style').match(/(solid|double)/) !== null);
+                cell.bottomBorder = ($(this).css('border-bottom-style').match(/(solid|double)/) !== null);
+                row.push(cell);
+                
             }
             else {
                 v = $(this).text();
-                row.push(v);
+                row.push({ type: "static", value: v});
             }
         });
         rows.push(row);
@@ -55,19 +78,23 @@ TableExport.prototype._getFactsInSlice = function (slice) {
     var facts = [];
     for (var j = 0; j < slice.length; j++) {
         var cell = slice[j];
-        if (typeof cell == "object") {
-            facts.push(cell);
-
+        if (cell.type == 'fact') {
+            facts.push(cell.fact);
         }
     }
     return facts;
 }
 
 /* 
- * Returns a map of aspect names to Aspect objects
+ * Returns a map of aspect names to Aspect objects for aspects that are common
+ * to all facts in the given table slice.  Returns null if there are no facts
+ * in the slice.
  */ 
 TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
     var facts = this._getFactsInSlice(slice);
+    if (facts.length == 0) {
+        return null;
+    }
     var allAspectsMap = {};
     for (var i = 0; i < facts.length; i++) {
         var aa = Object.keys(facts[i].aspects());
@@ -78,14 +105,12 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
     var allAspects = Object.keys(allAspectsMap);
 
     var constantAspects = {};
-    if (facts.length > 0) {
-        for (var i = 0; i < allAspects.length; i++) {
-            var a = allAspects[i];
-            constantAspects[a] = facts[0].aspects()[a];
-            for (var j = 1; j < facts.length; j++) {
-                if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspects()[a])) {
-                    delete constantAspects[a];
-                }
+    for (var i = 0; i < allAspects.length; i++) {
+        var a = allAspects[i];
+        constantAspects[a] = facts[0].aspects()[a];
+        for (var j = 1; j < facts.length; j++) {
+            if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspects()[a])) {
+                delete constantAspects[a];
             }
         }
     }
@@ -97,23 +122,45 @@ TableExport.prototype._getColumnSlice = function (x) {
 }
 
 TableExport.prototype._writeTable = function (data) {
+    var wb = new Excel.Workbook();
+    var ws = wb.addWorksheet('Table');
+    
     var s = '';
     for (var i = 0; i < data.length; i++) {
         var row = data[i];
         for (var j = 0; j < row.length; j++) {
             var cell = row[j];
-            var v;
-            if (typeof cell == 'object') {
-                v = cell.value(); 
+
+            var cc = ws.getRow(i+1).getCell(j+1);
+            if (cell.type == 'fact') {
+                cc.value = Number(cell.fact.value());
+                cc.numFmt = '#,##0';
+                ws.getColumn(j+1).width = 18;
+                /* Make this an option - apply presentation signs */
+                if (cell.negative) {
+                    cc.value = Math.abs(cc.value) * -1;
+                }
+                else {
+                    cc.value = Math.abs(cc.value);
+                }
+                cc.border = {};
+                if (cell.topBorder) {
+                    cc.border.top = {style: "medium", color: { argb: 'FF000000' }};
+                }
+                if (cell.bottomBorder) {
+                    cc.border.bottom = {style: "medium", color: { argb: 'FF000000' }};
+                }
+            }
+            else if (cell.type == 'aspectLabel') {
+                cc.value = cell.value;
             }
             else {
-                v = cell;
+                cc.value = cell.value;
+                cc.font = { color : { argb: 'FF707070' } };
             }
-            s += '"' + v + '",';
         }
-        s += "\n";
     }
-    return s;
+    return wb;
 }
 
 TableExport.prototype.exportTable = function () {
@@ -127,7 +174,7 @@ TableExport.prototype.exportTable = function () {
         var row = data[i];
         var constantAspects = this._getConstantAspectsForSlice(row);
         rowAspects.push(constantAspects);
-        $.each(constantAspects, function (k,v) { allRowAspectsMap[k] = 1; });
+        $.each(constantAspects || {}, function (k,v) { allRowAspectsMap[k] = 1; });
         if (row.length > rowLength) {
             rowLength = row.length;
         }
@@ -142,12 +189,20 @@ TableExport.prototype.exportTable = function () {
         }
         var constantAspects = this._getConstantAspectsForSlice(slice);
         columnAspects.push(constantAspects);
-        $.each(constantAspects, function (k,v) { allColumnAspectsMap[k] = 1; });
+        $.each(constantAspects || {}, function (k,v) { allColumnAspectsMap[k] = 1; });
     }
+    /* Attempt to remove unnecessary headers.  If an aspect is specified on all
+     * columns that have facts (a universal column aspect), then don't include it
+     * as a row aspect as well.  XXX: we should do the reverse, but need to be
+     * careful not to delete aspects altogether. */
+    var universalColumnAspectMap = $.extend({}, allColumnAspectsMap);
+    $.each(allColumnAspectsMap, function (k,v) { 
+        $.each(columnAspects, function (i,ca) { 
+            if (ca !== null && !ca[k]) { delete universalColumnAspectMap[k] }
+        })}
+    );
+    $.each(universalColumnAspectMap, function (k,v) { delete allRowAspectsMap[k] });
 
-    /* If an aspect is on both rows and columns, if must be constant across the
-     * table, so only show it on columns */
-    $.each(allColumnAspectsMap, function (k,v) { delete allRowAspectsMap[k] });
     var allRowAspects = Object.keys(allRowAspectsMap);
     var allColumnAspects = Object.keys(allColumnAspectsMap);
 
@@ -158,11 +213,12 @@ TableExport.prototype.exportTable = function () {
             newRow.push("");
         }
         for (var k = 0; k < rowLength; k++) {
-            var v = columnAspects[k][aspect];
+            var ca = columnAspects[k] || {};
+            var v = ca[aspect];
             if (v !== undefined) {
                 v = v.valueLabel("std");
             }
-            newRow.push(v || "");
+            newRow.push({ type: 'aspectLabel', value : v || ""});
         }
         data.unshift(newRow);
     }
@@ -171,19 +227,20 @@ TableExport.prototype.exportTable = function () {
         var newCols = [];
         for (var i = 0; i < allRowAspects.length; i++) {
             var aspect = allRowAspects[i];
-            var v = rowAspects[k - allColumnAspects.length][aspect];
+            var ra = rowAspects[k - allColumnAspects.length] || {};
+            var v = ra[aspect];
             if (v !== undefined) {
                 v = v.valueLabel("std");
             }
-            newCols.push(v || "");
+            newCols.push({ type: 'aspectLabel', value : v || ""});
         }
         data[k] = newCols.concat(data[k]);
     }
 
 
-    var s = this._writeTable(data);
-
-
-    var file = new File([s],"table.csv", {type: "text/plain;charset=utf-8"});
-    FileSaver.saveAs(file);
+    var wb = this._writeTable(data);
+    wb.xlsx.writeBuffer().then( data => {
+      const blob = new Blob( [data], {type: "application/octet-stream"} );
+      FileSaver.saveAs( blob, 'table.xlsx');
+    });
 }

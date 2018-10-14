@@ -71,6 +71,10 @@ Fact.prototype.isMonetaryValue = function () {
     return unit && unit.namespace == "http://www.xbrl.org/2003/iso4217";
 }
 
+Fact.prototype.aspects = function () {
+    return this.f.a;
+}
+
 Fact.prototype.isAligned = function (of, coveredAspects) {
     if (Object.keys(this.f.a).length != Object.keys(of.f.a).length) {
         return false;

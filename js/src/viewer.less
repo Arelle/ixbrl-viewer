@@ -28,11 +28,30 @@
 }
 
 div.ixbrl-table-handle {
-    background-color: #ff0000;
-    width: 10px;
-    height: 10px;
+    border-left: solid #ff9000 12px;
+    border-bottom: solid rgba(0,0,0,0) 12px;;
+    //width: 0px;
+    //height: 0px;
     position: absolute;
     top: 0;
     left: 0;
+    cursor: pointer;
+    & > span {
+        display: none;
+    }
+        
+
+    &:hover {
+        border: solid #f90 1px;
+        border-radius: 2px;
+        color: #f90;
+        background-color: rgba(225,225,225,0.7);
+        padding: 7px 15px;
+        & > span {
+            font-family: sans-serif;
+            display: initial;
+        }
+
+    }
 }
 

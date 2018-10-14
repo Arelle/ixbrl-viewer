@@ -1,5 +1,6 @@
 import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
+import { Aspect } from "./aspect.js";
 import $ from 'jquery'
 
 export function Fact(report, factId) {
@@ -62,8 +63,6 @@ Fact.prototype.dimensions = function () {
         }
     });
     return dims;
-
-
 }
 
 Fact.prototype.isMonetaryValue = function () {
@@ -72,7 +71,16 @@ Fact.prototype.isMonetaryValue = function () {
 }
 
 Fact.prototype.aspects = function () {
-    return this.f.a;
+    var aspects = {};
+    var fact = this;
+    $.each(this.f.a, function (k,v) {
+        aspects[k] = fact.aspect(k);
+    });
+    return aspects;
+}
+
+Fact.prototype.aspect = function (a) {
+    return new Aspect(a, this.f.a[a], this._report);
 }
 
 Fact.prototype.isAligned = function (of, coveredAspects) {

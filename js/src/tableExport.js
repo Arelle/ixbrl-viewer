@@ -63,6 +63,9 @@ TableExport.prototype._getFactsInSlice = function (slice) {
     return facts;
 }
 
+/* 
+ * Returns a map of aspect names to Aspect objects
+ */ 
 TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
     var facts = this._getFactsInSlice(slice);
     var allAspectsMap = {};
@@ -80,7 +83,7 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
             var a = allAspects[i];
             constantAspects[a] = facts[0].aspects()[a];
             for (var j = 1; j < facts.length; j++) {
-                if (facts[j].aspects()[a] != constantAspects[a]) {
+                if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspects()[a])) {
                     delete constantAspects[a];
                 }
             }
@@ -93,13 +96,33 @@ TableExport.prototype._getColumnSlice = function (x) {
 
 }
 
+TableExport.prototype._writeTable = function (data) {
+    var s = '';
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        for (var j = 0; j < row.length; j++) {
+            var cell = row[j];
+            var v;
+            if (typeof cell == 'object') {
+                v = cell.value(); 
+            }
+            else {
+                v = cell;
+            }
+            s += '"' + v + '",';
+        }
+        s += "\n";
+    }
+    return s;
+}
+
 TableExport.prototype.exportTable = function () {
 
     var data = this._getRawTable(this._table);
     var rowLength = 0;
 
-    var rowAspects = [];
-    var allRowAspectsMap = {};
+    var rowAspects = []; // array of aspect sets that are constant for each row
+    var allRowAspectsMap = {}; // map to record full set of aspect names that appear on rows
     for (var i = 0; i < data.length; i++) {
         var row = data[i];
         var constantAspects = this._getConstantAspectsForSlice(row);
@@ -135,7 +158,11 @@ TableExport.prototype.exportTable = function () {
             newRow.push("");
         }
         for (var k = 0; k < rowLength; k++) {
-            newRow.push(columnAspects[k][aspect] || "");
+            var v = columnAspects[k][aspect];
+            if (v !== undefined) {
+                v = v.valueLabel("std");
+            }
+            newRow.push(v || "");
         }
         data.unshift(newRow);
     }
@@ -144,28 +171,18 @@ TableExport.prototype.exportTable = function () {
         var newCols = [];
         for (var i = 0; i < allRowAspects.length; i++) {
             var aspect = allRowAspects[i];
-            newCols.push(rowAspects[k - allColumnAspects.length][aspect] || "");
+            var v = rowAspects[k - allColumnAspects.length][aspect];
+            if (v !== undefined) {
+                v = v.valueLabel("std");
+            }
+            newCols.push(v || "");
         }
         data[k] = newCols.concat(data[k]);
     }
 
-    var s = "";
 
-    for (var i = 0; i < data.length; i++) {
-        var row = data[i];
-        for (var j = 0; j < row.length; j++) {
-            var cell = row[j];
-            var v;
-            if (typeof cell == 'object') {
-                v = cell.value(); 
-            }
-            else {
-                v = cell;
-            }
-            s += '"' + v + '",';
-        }
-        s += "\n";
-    }
+    var s = this._writeTable(data);
+
 
     var file = new File([s],"table.csv", {type: "text/plain;charset=utf-8"});
     FileSaver.saveAs(file);

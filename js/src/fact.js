@@ -9,6 +9,10 @@ export function Fact(report, factId) {
     this.id = factId;
 }
 
+Fact.prototype.report = function() {
+    return this._report;
+}
+
 Fact.prototype.getLabel = function(rolePrefix) {
     return this._report.getLabel(this.f.a.c, rolePrefix);
 }

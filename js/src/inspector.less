@@ -156,28 +156,43 @@ body {
             }
         }
 
-        #calculation .tree {
-            li.concept {
-                margin: 3px;
+        #calculation {
+            h2 {
+                font-size: medium;
             }
-            li.concept:not(.fact-link) {
-                color: #777;
-            }
+            .item {
+                padding: 5px 0;
 
-            li.fact-link {
-                text-decoration: underline;
-                cursor: pointer;
+                &:not(.fact-link, .total) .concept-name {
+                    color: #777;
+                }
+
+                &.fact-link {
+                    cursor: pointer;
+                    .concept-name {
+                        color: #00f;
+                    }
+                }
+                .weight {
+                    display: inline-block;
+                    width: 15px;
+                }
+                &.linked-highlight,
+                &.fact-link:hover {
+                    outline: solid 2px @linked-fact;
+                }
+                &.total {
+                    border-top: solid 1px #000;
+                }
             }
-            li.linked-highlight {
+        }
+        .year-on-year-fact-link {
+            cursor: pointer;
+            color: #00f;
+            &:hover {
                 outline: solid 2px @linked-fact;
             }
         }
-            .year-on-year-fact-link {
-                cursor: pointer;
-                &:hover {
-                    outline: solid 2px @linked-fact;
-                }
-            }
     }
 
 

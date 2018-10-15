@@ -2,6 +2,7 @@ import $ from 'jquery'
 import { formatNumber } from "./util.js";
 
 import { ReportSearch } from "./search.js";
+import { Calculation } from "./calculations.js";
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
@@ -47,90 +48,52 @@ Inspector.prototype.search = function (s) {
 }
 
 Inspector.prototype._calculationHTML = function (fact) {
-    var rels = this._report.getChildConcepts(fact.conceptName(), "calc")
-    var tree = $("<ul></ul>")
-    var report = this._report;
+    var calc = new Calculation(fact);
+    if (!calc.hasCalculations()) {
+        return "";
+    }
     var tableFacts = this._viewer.factsInSameTable(fact);
-    console.log(tableFacts.length + " facts in same table");
-    var bestMatchCount = 0;
-    var bestMatchELR = "";
+    var elr = calc.bestELRForFactSet(tableFacts);
+    var rCalc = calc.resolvedCalculation(elr);
+    var report = this._report;
     var viewer = this._viewer;
-
-    var conceptToFact = {};
-
-    $.each(rels, function (elr, rr) {
-        conceptToFact[elr] = {};
-        if (rr.length > 0) {
-            console.log(elr);
-            var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, function (r,i) { return r.t }) });
-            console.log("other facts");
-            console.log(otherFacts);
-            var matchCount = 0;
-            $.each(otherFacts, function (i,ff) {
-                conceptToFact[elr][ff.conceptName()] = conceptToFact[elr][ff.conceptName()] || {};
-                conceptToFact[elr][ff.conceptName()][ff.id] = ff;
-                if ($.inArray(ff.id, tableFacts) > -1) {
-                    matchCount++; 
-                }
-            });
-            console.log(elr + " " + matchCount/rr.length)
-            if (matchCount/rr.length > bestMatchCount) {
-                bestMatchCount = matchCount/rr.length;    
-                bestMatchELR = elr;
-            }
+    var html = $("<div></div>");
+    $("<h2></h2>").text(elr.match(/[^\/]*$/)[0]).appendTo(html);
+    $.each(rCalc, function (i, r) {
+        var itemHTML = $("<div></div>")
+            .addClass("item")
+            .append($("<span>").addClass("weight").text(r.weightSign + " "))
+            .append($("<span>").addClass("concept-name").text(report.getLabel(r.concept, "std")))
+            .appendTo(html);
+        if (r.facts) {
+            itemHTML.addClass("fact-link");
+            itemHTML.data('ivid', r.facts);
+            itemHTML.click(function () { viewer.showAndSelectFact(Object.values(r.facts)[0] ) });
+            itemHTML.mouseenter(function () { $.each(r.facts, function (k,f) { viewer.linkedHighlightFact(f); })});
+            itemHTML.mouseleave(function () { $.each(r.facts, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
+            $.each(r.facts, function (k,f) { viewer.highlightRelatedFact(f); });
         }
     });
-    console.log("Best match: " + bestMatchELR);
-    $.each(rels, function (elr, rr) {
-        var item =  $("<li></li>");
-        item.text(elr)
-        var list = $("<ul></ul>");
-        list.appendTo(item);
-        
-        $.each(rr, function (i,r) {
-            var i = $("<li class=\"concept\"></li>");
-            var s;
-            if (r.w == 1) {
-                s = '+';
-            }
-            else if (r.w == -1) {
-                s = '-';
-            }
-            else {
-                s = r.w;
-            }
-            i.text(s + ' ' + report.getLabel(r.t, "std"));
-            var ff = conceptToFact[elr][r.t];
-            if (ff) {
-                i.data('ivid', ff);
-                i.addClass("fact-link");
-                i.click(function () { viewer.showAndSelectFact(Object.values(ff)[0] ) });
-                i.mouseenter(function () { $.each(ff, function (k,f) { viewer.linkedHighlightFact(f); })});
-                i.mouseleave(function () { $.each(ff, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
-                $.each(ff, function (k,f) { viewer.highlightRelatedFact(f); });
-            }
-            i.appendTo(list);
-        });
-        item.appendTo(tree);
-    });
-    return tree;
+    $("<div>").addClass("item").addClass("total")
+        .append($("<span>").addClass("weight"))
+        .append($("<span>").addClass("concept-name").text(fact.getLabel("std")))
+        .appendTo(html);
+    return html;
 }
 
 Inspector.prototype.viewerMouseEnter = function (id) {
-    $('#calculation li.concept').filter(function () {   
+    $('#calculation .item').filter(function () {   
         return $.inArray(id, $.map($(this).data('ivid'), function (f)  { return f.id })) > -1 
     }).addClass('linked-highlight');
 }
 
 Inspector.prototype.viewerMouseLeave = function (id) {
-    $('#calculation li.concept').removeClass('linked-highlight');
+    $('#calculation .item').removeClass('linked-highlight');
 }
 
 Inspector.prototype.getPeriodIncrease = function (fact) {
     var viewer = this._viewer;
-    console.log("getPeriodIncrease");
     var otherFacts = this._report.getAlignedFacts(fact, {"pt": null, "pf": null });
-    console.log(otherFacts);
     var mostRecent;
     $.each(otherFacts, function (i, of) {
         if (of.periodTo() < fact.periodTo() && (!mostRecent || of.periodTo() > mostRecent.periodTo()) ) {
@@ -139,7 +102,6 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
     });
     var s = "";
     if (mostRecent) {
-        console.log(mostRecent.value() + " => " + fact.value());
         if (fact.value() > 0 == mostRecent.value() > 0) {
             var x = (fact.value() - mostRecent.value()) * 100 / mostRecent.value();
             var t;
@@ -149,11 +111,13 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
             else {
                 t = formatNumber(-1 * x,1) + "% decrease on ";
             }
-            s = $("<span></span>").text(t + mostRecent.periodTo())
-                .addClass("year-on-year-fact-link")
-                .click(function () { viewer.showAndSelectFact(mostRecent) })
-                .mouseenter(function () {  viewer.linkedHighlightFact(mostRecent); })
-                .mouseleave(function () {  viewer.clearLinkedHighlightFact(mostRecent); });
+            s = $("<span>").text(t);
+            $("<span></span>").text(mostRecent.periodTo())
+            .addClass("year-on-year-fact-link")
+            .appendTo(s)
+            .click(function () { viewer.showAndSelectFact(mostRecent) })
+            .mouseenter(function () {  viewer.linkedHighlightFact(mostRecent); })
+            .mouseleave(function () {  viewer.clearLinkedHighlightFact(mostRecent); });
 
         }
         else {

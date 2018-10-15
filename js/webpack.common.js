@@ -6,6 +6,19 @@ module.exports = {
     filename: 'ixbrlviewer.js',
     path: path.resolve(__dirname, 'dist')
   },
+  module: {
+    rules: [
+                {
+                    test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+                    use: "base64-inline-loader"
+                }
+            ]
+
+
+  }
+
+
+
 /*
   node: {
             fs: 'empty'

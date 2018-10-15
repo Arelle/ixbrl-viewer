@@ -1,3 +1,10 @@
+@font-face {
+    font-family: "icomoon";
+    src: url('./icomoon.woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 @import "colours.less";
 
 .iv-ixbrl-fact {
@@ -45,9 +52,17 @@ div.ixbrl-table-handle {
         border: solid #f90 1px;
         border-radius: 2px;
         color: #f90;
-        background-color: rgba(255,255,255,0.7);
+        background-color: rgba(255,255,255,0.85);
         padding: 7px 15px;
         & > span {
+            &:before {
+                font-family: "icomoon";
+                content: "\e95e";
+                padding-right: 7px;
+                position: relative;
+                top: 1px;
+            }
+            font-weight: bold;
             font-family: sans-serif;
             display: initial;
         }

@@ -157,11 +157,14 @@ body {
         }
 
         #calculation {
-            h2 {
-                font-size: medium;
+            select {
+                padding: 3px;
+                width: 100%;
+                margin: 5px 0;
             }
             .item {
                 padding: 5px 0;
+                position: relative;
 
                 &:not(.fact-link, .total) .concept-name {
                     color: #777;
@@ -173,9 +176,13 @@ body {
                         color: #00f;
                     }
                 }
+                .concept-name {
+                    display: block;
+                    margin-left: 15px;
+                }
                 .weight {
-                    display: inline-block;
-                    width: 15px;
+                    display: block;
+                    position: absolute;
                 }
                 &.linked-highlight,
                 &.fact-link:hover {

@@ -47,18 +47,33 @@ Inspector.prototype.search = function (s) {
     
 }
 
-Inspector.prototype._calculationHTML = function (fact) {
+Inspector.prototype.updateCalculation = function (fact, elr) {
+    $('#calculation .tree').html(this._calculationHTML(fact, elr));
+}
+
+Inspector.prototype._calculationHTML = function (fact, elr) {
     var calc = new Calculation(fact);
     if (!calc.hasCalculations()) {
         return "";
     }
     var tableFacts = this._viewer.factsInSameTable(fact);
-    var elr = calc.bestELRForFactSet(tableFacts);
+    if (!elr) {
+        elr = calc.bestELRForFactSet(tableFacts);
+    }
     var rCalc = calc.resolvedCalculation(elr);
     var report = this._report;
     var viewer = this._viewer;
+    var inspector = this;
     var html = $("<div></div>");
-    $("<h2></h2>").text(elr.match(/[^\/]*$/)[0]).appendTo(html);
+    var select = $("<select></select>").appendTo(html)
+        .change(function () { inspector.updateCalculation(fact, $(this).val())  });
+    $.each(calc.elrs(), function (e, label) {
+        var o = $("<option>").attr("value", e).text(label).appendTo(select);
+        if (e == elr) {
+            o.attr("selected", "selected");
+        }  
+    });
+
     $.each(rCalc, function (i, r) {
         var itemHTML = $("<div></div>")
             .addClass("item")
@@ -134,7 +149,7 @@ Inspector.prototype.selectFact = function (id) {
     $('#documentation').text(fact.getLabel("doc") || "");
     $('#concept').text(fact.conceptName());
     $('#period').text(fact.periodString());
-    $('#calculation .tree').html(this._calculationHTML(fact, "calc"));
+    this.updateCalculation(fact);
     var v = fact.value();
     if (fact.isMonetaryValue()) {
         v = fact.unit().localname + " " + formatNumber(v,2);

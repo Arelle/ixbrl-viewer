@@ -33,6 +33,17 @@ Calculation.prototype.hasCalculations = function () {
     return Object.keys(ctf).length > 0;
 }
 
+Calculation.prototype.elrs = function () {
+    var ctf = this.calculationFacts();
+    var elrs = {};
+    $.each(ctf, function (k,v) {
+        if (Object.keys(v).length > 0) {
+            elrs[k] = k.match(/[^\/]*$/)[0];
+        }
+    }); 
+    return elrs;
+}
+
 /*
  * Select the ELR which is the best match for a given array of facts
  */

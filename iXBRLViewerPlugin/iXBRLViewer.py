@@ -111,9 +111,12 @@ class IXBRLViewerBuilder:
                 relSet = self.dts.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
                     fromKey = self.roleMap.qname(r.fromModelObject.qname)
-                    if fromKey not in rr:
-                        rr[fromKey] = []
-                    rr[fromKey].append(self.roleMap.qname(r.toModelObject.qname))
+                    rel = {
+                        "t": self.roleMap.qname(r.toModelObject.qname),
+                    }
+                    if r.weight is not None:
+                        rel['w'] = r.weight
+                    rr.setdefault(fromKey, []).append(rel)
                     self.addConcept(r.toModelObject)
 
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[ELR] = rr

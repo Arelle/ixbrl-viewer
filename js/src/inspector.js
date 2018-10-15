@@ -62,7 +62,9 @@ Inspector.prototype._calculationHTML = function (fact) {
         conceptToFact[elr] = {};
         if (rr.length > 0) {
             console.log(elr);
-            var otherFacts = report.getAlignedFacts(fact, {"c": rr });
+            var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, function (r,i) { return r.t }) });
+            console.log("other facts");
+            console.log(otherFacts);
             var matchCount = 0;
             $.each(otherFacts, function (i,ff) {
                 conceptToFact[elr][ff.conceptName()] = conceptToFact[elr][ff.conceptName()] || {};
@@ -87,14 +89,25 @@ Inspector.prototype._calculationHTML = function (fact) {
         
         $.each(rr, function (i,r) {
             var i = $("<li class=\"concept\"></li>");
-            i.text(report.getLabel(r, "std"));
-            var ff = conceptToFact[elr][r];
+            var s;
+            if (r.w == 1) {
+                s = '+';
+            }
+            else if (r.w == -1) {
+                s = '-';
+            }
+            else {
+                s = r.w;
+            }
+            i.text(s + ' ' + report.getLabel(r.t, "std"));
+            var ff = conceptToFact[elr][r.t];
             if (ff) {
                 i.data('ivid', ff);
                 i.addClass("fact-link");
                 i.click(function () { viewer.showAndSelectFact(Object.values(ff)[0] ) });
                 i.mouseenter(function () { $.each(ff, function (k,f) { viewer.linkedHighlightFact(f); })});
                 i.mouseleave(function () { $.each(ff, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
+                $.each(ff, function (k,f) { viewer.highlightRelatedFact(f); });
             }
             i.appendTo(list);
         });
@@ -192,15 +205,6 @@ Inspector.prototype.selectFact = function (id) {
     $('#duplicates .next').off().click(function () { viewer.showAndSelectFact(duplicates[(n+1) % ndup])});
 
     this.getPeriodIncrease(fact);
-
-    var rels = this._report.getChildConcepts(fact.conceptName(), "calc")
-    if (Object.keys(rels).length > 0) {
-        var elr = Object.keys(rels)[0];
-        var otherFacts = this._report.getAlignedFacts(fact, {"c": rels[elr] });
-        $.each(otherFacts, function (i,ff) {
-            viewer.highlightRelatedFact(ff);
-        });
-    }
 
 
 }

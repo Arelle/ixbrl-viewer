@@ -3,6 +3,7 @@ import { formatNumber } from "./util.js";
 
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
+import { IXBRLChart } from './chart.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
@@ -12,6 +13,7 @@ export function Inspector() {
         .prop("type", "text/css")
         .text(inspector_css)
         .appendTo('head');
+    this._chart = new IXBRLChart();
 }
 
 Inspector.prototype.setReport = function (report) {
@@ -143,8 +145,10 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 }
 
+
 Inspector.prototype.selectFact = function (id) {
     var fact = this._report.getFactById(id);
+    var inspector = this;
     $('#std-label').text(fact.getLabel("std") || fact.conceptName());
     $('#documentation').text(fact.getLabel("doc") || "");
     $('#concept').text(fact.conceptName());
@@ -152,7 +156,7 @@ Inspector.prototype.selectFact = function (id) {
     this.updateCalculation(fact);
     var v = fact.value();
     if (fact.isMonetaryValue()) {
-        v = fact.unit().localname + " " + formatNumber(v,2);
+        v = fact.unit().valueLabel() + " " + formatNumber(v,2);
     }
     else if (fact.unit()) {
         v = v + " " + fact.unit().qname;
@@ -161,10 +165,22 @@ Inspector.prototype.selectFact = function (id) {
     $('#dimensions').empty();
     var dims = fact.dimensions();
     for (var d in dims) {
-        var x = $('<div class="dimension">').text(this._report.getLabel(d, "std") || d);
-        x.appendTo('#dimensions');
-        x = $('<div class="dimension-value">').text(this._report.getLabel(dims[d], "std") || dims[d]);
-        x.appendTo('#dimensions');
+        (function(d) {
+            $('<div class="dimension">')
+                .text(fact.report().getLabel(d, "std") || d)
+                .append(
+                    $("<span>") 
+                        .addClass("analyse")
+                        .text("")
+                        .click(function () {
+                            inspector._chart.analyseDimension(fact,[d])
+                        })
+                )
+                .appendTo('#dimensions');
+        })(d); 
+        $('<div class="dimension-value">')
+            .text(this._report.getLabel(dims[d], "std") || dims[d])
+            .appendTo('#dimensions');
         
     }
     $('#ixbrl-search-results tr').removeClass('selected');

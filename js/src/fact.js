@@ -52,7 +52,7 @@ Fact.prototype.value = function() {
 
 Fact.prototype.unit = function() {
     if (this.f.a.u) {
-        return new QName(this._report.prefixMap(), this.f.a.u);
+        return this.aspect("u");
     }
     else {
         return undefined;
@@ -71,7 +71,11 @@ Fact.prototype.dimensions = function () {
 
 Fact.prototype.isMonetaryValue = function () {
     var unit = this.unit();
-    return unit && unit.namespace == "http://www.xbrl.org/2003/iso4217";
+    if (!unit) {
+        return false;
+    }
+    var q = this.report().qname(unit.value());
+    return q.namespace == "http://www.xbrl.org/2003/iso4217";
 }
 
 Fact.prototype.aspects = function () {

@@ -1,4 +1,5 @@
 import { Fact } from "./fact.js"
+import { QName } from "./qname.js"
 import $ from 'jquery'
 
 export function iXBRLReport (jsonElement) {
@@ -7,6 +8,7 @@ export function iXBRLReport (jsonElement) {
 }
 
 iXBRLReport.prototype.getLabel = function(c, rolePrefix) {
+    rolePrefix = rolePrefix || 'std';
     var labels = this.data.concepts[c].labels[rolePrefix]
     if (labels === undefined) {
         return undefined;
@@ -36,6 +38,10 @@ iXBRLReport.prototype.prefixMap = function() {
     return this.data.prefixes;
 }
 
+iXBRLReport.prototype.qname = function(v) {
+    return new QName(this.prefixMap(), v);
+}
+
 iXBRLReport.prototype.getChildConcepts = function(c,arcrole) {
     var rels = {}
     if (this.data.rels.hasOwnProperty(arcrole)) {
@@ -63,5 +69,19 @@ iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
     return aligned; 
 }
 
-
+iXBRLReport.prototype.deduplicate = function (facts) {
+    var ff = [];
+    $.each(facts, function (i, f) {
+        var dupe = false;
+        $.each(ff, function (j, of) {
+            if (of.isAligned(f,{})) {
+                dupe = true;
+            }
+        });
+        if (!dupe){
+            ff.push(f);
+        }
+    });
+    return ff;
+}
 

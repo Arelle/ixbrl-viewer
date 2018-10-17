@@ -1,3 +1,4 @@
+@import "fonts.less";
 @import "colours.less";
 body {
     margin: 0;
@@ -128,6 +129,19 @@ body {
     }
     #inspector .dimension {
         margin-top: 10px;
+        margin-bottom: 5px;
+        .analyse {
+            cursor: pointer;
+            padding-left: 7px;
+            color: #00f;
+        }
+        .analyse:before {
+            font-family: "icomoon";
+            content:  "\e99b";
+            position: relative;
+            top: 1px;
+            
+        }
     }
     #inspector .dimension-value {
         padding-left: 10px;
@@ -275,6 +289,43 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+    #chart {
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        bottom: 50px;
+        right: 50px;
+        border: solid 1px #000;
+        background-color: #fff;
+        z-index: 10;
+        border-radius: 5px;
+        display: none;
+        .chart-container {
+           position: relative;
+           width: 100%;
+        }
+        .other-aspects {
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            .other-aspect {
+                display: inline-block;
+                padding: 5px;
+                margin: 5px;
+                border-radius: 3px;
+                border: solid 1px #333;
+                &.selected {
+                    background-color: #9f9;
+                    border-color: #3b3; 
+                }
+                &.selected, &.addable {
+                    cursor: pointer;
+                }
+            }
+
+        }
+    }
 
 
 

@@ -19,7 +19,20 @@ export function Inspector() {
 Inspector.prototype.setReport = function (report) {
     this._report = report;
     this._search = new ReportSearch(report);
+    var inspector = this;
+    var langSelect = $('#ixbrl-language-select');
+    var dl = this.selectDefaultLanguage();
+    inspector.setLanguage(dl);
+    langSelect.empty();
+    $.each(report.availableLanguages(), function (i,l) {
+        var o = $('<option>').text(l).appendTo(langSelect);
+        if (l == dl) {
+            o.attr("selected","selected");
+        }
+    });
+    langSelect.change(function () { inspector.setLanguage($(this).val()) });
 }
+
 
 Inspector.prototype.setViewer = function (viewer) {
     this._viewer = viewer;
@@ -145,61 +158,88 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 }
 
+Inspector.prototype.update = function () {
+    if (this._currentFact) {
+        var fact = this._currentFact;
+        var inspector = this;
+        $('#std-label').text(fact.getLabel("std") || fact.conceptName());
+        $('#documentation').text(fact.getLabel("doc") || "");
+        $('#concept').text(fact.conceptName());
+        $('#period').text(fact.periodString());
+        this.updateCalculation(fact);
+        var v = fact.value();
+        if (fact.isMonetaryValue()) {
+            v = fact.unit().valueLabel() + " " + formatNumber(v,2);
+        }
+        else if (fact.unit()) {
+            v = v + " " + fact.unit().qname;
+        }
+        $('#value').text(v);
+        $('#dimensions').empty();
+        var dims = fact.dimensions();
+        for (var d in dims) {
+            (function(d) {
+                $('<div class="dimension">')
+                    .text(fact.report().getLabel(d, "std") || d)
+                    .append(
+                        $("<span>") 
+                            .addClass("analyse")
+                            .text("")
+                            .click(function () {
+                                inspector._chart.analyseDimension(fact,[d])
+                            })
+                    )
+                    .appendTo('#dimensions');
+            })(d); 
+            $('<div class="dimension-value">')
+                .text(this._report.getLabel(dims[d], "std") || dims[d])
+                .appendTo('#dimensions');
+            
+        }
+        $('#ixbrl-search-results tr').removeClass('selected');
+        $('#ixbrl-search-results tr').filter(function () { return $(this).data('ivid') == id }).addClass('selected');
+
+        var duplicates = fact.duplicates();
+        var n = 0;
+        var ndup = duplicates.length;
+        for (var i = 0; i < ndup; i++) {
+            if (fact.id == duplicates[i].id) {
+                n = i;
+            }
+        }
+        $('#duplicates .text').text((n + 1) + " of " + ndup);
+        var viewer = this._viewer;
+        $('#duplicates .prev').off().click(function () { viewer.showAndSelectFact(duplicates[(n+ndup-1) % ndup])});
+        $('#duplicates .next').off().click(function () { viewer.showAndSelectFact(duplicates[(n+1) % ndup])});
+
+        this.getPeriodIncrease(fact);
+
+    }
+    
+
+}
 
 Inspector.prototype.selectFact = function (id) {
-    var fact = this._report.getFactById(id);
-    var inspector = this;
-    $('#std-label').text(fact.getLabel("std") || fact.conceptName());
-    $('#documentation').text(fact.getLabel("doc") || "");
-    $('#concept').text(fact.conceptName());
-    $('#period').text(fact.periodString());
-    this.updateCalculation(fact);
-    var v = fact.value();
-    if (fact.isMonetaryValue()) {
-        v = fact.unit().valueLabel() + " " + formatNumber(v,2);
-    }
-    else if (fact.unit()) {
-        v = v + " " + fact.unit().qname;
-    }
-    $('#value').text(v);
-    $('#dimensions').empty();
-    var dims = fact.dimensions();
-    for (var d in dims) {
-        (function(d) {
-            $('<div class="dimension">')
-                .text(fact.report().getLabel(d, "std") || d)
-                .append(
-                    $("<span>") 
-                        .addClass("analyse")
-                        .text("")
-                        .click(function () {
-                            inspector._chart.analyseDimension(fact,[d])
-                        })
-                )
-                .appendTo('#dimensions');
-        })(d); 
-        $('<div class="dimension-value">')
-            .text(this._report.getLabel(dims[d], "std") || dims[d])
-            .appendTo('#dimensions');
-        
-    }
-    $('#ixbrl-search-results tr').removeClass('selected');
-    $('#ixbrl-search-results tr').filter(function () { return $(this).data('ivid') == id }).addClass('selected');
-
-    var duplicates = fact.duplicates();
-    var n = 0;
-    var ndup = duplicates.length;
-    for (var i = 0; i < ndup; i++) {
-        if (fact.id == duplicates[i].id) {
-            n = i;
-        }
-    }
-    $('#duplicates .text').text((n + 1) + " of " + ndup);
-    var viewer = this._viewer;
-    $('#duplicates .prev').off().click(function () { viewer.showAndSelectFact(duplicates[(n+ndup-1) % ndup])});
-    $('#duplicates .next').off().click(function () { viewer.showAndSelectFact(duplicates[(n+1) % ndup])});
-
-    this.getPeriodIncrease(fact);
+    this._currentFact = this._report.getFactById(id);
+    this.update();
+}
 
 
+Inspector.prototype.selectDefaultLanguage = function () {
+    var preferredLanguages = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
+    var al = this._report.availableLanguages();
+    $.each(preferredLanguages, function (i, pl) {
+        $.each(al, function (j, l) {
+            if (l.toLowerCase() == pl.toLowerCase()) {
+                return l;
+            }
+        });
+    });
+    return this._report.availableLanguages()[0];
+}
+
+Inspector.prototype.setLanguage = function (lang) {
+    this._language = lang;
+    this._report.setLanguage(lang);
+    this.update();
 }

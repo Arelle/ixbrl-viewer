@@ -14,8 +14,29 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix) {
         return undefined;
     }
     else {
-        return labels["en"] || labels["en-us"]
+        if (this._language && labels[this._language]) {
+            return labels[this._language];
+        }
+        else {
+            return labels["en"] || labels["en-us"];
+        }
     }
+}
+
+iXBRLReport.prototype.availableLanguages = function() {
+    if (!this._availableLanguages) {
+        var map = {};
+        $.each(this.data.concepts, function (k,v) {
+            $.each(v.labels, function (rolePrefx, ll) {
+                $.each(ll, function (lang, v) {
+                    map[lang] = 1;
+                });
+            });
+        });
+        this._availableLanguages = Object.keys(map);
+
+    }
+    return this._availableLanguages;
 }
 
 iXBRLReport.prototype.getFactById = function(id) {
@@ -83,5 +104,9 @@ iXBRLReport.prototype.deduplicate = function (facts) {
         }
     });
     return ff;
+}
+
+iXBRLReport.prototype.setLanguage = function (lang) {
+    this._language = lang;
 }
 

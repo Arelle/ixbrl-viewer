@@ -133,6 +133,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
     var s = "";
     if (mostRecent) {
         if (fact.value() > 0 == mostRecent.value() > 0) {
+            var allMostRecent = this._report.getAlignedFacts(mostRecent);
             var x = (fact.value() - mostRecent.value()) * 100 / mostRecent.value();
             var t;
             if (x > 0) {
@@ -146,8 +147,8 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
             .addClass("year-on-year-fact-link")
             .appendTo(s)
             .click(function () { viewer.showAndSelectFact(mostRecent) })
-            .mouseenter(function () {  viewer.linkedHighlightFact(mostRecent); })
-            .mouseleave(function () {  viewer.clearLinkedHighlightFact(mostRecent); });
+            .mouseenter(function () {  $.each(allMostRecent, function (i,f) { viewer.linkedHighlightFact(f);} ) })
+            .mouseleave(function () {  $.each(allMostRecent, function (i,f) { viewer.clearLinkedHighlightFact(f);} ) });
 
         }
         else {
@@ -206,7 +207,7 @@ Inspector.prototype.update = function () {
             
         }
         $('#ixbrl-search-results tr').removeClass('selected');
-        $('#ixbrl-search-results tr').filter(function () { return $(this).data('ivid') == id }).addClass('selected');
+        $('#ixbrl-search-results tr').filter(function () { return $(this).data('ivid') == fact.id }).addClass('selected');
 
         var duplicates = fact.duplicates();
         var n = 0;

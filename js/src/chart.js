@@ -80,7 +80,6 @@ IXBRLChart.prototype._chooseMultiplier = function(facts) {
         max = max / 1000;
         scale += 3; 
     } 
-    console.log("max: " + max + " scale: " + scale);
     return scale;
 }
 
@@ -109,6 +108,9 @@ IXBRLChart.prototype.analyseDimension = function(fact, dims) {
     this._showAnalyseDimensionChart();
 }
 
+/*
+ * Create a bar chart show fact values broken down along up to two dimensions
+ */
 IXBRLChart.prototype._showAnalyseDimensionChart = function() {
     var fact = this._analyseFact;
     var dims = this._analyseDims;
@@ -118,43 +120,48 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
     $("<canvas>").appendTo($(".chart-container",c));
     $('.dialog-mask').show();
     c.show();
+
+    /* Find all facts that are aligned with the current fact, except for the
+     * two dimensions that we're breaking down by */
     var covered = {};
-    covered[dims[0]] = null;
+    if (dims[0]) {
+        covered[dims[0]] = null;
+    }
     if (dims[1]) {
         covered[dims[1]] = null;
     }
 
-    var dataLabel = fact.getLabel("std");
-
     var facts = fact.report().deduplicate(fact.report().getAlignedFacts(fact, covered));
 
-    var scale = this._chooseMultiplier(facts);
-    var yLabel = fact.unit().valueLabel() + " " + this._multiplierDescription(scale);
-    var labels = [];
+    /* Get the unique aspect values along each dimension.  This is to ensure
+     * that we assign facts to datasets consistently (we have one dataset per value
+     * on the second aspect, and a value within each dataset for each value on the
+     * first aspect */
+
     var set1av = new AspectSet();
     var set2av = new AspectSet();
-
     $.each(facts, function (i,f) {
-        set1av.add(f.aspects()[dims[0]]);
+        if (dims[0]) {
+            set1av.add(f.aspects()[dims[0]]);
+        }
         if (dims[1]) {
             set2av.add(f.aspects()[dims[1]]);
         }
     });
-
     var uv1 = set1av.uniqueValues();
     var uv2 = set2av.uniqueValues();
+
+    var scale = this._chooseMultiplier(facts);
+    var yLabel = fact.unit().valueLabel() + " " + this._multiplierDescription(scale);
+    var labels = [];
     
     var dataSets = [];
-
-    for (var i = 0; i < uv1.length; i++) {
-        labels.push(formatLabel(uv1[i].valueLabel("std") || '', 40));
+    /* Assign values to datasets.  If a dimension isn't specified, we still go
+     * through the relevant loop once so that we always have at least one plotted
+     * value */
+    for (var i = 0; i < (dims[0] ? uv1.length : 1); i++) {
+        labels.push(dims[0] ? formatLabel(uv1[i].valueLabel("std") || '', 40) : "");
         for (var j = 0; j < (dims[1] ? uv2.length : 1); j++) {
-            var covered = {};
-            covered[dims[0]] = uv1[i].value();
-            if (dims[1]) {
-                covered[dims[1]] = uv2[j].value();
-            }
-
             dataSets[j] = dataSets[j] || { 
                 label: dims[1] ? uv2[j].valueLabel() : '' || '', 
                 data: [],
@@ -162,9 +169,16 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
                 borderColor: this.dataSetColour(j),
             };
 
-            console.log(covered);
+            /* Find the fact that is aligned with the reference fact, except
+             * for the specified value(s) for the dimension(s) that we're analysing */
+            var covered = {};
+            if (dims[0]) {
+                covered[dims[0]] = uv1[i].value();
+            }
+            if (dims[1]) {
+                covered[dims[1]] = uv2[j].value();
+            }
             var dp = fact.report().getAlignedFacts(fact, covered);
-            console.log(dp);
             if (dp.length > 0) {
                 dataSets[j].data[i] = dp[0].value()/(10**scale);
             }
@@ -174,10 +188,10 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
         }
     }
 
+    /* Create controls for adding or removing aspects for analysis */
     $(".other-aspects", c).empty();
     var unselectedAspects = [];
     $.each(fact.aspects(), function (a,av) {
-        console.log(av);
         var a = $("<div>")
             .addClass("other-aspect")
             .appendTo($(".other-aspects",c));
@@ -197,9 +211,17 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
             }
         }
     });
+
     if (!dims[1]) {
-        dataSets[0].label = unselectedAspects.join(", ");
+        if (!dims[0]) {
+            labels[0] = unselectedAspects.join(", ");
+            dataSets[0].label = unselectedAspects.join(", ");
+        }
+        else {
+            dataSets[0].label = unselectedAspects.join(", ");
+        }
     }
+
     co.setChartSize();
 
     var ctx = $("canvas", c);
@@ -241,8 +263,6 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
 IXBRLChart.prototype.setChartSize = function () {
     var c = this._chart;
     var nh = c.height() - $('.other-aspects').height() - 16;
-    console.log("c.height " + c.height() + " od.heigh " + $('.other-aspects').height())
-    console.log("Setting height to " + nh);
     $('.chart-container',c).height(nh);
     $('canvas',c).attr('height',nh).height(nh);
 

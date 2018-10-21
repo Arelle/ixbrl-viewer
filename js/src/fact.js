@@ -1,6 +1,7 @@
 import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
+import { Period } from './period.js';
 import $ from 'jquery'
 
 export function Fact(report, factId) {
@@ -21,39 +22,21 @@ Fact.prototype.conceptName = function() {
     return this.f.a.c;
 }
 
+Fact.prototype.period = function (){
+    return new Period(this.f.a.p);
+}
+
 Fact.prototype.periodString = function() {
-    var s;
-    if (!this.f.a.p) {
-        /* forever */
-        s = "None";
-    }
-    else if (!this.f.a.p.includes('/')) {
-        /* instant */
-        s = isodateToHuman(this.f.a.pt, true);
-    }
-    else {
-        s = isodateToHuman(this.periodFrom(), false) + " to " + isodateToHuman(this.periodTo(), true);
-    }
-    return s;
+    return this.period().toString();
 }
 
 
 Fact.prototype.periodTo = function() {
-    if (this.f.a.p.includes('/')) {
-        var r = this.f.a.p.split('/');
-        return r[1];
-    }
-    else {
-        return this.f.a.p;
-    }
+    return this.period().to();
 }
 
 Fact.prototype.periodFrom = function() {
-    if (this.f.a.p.includes('/')) {
-        var r = this.f.a.p.split('/');
-        return r[0];
-    }
-    return null;
+    return this.period().from();
 }
 
 Fact.prototype.value = function() {

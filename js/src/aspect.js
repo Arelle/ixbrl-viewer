@@ -1,5 +1,6 @@
 import { QName } from './qname.js';
 import $ from 'jquery';
+import { Period } from './period.js';
 
 export function Aspect(a, v, report) {
     this._aspect = a;
@@ -52,6 +53,10 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
         else {
             return this._value;
         }
+    }
+    else if (this._aspect == 'p') {
+        var p = new Period(this._value);
+        return p.toString();
     }
     else {
         return this._value;

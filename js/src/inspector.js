@@ -142,7 +142,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
                 t = formatNumber(-1 * x,1) + "% decrease on ";
             }
             s = $("<span>").text(t);
-            $("<span></span>").text(mostRecent.periodTo())
+            $("<span></span>").text(mostRecent.periodString())
             .addClass("year-on-year-fact-link")
             .appendTo(s)
             .click(function () { viewer.showAndSelectFact(mostRecent) })

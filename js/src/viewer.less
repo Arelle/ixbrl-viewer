@@ -6,12 +6,18 @@
     cursor: pointer;
 }
 
-.ixbrl-highlight, .ixbrl-selected {
+.ixbrl-highlight {
     background-color: yellow;
 }
 
-.ixbrl-selected, .ixbrl-element:hover {
-    outline: dashed 1px black;
+.ixbrl-selected {
+    outline: solid 2px @primary;
+    outline-offset: 1px;
+}
+
+.ixbrl-element:hover:not(.ixbrl-selected) {
+    outline: dashed 2px @primary;
+    outline-offset: 1px;
 }
 
 .ixbrl-element {
@@ -21,11 +27,13 @@
 
 .ixbrl-related {
     outline: dashed 1px blue;
+    outline-offset: 1px;
 }
 
 .ixbrl-related.ixbrl-linked-highlight,
 .ixbrl-linked-highlight {
     outline: solid 2px @linked-fact;
+    outline-offset: 1px;
 }
 
 div.ixbrl-table-handle {

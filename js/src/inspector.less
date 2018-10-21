@@ -4,17 +4,6 @@ body {
     margin: 0;
 }
 #ixv {
-/*
-    #ixv-loading-mask {
-        position: fixed;
-        top: 0px;
-        left: 0px;
-        right: 0px;
-        bottom: 0;
-        z-index: 10;
-
-    }
-*/
 
     #ixv-progress {
         position: fixed; 
@@ -96,20 +85,68 @@ body {
         right: 0;
         bottom: 0;
         box-sizing: border-box; 
-        font-family: sans-serif;
+        &, table {
+            font-family: sans-serif;
+            font-size: 11pt;
+            color: @header-grey;
+        }
         height: 100%;
         overflow-y: scroll;
+
+        h2 {
+            text-align: center;
+            font-weight: normal;
+            border-bottom: solid 1px #ccc;
+            width: 100%;
+            padding-bottom: 5px;
+            color: @header-grey;
+
+        }
+
+        h3 {
+            font-weight: normal;
+            border-bottom: solid 1px #ccc;
+            width: 100%;
+            padding-bottom: 5px;
+            color: @header-grey;
+        }
+        
+        h4 {
+            font-weight: bold;
+            color: @header-grey;
+            margin-bottom: 14px;
+        }
     }
     #std-label {
-        margin-top: 10px;
-        font-weight: bold;
-        font-size:  large;
-        min-height: 45px;
+        margin-left: 30px;
+        min-height: 20px;
+        position: relative;
+        &:before {
+            color: @primary;
+            content: "\2022"; 
+            position: absolute;
+            top: -5px;
+            left: -17px;
+            font-size: x-large;
+        }
     }
     #concept {
         margin-top: 20px;
         font-size:  small;
         min-height: 25px;
+    }
+    table.fact-properties {
+    
+        width: 100%;
+        th {
+            width: 100px;
+            text-align: right;
+            padding-right: 30px;
+        }
+        th, td {
+            padding-top: 7px;
+            padding-bottom: 7px;
+        }
     }
     #duplicates {
         .next, .prev {
@@ -204,6 +241,7 @@ body {
                 &.linked-highlight,
                 &.fact-link:hover {
                     outline: solid 2px @linked-fact;
+                    outline-offset: 1px;
                 }
                 &.total {
                     border-top: solid 1px #000;
@@ -212,9 +250,10 @@ body {
         }
         .year-on-year-fact-link {
             cursor: pointer;
-            color: #00f;
+            color: @primary;
             &:hover {
                 outline: solid 2px @linked-fact;
+                outline-offset: 1px;
             }
         }
     }
@@ -232,7 +271,7 @@ body {
     }
 
     .loader {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;

@@ -155,7 +155,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
             s = "(change n/a)";
         }
     }
-    $("#period-comparison").html(s);
+    $(".fact-properties tr.change td").html(s);
 
 }
 
@@ -166,7 +166,7 @@ Inspector.prototype.update = function () {
         $('#std-label').text(fact.getLabel("std") || fact.conceptName());
         $('#documentation').text(fact.getLabel("doc") || "");
         $('#concept').text(fact.conceptName());
-        $('#period')
+        $('tr.period td')
             .text(fact.periodString())
             .append(
                 $("<span>") 
@@ -184,7 +184,7 @@ Inspector.prototype.update = function () {
         else if (fact.unit()) {
             v = v + " " + fact.unit().qname;
         }
-        $('#value').text(v);
+        $('tr.value td').text(v);
         $('#dimensions').empty();
         var dims = fact.dimensions();
         for (var d in dims) {

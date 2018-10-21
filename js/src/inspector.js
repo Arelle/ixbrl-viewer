@@ -123,7 +123,7 @@ Inspector.prototype.viewerMouseLeave = function (id) {
 
 Inspector.prototype.getPeriodIncrease = function (fact) {
     var viewer = this._viewer;
-    var otherFacts = this._report.getAlignedFacts(fact, {"pt": null, "pf": null });
+    var otherFacts = this._report.getAlignedFacts(fact, {"p":null });
     var mostRecent;
     $.each(otherFacts, function (i, of) {
         if (of.periodTo() < fact.periodTo() && (!mostRecent || of.periodTo() > mostRecent.periodTo()) ) {
@@ -165,7 +165,16 @@ Inspector.prototype.update = function () {
         $('#std-label').text(fact.getLabel("std") || fact.conceptName());
         $('#documentation').text(fact.getLabel("doc") || "");
         $('#concept').text(fact.conceptName());
-        $('#period').text(fact.periodString());
+        $('#period')
+            .text(fact.periodString())
+            .append(
+                $("<span>") 
+                    .addClass("analyse")
+                    .text("")
+                    .click(function () {
+                        inspector._chart.analyseDimension(fact,["p"])
+                    })
+            );
         this.updateCalculation(fact);
         var v = fact.value();
         if (fact.isMonetaryValue()) {

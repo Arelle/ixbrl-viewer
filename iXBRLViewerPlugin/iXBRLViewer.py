@@ -159,11 +159,14 @@ class IXBRLViewerBuilder:
                 self.addConcept(v.dimension)
                 self.addConcept(v.member)
 
+            # XXX does not support forever periods
             if f.context.isInstantPeriod:
-                aspects["pt"] = self.dateFormat(f.context.instantDatetime.isoformat())
+                aspects["p"] = self.dateFormat(f.context.instantDatetime.isoformat())
             elif f.context.isStartEndPeriod:
-                aspects["pf"] = self.dateFormat(f.context.startDatetime.isoformat())
-                aspects["pt"] = self.dateFormat(f.context.endDatetime.isoformat())
+                aspects["p"] = "%s/%s" % (
+                    self.dateFormat(f.context.startDatetime.isoformat()),
+                    self.dateFormat(f.context.endDatetime.isoformat())
+                )
 
             factData = {
                 "f": str(f.format),

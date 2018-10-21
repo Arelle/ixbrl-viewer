@@ -5,7 +5,7 @@ import { AspectSet } from './aspect.js';
 export function IXBRLChart() {
     this._chart = $('#ixv #chart');
     var c = this._chart;
-    $('#close', c).click(function () { c.hide() });
+    $('.close', c).click(function () { $('.dialog-mask').hide(); c.hide() });
 
 }
 
@@ -116,6 +116,7 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
     var c = this._chart;
     $("canvas",c).remove();
     $("<canvas>").appendTo($(".chart-container",c));
+    $('.dialog-mask').show();
     c.show();
     var covered = {};
     covered[dims[0]] = null;

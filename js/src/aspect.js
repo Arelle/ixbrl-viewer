@@ -15,7 +15,7 @@ Aspect.prototype.label = function() {
     if (this._aspect == 'c') {
         return "Concept";
     }
-    else if (this._aspect == 'pt' || this._aspect == 'pf') {
+    else if (this._aspect == 'p') {
         return "Period";
     }
     else if (this._aspect == 'u') {

@@ -130,6 +130,9 @@ body {
     #inspector .dimension {
         margin-top: 10px;
         margin-bottom: 5px;
+    }
+    #inspector .dimension,
+    #inspector #period {
         .analyse {
             cursor: pointer;
             padding-left: 7px;
@@ -290,17 +293,9 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+    
+
     #chart {
-        position: absolute;
-        top: 50px;
-        left: 50px;
-        bottom: 50px;
-        right: 50px;
-        border: solid 1px #000;
-        background-color: #fff;
-        z-index: 10;
-        border-radius: 5px;
-        display: none;
         .chart-container {
            position: relative;
            width: 100%;
@@ -326,7 +321,55 @@ body {
 
         }
     }
+    
+    .dialog-mask {
+        background-color: rgba(0,0,0,0.6);
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        z-index: 10;
+        display: none;
+    }
+    .dialog {
+        z-index: 15;
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        bottom: 50px;
+        right: 50px;
+        border: solid 1px #000;
+        background-color: #fff;
+        z-index: 15;
+        //border-radius: 5px;
+        display: none;
 
+        // Use this instead of padding so that we can absolutely position elements within it.
+        .contents {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            bottom: 10px;
+        }
+        .close {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            z-index: 20;
+            &:before {
+                cursor: pointer;
+                color: #999;
+                font-family: "icomoon"; 
+                content: "\ea0f";
+            }
+            &:hover:before {
+                cursor: pointer;
+                color: #000;
+            }
+        }
+    }
 
 
 }

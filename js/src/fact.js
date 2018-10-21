@@ -23,27 +23,37 @@ Fact.prototype.conceptName = function() {
 
 Fact.prototype.periodString = function() {
     var s;
-    if (!this.f.a.pt) {
+    if (!this.f.a.p) {
         /* forever */
         s = "None";
     }
-    else if (!this.f.a.pf) {
+    else if (!this.f.a.p.includes('/')) {
         /* instant */
         s = isodateToHuman(this.f.a.pt, true);
     }
     else {
-        s = isodateToHuman(this.f.a.pf, false) + " to " + isodateToHuman(this.f.a.pt, true);
+        s = isodateToHuman(this.periodFrom(), false) + " to " + isodateToHuman(this.periodTo(), true);
     }
     return s;
 }
 
 
 Fact.prototype.periodTo = function() {
-    return this.f.a.pt;
+    if (this.f.a.p.includes('/')) {
+        var r = this.f.a.p.split('/');
+        return r[1];
+    }
+    else {
+        return this.f.a.p;
+    }
 }
 
 Fact.prototype.periodFrom = function() {
-    return this.f.a.pf;
+    if (this.f.a.p.includes('/')) {
+        var r = this.f.a.p.split('/');
+        return r[0];
+    }
+    return null;
 }
 
 Fact.prototype.value = function() {

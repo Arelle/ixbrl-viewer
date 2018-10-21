@@ -5,8 +5,8 @@
     <div id="inspector">
       <div id="ixbrl-controls-top">
           <label><input id="ixbrl-show-all-tags" type="checkbox">Show all tags</label>
-          <button id="ixbrl-next-tag">Next tag</button>
-          <button id="ixbrl-prev-tag">Prev tag</button>
+          <button id="ixbrl-prev-tag">&lt; Prev tag</button>
+          <button id="ixbrl-next-tag">Next tag &gt;</button>
           Language: <select id="ixbrl-language-select"></select>
       </div>
       <div id="std-label"></div>
@@ -29,10 +29,14 @@
         <div class="tree"></div>
       </div>
     </div>
-    <div id="chart">
-        <div id="close">close</div>
-        <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
-        <div class="other-aspects"></div>
+    <div class="dialog-mask">
+    </div>
+    <div id="chart" class="dialog">
+        <div class="close"></div>
+        <div class="contents">
+            <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
+            <div class="other-aspects"></div>
+        </div>
     </div>
     <div id="iframe-container" >
         <div class="zoom-in">+</div>

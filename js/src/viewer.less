@@ -7,18 +7,31 @@
 }
 
 .ixbrl-highlight {
-    background-color: yellow;
+    background-color: yellow !important;
 }
 
-.ixbrl-selected {
-    outline: solid 2px @primary;
-    outline-offset: 1px;
+div, span {
+    &.ixbrl-selected {
+        outline: solid 2px @primary;
+        outline-offset: 1px;
+    }
+    &.ixbrl-element:hover:not(.ixbrl-selected) {
+        outline: dashed 2px @primary;
+        outline-offset: 1px;
+    }
 }
 
-.ixbrl-element:hover:not(.ixbrl-selected) {
-    outline: dashed 2px @primary;
-    outline-offset: 1px;
+td, th {
+    &.ixbrl-selected {
+        outline: solid 2px @primary !important;
+        outline-offset: -1px !important;
+    }
+    &.ixbrl-element:hover:not(.ixbrl-selected) {
+        outline: dashed 2px @primary !important;
+        outline-offset: -1px !important;
+    }
 }
+
 
 .ixbrl-element {
     cursor: pointer;

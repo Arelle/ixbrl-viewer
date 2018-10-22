@@ -78,7 +78,11 @@ body {
     }
 
     #inspector {
-        padding: 0 20px 20px 20px;
+        .inspector-body {
+            padding: 0 20px 20px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
         width: 25%;
         position: absolute;
         top: 0; 
@@ -169,11 +173,11 @@ body {
         margin-bottom: 5px;
     }
     #inspector .dimension,
-    #inspector #period {
+    #inspector .period {
         .analyse {
             cursor: pointer;
             padding-left: 7px;
-            color: #00f;
+            color: @primary;
         }
         .analyse:before {
             font-family: "icomoon";

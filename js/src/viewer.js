@@ -28,28 +28,36 @@ function localName(e) {
 Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   var elt;
   if(n.nodeType == 1 && (localName(n.nodeName) == 'NONNUMERIC' || localName(n.nodeName) == 'NONFRACTION')) {
-    var wrapper = "span";
-    var nn = n.getElementsByTagName("*");
-    for (var i = 0; i < nn.length; i++) {
-      if($(nn[i]).css("display") === "block") {
-        wrapper = 'div';
-        break;
-      }
+    var node = $(n).parent("td,th").eq(0);
+    if (node.length == 0) {
+        var wrapper = "<span>";
+        var nn = n.getElementsByTagName("*");
+        for (var i = 0; i < nn.length; i++) {
+          if($(nn[i]).css("display") === "block") {
+            wrapper = '<div>';
+            break;
+          }
+        }
+        $(n).wrap(wrapper);
+        node = $(n).parent();
     }
-    var elt;
+    node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
+    //var elt;
     if (localName(n.nodeName) == 'NONFRACTION') {
-      $(n).wrap('<' + wrapper + ' class="ixbrl-element ixbrl-element-nonfraction"></' + wrapper + '>');
-      $(n).parent().data('ivid', n.getAttribute("id"));
+      $(node).addClass("ixbrl-element-nonfraction");
+      /*
       if(inHidden) {
         elt = $(n).parent().clone();
       }
+      */
     }
     if (localName(n.nodeName) == 'NONNUMERIC') {
-      $(n).wrap('<' + wrapper + ' class="ixbrl-element ixbrl-element-nonnumeric"></' + wrapper + '>');
-      $(n).parent().data('ivid', n.getAttribute("id"));
+      $(node).addClass("ixbrl-element-nonfraction");
+      /*
       if(inHidden) {
         elt = $(n).parent().clone();
       }
+      */
     }
     if (elt) {
       var concept = n.getAttribute("name");

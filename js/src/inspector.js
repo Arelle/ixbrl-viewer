@@ -123,26 +123,32 @@ Inspector.prototype.viewerMouseLeave = function (id) {
 
 Inspector.prototype.getPeriodIncrease = function (fact) {
     var viewer = this._viewer;
-    var otherFacts = this._report.getAlignedFacts(fact, {"p":null });
-    var mostRecent;
-    $.each(otherFacts, function (i, of) {
-        if (of.periodTo() < fact.periodTo() && (!mostRecent || of.periodTo() > mostRecent.periodTo()) ) {
-            mostRecent = of;
-        }
-    });
-    var s = "";
-    if (mostRecent) {
-        if (fact.value() > 0 == mostRecent.value() > 0) {
-            var allMostRecent = this._report.getAlignedFacts(mostRecent);
-            var x = (fact.value() - mostRecent.value()) * 100 / mostRecent.value();
-            var t;
-            if (x > 0) {
-                t = formatNumber(x,1) + "% increase on ";
+    if (fact.isNumeric()) {
+        var otherFacts = this._report.getAlignedFacts(fact, {"p":null });
+        var mostRecent;
+        $.each(otherFacts, function (i, of) {
+            if (of.periodTo() < fact.periodTo() && (!mostRecent || of.periodTo() > mostRecent.periodTo()) ) {
+                mostRecent = of;
+            }
+        });
+        var s = "";
+        if (mostRecent) {
+            if (fact.value() > 0 == mostRecent.value() > 0) {
+                var allMostRecent = this._report.getAlignedFacts(mostRecent);
+                var x = (fact.value() - mostRecent.value()) * 100 / mostRecent.value();
+                var t;
+                if (x > 0) {
+                    t = formatNumber(x,1) + "% increase on ";
+                }
+                else {
+                    t = formatNumber(-1 * x,1) + "% decrease on ";
+                }
+                s = $("<span>").text(t);
             }
             else {
-                t = formatNumber(-1 * x,1) + "% decrease on ";
+                s = $("<span>").text("From " + mostRecent.readableValue() + " in "); 
             }
-            s = $("<span>").text(t);
+
             $("<span></span>").text(mostRecent.periodString())
             .addClass("year-on-year-fact-link")
             .appendTo(s)
@@ -152,8 +158,11 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
         }
         else {
-            s = "(change n/a)";
+            s = $("<i>").text("No prior fact");
         }
+    }
+    else {
+        s = $("<i>").text("n/a (non-numeric fact)");
     }
     $(".fact-properties tr.change td").html(s);
 
@@ -179,14 +188,7 @@ Inspector.prototype.update = function () {
                     })
             );
         this.updateCalculation(fact);
-        var v = fact.value();
-        if (fact.isMonetaryValue()) {
-            v = fact.unit().valueLabel() + " " + formatNumber(v,2);
-        }
-        else if (fact.unit()) {
-            v = v + " " + fact.unit().qname;
-        }
-        $('tr.value td').text(v);
+        $('tr.value td').text(fact.readableValue());
         $('#dimensions').empty();
         var dims = fact.dimensions();
         for (var d in dims) {

@@ -2,6 +2,7 @@ import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
+import { formatNumber } from "./util.js";
 import $ from 'jquery'
 
 export function Fact(report, factId) {
@@ -43,6 +44,17 @@ Fact.prototype.value = function() {
     return this.f.v;
 }
 
+Fact.prototype.readableValue = function() {
+    var v = this.f.v;
+    if (this.isMonetaryValue()) {
+        v = this.unit().valueLabel() + " " + formatNumber(v,2);
+    }
+    else if (this.unit()) {
+        v = v + " " + this.unit().qname;
+    }
+    return v;
+}
+
 Fact.prototype.unit = function() {
     if (this.f.a.u) {
         return this.aspect("u");
@@ -50,6 +62,10 @@ Fact.prototype.unit = function() {
     else {
         return undefined;
     }
+}
+
+Fact.prototype.isNumeric = function () {
+    return this.unit() !== undefined;
 }
 
 Fact.prototype.dimensions = function () {
@@ -110,7 +126,6 @@ Fact.prototype.isAligned = function (of, coveredAspects) {
     }
     return true;
 }
-
 
 
 Fact.prototype.duplicates = function () {

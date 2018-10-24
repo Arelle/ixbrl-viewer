@@ -9,45 +9,52 @@
           <button id="ixbrl-next-tag">Next tag &gt;</button>
           Language: <select id="ixbrl-language-select"></select>
       </div>
-      <div class="inspector-body">
-          <h2>Fact Properties</h2>
-          <h4>Concept</h4>
-          <div id="std-label"></div>
-          <div id="documentation"></div>
-          <h4>Dimensions</h4>
-          <div id="dimensions"></div>
-          <table class="fact-properties">
-            <tr class="period">
-                <th>Date</th>
+      <h2>Fact Properties</h2>
+      <div class="fact-details">
+         <h4>Concept</h4>
+         <div id="std-label"></div>
+         <div id="documentation"></div>
+         <h4>Dimensions</h4>
+         <div id="dimensions"></div>
+         <table class="fact-properties">
+           <tr class="period">
+               <th>Date</th>
+               <td></td>
+           </tr>
+           <tr class="value">
+               <th>Fact Value</th>
+               <td></td>
+           </tr>
+           <tr class="change">
+               <th>Change</th>
+               <td></td>
+           </tr>
+           <tr class="concept">
+                <th>Concept</th>
                 <td></td>
             </tr>
-            <tr class="value">
-                <th>Fact Value</th>
-                <td></td>
-            </tr>
-            <tr class="change">
-                <th>Change</th>
-                <td></td>
-            </tr>
-          </table>
+         </table>
 
-        
-          <div id="period-comparison"></div>
-          <div id="concept"></div>
-          <div id="duplicates"><span class="prev">&lt;</span> <span class="text"></span> <span class="next">&gt;</span></div>
-          <h3>Search</h3>
-          <div>
-            <input type="text" id="ixbrl-search">
-            <table class="scrollable" id="ixbrl-search-results">
-              <tbody>
-              </tbody>
-            </table>
-          </div>
-          <div id="calculation">
-            <h3>Calculations</h3>
-            <div class="tree"></div>
-          </div>
-        </div>
+         <div class="duplicates"><span class="prev"></span> <span class="text"></span> <span class="next"></span></div>
+   
+       </div>
+       <div class="no-fact-selected">
+         <span>No fact selected</span>
+       </div>
+       <h3>Search</h3>
+       <div class="search">
+         <div class="search-input">
+         <input type="text" id="ixbrl-search">
+         </div>
+         <table class="scrollable" id="ixbrl-search-results">
+           <tbody>
+           </tbody>
+         </table>
+       </div>
+       <div id="calculation">
+         <h3>Calculations</h3>
+         <div class="tree"></div>
+       </div>
     </div>
     <div class="dialog-mask">
     </div>

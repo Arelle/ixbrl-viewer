@@ -54,7 +54,7 @@ Inspector.prototype.search = function (s) {
     $('#ixbrl-search-results tr').remove();
     $.each(results, function (i,r) {
         var row = $('<tr><td></td></tr>');
-        row.find("td").text(r.fact.getLabel("std") + " (" + r.score + ")" );
+        row.find("td").text(r.fact.getLabel("std")); // + " (" + r.score + ")" );
         row.data('ivid', r.fact.id);
         row.appendTo('#ixbrl-search-results');
         row.click(function () { viewer.showAndSelectFact(r.fact) });
@@ -161,11 +161,13 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 Inspector.prototype.update = function () {
     if (this._currentFact) {
+        $('#inspector .no-fact-selected').hide();
+        $('#inspector .fact-details').show();
         var fact = this._currentFact;
         var inspector = this;
         $('#std-label').text(fact.getLabel("std") || fact.conceptName());
         $('#documentation').text(fact.getLabel("doc") || "");
-        $('#concept').text(fact.conceptName());
+        $('tr.concept td').text(fact.conceptName());
         $('tr.period td')
             .text(fact.periodString())
             .append(
@@ -217,10 +219,10 @@ Inspector.prototype.update = function () {
                 n = i;
             }
         }
-        $('#duplicates .text').text((n + 1) + " of " + ndup);
+        $('.duplicates .text').text((n + 1) + " of " + ndup);
         var viewer = this._viewer;
-        $('#duplicates .prev').off().click(function () { viewer.showAndSelectFact(duplicates[(n+ndup-1) % ndup])});
-        $('#duplicates .next').off().click(function () { viewer.showAndSelectFact(duplicates[(n+1) % ndup])});
+        $('.duplicates .prev').off().click(function () { viewer.showAndSelectFact(duplicates[(n+ndup-1) % ndup])});
+        $('.duplicates .next').off().click(function () { viewer.showAndSelectFact(duplicates[(n+1) % ndup])});
 
         this.getPeriodIncrease(fact);
 

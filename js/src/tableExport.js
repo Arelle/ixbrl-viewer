@@ -36,7 +36,8 @@ TableExport.prototype._getRawTable = function (table) {
                 }
             }
             var v;
-            var facts = $(this).find('.ixbrl-element');
+            
+            var facts = $(this).find(".ixbrl-element").addBack(".ixbrl-element");
             if (facts.length > 0) {
                 var id = facts.first().data('ivid');
                 var fact = report.getFactById(id);
@@ -166,6 +167,7 @@ TableExport.prototype._writeTable = function (data) {
 TableExport.prototype.exportTable = function () {
 
     var data = this._getRawTable(this._table);
+    console.log(data);
     var rowLength = 0;
 
     var rowAspects = []; // array of aspect sets that are constant for each row

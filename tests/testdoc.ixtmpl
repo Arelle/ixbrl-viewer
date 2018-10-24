@@ -9,6 +9,19 @@
             .time-series td { 
                 padding: 5px;
             }
+            table.accounts td,
+            table.accounts th {
+                padding: 5px;
+            }
+            td.figure {
+                text-align: right;
+            }
+            .top-border td.figure {
+                border-top: solid 1px #000;
+            }
+            .bottom-border td.figure {
+                border-bottom: solid 1px #000;
+            }
         </style>
     </head>
     <body xmlns="http://www.w3.org/1999/xhtml">
@@ -83,6 +96,39 @@ Profit Loss double tagged: {{ monetary ifrs:ProfitLoss[] }}{{ monetary ifrs:Prof
             {{ row "" [period=prev4] "2014" "6,509" }}
             {{ row "" [period=prev5] "2013" "5,336" }}
         </table>
+
+
+        <h3>Table export test</h3>
+
+        <p>The table below cannot be represented using the intersection of row and column aspects.</p>
+
+        <table class="accounts">
+            {{ column-aspects static [period=cur] [period=prev] }}
+            {{ column-styles "" "figure" "figure" }}
+
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>2018</th>
+                    <th>2017</th>
+                </tr>
+            </thead>
+            <tbody>
+{{ row ""                   ifrs:ProfitLoss[]                                       "Surplus" "252,867" "14,736" }}
+{{ row ""                   ifrs:AdjustmentsForDepreciationAndAmortisationExpense[] "Amortization and depreciation expense" "214,955" "165,030" }}
+            <tr>
+                <td>Manual row (periods swapped)</td>
+                <td class="figure">{{ monetary ifrs:ProfitLoss[period=prev] }}14,736{{end}}</td>
+                <td class="figure">{{ monetary ifrs:ProfitLoss[period=cur] }}252,867{{end}}</td>
+            </tr>
+{{ row ""                   ifrs:AdjustmentsForProvisions[]                         "Increase (decrease) of provisions" "27,174" "19,596" }}
+{{ row "top-border"                   ifrs:AdjustmentsForFinanceIncomeCost[sign=flip]         "Financial income/expense" "300" "-479" }}
+{{ row "bottom-border" ifrs:CashFlowsFromUsedInOperatingActivities[]          "Cash flow from operating activities" "-1,765,126" "1,648,790" }}
+            </tbody>
+        
+
+        </table>
+            
         
     </body>
      

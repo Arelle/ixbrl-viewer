@@ -97,6 +97,21 @@ body {
         height: 100%;
         overflow-y: scroll;
 
+        .fact-details {
+            display: none;
+        }
+
+        .no-fact-selected {
+            width: 100%;
+            padding: 50px 0;
+            text-align: center;
+            span {
+                font-size: large;
+            }
+             
+            
+        }
+
         h2 {
             text-align: center;
             font-weight: normal;
@@ -152,9 +167,26 @@ body {
             padding-bottom: 7px;
         }
     }
-    #duplicates {
+    .duplicates {
+        text-align: center;
+        width: 100%;
         .next, .prev {
             cursor: pointer;
+            color: @primary;
+        }
+        .next:before {
+            position: relative;
+            top: 1px;
+            padding: 0 3px;
+            font-family: "icomoon";     
+            content: "\ea20";
+        }
+        .prev:before {
+            position: relative;
+            top: 1px;
+            padding: 0 3px;
+            font-family: "icomoon";     
+            content: "\ea1f";
         }
     }
     #documentation {
@@ -198,19 +230,42 @@ body {
     }
 
     #inspector {
-        #ixbrl-search-results {
-            td {
-                padding: 7px 5px;
-                border-top: solid 1px #ccc;
-                cursor: pointer;
+        .search {
+            margin-left: 20px;
+            margin-right: 20px;
+            .search-input {
+                position: relative;
+                margin-bottom: 5px;
+                &:before {
+                    position: absolute;
+                    left: 7px;
+                    top: 7px;
+                    content: "\e986";
+                    font-family: "icomoon";
+                    z-index: 20;
+                }
+                input {
+                    width: 100%;
+                    padding: 7px 5px 7px 25px;
+                    border: solid 1px @border-grey;
+                    border-radius: 3px;
+                    color: @header-grey;
+                }
             }
+            #ixbrl-search-results {
+                td {
+                    padding: 7px 5px;
+                    border-top: solid 1px #ccc;
+                    cursor: pointer;
+                }
 
-            td:first-child {
-                border-top: none;
-            }
+                td:first-child {
+                    border-top: none;
+                }
 
-            .selected td {
-                background-color: #77f;
+                .selected td {
+                    background-color: #77f;
+                }
             }
         }
 

@@ -133,8 +133,8 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
         });
         var s = "";
         if (mostRecent) {
+            var allMostRecent = this._report.getAlignedFacts(mostRecent);
             if (fact.value() > 0 == mostRecent.value() > 0) {
-                var allMostRecent = this._report.getAlignedFacts(mostRecent);
                 var x = (fact.value() - mostRecent.value()) * 100 / mostRecent.value();
                 var t;
                 if (x > 0) {

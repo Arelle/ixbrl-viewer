@@ -5,6 +5,7 @@ import base64
 import io
 import os
 import re
+from arelle.ValidateXbrlCalcs import inferredDecimals
 from .ui import SaveViewerDialog
 
 class NamespaceMap:
@@ -141,15 +142,22 @@ class IXBRLViewerBuilder:
                 f.set("id","ixv-%d" % (idGen))
             idGen += 1
             conceptName = self.nsmap.qname(f.qname)
-            unit = None;
-            if f.isNumeric:
-                # XXX does not support complex units
-                unit = self.nsmap.qname(f.unit.measures[0][0])
 
             aspects = {
                 "c": conceptName,
-                "u": unit
             }
+
+            factData = {
+                "f": str(f.format),
+                "v": f.value,
+                "a": aspects,
+            }
+
+            if f.isNumeric:
+                # XXX does not support complex units
+                unit = self.nsmap.qname(f.unit.measures[0][0])
+                aspects["u"] = unit
+                factData["d"] = inferredDecimals(f)
             
             for d, v in f.context.qnameDims.items():
                 if v.memberQname is None:
@@ -167,12 +175,8 @@ class IXBRLViewerBuilder:
                     self.dateFormat(f.context.startDatetime.isoformat()),
                     self.dateFormat(f.context.endDatetime.isoformat())
                 )
+            
 
-            factData = {
-                "f": str(f.format),
-                "v": f.value,
-                "a": aspects,
-            }
 
             self.taxonomyData["facts"][f.id] = factData
 

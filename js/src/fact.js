@@ -46,11 +46,17 @@ Fact.prototype.value = function() {
 
 Fact.prototype.readableValue = function() {
     var v = this.f.v;
-    if (this.isMonetaryValue()) {
-        v = this.unit().valueLabel() + " " + formatNumber(v,2);
-    }
-    else if (this.unit()) {
-        v = v + " " + this.unit().qname;
+    if (this.isNumeric()) {
+        var d = this.decimals();
+        if (d < 0) {
+            d = 0;
+        }
+        if (this.isMonetaryValue()) {
+            v = this.unit().valueLabel() + " " + formatNumber(v,d);
+        }
+        else {
+            v = formatNumber(v,d) + " " + this.unit().qname;
+        }
     }
     return v;
 }
@@ -127,7 +133,46 @@ Fact.prototype.isAligned = function (of, coveredAspects) {
     return true;
 }
 
+Fact.prototype.decimals = function () {
+    return this.f.d;
+}
 
 Fact.prototype.duplicates = function () {
     return this._report.getAlignedFacts(this);
 }
+
+Fact.prototype.readableAccuracy = function () {
+    if (!this.isNumeric()) {
+        return "n/a";
+    }
+    var d = this.decimals();
+    var names = {
+        "3": "thousandths",
+        "2": "hundredths",
+        "0":  "ones",
+        "-1":  "tens",
+        "-2":  "hundreds",
+        "-3":  "thousands",
+        "-6":  "millions",
+        "-9":  "billions",
+    }    
+    var name = names[d];
+    if (this.isMonetaryValue()) {
+        var currency = this.report().qname(this.unit().value()).localname;
+        if (d == 2) {
+            if (currency == 'USD' || currency == 'EUR' || currency == 'AUD' || currency == 'ZAR') {
+                name = "cents";
+            }
+            else if (currency == 'GBP') {
+                name = "pence";
+            }
+        }
+    }
+    if (name) {
+        d += " ("+name+")";
+    }
+    return d;
+}
+
+
+

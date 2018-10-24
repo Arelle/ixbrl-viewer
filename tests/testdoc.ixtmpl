@@ -128,6 +128,18 @@ Profit Loss double tagged: {{ monetary ifrs:ProfitLoss[] }}{{ monetary ifrs:Prof
         
 
         </table>
+
+        <h3>Decimals/precision tests</h3>
+
+        <table class="accounts">
+            {{ column-aspects static [period=cur] }}
+            {{ column-styles "" "figure" }}
+            <tbody>
+            {{ row "" ifrs:ProfitLoss[decimals="-3"] "Decimals = -3" "137,000" }}
+            {{ row "" ifrs:ProfitLoss[decimals="2"] "Decimals = 2" "137,456.00" }}
+            {{ row "" ifrs:ProfitLoss[precision="3"] "Precision = 3" "137,000" }}
+            </tbody>
+        </table>
             
         
     </body>

@@ -14,5 +14,5 @@ export function isodateToHuman(s, adjust) {
 }
 
 export function formatNumber(v, d) {
-    return Number(v).toFixed(d).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    return Number(v).toFixed(d).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
 }

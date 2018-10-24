@@ -189,6 +189,7 @@ Inspector.prototype.update = function () {
             );
         this.updateCalculation(fact);
         $('tr.value td').text(fact.readableValue());
+        $('tr.accuracy td').text(fact.readableAccuracy());
         $('#dimensions').empty();
         var dims = fact.dimensions();
         for (var d in dims) {

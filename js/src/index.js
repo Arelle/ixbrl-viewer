@@ -56,17 +56,14 @@ $(function () {
                     })
                     .on('resizestart', function (event) {
                         $('#ixv').css("pointer-events", "none");
-                        console.log("resize start");
                     })
                     .on('resizemove', function (event) {
-                        console.log("resize move");
                         var target = event.target;
                         var w = 100 * event.rect.width / $(target).parent().width();
                         target.style.width = w + '%';
                         $('#inspector').css('width', (100 - w) + '%');
                     })
                     .on('resizeend', function (event) {
-                        console.log("resize end");
                         $('#ixv').css("pointer-events", "auto");
                     });
                     $('#ixv .loader').remove();

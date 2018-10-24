@@ -51,19 +51,27 @@ Inspector.prototype.setViewer = function (viewer) {
 Inspector.prototype.search = function (s) {
     var results = this._search.search(s);
     var viewer = this._viewer;
-    $('#ixbrl-search-results tr').remove();
+    var table = $('#inspector .search table.results');
+    $('tr', table).remove();
+    viewer.clearRelatedHighlighting();
     $.each(results, function (i,r) {
-        var row = $('<tr><td></td></tr>');
-        row.find("td").text(r.fact.getLabel("std")); // + " (" + r.score + ")" );
-        row.data('ivid', r.fact.id);
-        row.appendTo('#ixbrl-search-results');
-        row.click(function () { viewer.showAndSelectFact(r.fact) });
+        viewer.highlightRelatedFact(r.fact);
+        var row = $('<tr>')
+            .click(function () { viewer.showAndSelectFact(r.fact) })
+            .mouseenter(function () { viewer.linkedHighlightFact(r.fact); })
+            .mouseleave(function () { viewer.clearLinkedHighlightFact(r.fact); })
+            .data('ivid', r.fact.id)
+            .appendTo($("tbody", table));
+        $('<td>')
+            .text(r.fact.getLabel("std")) // + " (" + r.score + ")" );
+            .appendTo(row);
+
     });
     
 }
 
 Inspector.prototype.updateCalculation = function (fact, elr) {
-    $('#calculation .tree').html(this._calculationHTML(fact, elr));
+    $('.calculations .tree').html(this._calculationHTML(fact, elr));
 }
 
 Inspector.prototype._calculationHTML = function (fact, elr) {
@@ -112,13 +120,17 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
 }
 
 Inspector.prototype.viewerMouseEnter = function (id) {
-    $('#calculation .item').filter(function () {   
+    $('.calculations .item').filter(function () {   
         return $.inArray(id, $.map($(this).data('ivid'), function (f)  { return f.id })) > -1 
+    }).addClass('linked-highlight');
+    $('#inspector .search .results tr').filter(function () {   
+        return $(this).data('ivid') == id;
     }).addClass('linked-highlight');
 }
 
 Inspector.prototype.viewerMouseLeave = function (id) {
-    $('#calculation .item').removeClass('linked-highlight');
+    $('.calculations .item').removeClass('linked-highlight');
+    $('#inspector .search .results tr').removeClass('linked-highlight');
 }
 
 Inspector.prototype.getPeriodIncrease = function (fact) {
@@ -211,8 +223,8 @@ Inspector.prototype.update = function () {
                 .appendTo('#dimensions');
             
         }
-        $('#ixbrl-search-results tr').removeClass('selected');
-        $('#ixbrl-search-results tr').filter(function () { return $(this).data('ivid') == fact.id }).addClass('selected');
+        $('#inspector .search .results tr').removeClass('selected');
+        $('#inspector .search .results tr').filter(function () { return $(this).data('ivid') == fact.id }).addClass('selected');
 
         var duplicates = fact.duplicates();
         var n = 0;

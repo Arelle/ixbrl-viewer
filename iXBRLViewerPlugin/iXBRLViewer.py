@@ -3,6 +3,7 @@ from lxml import etree
 import json
 import base64
 import io
+import math
 import os
 import re
 from arelle.ValidateXbrlCalcs import inferredDecimals
@@ -157,7 +158,9 @@ class IXBRLViewerBuilder:
                 # XXX does not support complex units
                 unit = self.nsmap.qname(f.unit.measures[0][0])
                 aspects["u"] = unit
-                factData["d"] = inferredDecimals(f)
+                d = inferredDecimals(f)
+                if d != float("INF") and not math.isnan(d):
+                    factData["d"] = inferredDecimals(f)
             
             for d, v in f.context.qnameDims.items():
                 if v.memberQname is None:
@@ -186,7 +189,7 @@ class IXBRLViewerBuilder:
         self.taxonomyData["roles"] = self.roleMap.prefixmap
         self.taxonomyData["rels"] = self.getRelationnShips()
 
-        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1))
+        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
         #taxonomyDataJSON = json.dumps(taxonomyData, indent=None, separators=(",",":"))
 
         dts.info("viewer:info", "Saving iXBRL viewer to %s" % (outFile))

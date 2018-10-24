@@ -170,6 +170,10 @@ Viewer.prototype.highlightRelatedFact = function (f) {
     e.addClass("ixbrl-related");
 }
 
+Viewer.prototype.clearRelatedHighlighting = function (f) {
+    $(".ixbrl-related", this._contents).removeClass("ixbrl-related");
+}
+
 Viewer.prototype.elementForFact = function (fact) {
     return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == fact.id }).first();
 }

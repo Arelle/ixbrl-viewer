@@ -1,5 +1,7 @@
 @import "fonts.less";
 @import "colours.less";
+@import "common.less";
+
 body {
     margin: 0;
 }
@@ -73,8 +75,6 @@ body {
             bottom: 0;
             z-index: 20;
         }
-
-        
     }
 
     #inspector {
@@ -92,7 +92,7 @@ body {
         &, table {
             font-family: sans-serif;
             font-size: 11pt;
-            color: @header-grey;
+            color: @text-grey;
         }
         height: 100%;
         overflow-y: scroll;
@@ -115,24 +115,24 @@ body {
         h2 {
             text-align: center;
             font-weight: normal;
-            border-bottom: solid 1px #ccc;
+            border-bottom: solid 1px @border-grey;
             width: 100%;
             padding-bottom: 5px;
-            color: @header-grey;
+            color: @text-grey;
 
         }
 
         h3 {
             font-weight: normal;
-            border-bottom: solid 1px #ccc;
+            border-bottom: solid 1px @border-grey;
             width: 100%;
             padding-bottom: 5px;
-            color: @header-grey;
+            color: @text-grey;
         }
         
         h4 {
             font-weight: bold;
-            color: @header-grey;
+            color: @text-grey;
             margin-bottom: 14px;
         }
     }
@@ -250,27 +250,31 @@ body {
                     padding: 7px 5px 7px 25px;
                     border: solid 1px @border-grey;
                     border-radius: 5px;
-                    color: @header-grey;
+                    color: @text-grey;
                 }
             }
-            #ixbrl-search-results {
+            .results {
+                tr:hover td {
+                    .linked-highlight-cell();
+                }
                 td {
                     padding: 7px 5px;
-                    border-top: solid 1px #ccc;
                     cursor: pointer;
                 }
 
-                td:first-child {
-                    border-top: none;
+                .selected td {
+                    color: @primary;
                 }
 
-                .selected td {
-                    background-color: #77f;
+                .linked-highlight td {
+                    .linked-highlight-cell();
                 }
             }
         }
 
-        #calculation {
+        .calculations {
+            margin-left: 20px;  
+            margin-right: 20px;
             select {
                 padding: 3px;
                 width: 100%;
@@ -287,7 +291,7 @@ body {
                 &.fact-link {
                     cursor: pointer;
                     .concept-name {
-                        color: #00f;
+                        color: @primary;
                     }
                 }
                 .concept-name {
@@ -300,11 +304,10 @@ body {
                 }
                 &.linked-highlight,
                 &.fact-link:hover {
-                    outline: solid 2px @linked-fact;
-                    outline-offset: 1px;
+                    .linked-highlight-text();
                 }
                 &.total {
-                    border-top: solid 1px #000;
+                    border-top: solid 1px @border-grey;
                 }
             }
         }

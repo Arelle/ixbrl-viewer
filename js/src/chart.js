@@ -4,9 +4,18 @@ import { AspectSet } from './aspect.js';
 
 export function IXBRLChart() {
     this._chart = $('#ixv #chart');
-    var c = this._chart;
-    $('.close', c).click(function () { $('.dialog-mask').hide(); c.hide() });
+    var c = this;
+    $('.close', this._chart).click(function () { c.close() });
+    $(document).bind("keyup",function (e) {
+        if (e.keyCode === 27) {
+            c.close();
+        }
+    });
+}
 
+IXBRLChart.prototype.close = function () {
+    $('.dialog-mask').hide(); 
+    this._chart.hide() ;
 }
 
 /* takes a string phrase and breaks it into separate phrases 

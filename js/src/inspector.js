@@ -40,8 +40,8 @@ Inspector.prototype.setViewer = function (viewer) {
     viewer.onSelect.add(function (id) { inspector.selectFact(id) });
     viewer.onMouseEnter.add(function (id) { inspector.viewerMouseEnter(id) });
     viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
-    $('#ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
-    $('#ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
+    $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
+    $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 
     $('#ixbrl-show-all-tags').change(function(e){ viewer.highlightAllTags(this.checked) });
     $('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });

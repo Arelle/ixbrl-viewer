@@ -1,9 +1,17 @@
 @import "fonts.less";
 @import "colours.less";
 @import "common.less";
+@import "form-controls.less";
 
 body {
     margin: 0;
+}
+.clearfix {
+    &:after {
+        content: " ";
+        display: table;
+        clear: both;
+    }
 }
 #ixv {
 
@@ -234,9 +242,53 @@ body {
     }
 
     #ixbrl-controls-top {
-        padding-top:10px;
-        padding-bottom:10px;
+        .clearfix();
+        padding: 5px;
         border-bottom: solid 1px #333;
+        & > div {
+            float: left;
+            box-sizing: border-box;
+        }
+
+        .show-all-tags {
+            .form-static();
+            width: 30%;
+            min-width: 120px;
+        }
+        
+        .next-prev {
+            .form-static();
+            width: 40%; 
+            min-width: 170px; 
+            text-align: center;
+            display: inline;
+            .ixbrl-next-tag, .ixbrl-prev-tag {
+                color: @primary;
+                cursor: pointer; 
+                margin: 0 5px;
+                position: relative;
+            }
+            .ixbrl-next-tag:after {
+                position: relative;
+                top: 1px;
+                left: 3px;
+                font-family: "icomoon";     
+                content: "\ea20";
+            }
+            .ixbrl-prev-tag:before {
+                position: relative;
+                top: 1px;
+                right: 3px;
+                font-family: "icomoon";     
+                content: "\ea1f";
+            }
+        
+        }
+        .language {
+            width: 30%;
+            min-width: 125px;
+            text-align: right;
+        }
     }
 
     #inspector {
@@ -256,10 +308,7 @@ body {
                 }
                 input {
                     width: 100%;
-                    padding: 7px 5px 7px 25px;
-                    border: solid 1px @border-grey;
-                    border-radius: 5px;
-                    color: @text-grey;
+                    padding-left: 25px;
                 }
             }
             .results {

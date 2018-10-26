@@ -146,6 +146,12 @@ Fact.prototype.readableAccuracy = function () {
         return "n/a";
     }
     var d = this.decimals();
+    if (d === undefined) {
+        return "Infinite precision"
+    }
+    else if (d === null) {
+        return "Unspecified";
+    }
     var names = {
         "3": "thousandths",
         "2": "hundredths",

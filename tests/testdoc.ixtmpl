@@ -138,6 +138,9 @@ Profit Loss double tagged: {{ monetary ifrs:ProfitLoss[] }}{{ monetary ifrs:Prof
             {{ row "" ifrs:ProfitLoss[decimals="-3"] "Decimals = -3" "137,000" }}
             {{ row "" ifrs:ProfitLoss[decimals="2"] "Decimals = 2" "137,456.00" }}
             {{ row "" ifrs:ProfitLoss[precision="3"] "Precision = 3" "137,000" }}
+            {{ row "" ifrs:ProfitLoss[precision="INF"] "Precision = INF" "137,000.00" }}
+            {{ row "" ifrs:ProfitLoss[decimals="INF"] "Decimals = INF" "137,000.00" }}
+            {{ row "" ifrs:ProfitLoss[precision="0"] "Precision = 0" "137,000.00" }}
             </tbody>
         </table>
             

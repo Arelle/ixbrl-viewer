@@ -166,6 +166,15 @@ body {
             padding-top: 7px;
             padding-bottom: 7px;
         }
+        tr.value {
+            &:not(.truncated) .show-all {
+                display: none;
+            }
+            .show-all {
+                color: @primary;
+                cursor: pointer;
+            }
+        }
     }
     .duplicates {
         text-align: center;

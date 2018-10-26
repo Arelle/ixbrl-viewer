@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import { formatNumber } from "./util.js";
+import { formatNumber, wrapLabel } from "./util.js";
 
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
@@ -174,10 +174,32 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
         }
     }
     else {
-        s = $("<i>").text("n/a (non-numeric fact)");
+        s = $("<i>").text("n/a").attr("title", "non-numeric fact");
     }
     $(".fact-properties tr.change td").html(s);
 
+}
+
+Inspector.prototype._updateValue = function (fact, showAll) {
+    var inspector = this;
+    var v = fact.readableValue();
+    if (!showAll) {
+        var fullLabel = v;
+        var vv = wrapLabel(v, 120);
+        if (vv.length > 1) {
+            $('#inspector tr.value').addClass("truncated");
+            $('#inspector tr.value .show-all').off().click(function () { inspector._updateValue(fact, true); });
+        }
+        else {
+            $('#inspector tr.value').removeClass('truncated');
+        }
+        v = vv[0];
+    }
+    else {
+        $('#inspector tr.value').removeClass('truncated');
+    }
+
+    $('tr.value td .value').text(v);
 }
 
 Inspector.prototype.update = function () {
@@ -200,7 +222,7 @@ Inspector.prototype.update = function () {
                     })
             );
         this.updateCalculation(fact);
-        $('tr.value td').text(fact.readableValue());
+        this._updateValue(fact);
         $('tr.accuracy td').text(fact.readableAccuracy());
         $('#dimensions').empty();
         var dims = fact.dimensions();

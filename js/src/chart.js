@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import Chart from 'chart.js';
 import { AspectSet } from './aspect.js';
+import { wrapLabel } from "./util.js";
 
 export function IXBRLChart() {
     this._chart = $('#ixv #chart');
@@ -18,53 +19,6 @@ IXBRLChart.prototype.close = function () {
     this._chart.hide() ;
 }
 
-/* takes a string phrase and breaks it into separate phrases 
- *    no bigger than 'maxwidth', breaks are made at complete words.*/
-
-function formatLabel(str, maxwidth){
-    var sections = [];
-    var words = str.split(" ");
-    var temp = "";
-
-    words.forEach(function(item, index){
-        if(temp.length > 0)
-        {
-            var concat = temp + ' ' + item;
-
-            if(concat.length > maxwidth){
-                sections.push(temp);
-                temp = "";
-            }
-            else{
-                if(index == (words.length-1))
-                {
-                    sections.push(concat);
-                    return;
-                }
-                else{
-                    temp = concat;
-                    return;
-                }
-            }
-        }
-
-        if(index == (words.length-1))
-        {
-            sections.push(item);
-            return;
-        }
-
-        if(item.length < maxwidth) {
-            temp = item;
-        }
-        else {
-            sections.push(item);
-        }
-
-    });
-
-    return sections;
-}
 
 IXBRLChart.prototype._multiplierDescription = function(m) {
     var desc = {
@@ -169,7 +123,7 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
      * through the relevant loop once so that we always have at least one plotted
      * value */
     for (var i = 0; i < (dims[0] ? uv1.length : 1); i++) {
-        labels.push(dims[0] ? formatLabel(uv1[i].valueLabel("std") || '', 40) : "");
+        labels.push(dims[0] ? wrapLabel(uv1[i].valueLabel("std") || '', 40) : "");
         for (var j = 0; j < (dims[1] ? uv2.length : 1); j++) {
             dataSets[j] = dataSets[j] || { 
                 label: dims[1] ? uv2[j].valueLabel() : '' || '', 

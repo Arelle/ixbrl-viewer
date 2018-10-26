@@ -37,9 +37,9 @@ Inspector.prototype.setReport = function (report) {
 Inspector.prototype.setViewer = function (viewer) {
     this._viewer = viewer;
     var inspector = this;
-    viewer.onSelect(function (id) { inspector.selectFact(id) });
-    viewer.onMouseEnter(function (id) { inspector.viewerMouseEnter(id) });
-    viewer.onMouseLeave(function (id) { inspector.viewerMouseLeave(id) });
+    viewer.onSelect.add(function (id) { inspector.selectFact(id) });
+    viewer.onMouseEnter.add(function (id) { inspector.viewerMouseEnter(id) });
+    viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
     $('#ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('#ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 

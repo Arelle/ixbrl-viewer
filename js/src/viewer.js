@@ -5,9 +5,9 @@ export function Viewer(iframe, report) {
     this._report = report;
     this._iframe = iframe;
     this._contents = iframe.contents();
-    this._onSelectHandlers = [];
-    this._onMouseEnterHandlers = [];
-    this._onMouseLeaveHandlers = [];
+    this.onSelect = $.Callbacks();
+    this.onMouseEnter = $.Callbacks();
+    this.onMouseLeave = $.Callbacks();
 
     this._preProcessiXBRL($("body", iframe.contents()).get(0));
     this._applyStyles();
@@ -146,23 +146,17 @@ Viewer.prototype.selectElement = function (e) {
     e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
     e.addClass("ixbrl-selected");
     var id = e.data('ivid');
-    $.each(this._onSelectHandlers, function (i, handler) {
-        handler(id);
-    });
+    this.onSelect.fire(id);
 }
 
 Viewer.prototype._mouseEnter = function (e) {
     var id = e.data('ivid');
-    $.each(this._onMouseEnterHandlers, function (i, handler) {
-        handler(id);
-    });
+    this.onMouseEnter.fire(id);
 }
 
 Viewer.prototype._mouseLeave = function (e) {
     var id = e.data('ivid');
-    $.each(this._onMouseLeaveHandlers, function (i, handler) {
-        handler(id);
-    });
+    this.onMouseLeave.fire(id);
 }
 
 Viewer.prototype.highlightRelatedFact = function (f) {
@@ -180,18 +174,6 @@ Viewer.prototype.elementForFact = function (fact) {
 
 Viewer.prototype.showAndSelectFact = function (fact) {
     this.showAndSelectElement(this.elementForFact(fact));
-}
-
-Viewer.prototype.onSelect = function (f) {
-    this._onSelectHandlers.push(f);
-}
-
-Viewer.prototype.onMouseEnter = function (f) {
-    this._onMouseEnterHandlers.push(f);
-}
-
-Viewer.prototype.onMouseLeave = function (f) {
-    this._onMouseLeaveHandlers.push(f);
 }
 
 Viewer.prototype.highlightAllTags = function (on) {

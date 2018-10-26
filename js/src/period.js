@@ -12,7 +12,7 @@ Period.prototype.toString = function() {
     }
     else if (!this._p.includes('/')) {
         /* instant */
-        s = isodateToHuman(this._p, true);
+        s = isodateToHuman(this.to(), true);
     }
     else {
         s = isodateToHuman(this.from(), false) + " to " + isodateToHuman(this.to(), true);
@@ -25,17 +25,17 @@ Period.prototype.toString = function() {
 Period.prototype.to = function() {
     if (this._p.includes('/')) {
         var r = this._p.split('/');
-        return r[1];
+        return new Date(r[1]);
     }
     else {
-        return this._p;
+        return new Date(this._p);
     }
 }
 
 Period.prototype.from = function() {
     if (this._p.includes('/')) {
         var r = this._p.split('/');
-        return r[0];
+        return new Date(r[0]);
     }
     return null;
 }

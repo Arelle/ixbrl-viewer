@@ -1,7 +1,6 @@
 import dateFormat from "dateformat"
 
-export function isodateToHuman(s, adjust) {
-    var d = new Date(s);
+export function isodateToHuman(d, adjust) {
     if (d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() == 0) { 
         if (adjust) {
             d.setDate(d.getDate() - 1);

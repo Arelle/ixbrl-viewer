@@ -143,6 +143,30 @@ Profit Loss double tagged: {{ monetary ifrs:ProfitLoss[] }}{{ monetary ifrs:Prof
             {{ row "" ifrs:ProfitLoss[precision="0"] "Precision = 0" "137,000.00" }}
             </tbody>
         </table>
+
+        <h3>Prior period tests</h3>
+
+        {{ period cur3mo 2018-09-01 2018-12-31 }}
+        {{ period prev3mo 2017-09-01 2017-12-31 }}
+
+        <table class="accounts">
+            {{ column-aspects static [period=cur] [period=prev] [period=cur3mo] [period=prev3mo] }}
+            {{ column-styles "" "figure" "figure" "figure" "figure" }}
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>2018</th>
+                    <th>2017</th>
+                    <th>3 months to <br></br>31 Dec 2018</th>
+                    <th>3 months to <br></br>31 Dec 2017</th>
+                </tr>
+
+            </thead>
+            <tbody>
+            {{ row "" ifrs:LicenceFeeIncome[] "Licence fee income" "123,000" "99,000" "35,000" "22,000" }}
+            {{ row "" ifrs:FinanceIncomeCost[] "Finance Income (Cost)" "88,000" "(67,000)" "(35,000)" "(22,000)" }}
+            </tbody>
+        </table>
             
         
     </body>

@@ -15,8 +15,8 @@ Fact.prototype.report = function() {
     return this._report;
 }
 
-Fact.prototype.getLabel = function(rolePrefix) {
-    return this._report.getLabel(this.f.a.c, rolePrefix);
+Fact.prototype.getLabel = function(rolePrefix, withPrefix) {
+    return this._report.getLabel(this.f.a.c, rolePrefix, withPrefix);
 }
 
 Fact.prototype.conceptName = function() {

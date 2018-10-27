@@ -4,6 +4,7 @@ import { formatNumber, wrapLabel } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
+import { ViewerOptions } from './viewerOptions.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
@@ -14,10 +15,12 @@ export function Inspector() {
         .text(inspector_css)
         .appendTo('head');
     this._chart = new IXBRLChart();
+    this._viewerOptions = new ViewerOptions()
 }
 
 Inspector.prototype.setReport = function (report) {
     this._report = report;
+    report.setViewerOptions(this._viewerOptions);
     this._search = new ReportSearch(report);
     var inspector = this;
     var langSelect = $('#ixbrl-language-select');
@@ -208,7 +211,7 @@ Inspector.prototype.update = function () {
         $('#inspector .fact-details').show();
         var fact = this._currentFact;
         var inspector = this;
-        $('#std-label').text(fact.getLabel("std") || fact.conceptName());
+        $('#std-label').text(fact.getLabel("std", true) || fact.conceptName());
         $('#documentation').text(fact.getLabel("doc") || "");
         $('tr.concept td').text(fact.conceptName());
         $('tr.period td')
@@ -229,7 +232,7 @@ Inspector.prototype.update = function () {
         for (var d in dims) {
             (function(d) {
                 $('<div class="dimension">')
-                    .text(fact.report().getLabel(d, "std") || d)
+                    .text(fact.report().getLabel(d, "std", true) || d)
                     .append(
                         $("<span>") 
                             .addClass("analyse")
@@ -241,7 +244,7 @@ Inspector.prototype.update = function () {
                     .appendTo('#dimensions');
             })(d); 
             $('<div class="dimension-value">')
-                .text(this._report.getLabel(dims[d], "std") || dims[d])
+                .text(this._report.getLabel(dims[d], "std", true) || dims[d])
                 .appendTo('#dimensions');
             
         }
@@ -288,7 +291,6 @@ Inspector.prototype.selectDefaultLanguage = function () {
 }
 
 Inspector.prototype.setLanguage = function (lang) {
-    this._language = lang;
-    this._report.setLanguage(lang);
+    this._viewerOptions.language = lang;
     this.update();
 }

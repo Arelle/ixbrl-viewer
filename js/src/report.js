@@ -7,19 +7,25 @@ export function iXBRLReport (jsonElement) {
     this._facts = {};
 }
 
-iXBRLReport.prototype.getLabel = function(c, rolePrefix) {
+iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptions) {
     rolePrefix = rolePrefix || 'std';
+    var lang = this._viewerOptions.language;
     var labels = this.data.concepts[c].labels[rolePrefix]
     if (labels === undefined) {
         return undefined;
     }
     else {
-        if (this._language && labels[this._language]) {
-            return labels[this._language];
+        var s = '';
+        if (showPrefix && this._viewerOptions.showPrefixes) {
+            s = "(" + this.qname(c).prefix + ") ";
+        }
+        if (lang && labels[lang]) {
+            s += labels[lang];
         }
         else {
-            return labels["en"] || labels["en-us"];
+            s += labels["en"] || labels["en-us"];
         }
+        return s;
     }
 }
 
@@ -106,7 +112,7 @@ iXBRLReport.prototype.deduplicate = function (facts) {
     return ff;
 }
 
-iXBRLReport.prototype.setLanguage = function (lang) {
-    this._language = lang;
+iXBRLReport.prototype.setViewerOptions = function (vo) {
+    this._viewerOptions = vo;
 }
 

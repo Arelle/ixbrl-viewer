@@ -222,6 +222,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--viewer-url", 
                       action="store", 
                       dest="viewerURL", 
+                      default="js/dist/ixbrlviewer.js",
                       help=_("Specify the URL to ixbrlviewer.js"))
 
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs):
@@ -230,10 +231,9 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs):
         cntlr.addToLog("No taxonomy loaded.")
         return
     outFile = getattr(options, 'saveViewerFile', False)
-    viewerURL = getattr(options, 'viewerURL', "js/dist/ixbrlviewer.js")
     if outFile:
         viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
-        viewerBuilder.saveViewer(outFile, scriptUrl=viewerURL)
+        viewerBuilder.saveViewer(outFile, scriptUrl=options.viewerURL)
 
 def iXBRLViewerMenuCommand(cntlr):
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:

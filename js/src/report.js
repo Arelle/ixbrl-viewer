@@ -116,3 +116,14 @@ iXBRLReport.prototype.setViewerOptions = function (vo) {
     this._viewerOptions = vo;
 }
 
+iXBRLReport.prototype.namespaceGroups = function () {
+    var counts = {};
+    $.each(this.facts(), function (i, f) {
+        counts[f.conceptQName().prefix] = counts[f.conceptQName().prefix] || 0;
+        counts[f.conceptQName().prefix]++;
+    });
+    var prefixes = Object.keys(counts);
+    prefixes.sort(function (a, b) { return counts[b] - counts[a] });
+    return prefixes;
+}
+

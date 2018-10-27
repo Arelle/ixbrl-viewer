@@ -176,12 +176,26 @@ Viewer.prototype.showAndSelectFact = function (fact) {
     this.showAndSelectElement(this.elementForFact(fact));
 }
 
-Viewer.prototype.highlightAllTags = function (on) {
+Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
+    var groups = {};
+    $.each(namespaceGroups, function (i, ns) {
+        groups[ns] = i;
+    });
+    var report = this._report;
     if (on) {
-        $(".ixbrl-element", this._contents).addClass("ixbrl-highlight");
+        $(".ixbrl-element", this._contents).each(function () {
+            $(this).addClass("ixbrl-highlight");
+            var i = groups[report.getFactById($(this).data('ivid')).conceptQName().prefix];
+            if (i !== undefined) {
+                $(this).addClass("ixbrl-highlight-" + i);
+            }
+        });
     }
     else {
-        $(".ixbrl-element", this._contents).removeClass("ixbrl-highlight");
+        //$(".ixbrl-element", this._contents).removeClass("ixbrl-highlight");
+        $(".ixbrl-element", this._contents).removeClass (function (i, className) {
+            return (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ');
+        });
     }
 }
 

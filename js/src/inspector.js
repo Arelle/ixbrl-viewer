@@ -46,7 +46,7 @@ Inspector.prototype.setViewer = function (viewer) {
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 
-    $('#ixbrl-show-all-tags').change(function(e){ viewer.highlightAllTags(this.checked) });
+    $('#ixbrl-show-all-tags').change(function(e){ viewer.highlightAllTags(this.checked, inspector._report.namespaceGroups()) });
     $('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
 }
 

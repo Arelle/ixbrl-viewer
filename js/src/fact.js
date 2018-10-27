@@ -23,6 +23,10 @@ Fact.prototype.conceptName = function() {
     return this.f.a.c;
 }
 
+Fact.prototype.conceptQName = function() {
+    return this._report.qname(this.f.a.c);
+}
+
 Fact.prototype.period = function (){
     return new Period(this.f.a.p);
 }

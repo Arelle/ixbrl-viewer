@@ -8,7 +8,16 @@
 }
 
 .ixbrl-highlight {
-    background-color: yellow !important;
+    background-color: @highlight-default !important;
+    &.ixbrl-highlight-1 {
+        background-color: @highlight-1 !important;
+    }
+    &.ixbrl-highlight-2 {
+        background-color: @highlight-2 !important;
+    }
+}
+
+.ixbrl-highlight.ixbrl-highlight-1 {
 }
 
 div, span {

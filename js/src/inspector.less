@@ -153,7 +153,7 @@ body {
             content: "\2022"; 
             position: absolute;
             top: -5px;
-            left: -17px;
+            left: -20px;
             font-size: x-large;
         }
     }
@@ -167,10 +167,32 @@ body {
         margin-right: 20px;
         margin-bottom: 10px;
         .dimension {
-            padding-left: 10px;
+            position: relative;
+            margin: 15px 0 15px 10px;
+            &:before {
+                color: @primary;
+                font-family: "xbrlicons";
+                content: "B";
+                position: absolute;
+                top: 2px;
+                left: -25px;
+                font-size: 120%
+                
+            }
         }
         .dimension-value {
-            padding-left: 30px;
+            position: relative;
+            margin: 15px 0 15px 35px;
+            &:before {
+                position: absolute;
+                color: @primary;
+                font-family: "xbrlicons";
+                content: "A";
+                top: 2px;
+                left: -25px;
+                font-size: 120%
+                
+            }
         }
         
     }

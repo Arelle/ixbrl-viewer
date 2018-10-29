@@ -63,3 +63,7 @@ export function wrapLabel(str, maxwidth){
     return sections;
 }
 
+export function escapeRegex(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+

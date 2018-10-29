@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import { TableExport } from './tableExport.js'
+import { escapeRegex } from './util.js'
 
 export function Viewer(iframe, report) {
     this._report = report;
@@ -25,11 +26,18 @@ function localName(e) {
     }
 }
 
+
 Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   var elt;
   if(n.nodeType == 1 && (localName(n.nodeName) == 'NONNUMERIC' || localName(n.nodeName) == 'NONFRACTION')) {
-    var node = $(n).parent("td,th").eq(0);
-    if (node.length == 0) {
+    var node = $(n).closest("td,th").eq(0);
+    if (node.length == 1) {
+        var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
+        if (node.text().match(regex) == null) {
+            node = null;
+        } 
+    }
+    if (node == null || node.length == 0) {
         var wrapper = "<span>";
         var nn = n.getElementsByTagName("*");
         for (var i = 0; i < nn.length; i++) {

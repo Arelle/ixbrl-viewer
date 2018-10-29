@@ -61,9 +61,19 @@ Profit Loss double tagged: {{ monetary ifrs:ProfitLoss[] }}{{ monetary ifrs:Prof
         {{ default period-type=instant }}
         <table>
             <tr>
-                <td style="padding: 15px">Element in span</td>
+                <td style="padding: 15px">Element in span with no other content</td>
                 <td style="padding: 15px"><span>{{monetary ifrs:DeferredTaxAssets[]}}761,123{{end}}</span></td>
                 <td style="padding: 15px">{{monetary ifrs:DeferredTaxAssets[period=prev]}}(461,123){{end}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 15px">Other HTML present - cell highlighting OK</td>
+                <td style="padding: 15px">$(<span>{{monetary ifrs:DeferredTaxAssets[]}}761,123{{end}}</span>)</td>
+                <td style="padding: 15px"><span style="font-weight: bold">&#163;</span><i>{{monetary ifrs:DeferredTaxAssets[period=prev]}}(461,123){{end}}</i></td>
+            </tr>
+            <tr>
+                <td style="padding: 15px">Other alpha numeric content present - cell highlighting not OK</td>
+                <td style="padding: 15px"><span>{{monetary ifrs:DeferredTaxAssets[]}}761,123{{end}}</span> <span>{{monetary ifrs:DeferredTaxAssets[]}}761,123{{end}}</span></td>
+                <td style="padding: 15px"><span style="font-weight: bold">GBP</span><i>{{monetary ifrs:DeferredTaxAssets[period=prev]}}(461,123){{end}}</i></td>
             </tr>
             <tr>
                 <td style="padding: 5px">Border via style attribute</td>

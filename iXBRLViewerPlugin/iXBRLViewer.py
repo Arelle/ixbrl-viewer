@@ -1,4 +1,5 @@
 from arelle import ModelDtsObject, XbrlConst, XmlUtil, ModelValue 
+from arelle.ModelValue import QName
 from lxml import etree
 import json
 import base64
@@ -143,16 +144,19 @@ class IXBRLViewerBuilder:
                 f.set("id","ixv-%d" % (idGen))
             idGen += 1
             conceptName = self.nsmap.qname(f.qname)
+            scheme, ident = f.context.entityIdentifier
 
             aspects = {
                 "c": conceptName,
+                "e": self.nsmap.qname(QName(self.nsmap.getPrefix(scheme,"e"), scheme, ident)),
             }
 
             factData = {
-                "f": str(f.format),
                 "v": f.value,
                 "a": aspects,
             }
+            if f.format is not None:
+                factData["f"] = str(f.format)
 
             if f.isNumeric:
                 # XXX does not support complex units

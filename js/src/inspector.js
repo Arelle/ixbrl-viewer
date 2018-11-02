@@ -205,6 +205,10 @@ Inspector.prototype._updateValue = function (fact, showAll) {
     $('tr.value td .value').text(v);
 }
 
+Inspector.prototype._updateEntityIdentifier = function (fact) {
+    $('tr.entity-identifier td').text(fact.f.a.e);
+}
+
 Inspector.prototype.update = function () {
     if (this._currentFact) {
         $('#inspector .no-fact-selected').hide();
@@ -224,6 +228,7 @@ Inspector.prototype.update = function () {
                         inspector._chart.analyseDimension(fact,["p"])
                     })
             );
+        this._updateEntityIdentifier(fact);
         this.updateCalculation(fact);
         this._updateValue(fact);
         $('tr.accuracy td').text(fact.readableAccuracy());

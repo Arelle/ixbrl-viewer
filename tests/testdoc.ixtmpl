@@ -39,6 +39,8 @@
 {{ default decimals="0" }}
 {{ default monetary-units=GBP }}
 {{ default numeric-transform = numdotdecimal }}
+{{ default entity-scheme = "http://www.example.com/1234" }}
+{{ default entity-identifier= "1234" }}
 {{ schema-ref http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd }}
 {{ schema-ref http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd }}
 

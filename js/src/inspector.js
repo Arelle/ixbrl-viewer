@@ -5,6 +5,7 @@ import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
+import { Identifiers } from './identifiers.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
@@ -206,7 +207,16 @@ Inspector.prototype._updateValue = function (fact, showAll) {
 }
 
 Inspector.prototype._updateEntityIdentifier = function (fact) {
-    $('tr.entity-identifier td').text(fact.f.a.e);
+    var url = Identifiers.identifierURLForFact(fact);
+    var cell = $('tr.entity-identifier td');
+    cell.empty();
+    if (url) {
+        $('<span>').text('['+Identifiers.identifierNameForFact(fact) + "] ").appendTo(cell)
+        $('<a target="_blank">').attr('href',url).text(fact.identifier().localname).appendTo(cell)
+    }
+    else {
+        cell.text(fact.f.a.e);
+    }
 }
 
 Inspector.prototype.update = function () {

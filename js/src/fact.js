@@ -201,5 +201,9 @@ Fact.prototype.readableAccuracy = function () {
     return d;
 }
 
+Fact.prototype.identifier = function () {
+    return this._report.qname(this.f.a.e);
+}
+
 
 

@@ -1,6 +1,7 @@
 import { QName } from './qname.js';
 import $ from 'jquery';
 import { Period } from './period.js';
+import { Identifiers } from './identifiers.js';
 
 export function Aspect(a, v, report) {
     this._aspect = a;
@@ -21,6 +22,9 @@ Aspect.prototype.label = function() {
     }
     else if (this._aspect == 'u') {
         return "Unit";
+    }
+    else if (this._aspect == 'e') {
+        return "Entity";
     }
     else {
         return this._report.getLabel(this._aspect);
@@ -57,6 +61,9 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
     else if (this._aspect == 'p') {
         var p = new Period(this._value);
         return p.toString();
+    }
+    else if (this._aspect == 'e') {
+        return Identifiers.readableName(this._report.qname(this._value));
     }
     else {
         return this._value;

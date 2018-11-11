@@ -113,9 +113,9 @@ class IXBRLViewerBuilder:
                 rr = dict()
                 relSet = self.dts.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
-                    fromKey = self.roleMap.qname(r.fromModelObject.qname)
+                    fromKey = self.nsmap.qname(r.fromModelObject.qname)
                     rel = {
-                        "t": self.roleMap.qname(r.toModelObject.qname),
+                        "t": self.nsmap.qname(r.toModelObject.qname),
                     }
                     if r.weight is not None:
                         rel['w'] = r.weight

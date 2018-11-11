@@ -45,7 +45,7 @@ TableExport.prototype._getRawTable = function (table) {
                 
                 var td = $(this)[0];
                 var n = facts[0];
-                var s = '';
+                var s = n.textContent;
                 while (n !== td) {
                     if (n.previousSibling !== null) {
                         n = n.previousSibling;
@@ -57,7 +57,7 @@ TableExport.prototype._getRawTable = function (table) {
                         s = n.textContent + s;
                     }
                 }
-                if (s.match(/[\(-]\s*$/) !== null) {
+                if (s.match(/[\(-]\s*\d/) !== null) {
                     cell.negative = true;
                 }
                 cell.topBorder = ($(this).css('border-top-style').match(/(solid|double)/) !== null);

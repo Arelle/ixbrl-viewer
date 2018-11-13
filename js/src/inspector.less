@@ -38,6 +38,7 @@ body {
             width: 100%;
             height: 100%;
             box-sizing: border-box;
+            border: none;
         }
 
         .zoom-in, .zoom-out {
@@ -104,6 +105,14 @@ body {
         }
         height: 100%;
         overflow-y: scroll;
+
+        a {
+            text-decoration: none;
+            color: @primary;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
 
         .fact-details {
             display: none;

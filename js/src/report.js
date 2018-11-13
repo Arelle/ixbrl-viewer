@@ -1,5 +1,6 @@
 import { Fact } from "./fact.js"
 import { QName } from "./qname.js"
+import { Concept } from "./concept.js";
 import $ from 'jquery'
 
 export function iXBRLReport (jsonElement) {
@@ -126,4 +127,10 @@ iXBRLReport.prototype.namespaceGroups = function () {
     prefixes.sort(function (a, b) { return counts[b] - counts[a] });
     return prefixes;
 }
+
+iXBRLReport.prototype.getConcept = function(name) {
+    return new Concept(this, name);
+}
+
+
 

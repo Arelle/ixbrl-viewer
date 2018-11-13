@@ -98,6 +98,12 @@ class IXBRLViewerBuilder:
                 l = lr.toModelObject
                 conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
 
+            refString = " ".join(_refPart.stringValue.strip()
+                               for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept)
+                               for _refPart in _refRel.toModelObject.iterchildren())
+
+            conceptData['r'] = refString
+
             self.taxonomyData["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):

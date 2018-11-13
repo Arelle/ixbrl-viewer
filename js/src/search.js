@@ -22,6 +22,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
             l += " " + this._report.getLabel(dims[d],"std");
         }
         doc.label = l;
+        doc.ref = f.concept().references();
         docs.push(doc);
     }
     this._searchIndex = lunr(function () {
@@ -30,6 +31,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
       this.field('startDate');
       this.field('date');
       this.field('doc');
+      this.field('ref');
 
       docs.forEach(function (doc) {
         this.add(doc);

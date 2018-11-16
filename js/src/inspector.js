@@ -17,8 +17,18 @@ export function Inspector() {
         .appendTo('head');
     this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()
-    $(".search-header").click(function () { $(".search").toggle(200); });
-    $(".fact-inspector-header").click(function () { $(".fact-inspector").toggle(200); });
+
+    
+    $(".collapsible-header").click(function () { 
+        var d = $(this).closest(".collapsible-section");
+        d.toggleClass("collapsed"); 
+        if (d.hasClass("collapsed")) {
+            d.find(".collapsible-body").slideUp(250);
+        }
+        else {
+            d.find(".collapsible-body").slideDown(250);
+        }
+    });
 }
 
 Inspector.prototype.setReport = function (report) {

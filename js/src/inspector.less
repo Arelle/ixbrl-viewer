@@ -92,6 +92,32 @@ body {
             width: 100%;
             box-sizing: border-box;
         }
+        .collapsible-section {
+            .collapsible-body {
+            }
+            .collapsible-header {
+                position: relative;
+                padding-left: 3px;
+                &:before {
+                    font-family: "icomoon";
+                    font-size: small;
+                    position: relative;
+                    top: -1px;
+                    left: -3px;
+                    content: "\ea1c";
+                    transform: rotate(90deg);
+                    transition: all 0.25s ease;
+                    display: inline-block;
+                }
+            }
+            &.collapsed {
+                .collapsible-header:before {
+                    transform: rotate(0);
+                }
+            }
+                
+        }
+        
         width: 25%;
         position: absolute;
         top: 0; 

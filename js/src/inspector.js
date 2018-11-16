@@ -50,7 +50,8 @@ Inspector.prototype.setViewer = function (viewer) {
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 
     $('#ixbrl-show-all-tags').change(function(e){ viewer.highlightAllTags(this.checked, inspector._report.namespaceGroups()) });
-    $('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
+    //$('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
+    $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
 }
 
 

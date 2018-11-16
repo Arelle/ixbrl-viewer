@@ -17,6 +17,8 @@ export function Inspector() {
         .appendTo('head');
     this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()
+    $(".search-header").click(function () { $(".search").toggle(200); });
+    $(".fact-inspector-header").click(function () { $(".fact-inspector").toggle(200); });
 }
 
 Inspector.prototype.setReport = function (report) {

@@ -238,8 +238,8 @@ Inspector.prototype.update = function () {
         $('#inspector .fact-details').show();
         var fact = this._currentFact;
         var inspector = this;
-        $('#std-label').text(fact.getLabel("std", true) || fact.conceptName());
-        $('#documentation').text(fact.getLabel("doc") || "");
+        $('.std-label').text(fact.getLabel("std", true) || fact.conceptName());
+        $('.documentation').text(fact.getLabel("doc") || "");
         $('tr.concept td').text(fact.conceptName());
         $('tr.period td')
             .text(fact.periodString())

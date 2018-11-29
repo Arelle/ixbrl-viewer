@@ -28,21 +28,21 @@
         <div style="display: none">
             {{ header }}
         </div>
-{{ namespace ifrs http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-full }}
-{{ period cur 2018-01-01 2018-12-31 }}
-{{ period prev 2017-01-01 2017-12-31 }}
-{{ period prev2 2016-01-01 2016-12-31 }}
-{{ period prev3 2015-01-01 2015-12-31 }}
-{{ period prev4 2014-01-01 2014-12-31 }}
-{{ period prev5 2013-01-01 2013-12-31 }}
+{{ namespace ifrs = "http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-full" }}
+{{ period cur "2018-01-01" "2018-12-31" }}
+{{ period prev "2017-01-01" "2017-12-31" }}
+{{ period prev2 "2016-01-01" "2016-12-31" }}
+{{ period prev3 "2015-01-01" "2015-12-31" }}
+{{ period prev4 "2014-01-01" "2014-12-31" }}
+{{ period prev5 "2013-01-01" "2013-12-31" }}
 {{ default period=cur }}
 {{ default decimals="0" }}
 {{ default monetary-units=GBP }}
 {{ default numeric-transform = numdotdecimal }}
 {{ default entity-scheme = "http://www.example.com/1234" }}
 {{ default entity-identifier= "1234" }}
-{{ schema-ref http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd }}
-{{ schema-ref http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd }}
+{{ schema-ref "http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd" }}
+{{ schema-ref "http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd" }}
 
         <p>
 {{ string ifrs:ConcentrationsOfRisk[] }}This is a text tag {{ end }}
@@ -158,8 +158,8 @@ Profit Loss double tagged: {{ monetary ifrs:ProfitLoss[] }}{{ monetary ifrs:Prof
 
         <h3>Prior period tests</h3>
 
-        {{ period cur3mo 2018-09-01 2018-12-31 }}
-        {{ period prev3mo 2017-09-01 2017-12-31 }}
+        {{ period cur3mo "2018-09-01" "2018-12-31" }}
+        {{ period prev3mo "2017-09-01" "2017-12-31" }}
 
         <table class="accounts">
             {{ column-aspects static [period=cur] [period=prev] [period=cur3mo] [period=prev3mo] }}

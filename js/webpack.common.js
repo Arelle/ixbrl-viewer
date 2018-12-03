@@ -4,7 +4,7 @@ module.exports = {
   module: {
     rules: [
                 {
-                    test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+                    test: /\.(woff(2)?|ttf|eot|svg|png)(\?v=\d+\.\d+\.\d+)?$/,
                     use: "base64-inline-loader"
                 }
             ]

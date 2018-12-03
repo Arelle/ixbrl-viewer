@@ -3,79 +3,87 @@
        <span class="text">Loading iXBRL Viewer</span>
     </div>
     <div id="inspector">
-      <div id="ixbrl-controls-top">
-          <div class="language">
-              <select id="ixbrl-language-select"></select>
+      <div class="inspector-content">
+          <div id="ixbrl-controls-top">
+              <div class="language">
+                  <select id="ixbrl-language-select"></select>
+              </div>
+              <div class="show-all-tags">
+                  <label><input id="ixbrl-show-all-tags" type="checkbox">Highlight</label>
+              </div>
+              <div class="next-prev">
+                  <span class="ixbrl-prev-tag">Prev tag</span>
+                  <span class="ixbrl-next-tag">Next tag</span>
+              </div>
           </div>
-          <div class="show-all-tags">
-              <label><input id="ixbrl-show-all-tags" type="checkbox">Highlight</label>
+          <div class="header">
+             <img src="inline-viewer.png" >
           </div>
-          <div class="next-prev">
-              <span class="ixbrl-prev-tag">Prev tag</span>
-              <span class="ixbrl-next-tag">Next tag</span>
-          </div>
-      </div>
-      <div class="collapsible-section">
-          <h2 class="fact-inspector-header collapsible-header">Fact Properties</h2>
-          <div class="fact-inspector collapsible-body">
-              <div class="fact-details">
-                 <h4>Concept</h4>
-                 <div class="std-label"></div>
-                 <div class="documentation"></div>
-                 <h4>Dimensions</h4>
-                 <div id="dimensions"></div>
-                 <table class="fact-properties">
-                   <tr class="period">
-                       <th>Date</th>
-                       <td></td>
-                   </tr>
-                   <tr class="value">
-                       <th>Fact Value</th>
-                       <td><span class="value"></span> <span class="show-all">[...]</span></td>
-                   </tr>
-                   <tr class="accuracy">
-                       <th>Accuracy</th>
-                       <td></td>
-                   </tr>
-                   <tr class="change">
-                       <th>Change</th>
-                       <td></td>
-                   </tr>
-                   <tr class="entity-identifier">
-                        <th>Entity</th>
-                        <td></td>
-                    </tr>
-                   <tr class="concept">
-                        <th>Concept</th>
-                        <td></td>
-                    </tr>
-                 </table>
+          <div class="collapsible-section">
+              <h3 class="fact-inspector-header collapsible-header">Fact Properties</h3>
+              <div class="fact-inspector collapsible-body">
+                  <div class="fact-details">
+                     <h4>Concept</h4>
+                     <div class="std-label"></div>
+                     <div class="documentation"></div>
+                     <h4>Dimensions</h4>
+                     <div id="dimensions"></div>
+                     <table class="fact-properties">
+                       <tr class="period">
+                           <th>Date</th>
+                           <td></td>
+                       </tr>
+                       <tr class="value">
+                           <th>Fact Value</th>
+                           <td><span class="value"></span> <span class="show-all">[...]</span></td>
+                       </tr>
+                       <tr class="accuracy">
+                           <th>Accuracy</th>
+                           <td></td>
+                       </tr>
+                       <tr class="change">
+                           <th>Change</th>
+                           <td></td>
+                       </tr>
+                       <tr class="entity-identifier">
+                            <th>Entity</th>
+                            <td></td>
+                        </tr>
+                       <tr class="concept">
+                            <th>Concept</th>
+                            <td></td>
+                        </tr>
+                     </table>
 
-                 <div class="duplicates"><span class="prev"></span> <span class="text"></span> <span class="next"></span></div>
-           
+                     <div class="duplicates"><span class="prev"></span> <span class="text"></span> <span class="next"></span></div>
+               
+                   </div>
+                   <div class="no-fact-selected">
+                     <span>No fact selected</span>
+                   </div>
                </div>
-               <div class="no-fact-selected">
-                 <span>No fact selected</span>
+            </div>
+           <div class="collapsible-section">
+               <h3 class="search-header collapsible-header">Search</h3>
+               <div class="search collapsible-body">
+                 <div class="search-input">
+                 <input type="text" id="ixbrl-search">
+                 </div>
+                 <table class="results scrollable" >
+                   <tbody>
+                   </tbody>
+                 </table>
                </div>
            </div>
+           <div class="collapsible-section">
+               <h3 class="collapsible-header">Calculations</h3>
+               <div class="collapsible-section calculations">
+                 <div class="tree"></div>
+               </div>
+            </div>
         </div>
-       <div class="collapsible-section">
-           <h3 class="search-header collapsible-header">Search</h3>
-           <div class="search collapsible-body">
-             <div class="search-input">
-             <input type="text" id="ixbrl-search">
-             </div>
-             <table class="results scrollable" >
-               <tbody>
-               </tbody>
-             </table>
-           </div>
-       </div>
-       <div class="collapsible-section">
-           <h3 class="collapsible-header">Calculations</h3>
-           <div class="collapsible-section calculations">
-             <div class="tree"></div>
-           </div>
+        <div class="powered-by">
+            <img src="powered-by-workiva.png" />
         </div>
     </div>
     <div class="dialog-mask">

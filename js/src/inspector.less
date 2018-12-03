@@ -32,7 +32,6 @@ body {
         box-sizing: border-box; 
         position: relative;
         z-index: 0;
-        padding-right: 5px;
 
         & > iframe {
             width: 100%;
@@ -71,7 +70,7 @@ body {
             position: absolute;
             top: 0;
             width: 5px;
-            right: 0;
+            right: -5px;
             bottom: 0;
             z-index: 20;
         }
@@ -80,24 +79,42 @@ body {
             position: absolute;
             top: 0;
             width: 3px;
-            right: 5px;
+            right: 0;
             bottom: 0;
             z-index: 20;
         }
     }
 
     #inspector {
-        .inspector-body {
-            padding: 0 20px 20px 20px;
-            width: 100%;
-            box-sizing: border-box;
+        
+        width: 25%;
+        position: absolute;
+        top: 0; 
+        right: 0;
+        bottom: 0;
+        box-sizing: border-box; 
+        overflow: hidden;
+        &, table {
+            font-family: sans-serif;
+            font-size: 11pt;
+            color: @text-grey;
         }
+
+        a {
+            text-decoration: none;
+            color: @primary;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
         .collapsible-section {
             .collapsible-body {
+                padding-left: 5px;
             }
             .collapsible-header {
                 position: relative;
-                padding-left: 3px;
+                padding-left: 8px;
                 &:before {
                     font-family: "icomoon";
                     font-size: small;
@@ -117,27 +134,13 @@ body {
             }
                 
         }
-        
-        width: 25%;
-        position: absolute;
-        top: 0; 
-        right: 0;
-        bottom: 0;
-        box-sizing: border-box; 
-        &, table {
-            font-family: sans-serif;
-            font-size: 11pt;
-            color: @text-grey;
-        }
-        height: 100%;
-        overflow-y: scroll;
 
-        a {
-            text-decoration: none;
-            color: @primary;
-            &:hover {
-                text-decoration: underline;
+        .header {
+            text-align: center;
+            img {
+                width: 250px;
             }
+
         }
 
         .fact-details {
@@ -308,7 +311,7 @@ body {
     #ixbrl-controls-top {
         .clearfix();
         padding: 5px;
-        border-bottom: solid 1px #333;
+        border-bottom: solid 1px #999;
         & > div {
             float: left;
             box-sizing: border-box;
@@ -354,89 +357,115 @@ body {
     }
 
     #inspector {
-        .search {
-            margin-left: 20px;
-            margin-right: 20px;
-            .search-input {
-                position: relative;
-                margin-bottom: 5px;
-                &:before {
-                    position: absolute;
-                    left: 7px;
-                    top: 7px;
-                    content: "\e986";
-                    font-family: "icomoon";
-                    z-index: 20;
-                }
-                input {
-                    width: 100%;
-                    padding-left: 25px;
-                }
-            }
-            .results {
-                tr:hover td {
-                    .linked-highlight-cell();
-                }
-                td {
-                    padding: 7px 5px;
-                    cursor: pointer;
-                }
-
-                .selected td {
-                    color: @primary;
-                }
-
-                .linked-highlight td {
-                    .linked-highlight-cell();
-                }
-            }
-        }
-
-        .calculations {
-            margin-left: 20px;  
-            margin-right: 20px;
-            select {
-                padding: 3px;
-                width: 100%;
-                margin: 5px 0;
-            }
-            .item {
-                padding: 5px 0;
-                position: relative;
-
-                &:not(.fact-link, .total) .concept-name {
-                    color: #777;
-                }
-
-                &.fact-link {
-                    cursor: pointer;
-                    .concept-name {
-                        color: @primary;
+        height: 100%;
+        .inspector-content {
+            overflow-y: scroll;
+            padding-bottom: 50px;
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            .search {
+                margin-left: 20px;
+                margin-right: 20px;
+                .search-input {
+                    position: relative;
+                    margin-bottom: 5px;
+                    &:before {
+                        position: absolute;
+                        left: 7px;
+                        top: 7px;
+                        content: "\e986";
+                        font-family: "icomoon";
+                        z-index: 0;
+                    }
+                    input {
+                        width: 100%;
+                        padding-left: 25px;
                     }
                 }
-                .concept-name {
-                    display: block;
-                    margin-left: 15px;
+                .results {
+                    tr:hover td {
+                        .linked-highlight-cell();
+                    }
+                    td {
+                        padding: 7px 5px;
+                        cursor: pointer;
+                    }
+
+                    .selected td {
+                        color: @primary;
+                    }
+
+                    .linked-highlight td {
+                        .linked-highlight-cell();
+                    }
                 }
-                .weight {
-                    display: block;
-                    position: absolute;
+            }
+
+            .calculations {
+                margin-left: 20px;  
+                margin-right: 20px;
+                select {
+                    padding: 3px;
+                    width: 100%;
+                    margin: 5px 0;
                 }
-                &.linked-highlight,
-                &.fact-link:hover {
-                    .linked-highlight-text();
+                .item {
+                    padding: 5px 0;
+                    position: relative;
+
+                    &:not(.fact-link, .total) .concept-name {
+                        color: #777;
+                    }
+
+                    &.fact-link {
+                        cursor: pointer;
+                        .concept-name {
+                            color: @primary;
+                        }
+                    }
+                    .concept-name {
+                        display: block;
+                        margin-left: 15px;
+                    }
+                    .weight {
+                        display: block;
+                        position: absolute;
+                    }
+                    &.linked-highlight,
+                    &.fact-link:hover {
+                        .linked-highlight-text();
+                    }
+                    &.total {
+                        border-top: solid 1px @border-grey;
+                    }
                 }
-                &.total {
-                    border-top: solid 1px @border-grey;
+            }
+            .year-on-year-fact-link {
+                cursor: pointer;
+                color: @primary;
+                &:hover {
+                    outline: solid 2px @linked-fact;
+                    outline-offset: 1px;
                 }
             }
         }
-        .year-on-year-fact-link {
-            cursor: pointer;
-            color: @primary;
-            &:hover {
-                outline: solid 2px @linked-fact;
-                outline-offset: 1px;
+
+        .powered-by {
+            text-align: center;
+            position: absolute;
+            background: rgba(255,255,255,0.8);
+            left: 0px;
+            right: 15px;
+            bottom: 0;
+            height: 45px;
+            padding-top: 5px;
+            box-sizing:  border-box;
+
+            & > img {
+                width: 200px;
             }
         }
     }

@@ -9,8 +9,8 @@ import { Identifiers } from './identifiers.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
-    $(require('html-loader!./inspector.html')).prependTo('body');
-    var inspector_css = require('css-loader!less-loader!./inspector.less').toString(); 
+    $(require('html-loader!../html/inspector.html')).prependTo('body');
+    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
     $('<style id="ixv-style">')
         .prop("type", "text/css")
         .text(inspector_css)

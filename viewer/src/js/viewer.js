@@ -87,7 +87,7 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
 Viewer.prototype._applyStyles = function () {
     $("<style>")
         .prop("type", "text/css")
-        .html(require('css-loader!less-loader!./viewer.less').toString())
+        .html(require('css-loader!less-loader!../less/viewer.less').toString())
         .appendTo($("head", this._iframe.contents()));
 }
 

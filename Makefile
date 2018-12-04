@@ -3,15 +3,15 @@ all: dev tests
 tests:
 	$(MAKE) -C $@
 
-dev: js/dist/ixbrlviewer.dev.js
+dev: viewer/dist/ixbrlviewer.dev.js
 
-prod: js/dist/ixbrlviewer.js
+prod: viewer/dist/ixbrlviewer.js
 
-js/dist/ixbrlviewer.dev.js:	js/src/*
-	cd js && npx webpack --config webpack.dev.js --optimize-minimize
+viewer/dist/ixbrlviewer.dev.js:	viewer/src/*/*
+	cd viewer && npx webpack --config webpack.dev.js --optimize-minimize
 
-js/dist/ixbrlviewer.js:	js/src/*
-	cd js && npx webpack --config webpack.prod.js --optimize-minimize
+viewer/dist/ixbrlviewer.js:	viewer/src/*/*
+	cd viewer && npx webpack --config webpack.prod.js --optimize-minimize
 
 
 DATE ::= $(shell date "+%Y%m%d")

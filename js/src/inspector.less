@@ -110,11 +110,11 @@ body {
 
         .collapsible-section {
             .collapsible-body {
-                padding-left: 5px;
+                padding-left: 9px;
             }
             .collapsible-header {
                 position: relative;
-                padding-left: 8px;
+                padding-left: 12px;
                 &:before {
                     font-family: "icomoon";
                     font-size: small;
@@ -360,12 +360,14 @@ body {
         height: 100%;
         .inspector-content {
             overflow-y: scroll;
-            padding-bottom: 50px;
             position: absolute;
             top: 0;
             right: 0;
             left: 0;
             bottom: 0;
+            & > *:last-child {
+                margin-bottom: 50px;
+            }
             .search {
                 margin-left: 20px;
                 margin-right: 20px;

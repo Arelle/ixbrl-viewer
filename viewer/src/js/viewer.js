@@ -245,3 +245,7 @@ Viewer.prototype.clearLinkedHighlightFact = function (f) {
     e.removeClass("ixbrl-linked-highlight");
 }
 
+Viewer.prototype.getTitle = function () {
+    return $('head title', this._contents).text();
+}
+

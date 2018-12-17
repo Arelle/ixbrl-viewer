@@ -28,9 +28,11 @@ body {
 
     #iframe-container {
         width: 75%;
-        height: 100%;
         box-sizing: border-box; 
-        position: relative;
+        position: fixed;
+        left: 0;
+        top: 50px;
+        bottom: 0;
         z-index: 0;
 
         & > iframe {
@@ -85,101 +87,41 @@ body {
         }
     }
 
-    #inspector {
-        
-        width: 25%;
-        position: absolute;
-        top: 0; 
+    #top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
         right: 0;
-        bottom: 0;
-        box-sizing: border-box; 
-        overflow: hidden;
-        &, table {
-            font-family: sans-serif;
-            font-size: 11pt;
-            color: @text-grey;
-        }
-
-        a {
-            text-decoration: none;
-            color: @primary;
-            &:hover {
-                text-decoration: underline;
-            }
-        }
-
-        .collapsible-section {
-            .collapsible-body {
-                padding-left: 9px;
-            }
-            .collapsible-header {
-                position: relative;
-                padding-left: 12px;
-                &:before {
-                    font-family: "icomoon";
-                    font-size: small;
-                    position: relative;
-                    top: -1px;
-                    left: -3px;
-                    content: "\ea1c";
-                    transform: rotate(90deg);
-                    transition: all 0.25s ease;
-                    display: inline-block;
-                }
-            }
-            &.collapsed {
-                .collapsible-header:before {
-                    transform: rotate(0);
-                }
-            }
-                
-        }
+        height: 50px;
+        border-bottom: solid 1px #ccc;
 
         .header {
-            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
             img {
-                width: 250px;
+                height: 100%;
             }
-
         }
-
-        .fact-details {
-            display: none;
-        }
-
-        .no-fact-selected {
-            width: 100%;
-            padding: 50px 0;
-            text-align: center;
-            span {
-                font-size: large;
-            }
-             
-            
-        }
-    
-        h2, h3 {
-            font-weight: normal;
-            border-bottom: solid 1px @border-grey;
-            width: 100%;
+        .title {
             box-sizing: border-box;
-            padding-bottom: 5px;
-            color: @text-grey;
-        }
-
-        h2 {
+            width: 100%;
+            padding: 0 250px;
             text-align: center;
+            line-height: 50px;
+            height: 50px;
+            overflow: hidden;
         }
-
-        h3 {
-        }
-        
-        h4 {
-            font-weight: bold;
-            color: @text-grey;
-            margin-bottom: 14px;
+        .menu {
+            position: absolute;
+            right: 0;
+            top: 0;
+            padding-right: 20px;
+            line-height: 50px;
         }
     }
+
+
     .std-label {
         margin-left: 30px;
         min-height: 20px;
@@ -357,7 +299,93 @@ body {
     }
 
     #inspector {
-        height: 100%;
+        
+        width: 25%;
+        position: absolute;
+        top: 50px; 
+        right: 0;
+        bottom: 0;
+        box-sizing: border-box; 
+        overflow: hidden;
+        &, table {
+            font-family: sans-serif;
+            font-size: 11pt;
+            color: @text-grey;
+        }
+
+        a {
+            text-decoration: none;
+            color: @primary;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .collapsible-section {
+            .collapsible-body {
+                padding-left: 9px;
+            }
+            .collapsible-header {
+                position: relative;
+                padding-left: 12px;
+                &:before {
+                    font-family: "icomoon";
+                    font-size: small;
+                    position: relative;
+                    top: -1px;
+                    left: -3px;
+                    content: "\ea1c";
+                    transform: rotate(90deg);
+                    transition: all 0.25s ease;
+                    display: inline-block;
+                }
+            }
+            &.collapsed {
+                .collapsible-header:before {
+                    transform: rotate(0);
+                }
+            }
+                
+        }
+
+
+        .fact-details {
+            display: none;
+        }
+
+        .no-fact-selected {
+            width: 100%;
+            padding: 50px 0;
+            text-align: center;
+            span {
+                font-size: large;
+            }
+             
+            
+        }
+    
+        h2, h3 {
+            font-weight: normal;
+            border-bottom: solid 1px @border-grey;
+            width: 100%;
+            box-sizing: border-box;
+            padding-bottom: 5px;
+            color: @text-grey;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        h3 {
+        }
+        
+        h4 {
+            font-weight: bold;
+            color: @text-grey;
+            margin-bottom: 14px;
+        }
+
         .inspector-content {
             overflow-y: scroll;
             position: absolute;

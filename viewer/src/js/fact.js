@@ -63,7 +63,7 @@ Fact.prototype.readableValue = function() {
             v = this.unit().valueLabel() + " " + formatNumber(v,d);
         }
         else {
-            v = formatNumber(v,d) + " " + this.unit().qname;
+            v = formatNumber(v,d) + " " + this.unit().valueLabel();
         }
     }
     return v;

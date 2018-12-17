@@ -142,20 +142,7 @@ Fact.prototype.isAligned = function (of, coveredAspects) {
 }
 
 Fact.prototype.isEquivalentDuration = function (of) {
-    /* Two instants have equivalent duration */
-    if (this.periodFrom() == null && of.periodFrom() == null) {
-        return true;
-    }
-    /* One instant, one duration => not equivalent */
-    if (this.periodFrom() == null || of.periodFrom() == null) {
-        return false;
-    }
-    var d1 = of.periodTo() - of.periodFrom();
-    var d2 = this.periodTo() - this.periodFrom();
-    if (Math.abs(d1-d2) < 0.1 * (d1+d2)) {
-        return true;
-    }
-    return false;
+    return this.period().isEquivalentDuration(of.period());
 }
 
 Fact.prototype.decimals = function () {

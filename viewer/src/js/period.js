@@ -40,3 +40,19 @@ Period.prototype.from = function() {
     return null;
 }
 
+Period.prototype.isEquivalentDuration = function (op) {
+    /* Two instants have equivalent duration */
+    if (this.from() == null && op.from() == null) {
+        return true;
+    }
+    /* One instant, one duration => not equivalent */
+    if (this.from() == null || op.from() == null) {
+        return false;
+    }
+    var d1 = op.to() - op.from();
+    var d2 = this.to() - this.from();
+    if (Math.abs(d1-d2) < 0.1 * (d1+d2)) {
+        return true;
+    }
+    return false;
+}

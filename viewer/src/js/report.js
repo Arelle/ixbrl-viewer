@@ -1,11 +1,13 @@
 import { Fact } from "./fact.js"
 import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
+import { ViewerOptions } from "./viewerOptions.js";
 import $ from 'jquery'
 
-export function iXBRLReport (jsonElement) {
-    this.data = JSON.parse(jsonElement.innerHTML);
+export function iXBRLReport (data) {
+    this.data = data;
     this._facts = {};
+    this._viewerOptions = new ViewerOptions();
 }
 
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptions) {

@@ -36,7 +36,7 @@ $(function () {
             if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
                 clearInterval(timer);
 
-                var report = new iXBRLReport(document.getElementById('taxonomy-data'));
+                var report = new iXBRLReport(JSON.parse(document.getElementById('taxonomy-data').innerHTML));
                 var viewer = new Viewer($('iframe'), report);
 
                 $('#ixv .loader .text').text("Building search index");

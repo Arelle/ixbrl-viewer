@@ -54,9 +54,7 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
                 return "US $";
             }
         }
-        else {
-            return this._value;
-        }
+        return this._value;
     }
     else if (this._aspect == 'p') {
         var p = new Period(this._value);
@@ -69,6 +67,9 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
         return this._value;
     }
 }
+
+
+/* AspectSet is used to obtain a list of unique aspect values */
 
 export function AspectSet(as) {
     this._aspectSet = as || [];

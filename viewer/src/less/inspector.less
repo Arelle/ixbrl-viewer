@@ -2,6 +2,7 @@
 @import "colours.less";
 @import "common.less";
 @import "form-controls.less";
+@import "icons.less"; 
 
 body {
     margin: 0;
@@ -13,6 +14,9 @@ body {
         clear: both;
     }
 }
+
+@top-bar-height: 40px;
+
 #ixv {
 
     #ixv-progress {
@@ -31,7 +35,7 @@ body {
         box-sizing: border-box; 
         position: fixed;
         left: 0;
-        top: 50px;
+        top: @top-bar-height;
         bottom: 0;
         z-index: 0;
 
@@ -88,11 +92,13 @@ body {
     }
 
     #top-bar {
+        font-family: sans-serif;
+        color: @text-grey;
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        height: 50px;
+        height: @top-bar-height;
         border-bottom: solid 1px #ccc;
 
         .header {
@@ -108,8 +114,8 @@ body {
             width: 100%;
             padding: 0 250px;
             text-align: center;
-            line-height: 50px;
-            height: 50px;
+            line-height: @top-bar-height;
+            height: @top-bar-height;
             overflow: hidden;
         }
         .menu {
@@ -117,7 +123,16 @@ body {
             right: 0;
             top: 0;
             padding-right: 20px;
-            line-height: 50px;
+            line-height: @top-bar-height;
+            font-size: 14px;
+            cursor: pointer;
+            &:after {
+                font-family: "icomoon";
+                content: "\ea1c";
+                transform: rotate(90deg);
+                display: inline-block;
+                font-size: 12px;
+            }
         }
     }
 
@@ -251,48 +266,57 @@ body {
     }
 
     #ixbrl-controls-top {
-        .clearfix();
-        padding: 5px;
-        border-bottom: solid 1px #999;
-        & > div {
-            float: left;
-            box-sizing: border-box;
+        padding: 5px 9px;
+        text-align: center;
+        position: relative;
+        height: 34px;
+        border-bottom: solid 1px @border-grey;
+        .search  {
+            .square-button();
+            padding-top: 4px;
+            position: absolute;
+            top: 11px;
+            left: 9px;
         }
-
-        .show-all-tags {
-            .form-static();
-            width: 30%;
-            min-width: 90px;
-        }
-        
         .next-prev {
-            .form-static();
-            width: 40%; 
-            min-width: 170px; 
-            text-align: center;
-            display: inline;
-            .ixbrl-next-tag, .ixbrl-prev-tag {
-                color: @primary;
-                cursor: pointer; 
-                margin: 0 5px;
+            position: absolute;
+            top: 11px;
+            right: 9px;
+            & > span {
+                display: inline-block;
+                .square-button();
+                font-size: 25px;
+                margin-left: 4px;
                 position: relative;
             }
-            .ixbrl-next-tag:after {
-                position: relative;
-                top: 1px;
-                left: 3px;
-                font-family: "icomoon";     
-                content: "\ea20";
+            .ixbrl-next-tag:before {
+                position: absolute;;
+                top: -1px;
+                right: 5px;
+                font-family: "icomoon";
+                content: "\ea50";
+                transform: rotate(90deg);
+                display: inline-block;
             }
             .ixbrl-prev-tag:before {
-                position: relative;
-                top: 1px;
-                right: 3px;
-                font-family: "icomoon";     
-                content: "\ea1f";
+                position: absolute;
+                top: -1px;
+                left: 4px;
+                font-family: "icomoon";
+                content: "\ea50";
+                transform: rotate(270deg);
+                display: inline-block;
             }
-        
         }
+        h1.title {
+            margin: 0;
+            border: none;
+            padding-top: 5px;
+            font-size: 18px;
+            line-height: 27px;
+        }
+
+        
         .language {
             float:right;
         }
@@ -302,7 +326,7 @@ body {
         
         width: 25%;
         position: absolute;
-        top: 50px; 
+        top: @top-bar-height;
         right: 0;
         bottom: 0;
         box-sizing: border-box; 
@@ -364,7 +388,7 @@ body {
             
         }
     
-        h2, h3 {
+        h1, h2, h3 {
             font-weight: normal;
             border-bottom: solid 1px @border-grey;
             width: 100%;
@@ -397,8 +421,6 @@ body {
                 margin-bottom: 50px;
             }
             .search {
-                margin-left: 20px;
-                margin-right: 20px;
                 .search-input {
                     position: relative;
                     margin-bottom: 5px;

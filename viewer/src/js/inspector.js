@@ -6,6 +6,7 @@ import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
 import { Identifiers } from './identifiers.js';
+import { Menu } from './menu.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
@@ -29,24 +30,15 @@ export function Inspector() {
             d.find(".collapsible-body").slideDown(250);
         }
     });
+    this._optionsMenu = new Menu($("#display-options-menu"));
+    this.buildDisplayOptionsMenu();
 }
 
 Inspector.prototype.setReport = function (report) {
     this._report = report;
     report.setViewerOptions(this._viewerOptions);
     this._search = new ReportSearch(report);
-    var inspector = this;
-    var langSelect = $('#ixbrl-language-select');
-    var dl = this.selectDefaultLanguage();
-    inspector.setLanguage(dl);
-    langSelect.empty();
-    $.each(report.availableLanguages(), function (i,l) {
-        var o = $('<option>').text(l).appendTo(langSelect);
-        if (l == dl) {
-            o.attr("selected","selected");
-        }
-    });
-    langSelect.change(function () { inspector.setLanguage($(this).val()) });
+    this.buildDisplayOptionsMenu();
 }
 
 
@@ -59,11 +51,28 @@ Inspector.prototype.setViewer = function (viewer) {
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 
-    $('#ixbrl-show-all-tags').change(function(e){ viewer.highlightAllTags(this.checked, inspector._report.namespaceGroups()) });
     //$('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
 
-    $('#top-bar .title').text(this._viewer.getTitle());
+    $('#top-bar .document-title').text(this._viewer.getTitle());
+}
+
+Inspector.prototype.buildDisplayOptionsMenu = function () {
+    var inspector = this;
+    this._optionsMenu.reset();
+    this._optionsMenu.addCheckboxItem("Highlight", function (checked) { inspector.highlightAllTags(checked)});
+    console.log(this._report);
+    if (this._report) {
+        var dl = this.selectDefaultLanguage();
+        this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, function (lang) { inspector.setLanguage(lang) });
+        this.setLanguage(dl);
+    }
+
+}
+
+Inspector.prototype.highlightAllTags = function (checked) {
+    var inspector = this;
+    this._viewer.highlightAllTags(checked, inspector._report.namespaceGroups());
 }
 
 

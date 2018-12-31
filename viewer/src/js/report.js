@@ -48,6 +48,10 @@ iXBRLReport.prototype.availableLanguages = function() {
     return this._availableLanguages;
 }
 
+iXBRLReport.prototype.languageNames = function() {
+    return this.data.languages;
+}
+
 iXBRLReport.prototype.getFactById = function(id) {
     if (!this._facts[id]) {
         this._facts[id] = new Fact(this, id);

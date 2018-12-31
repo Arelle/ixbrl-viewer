@@ -100,6 +100,8 @@ body {
         right: 0;
         height: @top-bar-height;
         border-bottom: solid 1px #ccc;
+        z-index: 5;
+       
 
         .header {
             position: absolute;
@@ -109,7 +111,7 @@ body {
                 height: 100%;
             }
         }
-        .title {
+        .document-title {
             box-sizing: border-box;
             width: 100%;
             padding: 0 250px;
@@ -126,12 +128,46 @@ body {
             line-height: @top-bar-height;
             font-size: 14px;
             cursor: pointer;
-            &:after {
+            .title:after {
                 font-family: "icomoon";
                 content: "\ea1c";
                 transform: rotate(90deg);
                 display: inline-block;
                 font-size: 12px;
+                position: relative;
+                left: 3px;
+            }
+            .content {
+                line-height: initial;
+                position: absolute;
+                top: @top-bar-height;
+                right: 0px;
+                background: #fff;
+                z-index: 5;
+                border: solid 1px @border-grey;
+                display: none;
+                .group {
+                    border-bottom: solid 1px @border-grey;
+                    border-top: solid 1px @border-grey;
+                }
+                .item {
+                    position: relative;
+                    padding: 10px 25px 10px 30px;
+                    white-space: nowrap;
+                    &:hover {
+                        background: @border-grey;
+                    }
+                    &.checkbox.checked:before {
+                        font-family: "icomoon";
+                        content: "\ea10";
+                        position: absolute;
+                        top: 12px;
+                        left: 9px;
+           
+                    }
+
+                        
+                }
             }
         }
     }

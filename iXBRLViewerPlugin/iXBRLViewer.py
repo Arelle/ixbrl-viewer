@@ -7,6 +7,7 @@ import io
 import math
 import os
 import re
+import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from .ui import SaveViewerDialog
 
@@ -57,6 +58,7 @@ class IXBRLViewerBuilder:
         self.dts = dts
         self.taxonomyData = {
             "concepts": {},
+            "languages": {},
             "facts": {},
         }
 
@@ -84,7 +86,26 @@ class IXBRLViewerBuilder:
         """
         return s.replace("<","\\u003C").replace(">","\\u003E").replace("&","\\u0026")
         
+    def makeLanguageName(self, langCode):
+        code = re.sub("-.*","",langCode)
+        try:
+            language = pycountry.languages.lookup(code)
+            match = re.match(r'^[^-]+-(.*)$',langCode)
+            name = language.name
+            if match is not None:
+                name = "%s (%s)" % (name, match.group(1).upper())
+        except LookupError:
+            name = langCode
 
+        return name
+    
+
+    def addLanguage(self, langCode):
+        if langCode not in self.taxonomyData["languages"]:
+            self.taxonomyData["languages"][langCode] = self.makeLanguageName(langCode)
+
+            
+    
 
     def addConcept(self, concept):
         labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
@@ -97,6 +118,7 @@ class IXBRLViewerBuilder:
             for lr in labels:
                 l = lr.toModelObject
                 conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+                self.addLanguage(l.xmlLang.lower());
 
             refString = " ".join(_refPart.stringValue.strip()
                                for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept)

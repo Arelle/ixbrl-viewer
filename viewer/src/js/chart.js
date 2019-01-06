@@ -156,22 +156,25 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
     $(".other-aspects", c).empty();
     var unselectedAspects = [];
     $.each(fact.aspects(), function (a,av) {
-        var a = $("<div>")
-            .addClass("other-aspect")
-            .appendTo($(".other-aspects",c));
-        if ($.inArray(av.name(), dims) > -1) {
-            a.addClass("selected")
-                .text(av.label() + ": *")
-                .click(function () { co.removeAspect(av.name()) });
-        }
-        else {
-            if (av.name() != 'u') {
-                unselectedAspects.push(av.valueLabel());
+        /* Don't show concept in list of additional aspects */
+        if (av.name() != 'c') {
+            var a = $("<div>")
+                .addClass("other-aspect")
+                .appendTo($(".other-aspects",c));
+            if ($.inArray(av.name(), dims) > -1) {
+                a.addClass("selected")
+                    .text(av.label() + ": *")
+                    .click(function () { co.removeAspect(av.name()) });
             }
-            a.text(av.label() + ": " + av.valueLabel());
-            if (dims.length < 2) {
-                a.addClass("addable")
-                    .click(function () { co.addAspect(av.name()) });
+            else {
+                if (av.name() != 'u') {
+                    unselectedAspects.push(av.valueLabel());
+                }
+                a.text(av.label() + ": " + av.valueLabel());
+                if (dims.length < 2) {
+                    a.addClass("addable")
+                        .click(function () { co.addAspect(av.name()) });
+                }
             }
         }
     });

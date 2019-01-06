@@ -48,8 +48,9 @@ IXBRLChart.prototype._chooseMultiplier = function(facts) {
 
 IXBRLChart.prototype.dataSetColour = function(i) {
     return [
-        'rgba(255, 0, 108, 1.0)',
-        'rgba(255, 108, 0, 1.0)',
+        '#66cc00',
+        '#0094ff',
+        '#fbad17'
     ][i];
 }
 

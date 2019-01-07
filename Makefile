@@ -1,6 +1,6 @@
-all: dev tests
+all: dev samples
 
-tests:
+samples:
 	$(MAKE) -C $@
 
 dev: viewer/dist/ixbrlviewer.dev.js
@@ -12,6 +12,15 @@ viewer/dist/ixbrlviewer.dev.js:	viewer/src/*/*
 
 viewer/dist/ixbrlviewer.js:	viewer/src/*/*
 	cd viewer && npx webpack --config webpack.prod.js --optimize-minimize
+
+test: testplugin testviewer
+
+testplugin:
+	PYTHONPATH=Arelle python3 iXBRLViewerPlugin/tests/iXBRLViewerTests.py
+
+testviewer:
+	cd viewer && jest
+
 
 
 DATE ::= $(shell date "+%Y%m%d")

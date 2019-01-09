@@ -3,6 +3,7 @@
 @import "common.less";
 @import "form-controls.less";
 @import "icons.less"; 
+@import "chart.less";
 
 body {
     margin: 0;
@@ -92,7 +93,7 @@ body {
     }
 
     #top-bar {
-        font-family: sans-serif;
+        .default-font();
         color: @text-grey;
         position: fixed;
         top: 0;
@@ -382,7 +383,7 @@ body {
         box-sizing: border-box; 
         overflow: hidden;
         &, table {
-            font-family: sans-serif;
+            .default-font();
             font-size: 11pt;
             color: @text-grey;
         }
@@ -623,53 +624,25 @@ body {
         border: 3px solid rgba(255,255,255,.1)
     }
 
-.loader .text:before {
-    border: 3px solid rgba(255,255,255,.1)
-}
-
-.loader .text:after {
-    -webkit-animation: loader .6s linear;
-    animation: loader .6s linear;
-    -webkit-animation-iteration-count: infinite;
-    animation-iteration-count: infinite;
-    border-color: #fff transparent transparent;
-}
-
-
-@keyframes loader {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-    
-
-    #chart {
-        .chart-container {
-           position: relative;
-           width: 100%;
-        }
-        .other-aspects {
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            .other-aspect {
-                display: inline-block;
-                padding: 5px;
-                margin: 5px;
-                border-radius: 3px;
-                border: solid 1px #333;
-                &.selected {
-                    background-color: #9f9;
-                    border-color: #3b3; 
-                }
-                &.selected, &.addable {
-                    cursor: pointer;
-                }
-            }
-
-        }
+    .loader .text:before {
+        border: 3px solid rgba(255,255,255,.1)
     }
-    
+
+    .loader .text:after {
+        -webkit-animation: loader .6s linear;
+        animation: loader .6s linear;
+        -webkit-animation-iteration-count: infinite;
+        animation-iteration-count: infinite;
+        border-color: #fff transparent transparent;
+    }
+
+
+    @keyframes loader {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+        
     .dialog-mask {
         background-color: rgba(0,0,0,0.6);
         position: fixed;
@@ -718,6 +691,7 @@ body {
             }
         }
     }
+
 
 
 }

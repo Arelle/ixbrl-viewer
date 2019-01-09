@@ -189,6 +189,9 @@ Fact.prototype.readableAccuracy = function () {
     if (name) {
         d += " ("+name+")";
     }
+    else {
+        d += "";
+    }
     return d;
 }
 

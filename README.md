@@ -1,6 +1,6 @@
 # Workiva iXBRL Viewer
 
-The [Workiva](https://www.workiva.com) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org) reports to be viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL report.  Key features include:
+The [Workiva](https://www.workiva.com) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL report.  Key features include:
 
 * Full text search on taxonomy labels and references
 * View full details of tagged facts
@@ -64,7 +64,7 @@ python3 Arelle/arelleCmdLine.py --plugins=/path/to/iXBRLViewerPlugin -f ixbrl-re
 
 ```
 
-Note:
+Notes:
 
 * "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
 * The plugin path needs to an absolute file path

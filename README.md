@@ -28,11 +28,11 @@ viewer application, which is a single file which may be stored locally.
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
 2. Download [Arelle][arelle-git] and start the GUI.
-3. Select **Manage Plugins** from the help menu.
+3. Select **Manage Plugins** from the **Help** menu.
 4. Press **Browse** under "Find plug-in modules".  
-5. Browse to the **iXBRLViewerPlugin** directory within your checkout of the iXBRL Viewer git repository and select the **__init.py__** file within it.
+5. Browse to the **iXBRLViewerPlugin** directory within your checkout of the iXBRL Viewer git repository and select the **\_\_init\_\_.py** file within it.
 6. Press **Close** and then **Yes** when prompted to restart Arelle.
-7. You should now have a **Save iXBRL Viewer instance** on the tools menu.
+7. You should now have a **Save iXBRL Viewer instance** on the **Tools** menu.
 
 [ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
 [arelle-git]: https://github.com/Arelle/Arelle

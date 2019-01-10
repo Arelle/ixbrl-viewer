@@ -44,9 +44,11 @@ Arelle, and then use the **Save iXBRL Viewer instance** option on the **Tools**
 menu.
 
 You will need to provide a URL to the **ixbrlviewer.js** file which can be
-found in the **viewer/dist** directory within the repository.  The easiest way
-to do this is to create a new directory, copy the **ixbrlviewer.js** file to
-that directory, and then specify the **script URL** as "ixbrlviewer.js".
+found in the **viewer/dist** directory within the repository.  This can be 
+either an absolute URL, or a relative URL from the iXBRL viewer file to the 
+ixbrlviewer.js file.  The easiest way to do this is to create a new directory, 
+copy the **ixbrlviewer.js** file to that directory, and then specify the 
+**script URL** as just "ixbrlviewer.js".
 
 You should now save the viewer iXBRL file to a new file in the newly created
 directory by selecting **Browse**, browsing to the directory, and providing a

@@ -1,0 +1,105 @@
+@import "fonts.less";
+@import "colours.less";
+@import "common.less";
+
+.iv-ixbrl-fact {
+    background-color: yellow;
+    cursor: pointer;
+}
+
+.ixbrl-highlight {
+    background-color: @highlight-default !important;
+    &.ixbrl-highlight-1 {
+        background-color: @highlight-1 !important;
+    }
+    &.ixbrl-highlight-2 {
+        background-color: @highlight-2 !important;
+    }
+}
+
+.ixbrl-highlight.ixbrl-highlight-1 {
+}
+
+div, span {
+    &.ixbrl-selected {
+        outline: solid 2px @primary;
+        outline-offset: 1px;
+    }
+    &.ixbrl-element:hover:not(.ixbrl-selected) {
+        outline: dashed 2px @primary;
+        outline-offset: 1px;
+    }
+}
+
+td, th {
+    &.ixbrl-selected {
+        outline: solid 2px @primary !important;
+        outline-offset: -1px !important;
+    }
+    &.ixbrl-element:hover:not(.ixbrl-selected) {
+        outline: dashed 2px @primary !important;
+        outline-offset: -1px !important;
+    }
+}
+
+
+.ixbrl-element {
+    cursor: pointer;
+/*  Not sure why this was here, but it creates problems for borders on table elements */
+/*    position: relative; */
+}
+
+.ixbrl-related {
+    outline: dashed 2px @related-fact;
+    outline-offset: 1px;
+}
+
+td,th {
+    &.ixbrl-related {
+        outline-offset: -1px;
+    }
+}
+
+.ixbrl-related.ixbrl-linked-highlight,
+.ixbrl-linked-highlight {
+    .linked-highlight-text();
+}
+
+td.ixbrl-related.ixbrl-linked-highlight,
+td.ixbrl-linked-highlight {
+    .linked-highlight-cell();
+}
+
+div.ixbrl-table-handle {
+    border-left: solid #ff9000 12px;
+    border-bottom: solid rgba(0,0,0,0) 12px;;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    & > span {
+        display: none;
+    }
+
+    &:hover {
+        border: solid #f90 1px;
+        border-radius: 2px;
+        color: #f90;
+        background-color: rgba(255,255,255,0.85);
+        padding: 7px 15px;
+        & > span {
+            &:before {
+                font-family: "icomoon";
+                content: "\e95e";
+                padding-right: 7px;
+                position: relative;
+                top: 1px;
+            }
+            font-weight: bold;
+            font-family: sans-serif;
+            display: initial;
+        }
+
+    }
+}
+

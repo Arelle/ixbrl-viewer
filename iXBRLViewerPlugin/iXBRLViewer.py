@@ -8,7 +8,8 @@ import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
 
 class NamespaceMap:
-    """Class for building a 1:1 map of prefixes to namespace URIs
+    """
+    Class for building a 1:1 map of prefixes to namespace URIs
     Will attempt to use a provided, preferred prefix, but will uniquify as
     required.
     """
@@ -18,7 +19,8 @@ class NamespaceMap:
         self.prefixmap = dict()
 
     def getPrefix(self, ns, preferredPrefix = None):
-        """Get the prefix for the specified namespace.
+        """
+        Get the prefix for the specified namespace.
         If no prefix is yet defined, define one using the preferred prefix, if
         provided and not yet used, otherwise add a number to the end of the preferred
         prefix (or the string "ns")
@@ -60,11 +62,14 @@ class IXBRLViewerBuilder:
         return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
 
     def dateFormat(self, d):
-        """Strip the time component from an ISO date if it's zero"""
+        """
+        Strip the time component from an ISO date if it's zero
+        """
         return re.sub("T00:00:00$", "", d)
 
     def escapeJSONForScriptTag(self, s):
-        """JSON encodes XML special characters
+        """
+        JSON encodes XML special characters
         XML and HTML apply difference escaping rules to content within script
         tags and we need our output to be valid XML, but treated as HTML by browsers.
 
@@ -141,7 +146,8 @@ class IXBRLViewerBuilder:
         return rels
 
     def createViewer(self, scriptUrl = "js/dist/ixbrlviewer.js"):
-        '''Save an iXBRL file with XBRL data as a JSON blob, and a script tag added
+        '''
+        Create an iXBRL file with XBRL data as a JSON blob, and script tags added
         '''
 
         dts = self.dts
@@ -227,6 +233,9 @@ class IXBRLViewerBuilder:
         return dts.modelDocument.xmlDocument
 
     def saveViewer(self, outFile, xmlDocument):
+        '''
+        Save the ixbl viewer
+        '''
         with open(outFile, "wb") as fout:
             # Using "xml" permits self-closing tags which confuses an HTML DOM
             fout.write(etree.tostring(xmlDocument, method="xml", encoding="utf-8", xml_declaration=True))

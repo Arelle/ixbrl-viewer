@@ -56,13 +56,13 @@ def commandLineRun(*args, **kwargs):
 
 
 __pluginInfo__ = {
-    'name': 'Create iXBRL Viewer',
+    'name': 'ixbrl-viewer',
     'version': '0.1',
-    'description': "",
-    'license': '',
+    'description': "iXBRL Viewer creator",
+    'license': 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
     'author': 'Paul Warren',
-    'copyright': '',
-    'imports': [ "./iXBRLViewer.py" ],
+    'copyright': 'Copyright :: Workiva Inc. :: 2019',
+    'imports': ["./iXBRLViewer.py"],
     'CntlrCmdLine.Options': commandLineOptionExtender,
     'CntlrCmdLine.Xbrl.Run': commandLineRun,
     'CntlrWinMain.Menu.Tools': menuExtender,

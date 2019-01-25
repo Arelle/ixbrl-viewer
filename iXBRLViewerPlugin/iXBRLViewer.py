@@ -36,6 +36,7 @@ class NamespaceMap:
     def getPrefix(self, ns, preferredPrefix = None):
         """
         Get the prefix for the specified namespace.
+
         If no prefix is yet defined, define one using the preferred prefix, if
         provided and not yet used, otherwise add a number to the end of the preferred
         prefix (or the string "ns")
@@ -84,9 +85,8 @@ class IXBRLViewerBuilder:
 
     def escapeJSONForScriptTag(self, s):
         """
-        JSON encodes XML special characters
-        XML and HTML apply difference escaping rules to content within script
-        tags and we need our output to be valid XML, but treated as HTML by browsers.
+        JSON encodes XML special characters XML and HTML apply difference escaping rules to content
+        within script tags and we need our output to be valid XML, but treated as HTML by browsers.
 
         If we allow XML escaping to occur in a script tag, browsers treating
         the document as HTML won't unescape it.  If we don't escape XML special
@@ -160,10 +160,10 @@ class IXBRLViewerBuilder:
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[ELR] = rr
         return rels
 
-    def createViewer(self, scriptUrl = "js/dist/ixbrlviewer.js"):
-        '''
+    def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js"):
+        """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added
-        '''
+        """
 
         dts = self.dts
         idGen = 0
@@ -248,9 +248,9 @@ class IXBRLViewerBuilder:
         return dts.modelDocument.xmlDocument
 
     def saveViewer(self, outFile, xmlDocument):
-        '''
+        """
         Save the ixbl viewer
-        '''
+        """
         with open(outFile, "wb") as fout:
             # Using "xml" permits self-closing tags which confuses an HTML DOM
             fout.write(etree.tostring(xmlDocument, method="xml", encoding="utf-8", xml_declaration=True))

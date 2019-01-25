@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     classifiers=[
         'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
-        'Copyright :: Workiva Inc. :: 2015-2018'
+        'Copyright :: Workiva Inc. :: 2019'
         'Programming Language :: Python :: 3.6',
     ],
     install_requires=['pycountry'],

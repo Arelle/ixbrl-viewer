@@ -16,7 +16,7 @@ from .iXBRLViewer import IXBRLViewerBuilder
 from .ui import SaveViewerDialog
 
 
-def iXBRLViewerCommandLineOptionExtender(parser):
+def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer",
                       action="store",
                       dest="saveViewerFile",
@@ -28,7 +28,7 @@ def iXBRLViewerCommandLineOptionExtender(parser):
                       help="Specify the URL to ixbrlviewer.js")
 
 
-def iXBRLViewerCommandLineXbrlRun(cntlr, options):
+def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
         cntlr.addToLog("No taxonomy loaded.")
@@ -51,7 +51,7 @@ def iXBRLViewerMenuCommand(cntlr):
         viewerBuilder.saveViewer(dialog.filename(), xmlDocument)
 
 
-def iXBRLViewerMenuExtender(cntlr, menu):
+def iXBRLViewerMenuExtender(cntlr, menu, *args, **kwargs):
     # Extend menu with an item for the savedts plugin
     menu.add_command(label="Save iXBRL Viewer Instance",
                      underline=0,

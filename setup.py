@@ -15,5 +15,9 @@ setup(
         'Copyright :: Workiva Inc. :: 2019'
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=['pycountry'],
+    install_requires=[
+        'isodate==0.6.0',
+        'numpy==1.16.1',
+        'pycountry==18.12.8'
+    ],
 )

@@ -1,0 +1,6 @@
+version: 1
+
+raven_monitored_keywords:
+  etree:
+    reason: This repo uses lxml, and etree is vulnerable to XXE
+    infosec_review: true

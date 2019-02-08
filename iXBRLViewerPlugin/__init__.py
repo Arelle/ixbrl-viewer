@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from .iXBRLViewer import IXBRLViewerBuilder
-from .ui import SaveViewerDialog
 
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
@@ -41,6 +40,7 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
 
 
 def iXBRLViewerMenuCommand(cntlr):
+    from .ui import SaveViewerDialog
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
         cntlr.addToLog("No document loaded.")
         return

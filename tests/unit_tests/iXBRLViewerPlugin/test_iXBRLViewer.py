@@ -249,7 +249,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     def test_addConcept_simple_case(self):
-        self.builder.addConcept(self.cash_concept)
+        self.builder_1.addConcept(self.cash_concept)
         self.assertTrue(self.builder_1.taxonomyData.get('concepts').get('us-gaap:Cash'))
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')

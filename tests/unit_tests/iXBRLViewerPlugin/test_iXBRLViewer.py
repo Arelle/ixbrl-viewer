@@ -196,8 +196,7 @@ class TestIXBRLViewer(unittest.TestCase):
             value=None,
             decimals=None,
             precision=None,
-            format=None,
-
+            format=None
         )
 
         def fromModelObjects_effect(concept):

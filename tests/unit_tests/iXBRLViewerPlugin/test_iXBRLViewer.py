@@ -12,13 +12,18 @@ def qname_effect(prefix, namespaceURI, localName):
         localName=localName
     )
 
+def inferredDecimals_effect(fact):
+    return float("INF")
+
 
 sys.modules['arelle'] = Mock()
 sys.modules['arelle.XbrlConst'] = Mock()
 sys.modules['arelle.ModelValue'] = Mock(
     QName=qname_effect
 )
-sys.modules['arelle.ValidateXbrlCalcs'] = Mock()
+sys.modules['arelle.ValidateXbrlCalcs'] = Mock(
+    inferredDecimals=inferredDecimals_effect
+)
 
 from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder
 
@@ -155,7 +160,7 @@ class TestIXBRLViewer(unittest.TestCase):
         def isoformat_effect():
             return '01-01-19T00:00:00'
 
-        context = Mock(
+        context_1 = Mock(
             entityIdentifier=('scheme', 'ident'),
             qnameDims={'d': dimension},
             isInstantPeriod=False,
@@ -164,14 +169,34 @@ class TestIXBRLViewer(unittest.TestCase):
             endDatetime=Mock(isoformat=isoformat_effect)
         )
 
-        fact = Mock(
+        context_2 = Mock(
+            entityIdentifier=('scheme', 'ident'),
+            qnameDims={},
+            isInstantPeriod=None,
+            isStartEndPeriod=None
+        )
+
+        fact_1 = Mock(
             id='fact_id',
             qname=self.cash_concept.qname,
             value=100,
             isNumeric=False,
-            context=context,
+            context=context_1,
             concept=self.cash_concept,
             format='format'
+        )
+
+        fact_2 = Mock(
+            id='fact_id',
+            qname=self.cash_concept.qname,
+            concept=self.cash_concept,
+            context=context_2,
+            isNumeric=True,
+            unit=None,
+            value=None,
+            decimals=None,
+            precision=None,
+            format=None
         )
 
         def fromModelObjects_effect(concept):
@@ -197,25 +222,34 @@ class TestIXBRLViewer(unittest.TestCase):
             xmlDocument=lxml.etree.ElementTree(root)
         )
 
-        self.modelXbrl = Mock(
+        self.modelXbrl_1 = Mock(
             relationshipSet=relationshipSet_effect,
             baseSets=baseSets,
-            facts=[fact],
+            facts=[fact_1],
             info=info_effect,
             modelDocument=self.modelDocument
         )
-        self.cash_concept.modelXbrl = self.modelXbrl
-        to_concept.modelXbrl = self.modelXbrl
-        from_concept.modelXbrl = self.modelXbrl
-        dimension_concept.modelXbrl = self.modelXbrl
-        member_concept.modelXbrl = self.modelXbrl
-        self.builder = IXBRLViewerBuilder(self.modelXbrl)
+        self.modelXbrl_2 = Mock(
+            relationshipSet=relationshipSet_effect,
+            baseSets=baseSets,
+            facts=[fact_2],
+            info=info_effect,
+            modelDocument=self.modelDocument
+        )
+
+        self.cash_concept.modelXbrl = self.modelXbrl_1
+        to_concept.modelXbrl = self.modelXbrl_1
+        from_concept.modelXbrl = self.modelXbrl_1
+        dimension_concept.modelXbrl = self.modelXbrl_1
+        member_concept.modelXbrl = self.modelXbrl_1
+        self.builder_1 = IXBRLViewerBuilder(self.modelXbrl_1)
+        self.builder_2 = IXBRLViewerBuilder(self.modelXbrl_2)
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     def test_addConcept_simple_case(self):
-        self.builder.addConcept(self.cash_concept)
-        self.assertTrue(self.builder.taxonomyData.get('concepts').get('us-gaap:Cash'))
+        self.builder_1.addConcept(self.cash_concept)
+        self.assertTrue(self.builder_1.taxonomyData.get('concepts').get('us-gaap:Cash'))
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
@@ -228,7 +262,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_returns_a_rel(self):
-        result = self.builder.getRelationnShips()
+        result = self.builder_1.getRelationnShips()
         self.assertTrue(result.get('ns0').get('ELR').get('us-gaap:from_concept'))
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
@@ -239,7 +273,23 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
     def test_createViewer(self):
         js_uri = 'ixbrlviewer.js'
-        result = self.builder.createViewer(js_uri)
+        result = self.builder_1.createViewer(js_uri)
+        body = result.getroot()[0]
+        self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
+        self.assertEqual(body[1].attrib.get('src'), js_uri)
+        self.assertEqual(body[2].attrib.get('id'), 'taxonomy-data')
+        self.assertEqual(body[2].attrib.get('type'), 'application/json')
+        self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+
+    @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
+    @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
+    @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
+    @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
+    @patch('arelle.XbrlConst.standardLabel', 'http://www.xbrl.org/2003/role/label')
+    @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
+    def test_createViewer_bad_path(self):
+        js_uri = 'ixbrlviewer.js'
+        result = self.builder_2.createViewer(js_uri)
         body = result.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
         self.assertEqual(body[1].attrib.get('src'), js_uri)

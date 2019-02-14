@@ -193,12 +193,13 @@ class IXBRLViewerBuilder:
                 factData["f"] = str(f.format)
 
             if f.isNumeric:
-                # XXX does not support complex units
-                unit = self.nsmap.qname(f.unit.measures[0][0])
-                aspects["u"] = unit
+                if f.unit:
+                    # XXX does not support complex units
+                    unit = self.nsmap.qname(f.unit.measures[0][0])
+                    aspects["u"] = unit
                 d = inferredDecimals(f)
                 if d != float("INF") and not math.isnan(d):
-                    factData["d"] = inferredDecimals(f)
+                    factData["d"] = d
 
             for d, v in f.context.qnameDims.items():
                 if v.memberQname is None:

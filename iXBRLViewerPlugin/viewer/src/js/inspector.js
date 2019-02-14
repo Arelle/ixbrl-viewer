@@ -24,7 +24,7 @@ import { Accordian } from './accordian.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
-    $(require('html-loader!../html/inspector.html')).prependTo('body');
+    $(require('../html/inspector.html')).prependTo('body');
     var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
     $('<style id="ixv-style"></style>')
         .prop("type", "text/css")

@@ -19,6 +19,17 @@ module.exports = {
                 {
                     test: /\.(woff(2)?|ttf|eot|svg|png)(\?v=\d+\.\d+\.\d+)?$/,
                     use: "base64-inline-loader"
+                },
+                {
+                    test: /\.html$/,
+                    use: [ { 
+                        loader: "html-loader",
+                        options: {
+                            minimize: true,
+                            removeAttributeQuotes: false,
+                            keepClosingSlash: true
+                        }
+                    }]
                 }
             ]
 

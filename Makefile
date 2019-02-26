@@ -33,7 +33,7 @@ testplugin:
 	PYTHONPATH=Arelle python3 iXBRLViewerPlugin/tests/iXBRLViewerTests.py
 
 testviewer:
-	cd iXBRLViewerPlugin/viewer && jest
+	npm run test
 
 
 

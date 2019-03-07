@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@wkgithub:Workiva/ixbrl-viewer.git"
+    "url": "git@github.com:Workiva/ixbrl-viewer.git"
   },
   "author": "",
   "devDependencies": {

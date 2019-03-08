@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ixbrl_viewer',
-    version='0.1.3',
+    version='0.1.4',
     description='The Workiva iXBRL Viewer allows iXBRL reports to be viewed interactively in a web browser',
     long_description=open('README.md').read(),
     url='https://github.com/workiva/ixbrl-viewer',

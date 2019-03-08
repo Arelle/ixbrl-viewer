@@ -31,9 +31,9 @@ that runs the viewer functionality. In order to successfully build an ixbrl-view
 the ixbrlviewer file.
 
 1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
-1. Install webpack-cli globally: `npm install -g webpack-cli@3.1.0`
-2. Install webpack globally: `npm install -g webpack@4.19.0`                                               
-3. Install the following dependencies for javascript via `npm install`:
+2. Install webpack-cli globally: `npm install -g webpack-cli@3.1.0`
+3. Install webpack globally: `npm install -g webpack@4.19.0`                                               
+4. Install the following dependencies for javascript via `npm install`:
     * base64-inline-loader@1.1.1
     * chart.js@2.7.3
     * css-loader@1.0.0
@@ -47,7 +47,7 @@ the ixbrlviewer file.
     * less-loader@4.1.0
     * lunr@2.3.3
     * webpack-merge@4.1.4
-4. run `make prod`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
+5. run `make prod`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
 
 ## Installing the Arelle plugin
 

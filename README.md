@@ -24,6 +24,31 @@ prepared, the viewer is entirely standalone, and does not require access to the
 taxonomy, or to any online services.  The only dependency is on the Javascript
 viewer application, which is a single file which may be stored locally.
 
+## Building the ixbrlviewer
+
+The viewer works off of one js file called ixbrlviewer.js. It contains all of the javascript
+that runs the viewer functionality. In order to successfully build an ixbrl-viewer you need to first build
+the ixbrlviewer file.
+
+1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
+1. Install webpack-cli globally: `npm install -g webpack-cli@3.1.0`
+2. Install webpack globally: `npm install -g webpack@4.19.0`                                               
+3. Install the following dependencies for javascript via `npm install`:
+    * base64-inline-loader@1.1.1
+    * chart.js@2.7.3
+    * css-loader@1.0.0
+    * dateformat@3.0.3
+    * exceljs@1.6.2
+    * file-saver@2.0.0-rc.
+    * html-loader@0.5.5
+    * interactjs@1.3.4
+    * jquery@3.3.1
+    * less@3.8.1
+    * less-loader@4.1.0
+    * lunr@2.3.3
+    * webpack-merge@4.1.4
+4. run `make prod`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
+
 ## Installing the Arelle plugin
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
@@ -70,5 +95,19 @@ Notes:
 
 * "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
 * The plugin path needs to an absolute file path
+
+## Running Unit Tests
+
+In order to run the javascript unit tests you need to make sure that you have
+the following javascript dependencies installed:
+    * jest@23.6.0
+    * babel-plugin-transform-es2015-modules-commonjs
+
+Run the following command to run javascript unit tests:
+`npm run test`
+
+In order to run the python unit tests make sure that you have pip installed requirements-dev.txt.
+
+Run the following command to run python unit tests: `nosetests`
 
 

@@ -31,22 +31,7 @@ that runs the viewer functionality. In order to successfully build an ixbrl-view
 the ixbrlviewer file.
 
 1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
-2. Install webpack-cli globally: `npm install -g webpack-cli@3.1.0`
-3. Install webpack globally: `npm install -g webpack@4.19.0`                                               
-4. Install the following dependencies for javascript via `npm install`:
-    * base64-inline-loader@1.1.1
-    * chart.js@2.7.3
-    * css-loader@1.0.0
-    * dateformat@3.0.3
-    * exceljs@1.6.2
-    * file-saver@2.0.0-rc.
-    * html-loader@0.5.5
-    * interactjs@1.3.4
-    * jquery@3.3.1
-    * less@3.8.1
-    * less-loader@4.1.0
-    * lunr@2.3.3
-    * webpack-merge@4.1.4
+4. Install the dependencies for javascript by running: `npm install`
 5. run `make prod`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
 
 ## Installing the Arelle plugin
@@ -99,8 +84,7 @@ Notes:
 ## Running Unit Tests
 
 In order to run the javascript unit tests you need to make sure that you have
-the following javascript dependencies installed:
-    * jest@23.6.0
+the following javascript dependency installed:
     * babel-plugin-transform-es2015-modules-commonjs
 
 Run the following command to run javascript unit tests:

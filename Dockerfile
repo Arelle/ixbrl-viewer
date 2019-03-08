@@ -13,6 +13,9 @@ ADD . /build/
 RUN apt-get update && apt-get install -y curl && \
     curl -sL https://deb.nodesource.com/setup_10.x | bash && \
     apt-get install -y nodejs build-essential
+RUN npm install -g webpack-cli && npm install --save-dev -g webpack@4.29.5 && \
+    npm install webpack-merge css-loader dateformat jquery less-loader file-saver && \
+    npm install html-loader interactjs lunr less base64-inline-loader chart.js exceljs
 RUN make prod
 
 # python tests

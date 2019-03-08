@@ -6,9 +6,14 @@ COPY requirements-dev.txt ./requirements-dev.txt
 COPY requirements.txt ./requirements.txt
 RUN pip install -r requirements-dev.txt
 
-# Build Environment Vars
 WORKDIR /build/
 ADD . /build/
+
+# build ixbrlviewer.js
+RUN apt-get update && apt-get install -y curl && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash && \
+    apt-get install -y nodejs build-essential
+RUN make prod
 
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml

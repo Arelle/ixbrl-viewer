@@ -18,6 +18,10 @@ RUN npm install -g webpack-cli && npm install --save-dev -g webpack@4.29.5 && \
     npm install html-loader interactjs lunr less base64-inline-loader chart.js exceljs
 RUN make prod
 
+# javascript tests
+RUN npm install jest babel-plugin-transform-es2015-modules-commonjs
+RUN npm run test
+
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml
 RUN mkdir /test_reports

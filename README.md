@@ -83,12 +83,9 @@ Notes:
 
 ## Running Unit Tests
 
-In order to run the javascript unit tests you need to make sure that you have
-the following javascript dependency installed:
-    * babel-plugin-transform-es2015-modules-commonjs
+In order to run the javascript unit tests make sure that you have installed all of the npm requirements.
 
-Run the following command to run javascript unit tests:
-`npm run test`
+Run the following command to run javascript unit tests: `npm run test`
 
 In order to run the python unit tests make sure that you have pip installed requirements-dev.txt.
 

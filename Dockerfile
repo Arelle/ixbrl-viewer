@@ -1,6 +1,10 @@
 FROM python:3.6 as build
 
 ARG PIP_INDEX_URL
+ARG ARTIFACTORY_PRO_AUTH
+ARG NPM_CONFIG__AUTH
+ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
+ARG NPM_CONFIG_ALWAYS_AUTH=true
 
 COPY requirements-dev.txt ./requirements-dev.txt
 COPY requirements.txt ./requirements.txt
@@ -17,7 +21,6 @@ RUN npm install
 RUN make prod
 
 # javascript tests
-RUN npm install babel-plugin-transform-es2015-modules-commonjs
 RUN npm run test
 
 # python tests

@@ -1,7 +1,6 @@
 FROM python:3.6 as build
 
 ARG PIP_INDEX_URL
-ARG ARTIFACTORY_PRO_AUTH
 ARG NPM_CONFIG__AUTH
 ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
 ARG NPM_CONFIG_ALWAYS_AUTH=true

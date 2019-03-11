@@ -1,14 +1,26 @@
 FROM python:3.6 as build
 
 ARG PIP_INDEX_URL
+ARG NPM_CONFIG__AUTH
+ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
+ARG NPM_CONFIG_ALWAYS_AUTH=true
 
 COPY requirements-dev.txt ./requirements-dev.txt
 COPY requirements.txt ./requirements.txt
 RUN pip install -r requirements-dev.txt
 
-# Build Environment Vars
 WORKDIR /build/
 ADD . /build/
+
+# build ixbrlviewer.js
+RUN apt-get update && apt-get install -y curl && \
+    curl -sL https://deb.nodesource.com/setup_10.x | bash && \
+    apt-get install -y nodejs build-essential
+RUN npm install
+RUN make prod
+
+# javascript tests
+RUN npm run test
 
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml

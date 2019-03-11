@@ -24,6 +24,16 @@ prepared, the viewer is entirely standalone, and does not require access to the
 taxonomy, or to any online services.  The only dependency is on the Javascript
 viewer application, which is a single file which may be stored locally.
 
+## Building the ixbrlviewer
+
+The viewer works off of one js file called ixbrlviewer.js. It contains all of the javascript
+that runs the viewer functionality. In order to successfully build an ixbrl-viewer you need to first build
+the ixbrlviewer file.
+
+1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
+2. Install the dependencies for javascript by running: `npm install`
+3. run `make prod`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
+
 ## Installing the Arelle plugin
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
@@ -70,5 +80,15 @@ Notes:
 
 * "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
 * The plugin path needs to an absolute file path
+
+## Running Unit Tests
+
+In order to run the javascript unit tests make sure that you have installed all of the npm requirements.
+
+Run the following command to run javascript unit tests: `npm run test`
+
+In order to run the python unit tests make sure that you have pip installed requirements-dev.txt.
+
+Run the following command to run python unit tests: `nosetests`
 
 

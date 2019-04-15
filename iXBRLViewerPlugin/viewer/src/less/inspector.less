@@ -26,6 +26,8 @@
 @powered-by-footer-height: 30px;
 
 #ixv {
+    font-size: 1.4rem;
+    .default-font();
 
     #ixv-progress {
         position: fixed; 
@@ -386,11 +388,6 @@
         bottom: 0;
         box-sizing: border-box; 
         overflow: hidden;
-        &, table {
-            .default-font();
-            font-size: 11pt;
-            color: @text-grey;
-        }
 
         a {
             text-decoration: none;
@@ -510,6 +507,33 @@
                     }
                 }
             }
+            .accordian .card {
+                margin-top: 0.4rem;
+                background-color: #f9f9f9;
+                .body {
+                    display: none;
+                    padding-left: 1.6rem;
+                    padding-right: 1.6rem;
+                }
+                .title {
+                    padding: 1.2rem 1.6rem;
+                    cursor: pointer;
+                    line-height: 1.8rem;
+                    &:hover {
+                        background-color: #f3f3f3;
+                    }
+                }
+                &.active {
+                    background-color: #f3f3f3;
+                    .title {
+                        font-weight: bold;
+                    }
+                    .body {
+                        display: block;
+                    }
+                }
+
+            }
 
             .calculations {
                 margin-left: 20px;  
@@ -522,6 +546,7 @@
                 .item {
                     padding: 5px 0;
                     position: relative;
+                    line-height: 1.8rem;
 
                     &:not(.fact-link, .total) .concept-name {
                         color: #777;
@@ -547,6 +572,7 @@
                     }
                     &.total {
                         border-top: solid 1px @border-grey;
+                        padding-bottom: 1.2rem;
                     }
                 }
             }

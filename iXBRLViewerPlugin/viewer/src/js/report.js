@@ -153,4 +153,6 @@ iXBRLReport.prototype.getConcept = function(name) {
 }
 
 
-
+iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
+    return this.data.roleDefs[rolePrefix]["en"];
+}

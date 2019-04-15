@@ -12,25 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@import "core.less";
 @import "fonts.less";
 @import "colours.less";
 @import "common.less";
 @import "form-controls.less";
 @import "icons.less"; 
 @import "chart.less";
+@import (reference) "text-mixins.less";
 
-body {
-    margin: 0;
-}
-.clearfix {
-    &:after {
-        content: " ";
-        display: table;
-        clear: both;
-    }
-}
-
-@top-bar-height: 40px;
+@top-bar-height: 35px;
+@powered-by-footer-height: 30px;
 
 #ixv {
 
@@ -117,7 +109,6 @@ body {
         border-bottom: solid 1px #ccc;
         z-index: 5;
        
-
         .header {
             position: absolute;
             top: 0;
@@ -141,7 +132,6 @@ body {
             top: 0;
             padding-right: 20px;
             line-height: @top-bar-height;
-            font-size: 14px;
             cursor: pointer;
             .title:after {
                 font-family: "icomoon";
@@ -476,12 +466,12 @@ body {
         }
 
         .inspector-content {
-            overflow-y: scroll;
+            overflow-y: auto;
             position: absolute;
             top: 0;
             right: 0;
             left: 0;
-            bottom: 0;
+            bottom: @powered-by-footer-height;
             & > *:last-child {
                 margin-bottom: 50px;
             }
@@ -571,18 +561,22 @@ body {
         }
 
         .powered-by {
+            .text-sm();
             text-align: center;
             position: absolute;
-            background: rgba(255,255,255,0.8);
+            //background: rgba(255,255,255,0.8);
+            background: #fff;
             left: 0px;
-            right: 15px;
+            right: 0;
             bottom: 0;
-            height: 45px;
+            height: @powered-by-footer-height;
             padding-top: 5px;
+            margin: 0 10px;
             box-sizing:  border-box;
+            border-top: @simple-border;
 
             img {
-                width: 200px;
+                height: 14px;
             }
         }
     }

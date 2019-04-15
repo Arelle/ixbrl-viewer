@@ -201,7 +201,6 @@ Viewer.prototype.elementForFact = function (fact) {
 Viewer.prototype.elementsForFacts = function (facts) {
     var ids = $.map(facts, function (f) { return f.id });
     var elements = $('.ixbrl-element', this._contents).filter(function () { return $.inArray($(this).data('ivid'), ids ) > -1 });
-    console.log(elements);
     return elements;
 }
 

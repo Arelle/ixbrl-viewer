@@ -163,8 +163,7 @@
                         background: @border-grey;
                     }
                     &.checkbox.checked:before {
-                        font-family: "icomoon";
-                        content: "\ea10";
+                        .icon-tick();
                         position: absolute;
                         top: 12px;
                         left: 9px;
@@ -480,11 +479,11 @@
                     position: relative;
                     margin-bottom: 5px;
                     &:before {
+                        .icon-search();
                         position: absolute;
-                        left: 7px;
-                        top: 7px;
-                        content: "\e986";
-                        font-family: "icomoon";
+                        left: 5px;
+                        top: 5px;
+                        font-size: 20px;
                         z-index: 0;
                     }
                     input {

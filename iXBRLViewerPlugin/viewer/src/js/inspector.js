@@ -76,7 +76,6 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
     var inspector = this;
     this._optionsMenu.reset();
     this._optionsMenu.addCheckboxItem("Highlight", function (checked) { inspector.highlightAllTags(checked)});
-    console.log(this._report);
     if (this._report) {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, function (lang) { inspector.setLanguage(lang) });

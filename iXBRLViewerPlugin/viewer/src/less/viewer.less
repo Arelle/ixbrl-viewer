@@ -31,9 +31,6 @@
     }
 }
 
-.ixbrl-highlight.ixbrl-highlight-1 {
-}
-
 div, span {
     &.ixbrl-selected {
         outline: solid 2px @primary;
@@ -45,6 +42,15 @@ div, span {
     }
 }
 
+.ixbrl-element {
+    cursor: pointer;
+}
+
+.ixbrl-related {
+    outline: dashed 2px @related-fact;
+    outline-offset: 1px;
+}
+
 td, th {
     &.ixbrl-selected {
         outline: solid 2px @primary !important;
@@ -54,21 +60,6 @@ td, th {
         outline: dashed 2px @primary !important;
         outline-offset: -1px !important;
     }
-}
-
-
-.ixbrl-element {
-    cursor: pointer;
-/*  Not sure why this was here, but it creates problems for borders on table elements */
-/*    position: relative; */
-}
-
-.ixbrl-related {
-    outline: dashed 2px @related-fact;
-    outline-offset: 1px;
-}
-
-td,th {
     &.ixbrl-related {
         outline-offset: -1px;
     }
@@ -87,10 +78,8 @@ td.ixbrl-linked-highlight {
 div.ixbrl-table-handle {
     @export-handle-size: 0.4rem;
     position: absolute;
-    top: 0;
     left: 0;
     cursor: pointer;
-
     width: 0;
     height: 0;
     border: @export-handle-size solid transparent;
@@ -106,7 +95,6 @@ div.ixbrl-table-handle {
       border: @export-handle-size solid transparent;
       border-top-color: @workiva-green;
     }
-
 
     & > span {
         display: none;
@@ -138,7 +126,5 @@ div.ixbrl-table-handle {
             padding: 7px 15px;
             background-color: @workiva-green;
         }
-
     }
 }
-

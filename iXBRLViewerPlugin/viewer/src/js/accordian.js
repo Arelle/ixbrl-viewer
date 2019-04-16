@@ -39,7 +39,6 @@ Accordian.prototype.addCard = function(title, body, selected) {
     if (selected) {
         card.addClass("active");
     }
-
 }
 
 Accordian.prototype.html = function () {

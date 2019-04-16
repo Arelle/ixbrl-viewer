@@ -108,14 +108,34 @@ Inspector.prototype.search = function (s) {
                 .text(r.fact.getLabel("std")) // + " (" + r.score + ")" );
                 .appendTo(row);
         }
-
     });
     viewer.highlightRelatedFacts($.map(results, function (r) { return r.fact } ));
-    
 }
 
 Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').html(this._calculationHTML(fact, elr));
+}
+
+Inspector.prototype._referencesHTML = function (fact) {
+    var c = fact.concept();
+    var a = new Accordian();
+    $.each(fact.concept().references(), function (i,r) {
+        var title = $("<span>").text(r[0].value);
+        var body =  $('<table class="fact-properties"><tbody>')
+        var tbody = body.find("tbody");
+        $.each(r, function (j,p) {
+            var row = $("<tr>")
+                .append($("<th>").text(p.part))
+                .append($("<td>").text(p.value))
+                .appendTo(tbody);
+            if (p.part == 'URI') {
+                row.addClass("uri");
+                row.find("td").wrapInner($("<a>").attr("href",p.value));
+            }
+        });
+        a.addCard(title, body, i == 0);
+    });
+    return a.html();
 }
 
 Inspector.prototype._calculationHTML = function (fact, elr) {
@@ -281,6 +301,7 @@ Inspector.prototype.update = function () {
             );
         this._updateEntityIdentifier(fact);
         this.updateCalculation(fact);
+        $('div.references').html(this._referencesHTML(fact));
         this._updateValue(fact);
         $('tr.accuracy td').text(fact.readableAccuracy());
         $('#dimensions').empty();

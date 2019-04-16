@@ -32,7 +32,7 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_none(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return default namespace.
+        Tests NamespaceMap.getPrefix with None. Should return generated prefix.
         """
         ns_map = NamespaceMap()
         result = ns_map.getPrefix(None)
@@ -40,7 +40,7 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_none_with_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return prefix.
+        Tests NamespaceMap.getPrefix with None. Should return specified prefix.
         """
         ns_map = NamespaceMap()
         prefix = 'prefix'
@@ -49,7 +49,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_namespace(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should default namespace.
+        Tests NamespaceMap.getPrefix for 'namespace'. Should return generated
+        prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -58,7 +59,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_namespace_with_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return prefix.
+        Tests NamespaceMap.getPrefix with 'namespace' with preferred prefix.
+        Should return specified prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -68,7 +70,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_subsequent_call_with_namespace(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return default namespace.
+        Tests NamespaceMap.getPrefix twice with 'namespace'. Should return same
+        generated prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -79,7 +82,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_subsequent_call_with_namespace_and_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return prefix.
+        Tests NamespaceMap.getPrefix twice with 'namespace' and specified
+        prefix. Should return same specified prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -91,7 +95,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_subsequent_call_with_namespace_and_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return default namespaces.
+        Tests NamespaceMap.getPrefix with two namespaces.  Should return
+        sequential generated prefixes.
         """
         ns_map = NamespaceMap()
         namespace_1 = 'namespace_1'

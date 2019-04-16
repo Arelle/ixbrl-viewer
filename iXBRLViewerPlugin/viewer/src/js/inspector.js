@@ -21,6 +21,7 @@ import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
 import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
+import { Accordian } from './accordian.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
@@ -75,7 +76,6 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
     var inspector = this;
     this._optionsMenu.reset();
     this._optionsMenu.addCheckboxItem("Highlight", function (checked) { inspector.highlightAllTags(checked)});
-    console.log(this._report);
     if (this._report) {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, function (lang) { inspector.setLanguage(lang) });
@@ -125,40 +125,41 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
     if (!elr) {
         elr = calc.bestELRForFactSet(tableFacts);
     }
-    var rCalc = calc.resolvedCalculation(elr);
     var report = this._report;
     var viewer = this._viewer;
     var inspector = this;
-    var html = $("<div></div>");
-    var select = $("<select></select>").appendTo(html)
-        .change(function () { inspector.updateCalculation(fact, $(this).val())  });
-    $.each(calc.elrs(), function (e, label) {
-        var o = $("<option>").attr("value", e).text(label).appendTo(select);
-        if (e == elr) {
-            o.attr("selected", "selected");
-        }  
-    });
+    var a = new Accordian();
 
-    $.each(rCalc, function (i, r) {
-        var itemHTML = $("<div></div>")
-            .addClass("item")
-            .append($("<span>").addClass("weight").text(r.weightSign + " "))
-            .append($("<span>").addClass("concept-name").text(report.getLabel(r.concept, "std")))
-            .appendTo(html);
-        if (r.facts) {
-            itemHTML.addClass("fact-link");
-            itemHTML.data('ivid', r.facts);
-            itemHTML.click(function () { viewer.showAndSelectFact(Object.values(r.facts)[0] ) });
-            itemHTML.mouseenter(function () { $.each(r.facts, function (k,f) { viewer.linkedHighlightFact(f); })});
-            itemHTML.mouseleave(function () { $.each(r.facts, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
-            $.each(r.facts, function (k,f) { viewer.highlightRelatedFact(f); });
-        }
+    $.each(calc.elrs(), function (e, rolePrefix) {
+        var label = report.getRoleLabel(rolePrefix, inspector._viewerOptions);
+
+        var rCalc = calc.resolvedCalculation(e);
+        var calcBody = $('<div>');
+        $.each(rCalc, function (i, r) {
+            var itemHTML = $("<div></div>")
+                .addClass("item")
+                .append($("<span>").addClass("weight").text(r.weightSign + " "))
+                .append($("<span>").addClass("concept-name").text(report.getLabel(r.concept, "std")))
+                .appendTo(calcBody);
+
+            if (r.facts) {
+                itemHTML.addClass("fact-link");
+                itemHTML.data('ivid', r.facts);
+                itemHTML.click(function () { viewer.showAndSelectFact(Object.values(r.facts)[0] ) });
+                itemHTML.mouseenter(function () { $.each(r.facts, function (k,f) { viewer.linkedHighlightFact(f); })});
+                itemHTML.mouseleave(function () { $.each(r.facts, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
+                $.each(r.facts, function (k,f) { viewer.highlightRelatedFact(f); });
+            }
+        });
+        $("<div>").addClass("item").addClass("total")
+            .append($("<span>").addClass("weight"))
+            .append($("<span>").addClass("concept-name").text(fact.getLabel("std")))
+            .appendTo(calcBody);
+
+        a.addCard($("<span>").text(label), calcBody, e == elr);
+
     });
-    $("<div>").addClass("item").addClass("total")
-        .append($("<span>").addClass("weight"))
-        .append($("<span>").addClass("concept-name").text(fact.getLabel("std")))
-        .appendTo(html);
-    return html;
+    return a.html();
 }
 
 Inspector.prototype.viewerMouseEnter = function (id) {

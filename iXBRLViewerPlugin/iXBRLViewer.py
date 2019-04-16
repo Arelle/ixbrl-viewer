@@ -113,6 +113,15 @@ class IXBRLViewerBuilder:
     def addLanguage(self, langCode):
         if langCode not in self.taxonomyData["languages"]:
             self.taxonomyData["languages"][langCode] = self.makeLanguageName(langCode)
+            
+    def addELR(self, elr):
+        prefix = self.roleMap.getPrefix(elr)
+        if self.taxonomyData.setdefault("roleDefs",{}).get(prefix, None) is None:
+            rt = self.dts.roleTypes[elr]
+            label = elr
+            if len(rt) > 0:
+                label = rt[0].definition
+            self.taxonomyData["roleDefs"].setdefault(prefix,{})["en"] = label
 
     def addConcept(self, concept):
         labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
@@ -139,12 +148,13 @@ class IXBRLViewerBuilder:
         for r in rels.fromModelObject(item):
             self.treeWalk(rels, r.toModelObject, indent + 1)
 
-    def getRelationnShips(self):
+    def getRelationships(self):
         rels = {}
 
         for baseSetKey, baseSetModelLinks  in self.dts.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
             if (arcrole == XbrlConst.parentChild or arcrole == XbrlConst.summationItem) and ELR is not None:
+                self.addELR(ELR)
                 rr = dict()
                 relSet = self.dts.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
@@ -157,7 +167,7 @@ class IXBRLViewerBuilder:
                     rr.setdefault(fromKey, []).append(rel)
                     self.addConcept(r.toModelObject)
 
-                rels.setdefault(self.roleMap.getPrefix(arcrole),{})[ELR] = rr
+                rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
 
     def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js"):
@@ -224,7 +234,7 @@ class IXBRLViewerBuilder:
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
-        self.taxonomyData["rels"] = self.getRelationnShips()
+        self.taxonomyData["rels"] = self.getRelationships()
 
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 

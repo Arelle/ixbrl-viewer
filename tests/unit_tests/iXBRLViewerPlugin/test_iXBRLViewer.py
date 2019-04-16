@@ -32,7 +32,7 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_none(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return default namespace.
+        Tests NamespaceMap.getPrefix with None. Should return generated prefix.
         """
         ns_map = NamespaceMap()
         result = ns_map.getPrefix(None)
@@ -40,7 +40,7 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_none_with_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return prefix.
+        Tests NamespaceMap.getPrefix with None. Should return specified prefix.
         """
         ns_map = NamespaceMap()
         prefix = 'prefix'
@@ -49,7 +49,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_namespace(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should default namespace.
+        Tests NamespaceMap.getPrefix for 'namespace'. Should return generated
+        prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -58,7 +59,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_with_namespace_with_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return prefix.
+        Tests NamespaceMap.getPrefix with 'namespace' with preferred prefix.
+        Should return specified prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -68,7 +70,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_subsequent_call_with_namespace(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return default namespace.
+        Tests NamespaceMap.getPrefix twice with 'namespace'. Should return same
+        generated prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -79,7 +82,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_subsequent_call_with_namespace_and_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return prefix.
+        Tests NamespaceMap.getPrefix twice with 'namespace' and specified
+        prefix. Should return same specified prefix.
         """
         ns_map = NamespaceMap()
         namespace = 'namespace'
@@ -91,7 +95,8 @@ class TestNamespaceMap(unittest.TestCase):
 
     def test_getPrefix_subsequent_call_with_namespace_and_prefix(self):
         """
-        Tests NamespaceMap.getPrefix with None. Should return default namespaces.
+        Tests NamespaceMap.getPrefix with two namespaces.  Should return
+        sequential generated prefixes.
         """
         ns_map = NamespaceMap()
         namespace_1 = 'namespace_1'
@@ -215,6 +220,9 @@ class TestIXBRLViewer(unittest.TestCase):
         baseSets = defaultdict(list)
         baseSets[('http://www.xbrl.org/2003/arcrole/parent-child', 'ELR', 'linkqname', 'arcqname')] = []
 
+        roleTypes = defaultdict(list)
+        roleTypes['ELR'] = [Mock(definition = "ELR Label")]
+
         root = lxml.etree.Element('root')
         lxml.etree.SubElement(root, '{http://www.w3.org/1999/xhtml}body')
 
@@ -225,6 +233,7 @@ class TestIXBRLViewer(unittest.TestCase):
         self.modelXbrl_1 = Mock(
             relationshipSet=relationshipSet_effect,
             baseSets=baseSets,
+            roleTypes=roleTypes,
             facts=[fact_1],
             info=info_effect,
             modelDocument=self.modelDocument
@@ -232,6 +241,7 @@ class TestIXBRLViewer(unittest.TestCase):
         self.modelXbrl_2 = Mock(
             relationshipSet=relationshipSet_effect,
             baseSets=baseSets,
+            roleTypes=roleTypes,
             facts=[fact_2],
             info=info_effect,
             modelDocument=self.modelDocument
@@ -256,14 +266,36 @@ class TestIXBRLViewer(unittest.TestCase):
     def test_getRelationships_simple_case(self):
         modelXbrl = Mock(baseSets=defaultdict(list))
         builder = IXBRLViewerBuilder(modelXbrl)
-        result = builder.getRelationnShips()
+        result = builder.getRelationships()
         self.assertDictEqual(result, {})
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_returns_a_rel(self):
-        result = self.builder_1.getRelationnShips()
-        self.assertTrue(result.get('ns0').get('ELR').get('us-gaap:from_concept'))
+        result = self.builder_1.getRelationships()
+        roleMap = self.builder_1.roleMap
+        pcPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/parent-child')
+        self.assertTrue(result.get(pcPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept'))
+
+    def test_addELR_no_definition(self):
+        """
+        Adding an ELR with no definition should result in an "en" label with
+        the roleURI as its value
+        """
+        elr = "http://example.com/unknownELR"
+        self.builder_1.addELR(elr)
+        elrPrefix = self.builder_1.roleMap.getPrefix(elr)
+        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix).get("en"), elr)
+
+    def test_addELR_with_definition(self):
+        """
+        Adding an ELR with no definition should result in an "en" label with
+        the roleURI as its value
+        """
+        elr = "ELR"
+        self.builder_1.addELR(elr)
+        elrPrefix = self.builder_1.roleMap.getPrefix(elr)
+        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix).get("en"), "ELR Label")
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')

@@ -97,18 +97,20 @@ Inspector.prototype.search = function (s) {
     $('tr', table).remove();
     viewer.clearRelatedHighlighting();
     $.each(results, function (i,r) {
-        viewer.highlightRelatedFact(r.fact);
-        var row = $('<tr>')
-            .click(function () { viewer.showAndSelectFact(r.fact) })
-            .mouseenter(function () { viewer.linkedHighlightFact(r.fact); })
-            .mouseleave(function () { viewer.clearLinkedHighlightFact(r.fact); })
-            .data('ivid', r.fact.id)
-            .appendTo($("tbody", table));
-        $('<td>')
-            .text(r.fact.getLabel("std")) // + " (" + r.score + ")" );
-            .appendTo(row);
+        if (i < 100) {
+            var row = $('<tr>')
+                .click(function () { viewer.showAndSelectFact(r.fact) })
+                .mouseenter(function () { viewer.linkedHighlightFact(r.fact); })
+                .mouseleave(function () { viewer.clearLinkedHighlightFact(r.fact); })
+                .data('ivid', r.fact.id)
+                .appendTo($("tbody", table));
+            $('<td>')
+                .text(r.fact.getLabel("std")) // + " (" + r.score + ")" );
+                .appendTo(row);
+        }
 
     });
+    viewer.highlightRelatedFacts($.map(results, function (r) { return r.fact } ));
     
 }
 

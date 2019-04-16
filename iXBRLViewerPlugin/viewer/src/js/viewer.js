@@ -186,12 +186,22 @@ Viewer.prototype.highlightRelatedFact = function (f) {
     e.addClass("ixbrl-related");
 }
 
+Viewer.prototype.highlightRelatedFacts = function (facts) {
+    this.elementsForFacts(facts).addClass("ixbrl-related");
+}
+
 Viewer.prototype.clearRelatedHighlighting = function (f) {
     $(".ixbrl-related", this._contents).removeClass("ixbrl-related");
 }
 
 Viewer.prototype.elementForFact = function (fact) {
     return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == fact.id }).first();
+}
+
+Viewer.prototype.elementsForFacts = function (facts) {
+    var ids = $.map(facts, function (f) { return f.id });
+    var elements = $('.ixbrl-element', this._contents).filter(function () { return $.inArray($(this).data('ivid'), ids ) > -1 });
+    return elements;
 }
 
 Viewer.prototype.showAndSelectFact = function (fact) {

@@ -221,6 +221,7 @@ class TestIXBRLViewer(unittest.TestCase):
         baseSets[('http://www.xbrl.org/2003/arcrole/parent-child', 'ELR', 'linkqname', 'arcqname')] = []
 
         roleTypes = defaultdict(list)
+        roleTypes['ELR'] = [Mock(definition = "ELR Label")]
 
         root = lxml.etree.Element('root')
         lxml.etree.SubElement(root, '{http://www.w3.org/1999/xhtml}body')
@@ -275,6 +276,26 @@ class TestIXBRLViewer(unittest.TestCase):
         roleMap = self.builder_1.roleMap
         pcPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/parent-child')
         self.assertTrue(result.get(pcPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept'))
+
+    def test_addELR_no_definition(self):
+        """
+        Adding an ELR with no definition should result in an "en" label with
+        the roleURI as its value
+        """
+        elr = "http://example.com/unknownELR"
+        self.builder_1.addELR(elr)
+        elrPrefix = self.builder_1.roleMap.getPrefix(elr)
+        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix).get("en"), elr)
+
+    def test_addELR_with_definition(self):
+        """
+        Adding an ELR with no definition should result in an "en" label with
+        the roleURI as its value
+        """
+        elr = "ELR"
+        self.builder_1.addELR(elr)
+        elrPrefix = self.builder_1.roleMap.getPrefix(elr)
+        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix).get("en"), "ELR Label")
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')

@@ -71,14 +71,16 @@ Inspector.prototype.setViewer = function (viewer) {
     $('#top-bar .document-title').text(this._viewer.getTitle());
 }
 
-/* 
+/*
  * Check for fragment identifier pointing to a specific fact and select it if
  * present.
  */
 Inspector.prototype.handleFactDeepLink = function () {
     if (location.hash.startsWith("#f-")) {
-        var factId = location.hash.slice(3);
-        this._viewer.showAndSelectFact(this._report.getFactById(factId));
+        var fact = this._report.getFactById(location.hash.slice(3));
+        if (fact !== null) {
+            this._viewer.showAndSelectFact(fact);
+        }
     }
 }
 

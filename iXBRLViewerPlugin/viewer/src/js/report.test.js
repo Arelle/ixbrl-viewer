@@ -40,18 +40,49 @@ var testReportData = {
                 }
             }
         }
+    },
+
+    "facts": {
+        "f1": {
+            "d": -3,
+            "v": 1000,
+            "a": {
+                "c": "eg:Concept1",
+                "u": "iso4217:USD",
+                "p": "2018-01-01/2019-01-01",
+            }
+        }
     }
 };
 
 
-test("Language options", () => {
+describe("Language options", () => {
     var testReport = new iXBRLReport(testReportData);
-    var al = testReport.availableLanguages();
-    expect(al).toHaveLength(3);
-    expect(al).toEqual(expect.arrayContaining(["en", "en-us", "en-gb"]));
+    test("Available languages", () => {
+        var al = testReport.availableLanguages();
+        expect(al).toHaveLength(3);
+        expect(al).toEqual(expect.arrayContaining(["en", "en-us", "en-gb"]));
+    });
 
-    var ln = testReport.languageNames();
-    expect(Object.keys(ln)).toHaveLength(2);
-    expect(ln['en']).toBe("English");
-    expect(ln['en-us']).toBe("English (US)");
+    test("Names for available languages", () => {
+        var ln = testReport.languageNames();
+        expect(Object.keys(ln)).toHaveLength(2);
+        expect(ln['en']).toBe("English");
+        expect(ln['en-us']).toBe("English (US)");
+    });
+});
+
+describe("Fetching facts", () => {
+    var testReport = new iXBRLReport(testReportData);
+
+    test("Successful", () => {
+        var f = testReport.getFactById("f1");
+        expect(f).not.toBeNull();
+        expect(f.decimals()).toEqual(-3);
+    });
+
+    test("Non-existent fact", () => {
+        var f = testReport.getFactById("fact-does-not-exist");
+        expect(f).toBeNull();
+    });
 });

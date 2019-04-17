@@ -67,8 +67,13 @@ iXBRLReport.prototype.languageNames = function() {
 }
 
 iXBRLReport.prototype.getFactById = function(id) {
-    if (!this._facts[id]) {
-        this._facts[id] = new Fact(this, id);
+    if (!this._facts.hasOwnProperty(id)) {
+        if (this.data.facts.hasOwnProperty(id)) {
+            this._facts[id] = new Fact(this, id);
+        }
+        else {
+            this._facts[id] = null;
+        }
     }
     return this._facts[id];
 }

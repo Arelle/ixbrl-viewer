@@ -14,7 +14,6 @@
 
 import $ from 'jquery'
 import { formatNumber, wrapLabel } from "./util.js";
-
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -70,6 +69,25 @@ Inspector.prototype.setViewer = function (viewer) {
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
 
     $('#top-bar .document-title').text(this._viewer.getTitle());
+}
+
+/*
+ * Check for fragment identifier pointing to a specific fact and select it if
+ * present.
+ */
+Inspector.prototype.handleFactDeepLink = function () {
+    if (location.hash.startsWith("#f-")) {
+        var fact = this._report.getFactById(location.hash.slice(3));
+        if (fact !== null) {
+            this._viewer.showAndSelectFact(fact);
+        }
+    }
+}
+
+Inspector.prototype.updateURLFragment = function () {
+    if (this._currentFact) {
+        location.hash = "#f-" + this._currentFact.id;
+    }
 }
 
 Inspector.prototype.buildDisplayOptionsMenu = function () {
@@ -323,8 +341,7 @@ Inspector.prototype.update = function () {
         this.getPeriodIncrease(fact);
 
     }
-    
-
+    this.updateURLFragment();
 }
 
 Inspector.prototype.selectFact = function (id) {

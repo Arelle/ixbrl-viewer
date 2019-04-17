@@ -81,6 +81,9 @@ $(function () {
                         $('#ixv').css("pointer-events", "auto");
                     });
                     $('#ixv .loader').remove();
+
+                    /* Focus on fact specified in URL fragment, if any */
+                    inspector.handleFactDeepLink();
                 },0);
 
 

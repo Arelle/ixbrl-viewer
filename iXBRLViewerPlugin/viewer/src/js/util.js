@@ -15,6 +15,12 @@
 import dateFormat from "dateformat"
 import moment from "moment";
 
+/* 
+ * Takes a moment.js oject and converts it to a human readable date, or date
+ * and time if the time component is not midnight.  Adjust specifies that a
+ * date (but not a date time) should be shown as the day before.  This is to
+ * satisfy the convention of describing durations using inclusive dates.
+ */
 export function momentToHuman(d, adjust) {
     if (d.hours() + d.minutes() + d.seconds() == 0) { 
         if (adjust) {
@@ -27,12 +33,18 @@ export function momentToHuman(d, adjust) {
     }
 }
 
+/*
+ * Format a number with a thousands separator, and the specified number of
+ * decimal places.
+ */
 export function formatNumber(v, d) {
     return Number(v).toFixed(d).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
 }
 
-/* takes a string phrase and breaks it into separate phrases 
- *    no bigger than 'maxwidth', breaks are made at complete words.*/
+/* 
+ * Takes a string phrase and breaks it into separate phrases no bigger than
+ * 'maxwidth'. breaks are made at complete words.
+ */
 export function wrapLabel(str, maxwidth){
     var sections = [];
     var words = str.split(" ");
@@ -77,13 +89,15 @@ export function wrapLabel(str, maxwidth){
     return sections;
 }
 
+/* The JSON format supports datetimes being abbreviated to just xsd:dates.
+ * moment.js doesn't support timezoned dates, so fix them to midnight before
+ * passing to moment */
 export function xbrlDateToMoment(dateString) {
     /* If the string has something after the date part other than a time part,
      * insert a time part of 'T00:00:00'
      *
      * i.e. 2010-01-01Z => 2010-01-01T00:00:00Z
      *
-     * xsd:dates are allowed a timezone, but moment doesn't support it.
      */
     dateString = dateString.replace(
         /^(\d{4,}-\d{2}-\d{2})(?!T|$)/, 

@@ -113,7 +113,7 @@ Inspector.prototype.search = function (s) {
 }
 
 Inspector.prototype.updateCalculation = function (fact, elr) {
-    $('.calculations .tree').html(this._calculationHTML(fact, elr));
+    $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
 }
 
 Inspector.prototype._referencesHTML = function (fact) {
@@ -135,7 +135,7 @@ Inspector.prototype._referencesHTML = function (fact) {
         });
         a.addCard(title, body, i == 0);
     });
-    return a.html();
+    return a.contents();
 }
 
 Inspector.prototype._calculationHTML = function (fact, elr) {
@@ -181,7 +181,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
         a.addCard($("<span>").text(label), calcBody, e == elr);
 
     });
-    return a.html();
+    return a.contents();
 }
 
 Inspector.prototype.viewerMouseEnter = function (id) {
@@ -301,7 +301,7 @@ Inspector.prototype.update = function () {
             );
         this._updateEntityIdentifier(fact);
         this.updateCalculation(fact);
-        $('div.references').html(this._referencesHTML(fact));
+        $('div.references').empty().append(this._referencesHTML(fact));
         this._updateValue(fact);
         $('tr.accuracy td').text(fact.readableAccuracy());
         $('#dimensions').empty();

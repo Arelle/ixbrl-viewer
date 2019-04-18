@@ -15,7 +15,7 @@
 import $ from 'jquery'
 
 export function Accordian() {
-    this._html = $('<div class="accordian">');
+    this._contents = $('<div class="accordian">');
 }
 
 Accordian.prototype.addCard = function(title, body, selected) {
@@ -34,13 +34,13 @@ Accordian.prototype.addCard = function(title, body, selected) {
             })
         )
         .append($('<div class="body">').append(body))
-        .appendTo(this._html);
+        .appendTo(this._contents);
 
     if (selected) {
         card.addClass("active");
     }
 }
 
-Accordian.prototype.html = function () {
-    return this._html;
+Accordian.prototype.contents = function () {
+    return this._contents;
 }

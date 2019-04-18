@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isodateToHuman } from "./util.js"
+import { xbrlDateToMoment, momentToHuman } from "./util.js"
+import moment from "moment";
 
 export function Period(p) {
     this._p = p;
@@ -26,30 +27,36 @@ Period.prototype.toString = function() {
     }
     else if (!this._p.includes('/')) {
         /* instant */
-        s = isodateToHuman(this.to(), true);
+        s = momentToHuman(this.to(), true);
     }
     else {
-        s = isodateToHuman(this.from(), false) + " to " + isodateToHuman(this.to(), true);
+        s = momentToHuman(this.from(), false) + " to " + momentToHuman(this.to(), true);
     }
     return s;
 }
 
 
-
+/*
+ * Returns the date (instant) or end date (duration) of the period as a moment
+ * object
+ */
 Period.prototype.to = function() {
     if (this._p.includes('/')) {
         var r = this._p.split('/');
-        return new Date(r[1]);
+        return xbrlDateToMoment(r[1]);
     }
     else {
-        return new Date(this._p);
+        return xbrlDateToMoment(this._p);
     }
 }
 
+/*
+ * Returns null (instant) or start date (duration) as a moment object.
+ */
 Period.prototype.from = function() {
     if (this._p.includes('/')) {
         var r = this._p.split('/');
-        return new Date(r[0]);
+        return xbrlDateToMoment(r[0]);
     }
     return null;
 }
@@ -63,8 +70,8 @@ Period.prototype.isEquivalentDuration = function (op) {
     if (this.from() == null || op.from() == null) {
         return false;
     }
-    var d1 = op.to() - op.from();
-    var d2 = this.to() - this.from();
+    var d1 = op.to().toDate() - op.from().toDate();
+    var d2 = this.to().toDate() - this.from().toDate();
     if (Math.abs(d1-d2) < 0.1 * (d1+d2)) {
         return true;
     }

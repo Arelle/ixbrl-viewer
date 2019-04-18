@@ -13,16 +13,17 @@
 // limitations under the License.
 
 import dateFormat from "dateformat"
+import moment from "moment";
 
-export function isodateToHuman(d, adjust) {
-    if (d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() == 0) { 
+export function momentToHuman(d, adjust) {
+    if (d.hours() + d.minutes() + d.seconds() == 0) { 
         if (adjust) {
-            d.setDate(d.getDate() - 1);
+            d = d.clone().subtract(1, 'day');
         }
-        return dateFormat(d,"d mmm yyyy");
+        return d.format('D MMM Y');
     }
     else {
-        return dateFormat(d,"d mmm yyyy HH:MM:ss");
+        return d.format("D MMM Y HH:mm:ss");
     }
 }
 
@@ -73,8 +74,22 @@ export function wrapLabel(str, maxwidth){
         }
 
     });
-
     return sections;
+}
+
+export function xbrlDateToMoment(dateString) {
+    /* If the string has something after the date part other than a time part,
+     * insert a time part of 'T00:00:00'
+     *
+     * i.e. 2010-01-01Z => 2010-01-01T00:00:00Z
+     *
+     * xsd:dates are allowed a timezone, but moment doesn't support it.
+     */
+    dateString = dateString.replace(
+        /^(\d{4,}-\d{2}-\d{2})(?!T|$)/, 
+        function(match, $1) { return $1 + 'T00:00:00' }
+    );
+    return moment.utc(dateString);
 }
 
 export function escapeRegex(text) {

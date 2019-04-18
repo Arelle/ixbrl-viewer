@@ -36,7 +36,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
             l += " " + this._report.getLabel(dims[d],"std");
         }
         doc.label = l;
-        doc.ref = f.concept().references();
+        doc.ref = f.concept().referenceValuesAsString();
         docs.push(doc);
     }
     this._searchIndex = lunr(function () {

@@ -12,10 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import $ from 'jquery'
+
 export function Concept(report, name) {
     this._c = report.data.concepts[name]
 }
 
-Concept.prototype.references = function() { 
-    return this._c.r;
+/*
+ * Return a space separated list of reference values, or the empty string if
+ * the concept has none.
+ */
+Concept.prototype.referenceValuesAsString = function() {
+    if (!this._c.r) {
+        return "";
+    }
+    else {
+        return $.map(this._c.r, function (r,j) {
+                    return $.map(r, function (p,i) { return p[1] }).join(" ")
+        }).join(" ");
+    }
+}
+
+Concept.prototype.references = function () {
+    if (!this._c.r) {
+        return  [];
+    }
+    else {
+        return $.map(this._c.r, function (r, i) {
+            return [ $.map(r, function (p, j) {
+                return { "part": p[0], "value": p[1] };
+            })];
+        });
+    }
 }

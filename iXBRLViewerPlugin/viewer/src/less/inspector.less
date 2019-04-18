@@ -227,6 +227,7 @@
         }
     }
     table.fact-properties {
+        table-layout: fixed;
         width: 100%;
         th {
             width: 100px;
@@ -245,6 +246,13 @@
                 color: @primary;
                 cursor: pointer;
             }
+        }
+        td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        tr.uri > td {
+            white-space: nowrap;
         }
     }
     .duplicates {
@@ -387,7 +395,8 @@
 
         .collapsible-section {
             .collapsible-body {
-                padding-left: 9px;
+                padding-left: 0.9rem;
+                padding-right: 0.9rem;
             }
             .collapsible-header {
                 position: relative;
@@ -517,13 +526,6 @@
             }
 
             .calculations {
-                margin-left: 20px;  
-                margin-right: 20px;
-                select {
-                    padding: 3px;
-                    width: 100%;
-                    margin: 5px 0;
-                }
                 .item {
                     padding: 5px 0;
                     position: relative;

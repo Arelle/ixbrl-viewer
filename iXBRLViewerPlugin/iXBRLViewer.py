@@ -136,11 +136,15 @@ class IXBRLViewerBuilder:
                 conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
                 self.addLanguage(l.xmlLang.lower());
 
-            refString = " ".join(_refPart.stringValue.strip()
-                                 for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept)
-                                 for _refPart in _refRel.toModelObject.iterchildren())
+            refData = []
+            for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
+                ref = []
+                for _refPart in _refRel.toModelObject.iterchildren():
+                    ref.append([_refPart.localName, _refPart.stringValue.strip()])
+                refData.append(ref)
 
-            conceptData['r'] = refString
+            if len(refData) > 0:
+                conceptData['r'] = refData
 
             self.taxonomyData["concepts"][conceptName] = conceptData
 
@@ -260,7 +264,7 @@ class IXBRLViewerBuilder:
 
     def saveViewer(self, outFile, xmlDocument):
         """
-        Save the ixbl viewer
+        Save the iXBRL viewer
         """
         with open(outFile, "wb") as fout:
             # Using "xml" permits self-closing tags which confuses an HTML DOM

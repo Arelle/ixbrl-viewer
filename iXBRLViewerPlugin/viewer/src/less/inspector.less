@@ -26,8 +26,12 @@
 @powered-by-footer-height: 30px;
 
 #ixv {
-    font-size: 1.4rem;
-    .default-font();
+    /* Specify these here, not on body in case the iXBRL document has its own
+     * style attribute */
+    &, table {
+        .default-font();
+        .text-md();
+    }
 
     #ixv-progress {
         position: fixed; 

@@ -34,6 +34,9 @@ function reparentDocument() {
      * the body tag in an HTML DOM, so move them so that they are */
     $('body script').appendTo($('body'));
     $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo($(iframe).contents().find('body'));
+
+    /* Avoid any inline styles on the old body interfering with the inspector */
+    $('body').removeAttr('style');
     return iframe;
 
 }

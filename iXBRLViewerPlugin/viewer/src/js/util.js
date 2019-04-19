@@ -19,7 +19,11 @@ import moment from "moment";
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a
  * date (but not a date time) should be shown as the day before.  This is to
- * satisfy the convention of describing durations using inclusive dates.
+ * satisfy the human convention of describing durations using inclusive dates.
+ *
+ * i.e. 2018-01-01T00:00:00 to 2019-01-01T00:00:00 is described as
+ *      "Jan 1 2018 to Dec 31 2018"
+ *
  */
 export function momentToHuman(d, adjust) {
     if (d.hours() + d.minutes() + d.seconds() == 0) { 
@@ -89,15 +93,20 @@ export function wrapLabel(str, maxwidth){
     return sections;
 }
 
-/* The JSON format supports datetimes being abbreviated to just xsd:dates.
+/* 
+ * The JSON format supports datetimes being abbreviated to just xsd:dates.
  * moment.js doesn't support timezoned dates, so fix them to midnight before
- * passing to moment */
+ * passing to moment 
+ *
+ * Note that the strings we're working with are not raw XBRL 2.1 dates, and
+ * do not apply different conventions for start and aned dates.  A date
+ * with no time part always means T00:00:00.
+ */
 export function xbrlDateToMoment(dateString) {
     /* If the string has something after the date part other than a time part,
      * insert a time part of 'T00:00:00'
      *
      * i.e. 2010-01-01Z => 2010-01-01T00:00:00Z
-     *
      */
     dateString = dateString.replace(
         /^(\d{4,}-\d{2}-\d{2})(?!T|$)/, 

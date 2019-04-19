@@ -32,9 +32,7 @@ export function momentToHuman(d, adjust) {
         }
         return d.format('D MMM Y');
     }
-    else {
-        return d.format("D MMM Y HH:mm:ss");
-    }
+    return d.format("D MMM Y HH:mm:ss");
 }
 
 /*

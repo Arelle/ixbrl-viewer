@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const webpack = require('webpack');
 module.exports = {
   entry: './src/js/index.js',
   module: {
@@ -23,21 +24,9 @@ module.exports = {
             ]
 
 
-  }
-
-
-
-/*
-  node: {
-            fs: 'empty'
   },
-*/
-/*
-  externals: [
-    {
-       './cptable': 'var cptable',
-       '../xlsx.js': 'var _XLSX'
-    }
+  plugins: [
+    // Ignore all locale files of moment.js
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   ]
-*/
 };

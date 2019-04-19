@@ -31,6 +31,7 @@
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
     "lunr": "^2.3.5",
+    "moment": "^2.24.0",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3",
     "webpack-merge": "^4.2.1"

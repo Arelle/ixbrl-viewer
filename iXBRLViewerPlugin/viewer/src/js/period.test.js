@@ -12,26 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import moment from 'moment';
 import { Period } from "./period.js";
+import "./moment-jest.js";
 
 describe("Duration vs instant", () => {
     test("Durations", () => {
         var d = new Period("2018-01-01/2019-01-01"); 
-        expect(d.from()).toEqual(new Date("2018-01-01"));
-        expect(d.to()).toEqual(new Date("2019-01-01"));
+        expect(d.from()).toEqualDate(moment.utc("2018-01-01"));
+        expect(d.to()).toEqualDate(moment.utc("2019-01-01"));
         expect(d.toString()).toEqual("1 Jan 2018 to 31 Dec 2018");
     });
     test("Instant without time", () => {
         var i = new Period("2019-01-01"); 
         expect(i.from()).toBeNull();
-        expect(i.to()).toEqual(new Date("2019-01-01"));
+        expect(i.to()).toEqualDate(moment.utc("2019-01-01"));
         expect(i.toString()).toEqual("31 Dec 2018");
     });
 
     test("Instant with time", () => {
         var i = new Period("2019-01-01T06:00:00"); 
         expect(i.from()).toBeNull();
-        expect(i.to()).toEqual(new Date("2019-01-01T06:00:00"));
+        expect(i.to()).toEqualDate(moment.utc("2019-01-01T06:00:00"));
         expect(i.toString()).toEqual("1 Jan 2019 06:00:00");
     });
 });

@@ -24,9 +24,9 @@ import { Accordian } from './accordian.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
-    $(require('html-loader!../html/inspector.html')).prependTo('body');
+    $(require('../html/inspector.html')).prependTo('body');
     var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
-    $('<style id="ixv-style">')
+    $('<style id="ixv-style"></style>')
         .prop("type", "text/css")
         .text(inspector_css)
         .appendTo('head');
@@ -116,13 +116,13 @@ Inspector.prototype.search = function (s) {
     viewer.clearRelatedHighlighting();
     $.each(results, function (i,r) {
         if (i < 100) {
-            var row = $('<tr>')
+            var row = $('<tr></tr>')
                 .click(function () { viewer.showAndSelectFact(r.fact) })
                 .mouseenter(function () { viewer.linkedHighlightFact(r.fact); })
                 .mouseleave(function () { viewer.clearLinkedHighlightFact(r.fact); })
                 .data('ivid', r.fact.id)
                 .appendTo($("tbody", table));
-            $('<td>')
+            $('<td></td>')
                 .text(r.fact.getLabel("std")) // + " (" + r.score + ")" );
                 .appendTo(row);
         }
@@ -138,13 +138,13 @@ Inspector.prototype._referencesHTML = function (fact) {
     var c = fact.concept();
     var a = new Accordian();
     $.each(fact.concept().references(), function (i,r) {
-        var title = $("<span>").text(r[0].value);
-        var body =  $('<table class="fact-properties"><tbody>')
+        var title = $("<span></span>").text(r[0].value);
+        var body =  $('<table class="fact-properties"><tbody></tbody></table>')
         var tbody = body.find("tbody");
         $.each(r, function (j,p) {
             var row = $("<tr>")
-                .append($("<th>").text(p.part))
-                .append($("<td>").text(p.value))
+                .append($("<th></th>").text(p.part))
+                .append($("<td></td>").text(p.value))
                 .appendTo(tbody);
             if (p.part == 'URI') {
                 row.addClass("uri");
@@ -174,12 +174,12 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
         var label = report.getRoleLabel(rolePrefix, inspector._viewerOptions);
 
         var rCalc = calc.resolvedCalculation(e);
-        var calcBody = $('<div>');
+        var calcBody = $('<div></div>');
         $.each(rCalc, function (i, r) {
             var itemHTML = $("<div></div>")
                 .addClass("item")
-                .append($("<span>").addClass("weight").text(r.weightSign + " "))
-                .append($("<span>").addClass("concept-name").text(report.getLabel(r.concept, "std")))
+                .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
+                .append($("<span></span>").addClass("concept-name").text(report.getLabel(r.concept, "std")))
                 .appendTo(calcBody);
 
             if (r.facts) {
@@ -191,12 +191,12 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
                 $.each(r.facts, function (k,f) { viewer.highlightRelatedFact(f); });
             }
         });
-        $("<div>").addClass("item").addClass("total")
-            .append($("<span>").addClass("weight"))
-            .append($("<span>").addClass("concept-name").text(fact.getLabel("std")))
+        $("<div></div>").addClass("item").addClass("total")
+            .append($("<span></span>").addClass("weight"))
+            .append($("<span></span>").addClass("concept-name").text(fact.getLabel("std")))
             .appendTo(calcBody);
 
-        a.addCard($("<span>").text(label), calcBody, e == elr);
+        a.addCard($("<span></span>").text(label), calcBody, e == elr);
 
     });
     return a.contents();
@@ -290,8 +290,8 @@ Inspector.prototype._updateEntityIdentifier = function (fact) {
     var cell = $('tr.entity-identifier td');
     cell.empty();
     if (url) {
-        $('<span>').text('['+Identifiers.identifierNameForFact(fact) + "] ").appendTo(cell)
-        $('<a target="_blank">').attr('href',url).text(fact.identifier().localname).appendTo(cell)
+        $('<span></span>').text('['+Identifiers.identifierNameForFact(fact) + "] ").appendTo(cell)
+        $('<a target="_blank"></a>').attr('href',url).text(fact.identifier().localname).appendTo(cell)
     }
     else {
         cell.text(fact.f.a.e);
@@ -310,7 +310,7 @@ Inspector.prototype.update = function () {
         $('tr.period td')
             .text(fact.periodString())
             .append(
-                $("<span>") 
+                $("<span></span>") 
                     .addClass("analyse")
                     .text("")
                     .click(function () {
@@ -326,10 +326,10 @@ Inspector.prototype.update = function () {
         var dims = fact.dimensions();
         for (var d in dims) {
             (function(d) {
-                $('<div class="dimension">')
+                $('<div class="dimension"></div>')
                     .text(fact.report().getLabel(d, "std", true) || d)
                     .append(
-                        $("<span>") 
+                        $("<span></span>") 
                             .addClass("analyse")
                             .text("")
                             .click(function () {
@@ -338,7 +338,7 @@ Inspector.prototype.update = function () {
                     )
                     .appendTo('#dimensions');
             })(d); 
-            $('<div class="dimension-value">')
+            $('<div class="dimension-value"></div>')
                 .text(this._report.getLabel(dims[d], "std", true) || dims[d])
                 .appendTo('#dimensions');
             

@@ -15,12 +15,12 @@
 import $ from 'jquery'
 
 export function Accordian() {
-    this._contents = $('<div class="accordian">');
+    this._contents = $('<div class="accordian"></div>');
 }
 
 Accordian.prototype.addCard = function(title, body, selected) {
-    var card = $('<div class="card">')
-        .append($('<div class="title">')
+    var card = $('<div class="card"></div>')
+        .append($('<div class="title"></div>')
             .append(title)
             .click(function () {
                 var thisCard = $(this).closest(".card");
@@ -33,7 +33,7 @@ Accordian.prototype.addCard = function(title, body, selected) {
                 }
             })
         )
-        .append($('<div class="body">').append(body))
+        .append($('<div class="body"></div>').append(body))
         .appendTo(this._contents);
 
     if (selected) {

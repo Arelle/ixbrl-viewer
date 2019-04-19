@@ -28,7 +28,6 @@ export function Viewer(iframe, report) {
     this._applyStyles();
     this._bindHandlers();
     this.scale = 1;
-    
 }
 
 function localName(e) {
@@ -43,7 +42,8 @@ function localName(e) {
 
 Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   var elt;
-  if(n.nodeType == 1 && (localName(n.nodeName) == 'NONNUMERIC' || localName(n.nodeName) == 'NONFRACTION')) {
+  var name = localName(n.nodeName).toUpperCase();
+  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION')) {
     var node = $(n).closest("td,th").eq(0);
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
@@ -64,22 +64,11 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
         node = $(n).parent();
     }
     node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
-    //var elt;
     if (localName(n.nodeName) == 'NONFRACTION') {
       $(node).addClass("ixbrl-element-nonfraction");
-      /*
-      if(inHidden) {
-        elt = $(n).parent().clone();
-      }
-      */
     }
     if (localName(n.nodeName) == 'NONNUMERIC') {
       $(node).addClass("ixbrl-element-nonfraction");
-      /*
-      if(inHidden) {
-        elt = $(n).parent().clone();
-      }
-      */
     }
     if (elt) {
       var concept = n.getAttribute("name");
@@ -137,9 +126,7 @@ Viewer.prototype._bindHandlers = function () {
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
 
     TableExport.addHandles(this._contents, this._report);
-
 }
-
 
 Viewer.prototype.selectNextTag = function () {
     this._selectAdjacentTag(1);
@@ -272,4 +259,3 @@ Viewer.prototype.clearLinkedHighlightFact = function (f) {
 Viewer.prototype.getTitle = function () {
     return $('head title', this._contents).text();
 }
-

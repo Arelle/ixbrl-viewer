@@ -43,7 +43,8 @@ function localName(e) {
 
 Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   var elt;
-  if(n.nodeType == 1 && (localName(n.nodeName) == 'NONNUMERIC' || localName(n.nodeName) == 'NONFRACTION')) {
+  var name = localName(n.nodeName).toUpperCase();
+  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION')) {
     var node = $(n).closest("td,th").eq(0);
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";

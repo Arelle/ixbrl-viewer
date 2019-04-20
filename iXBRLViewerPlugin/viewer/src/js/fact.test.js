@@ -318,6 +318,26 @@ describe("Readable accuracy", () => {
 
 describe("Readable value", () => {
 
+    test("Monetary value", () => {
+
+        expect(testFact({ "v": "10", a: { u: "iso4217:USD" } }).readableValue())
+            .toBe("US $ 10");
+
+        expect(testFact({ "v": "10", a: { u: "iso4217:GBP" } }).readableValue())
+            .toBe("£ 10");
+
+        expect(testFact({ "v": "10000", d: 2, a: { u: "iso4217:GBP" } }).readableValue())
+            .toBe("£ 10,000.00");
+
+    });
+
+    test("Other numeric", () => {
+
+        expect(testFact({ "v": "10", d: -2, a: { u: "xbrli:foo" } }).readableValue())
+            .toBe("10 xbrli:foo");
+
+    });
+
     test("Simple string", () => {
 
         expect(testFact({ "v": "abc" }).readableValue()).toBe("abc");

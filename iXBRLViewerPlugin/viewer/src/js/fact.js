@@ -85,15 +85,16 @@ Fact.prototype.readableValue = function() {
      * based on data type, but we don't currently have access to that in the
      * report data.
      */
-    else if (v.match(/^\s*<[A-Za-z]/)) {
-        var html = $($.parseHTML(v, null, false));
-        /* Insert an extra space at the end of block elements to preserve
-         * separation of sections of text. */
+    else if (v.match(/^[\s\u00a0]*<[A-Za-z]/)) {
+        var html = $("<div>").append($($.parseHTML(v, null, false)));
+        /* Insert an extra space at the beginning and end of block elements to
+         * preserve separation of sections of text. */
         html
             .find("p, td, th, h1, h2, h3, h4, ol, ul, pre, blockquote, dl, div")
-            .append(document.createTextNode(" "));
-        /* Replace nbsp with normal space to avoid double spaces in the output */
-        v = html.text().replace(/\u00a0/g, " ");
+            .append(document.createTextNode(' '))
+            .prepend(document.createTextNode(' '));
+        /* Replace runs of whitespace (including nbsp) with a single space */
+        v = html.text().replace(/[\u00a0\s]+/g, " ").trim();
     }
     return v;
 }

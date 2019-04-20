@@ -56,6 +56,7 @@ function testReport(facts) {
 }
 
 function testFact(factData) {
+    factData.a = factData.a || {};
     return new Fact(testReport({"f1": factData}), "f1");
 }
 
@@ -310,6 +311,60 @@ describe("Readable accuracy", () => {
             "d": 2,
             "a": { "u": "iso4217:GBP" }
         }).readableAccuracy()).toBe("2 (pence)");
+
+    });
+});
+
+
+describe("Readable value", () => {
+
+    test("Simple string", () => {
+
+        expect(testFact({ "v": "abc" }).readableValue()).toBe("abc");
+
+        expect(testFact({ "v": "abc <i>italic</i>" }).readableValue()).toBe("abc <i>italic</i>");
+        expect(testFact({ "v": "a > b" }).readableValue()).toBe("a > b");
+
+    });
+
+    test("Detect and strip HTML tags", () => {
+
+        expect(testFact({ "v": "<b>foo</b>" }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "v": "    <b>foo</b>bar" }).readableValue())
+            .toBe("foobar");
+
+        expect(testFact({ "v": "\u00a0<b>foo</b>" }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "v": ".<b>foo</b>" }).readableValue())
+            .toBe(".<b>foo</b>");
+
+    });
+
+    test("Text in consecutive inline elements should be contiguous", () => {
+
+        expect(testFact({ "v": "<b>foo</b><i>bar</i>" }).readableValue())
+            .toBe("foobar");
+
+    });
+
+    test("Text in block/table elements should be separated.", () => {
+
+        expect(testFact({ "v": "<p>foo</p><p>bar</p>" }).readableValue())
+            .toBe("foo bar");
+
+        expect(testFact({ "v": "<table><tr><td>cell1</td><td>cell2</td></tr></table>" })
+            .readableValue())
+            .toBe("cell1 cell2");
+
+    });
+
+    test("Whitespace normalisation", () => {
+
+        expect(testFact({ "v": "<p>bar  foo</p> <p>bar</p>" }).readableValue())
+            .toBe("bar foo bar");
 
     });
 });

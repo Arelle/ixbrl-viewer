@@ -32,7 +32,7 @@ the ixbrlviewer file.
 
 1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
 2. Install the dependencies for javascript by running: `npm install`
-3. run `make prod`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
+3. run `npm run dev`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
 
 ## Installing the Arelle plugin
 

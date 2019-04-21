@@ -7,7 +7,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
+    "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js"
   },
   "repository": {
     "type": "git",

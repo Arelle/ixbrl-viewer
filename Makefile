@@ -22,10 +22,10 @@ dev: iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js
 prod: iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js
 
 iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js:	iXBRLViewerPlugin/viewer/src/*/*
-	cd iXBRLViewerPlugin/viewer && npx webpack --config webpack.dev.js --optimize-minimize
+	npm run dev
 
 iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js:	iXBRLViewerPlugin/viewer/src/*/*
-	cd iXBRLViewerPlugin/viewer && npx webpack --config webpack.prod.js --optimize-minimize
+	npm run prod
 
 test: testplugin testviewer
 

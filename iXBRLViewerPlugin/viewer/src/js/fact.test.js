@@ -360,6 +360,27 @@ describe("Readable value", () => {
 
         expect(testFact({ "v": ".<b>foo</b>" }).readableValue())
             .toBe(".<b>foo</b>");
+    });
+
+    test("Detect and strip HTML tags - check QName detection", () => {
+        expect(testFact({ "v": "<xhtml:b>foo</xhtml:b>" }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "v": '<xhtml:span style="font-weight: bold">foo</xhtml:span>' }).readableValue())
+            .toBe("foo");
+
+        /* Not a QName */
+        expect(testFact({ "v": "<1b>foo</1b>" }).readableValue())
+            .toBe("<1b>foo</1b>");
+
+        /* Not a QName */
+        expect(testFact({ "v": "<b:b:b>foo</b:b:b>" }).readableValue())
+            .toBe("<b:b:b>foo</b:b:b>");
+    });
+
+    test("Detect and strip HTML tags - start with a self-closing tag", () => {
+        expect(testFact({ "v": "<div/><b>bar</b>" }).readableValue())
+            .toBe("bar");
 
     });
 
@@ -374,6 +395,11 @@ describe("Readable value", () => {
 
         expect(testFact({ "v": "<p>foo</p><p>bar</p>" }).readableValue())
             .toBe("foo bar");
+
+        /* This should really return "foo bar", but we don't correctly detect
+         * block tags in prefixed XHTML */
+        expect(testFact({ "v": '<xhtml:p xmlns:xhtml="https://www.w3.org/1999/xhtml/">foo</xhtml:p><xhtml:p>bar</xhtml:p>' }).readableValue())
+            .toBe("foobar");
 
         expect(testFact({ "v": "<table><tr><td>cell1</td><td>cell2</td></tr></table>" })
             .readableValue())

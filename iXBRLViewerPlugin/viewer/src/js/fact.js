@@ -85,7 +85,7 @@ Fact.prototype.readableValue = function() {
      * based on data type, but we don't currently have access to that in the
      * report data.
      */
-    else if (v.match(/^[\s\u00a0]*<[A-Za-z]/)) {
+    else if (v.match(/^[\s\u00a0]*<([a-zA-Z_][\w.-]*:)?[a-zA-Z_][\w.-]*(\s|>|\/>)/)) {
         var html = $("<div>").append($($.parseHTML(v, null, false)));
         /* Insert an extra space at the beginning and end of block elements to
          * preserve separation of sections of text. */

@@ -1,0 +1,41 @@
+# Copyright 2019 Workiva Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# This file lists sample files and taxonomy packages that will be downloaded
+# automatically and to generate sample viewers.
+#
+# Format is:
+#     <target-dir> <url> <sha256sum>
+# or  <target-dir> <url|filename> <sha256sum>
+#
+# target-dir should be "packages" for taxonomy packages, and src/<name> for
+# instances/extension taxonomies
+
+packages http://xbrl.fasb.org/us-gaap/2018/us-gaap-2018-01-31.zip 1c1dac3d1cf8575c3e0f425a8dd6d800d8989febbddfc3f42c62f802715d3d7f
+packages http://xbrl.ifrs.org/taxonomy/2017-03-09/IFRST_2017-03-09.zip cedabb8514c041099e48877c057fee4a50bf6363cf6039f651047c3cbe0b88c6
+# The official FRC taxonomy uses an old taxonomy package spec.
+packages https://www.blinkace.com/taxonomies/FRC-Taxonomy-v2.1.0.zip 6b6d621ea1a941b99a9cdb934e1f88db3d56c02be1dbf8b5b79c6f16a004b943
+
+# Sample SEC iXBRL filing
+src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len-20181130x10k.htm 884b275d152ca73d9950d5d1a2a563a0220461c6545c47c0b581f272fb5205a5
+src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len-20181130.xsd 5453a709c2bc7ffea7f29011a96c0d1c274ececcead6ff764b3bbfffbe452919
+src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len-20181130_cal.xml 8bb56d63d8d3f6e08599f9dbcf3639f59a91882c17711dc8c9c6fb85b4ea7a8b
+src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len-20181130_pre.xml 8f2661e523e5039af3433ca65f2665f03ec513cea3b1c0c2f600ade51362a04c
+src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len-20181130_def.xml 47e1d442ca19d263aba75c74820b16ff952fa597f1af027a1722c745c5642bbc
+src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len-20181130_lab.xml ef2fffeaa3a6da0a7fb09c735318753e843b46d3040958fc3d2d21095151114f
+
+# Sample XHTML report that does not render properly in HTML mode
+src/blinkace https://beta.companieshouse.gov.uk/company/08658934/filing-history/MzIzMTgyOTM5NWFkaXF6a2N4/document?format=xhtml&download=1|blinkace.xhtml 5d7807022552917c32cc6a8155f27924b3d9656d08406eb3defc26572f562417
+

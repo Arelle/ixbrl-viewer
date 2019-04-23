@@ -21,6 +21,7 @@ import $ from 'jquery'
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
+    this._ixData = report.getIXDataForFact(factId);
     this._report = report;
     this.id = factId;
 }
@@ -80,12 +81,7 @@ Fact.prototype.readableValue = function() {
             v = formatNumber(v,d) + " " + this.unit().valueLabel();
         }
     }
-    /* If the text value appears to start with an HTML tag, treat as HTML and
-     * use the text content as the value.  It would be better to apply this
-     * based on data type, but we don't currently have access to that in the
-     * report data.
-     */
-    else if (v.match(/^[\s\u00a0]*<([a-zA-Z_][\w.-]*:)?[a-zA-Z_][\w.-]*(\s|>|\/>)/)) {
+    else if (this.escaped()) {
         var html = $("<div>").append($($.parseHTML(v, null, false)));
         /* Insert an extra space at the beginning and end of block elements to
          * preserve separation of sections of text. */
@@ -229,5 +225,6 @@ Fact.prototype.identifier = function () {
     return this._report.qname(this.f.a.e);
 }
 
-
-
+Fact.prototype.escaped = function () {
+    return this._ixData.escape;
+}

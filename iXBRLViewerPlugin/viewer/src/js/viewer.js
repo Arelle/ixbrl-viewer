@@ -24,7 +24,9 @@ export function Viewer(iframe, report) {
     this.onMouseEnter = $.Callbacks();
     this.onMouseLeave = $.Callbacks();
 
+    this._factData = {};
     this._preProcessiXBRL($("body", iframe.contents()).get(0));
+    report.setIXData(this._factData);
     this._applyStyles();
     this._bindHandlers();
     this.scale = 1;
@@ -69,6 +71,9 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
     }
     if (localName(n.nodeName) == 'NONNUMERIC') {
       $(node).addClass("ixbrl-element-nonfraction");
+      if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
+          this._setFactData(n.getAttribute('id'), 'escape', true);
+      }
     }
     if (elt) {
       var concept = n.getAttribute("name");
@@ -85,6 +90,11 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   for (var i=0; i < n.childNodes.length; i++) {
     this._preProcessiXBRL(n.childNodes[i], inHidden);
   }
+}
+
+Viewer.prototype._setFactData = function (id, prop, value) {
+    this._factData[id] = this._factData[id] || {};
+    this._factData[id][prop] = value;
 }
 
 Viewer.prototype._applyStyles = function () {

@@ -48,15 +48,19 @@ var testReportData = {
     }
 };
 
-function testReport(facts) {
+function testReport(facts, ixData) {
     // Deep copy of standing data
     var data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    return new iXBRLReport(data);
+    var report = new iXBRLReport(data);
+    report.setIXData(ixData);
+    return report;
 }
 
-function testFact(factData) {
-    return new Fact(testReport({"f1": factData}), "f1");
+function testFact(factData, ixData) {
+    factData.a = factData.a || {};
+    ixData = ixData || {};
+    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
 }
 
 describe("Simple fact properties", () => {
@@ -310,6 +314,109 @@ describe("Readable accuracy", () => {
             "d": 2,
             "a": { "u": "iso4217:GBP" }
         }).readableAccuracy()).toBe("2 (pence)");
+
+    });
+});
+
+
+describe("Readable value", () => {
+
+    test("Monetary value", () => {
+
+        expect(testFact({ "v": "10", a: { u: "iso4217:USD" } }).readableValue())
+            .toBe("US $ 10");
+
+        expect(testFact({ "v": "10", a: { u: "iso4217:GBP" } }).readableValue())
+            .toBe("£ 10");
+
+        expect(testFact({ "v": "10000", d: 2, a: { u: "iso4217:GBP" } }).readableValue())
+            .toBe("£ 10,000.00");
+
+    });
+
+    test("Other numeric", () => {
+
+        expect(testFact({ "v": "10", d: -2, a: { u: "xbrli:foo" } }).readableValue())
+            .toBe("10 xbrli:foo");
+
+    });
+
+    test("Simple string", () => {
+
+        expect(testFact({ "v": "abc" }).readableValue()).toBe("abc");
+
+        expect(testFact({ "v": "abc <i>italic</i>" }).readableValue()).toBe("abc <i>italic</i>");
+        expect(testFact({ "v": "a > b" }).readableValue()).toBe("a > b");
+
+    });
+
+    test("Strip HTML tags and normalise whitespace", () => {
+
+        expect(testFact({ "v": "<b>foo</b>" }, {"escape": true }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "v": "    <b>foo</b>bar" }, {"escape": true }).readableValue())
+            .toBe("foobar");
+
+        expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escape": true }).readableValue())
+            .toBe("foo");
+
+    });
+
+    test("Don't strip non-escaped facts", () => {
+
+        expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escape": false }).readableValue())
+            .toBe("\u00a0<b>foo</b>");
+        
+        expect(testFact({ "v": "\u00a0<b>foo</b>" }, {  }).readableValue())
+            .toBe("\u00a0<b>foo</b>");
+
+    });
+
+    test("Detect and strip HTML tags - XHTML tags and attributes", () => {
+        expect(testFact({ "v": "<xhtml:b>foo</xhtml:b>" }, {"escape": true }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "v": '<xhtml:span style="font-weight: bold">foo</xhtml:span>' }, {"escape": true }).readableValue())
+            .toBe("foo");
+    });
+
+    test("Detect and strip HTML tags - check behaviour with invalid HTML", () => {
+        /* Invalid HTML  */
+        expect(testFact({ "v": "<b:b:b>foo</b:b:b>" }, {"escape": true }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "v": "<foo<bar>baz</bar>" }, {"escape": true }).readableValue())
+            .toBe("baz");
+    });
+
+    test("Text in consecutive inline elements should be contiguous", () => {
+
+        expect(testFact({ "v": "<b>foo</b><i>bar</i>" }, {"escape":true }).readableValue())
+            .toBe("foobar");
+
+    });
+
+    test("Text in block/table elements should be separated.", () => {
+
+        expect(testFact({ "v": "<p>foo</p><p>bar</p>" }, {"escape":true }).readableValue())
+            .toBe("foo bar");
+
+        /* This should really return "foo bar", but we don't correctly detect
+         * block tags in prefixed XHTML */
+        expect(testFact({ "v": '<xhtml:p xmlns:xhtml="https://www.w3.org/1999/xhtml/">foo</xhtml:p><xhtml:p>bar</xhtml:p>' }, {"escape":true }).readableValue())
+            .toBe("foobar");
+
+        expect(testFact({ "v": "<table><tr><td>cell1</td><td>cell2</td></tr></table>" }, {"escape":true })
+            .readableValue())
+            .toBe("cell1 cell2");
+
+    });
+
+    test("Whitespace normalisation", () => {
+
+        expect(testFact({ "v": "<p>bar  foo</p> <p>bar</p>" }, {"escape":true }).readableValue())
+            .toBe("bar foo bar");
 
     });
 });

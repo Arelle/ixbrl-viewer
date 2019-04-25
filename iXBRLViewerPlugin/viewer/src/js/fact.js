@@ -21,6 +21,7 @@ import $ from 'jquery'
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
+    this._ixData = report.getIXDataForFact(factId);
     this._report = report;
     this.id = factId;
 }
@@ -79,6 +80,17 @@ Fact.prototype.readableValue = function() {
         else {
             v = formatNumber(v,d) + " " + this.unit().valueLabel();
         }
+    }
+    else if (this.escaped()) {
+        var html = $("<div>").append($($.parseHTML(v, null, false)));
+        /* Insert an extra space at the beginning and end of block elements to
+         * preserve separation of sections of text. */
+        html
+            .find("p, td, th, h1, h2, h3, h4, ol, ul, pre, blockquote, dl, div")
+            .append(document.createTextNode(' '))
+            .prepend(document.createTextNode(' '));
+        /* Replace runs of whitespace (including nbsp) with a single space */
+        v = html.text().replace(/[\u00a0\s]+/g, " ").trim();
     }
     return v;
 }
@@ -213,5 +225,6 @@ Fact.prototype.identifier = function () {
     return this._report.qname(this.f.a.e);
 }
 
-
-
+Fact.prototype.escaped = function () {
+    return this._ixData.escape;
+}

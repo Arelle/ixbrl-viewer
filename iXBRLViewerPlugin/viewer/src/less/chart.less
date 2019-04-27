@@ -13,39 +13,45 @@
 // limitations under the License.
 
 #ixv #chart {
-    .default-font();
-    .chart-container {
-       position: relative;
-       width: 100%;
-    }
-    .other-aspects {
-        width: 100%;
-        position: absolute;
-        bottom: 0;
-        .other-aspect {
-            display: inline-block;
-            padding: 5px 10px;
-            margin: 10px;
-            
-            &.addable {
-                color: @primary;
-                &:hover {
-                    color: @primary-focus;
-                    text-decoration: underline;
-                }
-            }
-            &.selected {
-                background-color: @button-primary-bg;
-                border-radius: 0.4rem;
-                border: 0.1rem solid @button-primary-border;
-                /* border: solid 1px #399; */
-                color: #fff;
-            }
-            &.selected, &.addable {
-                cursor: pointer;
-            }
+  .default-font();
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .other-aspects {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+
+    .other-aspect {
+      display: inline-block;
+      padding: 5px 10px;
+      margin: 10px;
+
+      &.selected,
+      &.addable {
+        cursor: pointer;
+      }
+
+      &.addable {
+        color: @primary;
+
+        &:hover {
+          color: @primary-focus;
+          text-decoration: underline;
         }
+      }
 
+      &.selected {
+        background-color: @button-primary-bg;
+        border-radius: 0.4rem;
+        border: 0.1rem solid @button-primary-border;
+
+        /* border: solid 1px #399; */
+        color: #fff;
+      }
     }
+  }
 }
-

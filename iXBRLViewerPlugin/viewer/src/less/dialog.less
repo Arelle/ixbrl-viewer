@@ -13,39 +13,42 @@
 // limitations under the License.
 
 .dialog {
-    z-index: 15;
-    position: absolute;
-    top: 5rem;
-    left: 5rem;
-    bottom: 5rem;
-    right: 5rem;
-    border: solid 1px #000;
-    background-color: #fff;
-    display: none;
+  z-index: 15;
+  position: absolute;
+  top: 5rem;
+  left: 5rem;
+  bottom: 5rem;
+  right: 5rem;
+  border: solid 1px #000;
+  background-color: #fff;
+  display: none;
 
-    // Use this instead of padding so that we can absolutely position elements within it.
-    .contents {
-        position: absolute;
-        left: 2rem;
-        right: 2rem;
-        top: 2rem;
-        bottom: 2rem;
+  // Use this instead of padding so that we can absolutely position elements within it.
+  .contents {
+    position: absolute;
+    left: 2rem;
+    right: 2rem;
+    top: 2rem;
+    bottom: 2rem;
+  }
+
+  .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1.8rem 2rem 0;
+    font-size: 2.6rem;
+    z-index: 20;
+    cursor: pointer;
+    line-height: 2.2rem;
+    opacity: 0.2;
+
+    &::before {
+      content: "\00d7";
     }
-    .close {
-        position: absolute;
-        top: 0;
-        right: 0;
-        padding: 1.8rem 2rem 0;
-        font-size: 2.6rem;
-        z-index: 20;
-        cursor: pointer;
-        line-height: 2.2rem;
-        opacity: 0.2;
-        &:before {
-            content: "\00d7";
-        }
-        &:hover {
-            opacity: 1;
-        }
+
+    &:hover {
+      opacity: 1;
     }
+  }
 }

@@ -1,0 +1,70 @@
+// Copyright 2019 Workiva Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ixv {
+  #top-bar {
+    .menu {
+      position: absolute;
+      right: 0;
+      top: 0;
+      padding-right: 20px;
+      line-height: @top-bar-height;
+      cursor: pointer;
+
+      .title::after {
+        font-family: "icomoon";
+        content: "\ea1c";
+        transform: rotate(90deg);
+        display: inline-block;
+        font-size: 12px;
+        position: relative;
+        left: 3px;
+      }
+
+      .content {
+        line-height: initial;
+        position: absolute;
+        top: @top-bar-height;
+        right: 0;
+        background: #fff;
+        z-index: 5;
+        border: solid 1px @border-grey;
+        display: none;
+
+        .group {
+          border-bottom: solid 1px @border-grey;
+          border-top: solid 1px @border-grey;
+        }
+
+        .item {
+          position: relative;
+          padding: 10px 25px 10px 30px;
+          white-space: nowrap;
+
+          &:hover {
+            background: @border-grey;
+          }
+
+          &.checkbox.checked::before {
+            .icon-tick();
+
+            position: absolute;
+            top: 12px;
+            left: 9px;
+          }
+        }
+      }
+    }
+  }
+}

@@ -20,6 +20,7 @@
 @import "icons.less";
 @import "chart.less";
 @import "dialog.less";
+@import "menu.less";
 @import (reference) "text-mixins.less";
 
 @top-bar-height: 35px;
@@ -76,17 +77,17 @@
       cursor: pointer;
     }
 
-    .zoom-in:hover,
-    .zoom-out:hover {
-      background-color: rgba(128, 128, 128, 0.7);
-    }
-
     .zoom-in {
       top: 15px;
     }
 
     .zoom-out {
       top: 40px;
+    }
+
+    .zoom-in:hover,
+    .zoom-out:hover {
+      background-color: rgba(128, 128, 128, 0.7);
     }
 
     .resize {
@@ -141,59 +142,6 @@
       height: @top-bar-height;
       overflow: hidden;
     }
-
-    .menu {
-      position: absolute;
-      right: 0;
-      top: 0;
-      padding-right: 20px;
-      line-height: @top-bar-height;
-      cursor: pointer;
-
-      .title::after {
-        font-family: "icomoon";
-        content: "\ea1c";
-        transform: rotate(90deg);
-        display: inline-block;
-        font-size: 12px;
-        position: relative;
-        left: 3px;
-      }
-
-      .content {
-        line-height: initial;
-        position: absolute;
-        top: @top-bar-height;
-        right: 0;
-        background: #fff;
-        z-index: 5;
-        border: solid 1px @border-grey;
-        display: none;
-
-        .group {
-          border-bottom: solid 1px @border-grey;
-          border-top: solid 1px @border-grey;
-        }
-
-        .item {
-          position: relative;
-          padding: 10px 25px 10px 30px;
-          white-space: nowrap;
-
-          &:hover {
-            background: @border-grey;
-          }
-
-          &.checkbox.checked::before {
-            .icon-tick();
-
-            position: absolute;
-            top: 12px;
-            left: 9px;
-          }
-        }
-      }
-    }
   }
 
   .std-label {
@@ -241,7 +189,7 @@
       position: relative;
       margin: 15px 0 15px 35px;
 
-      &:before {
+      &::before {
         position: absolute;
         color: @primary;
         font-family: "xbrlicons";
@@ -270,13 +218,13 @@
     }
 
     tr.value {
-      &:not(.truncated) .show-all {
-        display: none;
-      }
-
       .show-all {
         color: @primary;
         cursor: pointer;
+      }
+
+      &:not(.truncated) .show-all {
+        display: none;
       }
     }
 
@@ -551,10 +499,6 @@
         }
 
         .results {
-          tr:hover td {
-            .linked-highlight-cell();
-          }
-
           td {
             padding: 7px 5px;
             cursor: pointer;
@@ -565,6 +509,10 @@
           }
 
           .linked-highlight td {
+            .linked-highlight-cell();
+          }
+
+          tr:hover td {
             .linked-highlight-cell();
           }
         }
@@ -613,17 +561,17 @@
             color: #777;
           }
 
+          .concept-name {
+            display: block;
+            margin-left: 15px;
+          }
+
           &.fact-link {
             cursor: pointer;
 
             .concept-name {
               color: @primary;
             }
-          }
-
-          .concept-name {
-            display: block;
-            margin-left: 15px;
           }
 
           .weight {
@@ -715,10 +663,6 @@
     border-style: solid;
     border-width: 3px;
     box-shadow: 0 0 0 1px transparent;
-  }
-
-  .loader .text::before {
-    border: 3px solid rgba(255, 255, 255, 0.1);
   }
 
   .loader .text::before {

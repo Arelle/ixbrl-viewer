@@ -59,6 +59,9 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
         return this._report.getLabel(this._value, rolePrefix);
     }
     else if (this._aspect == 'u') {
+        if (this._value === null) {
+            return "<NOUNIT>";
+        }
         var qname = this._report.qname(this._value);
         if (qname.namespace == "http://www.xbrl.org/2003/iso4217") {
             if (qname.localname == 'GBP') {

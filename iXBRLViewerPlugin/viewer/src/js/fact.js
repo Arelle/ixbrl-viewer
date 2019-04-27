@@ -96,7 +96,7 @@ Fact.prototype.readableValue = function() {
 }
 
 Fact.prototype.unit = function() {
-    if (this.f.a.u) {
+    if (this.isNumeric()) {
         return this.aspect("u");
     }
     else {
@@ -105,7 +105,7 @@ Fact.prototype.unit = function() {
 }
 
 Fact.prototype.isNumeric = function () {
-    return this.unit() !== undefined;
+    return this.f.a.u !== undefined;
 }
 
 Fact.prototype.dimensions = function () {
@@ -120,7 +120,7 @@ Fact.prototype.dimensions = function () {
 
 Fact.prototype.isMonetaryValue = function () {
     var unit = this.unit();
-    if (!unit) {
+    if (!unit || unit.value() === null) {
         return false;
     }
     var q = this.report().qname(unit.value());

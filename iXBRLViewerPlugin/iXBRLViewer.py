@@ -211,6 +211,12 @@ class IXBRLViewerBuilder:
                     # XXX does not support complex units
                     unit = self.nsmap.qname(f.unit.measures[0][0])
                     aspects["u"] = unit
+                else:
+                    # The presence of the unit aspect is used by the viewer to
+                    # identify numeric facts.  If the fact has no unit (invalid
+                    # XBRL, but we want to support it for draft documents),
+                    # include the unit aspect with a null value.
+                    aspects["u"] = None
                 d = inferredDecimals(f)
                 if d != float("INF") and not math.isnan(d):
                     factData["d"] = d

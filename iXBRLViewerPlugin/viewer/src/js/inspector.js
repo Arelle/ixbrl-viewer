@@ -308,8 +308,9 @@ Inspector.prototype.update = function () {
         $('.documentation').text(fact.getLabel("doc") || "");
         $('tr.concept td').text(fact.conceptName());
         $('tr.period td')
-            .text(fact.periodString())
-            .append(
+            .text(fact.periodString());
+        if (fact.isNumeric()) {
+            $('tr.period td').append(
                 $("<span></span>") 
                     .addClass("analyse")
                     .text("")
@@ -317,6 +318,7 @@ Inspector.prototype.update = function () {
                         inspector._chart.analyseDimension(fact,["p"])
                     })
             );
+        }
         this._updateEntityIdentifier(fact);
         this.updateCalculation(fact);
         $('div.references').empty().append(this._referencesHTML(fact));
@@ -325,19 +327,19 @@ Inspector.prototype.update = function () {
         $('#dimensions').empty();
         var dims = fact.dimensions();
         for (var d in dims) {
-            (function(d) {
-                $('<div class="dimension"></div>')
-                    .text(fact.report().getLabel(d, "std", true) || d)
-                    .append(
-                        $("<span></span>") 
-                            .addClass("analyse")
-                            .text("")
-                            .click(function () {
-                                inspector._chart.analyseDimension(fact,[d])
-                            })
-                    )
-                    .appendTo('#dimensions');
-            })(d); 
+            var h = $('<div class="dimension"></div>')
+                .text(fact.report().getLabel(d, "std", true) || d)
+                .appendTo('#dimensions');
+            if (fact.isNumeric()) {
+                h.append(
+                    $("<span></span>") 
+                        .addClass("analyse")
+                        .text("")
+                        .click(function () {
+                            inspector._chart.analyseDimension(fact,[d])
+                        })
+                )
+            }
             $('<div class="dimension-value"></div>')
                 .text(this._report.getLabel(dims[d], "std", true) || dims[d])
                 .appendTo('#dimensions');

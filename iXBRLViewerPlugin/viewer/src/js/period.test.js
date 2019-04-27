@@ -38,6 +38,33 @@ describe("Duration vs instant", () => {
     });
 });
 
+describe("Period.toString", () => {
+    test("Instant with no time part", () => {
+        var d = new Period("2018-06-02");
+        expect(d.toString()).toEqual("1 Jun 2018");
+    });
+    test("Instant with explicit zero time part", () => {
+        var d = new Period("2018-06-02T00:00:00");
+        expect(d.toString()).toEqual("1 Jun 2018");
+    });
+    test("Instant with non-zero time part", () => {
+        var d = new Period("2018-06-01T03:00:00");
+        expect(d.toString()).toEqual("1 Jun 2018 03:00:00");
+    });
+    test("Duration with no time part", () => {
+        var d = new Period("2017-06-02/2018-06-02");
+        expect(d.toString()).toEqual("2 Jun 2017 to 1 Jun 2018");
+    });
+    test("Instant with explicit zero time part", () => {
+        var d = new Period("2017-06-02T00:00:00/2018-06-02T00:00:00");
+        expect(d.toString()).toEqual("2 Jun 2017 to 1 Jun 2018");
+    });
+    test("Instant with non-zero time part", () => {
+        var d = new Period("2017-06-02T07:00:00/2018-06-01T03:00:00");
+        expect(d.toString()).toEqual("2 Jun 2017 07:00:00 to 1 Jun 2018 03:00:00");
+    });
+});
+
 describe("Equivalent durations", () => {
     test("Instant vs duration", () => {
         var i = new Period("2019-01-01"); 

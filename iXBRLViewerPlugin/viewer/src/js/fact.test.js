@@ -420,3 +420,30 @@ describe("Readable value", () => {
 
     });
 });
+
+describe("Unit aspect handling", () => {
+
+    test("Numeric, missing unit", () => {    
+        var f = testFact({
+            "v": "1234",
+            "a": {  
+                "u": null
+            }
+        });
+        expect(f.isNumeric()).toBeTruthy();
+        expect(f.unit()).not.toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.unit().value()).toBeNull();
+        expect(f.unit().valueLabel()).toBe("<NOUNIT>");
+    });
+
+    test("Non-numeric, no unit", () => {    
+        var f = testFact({
+            "v": "1234",
+            "a": {  
+            }
+        });
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.unit()).toBeUndefined();
+    });
+});

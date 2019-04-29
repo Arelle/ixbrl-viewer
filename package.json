@@ -9,11 +9,18 @@
   "scripts": {
     "test": "jest",
     "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
-    "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js"
+    "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
+    "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:Workiva/ixbrl-viewer.git"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-standard",
+    "rules": {
+      "font-family-no-missing-generic-family-keyword": null
+    }
   },
   "author": "",
   "devDependencies": {
@@ -34,6 +41,8 @@
     "less-loader": "^4.1.0",
     "lunr": "^2.3.5",
     "moment": "^2.24.0",
+    "stylelint": "^10.0.1",
+    "stylelint-config-standard": "^18.3.0",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3",
     "webpack-merge": "^4.2.1"

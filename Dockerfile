@@ -22,6 +22,9 @@ RUN make prod
 # javascript tests
 RUN npm run test
 
+# lint check .less files
+RUN npm run stylelint
+
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml
 RUN mkdir /test_reports

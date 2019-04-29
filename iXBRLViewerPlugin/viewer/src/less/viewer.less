@@ -17,114 +17,127 @@
 @import "common.less";
 
 .iv-ixbrl-fact {
-    background-color: yellow;
-    cursor: pointer;
+  background-color: yellow;
+  cursor: pointer;
 }
 
 .ixbrl-highlight {
-    background-color: @highlight-default !important;
-    &.ixbrl-highlight-1 {
-        background-color: @highlight-1 !important;
-    }
-    &.ixbrl-highlight-2 {
-        background-color: @highlight-2 !important;
-    }
+  background-color: @highlight-default !important;
+
+  &.ixbrl-highlight-1 {
+    background-color: @highlight-1 !important;
+  }
+
+  &.ixbrl-highlight-2 {
+    background-color: @highlight-2 !important;
+  }
 }
 
-div, span {
-    &.ixbrl-selected {
-        outline: solid 2px @primary;
-        outline-offset: 1px;
-    }
-    &.ixbrl-element:hover:not(.ixbrl-selected) {
-        outline: dashed 2px @primary;
-        outline-offset: 1px;
-    }
+div,
+span {
+  &.ixbrl-selected {
+    outline: solid 2px @primary;
+    outline-offset: 1px;
+  }
+
+  &.ixbrl-element:hover:not(.ixbrl-selected) {
+    outline: dashed 2px @primary;
+    outline-offset: 1px;
+  }
 }
 
 .ixbrl-element {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .ixbrl-related {
-    outline: dashed 2px @related-fact;
-    outline-offset: 1px;
+  outline: dashed 2px @related-fact;
+  outline-offset: 1px;
 }
 
-td, th {
-    &.ixbrl-selected {
-        outline: solid 2px @primary !important;
-        outline-offset: -1px !important;
-    }
-    &.ixbrl-element:hover:not(.ixbrl-selected) {
-        outline: dashed 2px @primary !important;
-        outline-offset: -1px !important;
-    }
-    &.ixbrl-related {
-        outline-offset: -1px;
-    }
+td,
+th {
+  &.ixbrl-selected {
+    outline: solid 2px @primary !important;
+    outline-offset: -1px !important;
+  }
+
+  &.ixbrl-element:hover:not(.ixbrl-selected) {
+    outline: dashed 2px @primary !important;
+    outline-offset: -1px !important;
+  }
+
+  &.ixbrl-related {
+    outline-offset: -1px;
+  }
 }
 
 .ixbrl-related.ixbrl-linked-highlight,
 .ixbrl-linked-highlight {
-    .linked-highlight-text();
+  .linked-highlight-text();
 }
 
 td.ixbrl-related.ixbrl-linked-highlight,
 td.ixbrl-linked-highlight {
-    .linked-highlight-cell();
+  .linked-highlight-cell();
 }
 
 div.ixbrl-table-handle {
-    @export-handle-size: 0.4rem;
+  @export-handle-size: 0.4rem;
+
+  position: absolute;
+  left: 0;
+  cursor: pointer;
+  width: 0;
+  height: 0;
+  border: @export-handle-size solid transparent;
+  border-bottom-color: @workiva-green;
+  top: -2 * @export-handle-size;
+
+  &::after {
+    content: '';
     position: absolute;
-    left: 0;
-    cursor: pointer;
+    left: -@export-handle-size;
+    top: @export-handle-size;
     width: 0;
     height: 0;
     border: @export-handle-size solid transparent;
-    border-bottom-color: @workiva-green;
-    top: -2 * @export-handle-size;
-    &:after {
-      content: '';
-      position: absolute;
-      left: -@export-handle-size;
-      top: @export-handle-size;
-      width: 0;
-      height: 0;
-      border: @export-handle-size solid transparent;
-      border-top-color: @workiva-green;
+    border-top-color: @workiva-green;
+  }
+
+  & > span {
+    display: none;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    &::after {
+      display: none;
     }
+
+    border: none;
+    color: #fff;
+    transition: width 0.3s;
+    width: 9rem;
+    height: initial;
+    left: -0.1rem;
+    padding: 2 * @export-handle-size - 0.1rem 0 0 0;
 
     & > span {
-        display: none;
-        white-space: nowrap;
-    }
+      border: solid 0.1rem #fff;
 
-    &:hover {
-        &:after {
-            display: none;
-        }
-        border: none;
-        color: #fff;
-        transition: width 0.3s;
-        width: 9rem;
-        height: initial;
-        left: -0.1rem;
-        padding: 2 * @export-handle-size - 0.1rem 0 0 0;
-        & > span {
-            border: solid 0.1rem #fff;
-            &:before {
-                font-family: "icomoon";
-                content: "\e95e";
-                padding-right: 7px;
-                position: relative;
-                top: 1px;
-            }
-            font-family: sans-serif;
-            display: block;
-            padding: 7px 15px;
-            background-color: @workiva-green;
-        }
+      &::before {
+        font-family: "icomoon";
+        content: "\e95e";
+        padding-right: 7px;
+        position: relative;
+        top: 1px;
+      }
+
+      font-family: sans-serif;
+      display: block;
+      padding: 7px 15px;
+      background-color: @workiva-green;
     }
+  }
 }

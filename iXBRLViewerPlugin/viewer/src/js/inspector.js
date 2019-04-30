@@ -21,6 +21,7 @@ import { ViewerOptions } from './viewerOptions.js';
 import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
 import { Accordian } from './accordian.js';
+import { FactSet } from './factset.js';
 
 export function Inspector() {
     /* Insert HTML and CSS styles into body */
@@ -59,7 +60,7 @@ Inspector.prototype.setReport = function (report) {
 Inspector.prototype.setViewer = function (viewer) {
     this._viewer = viewer;
     var inspector = this;
-    viewer.onSelect.add(function (id) { inspector.selectFact(id) });
+    viewer.onSelect.add(function (id, eltSet) { inspector.selectFact(id, eltSet) });
     viewer.onMouseEnter.add(function (id) { inspector.viewerMouseEnter(id) });
     viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
@@ -263,31 +264,31 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 }
 
-Inspector.prototype._updateValue = function (fact, showAll) {
+Inspector.prototype._updateValue = function (fact, showAll, context) {
     var inspector = this;
     var v = fact.readableValue();
     if (!showAll) {
         var fullLabel = v;
         var vv = wrapLabel(v, 120);
         if (vv.length > 1) {
-            $('#inspector tr.value').addClass("truncated");
-            $('#inspector tr.value .show-all').off().click(function () { inspector._updateValue(fact, true); });
+            $('#inspector tr.value', context).addClass("truncated");
+            $('#inspector tr.value .show-all', context).off().click(function () { inspector._updateValue(fact, true); });
         }
         else {
-            $('#inspector tr.value').removeClass('truncated');
+            $('#inspector tr.value', context).removeClass('truncated');
         }
         v = vv[0];
     }
     else {
-        $('#inspector tr.value').removeClass('truncated');
+        $('#inspector tr.value', context).removeClass('truncated');
     }
 
-    $('tr.value td .value').text(v);
+    $('tr.value td .value', context).text(v);
 }
 
-Inspector.prototype._updateEntityIdentifier = function (fact) {
+Inspector.prototype._updateEntityIdentifier = function (fact, context) {
     var url = Identifiers.identifierURLForFact(fact);
-    var cell = $('tr.entity-identifier td');
+    var cell = $('tr.entity-identifier td', context);
     cell.empty();
     if (url) {
         $('<span></span>').text('['+Identifiers.identifierNameForFact(fact) + "] ").appendTo(cell)
@@ -299,52 +300,73 @@ Inspector.prototype._updateEntityIdentifier = function (fact) {
 }
 
 Inspector.prototype.update = function () {
-    if (this._currentFact) {
-        $('#inspector .no-fact-selected').hide();
-        $('#inspector .fact-details').show();
-        var fact = this._currentFact;
-        var inspector = this;
-        $('.std-label').text(fact.getLabel("std", true) || fact.conceptName());
-        $('.documentation').text(fact.getLabel("doc") || "");
-        $('tr.concept td').text(fact.conceptName());
-        $('tr.period td')
-            .text(fact.periodString());
-        if (fact.isNumeric()) {
-            $('tr.period td').append(
-                $("<span></span>") 
-                    .addClass("analyse")
-                    .text("")
-                    .click(function () {
-                        inspector._chart.analyseDimension(fact,["p"])
-                    })
-            );
-        }
-        this._updateEntityIdentifier(fact);
-        this.updateCalculation(fact);
-        $('div.references').empty().append(this._referencesHTML(fact));
-        this._updateValue(fact);
-        $('tr.accuracy td').text(fact.readableAccuracy());
-        $('#dimensions').empty();
-        var dims = fact.dimensions();
-        for (var d in dims) {
-            var h = $('<div class="dimension"></div>')
-                .text(fact.report().getLabel(d, "std", true) || d)
-                .appendTo('#dimensions');
+    var inspector = this;
+    if (inspector._currentFact) {
+        var fact = inspector._currentFact;
+        $('#inspector .fact-inspector').empty();
+        var a = new Accordian({
+            onSelect: function (id) { 
+                inspector._currentFact = inspector._report.getFactById(id)
+                inspector._viewer.highlightFact(inspector._currentFact); 
+                inspector.update();
+            }, 
+            alwaysOpen: true,
+            dissolveSingle: true,
+        });
+        var fs = new FactSet(this._currentFactSet);
+        $.each(inspector._currentFactSet, function (i, fact) {
+            var factHTML = $(require('../html/fact-details.html')); 
+            $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
+            $('.documentation', factHTML).text(fact.getLabel("doc") || "");
+            $('tr.concept td', factHTML).text(fact.conceptName());
+            $('tr.period td', factHTML)
+                .text(fact.periodString());
             if (fact.isNumeric()) {
-                h.append(
+                $('tr.period td', factHTML).append(
                     $("<span></span>") 
                         .addClass("analyse")
                         .text("")
                         .click(function () {
-                            inspector._chart.analyseDimension(fact,[d])
+                            inspector._chart.analyseDimension(fact,["p"])
                         })
-                )
+                );
             }
-            $('<div class="dimension-value"></div>')
-                .text(this._report.getLabel(dims[d], "std", true) || dims[d])
-                .appendTo('#dimensions');
-            
-        }
+            inspector._updateEntityIdentifier(fact, factHTML);
+            inspector._updateValue(fact, false, factHTML);
+            $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
+            $('#dimensions', factHTML).empty();
+            var dims = fact.dimensions();
+            for (var d in dims) {
+                var h = $('<div class="dimension"></div>')
+                    .text(fact.report().getLabel(d, "std", true) || d)
+                    .appendTo('#dimensions', factHTML);
+                if (fact.isNumeric()) {
+                    h.append(
+                        $("<span></span>") 
+                            .addClass("analyse")
+                            .text("")
+                            .click(function () {
+                                inspector._chart.analyseDimension(fact,[d])
+                            })
+                    )
+                }
+                $('<div class="dimension-value"></div>')
+                    .text(this._report.getLabel(dims[d], "std", true) || dims[d])
+                    .appendTo('#dimensions', factHTML);
+                
+            }
+            a.addCard(
+                fs.minimallyUniqueLabel(fact),
+                factHTML, 
+                fact.id == inspector._currentFact.id, 
+                fact.id
+            );
+        });
+
+        var fact = inspector._currentFact;
+        a.contents().appendTo('#inspector .fact-inspector');
+        this.updateCalculation(fact);
+        $('div.references').empty().append(this._referencesHTML(fact));
         $('#inspector .search .results tr').removeClass('selected');
         $('#inspector .search .results tr').filter(function () { return $(this).data('ivid') == fact.id }).addClass('selected');
 
@@ -367,8 +389,17 @@ Inspector.prototype.update = function () {
     this.updateURLFragment();
 }
 
-Inspector.prototype.selectFact = function (id) {
+Inspector.prototype.selectFact = function (id, factIdSet) {
     this._currentFact = this._report.getFactById(id);
+    if (factIdSet) {
+        this._currentFactSet = [];
+        for (var i = 0; i < factIdSet.length; i++) {
+            this._currentFactSet.push(this._report.getFactById(factIdSet[i]));
+        }
+    }
+    else {
+        this._currentFactSet = [this._currentFact];
+    }
     this.update();
 }
 

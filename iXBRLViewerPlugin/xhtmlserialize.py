@@ -17,7 +17,11 @@ import re
 
 class XHTMLSerializer:
 
-    selfClosableElements = ('area', 'base', 'br', 'col', 'hr', 'img', 'input', 'link', 'meta', 'param')
+    # From https://www.w3.org/TR/html401/index/elements.html
+    selfClosableElements = (
+        'area', 'base', 'basefont', 'br', 'col', 'frame', 'hr', 'img', 
+        'input', 'isindex', 'link', 'meta', 'param'
+    )
 
     def _expandEmptyTags(self, xml):
         """

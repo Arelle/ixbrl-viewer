@@ -3,30 +3,11 @@ import sys
 import unittest
 from collections import defaultdict
 from unittest.mock import Mock, patch
+from .mock_arelle import mock_arelle
 
-
-def qname_effect(prefix, namespaceURI, localName):
-    return Mock(
-        prefix=prefix,
-        namespaceURI=namespaceURI,
-        localName=localName
-    )
-
-def inferredDecimals_effect(fact):
-    return float("INF")
-
-
-sys.modules['arelle'] = Mock()
-sys.modules['arelle.XbrlConst'] = Mock()
-sys.modules['arelle.ModelValue'] = Mock(
-    QName=qname_effect
-)
-sys.modules['arelle.ValidateXbrlCalcs'] = Mock(
-    inferredDecimals=inferredDecimals_effect
-)
+mock_arelle()
 
 from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder
-
 
 class TestNamespaceMap(unittest.TestCase):
 

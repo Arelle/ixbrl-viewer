@@ -20,7 +20,7 @@ import math
 import re
 import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
-
+from .xhtmlserialize import XHTMLSerializer
 
 class NamespaceMap:
     """
@@ -186,7 +186,6 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.summationItem,"calc")
         self.roleMap.getPrefix(XbrlConst.parentChild,"pres")
 
-
         for f in dts.facts:
             if f.id is None:
                 f.set("id","ixv-%d" % (idGen))
@@ -239,7 +238,6 @@ class IXBRLViewerBuilder:
                 )
 
             self.taxonomyData["facts"][f.id] = factData
-
             self.addConcept(f.concept)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
@@ -255,6 +253,7 @@ class IXBRLViewerBuilder:
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
                 e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='%s'  />" % scriptUrl)
+                # Don't self close
                 e.text = ''
                 child.append(e)
 
@@ -273,5 +272,5 @@ class IXBRLViewerBuilder:
         Save the iXBRL viewer
         """
         with open(outFile, "wb") as fout:
-            # Using "xml" permits self-closing tags which confuses an HTML DOM
-            fout.write(etree.tostring(xmlDocument, method="xml", encoding="utf-8", xml_declaration=True))
+            writer = XHTMLSerializer()
+            writer.serialize(xmlDocument)

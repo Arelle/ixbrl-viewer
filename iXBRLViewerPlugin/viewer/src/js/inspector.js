@@ -357,7 +357,7 @@ Inspector.prototype.update = function () {
             }
             a.addCard(
                 fs.minimallyUniqueLabel(fact),
-                factHTML, 
+                factHTML.children(), 
                 fact.id == inspector._currentFact.id, 
                 fact.id
             );

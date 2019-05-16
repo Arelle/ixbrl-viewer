@@ -273,4 +273,4 @@ class IXBRLViewerBuilder:
         """
         with open(outFile, "wb") as fout:
             writer = XHTMLSerializer()
-            writer.serialize(xmlDocument)
+            writer.serialize(xmlDocument, fout)

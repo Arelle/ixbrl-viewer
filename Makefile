@@ -30,7 +30,7 @@ iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js:	iXBRLViewerPlugin/viewer/src/*/*
 test: testplugin testviewer
 
 testplugin:
-	PYTHONPATH=Arelle python3 iXBRLViewerPlugin/tests/iXBRLViewerTests.py
+	nosetests3 tests.unit_tests
 
 testviewer:
 	npm run test

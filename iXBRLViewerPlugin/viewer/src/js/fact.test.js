@@ -447,3 +447,23 @@ describe("Unit aspect handling", () => {
         expect(f.unit()).toBeUndefined();
     });
 });
+
+describe("Get Label", () => {
+    var f = testFact({
+            "d": -3,
+            "v": 1000,
+            "a": {
+                "c": "eg:Concept1",
+                "u": "iso4217:USD", 
+                "p": "2018-01-01/2019-01-01",
+            }});
+
+    test("Get standard label", () => {
+        expect(f.getLabel("std")).toEqual("English label")
+    });
+
+    test("Get non-existent label", () => {
+        expect(f.getLabel("doc")).toBeUndefined();
+    });
+
+});

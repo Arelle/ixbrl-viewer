@@ -145,7 +145,7 @@ Viewer.prototype.handleMessage = function (event) {
     var jsonString = event.originalEvent.data;
     var data = JSON.parse(jsonString);
 
-    if(data.task == 'SHOW_FACT') {
+    if (data.task == 'SHOW_FACT') {
         var factId = data.factId;
         this.showAndSelectFactById(factId);
     }
@@ -226,9 +226,9 @@ Viewer.prototype.showAndSelectFact = function (fact) {
 }
 
 Viewer.prototype.showAndSelectFactById = function (factId) {
-    let element = this.elementForFactId(factId);
-    if(element) {
-        this.showAndSelectElement(element);
+    let fact = this.elementForFactId(factId);
+    if (fact) {
+        this.showAndSelectElement(fact);
     }
 }
 

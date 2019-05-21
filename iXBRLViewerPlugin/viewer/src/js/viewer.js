@@ -226,9 +226,9 @@ Viewer.prototype.showAndSelectFact = function (fact) {
 }
 
 Viewer.prototype.showAndSelectFactById = function (factId) {
-    let fact = this.elementForFactId(factId);
-    if(fact) {
-        this.showAndSelectElement(fact);
+    let element = this.elementForFactId(factId);
+    if(element) {
+        this.showAndSelectElement(element);
     }
 }
 

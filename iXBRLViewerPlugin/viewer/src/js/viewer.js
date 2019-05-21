@@ -135,7 +135,23 @@ Viewer.prototype._bindHandlers = function () {
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
 
+    // Listen to messages posted to this window
+    $(window).on("message", function(e) { viewer.handleMessage(e) });
+
     TableExport.addHandles(this._contents, this._report);
+}
+
+Viewer.prototype.handleMessage = function (event) {
+    var jsonString = event.originalEvent.data;
+    var data = JSON.parse(jsonString);
+
+    if(data.task == 'SHOW_FACT') {
+        var factId = data.factId;
+        this.showAndSelectFactById(factId);
+    }
+    else {
+        console.log("Not handling unsupported task message: " + jsonString);
+    }
 }
 
 Viewer.prototype.selectNextTag = function () {
@@ -192,7 +208,11 @@ Viewer.prototype.clearRelatedHighlighting = function (f) {
 }
 
 Viewer.prototype.elementForFact = function (fact) {
-    return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == fact.id }).first();
+    return this.elementForFactId(fact.id);
+}
+
+Viewer.prototype.elementForFactId = function (factId) {
+    return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == factId }).first();
 }
 
 Viewer.prototype.elementsForFacts = function (facts) {
@@ -203,6 +223,13 @@ Viewer.prototype.elementsForFacts = function (facts) {
 
 Viewer.prototype.showAndSelectFact = function (fact) {
     this.showAndSelectElement(this.elementForFact(fact));
+}
+
+Viewer.prototype.showAndSelectFactById = function (factId) {
+    let fact = this.elementForFactId(factId);
+    if(fact) {
+        this.showAndSelectElement(fact);
+    }
 }
 
 Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
@@ -221,7 +248,6 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
         });
     }
     else {
-        //$(".ixbrl-element", this._contents).removeClass("ixbrl-highlight");
         $(".ixbrl-element", this._contents).removeClass (function (i, className) {
             return (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ');
         });

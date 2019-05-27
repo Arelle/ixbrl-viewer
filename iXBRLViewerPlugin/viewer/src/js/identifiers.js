@@ -13,9 +13,9 @@
 // limitations under the License.
 
 var schemes = {
-    "http://standards.iso.org/iso/17442": { "name": "LEI", "url": "https://www.gleif.org/lei/%s" },
+    "http://standards.iso.org/iso/17442": { "name": "LEI", "url": "https://search.gleif.org/#/record/%s" },
     "http://www.sec.gov/CIK": { "name": "CIK", "url": "https://www.sec.gov/cgi-bin/browse-edgar?CIK=%s"},
-
+    "http://www.companieshouse.gov.uk/": { "name": "UK CRN", "url": "https://beta.companieshouse.gov.uk/company/%s"},
 };
 
 export function Identifiers() {

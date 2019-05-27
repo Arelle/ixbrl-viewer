@@ -290,6 +290,7 @@ class TestIXBRLViewer(unittest.TestCase):
         body = result.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
         self.assertEqual(body[1].attrib.get('src'), js_uri)
+        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
         self.assertEqual(body[2].attrib.get('id'), 'taxonomy-data')
         self.assertEqual(body[2].attrib.get('type'), 'application/json')
         self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
@@ -306,6 +307,7 @@ class TestIXBRLViewer(unittest.TestCase):
         body = result.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
         self.assertEqual(body[1].attrib.get('src'), js_uri)
+        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
         self.assertEqual(body[2].attrib.get('id'), 'taxonomy-data')
         self.assertEqual(body[2].attrib.get('type'), 'application/json')
         self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')

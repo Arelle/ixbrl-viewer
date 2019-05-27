@@ -41,6 +41,14 @@ function reparentDocument() {
 
 }
 
+function getTaxonomyData() {
+    var elt = document.body.lastElementChild;
+    if (elt.tagName.toUpperCase() != 'SCRIPT' || elt.getAttribute("type") != 'application/json') {
+        return null;
+    }
+    return elt.innerHTML;
+}
+
 $(function () {
     var inspector = new Inspector();
     setTimeout(function(){
@@ -53,7 +61,13 @@ $(function () {
             if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
                 clearInterval(timer);
 
-                var report = new iXBRLReport(JSON.parse(document.getElementById('taxonomy-data').innerHTML));
+                var taxonomyData = getTaxonomyData();
+                if (taxonomyData !== null) {
+                    $('#ixv .loader .text').text("Error: Could not find viewer data");
+                    $('#ixv .loader').removeClass("loading");
+                    return;
+                }
+                var report = new iXBRLReport(JSON.parse(taxonomyData));
                 var viewer = new Viewer($('iframe'), report);
 
                 $('#ixv .loader .text').text("Building search index");

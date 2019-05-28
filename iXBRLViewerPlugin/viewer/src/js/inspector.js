@@ -339,7 +339,7 @@ Inspector.prototype.update = function () {
             for (var d in dims) {
                 var h = $('<div class="dimension"></div>')
                     .text(fact.report().getLabel(d, "std", true) || d)
-                    .appendTo('#dimensions', factHTML);
+                    .appendTo($('#dimensions', factHTML));
                 if (fact.isNumeric()) {
                     h.append(
                         $("<span></span>") 
@@ -350,10 +350,6 @@ Inspector.prototype.update = function () {
                             })
                     )
                 }
-                $('<div class="dimension-value"></div>')
-                    .text(this._report.getLabel(dims[d], "std", true) || dims[d])
-                    .appendTo('#dimensions', factHTML);
-                
             }
             a.addCard(
                 fs.minimallyUniqueLabel(fact),

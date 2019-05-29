@@ -34,16 +34,21 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptio
         return undefined;
     }
     else {
+        var label;
+        if (lang && labels[lang]) {
+            label = labels[lang];
+        }
+        else {
+            label = labels["en"] || labels["en-us"];
+        }
+        if (label === undefined) {
+            return undefined;
+        }
         var s = '';
         if (showPrefix && this._viewerOptions.showPrefixes) {
             s = "(" + this.qname(c).prefix + ") ";
         }
-        if (lang && labels[lang]) {
-            s += labels[lang];
-        }
-        else {
-            s += labels["en"] || labels["en-us"];
-        }
+        s += label;
         return s;
     }
 }

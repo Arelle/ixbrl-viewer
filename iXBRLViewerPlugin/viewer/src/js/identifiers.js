@@ -15,7 +15,7 @@
 var schemes = {
     "http://standards.iso.org/iso/17442": { "name": "LEI", "url": "https://search.gleif.org/#/record/%s" },
     "http://www.sec.gov/CIK": { "name": "CIK", "url": "https://www.sec.gov/cgi-bin/browse-edgar?CIK=%s"},
-    "http://www.companieshouse.gov.uk/": { "name": "UK CRN", "url": "https://beta.companieshouse.gov.uk/company/%s"},
+    "http://www.companieshouse.gov.uk/": { "name": "UK CRN", "url": "https://beta.companieshouse.gov.uk/company/%08d"},
 };
 
 export function Identifiers() {
@@ -24,7 +24,11 @@ export function Identifiers() {
 Identifiers.identifierURLForFact = function(fact) {
     var data = schemes[fact.identifier().namespace];
     if (data !== undefined) {
-        return data.url.replace('%s', fact.identifier().localname);
+        var url = data.url.replace('%s', fact.identifier().localname);
+        url = url.replace(/%0(\d+)d/, function (match, width) { 
+            return fact.identifier().localname.padStart(width, "0");
+        });
+        return url;
     }
     return undefined;
 }

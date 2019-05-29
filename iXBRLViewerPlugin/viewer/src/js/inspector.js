@@ -307,7 +307,7 @@ Inspector.prototype.update = function () {
         var a = new Accordian({
             onSelect: function (id) { 
                 inspector._currentFact = inspector._report.getFactById(id)
-                inspector._viewer.highlightFact(inspector._currentFact); 
+                inspector._viewer.highlightFact(inspector._currentFact.id); 
                 inspector.update();
             }, 
             alwaysOpen: true,

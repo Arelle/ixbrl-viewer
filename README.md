@@ -26,13 +26,17 @@ viewer application, which is a single file which may be stored locally.
 
 ## Building the ixbrlviewer
 
-The viewer works off of one js file called ixbrlviewer.js. It contains all of the javascript
-that runs the viewer functionality. In order to successfully build an ixbrl-viewer you need to first build
-the ixbrlviewer file.
+The viewer works using a single Javascript file called ixbrlviewer.js. It
+contains all of the javascript that runs the viewer functionality. In order to
+successfully build an ixbrl-viewer you need to first build the ixbrlviewer
+file.
 
 1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
-2. Install the dependencies for javascript by running: `npm install`
-3. run `npm run dev`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
+2. Install the dependencies for javascript by running: `npm install`.  This
+   command must be run from within the `ixbrl-viewer directory` (i.e. the root
+   of your checkout of the repository).
+3. Run `npm run prod`. This will create the ixbrlviewer.js in the
+   iXBRLViewerPlugin/viewer/dist directory.
 
 ## Installing the Arelle plugin
 

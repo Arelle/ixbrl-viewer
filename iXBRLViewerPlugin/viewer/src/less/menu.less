@@ -32,36 +32,42 @@
         left: 3px;
       }
 
-      .content {
-        line-height: initial;
-        position: absolute;
+      .content-container {
+        position: fixed;
         top: @top-bar-height;
         right: 0;
-        background: #fff;
-        z-index: 5;
-        border: solid 1px @border-grey;
+        bottom: 0;
         display: none;
 
-        .group {
-          border-bottom: solid 1px @border-grey;
-          border-top: solid 1px @border-grey;
-        }
+        .content {
+          line-height: initial;
+          background: #fff;
+          z-index: 5;
+          border: solid 1px @border-grey;
+          max-height: 100%;
+          overflow-y: scroll;
 
-        .item {
-          position: relative;
-          padding: 10px 25px 10px 30px;
-          white-space: nowrap;
-
-          &:hover {
-            background: @border-grey;
+          .group {
+            border-bottom: solid 1px @border-grey;
+            border-top: solid 1px @border-grey;
           }
 
-          &.checkbox.checked::before {
-            .icon-tick();
+          .item {
+            position: relative;
+            padding: 10px 25px 10px 30px;
+            white-space: nowrap;
 
-            position: absolute;
-            top: 12px;
-            left: 9px;
+            &:hover {
+              background: @border-grey;
+            }
+
+            &.checkbox.checked::before {
+              .icon-tick();
+
+              position: absolute;
+              top: 12px;
+              left: 9px;
+            }
           }
         }
       }

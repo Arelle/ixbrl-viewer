@@ -18,12 +18,16 @@ export function Menu(elt) {
     this._elt = elt;
     var menu = this;
 
-    elt.find(".title").click(function () {
-        elt.find(".content").toggle();
+    elt.find(".title").click(function (e) {
+        elt.find(".content-container").toggle();
+        /* Stop an opening click from also being treated as an "out-of-menu"
+         * closing click */
+        e.stopPropagation();
     });
 
     $('html').click(function(event) {
-        if (elt.find($(event.target)).length === 0) {
+        if ($(".content",elt).find($(event.target)).length === 0) {
+            console.log("closing");
             menu.close();
         }
     });
@@ -34,7 +38,7 @@ Menu.prototype.reset = function() {
 }
 
 Menu.prototype.close = function() {
-    this._elt.find(".content").hide();
+    this._elt.find(".content-container").hide();
 }
 
 Menu.prototype.addCheckboxItem = function(name, callback) {

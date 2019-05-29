@@ -206,7 +206,7 @@ class IXBRLViewerBuilder:
                 factData["f"] = str(f.format)
 
             if f.isNumeric:
-                if f.unit:
+                if f.unit is not None:
                     # XXX does not support complex units
                     unit = self.nsmap.qname(f.unit.measures[0][0])
                     aspects["u"] = unit

@@ -1,0 +1,41 @@
+# Copyright 2019 Workiva Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+HTM_TARGETS = $(patsubst %.htm, ../../viewers/%-viewer.htm, $(wildcard *.htm))
+HTML_TARGETS = $(patsubst %.html, ../../viewers/%-viewer.html, $(wildcard *.html))
+XHTML_TARGETS = $(patsubst %.xhtml, ../../viewers/%-viewer.xhtml, $(wildcard *.xhtml))
+
+# eval followed by space is a silly trick to match a space
+PACKAGES = $(subst $(eval) ,|,$(wildcard ../../packages/*.zip))
+
+viewer: $(HTM_TARGETS) $(XHTML_TARGETS) $(HTML_TARGETS)
+
+make_viewer = python3 ../../../Arelle/arelleCmdLine.py '--packages=$(PACKAGES)' --plugins=$(shell pwd)/../../../iXBRLViewerPlugin/ -v -f $(1) --save-viewer=$(2) --viewer-url=../../iXBRLViewerPlugin/viewer/dist/ixbrlviewer.dev.js
+
+TAXONOMY_FILES = $(wildcard *.x??)
+
+COMMON_DEPS = ../../viewers/ $(TAXONOMY_FILES) $(wildcard ../../../iXBRLViewerPlugin/*.py)
+
+../../viewers/%-viewer.htm: %.htm $(COMMON_DEPS)
+	$(call make_viewer,$<,$@)
+
+../../viewers/%-viewer.html: %.html $(COMMON_DEPS)
+	$(call make_viewer,$<,$@)
+
+../../viewers/%-viewer.xhtml: %.xhtml $(COMMON_DEPS)
+	$(call make_viewer,$<,$@)
+
+../../viewers/: 
+	mkdir -p $@
+

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-all: dev samples
+all: dev
 
-samples:
+samples: Arelle
 	$(MAKE) -C $@
 
 dev: iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js
@@ -32,6 +32,9 @@ test: testplugin testviewer
 testplugin:
 	nosetests3 tests.unit_tests
 
+Arelle:
+	git clone https://github.com/Arelle/Arelle.git Arelle
+
 testviewer:
 	npm run test
 
@@ -44,4 +47,4 @@ dist: prod
 	cp -r iXBRLViewerPlugin js/dist/ixbrlviewer.js $(DIST)
 	zip -r $(DIST).zip $(DIST) -x \*/__pycache__/\* \*/.\*
 	
-.PHONY: tests
+.PHONY: samples

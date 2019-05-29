@@ -12,14 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SRCS = $(wildcard *.ixtmpl)
-DOCS = $(SRCS:%.ixtmpl=%)
+SRC_DIRS = $(wildcard src/*)
+DIRS_CMD = $(foreach subdir, $(SRC_DIRS), make-rule/$(subdir))
 
+make-rule/%: fetch-files
+	cd $* && $(MAKE) -f ../../Makefile-src viewer
 
-all: $(DOCS:%=%-viewer.html)
+# fetch-sample-files may create new directories, so reinvoke make to get
+# SRC_DIRS re-evaluated.
+all: 
+	./fetch-sample-files.py
+	$(MAKE) allsamples
 
-%-viewer.html: %.html
-	python3 ../Arelle/arelleCmdLine.py '--packages=packages/us-gaap-2016-01-31-package.zip|packages/IFRST_2017-03-09-es.zip' --plugins=$(shell pwd)/../iXBRLViewerPlugin/ -v -f $< --save-viewer=$@ --viewer-url=../viewer/dist/ixbrlviewer.dev.js
-	
-#%.html: %.ixtmpl
-#	/home/pdw/c.b.c/xbrl/ixbrl-templates/ixbrltemplate.py $< -o $@
+allsamples: $(DIRS_CMD)
+
+.PHONY: fetch-files
+

@@ -33,7 +33,7 @@ class XHTMLSerializer:
         """
         for e in xml.iter('*'):
             m = re.match(r'\{http://www\.w3\.org/1999/xhtml\}(.*)', e.tag)
-            if m is not None and m[1] not in XHTMLSerializer.selfClosableElements and e.text is None:
+            if m is not None and m.group(1) not in XHTMLSerializer.selfClosableElements and e.text is None:
                 e.text = ''
 
     def serialize(self, xmlDocument, fout):

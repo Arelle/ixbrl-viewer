@@ -22,7 +22,7 @@ FactSet.prototype._allDimensions = function() {
     for (var i = 0; i < this._facts.length; i++) {
         var dd = Object.keys(this._facts[i].dimensions());
         for (var j = 0; j < dd.length; j++) {
-            dims[dd[j]] = 1;
+            dims[dd[j]] = true;
         }
     }
     return Object.keys(dims);

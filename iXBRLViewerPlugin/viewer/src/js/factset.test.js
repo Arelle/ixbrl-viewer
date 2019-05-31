@@ -46,6 +46,10 @@ var testReportData = {
                 }
             }
         },
+        "eg:Concept4": {
+            "labels": {
+            }
+        },
         "eg:Dimension1": {
             "labels": {
                 "std": {
@@ -172,4 +176,38 @@ describe("Minimally unique labels (dimensional)", () => {
     expect(fs.minimallyUniqueLabel(f4)).toEqual("Concept 1");
   });
 
+});
+
+describe("Minimally unique labels (duplicate facts)", () => {
+  var report = testReport({ 
+      "f1": testFact({"c": "eg:Concept1", "p": "2018-01-01", "eg:Dimension1": "eg:DimensionValue1"}),
+      "f2": testFact({"c": "eg:Concept1", "p": "2018-01-01", "eg:Dimension1": "eg:DimensionValue1"}),
+  });
+
+  var f1 = new Fact(report, "f1");
+  var f2 = new Fact(report, "f2");
+
+  test("Two facts, all aspects the same", () => {
+    var fs = new FactSet([ f1, f2 ]);
+    expect(fs._allDimensions()).toEqual(["eg:Dimension1"]);
+    expect(fs.minimallyUniqueLabel(f1)).toEqual("Concept 1");
+    expect(fs.minimallyUniqueLabel(f2)).toEqual("Concept 1");
+  });
+});
+
+describe("Minimally unique labels (missing labels)", () => {
+  var report = testReport({ 
+      "f1": testFact({"c": "eg:Concept1", "p": "2018-01-01" }),
+      "f2": testFact({"c": "eg:Concept4", "p": "2018-01-01" }),
+  });
+
+  var f1 = new Fact(report, "f1");
+  var f2 = new Fact(report, "f2");
+
+  test("Two facts, one has no label", () => {
+    var fs = new FactSet([ f1, f2 ]);
+    expect(fs._allDimensions()).toEqual([]);
+    expect(fs.minimallyUniqueLabel(f1)).toEqual("Concept 1");
+    expect(fs.minimallyUniqueLabel(f2)).toEqual("eg:Concept4");
+  });
 });

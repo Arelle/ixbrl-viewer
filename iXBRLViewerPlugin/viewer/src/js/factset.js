@@ -46,32 +46,31 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
             allLabels[f.id] = [];
             for (var j = 0; j < allDims.length; j++) {
                 var dd = f.aspects()[allDims[j]];
-                allLabels[f.id].push(dd ? dd.valueLabel() : "");
+                allLabels[f.id].push(dd ? dd.valueLabel() : null);
             }
         }
         /* Iterate each aspect label and compare that label across all facts in
          * the set */
         var uniqueLabels = {};
-        var haveEmptyLabels;
-        for (var j = 0; j < allDims.length + 2; j++) {
+        for (var j = 0; j < allDims.length; j++) {
             var labelMap = {};
             for (var i = 0; i < this._facts.length; i++) {
                 labelMap[allLabels[this._facts[i].id][j]] = true;
             }
 
             var uniqueLabelsByLabel = {};
-            haveEmptyLabels = false;
             if (Object.keys(labelMap).length > 1) {
                 /* We have at least two different labels, so include this
                  * aspect in the label for all facts in the set */
                 for (var i = 0; i < this._facts.length; i++) {
                     var fid = this._facts[i].id;
                     var l = allLabels[fid][j];
-                    uniqueLabels[fid] = (uniqueLabels[fid] === undefined ? l : uniqueLabels[fid] + ", " + l);
-                    if (uniqueLabels[fid] === "") {
-                        haveEmptyLabels = true;
+                    if (l !== null) {
+                        uniqueLabels[fid] = (uniqueLabels[fid] === undefined ? l : uniqueLabels[fid] + ", " + l);
                     }
-                    uniqueLabelsByLabel[uniqueLabels[fid]] = true;
+                    if (uniqueLabels[fid] !== undefined) {
+                        uniqueLabelsByLabel[uniqueLabels[fid]] = true;
+                    }
                 } 
                 /* We have as many different labels as facts - we're done */
                 if (Object.keys(uniqueLabelsByLabel).length == this._facts.length) {
@@ -79,8 +78,10 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
                 }
             }
         }
-        /* If any label is empty, add the concept label onto the start of all of them */
-        if (haveEmptyLabels) {
+
+        /* If any label is empty, add the concept label onto the start of all
+         * of them */
+        if (Object.keys(uniqueLabels).length < this._facts.length) {
             for (var i = 0; i < this._facts.length; i++) {
                 var fid = this._facts[i].id;
                 uniqueLabels[fid] = uniqueLabels[fid] ? allLabels[fid][0] + ', ' + uniqueLabels[fid] : allLabels[fid][0];

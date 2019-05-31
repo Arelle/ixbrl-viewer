@@ -16,6 +16,7 @@ export function FactSet(facts) {
     this._facts = facts;
 }
 
+/* Returns the union of dimensions present on facts in the set */
 FactSet.prototype._allDimensions = function() {
     var dims = {};
     for (var i = 0; i < this._facts.length; i++) {
@@ -27,6 +28,13 @@ FactSet.prototype._allDimensions = function() {
     return Object.keys(dims);
 }
 
+/* Returns the "minimally unique" label for the specified fact in the set.
+ * 
+ * Minimally unique means that we include the value for just enough dimensions
+ * to generate labels that are unique within the set.
+ *
+ * In order to generate the best labels, we try concept and period first.
+ */
 FactSet.prototype.minimallyUniqueLabel = function(fact) {
     if (!this._minimallyUniqueLabels) {
         var allLabels = {};
@@ -51,10 +59,11 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
                 labelMap[allLabels[this._facts[i].id][j]] = true;
             }
 
-            /* We have at least two different labels, so include this label */
             var uniqueLabelsByLabel = {};
             haveEmptyLabels = false;
             if (Object.keys(labelMap).length > 1) {
+                /* We have at least two different labels, so include this
+                 * aspect in the label for all facts in the set */
                 for (var i = 0; i < this._facts.length; i++) {
                     var fid = this._facts[i].id;
                     var l = allLabels[fid][j];

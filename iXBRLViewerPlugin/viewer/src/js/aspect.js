@@ -56,7 +56,7 @@ Aspect.prototype.equalTo = function(a) {
 Aspect.prototype.valueLabel = function(rolePrefix) {
     /* Taxonomy-defined dimension, treat as explicit - or concept */
     if (this._aspect.indexOf(":") > -1 || this._aspect == 'c') {
-        return this._report.getLabel(this._value, rolePrefix);
+        return this._report.getLabel(this._value, rolePrefix) || this._value;
     }
     else if (this._aspect == 'u') {
         if (this._value === null) {

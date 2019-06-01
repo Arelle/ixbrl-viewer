@@ -38,21 +38,21 @@ FactSet.prototype._allDimensions = function() {
 FactSet.prototype.minimallyUniqueLabel = function(fact) {
     if (!this._minimallyUniqueLabels) {
         var allLabels = {};
-        var allDims = ["c", "p"].concat(this._allDimensions());
+        var allAspects = ["c", "p"].concat(this._allDimensions());
         /* Assemble a map of arrays of all aspect labels for all facts, in a
          * consistent order */
         for (var i = 0; i < this._facts.length; i++) {
             var f = this._facts[i];
             allLabels[f.id] = [];
-            for (var j = 0; j < allDims.length; j++) {
-                var dd = f.aspects()[allDims[j]];
+            for (var j = 0; j < allAspects.length; j++) {
+                var dd = f.aspects()[allAspects[j]];
                 allLabels[f.id].push(dd ? dd.valueLabel() : null);
             }
         }
         /* Iterate each aspect label and compare that label across all facts in
          * the set */
         var uniqueLabels = {};
-        for (var j = 0; j < allDims.length; j++) {
+        for (var j = 0; j < allAspects.length; j++) {
             var labelMap = {};
             for (var i = 0; i < this._facts.length; i++) {
                 labelMap[allLabels[this._facts[i].id][j]] = true;

@@ -65,11 +65,13 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
                 for (var i = 0; i < this._facts.length; i++) {
                     var fid = this._facts[i].id;
                     var l = allLabels[fid][j];
+                    var ul = uniqueLabels[fid] || [];
                     if (l !== null) {
-                        uniqueLabels[fid] = (uniqueLabels[fid] === undefined ? l : uniqueLabels[fid] + ", " + l);
+                        ul.push(l);
                     }
-                    if (uniqueLabels[fid] !== undefined) {
-                        uniqueLabelsByLabel[uniqueLabels[fid]] = true;
+                    if (ul.length > 0) {
+                        uniqueLabels[fid] = ul;
+                        uniqueLabelsByLabel[ul.join(", ")] = true;
                     }
                 } 
                 /* We have as many different labels as facts - we're done */
@@ -84,11 +86,13 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
         if (Object.keys(uniqueLabels).length < this._facts.length) {
             for (var i = 0; i < this._facts.length; i++) {
                 var fid = this._facts[i].id;
-                uniqueLabels[fid] = uniqueLabels[fid] ? allLabels[fid][0] + ', ' + uniqueLabels[fid] : allLabels[fid][0];
+                var ul = uniqueLabels[fid] || [];
+                ul.unshift(allLabels[fid][0]);
+                uniqueLabels[fid] = ul;
             }
         }
 
         this._minimallyUniqueLabels = uniqueLabels;
     }
-    return this._minimallyUniqueLabels[fact.id];
+    return this._minimallyUniqueLabels[fact.id].join(", ");
 }

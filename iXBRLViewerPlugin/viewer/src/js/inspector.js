@@ -313,8 +313,8 @@ Inspector.prototype.update = function () {
             alwaysOpen: true,
             dissolveSingle: true,
         });
-        var fs = new FactSet(this._currentFactSet);
-        $.each(inspector._currentFactSet, function (i, fact) {
+        var fs = new FactSet(this._currentFactList);
+        $.each(inspector._currentFactList, function (i, fact) {
             var factHTML = $(require('../html/fact-details.html')); 
             $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
             $('.documentation', factHTML).text(fact.getLabel("doc") || "");
@@ -385,16 +385,22 @@ Inspector.prototype.update = function () {
     this.updateURLFragment();
 }
 
-Inspector.prototype.selectFact = function (id, factIdSet) {
+/*
+ * Callback used to select facts when clicked in the viewer.
+ *
+ * Takes an ID of the fact to be selected, and an optional list of IDs for all
+ * facts that the click corresponds to (i.e. when there are nested facts)
+ */
+Inspector.prototype.selectFact = function (id, factIdList) {
     this._currentFact = this._report.getFactById(id);
-    if (factIdSet) {
-        this._currentFactSet = [];
-        for (var i = 0; i < factIdSet.length; i++) {
-            this._currentFactSet.push(this._report.getFactById(factIdSet[i]));
+    if (factIdList) {
+        this._currentFactList = [];
+        for (var i = 0; i < factIdList.length; i++) {
+            this._currentFactList.push(this._report.getFactById(factIdList[i]));
         }
     }
     else {
-        this._currentFactSet = [this._currentFact];
+        this._currentFactList = [this._currentFact];
     }
     this.update();
 }

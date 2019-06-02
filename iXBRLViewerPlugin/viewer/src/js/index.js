@@ -42,11 +42,13 @@ function reparentDocument() {
 }
 
 function getTaxonomyData() {
-    var elt = document.body.lastElementChild;
-    if (elt.tagName.toUpperCase() != 'SCRIPT' || elt.getAttribute("type") != 'application/json') {
-        return null;
+    for (var i = document.body.children.length - 1; i >= 0; i--) {
+        var elt = document.body.children[i];
+        if (elt.tagName.toUpperCase() == 'SCRIPT' && elt.getAttribute("type") == 'application/x.ixbrl-viewer+json') {
+            return elt.innerHTML;
+        }
     }
-    return elt.innerHTML;
+    return null;
 }
 
 $(function () {
@@ -62,7 +64,7 @@ $(function () {
                 clearInterval(timer);
 
                 var taxonomyData = getTaxonomyData();
-                if (taxonomyData !== null) {
+                if (taxonomyData === null) {
                     $('#ixv .loader .text').text("Error: Could not find viewer data");
                     $('#ixv .loader').removeClass("loading");
                     return;

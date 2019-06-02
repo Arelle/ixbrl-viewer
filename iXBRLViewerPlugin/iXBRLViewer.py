@@ -259,7 +259,7 @@ class IXBRLViewerBuilder:
 
                 # Putting this in the header can interfere with character set
                 # auto detection
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='application/json'></script>")
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='application/x.ixbrl-viewer+json'></script>")
                 e.text = taxonomyDataJSON
                 child.append(e)
                 child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))

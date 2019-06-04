@@ -40,13 +40,9 @@ file.
 
 ## Installing the Arelle plugin
 
-1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
-2. Download [Arelle][arelle-git].  **Note that the plugin does not currently work with the release builds of Arelle**.  Arelle must be installed from source so that it uses your system installation of Python.
-3. Install dependencies by opening a command window and running:
-```
-py -3 -mpip install openPyXL lxml isodate numpy pycountry
-```
-4. Open Arelle and select **Manage Plugins** from the **Help** menu.
+1. Download and install [Arelle][arelle-download]
+2. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
+3. Open Arelle and select **Manage Plugins** from the **Help** menu.
 5. Press **Browse** under "Find plug-in modules".  
 6. Browse to the **iXBRLViewerPlugin** directory within your checkout of the iXBRL Viewer git repository and select the **\_\_init\_\_.py** file within it.
 7. Press **Close** and then **Yes** when prompted to restart Arelle.
@@ -54,6 +50,7 @@ py -3 -mpip install openPyXL lxml isodate numpy pycountry
 
 [ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
 [arelle-git]: https://github.com/Arelle/Arelle
+[arelle-download]: http://arelle.org/pub
 
 ## Preparing an iXBRL file using the Arelle GUI
 

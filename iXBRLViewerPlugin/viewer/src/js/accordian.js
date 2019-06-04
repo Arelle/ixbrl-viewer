@@ -14,27 +14,40 @@
 
 import $ from 'jquery'
 
-export function Accordian() {
+export function Accordian(options) {
     this._contents = $('<div class="accordian"></div>');
+    this.onSelect = $.Callbacks();
+    this.options = options || {};
+    if (this.options.onSelect) {
+        this.onSelect.add(options.onSelect);
+    }
 }
 
-Accordian.prototype.addCard = function(title, body, selected) {
+Accordian.prototype.addCard = function(title, body, selected, data) {
+    var a = this;
     var card = $('<div class="card"></div>')
         .append($('<div class="title"></div>')
             .append(title)
             .click(function () {
                 var thisCard = $(this).closest(".card");
                 if (thisCard.hasClass("active")) {
-                    thisCard.removeClass("active");
+                    if (!options.alwaysOpen) {
+                        thisCard.removeClass("active");
+                    }
                 }
                 else {
                     thisCard.closest(".accordian").find(".card").removeClass("active");
                     thisCard.addClass("active");
+                    a.onSelect.fire(thisCard.data("accordian-card-id"));
                 }
             })
         )
         .append($('<div class="body"></div>').append(body))
         .appendTo(this._contents);
+
+    if (data !== null) {
+        card.data("accordian-card-id", data); 
+    }
 
     if (selected) {
         card.addClass("active");
@@ -42,5 +55,11 @@ Accordian.prototype.addCard = function(title, body, selected) {
 }
 
 Accordian.prototype.contents = function () {
+    if (this.options.alwaysOpen && this._contents.find(".card.active").length == 0) {
+        this._contents.find(".card").first().addClass("active");
+    }
+    if (this.options.dissolveSingle && this._contents.children().length == 1) {
+        return this._contents.children().first().find(".body");
+    }
     return this._contents;
 }

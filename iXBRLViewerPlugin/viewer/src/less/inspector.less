@@ -21,6 +21,7 @@
 @import "chart.less";
 @import "dialog.less";
 @import "menu.less";
+@import "accordian.less";
 @import (reference) "text-mixins.less";
 
 @top-bar-height: 35px;
@@ -430,10 +431,6 @@
       }
     }
 
-    .fact-details {
-      display: none;
-    }
-
     .no-fact-selected {
       width: 100%;
       padding: 50px 0;
@@ -514,39 +511,6 @@
 
           tr:hover td {
             .linked-highlight-cell();
-          }
-        }
-      }
-
-      .accordian .card {
-        margin-top: 0.4rem;
-        background-color: #f9f9f9;
-
-        .body {
-          display: none;
-          padding-left: 1.6rem;
-          padding-right: 1.6rem;
-        }
-
-        .title {
-          padding: 1.2rem 1.6rem;
-          cursor: pointer;
-          line-height: 1.8rem;
-
-          &:hover {
-            background-color: #f3f3f3;
-          }
-        }
-
-        &.active {
-          background-color: #f3f3f3;
-
-          .title {
-            font-weight: bold;
-          }
-
-          .body {
-            display: block;
           }
         }
       }

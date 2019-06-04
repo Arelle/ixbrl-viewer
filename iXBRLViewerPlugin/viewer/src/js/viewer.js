@@ -127,7 +127,7 @@ Viewer.prototype._bindHandlers = function () {
     $('.ixbrl-element', this._contents)
         .click(function (e) {
             e.stopPropagation();
-            viewer.selectElement($(this));
+            viewer.selectElementByClick($(this));
         })
         .mouseenter(function (e) { viewer._mouseEnter($(this)) })
         .mouseleave(function (e) { viewer._mouseLeave($(this)) });
@@ -177,11 +177,29 @@ Viewer.prototype.showAndSelectElement = function(e) {
     this.selectElement(e);
 }
 
-Viewer.prototype.selectElement = function (e) {
+/*
+ * Update the currently highlighted fact, but do not trigger a change in the
+ * inspector.
+ * 
+ * Used to switch facts when the selection corresponds to multiple facts.
+ */
+Viewer.prototype.highlightElement = function (e) {
     e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
     e.addClass("ixbrl-selected");
+}
+
+Viewer.prototype.selectElement = function (e, eltSet) {
+    this.highlightElement(e);
     var id = e.data('ivid');
-    this.onSelect.fire(id);
+    this.onSelect.fire(id, eltSet);
+}
+
+Viewer.prototype.selectElementByClick = function (e) {
+    var eltSet = [];
+    e.parents(".ixbrl-element").addBack().each(function () { 
+        eltSet.unshift($(this).data('ivid')); 
+    });
+    this.selectElement(e, eltSet);
 }
 
 Viewer.prototype._mouseEnter = function (e) {
@@ -219,6 +237,10 @@ Viewer.prototype.elementsForFacts = function (facts) {
     var ids = $.map(facts, function (f) { return f.id });
     var elements = $('.ixbrl-element', this._contents).filter(function () { return $.inArray($(this).data('ivid'), ids ) > -1 });
     return elements;
+}
+
+Viewer.prototype.highlightFact = function(fact) {
+    this.highlightElement(this.elementForFact(fact));
 }
 
 Viewer.prototype.showAndSelectFact = function (fact) {

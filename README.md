@@ -26,30 +26,31 @@ viewer application, which is a single file which may be stored locally.
 
 ## Building the ixbrlviewer
 
-The viewer works off of one js file called ixbrlviewer.js. It contains all of the javascript
-that runs the viewer functionality. In order to successfully build an ixbrl-viewer you need to first build
-the ixbrlviewer file.
+The viewer works using a single Javascript file called ixbrlviewer.js. It
+contains all of the javascript that runs the viewer functionality. In order to
+successfully build an ixbrl-viewer you need to first build the ixbrlviewer
+file.
 
-1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
-2. Install the dependencies for javascript by running: `npm install`
-3. run `npm run dev`. This will create the ixbrlviewer.js in the iXBRLViewerPlugin/viewer/dist directory.
+1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
+2. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
+3. Install the dependencies for javascript by running: `npm install`.  This
+   command must be run from within the `ixbrl-viewer directory` (i.e. the root
+   of your checkout of the repository).
+4. Run `npm run prod`. This will create the ixbrlviewer.js in the
+   iXBRLViewerPlugin/viewer/dist directory.
 
 ## Installing the Arelle plugin
 
-1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
-2. Download [Arelle][arelle-git].  **Note that the plugin does not currently work with the release builds of Arelle**.  Arelle must be installed from source so that it uses your system installation of Python.
-3. Install dependencies by opening a command window and running:
-```
-py -3 -mpip install openPyXL lxml isodate numpy pycountry
-```
-4. Open Arelle and select **Manage Plugins** from the **Help** menu.
-5. Press **Browse** under "Find plug-in modules".  
-6. Browse to the **iXBRLViewerPlugin** directory within your checkout of the iXBRL Viewer git repository and select the **\_\_init\_\_.py** file within it.
-7. Press **Close** and then **Yes** when prompted to restart Arelle.
-8. You should now have a **Save iXBRL Viewer instance** on the **Tools** menu.
+1. Download and install [Arelle][arelle-download]
+2. Open Arelle and select **Manage Plugins** from the **Help** menu.
+3. Press **Browse** under "Find plug-in modules".  
+4. Browse to the **iXBRLViewerPlugin** directory within your checkout of the iXBRL Viewer git repository and select the **\_\_init\_\_.py** file within it.
+5. Press **Close** and then **Yes** when prompted to restart Arelle.
+6. You should now have a **Save iXBRL Viewer instance** on the **Tools** menu.
 
 [ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
 [arelle-git]: https://github.com/Arelle/Arelle
+[arelle-download]: http://arelle.org/pub
 
 ## Preparing an iXBRL file using the Arelle GUI
 

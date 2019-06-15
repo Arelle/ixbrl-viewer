@@ -23,6 +23,7 @@
 @import "menu.less";
 @import "accordian.less";
 @import "loader.less";
+@import "tabs.less";
 @import (reference) "text-mixins.less";
 
 @top-bar-height: 35px;
@@ -56,6 +57,12 @@
     top: @top-bar-height;
     bottom: 0;
     z-index: 0;
+
+    .ixds-tabs {
+      .tab-area();
+
+      display: none;
+    }
 
     & > iframe {
       width: 100%;

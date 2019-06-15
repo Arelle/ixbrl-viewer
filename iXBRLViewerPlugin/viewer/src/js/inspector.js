@@ -73,7 +73,6 @@ Inspector.prototype.setViewer = function (viewer) {
     //$('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
 
-    $('#top-bar .document-title').text(this._viewer.getTitle());
 }
 
 /*
@@ -91,6 +90,7 @@ Inspector.prototype.handleMessage = function (event) {
     var data = JSON.parse(jsonString);
 
     if (data.task == 'SHOW_FACT') {
+        this.showDocumentForFactId(data.factId);
         this.selectFact(data.factId);
     }
     else {

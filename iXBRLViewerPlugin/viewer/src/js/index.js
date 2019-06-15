@@ -55,24 +55,40 @@ $(function () {
     var inspector = new Inspector();
     setTimeout(function(){
 
-        var iframe = reparentDocument();
+        var iframes = $(reparentDocument());
+
+        var taxonomyData = getTaxonomyData();
+        if (taxonomyData === null) {
+            $('#ixv .loader .text').text("Error: Could not find viewer data");
+            $('#ixv .loader').removeClass("loading");
+            return;
+        }
+        var report = new iXBRLReport(JSON.parse(taxonomyData));
+        if (report.isDocumentSet()) {
+            $('#ixv .ixds-tabs').show();
+            var ds = report.documentSetFiles();
+            for (var i = 1; i < ds.length; i++) {
+                var iframe = $("<iframe src=\"" + ds[i] + "\" />").appendTo("#ixv #iframe-container");
+                iframes = iframes.add(iframe);
+            }
+        }
 
         /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
         var timer = setInterval(function () {
-            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
-                clearInterval(timer);
-
-                var taxonomyData = getTaxonomyData();
-                if (taxonomyData === null) {
-                    $('#ixv .loader .text').text("Error: Could not find viewer data");
-                    $('#ixv .loader').removeClass("loading");
-                    return;
+            var complete = true;
+            iframes.each(function () {
+                var iframe = $(this).get(0);
+                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') {
+                    complete = false;
                 }
-                var report = new iXBRLReport(JSON.parse(taxonomyData));
-                var viewer = new Viewer($('iframe'), report);
-
+            });
+            if (complete) {
+                clearInterval(timer);
                 $('#ixv .loader .text').text("Building search index");
+
+                var viewer = new Viewer(iframes, report);
+
                 setTimeout(function () {
                     inspector.setReport(report);
                     inspector.setViewer(viewer);

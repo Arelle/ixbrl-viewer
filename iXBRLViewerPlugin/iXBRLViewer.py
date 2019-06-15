@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from arelle import XbrlConst
+from arelle.ModelDocument import Type
 from arelle.ModelValue import QName
 from lxml import etree
 import json
@@ -21,6 +22,7 @@ import re
 import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from .xhtmlserialize import XHTMLSerializer
+import os
 
 class NamespaceMap:
     """
@@ -245,11 +247,23 @@ class IXBRLViewerBuilder:
         self.taxonomyData["roles"] = self.roleMap.prefixmap
         self.taxonomyData["rels"] = self.getRelationships()
 
-        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 
         dts.info("viewer:info", "Creating iXBRL viewer")
 
-        for child in dts.modelDocument.xmlDocument.getroot():
+
+        if dts.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
+            # Sort by object index to preserve order in which files were specified.
+            docSet = sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+            xmlDocument = docSet[0].xmlDocument 
+
+            self.taxonomyData["docSetFiles"] = list(map(lambda x: os.path.basename(x.filepath), docSet))
+        else:
+            xmldocument = dts.modelDocument.xmlDocument
+
+
+        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
+
+        for child in xmlDocument.getroot():
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
@@ -266,7 +280,7 @@ class IXBRLViewerBuilder:
                 child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
                 break
 
-        return dts.modelDocument.xmlDocument
+        return xmlDocument
 
     def saveViewer(self, outFile, xmlDocument):
         """

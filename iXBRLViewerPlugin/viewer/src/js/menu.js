@@ -27,7 +27,6 @@ export function Menu(elt) {
 
     $('html').click(function(event) {
         if ($(".content",elt).find($(event.target)).length === 0) {
-            console.log("closing");
             menu.close();
         }
     });

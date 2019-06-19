@@ -69,6 +69,7 @@ Viewer.prototype._buildContinuationMap = function() {
 
 Viewer.prototype._addDocumentSetTabs = function() {
     if (this._report.isDocumentSet()) {
+        $('#ixv .ixds-tabs').show();
         var ds = this._report.documentSetFiles();
         var viewer = this;
         for (var i = 0; i < ds.length; i++) {
@@ -78,9 +79,9 @@ Viewer.prototype._addDocumentSetTabs = function() {
                 .click(function () { 
                     viewer.selectDocument($(this).data('ix-doc-id'))
                 })
-                .appendTo($('#ixv #iframe-container .ixds-tabs'));
+                .appendTo($('#ixv #viewer-pane .ixds-tabs'));
         }
-        $('#ixv #iframe-container .ixds-tabs .tab').eq(0).addClass("active");
+        $('#ixv #viewer-pane .ixds-tabs .tab').eq(0).addClass("active");
     }
 }
 
@@ -381,7 +382,7 @@ Viewer.prototype.showDocumentForFactId = function(factId) {
 }
 
 Viewer.prototype.selectDocument = function (doc) {
-    $('#ixv #iframe-container .ixds-tabs .tab')
+    $('#ixv #viewer-pane .ixds-tabs .tab')
         .removeClass("active")
         .eq(doc)
         .addClass("active");

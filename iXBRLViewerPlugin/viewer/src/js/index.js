@@ -38,7 +38,6 @@ function reparentDocument() {
     /* Avoid any inline styles on the old body interfering with the inspector */
     $('body').removeAttr('style');
     return iframe;
-
 }
 
 function getTaxonomyData() {
@@ -65,7 +64,6 @@ $(function () {
         }
         var report = new iXBRLReport(JSON.parse(taxonomyData));
         if (report.isDocumentSet()) {
-            $('#ixv .ixds-tabs').show();
             var ds = report.documentSetFiles();
             for (var i = 1; i < ds.length; i++) {
                 var iframe = $("<iframe src=\"" + ds[i] + "\" />").appendTo("#ixv #iframe-container");
@@ -93,7 +91,7 @@ $(function () {
                     inspector.setReport(report);
                     inspector.setViewer(viewer);
 
-                    interact('#iframe-container').resizable({
+                    interact('#viewer-pane').resizable({
                         edges: { left: false, right: ".resize", bottom: false, top: false},
                         restrictEdges: {
                             outer: 'parent',

@@ -74,10 +74,10 @@ $(function () {
         /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
         var timer = setInterval(function () {
             var complete = true;
-            iframes.each(function () {
-                var iframe = $(this).get(0);
+            iframes.each(function (n) {
+                var iframe = this;
                 var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                if (iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') {
+                if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
                     complete = false;
                 }
             });

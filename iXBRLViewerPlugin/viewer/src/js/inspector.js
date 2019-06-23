@@ -271,16 +271,16 @@ Inspector.prototype._updateValue = function (fact, showAll, context) {
         var fullLabel = v;
         var vv = wrapLabel(v, 120);
         if (vv.length > 1) {
-            $('#inspector tr.value', context).addClass("truncated");
-            $('#inspector tr.value .show-all', context).off().click(function () { inspector._updateValue(fact, true); });
+            $('tr.value', context).addClass("truncated");
+            $('tr.value .show-all', context).off().click(function () { inspector._updateValue(fact, true); });
         }
         else {
-            $('#inspector tr.value', context).removeClass('truncated');
+            $('tr.value', context).removeClass('truncated');
         }
         v = vv[0];
     }
     else {
-        $('#inspector tr.value', context).removeClass('truncated');
+        $('tr.value', context).removeClass('truncated');
     }
 
     $('tr.value td .value', context).text(v);

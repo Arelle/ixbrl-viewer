@@ -222,11 +222,13 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
     if (fact.isNumeric()) {
         var otherFacts = this._report.getAlignedFacts(fact, {"p":null });
         var mostRecent;
-        $.each(otherFacts, function (i, of) {
-            if (of.periodTo() < fact.periodTo() && (!mostRecent || of.periodTo() > mostRecent.periodTo()) && fact.isEquivalentDuration(of) ) {
-                mostRecent = of;
-            }
-        });
+        if (fact.periodTo()) {
+            $.each(otherFacts, function (i, of) {
+                if (of.periodTo() && of.periodTo() < fact.periodTo() && (!mostRecent || of.periodTo() > mostRecent.periodTo()) && fact.isEquivalentDuration(of)) {
+                    mostRecent = of;
+                }
+            });
+        }
         var s = "";
         if (mostRecent) {
             var allMostRecent = this._report.getAlignedFacts(mostRecent);

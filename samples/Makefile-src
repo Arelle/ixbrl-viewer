@@ -12,29 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HTM_TARGETS = $(patsubst %.htm, ../../viewers/%-viewer.htm, $(wildcard *.htm))
-HTML_TARGETS = $(patsubst %.html, ../../viewers/%-viewer.html, $(wildcard *.html))
-XHTML_TARGETS = $(patsubst %.xhtml, ../../viewers/%-viewer.xhtml, $(wildcard *.xhtml))
-
 # eval followed by space is a silly trick to match a space
-PACKAGES = $(subst $(eval) ,|,$(wildcard ../../packages/*.zip))
+#
 
-viewer: $(HTM_TARGETS) $(XHTML_TARGETS) $(HTML_TARGETS)
+TARGET=$(shell basename $(CURDIR))
+SRC_FILES=$(wildcard *)
 
-make_viewer = python3 ../../../Arelle/arelleCmdLine.py '--packages=$(PACKAGES)' --plugins=$(shell pwd)/../../../iXBRLViewerPlugin/ -v -f $(1) --save-viewer=$(2) --viewer-url=../../iXBRLViewerPlugin/viewer/dist/ixbrlviewer.dev.js
+viewer: ../../viewers/$(TARGET)
+	echo $<
+
+make_viewer = PYTHONPATH=../../../Arelle:../../../ ../../build-viewer.py --package-dir=../../packages --out=$(2) --viewer-url=../../../iXBRLViewerPlugin/viewer/dist/ixbrlviewer.dev.js $(1)
 
 TAXONOMY_FILES = $(wildcard *.x??)
 
 COMMON_DEPS = ../../viewers/ $(TAXONOMY_FILES) $(wildcard ../../../iXBRLViewerPlugin/*.py)
 
-../../viewers/%-viewer.htm: %.htm $(COMMON_DEPS)
-	$(call make_viewer,$<,$@)
-
-../../viewers/%-viewer.html: %.html $(COMMON_DEPS)
-	$(call make_viewer,$<,$@)
-
-../../viewers/%-viewer.xhtml: %.xhtml $(COMMON_DEPS)
-	$(call make_viewer,$<,$@)
+../../viewers/%: ../../viewers/ $(SRC_FILES)
+	mkdir -p $@
+	$(call make_viewer,.,$@)
+	touch $@
 
 ../../viewers/: 
 	mkdir -p $@

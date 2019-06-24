@@ -4,6 +4,7 @@ ARG PIP_INDEX_URL
 ARG NPM_CONFIG__AUTH
 ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
 ARG NPM_CONFIG_ALWAYS_AUTH=true
+ARG GIT_TAG
 
 COPY requirements-dev.txt ./requirements-dev.txt
 COPY requirements.txt ./requirements.txt

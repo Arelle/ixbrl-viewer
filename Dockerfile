@@ -32,6 +32,8 @@ RUN mkdir /test_reports
 RUN nosetests --with-xunit --xunit-file=/test_reports/results.xml --cover-html tests.unit_tests
 
 # pypi package creation
+# The following command replaces the @VERSION@ string in setup.py with the tagged version number from GIT_TAG
+RUN sed -i s/@VERSION@/$GIT_TAG/ setup.py
 ARG BUILD_ARTIFACTS_PYPI=/build/dist/*.tar.gz
 RUN python setup.py sdist
 

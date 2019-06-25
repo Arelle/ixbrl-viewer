@@ -151,8 +151,9 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
     else {
         next = elements.last();
     }
-        
-    this.showAndSelectElement(next);
+    
+    this.showElement(next);
+    this.selectElement(next);
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -168,24 +169,10 @@ Viewer.prototype._bindHandlers = function () {
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
 
-    // Listen to messages posted to this window
-    $(window).on("message", function(e) { viewer.handleMessage(e) });
 
     TableExport.addHandles(this._contents, this._report);
 }
 
-Viewer.prototype.handleMessage = function (event) {
-    var jsonString = event.originalEvent.data;
-    var data = JSON.parse(jsonString);
-
-    if (data.task == 'SHOW_FACT') {
-        var factId = data.factId;
-        this.showAndSelectFactById(factId);
-    }
-    else {
-        console.log("Not handling unsupported task message: " + jsonString);
-    }
-}
 
 Viewer.prototype.selectNextTag = function () {
     this._selectAdjacentTag(1);
@@ -195,7 +182,7 @@ Viewer.prototype.selectPrevTag = function () {
     this._selectAdjacentTag(-1);
 }
 
-Viewer.prototype.scrollIfNotVisible = function(e) {
+Viewer.prototype.showElement = function(e) {
     var viewTop = this._iframe.contents().scrollTop();
     var viewBottom = viewTop + this._iframe.height();
     var eTop = e.offset().top;
@@ -207,7 +194,6 @@ Viewer.prototype.scrollIfNotVisible = function(e) {
 
 Viewer.prototype.showAndSelectElement = function(e) {
     this.scrollIfNotVisible(e);
-    this.selectElement(e);
 }
 
 /*
@@ -231,7 +217,6 @@ Viewer.prototype._factIdForElement = function (e) {
 
 Viewer.prototype.selectElement = function (e, eltSet) {
     var factId = this._factIdForElement(e);
-    this.highlightFact(factId);
     this.onSelect.fire(factId, eltSet);
 }
 
@@ -288,14 +273,10 @@ Viewer.prototype.highlightFact = function(factId) {
     this.highlightElements(this.elementsForFactIds([factId].concat(continuations)));
 }
 
-Viewer.prototype.showAndSelectFact = function (fact) {
-    this.showAndSelectElement(this.elementForFact(fact));
-}
-
-Viewer.prototype.showAndSelectFactById = function (factId) {
-    let fact = this.elementForFactId(factId);
-    if (fact) {
-        this.showAndSelectElement(fact);
+Viewer.prototype.showFactById = function (factId) {
+    let elt = this.elementForFactId(factId);
+    if (elt) {
+        this.showElement(elt);
     }
 }
 

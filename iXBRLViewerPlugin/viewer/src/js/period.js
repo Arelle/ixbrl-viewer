@@ -19,9 +19,25 @@ export function Period(p) {
     this._p = p;
 }
 
+Period.prototype.type = function() {
+    if (!this._p) {
+        return undefined;
+    }
+    if (this._p == 'f') {
+        return 'f';
+    }
+    if (this._p.includes('/')) {
+        return 'd';
+    }
+    return 'i';
+}
+
 Period.prototype.toString = function() {
     var s;
     if (!this._p) {
+        s = "Undefined";
+    }
+    else if (this._p == 'f') {
         /* forever */
         s = "None";
     }
@@ -41,20 +57,23 @@ Period.prototype.toString = function() {
  * object
  */
 Period.prototype.to = function() {
-    if (this._p.includes('/')) {
-        var r = this._p.split('/');
-        return xbrlDateToMoment(r[1]);
+    if (this._p && this._p != 'f') {
+        if (this._p.includes('/')) {
+            var r = this._p.split('/');
+            return xbrlDateToMoment(r[1]);
+        }
+        else {
+            return xbrlDateToMoment(this._p);
+        }
     }
-    else {
-        return xbrlDateToMoment(this._p);
-    }
+    return null;
 }
 
 /*
  * Returns null (instant) or start date (duration) as a moment object.
  */
 Period.prototype.from = function() {
-    if (this._p.includes('/')) {
+    if (this._p && this._p.includes('/')) {
         var r = this._p.split('/');
         return xbrlDateToMoment(r[0]);
     }
@@ -62,13 +81,19 @@ Period.prototype.from = function() {
 }
 
 Period.prototype.isEquivalentDuration = function (op) {
-    /* Two instants have equivalent duration */
-    if (this.from() == null && op.from() == null) {
-        return true;
-    }
-    /* One instant, one duration => not equivalent */
-    if (this.from() == null || op.from() == null) {
+    var t1 = op.type();
+    var t2 = this.type();
+    /* Undefined periods are never equivalent. */
+    if (!t1 || !t2) {
         return false;
+    }
+    /* Periods must have the same type. */
+    if (t1 !== t2) {
+        return false;
+    }
+    /* Instants and forever are equivalent. */
+    if (t1 != 'd') {
+        return true;
     }
     var d1 = op.to().toDate() - op.from().toDate();
     var d2 = this.to().toDate() - this.from().toDate();

@@ -86,7 +86,6 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
     }
     node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
     if (n.getAttribute("continuedAt")) {
-        node.data('iv-continued-at', n.getAttribute("continuedAt"));
         this._continuedAtMap[n.getAttribute("id")] = { 
             "isFact": name != 'CONTINUATION',
             "continuedAt": n.getAttribute("continuedAt")

@@ -215,9 +215,15 @@ Viewer.prototype._factIdForElement = function (e) {
     return id;
 }
 
-Viewer.prototype.selectElement = function (e, eltSet) {
+/*
+ * Select the fact corresponding to the specified element.
+ *
+ * Takes an optional list of factIds corresponding to all facts that a click
+ * falls within.  If omitted, it's treated as a click on a non-nested fact.
+ */
+Viewer.prototype.selectElement = function (e, factIdList) {
     var factId = this._factIdForElement(e);
-    this.onSelect.fire(factId, eltSet);
+    this.onSelect.fire(factId, factIdList);
 }
 
 Viewer.prototype.selectElementByClick = function (e) {

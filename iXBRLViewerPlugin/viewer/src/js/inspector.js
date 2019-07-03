@@ -47,6 +47,10 @@ export function Inspector() {
     });
     this._optionsMenu = new Menu($("#display-options-menu"));
     this.buildDisplayOptionsMenu();
+
+    var inspector = this;
+    // Listen to messages posted to this window
+    $(window).on("message", function(e) { inspector.handleMessage(e) });
 }
 
 Inspector.prototype.setReport = function (report) {
@@ -78,10 +82,19 @@ Inspector.prototype.setViewer = function (viewer) {
  */
 Inspector.prototype.handleFactDeepLink = function () {
     if (location.hash.startsWith("#f-")) {
-        var fact = this._report.getFactById(location.hash.slice(3));
-        if (fact !== null) {
-            this._viewer.showAndSelectFact(fact);
-        }
+        this.selectFact(location.hash.slice(3));
+    }
+}
+
+Inspector.prototype.handleMessage = function (event) {
+    var jsonString = event.originalEvent.data;
+    var data = JSON.parse(jsonString);
+
+    if (data.task == 'SHOW_FACT') {
+        this.selectFact(data.factId);
+    }
+    else {
+        console.log("Not handling unsupported task message: " + jsonString);
     }
 }
 
@@ -112,13 +125,14 @@ Inspector.prototype.highlightAllTags = function (checked) {
 Inspector.prototype.search = function (s) {
     var results = this._search.search(s);
     var viewer = this._viewer;
+    var inspector = this;
     var table = $('#inspector .search table.results');
     $('tr', table).remove();
     viewer.clearRelatedHighlighting();
     $.each(results, function (i,r) {
         if (i < 100) {
             var row = $('<tr></tr>')
-                .click(function () { viewer.showAndSelectFact(r.fact) })
+                .click(function () { inspector.selectFact(r.fact.id) })
                 .mouseenter(function () { viewer.linkedHighlightFact(r.fact); })
                 .mouseleave(function () { viewer.clearLinkedHighlightFact(r.fact); })
                 .data('ivid', r.fact.id)
@@ -186,7 +200,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
             if (r.facts) {
                 itemHTML.addClass("fact-link");
                 itemHTML.data('ivid', r.facts);
-                itemHTML.click(function () { viewer.showAndSelectFact(Object.values(r.facts)[0] ) });
+                itemHTML.click(function () { inspector.selectFact(Object.values(r.facts)[0].id ) });
                 itemHTML.mouseenter(function () { $.each(r.facts, function (k,f) { viewer.linkedHighlightFact(f); })});
                 itemHTML.mouseleave(function () { $.each(r.facts, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
                 $.each(r.facts, function (k,f) { viewer.highlightRelatedFact(f); });
@@ -219,6 +233,7 @@ Inspector.prototype.viewerMouseLeave = function (id) {
 
 Inspector.prototype.getPeriodIncrease = function (fact) {
     var viewer = this._viewer;
+    var inspector = this;
     if (fact.isNumeric()) {
         var otherFacts = this._report.getAlignedFacts(fact, {"p":null });
         var mostRecent;
@@ -250,7 +265,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
             $("<span></span>").text(mostRecent.periodString())
             .addClass("year-on-year-fact-link")
             .appendTo(s)
-            .click(function () { viewer.showAndSelectFact(mostRecent) })
+            .click(function () { inspector.selectFact(mostRecent.id) })
             .mouseenter(function () {  $.each(allMostRecent, function (i,f) { viewer.linkedHighlightFact(f);} ) })
             .mouseleave(function () {  $.each(allMostRecent, function (i,f) { viewer.clearLinkedHighlightFact(f);} ) });
 
@@ -303,14 +318,12 @@ Inspector.prototype._updateEntityIdentifier = function (fact, context) {
 
 Inspector.prototype.update = function () {
     var inspector = this;
-    if (inspector._currentFact) {
-        var fact = inspector._currentFact;
+    var cf = inspector._currentFact;
+    if (cf) {
         $('#inspector .fact-inspector').empty();
         var a = new Accordian({
             onSelect: function (id) { 
-                inspector._currentFact = inspector._report.getFactById(id)
-                inspector._viewer.highlightFact(inspector._currentFact); 
-                inspector.update();
+                inspector.switchFact(id);
             }, 
             alwaysOpen: true,
             dissolveSingle: true,
@@ -356,54 +369,69 @@ Inspector.prototype.update = function () {
             a.addCard(
                 fs.minimallyUniqueLabel(fact),
                 factHTML.children(), 
-                fact.id == inspector._currentFact.id, 
+                fact.id == cf.id,
                 fact.id
             );
         });
 
-        var fact = inspector._currentFact;
         a.contents().appendTo('#inspector .fact-inspector');
-        this.updateCalculation(fact);
-        $('div.references').empty().append(this._referencesHTML(fact));
+        this.updateCalculation(cf);
+        $('div.references').empty().append(this._referencesHTML(cf));
         $('#inspector .search .results tr').removeClass('selected');
-        $('#inspector .search .results tr').filter(function () { return $(this).data('ivid') == fact.id }).addClass('selected');
+        $('#inspector .search .results tr').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
 
-        var duplicates = fact.duplicates();
+        var duplicates = cf.duplicates();
         var n = 0;
         var ndup = duplicates.length;
         for (var i = 0; i < ndup; i++) {
-            if (fact.id == duplicates[i].id) {
+            if (cf.id == duplicates[i].id) {
                 n = i;
             }
         }
         $('.duplicates .text').text((n + 1) + " of " + ndup);
         var viewer = this._viewer;
-        $('.duplicates .prev').off().click(function () { viewer.showAndSelectFact(duplicates[(n+ndup-1) % ndup])});
-        $('.duplicates .next').off().click(function () { viewer.showAndSelectFact(duplicates[(n+1) % ndup])});
+        $('.duplicates .prev').off().click(function () { inspector.selectFact(duplicates[(n+ndup-1) % ndup].id)});
+        $('.duplicates .next').off().click(function () { inspector.selectFact(duplicates[(n+1) % ndup].id)});
 
-        this.getPeriodIncrease(fact);
+        this.getPeriodIncrease(cf);
 
     }
     this.updateURLFragment();
 }
 
 /*
- * Callback used to select facts when clicked in the viewer.
+ * Select a fact from the report.
  *
- * Takes an ID of the fact to be selected, and an optional list of IDs for all
- * facts that the click corresponds to (i.e. when there are nested facts)
+ * Takes a fact ID to select and an optional list of "alternate" facts, which
+ * will be presented in an accordian.  This is used when the user clicks on a
+ * nested fact in the viewer, so that all facts corresponding to the area
+ * clicked are shown.
+ *
+ * If factIdList is omitted, the currently selected fact list is reset to just
+ * the primary fact.
  */
 Inspector.prototype.selectFact = function (id, factIdList) {
-    this._currentFact = this._report.getFactById(id);
-    if (factIdList) {
+    if (factIdList === undefined) {
+        this._currentFactList = [ this._report.getFactById(id) ];
+    }
+    else {
         this._currentFactList = [];
         for (var i = 0; i < factIdList.length; i++) {
             this._currentFactList.push(this._report.getFactById(factIdList[i]));
         }
     }
-    else {
-        this._currentFactList = [this._currentFact];
-    }
+    this.switchFact(id);
+}
+
+/*
+ * Switches the currently selected fact.  Unlike selectFact, this does not
+ * change the current list of "alternate" facts.  The fact "id" must be in the
+ * current fact list.
+ */
+Inspector.prototype.switchFact = function (id) {
+    this._currentFact = this._report.getFactById(id);
+    this._viewer.showFactById(id);
+    this._viewer.highlightFact(id);
     this.update();
 }
 

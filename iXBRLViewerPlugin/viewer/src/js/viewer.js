@@ -25,7 +25,9 @@ export function Viewer(iframe, report) {
     this.onMouseLeave = $.Callbacks();
 
     this._factData = {};
+    this._continuedAtMap = {};
     this._preProcessiXBRL($("body", iframe.contents()).get(0));
+    this._buildContinuationMap();
     report.setIXData(this._factData);
     this._applyStyles();
     this._bindHandlers();
@@ -41,11 +43,28 @@ function localName(e) {
     }
 }
 
+Viewer.prototype._buildContinuationMap = function() {
+    var continuations = Object.keys(this._continuedAtMap)
+    for (var i = 0; i < continuations.length; i++) {
+        var id = continuations[i];
+        if (this._continuedAtMap[id].isFact) {
+            var parts = [];
+            var nextId = id;
+            while (this._continuedAtMap[nextId].continuedAt !== undefined) {
+                nextId = this._continuedAtMap[nextId].continuedAt;
+                this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
+                this._continuedAtMap[nextId].continuationOf = id;
+                parts.push(nextId);
+            }
+            this._setFactData(id, "continuations", parts);
+        }
+    }
+}
 
 Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   var elt;
   var name = localName(n.nodeName).toUpperCase();
-  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION')) {
+  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION')) {
     var node = $(n).closest("td,th").eq(0);
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
@@ -66,11 +85,20 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
         node = $(n).parent();
     }
     node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
+    if (n.getAttribute("continuedAt")) {
+        this._continuedAtMap[n.getAttribute("id")] = { 
+            "isFact": name != 'CONTINUATION',
+            "continuedAt": n.getAttribute("continuedAt")
+        }
+    }
+    if (localName(n.nodeName) == 'CONTINUATION') {
+        node.addClass("ixbrl-continuation");
+    }
     if (localName(n.nodeName) == 'NONFRACTION') {
       $(node).addClass("ixbrl-element-nonfraction");
     }
     if (localName(n.nodeName) == 'NONNUMERIC') {
-      $(node).addClass("ixbrl-element-nonfraction");
+      $(node).addClass("ixbrl-element-nonnumeric");
       if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
           this._setFactData(n.getAttribute('id'), 'escape', true);
       }
@@ -97,6 +125,11 @@ Viewer.prototype._setFactData = function (id, prop, value) {
     this._factData[id][prop] = value;
 }
 
+Viewer.prototype._getFactData = function (id, prop) {
+    var fd = this._factData[id] || {};
+    return fd[prop];
+}
+
 Viewer.prototype._applyStyles = function () {
     $("<style>")
         .prop("type", "text/css")
@@ -118,8 +151,9 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
     else {
         next = elements.last();
     }
-        
-    this.showAndSelectElement(next);
+    
+    this.showElement(next);
+    this.selectElement(next);
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -135,24 +169,10 @@ Viewer.prototype._bindHandlers = function () {
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
 
-    // Listen to messages posted to this window
-    $(window).on("message", function(e) { viewer.handleMessage(e) });
 
     TableExport.addHandles(this._contents, this._report);
 }
 
-Viewer.prototype.handleMessage = function (event) {
-    var jsonString = event.originalEvent.data;
-    var data = JSON.parse(jsonString);
-
-    if (data.task == 'SHOW_FACT') {
-        var factId = data.factId;
-        this.showAndSelectFactById(factId);
-    }
-    else {
-        console.log("Not handling unsupported task message: " + jsonString);
-    }
-}
 
 Viewer.prototype.selectNextTag = function () {
     this._selectAdjacentTag(1);
@@ -162,7 +182,7 @@ Viewer.prototype.selectPrevTag = function () {
     this._selectAdjacentTag(-1);
 }
 
-Viewer.prototype.scrollIfNotVisible = function(e) {
+Viewer.prototype.showElement = function(e) {
     var viewTop = this._iframe.contents().scrollTop();
     var viewBottom = viewTop + this._iframe.height();
     var eTop = e.offset().top;
@@ -174,7 +194,6 @@ Viewer.prototype.scrollIfNotVisible = function(e) {
 
 Viewer.prototype.showAndSelectElement = function(e) {
     this.scrollIfNotVisible(e);
-    this.selectElement(e);
 }
 
 /*
@@ -183,21 +202,35 @@ Viewer.prototype.showAndSelectElement = function(e) {
  * 
  * Used to switch facts when the selection corresponds to multiple facts.
  */
-Viewer.prototype.highlightElement = function (e) {
-    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
-    e.addClass("ixbrl-selected");
+Viewer.prototype.highlightElements = function (ee) {
+    $("body", this._iframe.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    ee.addClass("ixbrl-selected");
 }
 
-Viewer.prototype.selectElement = function (e, eltSet) {
-    this.highlightElement(e);
+Viewer.prototype._factIdForElement = function (e) {
     var id = e.data('ivid');
-    this.onSelect.fire(id, eltSet);
+    if (e.hasClass("ixbrl-continuation")) {
+        id = this._continuedAtMap[id].continuationOf;
+    }
+    return id;
+}
+
+/*
+ * Select the fact corresponding to the specified element.
+ *
+ * Takes an optional list of factIds corresponding to all facts that a click
+ * falls within.  If omitted, it's treated as a click on a non-nested fact.
+ */
+Viewer.prototype.selectElement = function (e, factIdList) {
+    var factId = this._factIdForElement(e);
+    this.onSelect.fire(factId, factIdList);
 }
 
 Viewer.prototype.selectElementByClick = function (e) {
     var eltSet = [];
+    var viewer = this;
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet.unshift($(this).data('ivid')); 
+        eltSet.unshift(viewer._factIdForElement($(this))); 
     });
     this.selectElement(e, eltSet);
 }
@@ -233,24 +266,23 @@ Viewer.prototype.elementForFactId = function (factId) {
     return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == factId }).first();
 }
 
+Viewer.prototype.elementsForFactIds = function (ids) {
+    return $('.ixbrl-element', this._contents).filter(function () { return $.inArray($(this).data('ivid'), ids ) > -1 });
+}
+
 Viewer.prototype.elementsForFacts = function (facts) {
-    var ids = $.map(facts, function (f) { return f.id });
-    var elements = $('.ixbrl-element', this._contents).filter(function () { return $.inArray($(this).data('ivid'), ids ) > -1 });
-    return elements;
+    return this.elementsForFactIds($.map(facts, function (f) { return f.id }));
 }
 
-Viewer.prototype.highlightFact = function(fact) {
-    this.highlightElement(this.elementForFact(fact));
+Viewer.prototype.highlightFact = function(factId) {
+    var continuations = this._getFactData(factId, "continuations") || [];
+    this.highlightElements(this.elementsForFactIds([factId].concat(continuations)));
 }
 
-Viewer.prototype.showAndSelectFact = function (fact) {
-    this.showAndSelectElement(this.elementForFact(fact));
-}
-
-Viewer.prototype.showAndSelectFactById = function (factId) {
-    let fact = this.elementForFactId(factId);
-    if (fact) {
-        this.showAndSelectElement(fact);
+Viewer.prototype.showFactById = function (factId) {
+    let elt = this.elementForFactId(factId);
+    if (elt) {
+        this.showElement(elt);
     }
 }
 

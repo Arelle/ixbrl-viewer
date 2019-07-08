@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Workiva/ixbrl-viewer.git"
+    "url": "git@github.com:amanaconsulting/ixbrl-viewer.git"
   },
   "stylelint": {
     "extends": "stylelint-config-standard",

@@ -58,6 +58,12 @@ test("Unit aspects label - known currency", () => {
     expect(unitAspect.valueLabel()).toBe("£");  
 });
 
+test("Unit aspects label - known currency (EUR)", () => {
+    var unitAspect = new Aspect("u", "iso4217:EUR", testReport);
+    expect(unitAspect.label()).toBe("Unit");  
+    expect(unitAspect.valueLabel()).toBe("€");  
+});
+
 test("Unit aspects label - unknown currency", () => {
     var unitAspect = new Aspect("u", "iso4217:ZAR", testReport);
     expect(unitAspect.label()).toBe("Unit");  

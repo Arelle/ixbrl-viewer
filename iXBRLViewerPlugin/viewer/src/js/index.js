@@ -50,6 +50,12 @@ function getTaxonomyData() {
     return null;
 }
 
+function checkDocumentSetBrowserSupport() {
+    if (document.location.protocol == 'file:' && window.chrome) {
+        alert("Displaying iXBRL document sets from local files is not supported on Chrome.  Please view the viewer files using a web server, or try a different browser.");
+    }
+}
+
 $(function () {
     var inspector = new Inspector();
     setTimeout(function(){
@@ -69,6 +75,7 @@ $(function () {
                 var iframe = $("<iframe src=\"" + ds[i] + "\" />").appendTo("#ixv #iframe-container");
                 iframes = iframes.add(iframe);
             }
+            checkDocumentSetBrowserSupport();
         }
 
         /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */

@@ -199,7 +199,7 @@ class TestIXBRLViewer(unittest.TestCase):
             pass
 
         baseSets = defaultdict(list)
-        baseSets[('http://www.xbrl.org/2003/arcrole/parent-child', 'ELR', 'linkqname', 'arcqname')] = []
+        baseSets[('http://www.xbrl.org/2003/arcrole/summation-item', 'ELR', 'linkqname', 'arcqname')] = []
 
         roleTypes = defaultdict(list)
         roleTypes['ELR'] = [Mock(definition = "ELR Label")]
@@ -255,8 +255,8 @@ class TestIXBRLViewer(unittest.TestCase):
     def test_getRelationships_returns_a_rel(self):
         result = self.builder_1.getRelationships()
         roleMap = self.builder_1.roleMap
-        pcPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/parent-child')
-        self.assertTrue(result.get(pcPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept'))
+        siPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/summation-item')
+        self.assertTrue(result.get(siPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept'))
 
     def test_addELR_no_definition(self):
         """

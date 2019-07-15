@@ -26,7 +26,7 @@ export function Viewer(iframes, report) {
 
     this._factData = {};
     this._continuedAtMap = {};
-    this._factsByDocument = {};
+    this._docIndexesByFactId = {};
     var viewer = this;
     iframes.each(function (n) { 
         viewer._preProcessiXBRL($(this).contents().find("body").get(0), n)
@@ -85,7 +85,7 @@ Viewer.prototype._addDocumentSetTabs = function() {
     }
 }
 
-Viewer.prototype._preProcessiXBRL = function(n, doc, inHidden) {
+Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   var elt;
   var name = localName(n.nodeName).toUpperCase();
   if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION')) {
@@ -110,7 +110,7 @@ Viewer.prototype._preProcessiXBRL = function(n, doc, inHidden) {
     }
     var id = n.getAttribute("id");
     node.addClass("ixbrl-element").data('ivid',id);
-    this._factsByDocument[id] = doc;
+    this._docIndexesByFactId[id] = docIndex;
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
             "isFact": name != 'CONTINUATION',
@@ -142,7 +142,7 @@ Viewer.prototype._preProcessiXBRL = function(n, doc, inHidden) {
     inHidden = true;
   }
   for (var i=0; i < n.childNodes.length; i++) {
-    this._preProcessiXBRL(n.childNodes[i], doc, inHidden);
+    this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
   }
 }
 
@@ -373,22 +373,22 @@ Viewer.prototype.clearLinkedHighlightFact = function (f) {
     e.removeClass("ixbrl-linked-highlight");
 }
 
-Viewer.prototype._setTitle = function (doc) {
-    $('#top-bar .document-title').text($('head title', this._iframes.eq(doc).contents()).text());
+Viewer.prototype._setTitle = function (docIndex) {
+    $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
 }
 
 Viewer.prototype.showDocumentForFactId = function(factId) {
-    this.selectDocument(this._factsByDocument[factId]);
+    this.selectDocument(this._docIndexesByFactId[factId]);
 }
 
-Viewer.prototype.selectDocument = function (doc) {
+Viewer.prototype.selectDocument = function (docIndex) {
     $('#ixv #viewer-pane .ixds-tabs .tab')
         .removeClass("active")
-        .eq(doc)
+        .eq(docIndex)
         .addClass("active");
     this._iframes
         .hide()
-        .eq(doc)
+        .eq(docIndex)
         .show();
-    this._setTitle(doc);
+    this._setTitle(docIndex);
 }

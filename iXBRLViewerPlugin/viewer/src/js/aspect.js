@@ -70,6 +70,9 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
             else if (qname.localname == 'USD') {
                 return "US $";
             }
+            else if (qname.localname == 'EUR') {
+                return "€";
+            }
         }
         return this._value;
     }

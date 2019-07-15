@@ -157,7 +157,7 @@ class IXBRLViewerBuilder:
 
         for baseSetKey, baseSetModelLinks  in self.dts.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
-            if (arcrole == XbrlConst.parentChild or arcrole == XbrlConst.summationItem) and ELR is not None:
+            if arcrole == XbrlConst.summationItem and ELR is not None:
                 self.addELR(ELR)
                 rr = dict()
                 relSet = self.dts.relationshipSet(arcrole, ELR)

@@ -72,7 +72,7 @@ $(function () {
         if (report.isDocumentSet()) {
             var ds = report.documentSetFiles();
             for (var i = 1; i < ds.length; i++) {
-                var iframe = $("<iframe src=\"" + ds[i] + "\" />").appendTo("#ixv #iframe-container");
+                var iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
                 iframes = iframes.add(iframe);
             }
             checkDocumentSetBrowserSupport();

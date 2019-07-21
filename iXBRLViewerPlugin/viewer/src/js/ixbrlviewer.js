@@ -19,7 +19,22 @@ import { Viewer } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer() {
+    this._plugins = [];
+    this.inspector = new Inspector();
+    this.viewer = null;
+}
 
+iXBRLViewer.prototype.registerPlugin = function (plugin) {
+    this._plugins.push(plugin);
+}
+
+iXBRLViewer.prototype.callPluginMethod = function (methodName, ...args) {
+    var iv = this;
+    $.each(iv._plugins, function (n, p) {
+        if (typeof p[methodName] === 'function') {
+            p[methodName](...args);
+        }
+    });
 }
 
 iXBRLViewer.prototype._reparentDocument = function () {
@@ -62,7 +77,7 @@ function checkDocumentSetBrowserSupport() {
 
 iXBRLViewer.prototype.load = function() {
     var iv = this;
-    var inspector = new Inspector();
+    var inspector = this.inspector;
     setTimeout(function(){
 
         var iframes = $(iv._reparentDocument());
@@ -97,7 +112,7 @@ iXBRLViewer.prototype.load = function() {
                 clearInterval(timer);
                 $('#ixv .loader .text').text("Building search index");
 
-                var viewer = new Viewer(iframes, report);
+                var viewer = iv.viewer = new Viewer(iv, iframes, report);
 
                 setTimeout(function () {
                     inspector.setReport(report);

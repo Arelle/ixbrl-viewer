@@ -20,7 +20,7 @@ import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer() {
     this._plugins = [];
-    this.inspector = new Inspector();
+    this.inspector = new Inspector(this);
     this.viewer = null;
 }
 

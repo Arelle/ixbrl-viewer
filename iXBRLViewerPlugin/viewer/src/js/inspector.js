@@ -23,7 +23,7 @@ import { Menu } from './menu.js';
 import { Accordian } from './accordian.js';
 import { FactSet } from './factset.js';
 
-export function Inspector() {
+export function Inspector(iv) {
     /* Insert HTML and CSS styles into body */
     $(require('../html/inspector.html')).prependTo('body');
     var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
@@ -31,6 +31,7 @@ export function Inspector() {
         .prop("type", "text/css")
         .text(inspector_css)
         .appendTo('head');
+    this._iv = iv;
     this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()
 
@@ -106,12 +107,13 @@ Inspector.prototype.updateURLFragment = function () {
 Inspector.prototype.buildDisplayOptionsMenu = function () {
     var inspector = this;
     this._optionsMenu.reset();
-    this._optionsMenu.addCheckboxItem("Highlight", function (checked) { inspector.highlightAllTags(checked)});
+    this._optionsMenu.addCheckboxItem("Highlight", function (checked) { inspector.highlightAllTags(checked)}, "highlight-tags");
     if (this._report) {
         var dl = this.selectDefaultLanguage();
-        this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, function (lang) { inspector.setLanguage(lang) });
+        this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, function (lang) { inspector.setLanguage(lang) }, "select-language");
         this.setLanguage(dl);
     }
+    this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
 
 }
 

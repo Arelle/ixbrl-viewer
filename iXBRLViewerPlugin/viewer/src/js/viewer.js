@@ -156,10 +156,15 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
 }
 
 Viewer.prototype._applyStyles = function () {
-    $("<style>")
+    var stlyeElts = $("<style>")
         .prop("type", "text/css")
-        .html(require('css-loader!less-loader!../less/viewer.less').toString())
+        .text(require('css-loader!less-loader!../less/viewer.less').toString())
         .appendTo(this._iframes.contents().find("head"));
+    this._iv.callPluginMethod("updateViewerStyleElements", stlyeElts);
+}
+
+Viewer.prototype.contents = function() {
+    return this._iframes.contents();
 }
 
 

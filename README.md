@@ -72,6 +72,12 @@ file name.
 You should now be able to open the created file in Chrome, and the iXBRL viewer
 should load.
 
+## Preparing an iXBRL document set using the Arelle GUI
+
+To prepare an iXBRL document set, open the document set in Arelle.  The process
+is as for a single file, except that a directory should be selected as the
+output location, rather than a file.
+
 ## Preparing an iXBRL file using the Arelle command line
 
 The plugin can also be used on the command line:

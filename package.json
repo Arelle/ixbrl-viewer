@@ -2,7 +2,7 @@
   "name": "ixbrl-viewer",
   "version": "0.0.1",
   "description": "iXBRL Viewer",
-  "main": "index.js",
+  "main": "iXBRLViewerPlugin/viewer/src/js/index.js",
   "directories": {
     "test": "tests"
   },
@@ -23,7 +23,7 @@
     }
   },
   "author": "",
-  "devDependencies": {
+  "dependencies": {
     "babel-core": "^6.26.3",
     "babel-jest": "^24.1.0",
     "babel-preset-env": "^1.7.0",
@@ -47,6 +47,6 @@
     "webpack-cli": "^3.2.3",
     "webpack-merge": "^4.2.1"
   },
-  "dependencies": {},
+  "devDependencies": {},
   "license": "Apache-2.0"
 }

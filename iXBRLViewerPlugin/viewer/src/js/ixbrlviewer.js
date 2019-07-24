@@ -24,6 +24,29 @@ export function iXBRLViewer() {
     this.viewer = null;
 }
 
+/*
+ * Adds a plugin to the viewer.  The plugin should be an object with one or
+ * more of the methods listed below, which will be called by the viewer.
+ *
+ * preProcessiXBRL(bodyElement, docIndex)
+ *
+ * Called upon viewer intialisation, once for each iXBRL document.  bodyElement
+ * is a DOM object for the body element.  docIndex is the index of the document
+ * within the document set.
+ *
+ * updateViewerStyleElement(styleElts)
+ *
+ * styleElts is a JQuery object consisting of the viewer style elements for
+ * each document in the document set.  Additional CSS can be appended to the
+ * contents, or additional header elements inserted relatie to the provided
+ * style element.
+ *
+ * extendDisplayOptionsMenu(menu)
+ *
+ * Called when the display options menu is created or recreated.  menu is a
+ * Menu object, and can be modified to add additional menu items.
+ *
+ */
 iXBRLViewer.prototype.registerPlugin = function (plugin) {
     this._plugins.push(plugin);
 }

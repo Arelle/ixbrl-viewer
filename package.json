@@ -2,7 +2,7 @@
   "name": "ixbrl-viewer",
   "version": "0.0.1",
   "description": "iXBRL Viewer",
-  "main": "iXBRLViewerPlugin/viewer/src/js/index.js",
+  "main": "iXBRLViewerPlugin/viewer/src/js/ixbrlviewer.js",
   "directories": {
     "test": "tests"
   },

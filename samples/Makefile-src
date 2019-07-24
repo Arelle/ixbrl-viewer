@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# eval followed by space is a silly trick to match a space
-#
-
 TARGET=$(shell basename $(CURDIR))
 SRC_FILES=$(wildcard *)
 
@@ -27,7 +24,7 @@ TAXONOMY_FILES = $(wildcard *.x??)
 
 COMMON_DEPS = ../../viewers/ $(TAXONOMY_FILES) $(wildcard ../../../iXBRLViewerPlugin/*.py)
 
-../../viewers/%: ../../viewers/ $(SRC_FILES)
+../../viewers/%: ../../viewers/ $(SRC_FILES) $(COMMON_DEPS)
 	mkdir -p $@
 	$(call make_viewer,.,$@)
 	touch $@

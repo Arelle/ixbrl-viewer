@@ -67,6 +67,16 @@ Fact.prototype.value = function() {
     return this.f.v;
 }
 
+Fact.prototype.hasValidationResults = function() {
+    return "zv" in this.f;
+}
+
+Fact.prototype.getValidationResults = function() {
+    return this.f.zv.map( function (v) { 
+        return { ruleId: v["ri"], rule: v["r"], message: v["t"] };
+    });
+}
+
 Fact.prototype.readableValue = function() {
     var v = this.f.v;
     if (this.isNumeric()) {

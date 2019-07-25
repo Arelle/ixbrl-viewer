@@ -135,6 +135,23 @@ Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
 }
 
+Inspector.prototype.updateValidationResults = function (fact) {
+    $('#inspector .fact-validation-results').empty();
+    if (fact.hasValidationResults()) {
+        var a = new Accordian({            
+            alwaysOpen: true,
+        });
+        $.each(fact.getValidationResults(), function(i,r) {
+            var title = $('<span></span>').text(r.ruleId);
+            var messageBody = $('<div class="validation-result"></div>').text(r.message);
+            a.addCard(title, messageBody);
+        });
+        a.contents().appendTo('#inspector .fact-validation-results');
+    } else {
+        $('<div class="no-fact-selected"><span>No issues</span></div>').appendTo('#inspector .fact-validation-results');
+    }   
+}
+
 Inspector.prototype._referencesHTML = function (fact) {
     var c = fact.concept();
     var a = new Accordian();
@@ -383,6 +400,7 @@ Inspector.prototype.update = function () {
 
         this.getPeriodIncrease(fact);
 
+        this.updateValidationResults(fact);
     }
     this.updateURLFragment();
 }

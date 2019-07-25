@@ -31,7 +31,7 @@ Accordian.prototype.addCard = function(title, body, selected, data) {
             .click(function () {
                 var thisCard = $(this).closest(".card");
                 if (thisCard.hasClass("active")) {
-                    if (!options.alwaysOpen) {
+                    if (!a.options.alwaysOpen) {
                         thisCard.removeClass("active");
                     }
                 }

@@ -2,3 +2,5 @@ node_modules
 package_lock.json
 package-lock.json
 iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
+iXBRLViewerPlugin/viewer/aman_preview.html
+iXBRLViewerPlugin/viewer/dist/ixbrlviewer.dev.js

@@ -63,13 +63,23 @@ $(function () {
             if (iframeDoc.readyState == 'complete' || iframeDoc.readyState == 'interactive') {
                 clearInterval(timer);
 
-                var taxonomyData = getTaxonomyData();
-                if (taxonomyData === null) {
-                    $('#ixv .loader .text').text("Error: Could not find viewer data");
-                    $('#ixv .loader').removeClass("loading");
-                    return;
+                /* AMANA extension: In a case of multifile iXBRL attach JSON into every HTML page is too expensive --> */
+                var report;
+                if (window.hasOwnProperty('xbrldata__')) {
+                    /* We do not use dynamic loading external JSON via jQuery because it does not work for file:// protocol
+                         insted of this we generate script with assignment window.xbrldata__ = { <JSONdata> }; */
+                    report = new iXBRLReport(window.xbrldata__);
+                } else {
+                    var taxonomyData = getTaxonomyData();
+                    if (taxonomyData === null) {
+                        $('#ixv .loader .text').text("Error: Could not find viewer data");
+                        $('#ixv .loader').removeClass("loading");
+                        return;
+                    }
+                    report = new iXBRLReport(JSON.parse(taxonomyData));
                 }
-                var report = new iXBRLReport(JSON.parse(taxonomyData));
+                /* --> end AMANA extension */
+
                 var viewer = new Viewer($('iframe'), report);
 
                 $('#ixv .loader .text').text("Building search index");

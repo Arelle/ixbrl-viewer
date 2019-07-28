@@ -23,13 +23,30 @@ button {
   box-sizing: border-box;
 }
 
-.square-button {
-  border-radius: 3px;
-  border: solid 1px @border-grey;
-  width: 25px;
-  height: 25px;
+.square-button-bare {
+  width: 3.2rem;
+  height: 3.2rem;
   text-align: center;
   color: @icon-grey;
   box-sizing: border-box;
   cursor: pointer;
+  padding: 0.1rem;
+  font-size: 2.2rem;
+  line-height: 3.2rem;
+}
+
+.square-button {
+  .square-button-bare();
+
+  padding: 0;
+  border-radius: 3px;
+  border: solid 0.1rem @border-grey;
+  background-color: @button-background;
+  line-height: 3.0rem;
+}
+
+.square-button.primary {
+  color: #fff;
+  border-color: @button-primary-border;
+  background-color: @button-primary-bg; 
 }

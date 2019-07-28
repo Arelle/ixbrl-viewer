@@ -45,6 +45,12 @@ export function Inspector() {
             d.find(".collapsible-body").slideDown(250);
         }
     });
+    $("#inspector .controls .search").click(function () {
+        $(this).closest("#inspector").toggleClass("search-mode");
+    });
+    $("#inspector #ixbrl-controls-top .back").click(function () {
+        $(this).closest("#inspector").removeClass("search-mode");
+    });
     this._optionsMenu = new Menu($("#display-options-menu"));
     this.buildDisplayOptionsMenu();
 
@@ -125,7 +131,7 @@ Inspector.prototype.search = function (s) {
     var results = this._search.search(s);
     var viewer = this._viewer;
     var inspector = this;
-    var table = $('#inspector .search table.results');
+    var table = $('#inspector .search-results table.results');
     $('tr', table).remove();
     viewer.clearRelatedHighlighting();
     $.each(results, function (i,r) {

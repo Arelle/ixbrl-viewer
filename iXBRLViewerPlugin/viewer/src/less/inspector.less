@@ -158,6 +158,115 @@
     }
   }
 
+  #inspector {
+    #ixbrl-controls-top {
+      padding: 0 0.9rem;
+      text-align: center;
+      position: relative;
+      border-bottom: solid 1px @border-grey;
+      
+      .title {
+        position: relative;
+        border-bottom: @simple-border;
+
+        h1 {
+          margin: 0.8rem 0;
+          border: none;
+          padding: 0;
+          font-size: 1.8rem;
+          line-height: 3.2rem;
+        }
+
+        .back {
+          .square-button-bare();
+          
+          display: none;
+          top: 0;
+          left: 0;
+          position: absolute;
+
+          &::before {
+            .icon-chevron-left();
+          }
+        }
+      }
+
+      .controls {
+        position: relative;
+        width: 100%;
+        height: 3.2rem;
+        margin: 0.8rem 0;
+
+        .search {
+          .square-button();
+
+          position: absolute;
+          top: 0;
+          left: 0;
+
+          &::before {
+            .icon-search();
+
+            position: relative;
+          }
+        }
+
+
+        .next-prev {
+          position: absolute;
+          top: 0;
+          right: 0;
+
+          .ixbrl-next-tag,
+          .ixbrl-prev-tag {
+            .square-button-bare();
+
+            position: relative;
+            display: inline-block;
+          }
+
+          .ixbrl-next-tag::before {
+            .icon-arrow-down();
+          }
+
+          .ixbrl-prev-tag::before {
+            .icon-arrow-up();
+          }
+        }
+      }
+      .search-entry {
+        display: none;
+
+        padding: 0;
+        margin: 0.8rem 0;
+        input {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  #inspector.search-mode {
+    #ixbrl-controls-top {
+      .title {
+        .back {
+          display: block;
+        }
+      }
+      .controls {
+        .search {
+          .square-button.primary();
+        }
+      }
+      .search-entry {
+        display: block;
+      }
+    }
+    .fact-details {
+      display: none;
+    }
+  }
+
   .std-label {
     margin-left: 30px;
     min-height: 20px;
@@ -255,8 +364,8 @@
   .duplicates {
     text-align: center;
     width: 100%;
-    height: 25px;
-    line-height: 25px;
+    height: 3.2rem;
+    line-height: 3.2rem;
 
     & > * {
       vertical-align: middle;
@@ -268,31 +377,18 @@
 
     .next,
     .prev {
-      .square-button();
+      .square-button-bare();
 
       position: relative;
-      cursor: pointer;
-      font-size: 25px;
       display: inline-block;
-    }
-
-    .next::before {
-      position: absolute;
-      top: -1px;
-      right: 5px;
-      font-family: "icomoon";
-      content: "\ea50";
-      transform: rotate(90deg);
     }
 
     .prev::before {
-      position: absolute;
-      top: -1px;
-      left: 4px;
-      font-family: "icomoon";
-      content: "\ea50";
-      transform: rotate(270deg);
-      display: inline-block;
+      .icon-chevron-left();
+    }
+
+    .next::before {
+      .icon-chevron-right();
     }
   }
 
@@ -332,69 +428,6 @@
     }
   }
 
-  #ixbrl-controls-top {
-    padding: 5px 9px;
-    text-align: center;
-    position: relative;
-    height: 34px;
-    border-bottom: solid 1px @border-grey;
-
-    .search {
-      .square-button();
-
-      padding-top: 4px;
-      position: absolute;
-      top: 11px;
-      left: 9px;
-    }
-
-    .next-prev {
-      position: absolute;
-      top: 11px;
-      right: 9px;
-
-      & > span {
-        .square-button();
-
-        display: inline-block;
-        font-size: 25px;
-        margin-left: 4px;
-        position: relative;
-      }
-
-      .ixbrl-next-tag::before {
-        position: absolute;
-        top: -1px;
-        right: 5px;
-        font-family: "icomoon";
-        content: "\ea50";
-        transform: rotate(90deg);
-        display: inline-block;
-      }
-
-      .ixbrl-prev-tag::before {
-        position: absolute;
-        top: -1px;
-        left: 4px;
-        font-family: "icomoon";
-        content: "\ea50";
-        transform: rotate(270deg);
-        display: inline-block;
-      }
-    }
-
-    h1.title {
-      margin: 0;
-      border: none;
-      padding-top: 5px;
-      font-size: 18px;
-      line-height: 27px;
-    }
-
-    .language {
-      float: right;
-    }
-  }
 
   #inspector {
     width: 25%;

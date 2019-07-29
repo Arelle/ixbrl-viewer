@@ -71,14 +71,21 @@ Fact.prototype.readableValue = function() {
     var v = this.f.v;
     if (this.isNumeric()) {
         var d = this.decimals();
-        if (d < 0) {
-            d = 0;
-        }
-        if (this.isMonetaryValue()) {
-            v = this.unit().valueLabel() + " " + formatNumber(v,d);
+        var formattedNumber;
+        if (d === undefined) {
+            formattedNumber= v;
         }
         else {
-            v = formatNumber(v,d) + " " + this.unit().valueLabel();
+            if (d < 0) {
+                d = 0;
+            }
+            formattedNumber = formatNumber(v,d);
+        }
+        if (this.isMonetaryValue()) {
+            v = this.unit().valueLabel() + " " + formattedNumber;
+        }
+        else {
+            v = formattedNumber + " " + this.unit().valueLabel();
         }
     }
     else if (this.escaped()) {

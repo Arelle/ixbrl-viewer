@@ -51,8 +51,8 @@ function getTaxonomyData() {
 }
 
 function checkDocumentSetBrowserSupport() {
-    if (document.location.protocol == 'file:' && window.chrome) {
-        alert("Displaying iXBRL document sets from local files is not supported on Chrome.  Please view the viewer files using a web server, or try a different browser.");
+    if (document.location.protocol == 'file:') {
+        alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
     }
 }
 

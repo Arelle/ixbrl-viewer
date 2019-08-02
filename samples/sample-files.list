@@ -39,3 +39,15 @@ src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len
 # Sample XHTML report that does not render properly in HTML mode
 src/blinkace https://beta.companieshouse.gov.uk/company/08658934/filing-history/MzIzMTgyOTM5NWFkaXF6a2N4/document?format=xhtml&download=1|blinkace.xhtml 5d7807022552917c32cc6a8155f27924b3d9656d08406eb3defc26572f562417
 
+# iXBRL doc set filed at SEC
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010q.htm
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex311.htm 07b47b78317edea53567214b740fc82cfba656b40a69eb1f915f7dc54205a52a
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex312.htm 50fba118909680dcfa2ae4d6416a3d8974948517e19fd846c71abbd7e9529a6c
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex321.htm 6272cbe9fa97461a8666afe73d86aa26382965b084bac983a6cfab5e2fe81cd3
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex322.htm 2b3a5833a1d616a5ebe3115cd7fe9bfdaf4b237ee74ce2353190db52b4f4a4dc
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630.xsd 99c2bc7426582e6013b0c721697c662cba70bec849345f84dcdf2835a3552053
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_cal.xml d2e7be85e65b0d1096a67fa160e6ddc40cf7ccc7fd83ae0905f5724cec3c04f2
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_def.xml a3ca476bff8bf07b8661676ebfc11359d9ebbc0227fdaa8cb7e39ca5fe1bcdca
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_lab.xml 5b786fdbf81395748f34ce9ab4ae97583ce58559ad9a64ec295aae5cf758a5e2
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_pre.xml 62e67dd26a458c18789979d9960f30dcc573dcd65453d702375ce908f8ee3784
+

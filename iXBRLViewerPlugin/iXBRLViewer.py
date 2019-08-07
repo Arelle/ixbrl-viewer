@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from arelle import XbrlConst
+from arelle.ModelDocument import Type
 from arelle.ModelValue import QName
 from lxml import etree
 import json
@@ -21,6 +22,7 @@ import re
 import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from .xhtmlserialize import XHTMLSerializer
+import os
 
 class NamespaceMap:
     """
@@ -180,6 +182,7 @@ class IXBRLViewerBuilder:
         """
 
         dts = self.dts
+        iv = iXBRLViewer(dts)
         idGen = 0
         self.roleMap.getPrefix(XbrlConst.standardLabel,"std")
         self.roleMap.getPrefix(XbrlConst.documentationLabel,"doc")
@@ -245,11 +248,27 @@ class IXBRLViewerBuilder:
         self.taxonomyData["roles"] = self.roleMap.prefixmap
         self.taxonomyData["rels"] = self.getRelationships()
 
-        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
-
         dts.info("viewer:info", "Creating iXBRL viewer")
 
-        for child in dts.modelDocument.xmlDocument.getroot():
+        if dts.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
+            # Sort by object index to preserve order in which files were specified.
+            docSet = sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+            docSetFiles = list(map(lambda x: os.path.basename(x.filepath), docSet))
+            self.taxonomyData["docSetFiles"] = docSetFiles
+
+            for n in range(0, len(docSet)):
+                iv.addFile(iXBRLViewerFile(docSetFiles[n], docSet[n].xmlDocument))
+
+            xmlDocument = docSet[0].xmlDocument 
+
+        else:
+            xmlDocument = dts.modelDocument.xmlDocument
+            filename = os.path.basename(dts.modelDocument.filepath)
+            iv.addFile(iXBRLViewerFile(filename, xmlDocument))
+
+        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
+
+        for child in xmlDocument.getroot():
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
@@ -266,12 +285,48 @@ class IXBRLViewerBuilder:
                 child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
                 break
 
-        return dts.modelDocument.xmlDocument
+        return iv
 
-    def saveViewer(self, outFile, xmlDocument):
+class iXBRLViewerFile:
+
+    def __init__(self, filename, xmlDocument):
+        self.filename = filename
+        self.xmlDocument = xmlDocument
+
+class iXBRLViewer:
+
+    def __init__(self, dts):
+        self.files = []
+        self.dts = dts
+
+    def addFile(self, ivf):
+        self.files.append(ivf)
+
+    def save(self, outPath):
         """
         Save the iXBRL viewer
         """
-        with open(outFile, "wb") as fout:
-            writer = XHTMLSerializer()
-            writer.serialize(xmlDocument, fout)
+        if os.path.isdir(outPath):
+            # If output is a directory, write each file in the doc set to that
+            # directory using its existing filename
+            for f in self.files:
+                filename = os.path.join(outPath, f.filename)
+                self.dts.info("viewer:info", "Writing %s" % filename)
+                with open(filename, "wb") as fout:
+                    writer = XHTMLSerializer()
+                    writer.serialize(f.xmlDocument, fout)
+
+        else:
+            if len(self.files) > 1:
+                self.dts.error("viewer:error", "More than one file in input, but output is not a directory")
+            elif outPath.endswith(os.sep):
+                # Looks like a directory, but isn't one
+                self.dts.error("viewer:error", "Directory %s does not exist" % outPath)
+            elif not os.path.isdir(os.path.dirname(os.path.abspath(outPath))):
+                # Directory part of filename doesn't exist
+                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(outPath)))
+            else:
+                self.dts.info("viewer:info", "Writing %s" % outPath)
+                with open(outPath, "wb") as fout:
+                    writer = XHTMLSerializer()
+                    writer.serialize(self.files[0].xmlDocument, fout)

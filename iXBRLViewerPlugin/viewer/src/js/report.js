@@ -175,11 +175,18 @@ iXBRLReport.prototype.getConcept = function(name) {
     return new Concept(this, name);
 }
 
-
 iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
     /* This is currently hard-coded to "en" as the generator does not yet
      * support generic labels, and instead provides the (non-localisable) role
      * definition as a single "en" label.
      */
     return this.data.roleDefs[rolePrefix]["en"];
+}
+
+iXBRLReport.prototype.documentSetFiles = function() {
+    return this.data.docSetFiles;
+}
+
+iXBRLReport.prototype.isDocumentSet = function() {
+    return this.data.docSetFiles !== undefined;
 }

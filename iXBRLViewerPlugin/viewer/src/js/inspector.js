@@ -73,7 +73,6 @@ Inspector.prototype.setViewer = function (viewer) {
     //$('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
 
-    $('#top-bar .document-title').text(this._viewer.getTitle());
 }
 
 /*

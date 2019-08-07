@@ -208,7 +208,8 @@ class TestIXBRLViewer(unittest.TestCase):
         lxml.etree.SubElement(root, '{http://www.w3.org/1999/xhtml}body')
 
         self.modelDocument = Mock(
-            xmlDocument=lxml.etree.ElementTree(root)
+            xmlDocument=lxml.etree.ElementTree(root),
+            filepath=''
         )
 
         self.modelXbrl_1 = Mock(
@@ -287,7 +288,8 @@ class TestIXBRLViewer(unittest.TestCase):
     def test_createViewer(self):
         js_uri = 'ixbrlviewer.js'
         result = self.builder_1.createViewer(js_uri)
-        body = result.getroot()[0]
+        self.assertEqual(len(result.files),1)
+        body = result.files[0].xmlDocument.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
         self.assertEqual(body[1].attrib.get('src'), js_uri)
         self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
@@ -303,7 +305,8 @@ class TestIXBRLViewer(unittest.TestCase):
     def test_createViewer_bad_path(self):
         js_uri = 'ixbrlviewer.js'
         result = self.builder_2.createViewer(js_uri)
-        body = result.getroot()[0]
+        self.assertEqual(len(result.files),1)
+        body = result.files[0].xmlDocument.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
         self.assertEqual(body[1].attrib.get('src'), js_uri)
         self.assertEqual(body[1].attrib.get('type'), 'text/javascript')

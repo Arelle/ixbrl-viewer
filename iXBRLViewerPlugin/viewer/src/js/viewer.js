@@ -16,22 +16,28 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
 
-export function Viewer(iframe, report) {
+export function Viewer(iframes, report) {
     this._report = report;
-    this._iframe = iframe;
-    this._contents = iframe.contents();
+    this._iframes = iframes;
+    this._contents = iframes.contents();
     this.onSelect = $.Callbacks();
     this.onMouseEnter = $.Callbacks();
     this.onMouseLeave = $.Callbacks();
 
     this._factData = {};
     this._continuedAtMap = {};
-    this._preProcessiXBRL($("body", iframe.contents()).get(0));
+    this._docIndexesByFactId = {};
+    var viewer = this;
+    iframes.each(function (n) { 
+        viewer._preProcessiXBRL($(this).contents().find("body").get(0), n)
+    });
     this._buildContinuationMap();
     report.setIXData(this._factData);
     this._applyStyles();
     this._bindHandlers();
     this.scale = 1;
+    this._setTitle(0);
+    this._addDocumentSetTabs();
 }
 
 function localName(e) {
@@ -61,7 +67,25 @@ Viewer.prototype._buildContinuationMap = function() {
     }
 }
 
-Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
+Viewer.prototype._addDocumentSetTabs = function() {
+    if (this._report.isDocumentSet()) {
+        $('#ixv .ixds-tabs').show();
+        var ds = this._report.documentSetFiles();
+        var viewer = this;
+        for (var i = 0; i < ds.length; i++) {
+            $('<div class="tab">')
+                .text(ds[i])
+                .data('ix-doc-id', i)
+                .click(function () { 
+                    viewer.selectDocument($(this).data('ix-doc-id'))
+                })
+                .appendTo($('#ixv #viewer-pane .ixds-tabs'));
+        }
+        $('#ixv #viewer-pane .ixds-tabs .tab').eq(0).addClass("active");
+    }
+}
+
+Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   var elt;
   var name = localName(n.nodeName).toUpperCase();
   if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION')) {
@@ -84,9 +108,11 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
         $(n).wrap(wrapper);
         node = $(n).parent();
     }
-    node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
+    var id = n.getAttribute("id");
+    node.addClass("ixbrl-element").data('ivid',id);
+    this._docIndexesByFactId[id] = docIndex;
     if (n.getAttribute("continuedAt")) {
-        this._continuedAtMap[n.getAttribute("id")] = { 
+        this._continuedAtMap[id] = { 
             "isFact": name != 'CONTINUATION',
             "continuedAt": n.getAttribute("continuedAt")
         }
@@ -100,7 +126,7 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
     if (localName(n.nodeName) == 'NONNUMERIC') {
       $(node).addClass("ixbrl-element-nonnumeric");
       if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-          this._setFactData(n.getAttribute('id'), 'escape', true);
+          this._setFactData(id, 'escape', true);
       }
     }
     if (elt) {
@@ -116,7 +142,7 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
     inHidden = true;
   }
   for (var i=0; i < n.childNodes.length; i++) {
-    this._preProcessiXBRL(n.childNodes[i], inHidden);
+    this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
   }
 }
 
@@ -134,7 +160,7 @@ Viewer.prototype._applyStyles = function () {
     $("<style>")
         .prop("type", "text/css")
         .html(require('css-loader!less-loader!../less/viewer.less').toString())
-        .appendTo($("head", this._iframe.contents()));
+        .appendTo(this._iframes.contents().find("head"));
 }
 
 
@@ -152,6 +178,7 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
         next = elements.last();
     }
     
+    this.showDocumentForFactId(next.data('ivid'));
     this.showElement(next);
     this.selectElement(next);
 }
@@ -173,7 +200,6 @@ Viewer.prototype._bindHandlers = function () {
     TableExport.addHandles(this._contents, this._report);
 }
 
-
 Viewer.prototype.selectNextTag = function () {
     this._selectAdjacentTag(1);
 }
@@ -183,12 +209,12 @@ Viewer.prototype.selectPrevTag = function () {
 }
 
 Viewer.prototype.showElement = function(e) {
-    var viewTop = this._iframe.contents().scrollTop();
-    var viewBottom = viewTop + this._iframe.height();
+    var viewTop = this._iframes.contents().scrollTop();
+    var viewBottom = viewTop + this._iframes.height();
     var eTop = e.offset().top;
     var eBottom = eTop + e.height();
     if (eTop < viewTop || eBottom > viewBottom) {
-        this._iframe.contents().scrollTop(e.offset().top - this._iframe.height()/2);
+        this._iframes.contents().scrollTop(e.offset().top - this._iframes.height()/2);
     }
 }
 
@@ -203,7 +229,7 @@ Viewer.prototype.showAndSelectElement = function(e) {
  * Used to switch facts when the selection corresponds to multiple facts.
  */
 Viewer.prototype.highlightElements = function (ee) {
-    $("body", this._iframe.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
     ee.addClass("ixbrl-selected");
 }
 
@@ -281,6 +307,7 @@ Viewer.prototype.highlightFact = function(factId) {
 
 Viewer.prototype.showFactById = function (factId) {
     let elt = this.elementForFactId(factId);
+    this.showDocumentForFactId(factId);
     if (elt) {
         this.showElement(elt);
     }
@@ -346,6 +373,22 @@ Viewer.prototype.clearLinkedHighlightFact = function (f) {
     e.removeClass("ixbrl-linked-highlight");
 }
 
-Viewer.prototype.getTitle = function () {
-    return $('head title', this._contents).text();
+Viewer.prototype._setTitle = function (docIndex) {
+    $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
+}
+
+Viewer.prototype.showDocumentForFactId = function(factId) {
+    this.selectDocument(this._docIndexesByFactId[factId]);
+}
+
+Viewer.prototype.selectDocument = function (docIndex) {
+    $('#ixv #viewer-pane .ixds-tabs .tab')
+        .removeClass("active")
+        .eq(docIndex)
+        .addClass("active");
+    this._iframes
+        .hide()
+        .eq(docIndex)
+        .show();
+    this._setTitle(docIndex);
 }

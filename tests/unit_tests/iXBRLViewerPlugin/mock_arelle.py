@@ -18,6 +18,7 @@ def mock_arelle():
     if 'arelle' not in sys.modules:
         sys.modules['arelle'] = Mock()
         sys.modules['arelle.XbrlConst'] = Mock()
+        sys.modules['arelle.ModelDocument'] = Mock()
         sys.modules['arelle.ModelValue'] = Mock(
             QName=qname_effect
         )

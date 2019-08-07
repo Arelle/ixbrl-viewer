@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<html xmlns:ifrs-full="http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-full" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:ixt2="http://www.xbrl.org/inlineXBRL/transformation/2011-07-31" xmlns="http://www.w3.org/1999/xhtml" xmlns:ix="http://www.xbrl.org/2008/inlineXBRL" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <head>
+    <title>Inline XBRL Sample - Valeo Income Statement</title>
+    <style type="text/css">
+
+      body {
+        padding: 30px; 
+        font-family: sans-serif;
+      }
+
+      .content {
+        width: 1000px;
+      }
+
+      h1 {
+        color: #79d03b;
+        margin-bottom: 30px;
+      }
+
+      table.statement {
+        border-collapse: collapse;
+      }
+
+      th.row-label, td.row-label {
+        width: 500px;
+      }
+      
+      th.row-label {
+        font-size: small;
+        font-style: italic;
+      }
+
+      th, td {
+        padding: 7px 10px;
+        vertical-align: bottom;
+      }
+
+      th {
+        text-align: left;
+      }
+
+      th.row-notes,
+      td.row-notes {
+        font-weight: 300;
+        font-style: italic; 
+      }
+
+      td.row-label {
+        font-weight: bold;
+      }
+
+      th.number, td.number {
+        font-weight: bold;
+        text-align: right;
+        padding-right: 10px;
+        width: 175px;
+      }
+      
+      th.row-notes, td.row-notes {
+        text-align: right;
+        font-style: italic;
+        padding-right: 10px;
+        padding-left: 20px;
+      }
+
+
+      td.current {
+        background-color: #e7e7e8;
+      }
+
+      .row-total td, th.current {
+        color: white;
+        background-color: #79d03b;
+      }
+
+      th.current {
+        border-bottom: solid 1px white;
+      }
+
+      .row-total td.row-label {
+        text-transform: uppercase;
+      }
+
+      .row-indent td.row-label {
+        padding-left: 30px;
+        font-style: italic;
+      }
+
+      .row-newsection td {
+        border-top: solid 1px #79d03b;
+      }
+
+
+      sup {
+        font-size: small;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <h1>5.4.1 Consolidated statement of income</h1>
+      <table class="statement">
+        <tr>
+          <th class="row-label">(in millions of euros)</th>
+          <th class="row-notes">Notes</th>
+          <th class="number current">2014</th>
+          <th class="number">2013 restated
+            <sup>(7)</sup>
+          </th>
+        </tr>
+        <tr class="row-total">
+          <td class="row-label">Sales</td>
+          <td class="row-notes">4.1</td>
+          <td class="number row-total current">
+            <div>
+              <ix:nonFraction unitRef="EUR" decimals="-3" name="ifrs-full:Revenue" scale="6" format="ixt2:numdotdecimal" contextRef="dcur1">12,725</ix:nonFraction>
+            </div>
+          </td>
+          <td class="number row-total ">
+            <div>
+              <ix:nonFraction format="ixt2:numdotdecimal" scale="6" contextRef="dprev2" unitRef="EUR" decimals="-3" name="ifrs-full:Revenue">11,662</ix:nonFraction>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="row-label">Cost of sales</td>
+          <td class="row-notes">4.3</td>
+          <td class="number  current">
+            <div>(
+              <ix:nonFraction scale="6" format="ixt2:numdotdecimal" contextRef="dcur1" name="ifrs-full:CostOfSales" decimals="-3" unitRef="EUR">10,522</ix:nonFraction>)
+            </div>
+          </td>
+          <td class="number  ">
+            <div>(
+              <ix:nonFraction name="ifrs-full:CostOfSales" decimals="-3" unitRef="EUR" format="ixt2:numdotdecimal" scale="6" contextRef="dprev2">9,653</ix:nonFraction>)
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="row-label">GROSS MARGIN</td>
+          <td class="row-notes">4.3</td>
+          <td class="number  current">
+            <div>
+              <ix:nonFraction name="ifrs-full:GrossProfit" decimals="-3" unitRef="EUR" format="ixt2:numdotdecimal" scale="6" contextRef="dcur1">2,203</ix:nonFraction>
+            </div>
+          </td>
+          <td class="number  ">
+            <div>
+              <ix:nonFraction scale="6" format="ixt2:numdotdecimal" contextRef="dprev2" name="ifrs-full:GrossProfit" decimals="-3" unitRef="EUR">2,009</ix:nonFraction>
+            </div>
+          </td>
+        </tr>
+        <tr class="row-indent">
+          <td class="row-label">% of sales</td>
+          <td class="row-notes"></td>
+          <td class="number row-indent current">
+            <div>17.3%</div>
+          </td>
+          <td class="number row-indent ">
+            <div>17.2%</div>
+          </td>
+        </tr>
+        <tr class="row-newsection">
+          <td class="row-label">Research and Development expenditure, net</td>
+          <td class="row-notes">4.51</td>
+          <td class="number row-newsection current">
+            <div>(
+              <ix:nonFraction unitRef="EUR" decimals="-3" name="ifrs-full:ResearchAndDevelopmentExpense" format="ixt2:numdotdecimal" scale="6" contextRef="dcur1">685</ix:nonFraction>)
+            </div>
+          </td>
+          <td class="number row-newsection ">
+            <div>(
+              <ix:nonFraction name="ifrs-full:ResearchAndDevelopmentExpense" decimals="-3" unitRef="EUR" scale="6" format="ixt2:numdotdecimal" contextRef="dprev2">614</ix:nonFraction>)
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="row-label">Selling expenses</td>
+          <td class="row-notes"></td>
+          <td class="number  current">
+            <div>(
+              <ix:nonFraction contextRef="dcur1" format="ixt2:numdotdecimal" scale="6" unitRef="EUR" decimals="-3" name="ifrs-full:SalesAndMarketingExpense">207</ix:nonFraction>)
+            </div>
+          </td>
+          <td class="number  ">
+            <div>(
+              <ix:nonFraction contextRef="dprev2" scale="6" format="ixt2:numdotdecimal" decimals="-3" name="ifrs-full:SalesAndMarketingExpense" unitRef="EUR">193</ix:nonFraction>)
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="row-label">Administrative expenses</td>
+          <td class="row-notes"></td>
+          <td class="number  current">
+            <div>(
+              <ix:nonFraction scale="6" format="ixt2:numdotdecimal" contextRef="dcur1" unitRef="EUR" decimals="-3" name="ifrs-full:AdministrativeExpense">449</ix:nonFraction>)
+            </div>
+          </td>
+          <td class="number  ">
+            <div>(
+              <ix:nonFraction decimals="-3" name="ifrs-full:AdministrativeExpense" unitRef="EUR" contextRef="dprev2" scale="6" format="ixt2:numdotdecimal">436</ix:nonFraction>)
+            </div>
+          </td>
+        </tr>
+        <tr class="row-total">
+          <td class="row-label">Operating margin</td>
+          <td class="row-notes"></td>
+          <td class="number row-total current">
+            <div>
+              <ix:nonFraction format="ixt2:numdotdecimal" scale="6" contextRef="dcur1" unitRef="EUR" name="ifrs-full:ProfitLossFromOperatingActivities" decimals="-3">862</ix:nonFraction>
+            </div>
+          </td>
+          <td class="number row-total ">
+            <div>
+              <ix:nonFraction name="ifrs-full:ProfitLossFromOperatingActivities" decimals="-3" unitRef="EUR" scale="6" format="ixt2:numdotdecimal" contextRef="dprev2">766</ix:nonFraction>
+            </div>
+          </td>
+        </tr>
+        <tr class="row-indent">
+          <td class="row-label">% of sales</td>
+          <td class="row-notes"></td>
+          <td class="number row-indent current">
+            <div>6.8%</div>
+          </td>
+          <td class="number row-indent ">
+            <div>6.6%</div>
+          </td>
+        </tr>
+        <tr class="row-newsection">
+          <td class="row-label">Share in net earnings of equity-accounted companies</td>
+          <td class="row-notes">4.5 3.1</td>
+          <td class="number row-newsection current">
+            <div>
+              <ix:nonFraction format="ixt2:numdotdecimal" scale="6" contextRef="dcur1" unitRef="EUR" decimals="-3" name="ifrs-full:ShareOfProfitLossOfContinuingOperationsOfAssociatesAndJointVenturesAccountedForUsingEquityMethod">51</ix:nonFraction>
+            </div>
+          </td>
+          <td class="number row-newsection ">
+            <div>
+              <ix:nonFraction unitRef="EUR" decimals="-3" name="ifrs-full:ShareOfProfitLossOfContinuingOperationsOfAssociatesAndJointVenturesAccountedForUsingEquityMethod" scale="6" format="ixt2:numdotdecimal" contextRef="dprev2">26</ix:nonFraction>
+            </div>
+          </td>
+        </tr>
+        <tr class="row-total">
+          <td class="row-label">Operating margin including share in net earnings
+            <br /> of equity-accounted companies
+          </td>
+          <td class="row-notes">4.5</td>
+          <td class="number row-total current">
+            <div>
+              <ix:nonFraction scale="6" format="ixt2:numdotdecimal" contextRef="dcur1" unitRef="EUR" name="ifrs-full:ProfitLoss" decimals="-3">913</ix:nonFraction>
+            </div>
+          </td>
+          <td class="number row-total ">
+            <div>
+              <ix:nonFraction format="ixt2:numdotdecimal" scale="6" contextRef="dprev2" decimals="-3" name="ifrs-full:ProfitLoss" unitRef="EUR">792</ix:nonFraction>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <div style="margin-top: 30px; padding-top: 20px; border-top: dashed 1px #ccc; vertical-align: middle; display: table; min-height: 58px">
+        <img src="https://www.xbrl.org/wp-content/themes/xbrl/images/logoHeader.png" alt="XBRL logo" style="float: left; padding-right: 20px;"></img>
+        <div style="vertical-align: middle; display: table-cell;">
+    These samples have been prepared by XBRL International as a technology demonstration, and the accuracy of figures and information contained within this sample should not be relied upon for any purpose whatsoever.
+    </div>
+      </div>
+    </div>
+    <p>
+      Figure tagged in two reports <ix:nonFraction decimals="0" contextRef="c1" id="fx4" name="ifrs-full:EmployeeBenefitsExpense" unitRef="u1" sign="-" format="ixt2:numdotdecimal">1,234</ix:nonFraction>.
+    </p>
+    <p>
+      Figure tagged in three reports <ix:nonFraction decimals="0" contextRef="c1" id="fx5" name="ifrs-full:WagesAndSalaries" unitRef="u1" sign="-" format="ixt2:numdotdecimal">1,234</ix:nonFraction>.
+    </p>
+  </body>
+</html>

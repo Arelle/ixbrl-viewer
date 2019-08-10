@@ -319,12 +319,16 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
         groups[ns] = i;
     });
     var report = this._report;
+    var viewer = this;
     if (on) {
-        $(".ixbrl-element", this._contents).each(function () {
-            $(this).addClass("ixbrl-highlight");
-            var i = groups[report.getFactById($(this).data('ivid')).conceptQName().prefix];
+        $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
+            var factId = $(this).data('ivid');
+            var continuations = viewer._getFactData(factId, "continuations") || [];
+            var elements = viewer.elementsForFactIds([factId].concat(continuations));
+            elements.addClass("ixbrl-highlight");
+            var i = groups[report.getFactById(factId).conceptQName().prefix];
             if (i !== undefined) {
-                $(this).addClass("ixbrl-highlight-" + i);
+                elements.addClass("ixbrl-highlight-" + i);
             }
         });
     }

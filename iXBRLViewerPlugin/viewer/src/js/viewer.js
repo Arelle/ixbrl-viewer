@@ -387,8 +387,8 @@ Viewer.prototype.selectDocument = function (docIndex) {
         .eq(docIndex)
         .addClass("active");
     this._iframes
-        .hide()
+        .height(0)
         .eq(docIndex)
-        .show();
+        .height("100%");
     this._setTitle(docIndex);
 }

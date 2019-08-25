@@ -58,9 +58,15 @@ Viewer.prototype._buildContinuationMap = function() {
             var nextId = id;
             while (this._continuedAtMap[nextId].continuedAt !== undefined) {
                 nextId = this._continuedAtMap[nextId].continuedAt;
-                this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
-                this._continuedAtMap[nextId].continuationOf = id;
-                parts.push(nextId);
+                if (this._getFactData(nextId, "domnode")) {
+                    this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
+                    this._continuedAtMap[nextId].continuationOf = id;
+                    parts.push(nextId);
+                }
+                else {
+                    console.log("Unresolvable continuedAt reference: " + nextId);
+                    break;
+                }
             }
             this._setFactData(id, "continuations", parts);
         }

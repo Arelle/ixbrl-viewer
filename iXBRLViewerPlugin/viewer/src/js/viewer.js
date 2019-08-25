@@ -110,6 +110,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     }
     var id = n.getAttribute("id");
     node.addClass("ixbrl-element").data('ivid',id);
+    this._setFactData(id, 'domnode', node.get(0));
     this._docIndexesByFactId[id] = docIndex;
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
@@ -289,11 +290,14 @@ Viewer.prototype.elementForFact = function (fact) {
 }
 
 Viewer.prototype.elementForFactId = function (factId) {
-    return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == factId }).first();
+    return $(this._getFactData(factId, 'domnode'));
 }
 
 Viewer.prototype.elementsForFactIds = function (ids) {
-    return $('.ixbrl-element', this._contents).filter(function () { return $.inArray($(this).data('ivid'), ids ) > -1 });
+    var viewer = this;
+    return $($.map(ids, function (id, n) {
+        return viewer._getFactData(id, 'domnode');
+    }));
 }
 
 Viewer.prototype.elementsForFacts = function (facts) {

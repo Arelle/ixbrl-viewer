@@ -15,6 +15,7 @@
 import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
+import { IXNode } from './ixnode.js';
 
 export function Viewer(iframes, report) {
     this._report = report;
@@ -24,7 +25,7 @@ export function Viewer(iframes, report) {
     this.onMouseEnter = $.Callbacks();
     this.onMouseLeave = $.Callbacks();
 
-    this._factData = {};
+    this._ixNodeMap = {};
     this._continuedAtMap = {};
     this._docIndexesByFactId = {};
     var viewer = this;
@@ -32,7 +33,7 @@ export function Viewer(iframes, report) {
         viewer._preProcessiXBRL($(this).contents().find("body").get(0), n)
     });
     this._buildContinuationMap();
-    report.setIXData(this._factData);
+    report.setIXData(this._ixNodeMap);
     this._applyStyles();
     this._bindHandlers();
     this.scale = 1;
@@ -58,7 +59,7 @@ Viewer.prototype._buildContinuationMap = function() {
             var nextId = id;
             while (this._continuedAtMap[nextId].continuedAt !== undefined) {
                 nextId = this._continuedAtMap[nextId].continuedAt;
-                if (this._getFactData(nextId, "domnode")) {
+                if (this._ixNodeMap[nextId] !== undefined) {
                     this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
                     this._continuedAtMap[nextId].continuationOf = id;
                     parts.push(nextId);
@@ -68,7 +69,7 @@ Viewer.prototype._buildContinuationMap = function() {
                     break;
                 }
             }
-            this._setFactData(id, "continuations", parts);
+            this._ixNodeMap[id].continuations = parts;
         }
     }
 }
@@ -116,7 +117,8 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     }
     var id = n.getAttribute("id");
     node.addClass("ixbrl-element").data('ivid',id);
-    this._setFactData(id, 'domnode', node.get(0));
+    var ixn = new IXNode(node.get(0));
+    this._ixNodeMap[id] = ixn;
     this._docIndexesByFactId[id] = docIndex;
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
@@ -133,7 +135,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     if (localName(n.nodeName) == 'NONNUMERIC') {
       $(node).addClass("ixbrl-element-nonnumeric");
       if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-          this._setFactData(id, 'escape', true);
+          ixn.escaped = true;
       }
     }
     if (elt) {
@@ -151,16 +153,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   for (var i=0; i < n.childNodes.length; i++) {
     this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
   }
-}
-
-Viewer.prototype._setFactData = function (id, prop, value) {
-    this._factData[id] = this._factData[id] || {};
-    this._factData[id][prop] = value;
-}
-
-Viewer.prototype._getFactData = function (id, prop) {
-    var fd = this._factData[id] || {};
-    return fd[prop];
 }
 
 Viewer.prototype._applyStyles = function () {
@@ -296,13 +288,13 @@ Viewer.prototype.elementForFact = function (fact) {
 }
 
 Viewer.prototype.elementForFactId = function (factId) {
-    return $(this._getFactData(factId, 'domnode'));
+    return $(this._ixNodeMap[factId].domNode);
 }
 
 Viewer.prototype.elementsForFactIds = function (ids) {
     var viewer = this;
     return $($.map(ids, function (id, n) {
-        return viewer._getFactData(id, 'domnode');
+        return viewer._ixNodeMap[id].domNode;
     }));
 }
 
@@ -311,7 +303,7 @@ Viewer.prototype.elementsForFacts = function (facts) {
 }
 
 Viewer.prototype.highlightFact = function(factId) {
-    var continuations = this._getFactData(factId, "continuations") || [];
+    var continuations = this._ixNodeMap[factId].continuations;
     this.highlightElements(this.elementsForFactIds([factId].concat(continuations)));
 }
 
@@ -333,7 +325,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     if (on) {
         $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
             var factId = $(this).data('ivid');
-            var continuations = viewer._getFactData(factId, "continuations") || [];
+            var continuations = viewer._ixNodeMap[factId].continuations;
             var elements = viewer.elementsForFactIds([factId].concat(continuations));
             elements.addClass("ixbrl-highlight");
             var i = groups[report.getFactById(factId).conceptQName().prefix];

@@ -40,7 +40,7 @@ src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len
 src/blinkace https://beta.companieshouse.gov.uk/company/08658934/filing-history/MzIzMTgyOTM5NWFkaXF6a2N4/document?format=xhtml&download=1|blinkace.xhtml 5d7807022552917c32cc6a8155f27924b3d9656d08406eb3defc26572f562417
 
 # iXBRL doc set filed at SEC
-src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010q.htm
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010q.htm f618087d4b0e575bbb98bb3ae5473f46f2986948156adda4b135b88cb5978dce
 src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex311.htm 07b47b78317edea53567214b740fc82cfba656b40a69eb1f915f7dc54205a52a
 src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex312.htm 50fba118909680dcfa2ae4d6416a3d8974948517e19fd846c71abbd7e9529a6c
 src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex321.htm 6272cbe9fa97461a8666afe73d86aa26382965b084bac983a6cfab5e2fe81cd3

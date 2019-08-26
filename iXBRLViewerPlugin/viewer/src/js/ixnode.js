@@ -13,6 +13,14 @@
 // limitations under the License.
 
 
+/*
+ * Object to hold information related to iXBRL nodes in the HTML document.
+ * May correspond to either a nonNumeric/nonFraction element, or a continuation
+ * element.
+ * 
+ * The domNode property is the "containing" element which will either be an
+ * inserted div or span wrapper, or the nearest enclosing td or th.
+ */
 export function IXNode(node) {
     this.domNode = node;
     this.escaped = false;

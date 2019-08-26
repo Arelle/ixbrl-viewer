@@ -33,7 +33,7 @@ export function Viewer(iframes, report) {
         viewer._preProcessiXBRL($(this).contents().find("body").get(0), n)
     });
     this._buildContinuationMap();
-    report.setIXData(this._ixNodeMap);
+    report.setIXNodeMap(this._ixNodeMap);
     this._applyStyles();
     this._bindHandlers();
     this.scale = 1;

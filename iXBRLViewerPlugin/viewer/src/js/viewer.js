@@ -27,7 +27,6 @@ export function Viewer(iframes, report) {
 
     this._ixNodeMap = {};
     this._continuedAtMap = {};
-    this._docIndexesByFactId = {};
     var viewer = this;
     iframes.each(function (n) { 
         viewer._preProcessiXBRL($(this).contents().find("body").get(0), n)
@@ -117,9 +116,8 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     }
     var id = n.getAttribute("id");
     node.addClass("ixbrl-element").data('ivid',id);
-    var ixn = new IXNode(node.get(0));
+    var ixn = new IXNode(node.get(0), docIndex);
     this._ixNodeMap[id] = ixn;
-    this._docIndexesByFactId[id] = docIndex;
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
             "isFact": name != 'CONTINUATION',
@@ -384,7 +382,7 @@ Viewer.prototype._setTitle = function (docIndex) {
 }
 
 Viewer.prototype.showDocumentForFactId = function(factId) {
-    this.selectDocument(this._docIndexesByFactId[factId]);
+    this.selectDocument(this._ixNodeMap[factId].docIndex);
 }
 
 Viewer.prototype.selectDocument = function (docIndex) {

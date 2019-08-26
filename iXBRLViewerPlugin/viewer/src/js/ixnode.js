@@ -21,9 +21,10 @@
  * The domNode property is the "containing" element which will either be an
  * inserted div or span wrapper, or the nearest enclosing td or th.
  */
-export function IXNode(node) {
+export function IXNode(node, docIndex) {
     this.domNode = node;
     this.escaped = false;
     this.continuations = [];
+    this.docIndex = docIndex;
 }
 

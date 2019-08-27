@@ -18,11 +18,12 @@
  * May correspond to either a nonNumeric/nonFraction element, or a continuation
  * element.
  * 
- * The domNode property is the "containing" element which will either be an
- * inserted div or span wrapper, or the nearest enclosing td or th.
+ * The wrapperNode property is a jQuery object for the "containing" element
+ * which will either be an inserted div or span wrapper, or the nearest
+ * enclosing td or th.
  */
-export function IXNode(node, docIndex) {
-    this.domNode = node;
+export function IXNode(wrapperNode, docIndex) {
+    this.wrapperNode = wrapperNode;
     this.escaped = false;
     this.continuations = [];
     this.docIndex = docIndex;

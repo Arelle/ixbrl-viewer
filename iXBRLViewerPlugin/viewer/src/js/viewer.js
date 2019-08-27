@@ -116,7 +116,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     }
     var id = n.getAttribute("id");
     node.addClass("ixbrl-element").data('ivid',id);
-    var ixn = new IXNode(node.get(0), docIndex);
+    var ixn = new IXNode(node, docIndex);
     this._ixNodeMap[id] = ixn;
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
@@ -286,13 +286,13 @@ Viewer.prototype.elementForFact = function (fact) {
 }
 
 Viewer.prototype.elementForFactId = function (factId) {
-    return $(this._ixNodeMap[factId].domNode);
+    return this._ixNodeMap[factId].wrapperNode;
 }
 
 Viewer.prototype.elementsForFactIds = function (ids) {
     var viewer = this;
     return $($.map(ids, function (id, n) {
-        return viewer._ixNodeMap[id].domNode;
+        return viewer._ixNodeMap[id].wrapperNode.get();
     }));
 }
 

@@ -40,6 +40,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
     def createViewer(self, f, scriptUrl=None, outPath=None):
         if os.path.isdir(f):
             files = glob.glob(os.path.join(f, "*.xhtml")) + glob.glob(os.path.join(f, "*.html")) + glob.glob(os.path.join(f, "*.htm"))
+            files.sort()
             if len(files) > 1:
                 f = os.path.join(f, inlineXbrlDocumentSet.IXDS_SURROGATE) + inlineXbrlDocumentSet.IXDS_DOC_SEPARATOR.join(files)
             elif len(files) == 1:

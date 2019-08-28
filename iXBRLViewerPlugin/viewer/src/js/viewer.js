@@ -390,9 +390,11 @@ Viewer.prototype.selectDocument = function (docIndex) {
         .removeClass("active")
         .eq(docIndex)
         .addClass("active");
+    /* Show/hide documents using height rather than display property to avoid a
+     * delay when switching tabs on large, slow-to-render documents. */
     this._iframes
-        .hide()
+        .height(0)
         .eq(docIndex)
-        .show();
+        .height("100%");
     this._setTitle(docIndex);
 }

@@ -21,7 +21,7 @@ import $ from 'jquery'
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
-    this._ixData = report.getIXDataForFact(factId);
+    this._ixNode = report.getIXNodeForFactId(factId);
     this._report = report;
     this.id = factId;
 }
@@ -233,5 +233,5 @@ Fact.prototype.identifier = function () {
 }
 
 Fact.prototype.escaped = function () {
-    return this._ixData.escape;
+    return this._ixNode.escaped;
 }

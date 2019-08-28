@@ -20,9 +20,8 @@ import $ from 'jquery'
 
 export function iXBRLReport (data) {
     this.data = data;
-    this._viewerFactData = {};
     this._facts = {};
-    this._ixData = {};
+    this._ixNodeMap = {};
     this._viewerOptions = new ViewerOptions();
 }
 
@@ -88,12 +87,12 @@ iXBRLReport.prototype.getFactById = function(id) {
 /*
  * Set additional information about facts obtained from parsing the iXBRL.
  */
-iXBRLReport.prototype.setIXData = function(ixData) {
-    this._ixData = ixData;
+iXBRLReport.prototype.setIXNodeMap = function(ixData) {
+    this._ixNodeMap = ixData;
 }
 
-iXBRLReport.prototype.getIXDataForFact = function(factId) {
-    return this._ixData[factId] || {};
+iXBRLReport.prototype.getIXNodeForFactId = function(factId) {
+    return this._ixNodeMap[factId] || {};
 }
 
 iXBRLReport.prototype.facts = function() {

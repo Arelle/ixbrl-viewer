@@ -45,7 +45,7 @@ export function Inspector() {
             d.find(".collapsible-body").slideDown(250);
         }
     });
-    $("#inspector .controls .search").click(function () {
+    $("#inspector .controls .search-button").click(function () {
         $(this).closest("#inspector").toggleClass("search-mode");
     });
     $("#inspector #ixbrl-controls-top .back").click(function () {
@@ -76,7 +76,6 @@ Inspector.prototype.setViewer = function (viewer) {
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 
-    //$('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
 
 }
@@ -131,20 +130,30 @@ Inspector.prototype.search = function (s) {
     var results = this._search.search(s);
     var viewer = this._viewer;
     var inspector = this;
-    var table = $('#inspector .search-results table.results');
-    $('tr', table).remove();
+    var container = $('#inspector .search-results .results');
+    $('div', container).remove();
     viewer.clearRelatedHighlighting();
     $.each(results, function (i,r) {
+        var f = r.fact;
         if (i < 100) {
-            var row = $('<tr></tr>')
-                .click(function () { inspector.selectFact(r.fact.id) })
-                .mouseenter(function () { viewer.linkedHighlightFact(r.fact); })
-                .mouseleave(function () { viewer.clearLinkedHighlightFact(r.fact); })
-                .data('ivid', r.fact.id)
-                .appendTo($("tbody", table));
-            $('<td></td>')
-                .text(r.fact.getLabel("std")) // + " (" + r.score + ")" );
+            var row = $('<div class="result"></div>')
+                .click(function () { inspector.selectFact(f.id) })
+                .mouseenter(function () { viewer.linkedHighlightFact(f); })
+                .mouseleave(function () { viewer.clearLinkedHighlightFact(f); })
+                .data('ivid', f.id)
+                .appendTo(container);
+            $('<div class="title"></div>')
+                .text(f.getLabel("std"))
                 .appendTo(row);
+            $('<div class="dimension"></div>')
+                .text(f.period().toString())
+                .appendTo(row);
+            var dims = f.dimensions();
+            for (var d in dims) {
+                $('<div class="dimension"></div>')
+                    .text(f.report().getLabel(dims[d], "std", true) || dims[d])
+                    .appendTo(row);
+            }
         }
     });
     viewer.highlightRelatedFacts($.map(results, function (r) { return r.fact } ));
@@ -370,6 +379,9 @@ Inspector.prototype.update = function () {
                             })
                     )
                 }
+                $('<div class="dimension-value"></div>')
+                    .text(fact.report().getLabel(dims[d], "std", true) || dims[d])
+                    .appendTo(h);
             }
             a.addCard(
                 fs.minimallyUniqueLabel(fact),
@@ -382,8 +394,8 @@ Inspector.prototype.update = function () {
         a.contents().appendTo('#inspector .fact-inspector');
         this.updateCalculation(cf);
         $('div.references').empty().append(this._referencesHTML(cf));
-        $('#inspector .search .results tr').removeClass('selected');
-        $('#inspector .search .results tr').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+        $('#inspector .search-results .result').removeClass('selected');
+        $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
 
         var duplicates = cf.duplicates();
         var n = 0;

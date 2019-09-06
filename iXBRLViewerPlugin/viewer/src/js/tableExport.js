@@ -39,6 +39,7 @@ TableExport.addHandles = function (iframe, report) {
 TableExport.prototype._getRawTable = function (table) {
     var table = this._table;
     var report = this._report;
+    var maxRowLength = 0;
     var rows = [];
     table.find("tr:visible").each(function () {
         var row = [];
@@ -84,8 +85,17 @@ TableExport.prototype._getRawTable = function (table) {
                 row.push({ type: "static", value: v});
             }
         });
+        if (row.length > maxRowLength) {
+            maxRowLength = row.length;
+        }
         rows.push(row);
     });
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        while (row.length < maxRowLength) {
+            row.push({ type: "static", value: "" });
+        }
+    }
     return rows;
 }
 

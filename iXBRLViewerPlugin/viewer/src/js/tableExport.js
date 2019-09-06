@@ -40,9 +40,9 @@ TableExport.prototype._getRawTable = function (table) {
     var table = this._table;
     var report = this._report;
     var rows = [];
-    table.find("tr").each(function () {
+    table.find("tr:visible").each(function () {
         var row = [];
-        $(this).find("td, th").each(function () {
+        $(this).find("td:visible, th:visible").each(function () {
             var colspan = $(this).attr("colspan");
             if (colspan) {
                 for (var i=0; i < colspan-1; i++) {

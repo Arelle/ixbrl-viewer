@@ -33,18 +33,33 @@
   }
 }
 
+.ixbrl-highlight.ixbrl-element-nonnumeric span {
+   background-color: @highlight-2 !important;
+}
+
 div,
 span {
-  &.ixbrl-selected {
+  &.ixbrl-selected:not(.ixbrl-element-nonnumeric) {
     outline: solid 2px @primary;
     outline-offset: 1px;
   }
 
-  &.ixbrl-element:hover:not(.ixbrl-selected) {
+  &.ixbrl-element:hover:not(.ixbrl-selected):not(.ixbrl-element-nonnumeric) {
     outline: dashed 2px @primary;
     outline-offset: 1px;
   }
 }
+
+div.ixbrl-selected.ixbrl-element-nonnumeric span {
+  outline: solid 2px @primary;
+  outline-offset: 1px;
+}
+
+div.ixbrl-element.ixbrl-element-nonnumeric:not(.ixbrl-selected) span:hover {
+  outline: dashed 2px @primary;
+  outline-offset: 1px;
+}
+
 
 .ixbrl-element {
   cursor: pointer;   
@@ -145,3 +160,4 @@ div.ixbrl-table-handle {
     }
   }
 }
+

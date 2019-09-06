@@ -141,11 +141,24 @@ Inspector.prototype.updateValidationResults = function (fact) {
         var a = new Accordian({            
             alwaysOpen: true,
         });
+        // $.each(fact.getValidationResults(), function(i,r) {
+        //     var title = $('<span></span>').text(r.ruleId);
+        //     var messageBody = $('<div class="validation-result"></div>').text(r.message);
+        //     a.addCard(title, messageBody);
+        // });
+        let content = "";
         $.each(fact.getValidationResults(), function(i,r) {
-            var title = $('<span></span>').text(r.ruleId);
-            var messageBody = $('<div class="validation-result"></div>').text(r.message);
-            a.addCard(title, messageBody);
+            let fabClass = "";
+            switch (r.severity) {
+                case 0: fabClass = "green"; break;
+                case 1: fabClass = "yellow"; break;
+                case 2: fabClass = "red"; break;
+            }
+            content += `<p class='fab-container'><div class='fab ${fabClass}'></div><span class='fab-text'>${r.message.trim()}</span></p>\n`;
         });
+        var title = $('<span></span>').text('Results');
+        var messageBody = $('<div class="validation-result"></div>').html(content);
+        a.addCard(title, messageBody);
         a.contents().appendTo('#inspector .fact-validation-results');
     } else {
         $('<div class="no-fact-selected"><span>No issues</span></div>').appendTo('#inspector .fact-validation-results');

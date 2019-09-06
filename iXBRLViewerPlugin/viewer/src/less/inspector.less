@@ -610,3 +610,49 @@
     display: none;
   }
 }
+
+/* https://codepen.io/iraycd/pen/dHrxv */
+/* FAB */
+.fab {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  color: #fff;
+  overflow: hidden;
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0.2s;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+}
+
+.fab.red {
+  background-color: #d23f31;
+}
+
+.fab.blue {
+  background-color: #4285f4;
+}
+
+.fab.green {
+  background-color: #0f9d58;
+}
+
+.fab.yellow {
+  background-color: yellow;
+}
+
+.fab-container {
+  padding: 2px 0;
+  text-align: left;
+}
+
+.fab-container:before {
+  content: "\a0";
+  display: block;
+  padding: 2px 0;
+  line-height: 1px;
+  border-top: 0.25px solid rgba(255, 255, 255, 0.8); 
+}

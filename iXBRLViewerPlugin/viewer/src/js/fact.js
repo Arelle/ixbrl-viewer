@@ -68,12 +68,14 @@ Fact.prototype.value = function() {
 }
 
 Fact.prototype.hasValidationResults = function() {
-    return "zv" in this.f;
+    return "zv" in this.f && this.f.zv.find( function(v) {
+        return v["i"] === 2;
+    });
 }
 
 Fact.prototype.getValidationResults = function() {
     return this.f.zv.map( function (v) { 
-        return { ruleId: v["ri"], rule: v["r"], message: v["t"] };
+        return { ruleId: v["ri"], rule: v["r"], message: v["t"], severity: v["i"] };
     });
 }
 

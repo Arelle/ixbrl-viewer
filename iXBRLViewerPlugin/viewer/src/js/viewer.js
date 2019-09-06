@@ -47,9 +47,6 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   var name = localName(n.nodeName).toUpperCase();
   if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION')) {
     var node = $(n).closest("td,th").eq(0);
-    var fact = this._report.getFactById(n.getAttribute("id"));
-    if (fact && fact.hasValidationResults())
-        $(n).addClass("inline-fact-with-message");
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
         if (node.text().match(regex) == null) {
@@ -68,12 +65,15 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
         $(n).wrap(wrapper);
         node = $(n).parent();
     }
+    var fact = this._report.getFactById(n.getAttribute("id"));
+    if (fact && fact.hasValidationResults())
+        node.addClass("inline-fact-with-message");
     node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
-    if (localName(n.nodeName) == 'NONFRACTION') {
+    if (localName(n.nodeName).toUpperCase() == 'NONFRACTION') {
       $(node).addClass("ixbrl-element-nonfraction");
     }
-    if (localName(n.nodeName) == 'NONNUMERIC') {
-      $(node).addClass("ixbrl-element-nonfraction");
+    if (localName(n.nodeName).toUpperCase() == 'NONNUMERIC') {
+      $(node).addClass("ixbrl-element-nonnumeric");
       if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
           this._setFactData(n.getAttribute('id'), 'escape', true);
       }

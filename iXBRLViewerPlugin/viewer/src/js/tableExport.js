@@ -142,10 +142,6 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
     return constantAspects;
 }
 
-TableExport.prototype._getColumnSlice = function (x) {
-
-}
-
 TableExport.prototype._writeTable = function (data) {
     var wb = new Excel.Workbook();
     var ws = wb.addWorksheet('Table');

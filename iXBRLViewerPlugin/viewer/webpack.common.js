@@ -39,6 +39,11 @@ module.exports = {
 
 
   },
+  resolve: {
+    alias: {
+      'popper.js': path.resolve(__dirname, 'src/popperjs/popper.js')
+    }
+  },  
   plugins: [
     // Ignore all locale files of moment.js
     new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),

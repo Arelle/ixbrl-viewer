@@ -16,6 +16,8 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
 
+import 'bootstrap/js/dist/tooltip';
+
 export function Viewer(iframe, report) {
     this._report = report;
     this._iframe = iframe;
@@ -46,7 +48,7 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
   var elt;
   var name = localName(n.nodeName).toUpperCase();
   if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION')) {
-    var node = $(n).closest("td,th").eq(0);
+    var node = $(n).closest("td,th,span").eq(0);
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
         if (node.text().match(regex) == null) {
@@ -68,6 +70,19 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
     var fact = this._report.getFactById(n.getAttribute("id"));
     if (fact && fact.hasValidationResults())
         node.addClass("inline-fact-with-message");
+    var title = fact.getLabel("std");
+    $(node).attr('ix-title', title);
+    var container = $('body', this._contents);
+    var childs = $("span,div", node);
+    if (childs.length === 0)
+        childs = $(n);    
+    childs.tooltip({            
+            html: false,
+            container: container,
+            title: function() {
+                return $(this).attr('ix-title') || $(this).parents('.ixbrl-element').attr('ix-title');
+            }
+        });    
     node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
     if (localName(n.nodeName).toUpperCase() == 'NONFRACTION') {
       $(node).addClass("ixbrl-element-nonfraction");

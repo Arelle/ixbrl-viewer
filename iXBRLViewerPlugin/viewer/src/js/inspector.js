@@ -138,6 +138,16 @@ Inspector.prototype.search = function (s) {
         if (i < 100) {
             var row = $('<div class="result"></div>')
                 .click(function () { inspector.selectFact(f.id) })
+                .dblclick(function () { $('#inspector').removeClass("search-mode"); })
+                .mousedown(function (e) { 
+                    /* Prevents text selection via double click without
+                     * disabling click+drag text selection (which user-select:
+                     * none would )
+                     */
+                    if (e.detail > 1) { 
+                        e.preventDefault() 
+                    } 
+                })
                 .mouseenter(function () { viewer.linkedHighlightFact(f); })
                 .mouseleave(function () { viewer.clearLinkedHighlightFact(f); })
                 .data('ivid', f.id)

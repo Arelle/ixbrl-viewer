@@ -133,39 +133,55 @@ Inspector.prototype.search = function (s) {
     var container = $('#inspector .search-results .results');
     $('div', container).remove();
     viewer.clearRelatedHighlighting();
-    $.each(results, function (i,r) {
-        var f = r.fact;
-        if (i < 100) {
-            var row = $('<div class="result"></div>')
-                .click(function () { inspector.selectFact(f.id) })
-                .dblclick(function () { $('#inspector').removeClass("search-mode"); })
-                .mousedown(function (e) { 
-                    /* Prevents text selection via double click without
-                     * disabling click+drag text selection (which user-select:
-                     * none would )
-                     */
-                    if (e.detail > 1) { 
-                        e.preventDefault() 
-                    } 
-                })
-                .mouseenter(function () { viewer.linkedHighlightFact(f); })
-                .mouseleave(function () { viewer.clearLinkedHighlightFact(f); })
-                .data('ivid', f.id)
-                .appendTo(container);
-            $('<div class="title"></div>')
-                .text(f.getLabel("std"))
-                .appendTo(row);
-            $('<div class="dimension"></div>')
-                .text(f.period().toString())
-                .appendTo(row);
-            var dims = f.dimensions();
-            for (var d in dims) {
-                $('<div class="dimension"></div>')
-                    .text(f.report().getLabel(dims[d], "std", true) || dims[d])
+    var overlay = $('#inspector .search-results .search-overlay');
+    if (results.length > 0) {
+        overlay.hide();
+        $.each(results, function (i,r) {
+            var f = r.fact;
+            if (i < 100) {
+                var row = $('<div class="result"></div>')
+                    .click(function () { inspector.selectFact(f.id) })
+                    .dblclick(function () { $('#inspector').removeClass("search-mode"); })
+                    .mousedown(function (e) { 
+                        /* Prevents text selection via double click without
+                         * disabling click+drag text selection (which user-select:
+                         * none would )
+                         */
+                        if (e.detail > 1) { 
+                            e.preventDefault() 
+                        } 
+                    })
+                    .mouseenter(function () { viewer.linkedHighlightFact(f); })
+                    .mouseleave(function () { viewer.clearLinkedHighlightFact(f); })
+                    .data('ivid', f.id)
+                    .appendTo(container);
+                $('<div class="title"></div>')
+                    .text(f.getLabel("std"))
                     .appendTo(row);
+                $('<div class="dimension"></div>')
+                    .text(f.period().toString())
+                    .appendTo(row);
+                var dims = f.dimensions();
+                for (var d in dims) {
+                    $('<div class="dimension"></div>')
+                        .text(f.report().getLabel(dims[d], "std", true) || dims[d])
+                        .appendTo(row);
+                }
             }
+        });
+    }
+    else {
+        if (s.trim() != "") {
+            $(".title", overlay).text("No Match Found");
+            $(".text", overlay).text("Try again with different keywords");
         }
-    });
+        else {
+            $(".title", overlay).text("Fact Search");
+            $(".text", overlay).text("Please enter some search terms");
+        }
+
+        overlay.show();
+    }
     viewer.highlightRelatedFacts($.map(results, function (r) { return r.fact } ));
 }
 
@@ -344,6 +360,7 @@ Inspector.prototype.update = function () {
     var inspector = this;
     var cf = inspector._currentFact;
     if (cf) {
+        $('#inspector .fact-details').removeClass('no-fact-selected');
         $('#inspector .fact-inspector').empty();
         var a = new Accordian({
             onSelect: function (id) { 
@@ -422,6 +439,9 @@ Inspector.prototype.update = function () {
 
         this.getPeriodIncrease(cf);
 
+    }
+    else {
+        $('#inspector .fact-details').addClass('no-fact-selected');
     }
     this.updateURLFragment();
 }

@@ -160,16 +160,6 @@
   }
 
   #inspector {
-    .no-fact-selected {
-      width: 100%;
-      padding: 50px 0;
-      text-align: center;
-
-      span {
-        font-size: large;
-      }
-    }
-
     h1,
     h2,
     h3 {
@@ -305,15 +295,15 @@
 
       .dimension {
         position: relative;
-        margin: 1.5rem 0 1.5rem 1.0rem;
+        margin: 1.5rem 0 1.5rem 1rem;
 
         &::before {
+          .icon-dimension();
+
           color: @primary;
-          font-family: "xbrlicons";
-          content: "B";
           position: absolute;
-          top: 0.2rem;
-          left: -2.5rem;
+          top: 0;
+          left: -2.3rem;
           font-size: 120%;
         }
       }
@@ -323,12 +313,12 @@
         margin: 1.5rem 0 1.5rem 3.5rem;
 
         &::before {
+          .icon-dimension-member();
+
           position: absolute;
           color: @primary;
-          font-family: "xbrlicons";
-          content: "A";
-          top: 0.2rem;
-          left: -2.5rem;
+          top: 0;
+          left: -2.3rem;
           font-size: 120%;
         }
       }
@@ -530,6 +520,72 @@
 
           &.linked-highlight {
             .linked-highlight-cell();
+          }
+        }
+
+        .search-overlay {
+          transform: translate(-50%, -50%);
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          color: @text-light;
+          width: 85%;
+
+          .search-overlay-icon {
+            text-align: center;
+            font-size: 10rem;
+
+            &::before {
+              .icon-search();
+            }
+          }
+
+          .search-overlay-text {
+            text-align: center;
+            font-size: medium;
+
+            .title {
+              font-size: x-large;
+            }
+          }
+        }
+      }
+
+      .fact-details {
+        .no-fact-overlay {
+          display: none;
+        }
+      }
+
+      .fact-details.no-fact-selected {
+        position: absolute;
+        top: 13.8rem;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        & > :not(.no-fact-overlay) {
+          display: none;
+        }
+
+        .no-fact-overlay {
+          display: block;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          width: 80%;
+          text-align: center;
+          color: @text-light;
+
+          .no-fact-overlay-icon::before {
+            .icon-tag();
+
+            font-size: 10rem;
+          }
+
+          .title {
+            font-size: x-large;
           }
         }
       }

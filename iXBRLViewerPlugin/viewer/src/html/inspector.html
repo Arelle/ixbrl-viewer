@@ -50,12 +50,13 @@ limitations under the License.
             <input id="ixbrl-search" type="text" />
           </div>
         </div>
-        <div class="fact-details">
+        <div class="fact-details no-fact-selected">
+          <div class="no-fact-overlay">
+            <div class="no-fact-overlay-icon"></div>
+            <p class="title">No Fact Selected</p>
+          </div>
           <div class="collapsible-section">
             <div class="fact-inspector collapsible-body">
-              <div class="no-fact-selected">
-                <span>No fact selected</span>
-              </div>
             </div>
           </div>
           <div class="collapsible-section">
@@ -72,6 +73,10 @@ limitations under the License.
         </div>
         <div class="search-results">
           <div class="scrollable results">
+          </div>
+          <div class="search-overlay">
+              <div class="search-overlay-icon"></div>
+              <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
           </div>
         </div>
       </div>

@@ -58,6 +58,10 @@ ReportSearch.prototype.search = function(s) {
     var results = []
     var searchIndex = this;
 
+    if (s == "") {
+        return [];
+    }
+
     $.each(rr, function (i,r) {
         results.push({
             "fact": searchIndex._report.getFactById(r.ref),

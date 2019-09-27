@@ -82,7 +82,7 @@ iXBRLViewer.prototype._reparentDocument = function () {
     return iframe;
 }
 
-function getTaxonomyData() {
+iXBRLViewer.prototype._getTaxonomyData = function() {
     for (var i = document.body.children.length - 1; i >= 0; i--) {
         var elt = document.body.children[i];
         if (elt.tagName.toUpperCase() == 'SCRIPT' && elt.getAttribute("type") == 'application/x.ixbrl-viewer+json') {
@@ -92,7 +92,7 @@ function getTaxonomyData() {
     return null;
 }
 
-function checkDocumentSetBrowserSupport() {
+iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function() {
     if (document.location.protocol == 'file:') {
         alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
     }

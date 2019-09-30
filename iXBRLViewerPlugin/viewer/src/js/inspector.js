@@ -45,6 +45,12 @@ export function Inspector() {
             d.find(".collapsible-body").slideDown(250);
         }
     });
+    $("#inspector .controls .search-button").click(function () {
+        $(this).closest("#inspector").toggleClass("search-mode");
+    });
+    $("#inspector #ixbrl-controls-top .back").click(function () {
+        $(this).closest("#inspector").removeClass("search-mode");
+    });
     this._optionsMenu = new Menu($("#display-options-menu"));
     this.buildDisplayOptionsMenu();
 
@@ -70,7 +76,6 @@ Inspector.prototype.setViewer = function (viewer) {
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
 
-    //$('#ixbrl-search').keyup(function () { inspector.search($(this).val()) });
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
 
 }
@@ -125,22 +130,58 @@ Inspector.prototype.search = function (s) {
     var results = this._search.search(s);
     var viewer = this._viewer;
     var inspector = this;
-    var table = $('#inspector .search table.results');
-    $('tr', table).remove();
+    var container = $('#inspector .search-results .results');
+    $('div', container).remove();
     viewer.clearRelatedHighlighting();
-    $.each(results, function (i,r) {
-        if (i < 100) {
-            var row = $('<tr></tr>')
-                .click(function () { inspector.selectFact(r.fact.id) })
-                .mouseenter(function () { viewer.linkedHighlightFact(r.fact); })
-                .mouseleave(function () { viewer.clearLinkedHighlightFact(r.fact); })
-                .data('ivid', r.fact.id)
-                .appendTo($("tbody", table));
-            $('<td></td>')
-                .text(r.fact.getLabel("std")) // + " (" + r.score + ")" );
-                .appendTo(row);
+    var overlay = $('#inspector .search-results .search-overlay');
+    if (results.length > 0) {
+        overlay.hide();
+        $.each(results, function (i,r) {
+            var f = r.fact;
+            if (i < 100) {
+                var row = $('<div class="result"></div>')
+                    .click(function () { inspector.selectFact(f.id) })
+                    .dblclick(function () { $('#inspector').removeClass("search-mode"); })
+                    .mousedown(function (e) { 
+                        /* Prevents text selection via double click without
+                         * disabling click+drag text selection (which user-select:
+                         * none would )
+                         */
+                        if (e.detail > 1) { 
+                            e.preventDefault() 
+                        } 
+                    })
+                    .mouseenter(function () { viewer.linkedHighlightFact(f); })
+                    .mouseleave(function () { viewer.clearLinkedHighlightFact(f); })
+                    .data('ivid', f.id)
+                    .appendTo(container);
+                $('<div class="title"></div>')
+                    .text(f.getLabel("std"))
+                    .appendTo(row);
+                $('<div class="dimension"></div>')
+                    .text(f.period().toString())
+                    .appendTo(row);
+                var dims = f.dimensions();
+                for (var d in dims) {
+                    $('<div class="dimension"></div>')
+                        .text(f.report().getLabel(dims[d], "std", true) || dims[d])
+                        .appendTo(row);
+                }
+            }
+        });
+    }
+    else {
+        if (s.trim() != "") {
+            $(".title", overlay).text("No Match Found");
+            $(".text", overlay).text("Try again with different keywords");
         }
-    });
+        else {
+            $(".title", overlay).text("Fact Search");
+            $(".text", overlay).text("Please enter some search terms");
+        }
+
+        overlay.show();
+    }
     viewer.highlightRelatedFacts($.map(results, function (r) { return r.fact } ));
 }
 
@@ -319,6 +360,7 @@ Inspector.prototype.update = function () {
     var inspector = this;
     var cf = inspector._currentFact;
     if (cf) {
+        $('#inspector .fact-details').removeClass('no-fact-selected');
         $('#inspector .fact-inspector').empty();
         var a = new Accordian({
             onSelect: function (id) { 
@@ -364,6 +406,9 @@ Inspector.prototype.update = function () {
                             })
                     )
                 }
+                $('<div class="dimension-value"></div>')
+                    .text(fact.report().getLabel(dims[d], "std", true) || dims[d])
+                    .appendTo(h);
             }
             a.addCard(
                 fs.minimallyUniqueLabel(fact),
@@ -376,8 +421,8 @@ Inspector.prototype.update = function () {
         a.contents().appendTo('#inspector .fact-inspector');
         this.updateCalculation(cf);
         $('div.references').empty().append(this._referencesHTML(cf));
-        $('#inspector .search .results tr').removeClass('selected');
-        $('#inspector .search .results tr').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+        $('#inspector .search-results .result').removeClass('selected');
+        $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
 
         var duplicates = cf.duplicates();
         var n = 0;
@@ -394,6 +439,9 @@ Inspector.prototype.update = function () {
 
         this.getPeriodIncrease(cf);
 
+    }
+    else {
+        $('#inspector .fact-details').addClass('no-fact-selected');
     }
     this.updateURLFragment();
 }

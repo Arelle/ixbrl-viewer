@@ -32,57 +32,58 @@ limitations under the License.
     </div>
     <div id="inspector">
       <div class="inspector-content">
-          <div id="ixbrl-controls-top">
-              <!--
-              <div class="search">
-                <span class="icon-search"></span>
-              </div>
-              -->
-              <div class="next-prev">
-                  <span class="ixbrl-prev-tag"></span>
-                  <span class="ixbrl-next-tag"></span>
-              </div>
-              <h1 class="title">Fact Properties</h1>
+        <div id="ixbrl-controls-top">
+          <div class="title">
+            <h1 >Fact Properties</h1>
+            <div class="back">
+            </div>
+          </div>
+          <div class="controls">
+            <div class="search-button">
+              <span class="icon-search"></span>
+            </div>
+            <div class="next-prev">
+                <span class="ixbrl-prev-tag"></span><span class="ixbrl-next-tag"></span>
+            </div>
+          </div>
+          <div class="search-entry">
+            <input id="ixbrl-search" type="text" />
+          </div>
+        </div>
+        <div class="fact-details no-fact-selected">
+          <div class="no-fact-overlay">
+            <div class="no-fact-overlay-icon"></div>
+            <p class="title">No Fact Selected</p>
           </div>
           <div class="collapsible-section">
-              <div class="fact-inspector collapsible-body">
-                <div class="no-fact-selected">
-                  <span>No fact selected</span>
-                </div>
+            <div class="fact-inspector collapsible-body">
+            </div>
+          </div>
+          <div class="collapsible-section">
+             <h3 class="collapsible-header">References</h3>
+             <div class="collapsible-body references">
              </div>
-           </div>
-           <div class="collapsible-section">
-               <h3 class="search-header collapsible-header">Search</h3>
-               <div class="search collapsible-body">
-                 <div class="search-input">
-                     <input type="text" id="ixbrl-search" />
+          </div>
+          <div class="collapsible-section">
+                 <h3 class="collapsible-header">Calculations</h3>
+                 <div class="collapsible-body calculations">
+                   <div class="tree"></div>
                  </div>
-                 <div class="scrollable">
-                     <table class="results" >
-                       <thead>
-                       </thead>
-                       <tbody>
-                       </tbody>
-                     </table>
-                 </div>
-               </div>
-           </div>
-           <div class="collapsible-section">
-               <h3 class="collapsible-header">References</h3>
-               <div class="collapsible-body references">
-               </div>
-            </div>
-           <div class="collapsible-section">
-               <h3 class="collapsible-header">Calculations</h3>
-               <div class="collapsible-body calculations">
-                 <div class="tree"></div>
-               </div>
-            </div>
+          </div>
         </div>
-        <div class="powered-by">
-            Powered by
-            <a href="https://www.workiva.co.uk/solutions/xbrl-and-ixbrl" target="_blank"><img src="../img/workiva.svg" /></a>
+        <div class="search-results">
+          <div class="scrollable results">
+          </div>
+          <div class="search-overlay">
+              <div class="search-overlay-icon"></div>
+              <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
+          </div>
         </div>
+      </div>
+      <div class="powered-by">
+        Powered by
+        <a href="https://www.workiva.co.uk/solutions/xbrl-and-ixbrl" target="_blank"><img src="../img/workiva.svg" /></a>
+      </div>
     </div>
     <div class="dialog-mask">
     </div>

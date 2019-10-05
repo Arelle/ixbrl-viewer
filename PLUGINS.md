@@ -7,7 +7,7 @@ A plugin is a class with one or more of the following methods:
 
 * `extendDisplayOptionsMenu(menu)` - provides a menu object that can be modified to add additional options.
 * `preProcessiXBRL(body, docIndex)` - called once with the `<body>` DOM node for each document in the document set.
-* `updateViewerStyleElements(styleElts)` - called on initialisation with a jQuery object containing the `<style>` element from each document in the document set, allow additional styles to be registered.
+* `updateViewerStyleElements(styleElts)` - called on initialization with a jQuery object containing the `<style>` element from each document in the document set, allow additional styles to be registered.
 
 To instantiate a viewer with a plugin, call `registerPlugin`:
 

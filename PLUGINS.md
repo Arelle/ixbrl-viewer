@@ -1,7 +1,7 @@
 # Plugins
 
 The iXBRL Viewer provides a simple plugin framework, to enable projects to
-build a viewers with additional functionality.
+build JavaScript iXBRL viewers with additional functionality.
 
 A plugin is a class with one or more of the following methods:
 

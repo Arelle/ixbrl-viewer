@@ -38,7 +38,7 @@ export function iXBRLViewer() {
  *
  * styleElts is a JQuery object consisting of the viewer style elements for
  * each document in the document set.  Additional CSS can be appended to the
- * contents, or additional header elements inserted relatie to the provided
+ * contents, or additional header elements inserted relative to the provided
  * style element.
  *
  * extendDisplayOptionsMenu(menu)

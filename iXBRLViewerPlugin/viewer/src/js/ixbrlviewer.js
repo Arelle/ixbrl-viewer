@@ -168,11 +168,7 @@ iXBRLViewer.prototype.load = function() {
                     /* Focus on fact specified in URL fragment, if any */
                     inspector.handleFactDeepLink();
                 },0);
-
-
             }
         });
-        
     }, 0);
-    
 }

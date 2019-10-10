@@ -38,6 +38,10 @@
    background-color: @highlight-2 !important;
 }
 
+span.ixbrl-highlight.ixbrl-element-nonnumeric {
+  background-color: @highlight-2 !important;
+}
+
 div,
 span {
   &.ixbrl-selected:not(.ixbrl-element-nonnumeric) {
@@ -57,6 +61,16 @@ div.ixbrl-selected.ixbrl-element-nonnumeric span {
 }
 
 div.ixbrl-element.ixbrl-element-nonnumeric:not(.ixbrl-selected) span:hover {
+  outline: dashed 2px @primary;
+  outline-offset: 1px;
+}
+
+span.ixbrl-selected.ixbrl-element-nonnumeric {
+  outline: solid 2px @primary;
+  outline-offset: 1px;
+}
+
+span.ixbrl-element.ixbrl-element-nonnumeric:not(.ixbrl-selected):hover {
   outline: dashed 2px @primary;
   outline-offset: 1px;
 }

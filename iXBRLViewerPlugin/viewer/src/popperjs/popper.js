@@ -205,7 +205,7 @@ function getOffsetParent(element) {
     offsetParent = (element = element.nextElementSibling).offsetParent;
   }
 
-  var nodeName = offsetParent && offsetParent.nodeName;
+  var nodeName = offsetParent && offsetParent.nodeName.toUpperCase();
 
   if (!nodeName || nodeName === 'BODY' || nodeName === 'HTML') {
     return element ? element.ownerDocument.documentElement : document.documentElement;
@@ -213,7 +213,7 @@ function getOffsetParent(element) {
 
   // .offsetParent will return the closest TH, TD or TABLE in case
   // no offsetParent is present, I hate this job...
-  if (['TH', 'TD', 'TABLE'].indexOf(offsetParent.nodeName) !== -1 && getStyleComputedProperty(offsetParent, 'position') === 'static') {
+  if (['TH', 'TD', 'TABLE'].indexOf(nodeName) !== -1 && getStyleComputedProperty(offsetParent, 'position') === 'static') {
     return getOffsetParent(offsetParent);
   }
 
@@ -224,7 +224,7 @@ function isOffsetContainer(element) {
   var nodeName = element.nodeName;
 
   if (nodeName === 'BODY' || nodeName === 'body') {
-    return true;
+    return true; // Bug!
   }
   return nodeName === 'HTML' || nodeName === 'html' || getOffsetParent(element.firstElementChild) === element;
 }
@@ -482,11 +482,16 @@ function getBoundingClientRect(element) {
   // we make this check conditional for performance reasons
   if (horizScrollbar || vertScrollbar) {
     var styles = getStyleComputedProperty(element);
-    horizScrollbar -= getBordersSize(styles, 'x');
-    vertScrollbar -= getBordersSize(styles, 'y');
 
-    result.width -= horizScrollbar;
-    result.height -= vertScrollbar;
+    if (styles.display !== 'inline') {
+      // semyonc: http://www.w3.org/TR/cssom-view/#dom-element-clientwidth 
+      //    If the element has no associated CSS layout box or if the CSS layout box is inline the clientWidth and clientHeight return 0
+      horizScrollbar -= getBordersSize(styles, 'x');
+      vertScrollbar -= getBordersSize(styles, 'y');
+
+      result.width -= horizScrollbar;
+      result.height -= vertScrollbar;
+    }
   }
 
   return getClientRect(result);

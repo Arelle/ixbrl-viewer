@@ -17,7 +17,8 @@ import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
 import { IXNode } from './ixnode.js';
 
-export function Viewer(iframes, report) {
+export function Viewer(iv, iframes, report) {
+    this._iv = iv;
     this._report = report;
     this._iframes = iframes;
     this._contents = iframes.contents();
@@ -28,8 +29,9 @@ export function Viewer(iframes, report) {
     this._ixNodeMap = {};
     this._continuedAtMap = {};
     var viewer = this;
-    iframes.each(function (n) { 
-        viewer._preProcessiXBRL($(this).contents().find("body").get(0), n)
+    iframes.each(function (docIndex) { 
+        viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+        iv.callPluginMethod('preProcessiXBRL', $(this).contents().find("body").get(0), docIndex);
     });
     this._buildContinuationMap();
     report.setIXNodeMap(this._ixNodeMap);
@@ -154,10 +156,15 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
 }
 
 Viewer.prototype._applyStyles = function () {
-    $("<style>")
+    var stlyeElts = $("<style>")
         .prop("type", "text/css")
-        .html(require('css-loader!less-loader!../less/viewer.less').toString())
+        .text(require('css-loader!less-loader!../less/viewer.less').toString())
         .appendTo(this._iframes.contents().find("head"));
+    this._iv.callPluginMethod("updateViewerStyleElements", stlyeElts);
+}
+
+Viewer.prototype.contents = function() {
+    return this._iframes.contents();
 }
 
 

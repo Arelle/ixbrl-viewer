@@ -113,6 +113,9 @@ Inspector.prototype.updateURLFragment = function () {
     if (this._currentItem) {
         location.hash = "#f-" + this._currentItem.id;
     }
+    else {
+        location.hash = "";
+    }
 }
 
 Inspector.prototype.buildDisplayOptionsMenu = function () {

@@ -220,6 +220,10 @@ Viewer.prototype._bindHandlers = function () {
         })
         .mouseenter(function (e) { viewer._mouseEnter($(this)) })
         .mouseleave(function (e) { viewer._mouseLeave($(this)) });
+    $("body", this._contents)
+        .click(function (e) {
+            viewer.selectElement(null);
+        });
     
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
@@ -250,6 +254,10 @@ Viewer.prototype.showAndSelectElement = function(e) {
     this.scrollIfNotVisible(e);
 }
 
+Viewer.prototype.clearHighlighting = function () {
+    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+}
+
 /*
  * Update the currently highlighted fact, but do not trigger a change in the
  * inspector.
@@ -257,7 +265,7 @@ Viewer.prototype.showAndSelectElement = function(e) {
  * Used to switch facts when the selection corresponds to multiple facts.
  */
 Viewer.prototype.highlightElements = function (ee) {
-    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    this.clearHighlighting();
     ee.addClass("ixbrl-selected");
 }
 
@@ -276,8 +284,13 @@ Viewer.prototype._ixIdForElement = function (e) {
  * falls within.  If omitted, it's treated as a click on a non-nested fact.
  */
 Viewer.prototype.selectElement = function (e, factIdList) {
-    var factId = this._ixIdForElement(e);
-    this.onSelect.fire(factId, factIdList);
+    if (e !== null) {
+        var factId = this._ixIdForElement(e);
+        this.onSelect.fire(factId, factIdList);
+    }
+    else {
+        this.onSelect.fire(null);
+    }
 }
 
 Viewer.prototype.selectElementByClick = function (e) {
@@ -337,10 +350,12 @@ Viewer.prototype.highlightItem = function(factId) {
 }
 
 Viewer.prototype.showItemById = function (id) {
-    let elt = this.elementForItemId(id);
-    this.showDocumentForItemId(id);
-    if (elt) {
-        this.showElement(elt);
+    if (id !== null) {
+        let elt = this.elementForItemId(id);
+        this.showDocumentForItemId(id);
+        if (elt) {
+            this.showElement(elt);
+        }
     }
 }
 

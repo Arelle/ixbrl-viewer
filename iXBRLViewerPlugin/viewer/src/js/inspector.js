@@ -544,9 +544,16 @@ Inspector.prototype.selectItem = function (id, itemIdList) {
  * For footnotes, we currently only support a single footnote being selected.
  */
 Inspector.prototype.switchItem = function (id) {
-    this._currentItem = this._report.getItemById(id);
-    this._viewer.showItemById(id);
-    this._viewer.highlightItem(id);
+    if (id !== null) {
+        this._currentItem = this._report.getItemById(id);
+        this._viewer.showItemById(id);
+        this._viewer.highlightItem(id);
+    }
+    else {
+        this._currentItem = null;
+        this._viewer.clearHighlighting();
+    }
+    this.update();
     this.update();
 }
 

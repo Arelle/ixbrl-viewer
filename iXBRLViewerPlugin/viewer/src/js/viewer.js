@@ -28,18 +28,34 @@ export function Viewer(iv, iframes, report) {
 
     this._ixNodeMap = {};
     this._continuedAtMap = {};
-    var viewer = this;
-    iframes.each(function (docIndex) { 
-        viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
-        iv.callPluginMethod('preProcessiXBRL', $(this).contents().find("body").get(0), docIndex);
+}
+
+
+Viewer.prototype.initialize = function() {
+    return new Promise((resolve, reject) => {
+        var viewer = this;
+        viewer._iframes.each(function (docIndex) { 
+            viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+        });
+
+        /* Call plugin promise for each document in turn */
+        (async function () {
+            for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
+                await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
+            }
+        })()
+            .then(() => viewer._iv.setProgress("Preparing document") )
+            .then(() => {
+                this._buildContinuationMap();
+                this._report.setIXNodeMap(this._ixNodeMap);
+                this._applyStyles();
+                this._bindHandlers();
+                this.scale = 1;
+                this._setTitle(0);
+                this._addDocumentSetTabs();
+                resolve();
+            });
     });
-    this._buildContinuationMap();
-    report.setIXNodeMap(this._ixNodeMap);
-    this._applyStyles();
-    this._bindHandlers();
-    this.scale = 1;
-    this._setTitle(0);
-    this._addDocumentSetTabs();
 }
 
 function localName(e) {

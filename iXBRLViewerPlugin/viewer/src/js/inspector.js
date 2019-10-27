@@ -60,11 +60,17 @@ export function Inspector(iv) {
     $(window).on("message", function(e) { inspector.handleMessage(e) });
 }
 
-Inspector.prototype.setReport = function (report) {
-    this._report = report;
-    report.setViewerOptions(this._viewerOptions);
-    this._search = new ReportSearch(report);
-    this.buildDisplayOptionsMenu();
+Inspector.prototype.initialize = function (report) {
+    var inspector = this;
+    return new Promise(function (resolve, reject) {
+        inspector._report = report;
+        report.setViewerOptions(inspector._viewerOptions);
+        inspector._iv.setProgress("Building search index").then(() => {
+            inspector._search = new ReportSearch(report);
+            inspector.buildDisplayOptionsMenu();
+            resolve();
+        });
+    });
 }
 
 

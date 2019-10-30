@@ -60,6 +60,23 @@ iXBRLViewer.prototype.callPluginMethod = function (methodName, ...args) {
     });
 }
 
+iXBRLViewer.prototype.pluginPromise = function (methodName, ...args) {
+    var iv = this;
+    return new Promise(function (resolve, reject) {
+        /* Call promises in turn */
+        (async function () {
+            for (var n = 0; n < iv._plugins.length; n++) {
+                var p = iv._plugins[n];
+                if (typeof p[methodName] === 'function') {
+                    await p[methodName](...args);
+                }
+            }
+        })().then(() => {
+            resolve();
+        });
+    });
+}
+
 iXBRLViewer.prototype._reparentDocument = function () {
     var iframeContainer = $('#ixv #iframe-container');
     
@@ -133,42 +150,58 @@ iXBRLViewer.prototype.load = function() {
             });
             if (complete) {
                 clearInterval(timer);
-                $('#ixv .loader .text').text("Building search index");
 
                 var viewer = iv.viewer = new Viewer(iv, iframes, report);
 
-                setTimeout(function () {
-                    inspector.setReport(report);
-                    inspector.setViewer(viewer);
+                viewer.initialize()
+                    .then(() => inspector.initialize(report))
+                    .then(() => {
+                        inspector.setViewer(viewer);
+                        interact('#viewer-pane').resizable({
+                            edges: { left: false, right: ".resize", bottom: false, top: false},
+                            restrictEdges: {
+                                outer: 'parent',
+                                endOnly: true,
+                            },
+                            restrictSize: {
+                                min: { width: 100 }
+                            },
+                        })
+                        .on('resizestart', function (event) {
+                            $('#ixv').css("pointer-events", "none");
+                        })
+                        .on('resizemove', function (event) {
+                            var target = event.target;
+                            var w = 100 * event.rect.width / $(target).parent().width();
+                            target.style.width = w + '%';
+                            $('#inspector').css('width', (100 - w) + '%');
+                        })
+                        .on('resizeend', function (event) {
+                            $('#ixv').css("pointer-events", "auto");
+                        });
+                        $('#ixv .loader').remove();
 
-                    interact('#viewer-pane').resizable({
-                        edges: { left: false, right: ".resize", bottom: false, top: false},
-                        restrictEdges: {
-                            outer: 'parent',
-                            endOnly: true,
-                        },
-                        restrictSize: {
-                            min: { width: 100 }
-                        },
-                    })
-                    .on('resizestart', function (event) {
-                        $('#ixv').css("pointer-events", "none");
-                    })
-                    .on('resizemove', function (event) {
-                        var target = event.target;
-                        var w = 100 * event.rect.width / $(target).parent().width();
-                        target.style.width = w + '%';
-                        $('#inspector').css('width', (100 - w) + '%');
-                    })
-                    .on('resizeend', function (event) {
-                        $('#ixv').css("pointer-events", "auto");
+                        /* Focus on fact specified in URL fragment, if any */
+                        inspector.handleFactDeepLink();
                     });
-                    $('#ixv .loader').remove();
-
-                    /* Focus on fact specified in URL fragment, if any */
-                    inspector.handleFactDeepLink();
-                },0);
             }
         });
     }, 0);
+}
+
+/* Update the progress message during initial load.  Returns a Promise which
+ * resolves once the message is actually displayed */
+iXBRLViewer.prototype.setProgress = function (msg) {
+    return new Promise((resolve, reject) => {
+        /* We need to do a double requestAnimationFrame, as we need to get the
+         * message up before the ensuing thread-blocking work
+         * https://bugs.chromium.org/p/chromium/issues/detail?id=675795 
+         */
+        window.requestAnimationFrame(function () {
+            $('#ixv .loader .text').text(msg);
+            window.requestAnimationFrame(function () {
+                resolve();
+            });
+        });
+    });
 }

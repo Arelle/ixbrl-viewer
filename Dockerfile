@@ -13,6 +13,13 @@ RUN pip install -r requirements-dev.txt
 WORKDIR /build/
 ADD . /build/
 
+# The following command replaces the @VERSION@ string in setup.py and package.json
+# with the tagged version number from GIT_TAG
+ENV VERSION="0.0.0"
+RUN if [ "$GIT_TAG" != "" ] ; then VERSION=$GIT_TAG ; fi
+RUN echo Version = $VERSION
+RUN sed -i s/@VERSION@/$VERSION/ setup.py package.json
+
 # build ixbrlviewer.js
 RUN apt-get update && apt-get install -y curl && \
     curl -sL https://deb.nodesource.com/setup_10.x | bash && \
@@ -32,10 +39,12 @@ RUN mkdir /test_reports
 RUN nosetests --with-xunit --xunit-file=/test_reports/results.xml --cover-html tests.unit_tests
 
 # pypi package creation
-# The following command replaces the @VERSION@ string in setup.py with the tagged version number from GIT_TAG
-RUN sed -i s/@VERSION@/$GIT_TAG/ setup.py
 ARG BUILD_ARTIFACTS_PYPI=/build/dist/*.tar.gz
 RUN python setup.py sdist
+
+# npm package creation
+RUN npm pack
+ARG BUILD_ARTIFACTS_NPM=/build/*.tgz
 
 ARG BUILD_ARTIFACTS_AUDIT=/audit/*
 RUN mkdir /audit/

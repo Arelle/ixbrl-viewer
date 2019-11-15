@@ -18,8 +18,7 @@ ADD . /build/
 ENV VERSION="0.0.0"
 RUN if [ "$GIT_TAG" != "" ] ; then VERSION=$GIT_TAG ; fi
 RUN echo Version = $VERSION
-RUN sed -i s/@VERSION@/$VERSION/ setup.py
-RUN sed -i s/@VERSION@/$VERSION/ package.json
+RUN sed -i s/@VERSION@/$VERSION/ setup.py package.json
 
 # build ixbrlviewer.js
 RUN apt-get update && apt-get install -y curl && \

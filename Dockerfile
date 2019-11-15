@@ -14,10 +14,9 @@ WORKDIR /build/
 ADD . /build/
 
 # The following command replaces the @VERSION@ string in setup.py and package.json
-# with the tagged version number from GIT_TAG
-ENV VERSION="0.0.0"
-RUN if [ "$GIT_TAG" != "" ] ; then VERSION=$GIT_TAG ; fi
-RUN echo Version = $VERSION
+# with the tagged version number from GIT_TAG or `0.0.0` if GIT_TAG is not set
+ARG VERSION=${GIT_TAG:-0.0.0}
+RUN echo "Version = $VERSION"
 RUN sed -i s/@VERSION@/$VERSION/ setup.py package.json
 
 # build ixbrlviewer.js

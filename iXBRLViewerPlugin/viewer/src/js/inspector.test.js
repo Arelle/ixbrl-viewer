@@ -100,10 +100,9 @@ describe("Describe changes", () => {
         expect(insp.describeChange(fromFact(-1000000), toFact(1000))).toBe("From US $ -1000000 in ");
     });
 
-    test("From zero", () => {
+    test("From/to zero", () => {
         expect(insp.describeChange(fromFact(0), toFact(1000))).toBe("From US $ 0 in ");
         expect(insp.describeChange(fromFact(0), toFact(0))).toBe("From US $ 0 in ");
+        expect(insp.describeChange(fromFact(1000), toFact(0))).toBe("From US $ 1000 in ");
     });
-
-
 });

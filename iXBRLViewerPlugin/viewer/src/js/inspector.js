@@ -279,7 +279,7 @@ Inspector.prototype.viewerMouseLeave = function (id) {
 }
 
 Inspector.prototype.describeChange = function (oldFact, newFact) {
-    if (newFact.value() > 0 == oldFact.value() > 0) {
+    if (newFact.value() > 0 == oldFact.value() > 0 && Math.abs(oldFact.value()) + Math.abs(newFact.value()) > 0) {
         var x = (newFact.value() - oldFact.value()) * 100 / oldFact.value();
         var t;
         if (x >= 0) {

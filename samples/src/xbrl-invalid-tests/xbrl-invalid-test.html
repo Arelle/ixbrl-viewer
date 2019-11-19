@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns:ixt="http://www.xbrl.org/inlineXBRL/transformation/2011-07-31" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/1999/xhtml" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:ifrs="http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-full" xmlns:link="http://www.xbrl.org/2003/linkbase">
+  <head>
+    <title>iXBRL Viewer Test Document</title>
+    <style type="text/css">
+            .time-series td { 
+                padding: 5px;
+            }
+            table.accounts td,
+            table.accounts th {
+                padding: 5px;
+            }
+            td.figure {
+                text-align: right;
+            }
+            .top-border td.figure {
+                border-top: solid 1px #000;
+            }
+            .bottom-border td.figure {
+                border-bottom: solid 1px #000;
+            }
+        </style>
+  </head>
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <div style="display: none">
+      <ix:header>
+        <ix:references>
+          <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd" xlink:type="simple" />
+          <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd" xlink:type="simple" />
+        </ix:references>
+        <ix:resources>
+          <xbrli:unit id="u1">
+            <xbrli:measure>iso4217:GBP</xbrli:measure>
+          </xbrli:unit>
+          <xbrli:context id="c1">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2019-01-01</xbrli:startDate>
+              <xbrli:endDate>2019-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c2">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate></xbrli:startDate>
+              <xbrli:endDate></xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="i1">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:instant>2019-12-31</xbrli:instant>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="i2">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:instant></xbrli:instant>
+            </xbrli:period>
+          </xbrli:context>
+        </ix:resources>
+      </ix:header>
+    </div>
+    <h3>Numeric values</h3>
+    <table>
+      <tr>
+        <td style="padding: 15px">Missing period (duration)</td>
+        <td style="padding: 15px">
+          <ix:nonFraction decimals="0" name="ifrs:Revenue" unitRef="u1" format="ixt:numdotdecimal" contextRef="c1" id="f1">761,123</ix:nonFraction>
+        </td>
+        <td style="padding: 15px">(
+          <ix:nonFraction decimals="0" name="ifrs:Revenue" format="ixt:numdotdecimal" unitRef="u1" sign="-" id="f2" contextRef="c2">461,123</ix:nonFraction>)
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 15px">Missing period (instant)</td>
+        <td style="padding: 15px">
+          <ix:nonFraction decimals="0" name="ifrs:DeferredTaxAssets" unitRef="u1" format="ixt:numdotdecimal" contextRef="i1" id="f3">761,123</ix:nonFraction>
+        </td>
+        <td style="padding: 15px">(
+          <ix:nonFraction decimals="0" name="ifrs:DeferredTaxAssets" format="ixt:numdotdecimal" unitRef="u1" sign="-" id="f4" contextRef="i2">461,123</ix:nonFraction>)
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

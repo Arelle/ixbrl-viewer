@@ -233,9 +233,9 @@ class IXBRLViewerBuilder:
 
             if f.context.isForeverPeriod:
                 aspects["p"] = "f"
-            elif f.context.isInstantPeriod:
+            elif f.context.isInstantPeriod and f.context.instantDatetime is not None:
                 aspects["p"] = self.dateFormat(f.context.instantDatetime.isoformat())
-            elif f.context.isStartEndPeriod:
+            elif f.context.isStartEndPeriod and f.context.startDatetime is not None and f.context.endDatetime is not None:
                 aspects["p"] = "%s/%s" % (
                     self.dateFormat(f.context.startDatetime.isoformat()),
                     self.dateFormat(f.context.endDatetime.isoformat())

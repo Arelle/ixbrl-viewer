@@ -73,7 +73,6 @@ Inspector.prototype.initialize = function (report) {
     });
 }
 
-
 Inspector.prototype.setViewer = function (viewer) {
     this._viewer = viewer;
     var inspector = this;
@@ -279,6 +278,24 @@ Inspector.prototype.viewerMouseLeave = function (id) {
     $('#inspector .search .results tr').removeClass('linked-highlight');
 }
 
+Inspector.prototype.describeChange = function (oldFact, newFact) {
+    if (newFact.value() > 0 == oldFact.value() > 0 && Math.abs(oldFact.value()) + Math.abs(newFact.value()) > 0) {
+        var x = (newFact.value() - oldFact.value()) * 100 / oldFact.value();
+        var t;
+        if (x >= 0) {
+            t = formatNumber(x,1) + "% increase on ";
+        }
+        else {
+            t = formatNumber(-1 * x,1) + "% decrease on ";
+        }
+        return t;
+    }
+    else {
+        return "From " + oldFact.readableValue() + " in "; 
+    }
+
+}
+
 Inspector.prototype.getPeriodIncrease = function (fact) {
     var viewer = this._viewer;
     var inspector = this;
@@ -295,21 +312,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
         var s = "";
         if (mostRecent) {
             var allMostRecent = this._report.getAlignedFacts(mostRecent);
-            if (fact.value() > 0 == mostRecent.value() > 0) {
-                var x = (fact.value() - mostRecent.value()) * 100 / mostRecent.value();
-                var t;
-                if (x > 0) {
-                    t = formatNumber(x,1) + "% increase on ";
-                }
-                else {
-                    t = formatNumber(-1 * x,1) + "% decrease on ";
-                }
-                s = $("<span>").text(t);
-            }
-            else {
-                s = $("<span>").text("From " + mostRecent.readableValue() + " in "); 
-            }
-
+            s = $("<span></span>").text(this.describeChange(mostRecent, fact));
             $("<span></span>").text(mostRecent.periodString())
             .addClass("year-on-year-fact-link")
             .appendTo(s)

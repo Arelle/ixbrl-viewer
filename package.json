@@ -1,6 +1,6 @@
 {
   "name": "ixbrl-viewer",
-  "version": "@VERSION@",
+  "version": "0.0.0",
   "description": "iXBRL Viewer",
   "main": "iXBRLViewerPlugin/viewer/src/js/ixbrlviewer.js",
   "directories": {

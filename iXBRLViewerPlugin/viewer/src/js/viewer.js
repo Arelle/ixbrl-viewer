@@ -352,7 +352,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var report = this._report;
     var viewer = this;
     if (on) {
-        $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
+        $(".ixbrl-element:not(.ixbrl-continuation):not(.ixbrl-element-footnote)", this._contents).each(function () {
             var factId = $(this).data('ivid');
             var continuations = viewer._ixNodeMap[factId].continuations;
             var elements = viewer.elementsForFactIds([factId].concat(continuations));
@@ -362,6 +362,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
                 elements.addClass("ixbrl-highlight-" + i);
             }
         });
+        $(".ixbrl-element-footnote", this._contents).addClass("ixbrl-highlight");
     }
     else {
         $(".ixbrl-element", this._contents).removeClass (function (i, className) {

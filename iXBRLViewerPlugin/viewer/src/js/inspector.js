@@ -196,6 +196,10 @@ Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
 }
 
+Inspector.prototype.updateFootnotes = function (fact) {
+    $('.footnotes').empty().append(this._footnotesHTML(fact));
+}
+
 Inspector.prototype._referencesHTML = function (fact) {
     var c = fact.concept();
     var a = new Accordian();
@@ -262,6 +266,19 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
 
     });
     return a.contents();
+}
+
+Inspector.prototype._footnotesHTML = function (fact) {
+    var html = $("<ul></ul>");
+    $.each(fact.footnotes(), (n, fn) => {
+        $("<li></li>")
+            .appendTo(html)
+            .text(fn.id)
+            .mouseenter(() => { this._viewer.linkedHighlightFact(fn); })
+            .mouseleave(() => { this._viewer.clearLinkedHighlightFact(fn); })
+            .click(() => { this.selectFact(fn.id); });
+    });
+    return html;
 }
 
 Inspector.prototype.viewerMouseEnter = function (id) {
@@ -431,6 +448,7 @@ Inspector.prototype.update = function () {
 
         a.contents().appendTo('#inspector .fact-inspector');
         this.updateCalculation(cf);
+        this.updateFootnotes(cf);
         $('div.references').empty().append(this._referencesHTML(cf));
         $('#inspector .search-results .result').removeClass('selected');
         $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');

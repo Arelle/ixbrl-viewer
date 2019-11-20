@@ -27,5 +27,6 @@ export function IXNode(wrapperNode, docIndex) {
     this.escaped = false;
     this.continuations = [];
     this.docIndex = docIndex;
+    this.footnote = false;
 }
 

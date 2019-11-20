@@ -112,7 +112,10 @@ Viewer.prototype._addDocumentSetTabs = function() {
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   var elt;
   var name = localName(n.nodeName).toUpperCase();
-  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION')) {
+  var isFootnote = (name == 'FOOTNOTE');
+  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
+    /* Is the element the only significant content within a <td> or <th> ? If
+     * so, use that as the wrapper element. */
     var node = $(n).closest("td,th").eq(0);
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
@@ -120,6 +123,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             node = null;
         } 
     }
+    /* Otherwise, insert a <span> as wrapper */
     if (node == null || node.length == 0) {
         var wrapper = "<span>";
         var nn = n.getElementsByTagName("*");
@@ -153,6 +157,10 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
       if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
           ixn.escaped = true;
       }
+    }
+    if (isFootnote) {
+      $(node).addClass("ixbrl-element-footnote");
+      ixn.footnote = true;
     }
     if (elt) {
       var concept = n.getAttribute("name");

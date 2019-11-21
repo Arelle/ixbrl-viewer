@@ -238,5 +238,5 @@ Fact.prototype.escaped = function () {
 }
 
 Fact.prototype.footnotes = function () {
-    return $.map(this.f.fn || [], (fn, i) => new Footnote(fn));
+    return $.map(this.f.fn || [], (fn, i) => this._report.getFactById(fn));
 }

@@ -14,4 +14,9 @@
 
 export function Footnote(footnoteId) {
     this.id = footnoteId;
+    this.facts = [];
+}
+
+Footnote.prototype.addFact = function (f) {
+    this.facts.push(f); 
 }

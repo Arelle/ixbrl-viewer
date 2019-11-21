@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { Fact } from "./fact.js"
+import { Footnote } from "./footnote.js"
 import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
 import { ViewerOptions } from "./viewerOptions.js";
@@ -23,6 +24,23 @@ export function iXBRLReport (data) {
     this._facts = {};
     this._ixNodeMap = {};
     this._viewerOptions = new ViewerOptions();
+    this._initialize();
+}
+
+iXBRLReport.prototype._initialize = function () {
+    for (var id in this.data.facts) {
+        var f = new Fact(this, id);
+        this._facts[id] = f;
+        var fns = this.data.facts[id].fn || [];
+        fns.forEach((fnid) => {
+            var fn = this._facts[fnid];
+            if (fn === undefined) {
+                fn = new Footnote(fnid);
+                this._facts[fnid] = fn;
+            }
+            fn.addFact(f);
+        });
+    }
 }
 
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptions) {
@@ -73,14 +91,6 @@ iXBRLReport.prototype.languageNames = function() {
 }
 
 iXBRLReport.prototype.getFactById = function(id) {
-    if (!this._facts.hasOwnProperty(id)) {
-        if (this.data.facts.hasOwnProperty(id)) {
-            this._facts[id] = new Fact(this, id);
-        }
-        else {
-            this._facts[id] = null;
-        }
-    }
     return this._facts[id];
 }
 

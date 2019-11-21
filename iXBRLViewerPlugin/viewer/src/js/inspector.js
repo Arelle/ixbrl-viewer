@@ -22,6 +22,8 @@ import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
 import { Accordian } from './accordian.js';
 import { FactSet } from './factset.js';
+import { Fact } from './fact.js';
+import { Footnote } from './footnote.js';
 
 export function Inspector(iv) {
     /* Insert HTML and CSS styles into body */
@@ -387,7 +389,12 @@ Inspector.prototype._updateEntityIdentifier = function (fact, context) {
 Inspector.prototype.update = function () {
     var inspector = this;
     var cf = inspector._currentFact;
-    if (cf) {
+    if (!cf) {
+        $('#inspector').removeClass('footnote-mode');
+        $('#inspector .fact-details').addClass('no-fact-selected');
+    } 
+    else if (cf instanceof Fact) {
+        $('#inspector').removeClass('footnote-mode');
         $('#inspector .fact-details').removeClass('no-fact-selected');
         $('#inspector .fact-inspector').empty();
         var a = new Accordian({
@@ -469,8 +476,8 @@ Inspector.prototype.update = function () {
         this.getPeriodIncrease(cf);
 
     }
-    else {
-        $('#inspector .fact-details').addClass('no-fact-selected');
+    else if (cf instanceof Footnote) {
+        $('#inspector').addClass('footnote-mode');
     }
     this.updateURLFragment();
 }

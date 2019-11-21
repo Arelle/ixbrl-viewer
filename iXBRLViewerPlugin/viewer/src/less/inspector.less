@@ -197,6 +197,10 @@
           padding: 0;
           font-size: 1.8rem;
           line-height: 3.2rem;
+
+          &.footnote-properties {
+            display: none;
+          }
         }
 
         .back {
@@ -666,6 +670,21 @@
 
       .search-results {
         display: block;
+      }
+    }
+
+    &.footnote-mode:not(.search-mode) .inspector-content {
+      #ixbrl-controls-top .title {
+        h1.fact-properties {
+            display: none;
+        }
+        h1.footnote-properties {
+            display: block;
+        }
+      }
+      .fact-details,
+      .next-prev {
+        display: none;
       }
     }
 

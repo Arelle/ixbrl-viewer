@@ -64,7 +64,7 @@ ReportSearch.prototype.search = function(s) {
 
     $.each(rr, function (i,r) {
         results.push({
-            "fact": searchIndex._report.getFactById(r.ref),
+            "fact": searchIndex._report.getItemById(r.ref),
             "score": r.score
         });
     })

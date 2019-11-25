@@ -21,23 +21,32 @@ import $ from 'jquery'
 
 export function iXBRLReport (data) {
     this.data = data;
-    this._facts = {};
+    // A map of IDs to Fact and Footnote objects
+    this._items = {};
     this._ixNodeMap = {};
     this._viewerOptions = new ViewerOptions();
+}
+
+/*
+ * Set additional information about facts obtained from parsing the iXBRL.
+ */
+iXBRLReport.prototype.setIXNodeMap = function(ixData) {
+    this._ixNodeMap = ixData;
     this._initialize();
 }
 
 iXBRLReport.prototype._initialize = function () {
     for (var id in this.data.facts) {
         var f = new Fact(this, id);
-        this._facts[id] = f;
+        this._items[id] = f;
         var fns = this.data.facts[id].fn || [];
         fns.forEach((fnid) => {
-            var fn = this._facts[fnid];
+            var fn = this._items[fnid];
             if (fn === undefined) {
-                fn = new Footnote(fnid);
-                this._facts[fnid] = fn;
+                fn = new Footnote(this, fnid);
+                this._items[fnid] = fn;
             }
+            // Associate fact with footnote
             fn.addFact(f);
         });
     }
@@ -90,28 +99,22 @@ iXBRLReport.prototype.languageNames = function() {
     return this.data.languages;
 }
 
-iXBRLReport.prototype.getFactById = function(id) {
-    return this._facts[id];
+iXBRLReport.prototype.getItemById = function(id) {
+    return this._items[id];
 }
 
-/*
- * Set additional information about facts obtained from parsing the iXBRL.
- */
-iXBRLReport.prototype.setIXNodeMap = function(ixData) {
-    this._ixNodeMap = ixData;
-}
 
-iXBRLReport.prototype.getIXNodeForFactId = function(factId) {
-    return this._ixNodeMap[factId] || {};
+iXBRLReport.prototype.getIXNodeForItemId = function(id) {
+    return this._ixNodeMap[id] || {};
 }
 
 iXBRLReport.prototype.facts = function() {
-    var allFacts = [];
+    var allItems = [];
     var report = this;
     $.each(this.data.facts, function (id, f) {
-        allFacts.push(report.getFactById(id));
+        allItems.push(report.getItemById(id));
     });
-    return allFacts;
+    return allItems;
 }
 
 iXBRLReport.prototype.prefixMap = function() {

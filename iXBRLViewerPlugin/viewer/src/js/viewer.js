@@ -137,7 +137,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         node = $(n).parent();
     }
     var id = n.getAttribute("id");
-    node.addClass("ixbrl-element").data('ivid',id);
+    node.addClass("ixbrl-element").data('ivid', id);
     var ixn = new IXNode(node, docIndex);
     this._ixNodeMap[id] = ixn;
     if (n.getAttribute("continuedAt")) {
@@ -206,7 +206,7 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
         next = elements.last();
     }
     
-    this.showDocumentForFactId(next.data('ivid'));
+    this.showDocumentForItemId(next.data('ivid'));
     this.showElement(next);
     this.selectElement(next);
 }
@@ -313,14 +313,14 @@ Viewer.prototype.clearRelatedHighlighting = function (f) {
 }
 
 Viewer.prototype.elementForFact = function (fact) {
-    return this.elementForFactId(fact.id);
+    return this.elementForItemId(fact.id);
 }
 
-Viewer.prototype.elementForFactId = function (factId) {
+Viewer.prototype.elementForItemId = function (factId) {
     return this._ixNodeMap[factId].wrapperNode;
 }
 
-Viewer.prototype.elementsForFactIds = function (ids) {
+Viewer.prototype.elementsForItemIds = function (ids) {
     var viewer = this;
     return $($.map(ids, function (id, n) {
         return viewer._ixNodeMap[id].wrapperNode.get();
@@ -328,17 +328,17 @@ Viewer.prototype.elementsForFactIds = function (ids) {
 }
 
 Viewer.prototype.elementsForFacts = function (facts) {
-    return this.elementsForFactIds($.map(facts, function (f) { return f.id }));
+    return this.elementsForItemIds($.map(facts, function (f) { return f.id }));
 }
 
 Viewer.prototype.highlightFact = function(factId) {
     var continuations = this._ixNodeMap[factId].continuations;
-    this.highlightElements(this.elementsForFactIds([factId].concat(continuations)));
+    this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
 }
 
-Viewer.prototype.showFactById = function (factId) {
-    let elt = this.elementForFactId(factId);
-    this.showDocumentForFactId(factId);
+Viewer.prototype.showItemById = function (id) {
+    let elt = this.elementForItemId(id);
+    this.showDocumentForItemId(id);
     if (elt) {
         this.showElement(elt);
     }
@@ -355,7 +355,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
         $(".ixbrl-element:not(.ixbrl-continuation):not(.ixbrl-element-footnote)", this._contents).each(function () {
             var factId = $(this).data('ivid');
             var continuations = viewer._ixNodeMap[factId].continuations;
-            var elements = viewer.elementsForFactIds([factId].concat(continuations));
+            var elements = viewer.elementsForItemIds([factId].concat(continuations));
             elements.addClass("ixbrl-highlight");
             var i = groups[report.getFactById(factId).conceptQName().prefix];
             if (i !== undefined) {
@@ -413,7 +413,7 @@ Viewer.prototype._setTitle = function (docIndex) {
     $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
 }
 
-Viewer.prototype.showDocumentForFactId = function(factId) {
+Viewer.prototype.showDocumentForItemId = function(factId) {
     this.selectDocument(this._ixNodeMap[factId].docIndex);
 }
 

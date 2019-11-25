@@ -12,16 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export function Footnote(report, footnoteId) {
-    this.id = footnoteId;
-    this.facts = [];
-    this._ixNode = report.getIXNodeForItemId(footnoteId);
-}
+.block-list-item {
+  margin: 0.9rem 0;
+  padding: 0.3rem 0.9rem;
+  background-color: @button-background;
+  cursor: pointer;
+  position: relative;
 
-Footnote.prototype.addFact = function (f) {
-    this.facts.push(f); 
-}
+  & > * {
+    margin: 0.6rem 0;
+  }
 
-Footnote.prototype.textContent = function () {
-    return this._ixNode.wrapperNode.text();
+  &:hover {
+    background-color: @background-selected;
+  }
+
+  &.selected {
+    background-color: @background-selected;
+  }
+
+  &.linked-highlight {
+    .linked-highlight-cell();
+  }
 }

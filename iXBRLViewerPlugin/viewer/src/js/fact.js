@@ -22,7 +22,7 @@ import $ from 'jquery'
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
-    this._ixNode = report.getIXNodeForFactId(factId);
+    this._ixNode = report.getIXNodeForItemId(factId);
     this._report = report;
     this.id = factId;
 }
@@ -238,5 +238,5 @@ Fact.prototype.escaped = function () {
 }
 
 Fact.prototype.footnotes = function () {
-    return $.map(this.f.fn || [], (fn, i) => this._report.getFactById(fn));
+    return $.map(this.f.fn || [], (fn, i) => this._report.getItemById(fn));
 }

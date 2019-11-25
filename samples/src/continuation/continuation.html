@@ -31,7 +31,8 @@
               <xbrli:endDate>2017-12-31</xbrli:endDate>
             </xbrli:period>
           </xbrli:context>
-          <ix:relationship fromRefs="f1" toRefs="fn1" />
+          <ix:relationship fromRefs="f1" toRefs="fn1 fn2" />
+          <ix:relationship fromRefs="f4" toRefs="fn2" />
         </ix:resources>
       </ix:header>
     </div>
@@ -68,5 +69,16 @@
     <p><ix:footnote id="fn1">
         This is the content of footnote 1.
     </ix:footnote></p>
+    <ix:footnote id="fn2">
+        <p>
+            This is the content of footnote 2.  It's much longer that footnote 1 and has multiple paragraphs.
+        </p>
+        <p>
+            It also has <b>bold</b> and <i>italic</i> text.
+        </p>
+        <p>
+            It's also associated with multiple facts.
+        </p>
+    </ix:footnote>
   </body>
 </html>

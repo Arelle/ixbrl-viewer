@@ -245,9 +245,8 @@ class IXBRLViewerBuilder:
 
             frels = self.footnoteRelationshipSet.fromModelObject(f)
             if frels:
-                factData["fn"] = []
                 for frel in frels:
-                    factData["fn"].append(frel.toModelObject.id)
+                    factData.setdefault("fn", []).append(frel.toModelObject.id)
 
             self.taxonomyData["facts"][f.id] = factData
             self.addConcept(f.concept)

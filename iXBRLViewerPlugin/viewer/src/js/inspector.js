@@ -283,9 +283,9 @@ Inspector.prototype._footnotesHTML = function (fact) {
             .addClass("block-list-item")
             .appendTo(html)
             .text(t)
-            .mouseenter(() => { this._viewer.linkedHighlightFact(fn); })
-            .mouseleave(() => { this._viewer.clearLinkedHighlightFact(fn); })
-            .click(() => { this.selectItem(fn.id); });
+            .mouseenter(() => this._viewer.linkedHighlightFact(fn))
+            .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
+            .click(() => this.selectItem(fn.id));
     });
     return html;
 }
@@ -342,9 +342,9 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
             $("<span></span>").text(mostRecent.periodString())
             .addClass("year-on-year-fact-link")
             .appendTo(s)
-            .click(function () { inspector.selectItem(mostRecent.id) })
-            .mouseenter(function () {  $.each(allMostRecent, function (i,f) { viewer.linkedHighlightFact(f);} ) })
-            .mouseleave(function () {  $.each(allMostRecent, function (i,f) { viewer.clearLinkedHighlightFact(f);} ) });
+            .click(() => inspector.selectItem(mostRecent.id))
+            .mouseenter(() => $.each(allMostRecent, (i,f) => viewer.linkedHighlightFact(f)))
+            .mouseleave(() => $.each(allMostRecent, (i,f) => viewer.clearLinkedHighlightFact(f)));
 
         }
         else {
@@ -413,9 +413,7 @@ Inspector.prototype.update = function () {
         $('#inspector .fact-details').removeClass('no-fact-selected');
         $('#inspector .fact-inspector').empty();
         var a = new Accordian({
-            onSelect: function (id) { 
-                inspector.switchItem(id);
-            }, 
+            onSelect: (id) => inspector.switchItem(id),
             alwaysOpen: true,
             dissolveSingle: true,
         });
@@ -485,8 +483,8 @@ Inspector.prototype.update = function () {
         }
         $('.duplicates .text').text((n + 1) + " of " + ndup);
         var viewer = this._viewer;
-        $('.duplicates .prev').off().click(function () { inspector.selectItem(duplicates[(n+ndup-1) % ndup].id)});
-        $('.duplicates .next').off().click(function () { inspector.selectItem(duplicates[(n+1) % ndup].id)});
+        $('.duplicates .prev').off().click(() => inspector.selectItem(duplicates[(n+ndup-1) % ndup].id));
+        $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
 
         this.getPeriodIncrease(cf);
 

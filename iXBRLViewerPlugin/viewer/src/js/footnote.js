@@ -23,5 +23,5 @@ Footnote.prototype.addFact = function (f) {
 }
 
 Footnote.prototype.textContent = function () {
-    return this._ixNode.wrapperNode.text();
+    return this._ixNode.textContent();
 }

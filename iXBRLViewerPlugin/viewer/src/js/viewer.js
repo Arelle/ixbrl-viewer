@@ -79,7 +79,7 @@ Viewer.prototype._buildContinuationMap = function() {
                 if (this._ixNodeMap[nextId] !== undefined) {
                     this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
                     this._continuedAtMap[nextId].continuationOf = id;
-                    parts.push(nextId);
+                    parts.push(this._ixNodeMap[nextId]);
                 }
                 else {
                     console.log("Unresolvable continuedAt reference: " + nextId);
@@ -138,7 +138,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     }
     var id = n.getAttribute("id");
     node.addClass("ixbrl-element").data('ivid', id);
-    var ixn = new IXNode(node, docIndex);
+    var ixn = new IXNode(id, node, docIndex);
     this._ixNodeMap[id] = ixn;
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
@@ -332,7 +332,7 @@ Viewer.prototype.elementsForFacts = function (facts) {
 }
 
 Viewer.prototype.highlightFact = function(factId) {
-    var continuations = this._ixNodeMap[factId].continuations;
+    var continuations = this._ixNodeMap[factId].continuationIds();
     this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
 }
 
@@ -352,17 +352,19 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var report = this._report;
     var viewer = this;
     if (on) {
-        $(".ixbrl-element:not(.ixbrl-continuation):not(.ixbrl-element-footnote)", this._contents).each(function () {
+        $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
             var factId = $(this).data('ivid');
-            var continuations = viewer._ixNodeMap[factId].continuations;
-            var elements = viewer.elementsForItemIds([factId].concat(continuations));
+            var ixn = viewer._ixNodeMap[factId];
+            var elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
             elements.addClass("ixbrl-highlight");
-            var i = groups[report.getFactById(factId).conceptQName().prefix];
-            if (i !== undefined) {
-                elements.addClass("ixbrl-highlight-" + i);
+
+            if (!ixn.footnote) {
+                var i = groups[report.getItemById(factId).conceptQName().prefix];
+                if (i !== undefined) {
+                    elements.addClass("ixbrl-highlight-" + i);
+                }
             }
         });
-        $(".ixbrl-element-footnote", this._contents).addClass("ixbrl-highlight");
     }
     else {
         $(".ixbrl-element", this._contents).removeClass (function (i, className) {

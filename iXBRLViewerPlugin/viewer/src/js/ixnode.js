@@ -22,11 +22,21 @@
  * which will either be an inserted div or span wrapper, or the nearest
  * enclosing td or th.
  */
-export function IXNode(wrapperNode, docIndex) {
+export function IXNode(id, wrapperNode, docIndex) {
     this.wrapperNode = wrapperNode;
     this.escaped = false;
     this.continuations = [];
     this.docIndex = docIndex;
     this.footnote = false;
+    this.id = id;
 }
 
+IXNode.prototype.continuationIds = function () {
+    return this.continuations.map(n => n.id);
+}
+
+IXNode.prototype.textContent = function () {
+    return [this].concat(this.continuations)
+        .map(n => n.wrapperNode.text())
+        .join(" ");
+}

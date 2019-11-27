@@ -491,7 +491,7 @@ Inspector.prototype.update = function () {
     }
     else if (cf instanceof Footnote) {
         $('#inspector').addClass('footnote-mode');
-        $('#inspector .footnote-details .footnote-facts').html(this._footnoteFactsHTML());
+        $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML());
     }
     this.updateURLFragment();
 }

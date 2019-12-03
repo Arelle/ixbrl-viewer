@@ -36,6 +36,7 @@ iXBRLReport.prototype.setIXNodeMap = function(ixData) {
 }
 
 iXBRLReport.prototype._initialize = function () {
+    var fncount = 1;
     for (var id in this.data.facts) {
         var f = new Fact(this, id);
         this._items[id] = f;
@@ -43,7 +44,7 @@ iXBRLReport.prototype._initialize = function () {
         fns.forEach((fnid) => {
             var fn = this._items[fnid];
             if (fn === undefined) {
-                fn = new Footnote(this, fnid);
+                fn = new Footnote(this, fnid, "Footnote " + (fncount++).toString());
                 this._items[fnid] = fn;
             }
             // Associate fact with footnote

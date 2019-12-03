@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -274,15 +274,10 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
 Inspector.prototype._footnotesHTML = function (fact) {
     var html = $("<div></div>");
     $.each(fact.footnotes(), (n, fn) => {
-        var vv = wrapLabel(fn.textContent(), 120);
-        var t = vv[0];
-        if (vv.length > 1) {
-            t += ' \u2026';
-        }
         $("<div></div>")
             .addClass("block-list-item")
             .appendTo(html)
-            .text(t)
+            .text(truncateLabel(fn.textContent(), 120))
             .mouseenter(() => this._viewer.linkedHighlightFact(fn))
             .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
             .click(() => this.selectItem(fn.id));
@@ -408,8 +403,7 @@ Inspector.prototype.update = function () {
         $('#inspector').removeClass('footnote-mode');
         $('#inspector .fact-details').addClass('no-fact-selected');
     } 
-    else if (cf instanceof Fact) {
-        $('#inspector').removeClass('footnote-mode');
+    else { 
         $('#inspector .fact-details').removeClass('no-fact-selected');
         $('#inspector .fact-inspector').empty();
         var a = new Accordian({
@@ -419,47 +413,54 @@ Inspector.prototype.update = function () {
         });
         var fs = new FactSet(this._currentFactList);
         $.each(inspector._currentFactList, function (i, fact) {
-            var factHTML = $(require('../html/fact-details.html')); 
-            $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
-            $('.documentation', factHTML).text(fact.getLabel("doc") || "");
-            $('tr.concept td', factHTML).text(fact.conceptName());
-            $('tr.period td', factHTML)
-                .text(fact.periodString());
-            if (fact.isNumeric()) {
-                $('tr.period td', factHTML).append(
-                    $("<span></span>") 
-                        .addClass("analyse")
-                        .text("")
-                        .click(function () {
-                            inspector._chart.analyseDimension(fact,["p"])
-                        })
-                );
-            }
-            inspector._updateEntityIdentifier(fact, factHTML);
-            inspector._updateValue(fact, false, factHTML);
-            $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
-            $('#dimensions', factHTML).empty();
-            var dims = fact.dimensions();
-            for (var d in dims) {
-                var h = $('<div class="dimension"></div>')
-                    .text(fact.report().getLabel(d, "std", true) || d)
-                    .appendTo($('#dimensions', factHTML));
+            var factHTML;
+            var title = fs.minimallyUniqueLabel(fact);
+            if (fact instanceof Fact) {
+                factHTML = $(require('../html/fact-details.html')); 
+                $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
+                $('.documentation', factHTML).text(fact.getLabel("doc") || "");
+                $('tr.concept td', factHTML).text(fact.conceptName());
+                $('tr.period td', factHTML)
+                    .text(fact.periodString());
                 if (fact.isNumeric()) {
-                    h.append(
+                    $('tr.period td', factHTML).append(
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
                             .click(function () {
-                                inspector._chart.analyseDimension(fact,[d])
+                                inspector._chart.analyseDimension(fact,["p"])
                             })
-                    )
+                    );
                 }
-                $('<div class="dimension-value"></div>')
-                    .text(fact.report().getLabel(dims[d], "std", true) || dims[d])
-                    .appendTo(h);
+                inspector._updateEntityIdentifier(fact, factHTML);
+                inspector._updateValue(fact, false, factHTML);
+                $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
+                $('#dimensions', factHTML).empty();
+                var dims = fact.dimensions();
+                for (var d in dims) {
+                    var h = $('<div class="dimension"></div>')
+                        .text(fact.report().getLabel(d, "std", true) || d)
+                        .appendTo($('#dimensions', factHTML));
+                    if (fact.isNumeric()) {
+                        h.append(
+                            $("<span></span>") 
+                                .addClass("analyse")
+                                .text("")
+                                .click(function () {
+                                    inspector._chart.analyseDimension(fact,[d])
+                                })
+                        )
+                    }
+                    $('<div class="dimension-value"></div>')
+                        .text(fact.report().getLabel(dims[d], "std", true) || dims[d])
+                        .appendTo(h);
+                }
+            }
+            else if (fact instanceof Footnote) {
+                factHTML = $("<div></div>").append($("<p></p>").text(truncateLabel(fact.textContent(), 240)))
             }
             a.addCard(
-                fs.minimallyUniqueLabel(fact),
+                title,
                 factHTML.children(), 
                 fact.id == cf.id,
                 fact.id
@@ -467,31 +468,35 @@ Inspector.prototype.update = function () {
         });
 
         a.contents().appendTo('#inspector .fact-inspector');
-        this.updateCalculation(cf);
-        this.updateFootnotes(cf);
-        $('div.references').empty().append(this._referencesHTML(cf));
-        $('#inspector .search-results .result').removeClass('selected');
-        $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+        if (cf instanceof Fact) {
+            $('#inspector').removeClass('footnote-mode');
 
-        var duplicates = cf.duplicates();
-        var n = 0;
-        var ndup = duplicates.length;
-        for (var i = 0; i < ndup; i++) {
-            if (cf.id == duplicates[i].id) {
-                n = i;
+            this.updateCalculation(cf);
+            this.updateFootnotes(cf);
+            $('div.references').empty().append(this._referencesHTML(cf));
+            $('#inspector .search-results .result').removeClass('selected');
+            $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+
+            var duplicates = cf.duplicates();
+            var n = 0;
+            var ndup = duplicates.length;
+            for (var i = 0; i < ndup; i++) {
+                if (cf.id == duplicates[i].id) {
+                    n = i;
+                }
             }
+            $('.duplicates .text').text((n + 1) + " of " + ndup);
+            var viewer = this._viewer;
+            $('.duplicates .prev').off().click(() => inspector.selectItem(duplicates[(n+ndup-1) % ndup].id));
+            $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
+
+            this.getPeriodIncrease(cf);
+
         }
-        $('.duplicates .text').text((n + 1) + " of " + ndup);
-        var viewer = this._viewer;
-        $('.duplicates .prev').off().click(() => inspector.selectItem(duplicates[(n+ndup-1) % ndup].id));
-        $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
-
-        this.getPeriodIncrease(cf);
-
-    }
-    else if (cf instanceof Footnote) {
-        $('#inspector').addClass('footnote-mode');
-        $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML());
+        else if (cf instanceof Footnote) {
+            $('#inspector').addClass('footnote-mode');
+            $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML());
+        }
     }
     this.updateURLFragment();
 }

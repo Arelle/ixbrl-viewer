@@ -261,7 +261,7 @@ Viewer.prototype.highlightElements = function (ee) {
     ee.addClass("ixbrl-selected");
 }
 
-Viewer.prototype._factIdForElement = function (e) {
+Viewer.prototype._ixIdForElement = function (e) {
     var id = e.data('ivid');
     if (e.hasClass("ixbrl-continuation")) {
         id = this._continuedAtMap[id].continuationOf;
@@ -276,7 +276,7 @@ Viewer.prototype._factIdForElement = function (e) {
  * falls within.  If omitted, it's treated as a click on a non-nested fact.
  */
 Viewer.prototype.selectElement = function (e, factIdList) {
-    var factId = this._factIdForElement(e);
+    var factId = this._ixIdForElement(e);
     this.onSelect.fire(factId, factIdList);
 }
 
@@ -284,7 +284,7 @@ Viewer.prototype.selectElementByClick = function (e) {
     var eltSet = [];
     var viewer = this;
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet.unshift(viewer._factIdForElement($(this))); 
+        eltSet.unshift(viewer._ixIdForElement($(this))); 
     });
     this.selectElement(e, eltSet);
 }

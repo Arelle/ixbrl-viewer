@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export function Footnote(report, footnoteId) {
+export function Footnote(report, footnoteId, title) {
     this.id = footnoteId;
     this.facts = [];
+    this.title = title;
     this._ixNode = report.getIXNodeForItemId(footnoteId);
 }
 

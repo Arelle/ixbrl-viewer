@@ -521,9 +521,12 @@ Inspector.prototype.selectItem = function (id, factIdList) {
 }
 
 /*
- * Switches the currently selected fact.  Unlike selectItem, this does not
- * change the current list of "alternate" facts.  The fact "id" must be in the
- * current fact list.
+ * Switches the currently selected item.  Unlike selectItem, this does not
+ * change the current list of "alternate" items.  
+ *
+ * For facts, the "id" must be in the current alternate fact list.
+ *
+ * For footnotes, we currently only support a single footnote being selected.
  */
 Inspector.prototype.switchItem = function (id) {
     this._currentItem = this._report.getItemById(id);

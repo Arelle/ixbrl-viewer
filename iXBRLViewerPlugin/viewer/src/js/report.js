@@ -36,7 +36,14 @@ iXBRLReport.prototype.setIXNodeMap = function(ixData) {
 }
 
 iXBRLReport.prototype._initialize = function () {
-    var fncount = 1;
+
+    // Build an array of footnotes IDs in document order so that we can assign
+    // numbers to foonotes
+    var fnorder = Object.keys(this._ixNodeMap).filter((id) => this._ixNodeMap[id].footnote);
+    fnorder.sort((a,b) => this._ixNodeMap[a].docOrderindex - this._ixNodeMap[b].docOrderindex);
+
+    // Create footnote objects for all footnotes, and associate facts with
+    // those footnotes to allow 2 way fact <-> footnote navigation.
     for (var id in this.data.facts) {
         var f = new Fact(this, id);
         this._items[id] = f;
@@ -44,7 +51,7 @@ iXBRLReport.prototype._initialize = function () {
         fns.forEach((fnid) => {
             var fn = this._items[fnid];
             if (fn === undefined) {
-                fn = new Footnote(this, fnid, "Footnote " + (fncount++).toString());
+                fn = new Footnote(this, fnid, "Footnote " + (fnorder.indexOf(fnid) + 1));
                 this._items[fnid] = fn;
             }
             // Associate fact with footnote

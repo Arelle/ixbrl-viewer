@@ -22,6 +22,9 @@
  * which will either be an inserted div or span wrapper, or the nearest
  * enclosing td or th.
  */
+
+var docOrderindex = 0;
+
 export function IXNode(id, wrapperNode, docIndex) {
     this.wrapperNode = wrapperNode;
     this.escaped = false;
@@ -29,6 +32,7 @@ export function IXNode(id, wrapperNode, docIndex) {
     this.docIndex = docIndex;
     this.footnote = false;
     this.id = id;
+    this.docOrderindex = docOrderindex++;
 }
 
 IXNode.prototype.continuationIds = function () {

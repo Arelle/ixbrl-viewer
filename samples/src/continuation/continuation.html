@@ -32,7 +32,7 @@
             </xbrli:period>
           </xbrli:context>
           <ix:relationship fromRefs="f1" toRefs="fn1 fn2" />
-          <ix:relationship fromRefs="f4" toRefs="fn2" />
+          <ix:relationship fromRefs="f4" toRefs="fn2 fn4" />
           <ix:relationship fromRefs="f11" toRefs="fn3" />
         </ix:resources>
       </ix:header>
@@ -75,7 +75,10 @@
             This is the content of footnote 2.  It's much longer that footnote 1 and has multiple paragraphs.
         </p>
         <p>
-            It also has <b>bold</b> and <i>italic</i> text.
+            <ix:footnote id="fn4">
+            It also has <b>bold</b> and <i>italic</i> text, and contains a nested footnote.
+              <ix:nonNumeric id="f14" name="ifrs:ConcentrationsOfRisk" contextRef="c1" >And a nested fact.</ix:nonNumeric>
+            </ix:footnote>
         </p>
         <p>
             It's also associated with multiple facts.

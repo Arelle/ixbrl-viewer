@@ -395,8 +395,14 @@ Inspector.prototype._footnoteFactsHTML = function() {
     return html;
 }
 
+/* 
+ * Build an accordian containing a summary of all nested facts/footnotes
+ * corresponding to the current viewer selection.
+ */
 Inspector.prototype._selectionSummaryAccordian = function() {
     var cf = this._currentItem;
+
+    // dissolveSingle => title not shown if only one item in accordian
     var a = new Accordian({
         onSelect: (id) => this.switchItem(id),
         alwaysOpen: true,

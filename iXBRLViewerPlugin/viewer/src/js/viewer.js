@@ -331,7 +331,7 @@ Viewer.prototype.elementsForFacts = function (facts) {
     return this.elementsForItemIds($.map(facts, function (f) { return f.id }));
 }
 
-Viewer.prototype.highlightFact = function(factId) {
+Viewer.prototype.highlightItem = function(factId) {
     var continuations = this._ixNodeMap[factId].continuationIds();
     this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
 }

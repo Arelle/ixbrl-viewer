@@ -409,8 +409,8 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         dissolveSingle: true,
     });
 
-    var fs = new FactSet(this._currentFactList);
-    $.each(this._currentFactList, (i, fact) => {
+    var fs = new FactSet(this._currentItemList);
+    $.each(this._currentItemList, (i, fact) => {
         var factHTML;
         var title = fs.minimallyUniqueLabel(fact);
         if (fact instanceof Fact) {
@@ -514,22 +514,22 @@ Inspector.prototype.update = function () {
 /*
  * Select a fact or footnote from the report.
  *
- * Takes an ID to select.  If the item is a fact, an optional list of
- * "alternate" facts may be specified, which will be presented in an accordian.
- * This is used when the user clicks on a nested fact in the viewer, so that
- * all facts corresponding to the area clicked are shown.
+ * Takes an ID of the item to select.  An optional list of "alternate"
+ * fact/footnotes may be specified, which will be presented in an accordian.
+ * This is used when the user clicks on a nested fact/footnote in the viewer,
+ * so that all items corresponding to the area clicked are shown.
  *
- * If factIdList is omitted, the currently selected fact list is reset to just
- * the primary fact.
+ * If itemIdList is omitted, the currently selected item list is reset to just
+ * the primary item.
  */
-Inspector.prototype.selectItem = function (id, factIdList) {
-    if (factIdList === undefined) {
-        this._currentFactList = [ this._report.getItemById(id) ];
+Inspector.prototype.selectItem = function (id, itemIdList) {
+    if (itemIdList === undefined) {
+        this._currentItemList = [ this._report.getItemById(id) ];
     }
     else {
-        this._currentFactList = [];
-        for (var i = 0; i < factIdList.length; i++) {
-            this._currentFactList.push(this._report.getItemById(factIdList[i]));
+        this._currentItemList = [];
+        for (var i = 0; i < itemIdList.length; i++) {
+            this._currentItemList.push(this._report.getItemById(itemIdList[i]));
         }
     }
     this.switchItem(id);
@@ -546,7 +546,7 @@ Inspector.prototype.selectItem = function (id, factIdList) {
 Inspector.prototype.switchItem = function (id) {
     this._currentItem = this._report.getItemById(id);
     this._viewer.showItemById(id);
-    this._viewer.highlightFact(id);
+    this._viewer.highlightItem(id);
     this.update();
 }
 

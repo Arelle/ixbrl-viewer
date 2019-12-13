@@ -150,7 +150,7 @@ Inspector.prototype.factListRow = function(f) {
         .mouseleave(() => this._viewer.clearLinkedHighlightFact(f))
         .data('ivid', f.id);
     $('<div class="title"></div>')
-        .text(f.getLabel("std"))
+        .text(f.getLabel("std") || f.conceptName())
         .appendTo(row);
     $('<div class="dimension"></div>')
         .text(f.period().toString())

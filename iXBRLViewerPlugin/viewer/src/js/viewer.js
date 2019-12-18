@@ -79,7 +79,7 @@ Viewer.prototype._buildContinuationMap = function() {
                 if (this._ixNodeMap[nextId] !== undefined) {
                     this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
                     this._continuedAtMap[nextId].continuationOf = id;
-                    parts.push(nextId);
+                    parts.push(this._ixNodeMap[nextId]);
                 }
                 else {
                     console.log("Unresolvable continuedAt reference: " + nextId);
@@ -112,7 +112,10 @@ Viewer.prototype._addDocumentSetTabs = function() {
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   var elt;
   var name = localName(n.nodeName).toUpperCase();
-  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION')) {
+  var isFootnote = (name == 'FOOTNOTE');
+  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
+    /* Is the element the only significant content within a <td> or <th> ? If
+     * so, use that as the wrapper element. */
     var node = $(n).closest("td,th").eq(0);
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
@@ -120,6 +123,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             node = null;
         } 
     }
+    /* Otherwise, insert a <span> as wrapper */
     if (node == null || node.length == 0) {
         var wrapper = "<span>";
         var nn = n.getElementsByTagName("*");
@@ -133,8 +137,8 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         node = $(n).parent();
     }
     var id = n.getAttribute("id");
-    node.addClass("ixbrl-element").data('ivid',id);
-    var ixn = new IXNode(node, docIndex);
+    node.addClass("ixbrl-element").data('ivid', id);
+    var ixn = new IXNode(id, node, docIndex);
     this._ixNodeMap[id] = ixn;
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
@@ -153,6 +157,10 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
       if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
           ixn.escaped = true;
       }
+    }
+    if (isFootnote) {
+      $(node).addClass("ixbrl-element-footnote");
+      ixn.footnote = true;
     }
     if (elt) {
       var concept = n.getAttribute("name");
@@ -198,7 +206,7 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
         next = elements.last();
     }
     
-    this.showDocumentForFactId(next.data('ivid'));
+    this.showDocumentForItemId(next.data('ivid'));
     this.showElement(next);
     this.selectElement(next);
 }
@@ -253,7 +261,7 @@ Viewer.prototype.highlightElements = function (ee) {
     ee.addClass("ixbrl-selected");
 }
 
-Viewer.prototype._factIdForElement = function (e) {
+Viewer.prototype._ixIdForElement = function (e) {
     var id = e.data('ivid');
     if (e.hasClass("ixbrl-continuation")) {
         id = this._continuedAtMap[id].continuationOf;
@@ -268,7 +276,7 @@ Viewer.prototype._factIdForElement = function (e) {
  * falls within.  If omitted, it's treated as a click on a non-nested fact.
  */
 Viewer.prototype.selectElement = function (e, factIdList) {
-    var factId = this._factIdForElement(e);
+    var factId = this._ixIdForElement(e);
     this.onSelect.fire(factId, factIdList);
 }
 
@@ -276,7 +284,7 @@ Viewer.prototype.selectElementByClick = function (e) {
     var eltSet = [];
     var viewer = this;
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet.unshift(viewer._factIdForElement($(this))); 
+        eltSet.unshift(viewer._ixIdForElement($(this))); 
     });
     this.selectElement(e, eltSet);
 }
@@ -305,14 +313,14 @@ Viewer.prototype.clearRelatedHighlighting = function (f) {
 }
 
 Viewer.prototype.elementForFact = function (fact) {
-    return this.elementForFactId(fact.id);
+    return this.elementForItemId(fact.id);
 }
 
-Viewer.prototype.elementForFactId = function (factId) {
+Viewer.prototype.elementForItemId = function (factId) {
     return this._ixNodeMap[factId].wrapperNode;
 }
 
-Viewer.prototype.elementsForFactIds = function (ids) {
+Viewer.prototype.elementsForItemIds = function (ids) {
     var viewer = this;
     return $($.map(ids, function (id, n) {
         return viewer._ixNodeMap[id].wrapperNode.get();
@@ -320,17 +328,17 @@ Viewer.prototype.elementsForFactIds = function (ids) {
 }
 
 Viewer.prototype.elementsForFacts = function (facts) {
-    return this.elementsForFactIds($.map(facts, function (f) { return f.id }));
+    return this.elementsForItemIds($.map(facts, function (f) { return f.id }));
 }
 
-Viewer.prototype.highlightFact = function(factId) {
-    var continuations = this._ixNodeMap[factId].continuations;
-    this.highlightElements(this.elementsForFactIds([factId].concat(continuations)));
+Viewer.prototype.highlightItem = function(factId) {
+    var continuations = this._ixNodeMap[factId].continuationIds();
+    this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
 }
 
-Viewer.prototype.showFactById = function (factId) {
-    let elt = this.elementForFactId(factId);
-    this.showDocumentForFactId(factId);
+Viewer.prototype.showItemById = function (id) {
+    let elt = this.elementForItemId(id);
+    this.showDocumentForItemId(id);
     if (elt) {
         this.showElement(elt);
     }
@@ -346,12 +354,15 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     if (on) {
         $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
             var factId = $(this).data('ivid');
-            var continuations = viewer._ixNodeMap[factId].continuations;
-            var elements = viewer.elementsForFactIds([factId].concat(continuations));
+            var ixn = viewer._ixNodeMap[factId];
+            var elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
             elements.addClass("ixbrl-highlight");
-            var i = groups[report.getFactById(factId).conceptQName().prefix];
-            if (i !== undefined) {
-                elements.addClass("ixbrl-highlight-" + i);
+
+            if (!ixn.footnote) {
+                var i = groups[report.getItemById(factId).conceptQName().prefix];
+                if (i !== undefined) {
+                    elements.addClass("ixbrl-highlight-" + i);
+                }
             }
         });
     }
@@ -404,7 +415,7 @@ Viewer.prototype._setTitle = function (docIndex) {
     $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
 }
 
-Viewer.prototype.showDocumentForFactId = function(factId) {
+Viewer.prototype.showDocumentForItemId = function(factId) {
     this.selectDocument(this._ixNodeMap[factId].docIndex);
 }
 

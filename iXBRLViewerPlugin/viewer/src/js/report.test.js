@@ -58,6 +58,7 @@ var testReportData = {
 
 describe("Language options", () => {
     var testReport = new iXBRLReport(testReportData);
+    testReport._initialize();
     test("Available languages", () => {
         var al = testReport.availableLanguages();
         expect(al).toHaveLength(3);
@@ -74,15 +75,17 @@ describe("Language options", () => {
 
 describe("Fetching facts", () => {
     var testReport = new iXBRLReport(testReportData);
+    testReport._initialize();
 
     test("Successful", () => {
-        var f = testReport.getFactById("f1");
+        var f = testReport.getItemById("f1");
+        testReport._initialize();
         expect(f).not.toBeNull();
         expect(f.decimals()).toEqual(-3);
     });
 
     test("Non-existent fact", () => {
-        var f = testReport.getFactById("fact-does-not-exist");
-        expect(f).toBeNull();
+        var f = testReport.getItemById("fact-does-not-exist");
+        expect(f).toBeUndefined();
     });
 });

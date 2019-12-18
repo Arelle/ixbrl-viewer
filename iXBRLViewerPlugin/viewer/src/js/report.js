@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { Fact } from "./fact.js"
+import { Footnote } from "./footnote.js"
 import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
 import { ViewerOptions } from "./viewerOptions.js";
@@ -20,9 +21,43 @@ import $ from 'jquery'
 
 export function iXBRLReport (data) {
     this.data = data;
-    this._facts = {};
+    // A map of IDs to Fact and Footnote objects
+    this._items = {};
     this._ixNodeMap = {};
     this._viewerOptions = new ViewerOptions();
+}
+
+/*
+ * Set additional information about facts obtained from parsing the iXBRL.
+ */
+iXBRLReport.prototype.setIXNodeMap = function(ixData) {
+    this._ixNodeMap = ixData;
+    this._initialize();
+}
+
+iXBRLReport.prototype._initialize = function () {
+
+    // Build an array of footnotes IDs in document order so that we can assign
+    // numbers to foonotes
+    var fnorder = Object.keys(this._ixNodeMap).filter((id) => this._ixNodeMap[id].footnote);
+    fnorder.sort((a,b) => this._ixNodeMap[a].docOrderindex - this._ixNodeMap[b].docOrderindex);
+
+    // Create footnote objects for all footnotes, and associate facts with
+    // those footnotes to allow 2 way fact <-> footnote navigation.
+    for (var id in this.data.facts) {
+        var f = new Fact(this, id);
+        this._items[id] = f;
+        var fns = this.data.facts[id].fn || [];
+        fns.forEach((fnid) => {
+            var fn = this._items[fnid];
+            if (fn === undefined) {
+                fn = new Footnote(this, fnid, "Footnote " + (fnorder.indexOf(fnid) + 1));
+                this._items[fnid] = fn;
+            }
+            // Associate fact with footnote
+            fn.addFact(f);
+        });
+    }
 }
 
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptions) {
@@ -72,36 +107,22 @@ iXBRLReport.prototype.languageNames = function() {
     return this.data.languages;
 }
 
-iXBRLReport.prototype.getFactById = function(id) {
-    if (!this._facts.hasOwnProperty(id)) {
-        if (this.data.facts.hasOwnProperty(id)) {
-            this._facts[id] = new Fact(this, id);
-        }
-        else {
-            this._facts[id] = null;
-        }
-    }
-    return this._facts[id];
+iXBRLReport.prototype.getItemById = function(id) {
+    return this._items[id];
 }
 
-/*
- * Set additional information about facts obtained from parsing the iXBRL.
- */
-iXBRLReport.prototype.setIXNodeMap = function(ixData) {
-    this._ixNodeMap = ixData;
-}
 
-iXBRLReport.prototype.getIXNodeForFactId = function(factId) {
-    return this._ixNodeMap[factId] || {};
+iXBRLReport.prototype.getIXNodeForItemId = function(id) {
+    return this._ixNodeMap[id] || {};
 }
 
 iXBRLReport.prototype.facts = function() {
-    var allFacts = [];
+    var allItems = [];
     var report = this;
     $.each(this.data.facts, function (id, f) {
-        allFacts.push(report.getFactById(id));
+        allItems.push(report.getItemById(id));
     });
-    return allFacts;
+    return allItems;
 }
 
 iXBRLReport.prototype.prefixMap = function() {

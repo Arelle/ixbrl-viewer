@@ -91,6 +91,19 @@ export function wrapLabel(str, maxwidth){
     return sections;
 }
 
+/*
+ * Truncate the label to the specified length, breaking on a word boundary, and
+ * adding an ellipsis if the label is actually shortened.
+ */
+export function truncateLabel(label, length) {
+    var vv = wrapLabel(label, length);
+    var t = vv[0];
+    if (vv.length > 1) {
+        t += ' \u2026';
+    }
+    return t;
+}
+
 /* 
  * The JSON format supports datetimes being abbreviated to just xsd:dates.
  * moment.js doesn't support timezoned dates, so fix them to midnight before

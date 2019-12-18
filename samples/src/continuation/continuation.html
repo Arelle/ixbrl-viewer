@@ -31,6 +31,9 @@
               <xbrli:endDate>2017-12-31</xbrli:endDate>
             </xbrli:period>
           </xbrli:context>
+          <ix:relationship fromRefs="f1" toRefs="fn1 fn2" />
+          <ix:relationship fromRefs="f4" toRefs="fn2 fn4" />
+          <ix:relationship fromRefs="f11" toRefs="fn3" />
         </ix:resources>
       </ix:header>
     </div>
@@ -64,5 +67,33 @@
       </ix:nonNumeric>
       <ix:continuation id="f12"> ix:continuation </ix:continuation>
     </p>
+    <p><ix:footnote id="fn1">
+        This is the content of footnote 1.
+    </ix:footnote></p>
+    <ix:footnote id="fn2">
+        <p>
+            This is the content of footnote 2.  It's much longer that footnote 1 and has multiple paragraphs.
+        </p>
+        <p>
+            <ix:footnote id="fn4">
+            It also has <b>bold</b> and <i>italic</i> text, and contains a nested footnote.
+              <ix:nonNumeric id="f14" name="ifrs:ConcentrationsOfRisk" contextRef="c1" >And a nested fact.</ix:nonNumeric>
+            </ix:footnote>
+        </p>
+        <p>
+            It's also associated with multiple facts.
+        </p>
+    </ix:footnote>
+        <p>
+            <ix:footnote id="fn3" continuedAt="fn3-cont1">
+            This is 
+            </ix:footnote>
+            <ix:continuation id="fn3-cont1" continuedAt="fn3-cont2">
+            footnote 3
+            </ix:continuation>
+            <ix:continuation id="fn3-cont2">
+            which is split with continuations
+            </ix:continuation>
+        </p>
   </body>
 </html>

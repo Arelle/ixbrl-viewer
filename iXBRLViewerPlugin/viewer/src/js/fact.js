@@ -17,11 +17,12 @@ import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
+import { Footnote } from "./footnote.js";
 import $ from 'jquery'
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
-    this._ixNode = report.getIXNodeForFactId(factId);
+    this._ixNode = report.getIXNodeForItemId(factId);
     this._report = report;
     this.id = factId;
 }
@@ -234,4 +235,8 @@ Fact.prototype.identifier = function () {
 
 Fact.prototype.escaped = function () {
     return this._ixNode.escaped;
+}
+
+Fact.prototype.footnotes = function () {
+    return $.map(this.f.fn || [], (fn, i) => this._report.getItemById(fn));
 }

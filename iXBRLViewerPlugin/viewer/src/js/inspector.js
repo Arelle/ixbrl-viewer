@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -22,6 +22,8 @@ import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
 import { Accordian } from './accordian.js';
 import { FactSet } from './factset.js';
+import { Fact } from './fact.js';
+import { Footnote } from './footnote.js';
 
 export function Inspector(iv) {
     /* Insert HTML and CSS styles into body */
@@ -34,7 +36,6 @@ export function Inspector(iv) {
     this._iv = iv;
     this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()
-
     
     $(".collapsible-header").click(function () { 
         var d = $(this).closest(".collapsible-section");
@@ -76,7 +77,7 @@ Inspector.prototype.initialize = function (report) {
 Inspector.prototype.setViewer = function (viewer) {
     this._viewer = viewer;
     var inspector = this;
-    viewer.onSelect.add(function (id, eltSet) { inspector.selectFact(id, eltSet) });
+    viewer.onSelect.add(function (id, eltSet) { inspector.selectItem(id, eltSet) });
     viewer.onMouseEnter.add(function (id) { inspector.viewerMouseEnter(id) });
     viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
@@ -92,7 +93,7 @@ Inspector.prototype.setViewer = function (viewer) {
  */
 Inspector.prototype.handleFactDeepLink = function () {
     if (location.hash.startsWith("#f-")) {
-        this.selectFact(location.hash.slice(3));
+        this.selectItem(location.hash.slice(3));
     }
 }
 
@@ -101,7 +102,7 @@ Inspector.prototype.handleMessage = function (event) {
     var data = JSON.parse(jsonString);
 
     if (data.task == 'SHOW_FACT') {
-        this.selectFact(data.factId);
+        this.selectItem(data.factId);
     }
     else {
         console.log("Not handling unsupported task message: " + jsonString);
@@ -109,8 +110,8 @@ Inspector.prototype.handleMessage = function (event) {
 }
 
 Inspector.prototype.updateURLFragment = function () {
-    if (this._currentFact) {
-        location.hash = "#f-" + this._currentFact.id;
+    if (this._currentItem) {
+        location.hash = "#f-" + this._currentItem.id;
     }
 }
 
@@ -132,48 +133,50 @@ Inspector.prototype.highlightAllTags = function (checked) {
     this._viewer.highlightAllTags(checked, inspector._report.namespaceGroups());
 }
 
+Inspector.prototype.factListRow = function(f) {
+    var row = $('<div class="fact-list-item"></div>')
+        .click(() => this.selectItem(f.id))
+        .dblclick(function () { $('#inspector').removeClass("search-mode"); })
+        .mousedown(function (e) { 
+            /* Prevents text selection via double click without
+             * disabling click+drag text selection (which user-select:
+             * none would )
+             */
+            if (e.detail > 1) { 
+                e.preventDefault() 
+            } 
+        })
+        .mouseenter(() => this._viewer.linkedHighlightFact(f))
+        .mouseleave(() => this._viewer.clearLinkedHighlightFact(f))
+        .data('ivid', f.id);
+    $('<div class="title"></div>')
+        .text(f.getLabel("std") || f.conceptName())
+        .appendTo(row);
+    $('<div class="dimension"></div>')
+        .text(f.period().toString())
+        .appendTo(row);
+    var dims = f.dimensions();
+    for (var d in dims) {
+        $('<div class="dimension"></div>')
+            .text(f.report().getLabel(dims[d], "std", true) || dims[d])
+            .appendTo(row);
+    }
+    return row;
+}
 
 Inspector.prototype.search = function (s) {
     var results = this._search.search(s);
     var viewer = this._viewer;
-    var inspector = this;
     var container = $('#inspector .search-results .results');
     $('div', container).remove();
     viewer.clearRelatedHighlighting();
     var overlay = $('#inspector .search-results .search-overlay');
     if (results.length > 0) {
         overlay.hide();
-        $.each(results, function (i,r) {
+        $.each(results, (i,r) => {
             var f = r.fact;
             if (i < 100) {
-                var row = $('<div class="result"></div>')
-                    .click(function () { inspector.selectFact(f.id) })
-                    .dblclick(function () { $('#inspector').removeClass("search-mode"); })
-                    .mousedown(function (e) { 
-                        /* Prevents text selection via double click without
-                         * disabling click+drag text selection (which user-select:
-                         * none would )
-                         */
-                        if (e.detail > 1) { 
-                            e.preventDefault() 
-                        } 
-                    })
-                    .mouseenter(function () { viewer.linkedHighlightFact(f); })
-                    .mouseleave(function () { viewer.clearLinkedHighlightFact(f); })
-                    .data('ivid', f.id)
-                    .appendTo(container);
-                $('<div class="title"></div>')
-                    .text(f.getLabel("std"))
-                    .appendTo(row);
-                $('<div class="dimension"></div>')
-                    .text(f.period().toString())
-                    .appendTo(row);
-                var dims = f.dimensions();
-                for (var d in dims) {
-                    $('<div class="dimension"></div>')
-                        .text(f.report().getLabel(dims[d], "std", true) || dims[d])
-                        .appendTo(row);
-                }
+                this.factListRow(f).appendTo(container);
             }
         });
     }
@@ -194,6 +197,10 @@ Inspector.prototype.search = function (s) {
 
 Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
+}
+
+Inspector.prototype.updateFootnotes = function (fact) {
+    $('.footnotes').empty().append(this._footnotesHTML(fact));
 }
 
 Inspector.prototype._referencesHTML = function (fact) {
@@ -247,7 +254,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
             if (r.facts) {
                 itemHTML.addClass("fact-link");
                 itemHTML.data('ivid', r.facts);
-                itemHTML.click(function () { inspector.selectFact(Object.values(r.facts)[0].id ) });
+                itemHTML.click(function () { inspector.selectItem(Object.values(r.facts)[0].id ) });
                 itemHTML.mouseenter(function () { $.each(r.facts, function (k,f) { viewer.linkedHighlightFact(f); })});
                 itemHTML.mouseleave(function () { $.each(r.facts, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
                 $.each(r.facts, function (k,f) { viewer.highlightRelatedFact(f); });
@@ -262,6 +269,20 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
 
     });
     return a.contents();
+}
+
+Inspector.prototype._footnotesHTML = function (fact) {
+    var html = $("<div></div>");
+    $.each(fact.footnotes(), (n, fn) => {
+        $("<div></div>")
+            .addClass("block-list-item")
+            .appendTo(html)
+            .text(truncateLabel(fn.textContent(), 120))
+            .mouseenter(() => this._viewer.linkedHighlightFact(fn))
+            .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
+            .click(() => this.selectItem(fn.id));
+    });
+    return html;
 }
 
 Inspector.prototype.viewerMouseEnter = function (id) {
@@ -316,9 +337,9 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
             $("<span></span>").text(mostRecent.periodString())
             .addClass("year-on-year-fact-link")
             .appendTo(s)
-            .click(function () { inspector.selectFact(mostRecent.id) })
-            .mouseenter(function () {  $.each(allMostRecent, function (i,f) { viewer.linkedHighlightFact(f);} ) })
-            .mouseleave(function () {  $.each(allMostRecent, function (i,f) { viewer.clearLinkedHighlightFact(f);} ) });
+            .click(() => inspector.selectItem(mostRecent.id))
+            .mouseenter(() => $.each(allMostRecent, (i,f) => viewer.linkedHighlightFact(f)))
+            .mouseleave(() => $.each(allMostRecent, (i,f) => viewer.clearLinkedHighlightFact(f)));
 
         }
         else {
@@ -332,15 +353,14 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 }
 
-Inspector.prototype._updateValue = function (fact, showAll, context) {
-    var inspector = this;
-    var v = fact.readableValue();
+Inspector.prototype._updateValue = function (text, showAll, context) {
+    var v = text;
     if (!showAll) {
-        var fullLabel = v;
-        var vv = wrapLabel(v, 120);
+        var fullLabel = text;
+        var vv = wrapLabel(text, 120);
         if (vv.length > 1) {
             $('tr.value', context).addClass("truncated");
-            $('tr.value .show-all', context).off().click(function () { inspector._updateValue(fact, true); });
+            $('tr.value .show-all', context).off().click(() => this._updateValue(text, true, context));
         }
         else {
             $('tr.value', context).removeClass('truncated');
@@ -367,22 +387,34 @@ Inspector.prototype._updateEntityIdentifier = function (fact, context) {
     }
 }
 
-Inspector.prototype.update = function () {
-    var inspector = this;
-    var cf = inspector._currentFact;
-    if (cf) {
-        $('#inspector .fact-details').removeClass('no-fact-selected');
-        $('#inspector .fact-inspector').empty();
-        var a = new Accordian({
-            onSelect: function (id) { 
-                inspector.switchFact(id);
-            }, 
-            alwaysOpen: true,
-            dissolveSingle: true,
-        });
-        var fs = new FactSet(this._currentFactList);
-        $.each(inspector._currentFactList, function (i, fact) {
-            var factHTML = $(require('../html/fact-details.html')); 
+Inspector.prototype._footnoteFactsHTML = function() {
+    var html = $('<div></div>');
+    this._currentItem.facts.forEach((fact) =>  {
+        html.append(this.factListRow(fact));
+    });
+    return html;
+}
+
+/* 
+ * Build an accordian containing a summary of all nested facts/footnotes
+ * corresponding to the current viewer selection.
+ */
+Inspector.prototype._selectionSummaryAccordian = function() {
+    var cf = this._currentItem;
+
+    // dissolveSingle => title not shown if only one item in accordian
+    var a = new Accordian({
+        onSelect: (id) => this.switchItem(id),
+        alwaysOpen: true,
+        dissolveSingle: true,
+    });
+
+    var fs = new FactSet(this._currentItemList);
+    $.each(this._currentItemList, (i, fact) => {
+        var factHTML;
+        var title = fs.minimallyUniqueLabel(fact);
+        if (fact instanceof Fact) {
+            factHTML = $(require('../html/fact-details.html')); 
             $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
             $('.documentation', factHTML).text(fact.getLabel("doc") || "");
             $('tr.concept td', factHTML).text(fact.conceptName());
@@ -393,13 +425,11 @@ Inspector.prototype.update = function () {
                     $("<span></span>") 
                         .addClass("analyse")
                         .text("")
-                        .click(function () {
-                            inspector._chart.analyseDimension(fact,["p"])
-                        })
+                        .click(() => inspector._chart.analyseDimension(fact,["p"]))
                 );
             }
-            inspector._updateEntityIdentifier(fact, factHTML);
-            inspector._updateValue(fact, false, factHTML);
+            this._updateEntityIdentifier(fact, factHTML);
+            this._updateValue(fact.readableValue(), false, factHTML);
             $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
             $('#dimensions', factHTML).empty();
             var dims = fact.dimensions();
@@ -412,87 +442,113 @@ Inspector.prototype.update = function () {
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
-                            .click(function () {
-                                inspector._chart.analyseDimension(fact,[d])
-                            })
+                            .click(() => this._chart.analyseDimension(fact,[d]))
                     )
                 }
                 $('<div class="dimension-value"></div>')
                     .text(fact.report().getLabel(dims[d], "std", true) || dims[d])
                     .appendTo(h);
             }
-            a.addCard(
-                fs.minimallyUniqueLabel(fact),
-                factHTML.children(), 
-                fact.id == cf.id,
-                fact.id
-            );
-        });
-
-        a.contents().appendTo('#inspector .fact-inspector');
-        this.updateCalculation(cf);
-        $('div.references').empty().append(this._referencesHTML(cf));
-        $('#inspector .search-results .result').removeClass('selected');
-        $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
-
-        var duplicates = cf.duplicates();
-        var n = 0;
-        var ndup = duplicates.length;
-        for (var i = 0; i < ndup; i++) {
-            if (cf.id == duplicates[i].id) {
-                n = i;
-            }
         }
-        $('.duplicates .text').text((n + 1) + " of " + ndup);
-        var viewer = this._viewer;
-        $('.duplicates .prev').off().click(function () { inspector.selectFact(duplicates[(n+ndup-1) % ndup].id)});
-        $('.duplicates .next').off().click(function () { inspector.selectFact(duplicates[(n+1) % ndup].id)});
+        else if (fact instanceof Footnote) {
+            factHTML = $(require('../html/footnote-details.html')); 
+            this._updateValue(fact.textContent(), false, factHTML);
+        }
+        a.addCard(
+            title,
+            factHTML, 
+            fact.id == cf.id,
+            fact.id
+        );
+    });
+    return a;
+}
 
-        this.getPeriodIncrease(cf);
-
-    }
-    else {
+Inspector.prototype.update = function () {
+    var inspector = this;
+    var cf = inspector._currentItem;
+    if (!cf) {
+        $('#inspector').removeClass('footnote-mode');
         $('#inspector .fact-details').addClass('no-fact-selected');
+    } 
+    else { 
+        $('#inspector .fact-details').removeClass('no-fact-selected');
+
+        $('#inspector .fact-inspector')
+            .empty()
+            .append(this._selectionSummaryAccordian().contents());
+
+        if (cf instanceof Fact) {
+            $('#inspector').removeClass('footnote-mode');
+
+            this.updateCalculation(cf);
+            this.updateFootnotes(cf);
+            $('div.references').empty().append(this._referencesHTML(cf));
+            $('#inspector .search-results .result').removeClass('selected');
+            $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+
+            var duplicates = cf.duplicates();
+            var n = 0;
+            var ndup = duplicates.length;
+            for (var i = 0; i < ndup; i++) {
+                if (cf.id == duplicates[i].id) {
+                    n = i;
+                }
+            }
+            $('.duplicates .text').text((n + 1) + " of " + ndup);
+            var viewer = this._viewer;
+            $('.duplicates .prev').off().click(() => inspector.selectItem(duplicates[(n+ndup-1) % ndup].id));
+            $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
+
+            this.getPeriodIncrease(cf);
+
+        }
+        else if (cf instanceof Footnote) {
+            $('#inspector').addClass('footnote-mode');
+            $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML());
+        }
     }
     this.updateURLFragment();
 }
 
 /*
- * Select a fact from the report.
+ * Select a fact or footnote from the report.
  *
- * Takes a fact ID to select and an optional list of "alternate" facts, which
- * will be presented in an accordian.  This is used when the user clicks on a
- * nested fact in the viewer, so that all facts corresponding to the area
- * clicked are shown.
+ * Takes an ID of the item to select.  An optional list of "alternate"
+ * fact/footnotes may be specified, which will be presented in an accordian.
+ * This is used when the user clicks on a nested fact/footnote in the viewer,
+ * so that all items corresponding to the area clicked are shown.
  *
- * If factIdList is omitted, the currently selected fact list is reset to just
- * the primary fact.
+ * If itemIdList is omitted, the currently selected item list is reset to just
+ * the primary item.
  */
-Inspector.prototype.selectFact = function (id, factIdList) {
-    if (factIdList === undefined) {
-        this._currentFactList = [ this._report.getFactById(id) ];
+Inspector.prototype.selectItem = function (id, itemIdList) {
+    if (itemIdList === undefined) {
+        this._currentItemList = [ this._report.getItemById(id) ];
     }
     else {
-        this._currentFactList = [];
-        for (var i = 0; i < factIdList.length; i++) {
-            this._currentFactList.push(this._report.getFactById(factIdList[i]));
+        this._currentItemList = [];
+        for (var i = 0; i < itemIdList.length; i++) {
+            this._currentItemList.push(this._report.getItemById(itemIdList[i]));
         }
     }
-    this.switchFact(id);
+    this.switchItem(id);
 }
 
 /*
- * Switches the currently selected fact.  Unlike selectFact, this does not
- * change the current list of "alternate" facts.  The fact "id" must be in the
- * current fact list.
+ * Switches the currently selected item.  Unlike selectItem, this does not
+ * change the current list of "alternate" items.  
+ *
+ * For facts, the "id" must be in the current alternate fact list.
+ *
+ * For footnotes, we currently only support a single footnote being selected.
  */
-Inspector.prototype.switchFact = function (id) {
-    this._currentFact = this._report.getFactById(id);
-    this._viewer.showFactById(id);
-    this._viewer.highlightFact(id);
+Inspector.prototype.switchItem = function (id) {
+    this._currentItem = this._report.getItemById(id);
+    this._viewer.showItemById(id);
+    this._viewer.highlightItem(id);
     this.update();
 }
-
 
 Inspector.prototype.selectDefaultLanguage = function () {
     var preferredLanguages = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;

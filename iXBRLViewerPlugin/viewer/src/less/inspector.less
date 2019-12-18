@@ -25,6 +25,7 @@
 @import "loader.less";
 @import "tabs.less";
 @import (reference) "text-mixins.less";
+@import "block-list.less";
 
 @top-bar-height: 35px;
 @powered-by-footer-height: 30px;
@@ -197,6 +198,10 @@
           padding: 0;
           font-size: 1.8rem;
           line-height: 3.2rem;
+
+          &.footnote-properties {
+            display: none;
+          }
         }
 
         .back {
@@ -430,6 +435,11 @@
       }
     }
 
+    .inspector-section {
+      padding-left: 0.9rem;
+      padding-right: 0.9rem;
+    }
+
     .collapsible-section {
       .collapsible-body {
         padding-left: 0.9rem;
@@ -482,47 +492,6 @@
           overflow-y: scroll;
         }
 
-        .result {
-          margin: 0.9rem 0;
-          padding: 0.3rem 0.9rem;
-          background-color: @button-background;
-          cursor: pointer;
-          position: relative;
-
-          & > * {
-            margin: 0.6rem 0;
-          }
-
-          .title {
-            color: @text-title;
-          }
-
-          .dimension {
-            color: @text-light;
-            margin: 0.6rem 0;
-          }
-
-          &:hover {
-            background-color: @background-selected;
-          }
-
-          &.selected {
-            background-color: @background-selected;
-
-            .title {
-              font-weight: bold;
-            }
-
-            .dimension {
-              color: @text;
-            }
-          }
-
-          &.linked-highlight {
-            .linked-highlight-cell();
-          }
-        }
-
         .search-overlay {
           transform: translate(-50%, -50%);
           position: absolute;
@@ -551,13 +520,17 @@
         }
       }
 
-      .fact-details {
+      .inspector-body {
         .no-fact-overlay {
           display: none;
         }
       }
 
-      .fact-details.no-fact-selected {
+      .footnote-details {
+        display: none;
+      }
+
+      .inspector-body.no-fact-selected {
         position: absolute;
         top: 13.8rem;
         bottom: 0;
@@ -639,6 +612,31 @@
           outline-offset: 1px;
         }
       }
+
+      .fact-list {
+        .fact-list-item {
+          .block-list-item();
+
+          .title {
+            color: @text-title;
+          }
+
+          .dimension {
+            color: @text-light;
+            margin: 0.6rem 0;
+          }
+
+          &.selected {
+            .title {
+              font-weight: bold;
+            }
+
+            .dimension {
+              color: @text;
+            }
+          }
+        }
+      }
     }
 
     &.search-mode .inspector-content {
@@ -660,12 +658,34 @@
         }
       }
 
-      .fact-details {
+      .fact-details,
+      .footnote-details {
         display: none;
       }
 
       .search-results {
         display: block;
+      }
+    }
+
+    &.footnote-mode:not(.search-mode) .inspector-content {
+      #ixbrl-controls-top .title {
+        h1.fact-properties {
+          display: none;
+        }
+
+        h1.footnote-properties {
+          display: block;
+        }
+      }
+
+      .footnote-details {
+        display: block;
+      }
+
+      .fact-details,
+      .next-prev {
+        display: none;
       }
     }
 

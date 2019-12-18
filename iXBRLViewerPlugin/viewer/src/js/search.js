@@ -62,11 +62,11 @@ ReportSearch.prototype.search = function(s) {
         return [];
     }
 
-    $.each(rr, function (i,r) {
+    rr.forEach((i,r) => 
         results.push({
-            "fact": searchIndex._report.getFactById(r.ref),
+            "fact": searchIndex._report.getItemById(r.ref),
             "score": r.score
-        });
-    })
+        })
+    );
     return results;
 }

@@ -17,20 +17,30 @@
 .tab-area {
   .clearfix();
 
+  background-color: #e3e3e3;
   width: 100%;
-  border-bottom: @simple-border;
+  border: solid 0.1rem #cbcbcb;
+  //border-bottom: @simple-border;
 
   .tab {
-    border: @simple-border;
     float: left;
     padding: 1.2rem;
-    margin-bottom: -0.1rem;
-    background-color: #eee;
     cursor: pointer;
+    color: #444;
+    border: solid 0.1rem #cbcbcb;
+    border-top-left-radius: 0.6rem;
+    border-top-right-radius: 0.6rem;
+    margin-bottom: -0.1rem;
 
     &.active {
+      padding: 1.2rem;
       border-bottom-color: #fff;
       background-color: #fff;
+      border-top: solid 0.4rem #0085e6;
+    }
+
+    &:not(.active) {
+      padding-top: 1.5rem;
     }
   }
 }

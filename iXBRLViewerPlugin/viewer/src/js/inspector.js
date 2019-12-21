@@ -33,6 +33,9 @@ export function Inspector(iv) {
         .prop("type", "text/css")
         .text(inspector_css)
         .appendTo('head');
+    $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+        .attr('href', require('../img/favicon.ico'))
+        .appendTo('head');
     this._iv = iv;
     this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()

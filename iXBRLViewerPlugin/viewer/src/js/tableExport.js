@@ -39,10 +39,11 @@ TableExport.addHandles = function (iframe, report) {
 TableExport.prototype._getRawTable = function (table) {
     var table = this._table;
     var report = this._report;
+    var maxRowLength = 0;
     var rows = [];
-    table.find("tr").each(function () {
+    table.find("tr:visible").each(function () {
         var row = [];
-        $(this).find("td, th").each(function () {
+        $(this).find("td:visible, th:visible").each(function () {
             var colspan = $(this).attr("colspan");
             if (colspan) {
                 for (var i=0; i < colspan-1; i++) {
@@ -84,8 +85,17 @@ TableExport.prototype._getRawTable = function (table) {
                 row.push({ type: "static", value: v});
             }
         });
+        if (row.length > maxRowLength) {
+            maxRowLength = row.length;
+        }
         rows.push(row);
     });
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        while (row.length < maxRowLength) {
+            row.push({ type: "static", value: "" });
+        }
+    }
     return rows;
 }
 
@@ -130,10 +140,6 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
         }
     }
     return constantAspects;
-}
-
-TableExport.prototype._getColumnSlice = function (x) {
-
 }
 
 TableExport.prototype._writeTable = function (data) {

@@ -53,7 +53,7 @@ function testReport(facts, ixData) {
     var data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
     var report = new iXBRLReport(data);
-    report.setIXData(ixData);
+    report.setIXNodeMap(ixData);
     return report;
 }
 
@@ -98,6 +98,25 @@ describe("Simple fact properties", () => {
         expect(f.decimals()).toEqual(-3);
         expect(f.isMonetaryValue()).toBeFalsy();
         expect(f.readableValue()).toEqual("1,000 eg:USD");
+        expect(f.unit().value()).toEqual("eg:USD");
+        expect(f.conceptQName().prefix).toEqual("eg");
+        expect(f.conceptQName().localname).toEqual("Concept1");
+        expect(f.conceptQName().namespace).toEqual("http://www.example.com");
+    });
+
+    test("Numeric (infinite precision)", () => {
+        var f = testFact({
+                "v": 0.0125,
+                "a": {
+                    "c": "eg:Concept1",
+                    "u": "eg:USD", 
+                    "p": "2018-01-01/2019-01-01",
+                }});
+        expect(f.value()).toEqual(0.0125);
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isNumeric()).toBeTruthy();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("0.0125 eg:USD");
         expect(f.unit().value()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
@@ -352,20 +371,20 @@ describe("Readable value", () => {
 
     test("Strip HTML tags and normalise whitespace", () => {
 
-        expect(testFact({ "v": "<b>foo</b>" }, {"escape": true }).readableValue())
+        expect(testFact({ "v": "<b>foo</b>" }, {"escaped": true }).readableValue())
             .toBe("foo");
 
-        expect(testFact({ "v": "    <b>foo</b>bar" }, {"escape": true }).readableValue())
+        expect(testFact({ "v": "    <b>foo</b>bar" }, {"escaped": true }).readableValue())
             .toBe("foobar");
 
-        expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escape": true }).readableValue())
+        expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escaped": true }).readableValue())
             .toBe("foo");
 
     });
 
     test("Don't strip non-escaped facts", () => {
 
-        expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escape": false }).readableValue())
+        expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escaped": false }).readableValue())
             .toBe("\u00a0<b>foo</b>");
         
         expect(testFact({ "v": "\u00a0<b>foo</b>" }, {  }).readableValue())
@@ -374,40 +393,40 @@ describe("Readable value", () => {
     });
 
     test("Detect and strip HTML tags - XHTML tags and attributes", () => {
-        expect(testFact({ "v": "<xhtml:b>foo</xhtml:b>" }, {"escape": true }).readableValue())
+        expect(testFact({ "v": "<xhtml:b>foo</xhtml:b>" }, {"escaped": true }).readableValue())
             .toBe("foo");
 
-        expect(testFact({ "v": '<xhtml:span style="font-weight: bold">foo</xhtml:span>' }, {"escape": true }).readableValue())
+        expect(testFact({ "v": '<xhtml:span style="font-weight: bold">foo</xhtml:span>' }, {"escaped": true }).readableValue())
             .toBe("foo");
     });
 
     test("Detect and strip HTML tags - check behaviour with invalid HTML", () => {
         /* Invalid HTML  */
-        expect(testFact({ "v": "<b:b:b>foo</b:b:b>" }, {"escape": true }).readableValue())
+        expect(testFact({ "v": "<b:b:b>foo</b:b:b>" }, {"escaped": true }).readableValue())
             .toBe("foo");
 
-        expect(testFact({ "v": "<foo<bar>baz</bar>" }, {"escape": true }).readableValue())
+        expect(testFact({ "v": "<foo<bar>baz</bar>" }, {"escaped": true }).readableValue())
             .toBe("baz");
     });
 
     test("Text in consecutive inline elements should be contiguous", () => {
 
-        expect(testFact({ "v": "<b>foo</b><i>bar</i>" }, {"escape":true }).readableValue())
+        expect(testFact({ "v": "<b>foo</b><i>bar</i>" }, {"escaped":true }).readableValue())
             .toBe("foobar");
 
     });
 
     test("Text in block/table elements should be separated.", () => {
 
-        expect(testFact({ "v": "<p>foo</p><p>bar</p>" }, {"escape":true }).readableValue())
+        expect(testFact({ "v": "<p>foo</p><p>bar</p>" }, {"escaped":true }).readableValue())
             .toBe("foo bar");
 
         /* This should really return "foo bar", but we don't correctly detect
          * block tags in prefixed XHTML */
-        expect(testFact({ "v": '<xhtml:p xmlns:xhtml="https://www.w3.org/1999/xhtml/">foo</xhtml:p><xhtml:p>bar</xhtml:p>' }, {"escape":true }).readableValue())
+        expect(testFact({ "v": '<xhtml:p xmlns:xhtml="https://www.w3.org/1999/xhtml/">foo</xhtml:p><xhtml:p>bar</xhtml:p>' }, {"escaped":true }).readableValue())
             .toBe("foobar");
 
-        expect(testFact({ "v": "<table><tr><td>cell1</td><td>cell2</td></tr></table>" }, {"escape":true })
+        expect(testFact({ "v": "<table><tr><td>cell1</td><td>cell2</td></tr></table>" }, {"escaped":true })
             .readableValue())
             .toBe("cell1 cell2");
 
@@ -415,7 +434,7 @@ describe("Readable value", () => {
 
     test("Whitespace normalisation", () => {
 
-        expect(testFact({ "v": "<p>bar  foo</p> <p>bar</p>" }, {"escape":true }).readableValue())
+        expect(testFact({ "v": "<p>bar  foo</p> <p>bar</p>" }, {"escaped":true }).readableValue())
             .toBe("bar foo bar");
 
     });

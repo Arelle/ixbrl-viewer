@@ -58,11 +58,15 @@ ReportSearch.prototype.search = function(s) {
     var results = []
     var searchIndex = this;
 
-    $.each(rr, function (i,r) {
+    if (s == "") {
+        return [];
+    }
+
+    rr.forEach((i,r) => 
         results.push({
-            "fact": searchIndex._report.getFactById(r.ref),
+            "fact": searchIndex._report.getItemById(r.ref),
             "score": r.score
-        });
-    })
+        })
+    );
     return results;
 }

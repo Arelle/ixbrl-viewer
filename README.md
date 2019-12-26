@@ -72,6 +72,12 @@ file name.
 You should now be able to open the created file in Chrome, and the iXBRL viewer
 should load.
 
+## Preparing an iXBRL document set using the Arelle GUI
+
+To prepare an iXBRL document set, open the document set in Arelle.  The process
+is as for a single file, except that a directory should be selected as the
+output location, rather than a file.
+
 ## Preparing an iXBRL file using the Arelle command line
 
 The plugin can also be used on the command line:
@@ -85,6 +91,55 @@ Notes:
 
 * "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
 * The plugin path needs to an absolute file path
+
+## Preparing an iXBRL document set using the Arelle command line
+
+The iXBRL Viewer supports Inline XBRL document sets.  This requires the `inlineXbrlDocumentSet` plugin.  The input is specified using JSON in the following form:
+
+```json
+[
+  {
+    "ixds": [
+      { "file": "file1.html" },
+      { "file": "file2.html" },
+    ]
+  }
+]
+```
+
+The output must be specified as a directory.  For example:
+
+```
+python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url ixbrlviewer.js
+```
+
+The first file specified is the "primary" file, and should be opened in a
+browser to use the viewer.  The other files will be loaded in separate tabs
+within the viewer.
+
+## Using build-viewer.py
+
+As an alternative to the standard Arelle command line, the
+`samples/build-viewer.py` script can also be used.  To use the script, both the
+Arelle source code and the iXBRLViewerPlugin must be on the Python path. e.g.:
+
+```
+PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --help
+```
+
+A document set can be processed by passing a directory as input.  All `.html`
+and `.xhtml` in the directory will be combined into a document set.  The
+generated files will be saved into the directory specified by the `--out`
+option.  
+
+Taxonomy packages can be specified using `--package-dir`.  All ZIP files in the
+specified directories will be loaded as taxonomy packages.
+
+e.g.
+
+```
+PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --out out-dir --package-dir /my/packages/ ixds-dir
+```
 
 ## Running Unit Tests
 

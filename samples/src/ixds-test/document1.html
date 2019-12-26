@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns:ixt="http://www.xbrl.org/inlineXBRL/transformation/2011-07-31" xmlns:ifrs="http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-full" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns="http://www.w3.org/1999/xhtml" xmlns:xbrli="http://www.xbrl.org/2003/instance">
+  <head>
+    <title>iXBRL Viewer Test Document</title>
+    <style type="text/css">
+            .time-series td { 
+                padding: 5px;
+            }
+            table.accounts td,
+            table.accounts th {
+                padding: 5px;
+            }
+            td.figure {
+                text-align: right;
+            }
+            .top-border td.figure {
+                border-top: solid 1px #000;
+            }
+            .bottom-border td.figure {
+                border-bottom: solid 1px #000;
+            }
+        </style>
+  </head>
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <div style="display: none">
+      <ix:header>
+        <ix:references>
+          <link:schemaRef xlink:type="simple" xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd" />
+          <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd" xlink:type="simple" />
+        </ix:references>
+        <ix:resources>
+          <xbrli:unit id="u1">
+            <xbrli:measure>iso4217:GBP</xbrli:measure>
+          </xbrli:unit>
+          <xbrli:context id="c1">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2018-01-01</xbrli:startDate>
+              <xbrli:endDate>2019-01-01T00:00:00</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c2">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2017-01-01</xbrli:startDate>
+              <xbrli:endDate>2017-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c3">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:instant>2018-06-30</xbrli:instant>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c4">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:instant>2017-12-31</xbrli:instant>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c5">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2018-01-01</xbrli:startDate>
+              <xbrli:endDate>2018-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c6">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2017-01-01</xbrli:startDate>
+              <xbrli:endDate>2017-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c7">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2016-01-01</xbrli:startDate>
+              <xbrli:endDate>2016-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c8">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2015-01-01</xbrli:startDate>
+              <xbrli:endDate>2015-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c9">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2014-01-01</xbrli:startDate>
+              <xbrli:endDate>2014-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c10">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2013-01-01</xbrli:startDate>
+              <xbrli:endDate>2013-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c11">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2018-09-01</xbrli:startDate>
+              <xbrli:endDate>2018-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c12">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2017-09-01</xbrli:startDate>
+              <xbrli:endDate>2017-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="dcur1">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://standards.iso.org/iso/17442">5493006IH2N2WMIBB742</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2014-01-01</xbrli:startDate>
+              <xbrli:endDate>2014-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="dprev2">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://standards.iso.org/iso/17442">5493006IH2N2WMIBB742</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2013-01-01</xbrli:startDate>
+              <xbrli:endDate>2013-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="faureciadcur1">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://standards.iso.org/iso/17442">969500F0VMZLK2IULV85</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2014-01-01</xbrli:startDate>
+              <xbrli:endDate>2014-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="faureciadprev2">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://standards.iso.org/iso/17442">969500F0VMZLK2IULV85</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2013-01-01</xbrli:startDate>
+              <xbrli:endDate>2013-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="faureciadpprev3">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://standards.iso.org/iso/17442">969500F0VMZLK2IULV85</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2012-01-01</xbrli:startDate>
+              <xbrli:endDate>2012-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:unit id="EUR">
+            <xbrli:measure>iso4217:EUR</xbrli:measure>
+          </xbrli:unit>
+        </ix:resources>
+      </ix:header>
+    </div>
+    <p>
+      <ix:nonNumeric contextRef="c1" id="f1" name="ifrs:ConcentrationsOfRisk">This is a text tag </ix:nonNumeric>
+    </p>
+    <p>
+      <ix:nonNumeric contextRef="c1" name="ifrs:ChangesInExposureToRisk" id="f2">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Mauris rhoncus aenean vel elit. Turpis cursus in hac habitasse platea dictumst. Nulla porttitor massa id neque aliquam vestibulum morbi. At erat pellentesque adipiscing commodo elit at imperdiet dui  In egestas erat imperdiet sed euismod nisi porta lorem mollis. Ac ut consequat semper viverra nam. Sed ullamcorper morbi tincidunt ornare massa eget egestas purus. Risus ultricies tristique nulla aliquet. Pellentesque habitant morbi tristique senectus et. Ultrices neque ornare aenean euismod elementum nisi quis eleifend. </ix:nonNumeric>
+    </p>
+    <p>
+Profit Loss:
+      <ix:nonFraction name="ifrs:ProfitLoss" id="f3" decimals="0" contextRef="c1" unitRef="u1" format="ixt:numdotdecimal">1234</ix:nonFraction>
+    </p>
+    <p>
+Negative values in text using minus sign  -
+      <ix:nonFraction format="ixt:numdotdecimal" sign="-" unitRef="u1" contextRef="c1" decimals="0" name="ifrs:ProfitLoss" id="f3.1">1234</ix:nonFraction> and using brackets (
+      <ix:nonFraction decimals="0" contextRef="c1" id="f3.2" name="ifrs:ProfitLoss" unitRef="u1" sign="-" format="ixt:numdotdecimal">1234</ix:nonFraction>).
+        
+    </p>
+    <p>
+      Figure tagged in two reports <ix:nonFraction decimals="0" contextRef="c1" id="fx1" name="ifrs:EmployeeBenefitsExpense" unitRef="u1" sign="-" format="ixt:numdotdecimal">1,234</ix:nonFraction>.
+    </p>
+    <p>
+      Figure tagged in three reports <ix:nonFraction decimals="0" contextRef="c1" id="fx2" name="ifrs:WagesAndSalaries" unitRef="u1" sign="-" format="ixt:numdotdecimal">1,234</ix:nonFraction>.
+    </p>
+    <p>
+Profit Loss double tagged:
+      <ix:nonFraction name="ifrs:ProfitLoss" id="f4" contextRef="c1" decimals="0" format="ixt:numdotdecimal" unitRef="u1"><ix:nonFraction name="ifrs:ProfitLoss" id="f5" decimals="0" contextRef="c2" unitRef="u1" format="ixt:numdotdecimal">1234</ix:nonFraction></ix:nonFraction>
+    </p>
+    <p>
+      <ix:nonNumeric contextRef="c1" id="f6" name="ifrs:DescriptionOfExposureToRisk">Mattis rhoncus urna neque viverra justo nec ultrices. Amet tellus cras adipiscing enim. Sed arcu non odio euismod lacinia at. Odio euismod lacinia at quis risus sed vulputate odio. Ac odio tempor orci dapibus. In hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Quis risus sed vulputate odio ut enim. Adipiscing commodo elit at imperdiet dui accumsan sit. Quis vel eros donec ac odio tempor orci dapibus. Turpis nunc eget lorem dolor. Dui nunc mattis enim ut tellus elementum sagittis vitae et. Facilisis sed odio morbi quis commodo. Vitae auctor eu augue ut lectus arcu.
+        <b>Embedded fact:</b>
+        <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" contextRef="c3" decimals="0" id="f7" name="ifrs:Goodwill">1,234,576</ix:nonFraction> Iaculis nunc sed augue lacus viverra vitae congue eu consequat. Neque sodales ut etiam sit amet nisl. Dictum sit amet justo donec enim diam vulputate ut. A diam maecenas sed enim ut sem. Nisl nisi scelerisque eu ultrices vitae auctor. Purus semper eget duis at tellus at. Vehicula ipsum a arcu cursus vitae congue mauris rhoncus. 
+      </ix:nonNumeric>
+    </p>
+    <h3>Table formatting</h3>
+    <table>
+      <tr>
+        <td style="padding: 15px">Element in span with no other content</td>
+        <td style="padding: 15px">
+          <span>
+            <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" id="f8" name="ifrs:DeferredTaxAssets" contextRef="c3" decimals="0">761,123</ix:nonFraction>
+          </span>
+        </td>
+        <td style="padding: 15px">(
+          <ix:nonFraction id="f9" name="ifrs:DeferredTaxAssets" decimals="0" contextRef="c4" unitRef="u1" format="ixt:numdotdecimal" sign="-">461,123</ix:nonFraction>)
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 15px">Other HTML present - cell highlighting OK</td>
+        <td style="padding: 15px">$(
+          <span>
+            <ix:nonFraction contextRef="c3" decimals="0" name="ifrs:DeferredTaxAssets" id="f10" format="ixt:numdotdecimal" unitRef="u1">761,123</ix:nonFraction>
+          </span>)
+        </td>
+        <td style="padding: 15px">
+          <span style="font-weight: bold">&#163;</span>
+          <i>(
+            <ix:nonFraction unitRef="u1" sign="-" format="ixt:numdotdecimal" decimals="0" contextRef="c4" id="f11" name="ifrs:DeferredTaxAssets">461,123</ix:nonFraction>)
+          </i>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 15px">Other alpha numeric content present - cell highlighting not OK</td>
+        <td style="padding: 15px">
+          <span>
+            <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" id="f12" name="ifrs:DeferredTaxAssets" contextRef="c3" decimals="0">761,123</ix:nonFraction>
+          </span>
+          <span>
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" decimals="0" contextRef="c3" id="f13" name="ifrs:DeferredTaxAssets">761,123</ix:nonFraction>
+          </span>
+        </td>
+        <td style="padding: 15px">
+          <span style="font-weight: bold">GBP</span>
+          <i>(
+            <ix:nonFraction sign="-" format="ixt:numdotdecimal" unitRef="u1" contextRef="c4" decimals="0" name="ifrs:DeferredTaxAssets" id="f14">461,123</ix:nonFraction>)
+          </i>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 5px">Border via style attribute</td>
+        <td style="border-bottom: solid 1px #000; padding: 15px">
+          <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" name="ifrs:PropertyPlantAndEquipment" id="f15" contextRef="c3" decimals="0">761,123</ix:nonFraction>
+        </td>
+        <td style="border-bottom: solid 1px #000; padding: 15px">
+          <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" name="ifrs:PropertyPlantAndEquipment" id="f16" contextRef="c4" decimals="0">461,123</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 15px">Double border </td>
+        <td style="border-bottom: double 3px #000; padding: 15px">
+          <ix:nonFraction decimals="0" contextRef="c3" name="ifrs:PropertyPlantAndEquipment" id="f17" unitRef="u1" format="ixt:numdotdecimal">761,123</ix:nonFraction>
+        </td>
+        <td style="border-bottom: double 3px #000; padding: 5px">
+          <ix:nonFraction name="ifrs:PropertyPlantAndEquipment" id="f18" contextRef="c4" decimals="0" format="ixt:numdotdecimal" unitRef="u1">461,123</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 15px">Background colour</td>
+        <td style="border-bottom: solid 1px #000; padding: 15px; background-color: #f70;">
+          <ix:nonFraction decimals="0" contextRef="c3" name="ifrs:PropertyPlantAndEquipment" id="f19" unitRef="u1" format="ixt:numdotdecimal">761,123</ix:nonFraction>
+        </td>
+        <td style="border-bottom: solid 1px #000 !important; padding: 5px; background-color: #f70;">
+          <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" decimals="0" contextRef="c4" name="ifrs:PropertyPlantAndEquipment" id="f20">461,123</ix:nonFraction>
+        </td>
+      </tr>
+    </table>
+    <h3>Styled via inline stylesheet</h3>
+    <table class="time-series">
+      <tr>
+        <td>2018</td>
+        <td>
+          <ix:nonFraction name="ifrs:CostOfSales" id="f22" decimals="0" contextRef="c5" unitRef="u1" format="ixt:numdotdecimal">9,000</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td>2017</td>
+        <td>
+          <ix:nonFraction name="ifrs:CostOfSales" id="f24" decimals="0" contextRef="c6" unitRef="u1" format="ixt:numdotdecimal">8,750</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td>2016</td>
+        <td>
+          <ix:nonFraction contextRef="c7" decimals="0" name="ifrs:CostOfSales" id="f26" format="ixt:numdotdecimal" unitRef="u1">6,750</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td>2015</td>
+        <td>
+          <ix:nonFraction contextRef="c8" decimals="0" id="f28" name="ifrs:CostOfSales" format="ixt:numdotdecimal" unitRef="u1">6,500</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td>2014</td>
+        <td>
+          <ix:nonFraction contextRef="c9" decimals="0" id="f30" name="ifrs:CostOfSales" format="ixt:numdotdecimal" unitRef="u1">6,509</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td>2013</td>
+        <td>
+          <ix:nonFraction decimals="0" contextRef="c10" name="ifrs:CostOfSales" id="f32" unitRef="u1" format="ixt:numdotdecimal">5,336</ix:nonFraction>
+        </td>
+      </tr>
+    </table>
+    <h3>Table export test</h3>
+    <p>The table below cannot be represented using the intersection of row and column aspects.</p>
+    <table class="accounts">
+      <thead>
+        <tr>
+          <th></th>
+          <th>2018</th>
+          <th>2017</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Surplus</td>
+          <td class="figure">
+            <ix:nonFraction contextRef="c5" decimals="0" name="ifrs:ProfitLoss" id="f34" format="ixt:numdotdecimal" unitRef="u1">252,867</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction name="ifrs:ProfitLoss" id="f35" contextRef="c6" decimals="0" format="ixt:numdotdecimal" unitRef="u1">14,736</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Amortization and depreciation expense</td>
+          <td class="figure">
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" decimals="0" contextRef="c5" id="f37" name="ifrs:AdjustmentsForDepreciationAndAmortisationExpense">214,955</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction decimals="0" contextRef="c6" name="ifrs:AdjustmentsForDepreciationAndAmortisationExpense" id="f38" unitRef="u1" format="ixt:numdotdecimal">165,030</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Manual row (periods swapped)</td>
+          <td class="figure">
+            <ix:nonFraction decimals="0" contextRef="c6" name="ifrs:ProfitLoss" id="f39" unitRef="u1" format="ixt:numdotdecimal">14,736</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" name="ifrs:ProfitLoss" id="f40" contextRef="c5" decimals="0">252,867</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Increase (decrease) of provisions</td>
+          <td class="figure">
+            <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" contextRef="c5" decimals="0" name="ifrs:AdjustmentsForProvisions" id="f42">27,174</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" id="f43" name="ifrs:AdjustmentsForProvisions" decimals="0" contextRef="c6">19,596</ix:nonFraction>
+          </td>
+        </tr>
+        <tr class="top-border">
+          <td>Financial income/expense</td>
+          <td class="figure">
+            <ix:nonFraction contextRef="c5" decimals="0" id="f45" name="ifrs:AdjustmentsForFinanceIncomeCost" sign="-" format="ixt:numdotdecimal" unitRef="u1">300</ix:nonFraction>
+          </td>
+          <td class="figure">-
+            <ix:nonFraction decimals="0" contextRef="c6" name="ifrs:AdjustmentsForFinanceIncomeCost" id="f46" unitRef="u1" format="ixt:numdotdecimal">479</ix:nonFraction>
+          </td>
+        </tr>
+        <tr class="bottom-border">
+          <td>Cash flow from operating activities</td>
+          <td class="figure">-
+            <ix:nonFraction sign="-" format="ixt:numdotdecimal" unitRef="u1" contextRef="c5" decimals="0" name="ifrs:CashFlowsFromUsedInOperatingActivities" id="f48">1,765,126</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction contextRef="c6" decimals="0" id="f49" name="ifrs:CashFlowsFromUsedInOperatingActivities" format="ixt:numdotdecimal" unitRef="u1">1,648,790</ix:nonFraction>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Decimals/precision tests</h3>
+    <table class="accounts">
+      <tbody>
+        <tr>
+          <td>Decimals = -3</td>
+          <td class="figure">
+            <ix:nonFraction name="ifrs:ProfitLoss" id="f51" contextRef="c5" decimals="-3" format="ixt:numdotdecimal" unitRef="u1">137,000</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Decimals = 2</td>
+          <td class="figure">
+            <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" contextRef="c5" decimals="2" name="ifrs:ProfitLoss" id="f53">137,456.00</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Precision = 3</td>
+          <td class="figure">
+            <ix:nonFraction decimals="0" contextRef="c5" name="ifrs:ProfitLoss" id="f55" unitRef="u1" format="ixt:numdotdecimal">137,000</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Precision = INF</td>
+          <td class="figure">
+            <ix:nonFraction decimals="0" contextRef="c5" name="ifrs:ProfitLoss" id="f57" unitRef="u1" format="ixt:numdotdecimal">137,000.00</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Decimals = INF</td>
+          <td class="figure">
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" decimals="INF" contextRef="c5" name="ifrs:ProfitLoss" id="f59">137,000.00</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Precision = 0</td>
+          <td class="figure">
+            <ix:nonFraction contextRef="c5" decimals="0" id="f61" name="ifrs:ProfitLoss" format="ixt:numdotdecimal" unitRef="u1">137,000.00</ix:nonFraction>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Prior period tests</h3>
+    <table class="accounts">
+      <thead>
+        <tr>
+          <th></th>
+          <th>2018</th>
+          <th>2017</th>
+          <th>3 months to
+            <br></br>31 Dec 2018
+          </th>
+          <th>3 months to
+            <br></br>31 Dec 2017
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Licence fee income</td>
+          <td class="figure">
+            <ix:nonFraction contextRef="c5" decimals="0" name="ifrs:LicenceFeeIncome" id="f63" format="ixt:numdotdecimal" unitRef="u1">123,000</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction name="ifrs:LicenceFeeIncome" id="f64" decimals="0" contextRef="c6" unitRef="u1" format="ixt:numdotdecimal">99,000</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" id="f65" name="ifrs:LicenceFeeIncome" decimals="0" contextRef="c11">35,000</ix:nonFraction>
+          </td>
+          <td class="figure">
+            <ix:nonFraction decimals="0" contextRef="c12" name="ifrs:LicenceFeeIncome" id="f66" unitRef="u1" format="ixt:numdotdecimal">22,000</ix:nonFraction>
+          </td>
+        </tr>
+        <tr>
+          <td>Finance Income (Cost)</td>
+          <td class="figure">
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" decimals="0" contextRef="c5" id="f68" name="ifrs:FinanceIncomeCost">88,000</ix:nonFraction>
+          </td>
+          <td class="figure">(
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" sign="-" decimals="0" contextRef="c6" id="f69" name="ifrs:FinanceIncomeCost">67,000</ix:nonFraction>)
+          </td>
+          <td class="figure">(
+            <ix:nonFraction decimals="0" contextRef="c11" name="ifrs:FinanceIncomeCost" id="f70" unitRef="u1" format="ixt:numdotdecimal" sign="-">35,000</ix:nonFraction>)
+          </td>
+          <td class="figure">(
+            <ix:nonFraction unitRef="u1" format="ixt:numdotdecimal" sign="-" decimals="0" contextRef="c12" id="f71" name="ifrs:FinanceIncomeCost">22,000</ix:nonFraction>)
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Empty vs Self-closing tags</h3>
+    <div>
+      <div style="font-color: red"></div>
+      <div></div>
+      <span>This should not be red.</span>
+      <p style="font-color: red"></p>
+      <span>This should not be red.</span>
+      <div>
+        <div>Nested inside a pair of divs</div>
+      </div>
+      <p>&lt;hr&gt; should self-close</p>
+      <hr />
+      <p>Another paragraph
+        <i />
+      </p>
+    </div>
+  </body>
+</html>

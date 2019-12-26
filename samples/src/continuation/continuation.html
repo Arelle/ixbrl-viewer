@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" xmlns:ixt="http://www.xbrl.org/inlineXBRL/transformation/2011-07-31" xmlns:ifrs="http://xbrl.ifrs.org/taxonomy/2017-03-09/ifrs-full" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>iXBRL Viewer Continuation Document</title>
+    <style type="text/css"></style>
+  </head>
+  <body xmlns="http://www.w3.org/1999/xhtml">
+    <div style="display: none">
+      <ix:header>
+        <ix:references>
+          <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd" xlink:type="simple" />
+          <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd" xlink:type="simple" />
+        </ix:references>
+        <ix:resources>
+          <xbrli:context id="c1">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2018-01-01</xbrli:startDate>
+              <xbrli:endDate>2018-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <xbrli:context id="c2">
+            <xbrli:entity>
+              <xbrli:identifier scheme="http://www.example.com/1234">1234</xbrli:identifier>
+            </xbrli:entity>
+            <xbrli:period>
+              <xbrli:startDate>2017-01-01</xbrli:startDate>
+              <xbrli:endDate>2017-12-31</xbrli:endDate>
+            </xbrli:period>
+          </xbrli:context>
+          <ix:relationship fromRefs="f1" toRefs="fn1 fn2" />
+          <ix:relationship fromRefs="f4" toRefs="fn2 fn4" />
+          <ix:relationship fromRefs="f11" toRefs="fn3" />
+        </ix:resources>
+      </ix:header>
+    </div>
+    <h1>ix:continuation test document</h1>
+    <p>
+      <ix:nonNumeric continuedAt="f2" contextRef="c1" name="ifrs:DescriptionOfExposureToRisk" id="f1">This is the first part of a continued tag.</ix:nonNumeric>
+    </p>
+    <p>
+            Text not included.
+    </p>
+    <p>
+      <ix:continuation continuedAt="f3" id="f2">This is the second part of a continued tag.</ix:continuation>
+    </p>
+    <p>
+            Text not included.
+    </p>
+    <p>
+      <ix:continuation id="f3">This is the third part of a continued tag.</ix:continuation>
+    </p>
+    <p>
+      <ix:nonNumeric id="f4" name="ifrs:ConcentrationsOfRisk" contextRef="c1" continuedAt="f5">This</ix:nonNumeric> is
+      <ix:continuation continuedAt="f6" id="f5">a</ix:continuation> text
+      <ix:continuation continuedAt="f7" id="f6">tag</ix:continuation> with
+      <ix:continuation id="f7" continuedAt="f8">a</ix:continuation> continuation
+      <ix:continuation continuedAt="f9" id="f8">in</ix:continuation> every
+      <ix:continuation id="f9">other</ix:continuation> word.
+    </p>
+    <p>
+      <ix:nonNumeric contextRef="c1" name="ifrs:ChangesInExposureToRisk" id="f10">Overlapping facts
+        <ix:nonNumeric continuedAt="f12" id="f11" name="ifrs:ChangesInExposureToRisk" contextRef="c2">  using </ix:nonNumeric>
+      </ix:nonNumeric>
+      <ix:continuation id="f12"> ix:continuation </ix:continuation>
+    </p>
+    <p><ix:footnote id="fn1">
+        This is the content of footnote 1.
+    </ix:footnote></p>
+    <ix:footnote id="fn2">
+        <p>
+            This is the content of footnote 2.  It's much longer that footnote 1 and has multiple paragraphs.
+        </p>
+        <p>
+            <ix:footnote id="fn4">
+            It also has <b>bold</b> and <i>italic</i> text, and contains a nested footnote.
+              <ix:nonNumeric id="f14" name="ifrs:ConcentrationsOfRisk" contextRef="c1" >And a nested fact.</ix:nonNumeric>
+            </ix:footnote>
+        </p>
+        <p>
+            It's also associated with multiple facts.
+        </p>
+    </ix:footnote>
+        <p>
+            <ix:footnote id="fn3" continuedAt="fn3-cont1">
+            This is 
+            </ix:footnote>
+            <ix:continuation id="fn3-cont1" continuedAt="fn3-cont2">
+            footnote 3
+            </ix:continuation>
+            <ix:continuation id="fn3-cont2">
+            which is split with continuations
+            </ix:continuation>
+        </p>
+  </body>
+</html>

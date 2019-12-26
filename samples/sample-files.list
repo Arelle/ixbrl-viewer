@@ -39,3 +39,23 @@ src/lennar https://www.sec.gov/Archives/edgar/data/920760/000162828019000598/len
 # Sample XHTML report that does not render properly in HTML mode
 src/blinkace https://beta.companieshouse.gov.uk/company/08658934/filing-history/MzIzMTgyOTM5NWFkaXF6a2N4/document?format=xhtml&download=1|blinkace.xhtml 5d7807022552917c32cc6a8155f27924b3d9656d08406eb3defc26572f562417
 
+# iXBRL doc set filed at SEC
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010q.htm f618087d4b0e575bbb98bb3ae5473f46f2986948156adda4b135b88cb5978dce
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex311.htm 07b47b78317edea53567214b740fc82cfba656b40a69eb1f915f7dc54205a52a
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex312.htm 50fba118909680dcfa2ae4d6416a3d8974948517e19fd846c71abbd7e9529a6c
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex321.htm 6272cbe9fa97461a8666afe73d86aa26382965b084bac983a6cfab5e2fe81cd3
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban2019063010qex322.htm 2b3a5833a1d616a5ebe3115cd7fe9bfdaf4b237ee74ce2353190db52b4f4a4dc
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630.xsd 99c2bc7426582e6013b0c721697c662cba70bec849345f84dcdf2835a3552053
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_cal.xml d2e7be85e65b0d1096a67fa160e6ddc40cf7ccc7fd83ae0905f5724cec3c04f2
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_def.xml a3ca476bff8bf07b8661676ebfc11359d9ebbc0227fdaa8cb7e39ca5fe1bcdca
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_lab.xml 5b786fdbf81395748f34ce9ab4ae97583ce58559ad9a64ec295aae5cf758a5e2
+src/huntingdon https://www.sec.gov/Archives/edgar/data/49196/000004919619000054/hban-20190630_pre.xml 62e67dd26a458c18789979d9960f30dcc573dcd65453d702375ce908f8ee3784
+
+# iXBRL doc set filed at SEC
+src/summit https://www.sec.gov/Archives/edgar/data/1571371/000162828019009735/a10q22019.htm 0703c317f67efeb4e45f5c5727b2ecd90b3a5f309b7c459472ef2c8480fe43fb
+src/summit https://www.sec.gov/Archives/edgar/data/1571371/000162828019009735/exhibit99110q22019.htm 02e1d4256838c8fa2eb3623d6aa66396f1019ebf0f64d2f3341811403d17527d
+src/summit https://www.sec.gov/Archives/edgar/data/1571371/000162828019009735/sum-20190629.xsd 244c244a5993934c60669ebcc24666a32f365681b98af0888b4bb98f40ce9dc0
+src/summit https://www.sec.gov/Archives/edgar/data/1571371/000162828019009735/sum-20190629_cal.xml 5526761db211c7483cc8b0304648f8b5b8539f359fa00f6918c8432d53b61ce8
+src/summit https://www.sec.gov/Archives/edgar/data/1571371/000162828019009735/sum-20190629_def.xml ec7759d420c60f444d8867fba9c6156265659398be979db69e1ddcceb16c25db
+src/summit https://www.sec.gov/Archives/edgar/data/1571371/000162828019009735/sum-20190629_lab.xml e6ad1e926c76220c08c7097b2bda34aba1e6b28305d362f35d0b027add607c0e
+src/summit https://www.sec.gov/Archives/edgar/data/1571371/000162828019009735/sum-20190629_pre.xml 1260a703f07b4fac960565e182c8f650960641f406f964b4be275d57b9c4cfbd

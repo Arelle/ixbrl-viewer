@@ -15,23 +15,49 @@
 import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
+import { IXNode } from './ixnode.js';
 
 import 'bootstrap/js/dist/tooltip';
 
-export function Viewer(iframe, report) {
+export function Viewer(iv, iframes, report) {
+    this._iv = iv;
     this._report = report;
-    this._iframe = iframe;
-    this._contents = iframe.contents();
+    this._iframes = iframes;
+    this._contents = iframes.contents();
     this.onSelect = $.Callbacks();
     this.onMouseEnter = $.Callbacks();
     this.onMouseLeave = $.Callbacks();
 
-    this._factData = {};
-    this._preProcessiXBRL($("body", iframe.contents()).get(0));
-    report.setIXData(this._factData);
-    this._applyStyles();
-    this._bindHandlers();
-    this.scale = 1;
+    this._ixNodeMap = {};
+    this._continuedAtMap = {};
+}
+
+
+Viewer.prototype.initialize = function() {
+    return new Promise((resolve, reject) => {
+        var viewer = this;
+        viewer._iframes.each(function (docIndex) { 
+            viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+        });
+
+        /* Call plugin promise for each document in turn */
+        (async function () {
+            for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
+                await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
+            }
+        })()
+            .then(() => viewer._iv.setProgress("Preparing document") )
+            .then(() => {
+                this._buildContinuationMap();
+                this._report.setIXNodeMap(this._ixNodeMap);
+                this._applyStyles();
+                this._bindHandlers();
+                this.scale = 1;
+                this._setTitle(0);
+                this._addDocumentSetTabs();
+                resolve();
+            });
+    });
 }
 
 function localName(e) {
@@ -43,11 +69,55 @@ function localName(e) {
     }
 }
 
+Viewer.prototype._buildContinuationMap = function() {
+    var continuations = Object.keys(this._continuedAtMap)
+    for (var i = 0; i < continuations.length; i++) {
+        var id = continuations[i];
+        if (this._continuedAtMap[id].isFact) {
+            var parts = [];
+            var nextId = id;
+            while (this._continuedAtMap[nextId].continuedAt !== undefined) {
+                nextId = this._continuedAtMap[nextId].continuedAt;
+                if (this._ixNodeMap[nextId] !== undefined) {
+                    this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
+                    this._continuedAtMap[nextId].continuationOf = id;
+                    parts.push(this._ixNodeMap[nextId]);
+                }
+                else {
+                    console.log("Unresolvable continuedAt reference: " + nextId);
+                    break;
+                }
+            }
+            this._ixNodeMap[id].continuations = parts;
+        }
+    }
+}
 
-Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
+Viewer.prototype._addDocumentSetTabs = function() {
+    if (this._report.isDocumentSet()) {
+        $('#ixv .ixds-tabs').show();
+        var ds = this._report.documentSetFiles();
+        var viewer = this;
+        for (var i = 0; i < ds.length; i++) {
+            $('<div class="tab">')
+                .text(ds[i])
+                .data('ix-doc-id', i)
+                .click(function () { 
+                    viewer.selectDocument($(this).data('ix-doc-id'))
+                })
+                .appendTo($('#ixv #viewer-pane .ixds-tabs'));
+        }
+        $('#ixv #viewer-pane .ixds-tabs .tab').eq(0).addClass("active");
+    }
+}
+
+Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   var elt;
   var name = localName(n.nodeName).toUpperCase();
-  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION')) {
+  var isFootnote = (name == 'FOOTNOTE');
+  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
+    /* Is the element the only significant content within a <td> or <th> ? If
+     * so, use that as the wrapper element. */
     var node = $(n).closest("td,th,span").eq(0);
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
@@ -55,6 +125,7 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
             node = null;
         } 
     }
+    /* Otherwise, insert a <span> as wrapper */
     if (node == null || node.length == 0) {
         var wrapper = "<span>";
         var nn = n.getElementsByTagName("*");
@@ -67,7 +138,8 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
         $(n).wrap(wrapper);
         node = $(n).parent();
     }
-    var fact = this._report.getFactById(n.getAttribute("id"));
+    var id = n.getAttribute("id");
+    var fact = this._report.getFactById(id);
     if (fact && fact.hasValidationResults())
         node.addClass("inline-fact-with-message");
     if (fact) {
@@ -86,16 +158,31 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
             title: function() {
                 return $(this).attr('ix-title') || $(this).parents('.ixbrl-element').attr('ix-title');
             }
-        });    
-    node.addClass("ixbrl-element").data('ivid',n.getAttribute("id"));
-    if (localName(n.nodeName).toUpperCase() == 'NONFRACTION') {
+        });        
+    node.addClass("ixbrl-element").data('ivid', id);
+    var ixn = new IXNode(id, node, docIndex);
+    this._ixNodeMap[id] = ixn;
+    if (n.getAttribute("continuedAt")) {
+        this._continuedAtMap[id] = { 
+            "isFact": name != 'CONTINUATION',
+            "continuedAt": n.getAttribute("continuedAt")
+        }
+    }
+    if (localName(n.nodeName) == 'CONTINUATION') {
+        node.addClass("ixbrl-continuation");
+    }
+    if (localName(n.nodeName) == 'NONFRACTION') {
       $(node).addClass("ixbrl-element-nonfraction");
     }
-    if (localName(n.nodeName).toUpperCase() == 'NONNUMERIC') {
+    if (localName(n.nodeName) == 'NONNUMERIC') {
       $(node).addClass("ixbrl-element-nonnumeric");
       if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-          this._setFactData(n.getAttribute('id'), 'escape', true);
+          ixn.escaped = true;
       }
+    }
+    if (isFootnote) {
+      $(node).addClass("ixbrl-element-footnote");
+      ixn.footnote = true;
     }
     if (elt) {
       var concept = n.getAttribute("name");
@@ -110,20 +197,20 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
     inHidden = true;
   }
   for (var i=0; i < n.childNodes.length; i++) {
-    this._preProcessiXBRL(n.childNodes[i], inHidden);
+    this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
   }
 }
 
-Viewer.prototype._setFactData = function (id, prop, value) {
-    this._factData[id] = this._factData[id] || {};
-    this._factData[id][prop] = value;
+Viewer.prototype._applyStyles = function () {
+    var stlyeElts = $("<style>")
+        .prop("type", "text/css")
+        .text(require('css-loader!less-loader!../less/viewer.less').toString())
+        .appendTo(this._iframes.contents().find("head"));
+    this._iv.callPluginMethod("updateViewerStyleElements", stlyeElts);
 }
 
-Viewer.prototype._applyStyles = function () {
-    $("<style>")
-        .prop("type", "text/css")
-        .html(require('css-loader!less-loader!../less/viewer.less').toString())
-        .appendTo($("head", this._iframe.contents()));
+Viewer.prototype.contents = function() {
+    return this._iframes.contents();
 }
 
 
@@ -140,8 +227,10 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
     else {
         next = elements.last();
     }
-        
-    this.showAndSelectElement(next);
+    
+    this.showDocumentForItemId(next.data('ivid'));
+    this.showElement(next);
+    this.selectElement(next);
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -157,23 +246,8 @@ Viewer.prototype._bindHandlers = function () {
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
 
-    // Listen to messages posted to this window
-    $(window).on("message", function(e) { viewer.handleMessage(e) });
 
     TableExport.addHandles(this._contents, this._report);
-}
-
-Viewer.prototype.handleMessage = function (event) {
-    var jsonString = event.originalEvent.data;
-    var data = JSON.parse(jsonString);
-
-    if (data.task == 'SHOW_FACT') {
-        var factId = data.factId;
-        this.showAndSelectFactById(factId);
-    }
-    else {
-        console.log("Not handling unsupported task message: " + jsonString);
-    }
 }
 
 Viewer.prototype.selectNextTag = function () {
@@ -184,19 +258,18 @@ Viewer.prototype.selectPrevTag = function () {
     this._selectAdjacentTag(-1);
 }
 
-Viewer.prototype.scrollIfNotVisible = function(e) {
-    var viewTop = this._iframe.contents().scrollTop();
-    var viewBottom = viewTop + this._iframe.height();
+Viewer.prototype.showElement = function(e) {
+    var viewTop = this._iframes.contents().scrollTop();
+    var viewBottom = viewTop + this._iframes.height();
     var eTop = e.offset().top;
     var eBottom = eTop + e.height();
     if (eTop < viewTop || eBottom > viewBottom) {
-        this._iframe.contents().scrollTop(e.offset().top - this._iframe.height()/2);
+        this._iframes.contents().scrollTop(e.offset().top - this._iframes.height()/2);
     }
 }
 
 Viewer.prototype.showAndSelectElement = function(e) {
     this.scrollIfNotVisible(e);
-    this.selectElement(e);
 }
 
 /*
@@ -205,21 +278,35 @@ Viewer.prototype.showAndSelectElement = function(e) {
  * 
  * Used to switch facts when the selection corresponds to multiple facts.
  */
-Viewer.prototype.highlightElement = function (e) {
-    e.closest("body").find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
-    e.addClass("ixbrl-selected");
+Viewer.prototype.highlightElements = function (ee) {
+    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    ee.addClass("ixbrl-selected");
 }
 
-Viewer.prototype.selectElement = function (e, eltSet) {
-    this.highlightElement(e);
+Viewer.prototype._ixIdForElement = function (e) {
     var id = e.data('ivid');
-    this.onSelect.fire(id, eltSet);
+    if (e.hasClass("ixbrl-continuation")) {
+        id = this._continuedAtMap[id].continuationOf;
+    }
+    return id;
+}
+
+/*
+ * Select the fact corresponding to the specified element.
+ *
+ * Takes an optional list of factIds corresponding to all facts that a click
+ * falls within.  If omitted, it's treated as a click on a non-nested fact.
+ */
+Viewer.prototype.selectElement = function (e, factIdList) {
+    var factId = this._ixIdForElement(e);
+    this.onSelect.fire(factId, factIdList);
 }
 
 Viewer.prototype.selectElementByClick = function (e) {
     var eltSet = [];
+    var viewer = this;
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet.unshift($(this).data('ivid')); 
+        eltSet.unshift(viewer._ixIdForElement($(this))); 
     });
     this.selectElement(e, eltSet);
 }
@@ -248,31 +335,34 @@ Viewer.prototype.clearRelatedHighlighting = function (f) {
 }
 
 Viewer.prototype.elementForFact = function (fact) {
-    return this.elementForFactId(fact.id);
+    return this.elementForItemId(fact.id);
 }
 
-Viewer.prototype.elementForFactId = function (factId) {
-    return $('.ixbrl-element', this._contents).filter(function () { return $(this).data('ivid') == factId }).first();
+Viewer.prototype.elementForItemId = function (factId) {
+    return this._ixNodeMap[factId].wrapperNode;
+}
+
+Viewer.prototype.elementsForItemIds = function (ids) {
+    var viewer = this;
+    return $($.map(ids, function (id, n) {
+        return viewer._ixNodeMap[id].wrapperNode.get();
+    }));
 }
 
 Viewer.prototype.elementsForFacts = function (facts) {
-    var ids = $.map(facts, function (f) { return f.id });
-    var elements = $('.ixbrl-element', this._contents).filter(function () { return $.inArray($(this).data('ivid'), ids ) > -1 });
-    return elements;
+    return this.elementsForItemIds($.map(facts, function (f) { return f.id }));
 }
 
-Viewer.prototype.highlightFact = function(fact) {
-    this.highlightElement(this.elementForFact(fact));
+Viewer.prototype.highlightItem = function(factId) {
+    var continuations = this._ixNodeMap[factId].continuationIds();
+    this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
 }
 
-Viewer.prototype.showAndSelectFact = function (fact) {
-    this.showAndSelectElement(this.elementForFact(fact));
-}
-
-Viewer.prototype.showAndSelectFactById = function (factId) {
-    let fact = this.elementForFactId(factId);
-    if (fact) {
-        this.showAndSelectElement(fact);
+Viewer.prototype.showItemById = function (id) {
+    let elt = this.elementForItemId(id);
+    this.showDocumentForItemId(id);
+    if (elt) {
+        this.showElement(elt);
     }
 }
 
@@ -282,17 +372,19 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
         groups[ns] = i;
     });
     var report = this._report;
+    var viewer = this;
     if (on) {
-        $(".ixbrl-element", this._contents).each(function () {
-            $(this).addClass("ixbrl-highlight");
-            var fact = report.getFactById($(this).data('ivid'));            
-            if (fact) {
-                var i = groups[fact.conceptQName().prefix];
+        $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
+            var factId = $(this).data('ivid');
+            var ixn = viewer._ixNodeMap[factId];
+            var elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
+            elements.addClass("ixbrl-highlight");
+
+            if (!ixn.footnote) {
+                var i = groups[report.getItemById(factId).conceptQName().prefix];
                 if (i !== undefined) {
-                    $(this).addClass("ixbrl-highlight-" + i);
+                    elements.addClass("ixbrl-highlight-" + i);
                 }
-            } else {
-                $(this).addClass("ixbrl-highlight-missing");
             }
         });
     }
@@ -341,6 +433,24 @@ Viewer.prototype.clearLinkedHighlightFact = function (f) {
     e.removeClass("ixbrl-linked-highlight");
 }
 
-Viewer.prototype.getTitle = function () {
-    return $('head title', this._contents).text();
+Viewer.prototype._setTitle = function (docIndex) {
+    $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
+}
+
+Viewer.prototype.showDocumentForItemId = function(factId) {
+    this.selectDocument(this._ixNodeMap[factId].docIndex);
+}
+
+Viewer.prototype.selectDocument = function (docIndex) {
+    $('#ixv #viewer-pane .ixds-tabs .tab')
+        .removeClass("active")
+        .eq(docIndex)
+        .addClass("active");
+    /* Show/hide documents using height rather than display property to avoid a
+     * delay when switching tabs on large, slow-to-render documents. */
+    this._iframes
+        .height(0)
+        .eq(docIndex)
+        .height("100%");
+    this._setTitle(docIndex);
 }

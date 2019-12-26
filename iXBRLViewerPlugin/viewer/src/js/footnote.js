@@ -12,29 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@primary: #026dce;
-@primary-focus: #0094ff;
+export function Footnote(report, footnoteId, title) {
+    this.id = footnoteId;
+    this.facts = [];
+    this.title = title;
+    this._ixNode = report.getIXNodeForItemId(footnoteId);
+}
 
-@linked-fact: @primary;
-@related-fact: #0eb30e;
+Footnote.prototype.addFact = function (f) {
+    this.facts.push(f); 
+}
 
-@text-title: #444444;
-@text: #595959;
-@text-light: #b2b2b2;
-
-@border-grey: #e3e3e3;
-@simple-border: solid 0.1rem @border-grey;
-
-@highlight-default: #6cff6c;
-@highlight-1: #ffff3c;
-@highlight-2: #eaa8ff;
-
-@icon-grey: @text;
-
-@button-primary-bg: @primary-focus;
-@button-primary-border: #0085e6;
-
-@button-background: #f8f8f8;
-@background-selected: #f3f3f3;
-
-@workiva-green: #66ca00;
+Footnote.prototype.textContent = function () {
+    return this._ixNode.textContent();
+}

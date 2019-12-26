@@ -27,7 +27,6 @@ export function Menu(elt) {
 
     $('html').click(function(event) {
         if ($(".content",elt).find($(event.target)).length === 0) {
-            console.log("closing");
             menu.close();
         }
     });
@@ -41,21 +40,38 @@ Menu.prototype.close = function() {
     this._elt.find(".content-container").hide();
 }
 
-Menu.prototype.addCheckboxItem = function(name, callback) {
+Menu.prototype._add = function(item, after) {
+    var i;
+    if (after !== undefined) {
+        i = this._elt.find(".content > div").filter(function () {
+            return $(this).data('iv-menu-item-name') == after;     
+        });
+    }
+    if (i !== undefined && i.length > 0) {
+        i.after(item);
+    }
+    else {
+        item.appendTo(this._elt.find(".content"));
+    }
+}
+
+Menu.prototype.addCheckboxItem = function(name, callback, itemName, after) {
     var menu = this;
-    $('<div class="item checkbox"></div>')
+    var item = $('<div class="item checkbox"></div>')
         .text(name)
-        .appendTo(this._elt.find(".content"))
+        .data("iv-menu-item-name", itemName)
         .click(function () {
             $(this).toggleClass("checked");
             callback($(this).hasClass("checked"));
             menu.close(); 
         });
+    this._add(item, after);
 }
 
-Menu.prototype.addCheckboxGroup = function(values, names, def, callback) {
+Menu.prototype.addCheckboxGroup = function(values, names, def, callback, name, after) {
     var menu = this;
-    var group = $('<div class="group"></div>').appendTo(this._elt.find(".content"));
+    var group = $('<div class="group"></div>').data("iv-menu-item-name", name);
+    this._add(group, after);
 
     $.each(values, function (i, v) {
         var item = $('<div class="item checkbox"></div>')

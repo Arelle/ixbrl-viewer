@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export function FactSet(facts) {
-    this._facts = facts;
+import { Fact } from "./fact.js";
+import { Footnote } from "./footnote.js";
+
+export function FactSet(items) {
+    this._items = items;
 }
 
 /* Returns the union of dimensions present on facts in the set */
 FactSet.prototype._allDimensions = function() {
     var dims = {};
-    for (var i = 0; i < this._facts.length; i++) {
-        var dd = Object.keys(this._facts[i].dimensions());
+    var facts = this._items.filter((item) => item instanceof Fact);
+    for (var i = 0; i < facts.length; i++) {
+        var dd = Object.keys(facts[i].dimensions());
         for (var j = 0; j < dd.length; j++) {
             dims[dd[j]] = true;
         }
@@ -37,12 +41,13 @@ FactSet.prototype._allDimensions = function() {
  */
 FactSet.prototype.minimallyUniqueLabel = function(fact) {
     if (!this._minimallyUniqueLabels) {
+        var facts = this._items.filter((item) => item instanceof Fact);
         var allLabels = {};
         var allAspects = ["c", "p"].concat(this._allDimensions());
         /* Assemble a map of arrays of all aspect labels for all facts, in a
          * consistent order */
-        for (var i = 0; i < this._facts.length; i++) {
-            var f = this._facts[i];
+        for (var i = 0; i < facts.length; i++) {
+            var f = facts[i];
             allLabels[f.id] = [];
             for (var j = 0; j < allAspects.length; j++) {
                 var dd = f.aspects()[allAspects[j]];
@@ -54,16 +59,16 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
         var uniqueLabels = {};
         for (var j = 0; j < allAspects.length; j++) {
             var labelMap = {};
-            for (var i = 0; i < this._facts.length; i++) {
-                labelMap[allLabels[this._facts[i].id][j]] = true;
+            for (var i = 0; i < facts.length; i++) {
+                labelMap[allLabels[facts[i].id][j]] = true;
             }
 
             var uniqueLabelsByLabel = {};
             if (Object.keys(labelMap).length > 1) {
                 /* We have at least two different labels, so include this
                  * aspect in the label for all facts in the set */
-                for (var i = 0; i < this._facts.length; i++) {
-                    var fid = this._facts[i].id;
+                for (var i = 0; i < facts.length; i++) {
+                    var fid = facts[i].id;
                     var l = allLabels[fid][j];
                     var ul = uniqueLabels[fid] || [];
                     if (l !== null) {
@@ -75,7 +80,7 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
                     }
                 } 
                 /* We have as many different labels as facts - we're done */
-                if (Object.keys(uniqueLabelsByLabel).length == this._facts.length) {
+                if (Object.keys(uniqueLabelsByLabel).length == facts.length) {
                     break;
                 }
             }
@@ -83,14 +88,18 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
 
         /* If any label is empty, add the concept label onto the start of all
          * of them */
-        if (Object.keys(uniqueLabels).length < this._facts.length) {
-            for (var i = 0; i < this._facts.length; i++) {
-                var fid = this._facts[i].id;
+        if (Object.keys(uniqueLabels).length < facts.length) {
+            for (var i = 0; i < facts.length; i++) {
+                var fid = facts[i].id;
                 var ul = uniqueLabels[fid] || [];
                 ul.unshift(allLabels[fid][0]);
                 uniqueLabels[fid] = ul;
             }
         }
+
+        this._items.filter((item) => item instanceof Footnote).forEach((fn) => {
+            uniqueLabels[fn.id] = [fn.title];
+        });
 
         this._minimallyUniqueLabels = uniqueLabels;
     }

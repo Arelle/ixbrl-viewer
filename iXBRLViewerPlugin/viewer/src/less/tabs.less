@@ -12,29 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@primary: #026dce;
-@primary-focus: #0094ff;
+@import (reference) "clearfix.less";
 
-@linked-fact: @primary;
-@related-fact: #0eb30e;
+.tab-area {
+  .clearfix();
 
-@text-title: #444444;
-@text: #595959;
-@text-light: #b2b2b2;
+  width: 100%;
+  border-bottom: @simple-border;
 
-@border-grey: #e3e3e3;
-@simple-border: solid 0.1rem @border-grey;
+  .tab {
+    border: @simple-border;
+    float: left;
+    padding: 1.2rem;
+    margin-bottom: -0.1rem;
+    background-color: #eee;
+    cursor: pointer;
 
-@highlight-default: #6cff6c;
-@highlight-1: #ffff3c;
-@highlight-2: #eaa8ff;
-
-@icon-grey: @text;
-
-@button-primary-bg: @primary-focus;
-@button-primary-border: #0085e6;
-
-@button-background: #f8f8f8;
-@background-selected: #f3f3f3;
-
-@workiva-green: #66ca00;
+    &.active {
+      border-bottom-color: #fff;
+      background-color: #fff;
+    }
+  }
+}

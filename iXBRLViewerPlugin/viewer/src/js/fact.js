@@ -17,11 +17,12 @@ import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
+import { Footnote } from "./footnote.js";
 import $ from 'jquery'
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
-    this._ixData = report.getIXDataForFact(factId);
+    this._ixNode = report.getIXNodeForItemId(factId);
     this._report = report;
     this.id = factId;
 }
@@ -83,14 +84,21 @@ Fact.prototype.readableValue = function() {
     var v = this.f.v;
     if (this.isNumeric()) {
         var d = this.decimals();
-        if (d < 0) {
-            d = 0;
-        }
-        if (this.isMonetaryValue()) {
-            v = this.unit().valueLabel() + " " + formatNumber(v,d);
+        var formattedNumber;
+        if (d === undefined) {
+            formattedNumber= v;
         }
         else {
-            v = formatNumber(v,d) + " " + this.unit().valueLabel();
+            if (d < 0) {
+                d = 0;
+            }
+            formattedNumber = formatNumber(v,d);
+        }
+        if (this.isMonetaryValue()) {
+            v = this.unit().valueLabel() + " " + formattedNumber;
+        }
+        else {
+            v = formattedNumber + " " + this.unit().valueLabel();
         }
     }
     else if (this.escaped()) {
@@ -238,5 +246,9 @@ Fact.prototype.identifier = function () {
 }
 
 Fact.prototype.escaped = function () {
-    return this._ixData.escape;
+    return this._ixNode.escaped;
+}
+
+Fact.prototype.footnotes = function () {
+    return $.map(this.f.fn || [], (fn, i) => this._report.getItemById(fn));
 }

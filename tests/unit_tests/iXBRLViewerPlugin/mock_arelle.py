@@ -8,6 +8,11 @@ def qname_effect(prefix, namespaceURI, localName):
         localName=localName
     )
 
+def mrs_effect(dts, reltype):
+    return Mock(
+        fromModelObject = lambda source: []  
+    )
+
 def inferredDecimals_effect(fact):
     return float("INF")
 
@@ -18,6 +23,8 @@ def mock_arelle():
     if 'arelle' not in sys.modules:
         sys.modules['arelle'] = Mock()
         sys.modules['arelle.XbrlConst'] = Mock()
+        sys.modules['arelle.ModelDocument'] = Mock()
+        sys.modules['arelle.ModelRelationshipSet'] = Mock(ModelRelationshipSet = mrs_effect)
         sys.modules['arelle.ModelValue'] = Mock(
             QName=qname_effect
         )

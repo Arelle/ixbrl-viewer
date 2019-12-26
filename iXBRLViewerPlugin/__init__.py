@@ -19,7 +19,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer",
                       action="store",
                       dest="saveViewerFile",
-                      help="Save an HTML viewer file for an iXBRL report")
+                      help="Save an HTML viewer file for an iXBRL report. Specify either a filename or directory.")
     parser.add_option("--viewer-url",
                       action="store",
                       dest="viewerURL",
@@ -32,11 +32,11 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
         cntlr.addToLog("No taxonomy loaded.")
         return
-    outFile = getattr(options, 'saveViewerFile', False)
-    if outFile:
+    out = getattr(options, 'saveViewerFile', False)
+    if out:
         viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
-        xmlDocument = viewerBuilder.createViewer(scriptUrl=options.viewerURL)
-        viewerBuilder.saveViewer(outFile, xmlDocument)
+        iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL)
+        iv.save(out)
 
 
 def iXBRLViewerMenuCommand(cntlr):
@@ -47,8 +47,8 @@ def iXBRLViewerMenuCommand(cntlr):
     dialog = SaveViewerDialog(cntlr)
     if dialog.accepted and dialog.filename():
         viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
-        xmlDocument = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl())
-        viewerBuilder.saveViewer(dialog.filename(), xmlDocument)
+        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl())
+        iv.save(dialog.filename())
 
 
 def iXBRLViewerMenuExtender(cntlr, menu, *args, **kwargs):

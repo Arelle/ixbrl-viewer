@@ -70,12 +70,16 @@ Viewer.prototype._preProcessiXBRL = function(n, inHidden) {
     var fact = this._report.getFactById(n.getAttribute("id"));
     if (fact && fact.hasValidationResults())
         node.addClass("inline-fact-with-message");
-    var title = fact.getLabel("std");
-    $(node).attr('ix-title', title);
+    if (fact) {
+        var title = fact.getLabel("std");
+        $(node).attr('ix-title', title);
+    } else {
+        console.log(`Fact with id '${n.getAttribute("id")}' is not found in the report data`);
+    }
     var container = $('body', this._contents);
     var childs = $("span,div", node);
-    if (childs.length === 0)
-        childs = $(n);    
+    if (node.prop('tagName')  === "SPAN" || childs.length === 0)
+        childs = $(node);    
     childs.tooltip({            
             html: false,
             container: container,
@@ -281,9 +285,14 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     if (on) {
         $(".ixbrl-element", this._contents).each(function () {
             $(this).addClass("ixbrl-highlight");
-            var i = groups[report.getFactById($(this).data('ivid')).conceptQName().prefix];
-            if (i !== undefined) {
-                $(this).addClass("ixbrl-highlight-" + i);
+            var fact = report.getFactById($(this).data('ivid'));            
+            if (fact) {
+                var i = groups[fact.conceptQName().prefix];
+                if (i !== undefined) {
+                    $(this).addClass("ixbrl-highlight-" + i);
+                }
+            } else {
+                $(this).addClass("ixbrl-highlight-missing");
             }
         });
     }

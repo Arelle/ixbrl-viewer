@@ -179,11 +179,9 @@ iXBRLViewer.prototype.load = function() {
                         .on('resizestart', function (event) {
                             $('#ixv').css("pointer-events", "none");
                         })
-                        .on('resizemove', function (event) {
-                            var target = event.target;
-                            var w = 100 * event.rect.width / $(target).parent().width();
-                            target.style.width = w + '%';
-                            $('#inspector').css('width', (100 - w) + '%');
+                        .on('resizemove', function (event) {                            
+                            event.target.style.width = `${event.rect.width}px`;
+                            $('#inspector').css('width', `${window.innerWidth-event.rect.width}px`);
                         })
                         .on('resizeend', function (event) {
                             $('#ixv').css("pointer-events", "auto");

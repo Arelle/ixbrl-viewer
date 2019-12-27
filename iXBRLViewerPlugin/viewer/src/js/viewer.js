@@ -56,16 +56,21 @@ Viewer.prototype.initialize = function() {
                 this._setTitle(0);
                 this._addDocumentSetTabs();
                 resolve();
+            })
+            .then(() => {
+                viewer._iframes.each(function (docIndex) { 
+                    viewer._postProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+                });    
             });
     });
 }
 
 function localName(e) {
     if (e.indexOf(':') == -1) {
-        return e
+        return e.toUpperCase();
     }
     else {
-        return e.substring(e.indexOf(':') + 1)
+        return e.substring(e.indexOf(':') + 1).toUpperCase();
     }
 }
 
@@ -138,27 +143,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         $(n).wrap(wrapper);
         node = $(n).parent();
     }
-    var id = n.getAttribute("id");
-    var fact = this._report.getFactById(id);
-    if (fact && fact.hasValidationResults())
-        node.addClass("inline-fact-with-message");
-    if (fact) {
-        var title = fact.getLabel("std");
-        $(node).attr('ix-title', title);
-    } else {
-        console.log(`Fact with id '${n.getAttribute("id")}' is not found in the report data`);
-    }
-    var container = $('body', this._contents);
-    var childs = $("span,div", node);
-    if (node.prop('tagName')  === "SPAN" || childs.length === 0)
-        childs = $(node);    
-    childs.tooltip({            
-            html: false,
-            container: container,
-            title: function() {
-                return $(this).attr('ix-title') || $(this).parents('.ixbrl-element').attr('ix-title');
-            }
-        });        
+    var id = n.getAttribute("id");    
     node.addClass("ixbrl-element").data('ivid', id);
     var ixn = new IXNode(id, node, docIndex);
     this._ixNodeMap[id] = ixn;
@@ -199,6 +184,41 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   for (var i=0; i < n.childNodes.length; i++) {
     this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
   }
+}
+
+Viewer.prototype._postProcessiXBRL = function(container) {
+    var viewer = this;
+    $(container).find('.ixbrl-element').each(function (_, node) { 
+        var id = $(node).data('ivid');
+        var fact = viewer._report.getItemById(id);
+        if (fact) {
+            viewer._postProcessiXBRLNode(container, node, fact);
+            var ixNode = fact._ixNode;
+            ixNode.continuations.forEach(c => 
+                viewer._postProcessiXBRLNode(container, c.wrapperNode[0], fact));
+        }
+    });
+}
+
+Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
+    if (fact && fact.hasValidationResults())
+        $(node).addClass("inline-fact-with-message");
+    if (fact) {
+        var title = fact.getLabel("std");
+        $(node).attr('ix-title', title);
+    } else {
+        console.log(`Fact with id '${id}' is not found in the report data`);
+    }
+    var childs = $("span,div", node);
+    if (localName(node.nodeName)  === "SPAN" || childs.length === 0)
+        childs = $(node);    
+    childs.tooltip({            
+        html: false,
+        container: container,
+        title: function() {
+            return $(this).attr('ix-title') || $(this).parents('.ixbrl-element').attr('ix-title');
+        }
+    }); 
 }
 
 Viewer.prototype._applyStyles = function () {
@@ -381,9 +401,14 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
             elements.addClass("ixbrl-highlight");
 
             if (!ixn.footnote) {
-                var i = groups[report.getItemById(factId).conceptQName().prefix];
-                if (i !== undefined) {
-                    elements.addClass("ixbrl-highlight-" + i);
+                var fact = report.getItemById(factId);
+                if (fact) {
+                    var i = groups[fact.conceptQName().prefix];
+                    if (i !== undefined) {
+                        elements.addClass("ixbrl-highlight-" + i);
+                    }
+                } else {
+                    $(this).addClass("ixbrl-highlight-missing");
                 }
             }
         });

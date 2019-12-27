@@ -531,7 +531,7 @@ Inspector.prototype.update = function () {
             $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
 
             this.getPeriodIncrease(cf);
-            this.updateValidationResults(fact);
+            this.updateValidationResults(cf);
         }
         else if (cf instanceof Footnote) {
             $('#inspector').addClass('footnote-mode');

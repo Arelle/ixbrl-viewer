@@ -430,6 +430,7 @@ Inspector.prototype._footnoteFactsHTML = function() {
  * corresponding to the current viewer selection.
  */
 Inspector.prototype._selectionSummaryAccordian = function() {
+    var inspector = this;
     var cf = this._currentItem;
 
     // dissolveSingle => title not shown if only one item in accordian

@@ -22,6 +22,7 @@ export function iXBRLViewer() {
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
+    this._width = undefined;
 }
 
 /*
@@ -181,12 +182,19 @@ iXBRLViewer.prototype.load = function() {
                         })
                         .on('resizemove', function (event) {                            
                             event.target.style.width = `${event.rect.width}px`;
-                            $('#inspector').css('width', `${window.innerWidth-event.rect.width}px`);
+                            iv._width = window.innerWidth-event.rect.width;
+                            $('#inspector').css('width', `${iv._width}px`);
                         })
                         .on('resizeend', function (event) {
                             $('#ixv').css("pointer-events", "auto");
                         });
                         $('#ixv .loader').remove();
+
+                        $(window).on('resize', function(){
+                            if (iv._width) {                 
+                                $('#viewer-pane').css('width', `${window.innerWidth-iv._width}px`); 
+                            }
+                        });
 
                         /* Focus on fact specified in URL fragment, if any */
                         inspector.handleFactDeepLink();

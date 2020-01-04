@@ -55,7 +55,7 @@ TableExport.prototype._getRawTable = function (table) {
             var facts = $(this).find(".ixbrl-element").addBack(".ixbrl-element");
             if (facts.length > 0) {
                 var id = facts.first().data('ivid');
-                var fact = report.getFactById(id);
+                var fact = report.getItemById(id);
                 var cell = { type: "fact", fact: fact};
                 
                 var td = $(this)[0];

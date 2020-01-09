@@ -597,4 +597,5 @@ Inspector.prototype.selectDefaultLanguage = function () {
 Inspector.prototype.setLanguage = function (lang) {
     this._viewerOptions.language = lang;
     this.update();
+    this._search.buildSearchIndex();
 }

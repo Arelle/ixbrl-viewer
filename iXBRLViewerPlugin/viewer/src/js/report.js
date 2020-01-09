@@ -73,7 +73,7 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptio
             label = labels[lang];
         }
         else {
-            label = labels["en"] || labels["en-us"] || labels["de"];
+            label = labels["en"] || labels["en-us"];
         }
         if (label === undefined) {
             return undefined;

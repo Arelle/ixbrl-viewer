@@ -36,6 +36,6 @@ class XHTMLSerializer:
             if m is not None and m.group(1) not in XHTMLSerializer.selfClosableElements and e.text is None:
                 e.text = ''
 
-    def serialize(self, xmlDocument, fout):
+    def serialize(self, xmlDocument):
         self._expandEmptyTags(xmlDocument)
-        fout.write(etree.tostring(xmlDocument, method="xml", encoding="utf-8", xml_declaration=True))
+        return etree.tostring(xmlDocument, method="xml", encoding="utf-8", xml_declaration=True)

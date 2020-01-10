@@ -21,7 +21,6 @@ import math
 import re
 import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
-from arelle.ModelRelationshipSet import ModelRelationshipSet
 from .xhtmlserialize import XHTMLSerializer
 import os
 
@@ -76,7 +75,6 @@ class IXBRLViewerBuilder:
             "languages": {},
             "facts": {},
         }
-        self.footnoteRelationshipSet = ModelRelationshipSet(dts, "XBRL-footnotes")
 
     def lineWrap(self, s, n = 80):
         return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
@@ -137,15 +135,17 @@ class IXBRLViewerBuilder:
             }
             for lr in labels:
                 l = lr.toModelObject
-                conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
-                self.addLanguage(l.xmlLang.lower());
+                if l is not None:
+                    conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+                    self.addLanguage(l.xmlLang.lower());
 
             refData = []
             for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
                 ref = []
-                for _refPart in _refRel.toModelObject.iterchildren():
-                    ref.append([_refPart.localName, _refPart.stringValue.strip()])
-                refData.append(ref)
+                if _refRel.toModelObject is not None:
+                    for _refPart in _refRel.toModelObject.iterchildren():
+                        ref.append([_refPart.localName, _refPart.stringValue.strip()])
+                    refData.append(ref)
 
             if len(refData) > 0:
                 conceptData['r'] = refData
@@ -154,26 +154,28 @@ class IXBRLViewerBuilder:
 
     def treeWalk(self, rels, item, indent = 0):
         for r in rels.fromModelObject(item):
-            self.treeWalk(rels, r.toModelObject, indent + 1)
+            if r.toModelObject is not None:
+                self.treeWalk(rels, r.toModelObject, indent + 1)
 
     def getRelationships(self):
         rels = {}
 
         for baseSetKey, baseSetModelLinks  in self.dts.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
-            if arcrole == XbrlConst.summationItem and ELR is not None:
+            if (arcrole == XbrlConst.parentChild or arcrole == XbrlConst.summationItem) and ELR is not None:
                 self.addELR(ELR)
                 rr = dict()
                 relSet = self.dts.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
-                    fromKey = self.nsmap.qname(r.fromModelObject.qname)
-                    rel = {
-                        "t": self.nsmap.qname(r.toModelObject.qname),
-                    }
-                    if r.weight is not None:
-                        rel['w'] = r.weight
-                    rr.setdefault(fromKey, []).append(rel)
-                    self.addConcept(r.toModelObject)
+                    if r.fromModelObject is not None and r.toModelObject is not None:
+                        fromKey = self.nsmap.qname(r.fromModelObject.qname)
+                        rel = {
+                            "t": self.nsmap.qname(r.toModelObject.qname),
+                        }
+                        if r.weight is not None:
+                            rel['w'] = r.weight
+                        rr.setdefault(fromKey, []).append(rel)
+                        self.addConcept(r.toModelObject)
 
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
@@ -235,18 +237,13 @@ class IXBRLViewerBuilder:
 
             if f.context.isForeverPeriod:
                 aspects["p"] = "f"
-            elif f.context.isInstantPeriod and f.context.instantDatetime is not None:
+            elif f.context.isInstantPeriod:
                 aspects["p"] = self.dateFormat(f.context.instantDatetime.isoformat())
-            elif f.context.isStartEndPeriod and f.context.startDatetime is not None and f.context.endDatetime is not None:
+            elif f.context.isStartEndPeriod:
                 aspects["p"] = "%s/%s" % (
                     self.dateFormat(f.context.startDatetime.isoformat()),
                     self.dateFormat(f.context.endDatetime.isoformat())
                 )
-
-            frels = self.footnoteRelationshipSet.fromModelObject(f)
-            if frels:
-                for frel in frels:
-                    factData.setdefault("fn", []).append(frel.toModelObject.id)
 
             self.taxonomyData["facts"][f.id] = factData
             self.addConcept(f.concept)
@@ -309,21 +306,28 @@ class iXBRLViewer:
     def addFile(self, ivf):
         self.files.append(ivf)
 
-    def save(self, outPath):
+    def save(self, out, outDir=None, responseZip=None):
         """
         Save the iXBRL viewer
         """
-        if os.path.isdir(outPath):
-            # If output is a directory, write each file in the doc set to that
+        if responseZip or os.path.isdir(out):
+            # If output is a zip or directory, write each file in the doc set to that
             # directory using its existing filename
             for f in self.files:
-                filename = os.path.join(outPath, f.filename)
-                self.dts.info("viewer:info", "Writing %s" % filename)
-                with open(filename, "wb") as fout:
-                    writer = XHTMLSerializer()
-                    writer.serialize(f.xmlDocument, fout)
+                self.dts.info("viewer:info", "Writing %s" % f.filename)
+                writer = XHTMLSerializer()
+                xhtmlStr = writer.serialize(f.xmlDocument)
+                if responseZip:
+                    responseZip.writestr(f.filename, xhtmlStr)
+                else:
+                    with open(os.path.join(out, f.filename), "wb") as fout:
+                        fout.write(xhtmlStr)
 
         else:
+            if outDir:
+                outPath = os.path.join(outDir, out)
+            else:
+                outPath = out
             if len(self.files) > 1:
                 self.dts.error("viewer:error", "More than one file in input, but output is not a directory")
             elif outPath.endswith(os.sep):
@@ -336,4 +340,4 @@ class iXBRLViewer:
                 self.dts.info("viewer:info", "Writing %s" % outPath)
                 with open(outPath, "wb") as fout:
                     writer = XHTMLSerializer()
-                    writer.serialize(self.files[0].xmlDocument, fout)
+                    fout.write(writer.serialize(self.files[0].xmlDocument))

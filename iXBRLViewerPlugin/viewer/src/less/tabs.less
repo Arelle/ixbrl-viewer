@@ -21,6 +21,7 @@
   width: 100%;
   box-sizing: border-box;
   border-bottom: @simple-border;
+  display: flex;
 
   .tab {
     float: left;
@@ -31,6 +32,11 @@
     border-top-left-radius: 0.6rem;
     border-top-right-radius: 0.6rem;
     margin-bottom: -0.1rem;
+    flex-shrink: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 20em;
 
     &.active {
       padding: 1.2rem;

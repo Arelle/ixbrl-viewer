@@ -99,13 +99,14 @@ Viewer.prototype._addDocumentSetTabs = function() {
         for (var i = 0; i < ds.length; i++) {
             $('<div class="tab">')
                 .text(ds[i])
+                .prop('title', ds[i])
                 .data('ix-doc-id', i)
                 .click(function () { 
                     viewer.selectDocument($(this).data('ix-doc-id'))
                 })
-                .appendTo($('#ixv #viewer-pane .ixds-tabs'));
+                .appendTo($('#ixv #viewer-pane .ixds-tabs .tab-area'));
         }
-        $('#ixv #viewer-pane .ixds-tabs .tab').eq(0).addClass("active");
+        $('#ixv #viewer-pane .ixds-tabs .tab-area .tab').eq(0).addClass("active");
     }
 }
 

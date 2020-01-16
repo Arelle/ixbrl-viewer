@@ -62,7 +62,7 @@ ReportSearch.prototype.search = function(s) {
         return [];
     }
 
-    rr.forEach((i,r) => 
+    rr.forEach((r,i) => 
         results.push({
             "fact": searchIndex._report.getItemById(r.ref),
             "score": r.score

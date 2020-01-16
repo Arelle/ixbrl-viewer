@@ -266,7 +266,7 @@
       .search-entry {
         display: none;
         padding: 0;
-        margin: 0.8rem 0;
+        margin: 0.8rem 0.9rem;
 
         input {
           width: 100%;
@@ -453,6 +453,8 @@
       .collapsible-header {
         position: relative;
         padding-left: 12px;
+        cursor: pointer;
+        user-select: none;
 
         &::before {
           .icon-chevron-right();
@@ -495,6 +497,8 @@
         .scrollable {
           width: 100%;
           height: 100%;
+          box-sizing: border-box;
+          padding: 0 0.9rem;
           overflow-y: scroll;
         }
 

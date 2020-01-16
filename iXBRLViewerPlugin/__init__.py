@@ -154,7 +154,6 @@ __pluginInfo__ = {
     'license': 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
     'author': 'Paul Warren',
     'copyright': 'Copyright :: Workiva Inc. :: 2019',
-    #'imports': ["./iXBRLViewer.py"],
     'CntlrCmdLine.Options': commandLineOptionExtender,
     'CntlrCmdLine.Xbrl.Run': commandLineRun,
     'CntlrWinMain.Menu.Tools': menuExtender,

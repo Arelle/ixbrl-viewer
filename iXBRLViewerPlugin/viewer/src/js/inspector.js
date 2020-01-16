@@ -85,9 +85,7 @@ Inspector.prototype.setViewer = function (viewer) {
     viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
-
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
-
 }
 
 /*

@@ -15,6 +15,7 @@
 import $ from 'jquery'
 import FileSaver from 'file-saver'
 import * as Excel from 'exceljs/dist/exceljs.min.js';
+import { Fact } from './fact.js';
 
 export function TableExport(table, report) {
     this._table = table;
@@ -41,6 +42,7 @@ TableExport.prototype._getRawTable = function (table) {
     var report = this._report;
     var maxRowLength = 0;
     var rows = [];
+    var fact;
     table.find("tr:visible").each(function () {
         var row = [];
         $(this).find("td:visible, th:visible").each(function () {
@@ -53,9 +55,13 @@ TableExport.prototype._getRawTable = function (table) {
             var v;
             
             var facts = $(this).find(".ixbrl-element").addBack(".ixbrl-element");
+            var id;
+            fact = null;
             if (facts.length > 0) {
                 var id = facts.first().data('ivid');
-                var fact = report.getFactById(id);
+                fact = report.getItemById(id);
+            }
+            if (fact instanceof Fact) {
                 var cell = { type: "fact", fact: fact};
                 
                 var td = $(this)[0];

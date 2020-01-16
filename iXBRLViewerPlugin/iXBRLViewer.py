@@ -75,6 +75,7 @@ class IXBRLViewerBuilder:
             "languages": {},
             "facts": {},
         }
+        self.footnoteRelationshipSet = ModelRelationshipSet(dts, "XBRL-footnotes")
 
     def lineWrap(self, s, n = 80):
         return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
@@ -244,6 +245,11 @@ class IXBRLViewerBuilder:
                     self.dateFormat(f.context.startDatetime.isoformat()),
                     self.dateFormat(f.context.endDatetime.isoformat())
                 )
+
+            frels = self.footnoteRelationshipSet.fromModelObject(f)
+            if frels:
+                for frel in frels:
+                    factData.setdefault("fn", []).append(frel.toModelObject.id)
 
             self.taxonomyData["facts"][f.id] = factData
             self.addConcept(f.concept)

@@ -75,6 +75,9 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptio
         else {
             label = labels["en"] || labels["en-us"];
         }
+        if (Object.keys(labels).length == 1) { 
+            label = labels[Object.keys(labels)];
+        }
         if (label === undefined) {
             return undefined;
         }
@@ -143,6 +146,25 @@ iXBRLReport.prototype.getChildConcepts = function(c,arcrole) {
         })
     }
     return rels;
+}
+
+iXBRLReport.prototype.getAnchors = function(concept) {
+    var res = [];
+    var report = this;
+    if (this.data.rels.hasOwnProperty("wider-narrower")) {
+        $.each(this.data.rels["wider-narrower"], function (elr, rr) {
+            $.each(rr, function(c, r) {
+                if (concept.name == c) {
+                    $.each(r, function(i, v) { 
+                        res.push({concept: report.getConcept(v.t), wide: 0});
+                    });
+                } else 
+                    if (r[0].t == concept.name)
+                        res.push({concept: report.getConcept(c), wide: 1});
+            });
+        });
+    }
+    return res;
 }
 
 

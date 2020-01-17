@@ -425,6 +425,29 @@ Inspector.prototype._footnoteFactsHTML = function() {
     return html;
 }
 
+Inspector.prototype._extensionAnchorsHTML = function(fact) {
+    var ot = [];
+    var anchors = this._report.getAnchors(fact.concept());
+    if (anchors != 0) {        
+        ot.push($('<h4>Anchors</h4>'));
+        $.each(anchors, function(_, info) { 
+            let {concept, wide} = info;
+            let stdlabel =$('<div class="std-label"></div>')
+                .text(concept.getLabel("std", true) || concept.name);
+            if (wide === 1)
+                stdlabel.addClass("wider-anchor");
+            else
+                stdlabel.addClass("narrower-anchor");
+            if (ot.length > 1)
+                stdlabel.css("margin-top", "10px");
+            ot.push(stdlabel);
+            ot.push($('<div class="documentation"></div>')
+                .text(concept.getLabel("doc") || ""));
+        });
+    }
+    return $.makeArray(ot);
+}
+
 /* 
  * Build an accordian containing a summary of all nested facts/footnotes
  * corresponding to the current viewer selection.
@@ -448,6 +471,9 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             factHTML = $(require('../html/fact-details.html')); 
             $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
             $('.documentation', factHTML).text(fact.getLabel("doc") || "");
+            if (fact.concept().isTaxonomyExtension()) {
+                $('.anchors', factHTML).replaceWith(inspector._extensionAnchorsHTML(fact));
+            }
             $('tr.concept td', factHTML).text(fact.conceptName());
             $('tr.period td', factHTML)
                 .text(fact.periodString());

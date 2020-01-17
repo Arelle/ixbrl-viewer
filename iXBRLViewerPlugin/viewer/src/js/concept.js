@@ -15,6 +15,8 @@
 import $ from 'jquery'
 
 export function Concept(report, name) {
+    this._report = report;
+    this.name = name;    
     this._c = report.data.concepts[name]
 }
 
@@ -44,4 +46,12 @@ Concept.prototype.references = function () {
             })];
         });
     }
+}
+
+Concept.prototype.isTaxonomyExtension = function() {
+    return this._c && this._c.hasOwnProperty('e') && this._c.e === 1;
+}
+
+Concept.prototype.getLabel = function(rolePrefix, withPrefix) {
+    return this._report.getLabel(this.name, rolePrefix, withPrefix);
 }

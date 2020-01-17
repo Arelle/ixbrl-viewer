@@ -200,12 +200,28 @@ Viewer.prototype._postProcessiXBRL = function(container) {
     });
 }
 
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
 Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
     if (fact && fact.hasValidationResults())
         $(node).addClass("inline-fact-with-message");
+    var htmlTooltip;
     if (fact) {
         var title = fact.getLabel("std");
-        $(node).attr('ix-title', title);
+        if (fact.concept().isTaxonomyExtension()) {
+            $(node).attr('ix-title', `<i>${escapeHtml(title)}</i> (Extension)`);
+            htmlTooltip = true;
+        } else {
+            $(node).attr('ix-title', title);
+            htmlTooltip = false;
+        }
     } else {
         console.log(`Fact with id '${id}' is not found in the report data`);
     }
@@ -213,7 +229,7 @@ Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
     if (localName(node.nodeName)  === "SPAN" || childs.length === 0)
         childs = $(node);    
     childs.tooltip({            
-        html: false,
+        html: htmlTooltip,
         container: container,
         title: function() {
             return $(this).attr('ix-title') || $(this).parents('.ixbrl-element').attr('ix-title');

@@ -417,6 +417,18 @@
       font-family: serif;
     }
 
+    .wider-anchor {
+        &::after {
+          .icon-arrow-up();
+        }
+    }
+
+    .narrower-anchor {
+      &::after {
+        .icon-arrow-down();
+      }
+    }
+
     width: 25%;
     position: absolute;
     top: @top-bar-height;

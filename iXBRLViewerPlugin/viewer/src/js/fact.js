@@ -73,8 +73,11 @@ Fact.prototype.readableValue = function() {
     if (this.isNumeric()) {
         var d = this.decimals();
         var formattedNumber;
-        if (d === undefined) {
-            formattedNumber= v;
+        if (this.isNil()) {
+            formattedNumber = "nil";
+        }
+        else if (d === undefined) {
+            formattedNumber = v;
         }
         else {
             if (d < 0) {
@@ -187,8 +190,12 @@ Fact.prototype.duplicates = function () {
     return this._report.getAlignedFacts(this);
 }
 
+Fact.prototype.isNil = function() {
+    return this.f.v === null
+}
+
 Fact.prototype.readableAccuracy = function () {
-    if (!this.isNumeric()) {
+    if (!this.isNumeric() || this.isNil()) {
         return "n/a";
     }
     var d = this.decimals();

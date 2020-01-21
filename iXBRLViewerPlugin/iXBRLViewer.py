@@ -204,7 +204,7 @@ class IXBRLViewerBuilder:
             }
 
             factData = {
-                "v": f.value,
+                "v": f.value if not f.isNil else None,
                 "a": aspects,
             }
             if f.format is not None:

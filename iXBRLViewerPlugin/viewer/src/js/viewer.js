@@ -174,6 +174,19 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   else if(n.nodeType == 1 && localName(n.nodeName) == 'HIDDEN') {
     inHidden = true;
   }
+  else if(n.nodeType == 1) {
+    if (n.hasAttribute('style')) {
+      const re = /(?:^|\s|;)-sec-ix-hidden:\s*([^\s;]+)/;
+      var m = n.getAttribute('style').match(re);
+      if (m) {
+        console.log("IX Hidden: " + m[1]);
+        node = $(n);
+        node.addClass("ixbrl-element").data('ivid', m[1]);
+        var ixn = new IXNode(id, node, docIndex);
+        this._ixNodeMap[id] = ixn;
+      }
+    }
+  }
   for (var i=0; i < n.childNodes.length; i++) {
     this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
   }

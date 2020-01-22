@@ -113,6 +113,9 @@ Inspector.prototype.updateURLFragment = function () {
     if (this._currentItem) {
         location.hash = "#f-" + this._currentItem.id;
     }
+    else {
+        location.hash = "";
+    }
 }
 
 Inspector.prototype.buildDisplayOptionsMenu = function () {
@@ -469,10 +472,10 @@ Inspector.prototype.update = function () {
     var cf = inspector._currentItem;
     if (!cf) {
         $('#inspector').removeClass('footnote-mode');
-        $('#inspector .fact-details').addClass('no-fact-selected');
+        $('#inspector .inspector-body').addClass('no-fact-selected');
     } 
     else { 
-        $('#inspector .fact-details').removeClass('no-fact-selected');
+        $('#inspector .inspector-body').removeClass('no-fact-selected');
 
         $('#inspector .fact-inspector')
             .empty()
@@ -544,9 +547,16 @@ Inspector.prototype.selectItem = function (id, itemIdList) {
  * For footnotes, we currently only support a single footnote being selected.
  */
 Inspector.prototype.switchItem = function (id) {
-    this._currentItem = this._report.getItemById(id);
-    this._viewer.showItemById(id);
-    this._viewer.highlightItem(id);
+    if (id !== null) {
+        this._currentItem = this._report.getItemById(id);
+        this._viewer.showItemById(id);
+        this._viewer.highlightItem(id);
+    }
+    else {
+        this._currentItem = null;
+        this._viewer.clearHighlighting();
+    }
+    this.update();
     this.update();
 }
 

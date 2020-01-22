@@ -114,32 +114,40 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   var name = localName(n.nodeName).toUpperCase();
   var isFootnote = (name == 'FOOTNOTE');
   if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
-    /* Is the element the only significant content within a <td> or <th> ? If
-     * so, use that as the wrapper element. */
-    var node = $(n).closest("td,th").eq(0);
-    if (node.length == 1) {
-        var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
-        if (node.text().match(regex) == null) {
-            node = null;
-        } 
-    }
-    /* Otherwise, insert a <span> as wrapper */
-    if (node == null || node.length == 0) {
-        var wrapper = "<span>";
-        var nn = n.getElementsByTagName("*");
-        for (var i = 0; i < nn.length; i++) {
-          if($(nn[i]).css("display") === "block") {
-            wrapper = '<div>';
-            break;
+    var node = null;
+    if (!inHidden) {
+      /* Is the element the only significant content within a <td> or <th> ? If
+       * so, use that as the wrapper element. */
+      node = $(n).closest("td,th").eq(0);
+      if (node.length == 1) {
+          var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
+          if (node.text().match(regex) == null) {
+              node = null;
+          } 
+      }
+      /* Otherwise, insert a <span> as wrapper */
+      if (node == null || node.length == 0) {
+          var wrapper = "<span>";
+          var nn = n.getElementsByTagName("*");
+          for (var i = 0; i < nn.length; i++) {
+            if($(nn[i]).css("display") === "block") {
+              wrapper = '<div>';
+              break;
+            }
           }
-        }
-        $(n).wrap(wrapper);
-        node = $(n).parent();
+          $(n).wrap(wrapper);
+          node = $(n).parent();
+      }
+      var id = n.getAttribute("id");
+      node.addClass("ixbrl-element").data('ivid', id);
     }
-    var id = n.getAttribute("id");
-    node.addClass("ixbrl-element").data('ivid', id);
-    var ixn = new IXNode(id, node, docIndex);
-    this._ixNodeMap[id] = ixn;
+    /* We may have already created an IXNode for this ID from a -sec-ix-hidden
+     * element */
+    var ixn = this._ixNodeMap[id];
+    if (!ixn) {
+        ixn = new IXNode(id, node, docIndex);
+        this._ixNodeMap[id] = ixn;
+    }
     if (n.getAttribute("continuedAt")) {
         this._continuedAtMap[id] = { 
             "isFact": name != 'CONTINUATION',
@@ -179,11 +187,20 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
       const re = /(?:^|\s|;)-sec-ix-hidden:\s*([^\s;]+)/;
       var m = n.getAttribute('style').match(re);
       if (m) {
-        console.log("IX Hidden: " + m[1]);
+        var id = m[1];
         node = $(n);
-        node.addClass("ixbrl-element").data('ivid', m[1]);
-        var ixn = new IXNode(id, node, docIndex);
-        this._ixNodeMap[id] = ixn;
+        node.addClass("ixbrl-element").data('ivid', id);
+        /* We may have already seen the corresponding ix element in the hidden
+         * section */
+        var ixn = this._ixNodeMap[id];
+        if (ixn) {
+          /* ... if so, update the node and docIndex so we can navigate to it */
+          ixn.wrapperNode = node;
+          ixn.docIndex = docIndex;
+        }
+        else {
+          this._ixNodeMap[id] = new IXNode(id, node, docIndex);
+        }
       }
     }
   }

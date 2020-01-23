@@ -184,7 +184,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   }
   else if(n.nodeType == 1) {
     if (n.hasAttribute('style')) {
-      const re = /(?:^|\s|;)-sec-ix-hidden:\s*([^\s;]+)/;
+      const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
       var m = n.getAttribute('style').match(re);
       if (m) {
         var id = m[1];

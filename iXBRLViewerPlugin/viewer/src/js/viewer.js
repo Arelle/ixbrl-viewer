@@ -123,12 +123,14 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
     /* Is the element the only significant content within a <td> or <th> ? If
      * so, use that as the wrapper element. */
-    var node = $(n).closest("td,th,span").eq(0);
+    var node = $(n).closest("td,th,span").eq(0);    
     if (node.length == 1) {
         var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
         if (node.text().match(regex) == null) {
             node = null;
         } 
+        if (node != null && node.css('display') == 'none')
+            node = node.parent();
     }
     /* Otherwise, insert a <span> as wrapper */
     if (node == null || node.length == 0) {

@@ -18,18 +18,20 @@
       position: absolute;
       right: 0;
       top: 0;
-      padding-right: 20px;
       line-height: @top-bar-height;
       cursor: pointer;
 
-      .title::after {
-        font-family: "icomoon";
-        content: "\ea1c";
-        transform: rotate(90deg);
-        display: inline-block;
-        font-size: 12px;
+      .title {
+        padding-right: 3.2rem;
         position: relative;
-        left: 3px;
+      }
+
+      .title::after {
+        .icon-chevron-down();
+
+        font-size: 1.8rem;
+        position: absolute;
+        right: 1rem;
       }
 
       .content-container {
@@ -45,7 +47,7 @@
           z-index: 5;
           border: solid 1px @border-grey;
           max-height: 100%;
-          overflow-y: scroll;
+          overflow-y: auto;
 
           .group {
             border-bottom: solid 1px @border-grey;

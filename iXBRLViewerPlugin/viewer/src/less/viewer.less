@@ -15,6 +15,7 @@
 @import "fonts.less";
 @import "colours.less";
 @import "common.less";
+@import (reference) "icons.less";
 
 .iv-ixbrl-fact {
   background-color: yellow;
@@ -36,12 +37,12 @@
 div,
 span {
   &.ixbrl-selected {
-    outline: solid 2px @primary;
+    outline: solid 2px @primary-focus;
     outline-offset: 1px;
   }
 
   &.ixbrl-element:hover:not(.ixbrl-selected) {
-    outline: dashed 2px @primary;
+    outline: dashed 2px @primary-focus;
     outline-offset: 1px;
   }
 }
@@ -58,12 +59,12 @@ span {
 td,
 th {
   &.ixbrl-selected {
-    outline: solid 2px @primary !important;
+    outline: solid 2px @primary-focus !important;
     outline-offset: -1px !important;
   }
 
   &.ixbrl-element:hover:not(.ixbrl-selected) {
-    outline: dashed 2px @primary !important;
+    outline: dashed 2px @primary-focus !important;
     outline-offset: -1px !important;
   }
 
@@ -124,19 +125,18 @@ div.ixbrl-table-handle {
     padding: 2 * @export-handle-size - 0.1rem 0 0 0;
 
     & > span {
-      border: solid 0.1rem #fff;
-
       &::before {
-        font-family: "icomoon";
-        content: "\e95e";
-        padding-right: 7px;
-        position: relative;
-        top: 1px;
+        .icon-download();
+
+        position: absolute;
+        left: 0.8rem;
+        font-size: 1.2rem;
       }
 
+      border: solid 0.1rem #fff;
       font-family: sans-serif;
       display: block;
-      padding: 7px 15px;
+      padding: 0.7rem 1.5rem 0.7rem 2.5rem;
       background-color: @workiva-green;
     }
   }

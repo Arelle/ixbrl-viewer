@@ -32,6 +32,9 @@ RUN npm run test
 # lint check .less files
 RUN npm run stylelint
 
+# Upload ixbrlviewer.js to github artifacts
+ARG BUILD_ARTIFACTS_GITHUB_RELEASE_ASSETS=/build/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
+
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml
 RUN mkdir /test_reports

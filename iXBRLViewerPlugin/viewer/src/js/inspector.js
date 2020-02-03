@@ -429,7 +429,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                     $("<span></span>") 
                         .addClass("analyse")
                         .text("")
-                        .click(() => inspector._chart.analyseDimension(fact,["p"]))
+                        .click(() => this._chart.analyseDimension(fact,["p"]))
                 );
             }
             this._updateEntityIdentifier(fact, factHTML);

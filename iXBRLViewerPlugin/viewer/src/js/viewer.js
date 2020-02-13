@@ -216,7 +216,7 @@ Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
         $(node).addClass("inline-fact-with-message");
     var htmlTooltip;
     if (fact) {
-        var title = fact.getLabel("std");
+        var title = fact.getLabel("std") || fact.conceptName();
         if (fact.concept().isTaxonomyExtension()) {
             $(node).attr('ix-title', `<i>${escapeHtml(title)}</i> (Extension)`);
             htmlTooltip = true;

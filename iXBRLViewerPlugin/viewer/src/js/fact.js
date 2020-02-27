@@ -91,7 +91,7 @@ Fact.prototype.readableValue = function() {
         else {
             if (d < 0) {
                 d = 0;
-            }
+            }            
             formattedNumber = formatNumber(v,d);
         }
         if (this.isMonetaryValue()) {
@@ -251,4 +251,10 @@ Fact.prototype.escaped = function () {
 
 Fact.prototype.footnotes = function () {
     return $.map(this.f.fn || [], (fn, i) => this._report.getItemById(fn));
+}
+
+Fact.prototype.scale = function() {
+    var scale = this._ixNode.wrapperNode.find('[scale]').attr('scale');
+    if (scale)
+        return parseInt(scale);    
 }

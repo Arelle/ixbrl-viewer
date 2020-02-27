@@ -24,6 +24,7 @@ import { Accordian } from './accordian.js';
 import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
+import { escapeHtml } from './util.js'
 
 export function Inspector(iv) {
     /* Insert HTML and CSS styles into body */
@@ -218,7 +219,7 @@ Inspector.prototype.updateValidationResults = function (fact) {
                 case 1: fabClass = "yellow"; break;
                 case 2: fabClass = "red"; break;
             }
-            content += `<p class='fab-container'><div class='fab ${fabClass}'></div><span class='fab-text'>${r.message.trim()}</span></p>\n`;
+            content += `<p class='fab-container'><div class='fab ${fabClass}'></div><span class='fab-text'>${escapeHtml(r.message.trim())}</span></p>\n`;
         });
         var title = $('<span></span>').text('Results');
         var messageBody = $('<div class="validation-result"></div>').html(content);

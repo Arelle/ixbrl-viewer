@@ -1,6 +1,6 @@
 version: 1
 update_configs:
-  - package_manager: "java:gradle"
+  - package_manager: "javascript"
     directory: "/"
     update_schedule: "weekly"
     commit_message:

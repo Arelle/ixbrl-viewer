@@ -45,6 +45,23 @@ span.ixbrl-highlight.ixbrl-element-nonnumeric {
   background-color: @highlight-2 !important;
 }
 
+p.ixbrl-cellblock.ixbrl-highlight span {
+  background-color: @highlight-default !important;
+}
+
+p.ixbrl-cellblock.ixbrl-highlight-1 span {
+  background-color: @highlight-1 !important;
+}
+
+p.ixbrl-cellblock.ixbrl-highlight-2 span {
+  background-color: @highlight-2 !important;
+}
+
+p.ixbrl-cellblock.ixbrl-highlight-missing span {
+  background-color: rebeccapurple !important;
+}
+
+
 div,
 span {
   &.ixbrl-selected:not(.ixbrl-element-nonnumeric) {
@@ -78,9 +95,9 @@ span.ixbrl-element.ixbrl-element-nonnumeric:not(.ixbrl-selected):hover {
   outline-offset: 1px;
 }
 
-
 .ixbrl-element {
-  cursor: pointer;   
+  cursor: pointer; 
+  z-index: 1;  
 }
 
 .inline-fact-with-message.ixbrl-highlight {

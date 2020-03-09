@@ -154,8 +154,10 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
      * so, use that as the wrapper element. */
     var node = $(n).closest("td,th,span").eq(0);    
     if (node.length == 1) {
-        if (node.css('display') == 'none')
+        if (node.css('display') == 'none') {
             node = node.parent();
+            node.addClass('ixbrl-cellblock');
+        }
         else {
             var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
             if (node.text().match(regex) == null) {

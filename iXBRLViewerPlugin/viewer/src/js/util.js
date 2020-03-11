@@ -40,7 +40,15 @@ export function momentToHuman(d, adjust) {
  * decimal places.
  */
 export function formatNumber(v, d) {
-    return Number(v).toFixed(d).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+    var parts = Number(v).toFixed(d).split('.');
+    var res = "";
+    parts.forEach(function (s, index) {
+        if (index == 0)
+            res = s.replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+        else
+            res = res + '.' + s;
+    });
+    return res;
 }
 
 /* 

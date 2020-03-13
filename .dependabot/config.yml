@@ -3,7 +3,10 @@ update_configs:
   - package_manager: "javascript"
     directory: "/"
     update_schedule: "weekly"
-    commit_message:
-      prefix: "fix"
-      prefix_development: "chore"
-      include_scope: true
+    default_reviewers:
+      - "Workiva/xt"
+  - package_manager: "python"
+    directory: "/"
+    update_schedule: "weekly"
+    default_reviewers:
+      - "Workiva/xt"

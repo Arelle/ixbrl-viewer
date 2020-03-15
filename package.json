@@ -30,6 +30,7 @@
     "babel-preset-env": "^1.7.0",
     "base64-inline-loader": "^1.1.1",
     "chart.js": "^2.9.3",
+    "core-js": "^3.6.4",
     "css-loader": "^3.4.2",
     "dateformat": "^3.0.3",
     "exceljs": "^3.8.0",

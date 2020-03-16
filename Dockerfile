@@ -17,9 +17,9 @@ ADD . /build/
 # with the tagged version number from GIT_TAG or `0.0.0` if GIT_TAG is not set
 ARG VERSION=${GIT_TAG:-0.0.0}
 RUN echo "Version = $VERSION"
-# Update line 3 in setup.py
+# Update line 6 in setup.py
 RUN sed -i "6 s/0.0.0/$VERSION/" setup.py
-# Update line 6 in package.json
+# Update line 3 in package.json
 RUN sed -i "3 s/0.0.0/$VERSION/" package.json
 
 # build ixbrlviewer.js

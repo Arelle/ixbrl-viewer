@@ -14,7 +14,7 @@
 
 import $ from 'jquery'
 import { TableExport } from './tableExport.js'
-import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
+import { escapeRegex, escapeHtml, getScrollParent, getStyleComputedProperty } from './util.js'
 import { IXNode } from './ixnode.js';
 
 import 'bootstrap/js/dist/tooltip';
@@ -29,38 +29,8 @@ export function Viewer(iv, iframes, report) {
     this.onMouseLeave = $.Callbacks();
 
     this._ixNodeMap = {};
-    this._continuedAtMap = {};
-
-    https://gist.github.com/hsablonniere/2581101
-    if (!Element.prototype.scrollIntoViewIfNeeded) {
-        Element.prototype.scrollIntoViewIfNeeded = function (centerIfNeeded) {
-          centerIfNeeded = arguments.length === 0 ? true : !!centerIfNeeded;
-      
-          var parent = this.parentNode,
-              parentComputedStyle = window.getComputedStyle(parent, null),
-              parentBorderTopWidth = parseInt(parentComputedStyle.getPropertyValue('border-top-width')),
-              parentBorderLeftWidth = parseInt(parentComputedStyle.getPropertyValue('border-left-width')),
-              overTop = this.offsetTop - parent.offsetTop < parent.scrollTop,
-              overBottom = (this.offsetTop - parent.offsetTop + this.clientHeight - parentBorderTopWidth) > (parent.scrollTop + parent.clientHeight),
-              overLeft = this.offsetLeft - parent.offsetLeft < parent.scrollLeft,
-              overRight = (this.offsetLeft - parent.offsetLeft + this.clientWidth - parentBorderLeftWidth) > (parent.scrollLeft + parent.clientWidth),
-              alignWithTop = overTop && !overBottom;
-      
-          if ((overTop || overBottom) && centerIfNeeded) {
-            parent.scrollTop = this.offsetTop - parent.offsetTop - parent.clientHeight / 2 - parentBorderTopWidth + this.clientHeight / 2;
-          }
-      
-          if ((overLeft || overRight) && centerIfNeeded) {
-            parent.scrollLeft = this.offsetLeft - parent.offsetLeft - parent.clientWidth / 2 - parentBorderLeftWidth + this.clientWidth / 2;
-          }
-      
-          if ((overTop || overBottom || overLeft || overRight) && !centerIfNeeded) {
-            this.scrollIntoView(alignWithTop);
-          }
-        };
-      }    
+    this._continuedAtMap = {};        
 }
-
 
 Viewer.prototype.initialize = function() {
     return new Promise((resolve, reject) => {
@@ -321,7 +291,20 @@ Viewer.prototype.selectPrevTag = function () {
 }
 
 Viewer.prototype.showElement = function(e) {
-    e[0].scrollIntoViewIfNeeded(true);
+    if (Element.prototype.scrollIntoViewIfNeeded)
+        e[0].scrollIntoViewIfNeeded(true);
+    else {
+        var viewTop = this._iframes.contents().scrollTop();
+        var viewBottom = viewTop + this._iframes.height();
+        var eTop = e.offset().top;
+        var eBottom = eTop + e.height();
+        if (eTop < viewTop || eBottom > viewBottom) {
+            var scrollParent = getScrollParent(e[0]);                   
+            if (getStyleComputedProperty(scrollParent, 'position') !== 'absolute')
+                scrollParent = this._iframes.contents();
+            $(scrollParent).scrollTop(e.offset().top - this._iframes.height()/2);            
+        }
+    }
 }
 
 Viewer.prototype.showAndSelectElement = function(e) {

@@ -146,3 +146,47 @@ export function escapeHtml(unsafe) {
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
  }
+
+ // popper.js code fragment
+ // Copyright © 2016 Federico Zivolo and contributors (The MIT License)
+ function getParentNode(element) {
+    if (element.nodeName === 'HTML' || element.nodeName === 'html') {
+      return element;
+    }
+    return element.parentNode || element.host;
+  }
+
+  export function getStyleComputedProperty(element, property) {
+    if (element.nodeType !== 1) {
+      return [];
+    }
+    const window = element.ownerDocument.defaultView;
+    const css = window.getComputedStyle(element, null);
+    return property ? css[property] : css;
+  }
+
+ export function getScrollParent(element) {
+    // Return body, `getScroll` will take care to get the correct `scrollTop` from it
+    if (!element) {
+      return document.body
+    }
+  
+    switch (element.nodeName) {
+      case 'HTML':
+      case 'html':
+      case 'BODY':
+      case 'body':
+        return element.ownerDocument.body
+      case '#document':
+        return element.body
+    }
+  
+    // Firefox want us to check `-x` and `-y` variations as well
+    const { overflow, overflowX, overflowY } = getStyleComputedProperty(element);
+    if (/(auto|scroll|overlay)/.test(overflow + overflowY + overflowX)) {
+      return element;
+    }
+  
+    return getScrollParent(getParentNode(element));
+  }
+  // end code fragment

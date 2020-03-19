@@ -611,13 +611,16 @@ Inspector.prototype.switchItem = function (id) {
 Inspector.prototype.selectDefaultLanguage = function () {
     var preferredLanguages = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
     var al = this._report.availableLanguages();
+    var res;
     $.each(preferredLanguages, function (i, pl) {
         $.each(al, function (j, l) {
             if (l.toLowerCase() == pl.toLowerCase()) {
-                return l;
+                res = l;
             }
         });
     });
+    if (res)
+        return res;
     return this._report.availableLanguages()[0];
 }
 

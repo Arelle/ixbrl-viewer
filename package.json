@@ -35,7 +35,7 @@
     "dateformat": "^3.0.3",
     "exceljs": "^3.8.0",
     "file-saver": "^2.0.2",
-    "html-loader": "^0.5.5",
+    "html-loader": "^1.0.0",
     "interactjs": "^1.8.5",
     "jest": "^25.1.0",
     "jquery": "^3.4.1",

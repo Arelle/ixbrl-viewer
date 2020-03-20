@@ -159,8 +159,10 @@ iXBRLReport.prototype.getAnchors = function(concept) {
                         res.push({concept: report.getConcept(v.t), wide: 0});
                     });
                 } else 
-                    if (r[0].t == concept.name)
-                        res.push({concept: report.getConcept(c), wide: 1});
+                    $.each(r, function(i, v) {
+                        if (v.t == concept.name)
+                            res.push({concept: report.getConcept(c), wide: 1});
+                    });
             });
         });
     }

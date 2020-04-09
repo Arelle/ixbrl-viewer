@@ -115,7 +115,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
   var name = localName(n.nodeName).toUpperCase();
   var isFootnote = (name == 'FOOTNOTE');
   if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
-    var node = null;
+    var node = $();
     if (!inHidden) {
       /* Is the element the only significant content within a <td> or <th> ? If
        * so, use that as the wrapper element. */
@@ -123,11 +123,11 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
       if (node.length == 1) {
           var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
           if (node.text().match(regex) == null) {
-              node = null;
+              node = $();
           } 
       }
       /* Otherwise, insert a <span> as wrapper */
-      if (node == null || node.length == 0) {
+      if (node.length == 0) {
           var wrapper = "<span>";
           var nn = n.getElementsByTagName("*");
           for (var i = 0; i < nn.length; i++) {
@@ -156,7 +156,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         }
     }
     if (localName(n.nodeName) == 'CONTINUATION') {
-        node.addClass("ixbrl-continuation");
+      $(node).addClass("ixbrl-continuation");
     }
     if (localName(n.nodeName) == 'NONFRACTION') {
       $(node).addClass("ixbrl-element-nonfraction");

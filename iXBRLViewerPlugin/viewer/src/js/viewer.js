@@ -111,103 +111,103 @@ Viewer.prototype._addDocumentSetTabs = function() {
 }
 
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
-  var elt;
-  var name = localName(n.nodeName).toUpperCase();
-  var isFootnote = (name == 'FOOTNOTE');
-  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
-    var node = $();
-    if (!inHidden) {
-      /* Is the element the only significant content within a <td> or <th> ? If
-       * so, use that as the wrapper element. */
-      node = $(n).closest("td,th").eq(0);
-      if (node.length == 1) {
-          var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
-          if (node.text().match(regex) == null) {
-              node = $();
-          } 
-      }
-      /* Otherwise, insert a <span> as wrapper */
-      if (node.length == 0) {
-          var wrapper = "<span>";
-          var nn = n.getElementsByTagName("*");
-          for (var i = 0; i < nn.length; i++) {
-            if($(nn[i]).css("display") === "block") {
-              wrapper = '<div>';
-              break;
+    var elt;
+    var name = localName(n.nodeName).toUpperCase();
+    var isFootnote = (name == 'FOOTNOTE');
+    if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
+        var node = $();
+        if (!inHidden) {
+            /* Is the element the only significant content within a <td> or <th> ? If
+             * so, use that as the wrapper element. */
+            node = $(n).closest("td,th").eq(0);
+            if (node.length == 1) {
+                var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
+                if (node.text().match(regex) == null) {
+                    node = $();
+                } 
             }
-          }
-          $(n).wrap(wrapper);
-          node = $(n).parent();
-      }
-      var id = n.getAttribute("id");
-      node.addClass("ixbrl-element").data('ivid', id);
-    }
-    /* We may have already created an IXNode for this ID from a -sec-ix-hidden
-     * element */
-    var ixn = this._ixNodeMap[id];
-    if (!ixn) {
-        ixn = new IXNode(id, node, docIndex);
-        this._ixNodeMap[id] = ixn;
-    }
-    if (n.getAttribute("continuedAt")) {
-        this._continuedAtMap[id] = { 
-            "isFact": name != 'CONTINUATION',
-            "continuedAt": n.getAttribute("continuedAt")
+            /* Otherwise, insert a <span> as wrapper */
+            if (node.length == 0) {
+                var wrapper = "<span>";
+                var nn = n.getElementsByTagName("*");
+                for (var i = 0; i < nn.length; i++) {
+                    if($(nn[i]).css("display") === "block") {
+                        wrapper = '<div>';
+                        break;
+                    }
+                }
+                $(n).wrap(wrapper);
+                node = $(n).parent();
+            }
+            var id = n.getAttribute("id");
+            node.addClass("ixbrl-element").data('ivid', id);
         }
-    }
-    if (localName(n.nodeName) == 'CONTINUATION') {
-      $(node).addClass("ixbrl-continuation");
-    }
-    if (localName(n.nodeName) == 'NONFRACTION') {
-      $(node).addClass("ixbrl-element-nonfraction");
-    }
-    if (localName(n.nodeName) == 'NONNUMERIC') {
-      $(node).addClass("ixbrl-element-nonnumeric");
-      if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-          ixn.escaped = true;
-      }
-    }
-    if (isFootnote) {
-      $(node).addClass("ixbrl-element-footnote");
-      ixn.footnote = true;
-    }
-    if (elt) {
-      var concept = n.getAttribute("name");
-      if(elt.children().first().text() == "") {
-        elt.children().first().html("<i>no content</i>");
-      }
-      var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
-      $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
-    }
-  }
-  else if(n.nodeType == 1 && localName(n.nodeName) == 'HIDDEN') {
-    inHidden = true;
-  }
-  else if(n.nodeType == 1) {
-    if (n.hasAttribute('style')) {
-      const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
-      var m = n.getAttribute('style').match(re);
-      if (m) {
-        var id = m[1];
-        node = $(n);
-        node.addClass("ixbrl-element").data('ivid', id);
-        /* We may have already seen the corresponding ix element in the hidden
-         * section */
+        /* We may have already created an IXNode for this ID from a -sec-ix-hidden
+         * element */
         var ixn = this._ixNodeMap[id];
-        if (ixn) {
-          /* ... if so, update the node and docIndex so we can navigate to it */
-          ixn.wrapperNode = node;
-          ixn.docIndex = docIndex;
+        if (!ixn) {
+            ixn = new IXNode(id, node, docIndex);
+            this._ixNodeMap[id] = ixn;
         }
-        else {
-          this._ixNodeMap[id] = new IXNode(id, node, docIndex);
+        if (n.getAttribute("continuedAt")) {
+            this._continuedAtMap[id] = { 
+                "isFact": name != 'CONTINUATION',
+                "continuedAt": n.getAttribute("continuedAt")
+            }
         }
-      }
+        if (localName(n.nodeName) == 'CONTINUATION') {
+            $(node).addClass("ixbrl-continuation");
+        }
+        if (localName(n.nodeName) == 'NONFRACTION') {
+            $(node).addClass("ixbrl-element-nonfraction");
+        }
+        if (localName(n.nodeName) == 'NONNUMERIC') {
+            $(node).addClass("ixbrl-element-nonnumeric");
+            if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
+                ixn.escaped = true;
+            }
+        }
+        if (isFootnote) {
+            $(node).addClass("ixbrl-element-footnote");
+            ixn.footnote = true;
+        }
+        if (elt) {
+            var concept = n.getAttribute("name");
+            if (elt.children().first().text() == "") {
+                elt.children().first().html("<i>no content</i>");
+            }
+            var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
+            $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
+        }
     }
-  }
-  for (var i=0; i < n.childNodes.length; i++) {
-    this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
-  }
+    else if(n.nodeType == 1 && localName(n.nodeName) == 'HIDDEN') {
+        inHidden = true;
+    }
+    else if(n.nodeType == 1) {
+        if (n.hasAttribute('style')) {
+            const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+            var m = n.getAttribute('style').match(re);
+            if (m) {
+                var id = m[1];
+                node = $(n);
+                node.addClass("ixbrl-element").data('ivid', id);
+                /* We may have already seen the corresponding ix element in the hidden
+                 * section */
+                var ixn = this._ixNodeMap[id];
+                if (ixn) {
+                    /* ... if so, update the node and docIndex so we can navigate to it */
+                    ixn.wrapperNode = node;
+                    ixn.docIndex = docIndex;
+                }
+                else {
+                    this._ixNodeMap[id] = new IXNode(id, node, docIndex);
+                }
+            }
+        }
+    }
+    for (var i=0; i < n.childNodes.length; i++) {
+        this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
+    }
 }
 
 Viewer.prototype._applyStyles = function () {

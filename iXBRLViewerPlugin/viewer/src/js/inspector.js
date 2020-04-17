@@ -433,17 +433,16 @@ Inspector.prototype._extensionAnchorsHTML = function(fact) {
         ot.push($('<h4>Anchors</h4>'));
         $.each(anchors, function(_, info) { 
             let {concept, wide} = info;
-            let stdlabel =$('<div class="std-label"></div>')
-                .text(concept.getLabel("std", true) || concept.name);
+            let stdlabel = $('<div class="std-label anchor-label"></div>').text(concept.name);  
             if (wide === 1)
                 stdlabel.addClass("wider-anchor");
             else
-                stdlabel.addClass("narrower-anchor");
+                stdlabel.addClass("narrower-anchor");            
             if (ot.length > 1)
                 stdlabel.css("margin-top", "10px");
             ot.push(stdlabel);
             ot.push($('<div class="documentation"></div>')
-                .text(concept.getLabel("doc") || ""));
+                .text(concept.getLabel("doc") || ""));           
         });
     }
     return $.makeArray(ot);

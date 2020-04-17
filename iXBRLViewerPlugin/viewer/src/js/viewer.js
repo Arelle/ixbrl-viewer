@@ -30,6 +30,7 @@ export function Viewer(iv, iframes, report) {
 
     this._ixNodeMap = {};
     this._continuedAtMap = {};        
+    this._currentShowElement = null;
 }
 
 Viewer.prototype.initialize = function() {
@@ -291,8 +292,19 @@ Viewer.prototype.selectPrevTag = function () {
 }
 
 Viewer.prototype.showElement = function(e) {
+    if (e[0] != this._currentShowElement) {
+        this._currentShowElement = e[0];
+        var span = e.find('span').first();
+        if (span.length)
+            this.scrollIntoViewIfNeeded(span);
+        else
+            this.scrollIntoViewIfNeeded(e);
+    }
+}
+
+Viewer.prototype.scrollIntoViewIfNeeded = function(e) {
     if (Element.prototype.scrollIntoViewIfNeeded)
-        e[0].scrollIntoViewIfNeeded(true);
+       e[0].scrollIntoViewIfNeeded(true);
     else {
         var viewTop = this._iframes.contents().scrollTop();
         var viewBottom = viewTop + this._iframes.height();
@@ -304,8 +316,9 @@ Viewer.prototype.showElement = function(e) {
                 scrollParent = this._iframes.contents();
             $(scrollParent).scrollTop(e.offset().top - this._iframes.height()/2);            
         }
-    }
+    }        
 }
+
 
 Viewer.prototype.showAndSelectElement = function(e) {
     this.scrollIfNotVisible(e);

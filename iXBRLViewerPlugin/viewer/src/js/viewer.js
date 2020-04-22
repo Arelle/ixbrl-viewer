@@ -116,6 +116,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     var isFootnote = (name == 'FOOTNOTE');
     if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
         var node = $();
+        var id = n.getAttribute("id");
         if (!inHidden) {
             /* Is the element the only significant content within a <td> or <th> ? If
              * so, use that as the wrapper element. */
@@ -139,7 +140,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 $(n).wrap(wrapper);
                 node = $(n).parent();
             }
-            var id = n.getAttribute("id");
             node.addClass("ixbrl-element").data('ivid', id);
         }
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
@@ -155,13 +155,13 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 "continuedAt": n.getAttribute("continuedAt")
             }
         }
-        if (localName(n.nodeName) == 'CONTINUATION') {
+        if (name == 'CONTINUATION') {
             $(node).addClass("ixbrl-continuation");
         }
-        if (localName(n.nodeName) == 'NONFRACTION') {
+        if (name == 'NONFRACTION') {
             $(node).addClass("ixbrl-element-nonfraction");
         }
-        if (localName(n.nodeName) == 'NONNUMERIC') {
+        if (name == 'NONNUMERIC') {
             $(node).addClass("ixbrl-element-nonnumeric");
             if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
                 ixn.escaped = true;
@@ -180,7 +180,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
         }
     }
-    else if(n.nodeType == 1 && localName(n.nodeName) == 'HIDDEN') {
+    else if(n.nodeType == 1 && name == 'HIDDEN') {
         inHidden = true;
     }
     else if(n.nodeType == 1) {
@@ -384,7 +384,8 @@ Viewer.prototype.showItemById = function (id) {
     if (id !== null) {
         let elt = this.elementForItemId(id);
         this.showDocumentForItemId(id);
-        if (elt) {
+        /* Hidden elements will return an empty node list */
+        if (elt.length > 0) {
             this.showElement(elt);
         }
     }

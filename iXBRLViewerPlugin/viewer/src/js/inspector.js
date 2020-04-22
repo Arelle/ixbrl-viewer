@@ -488,8 +488,8 @@ Inspector.prototype.update = function () {
             this.updateCalculation(cf);
             this.updateFootnotes(cf);
             $('div.references').empty().append(this._referencesHTML(cf));
-            $('#inspector .search-results .result').removeClass('selected');
-            $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+            $('#inspector .search-results .fact-list-item').removeClass('selected');
+            $('#inspector .search-results .fact-list-item').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
 
             var duplicates = cf.duplicates();
             var n = 0;

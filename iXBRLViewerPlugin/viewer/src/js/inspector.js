@@ -165,6 +165,10 @@ Inspector.prototype.factListRow = function(f) {
             .text(f.report().getLabel(dims[d], "std", true) || dims[d])
             .appendTo(row);
     }
+    if (f.isHidden()) {
+        $('<div class="hidden">Hidden fact</div>')
+            .appendTo(row);
+    }
     return row;
 }
 

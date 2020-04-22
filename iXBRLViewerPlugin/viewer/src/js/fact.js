@@ -247,3 +247,7 @@ Fact.prototype.escaped = function () {
 Fact.prototype.footnotes = function () {
     return $.map(this.f.fn || [], (fn, i) => this._report.getItemById(fn));
 }
+
+Fact.prototype.isHidden = function () {
+    return this._ixNode.wrapperNode.length == 0;
+}

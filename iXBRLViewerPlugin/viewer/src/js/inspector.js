@@ -477,10 +477,10 @@ Inspector.prototype.update = function () {
     var cf = inspector._currentItem;
     if (!cf) {
         $('#inspector').removeClass('footnote-mode');
-        $('#inspector .inspector-body').addClass('no-fact-selected');
+        $('#inspector').addClass('no-fact-selected');
     } 
     else { 
-        $('#inspector .inspector-body').removeClass('no-fact-selected');
+        $('#inspector').removeClass('no-fact-selected');
 
         $('#inspector .fact-inspector')
             .empty()

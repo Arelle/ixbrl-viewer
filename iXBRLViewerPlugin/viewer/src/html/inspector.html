@@ -47,8 +47,37 @@ limitations under the License.
                 <span class="ixbrl-prev-tag"></span><span class="ixbrl-next-tag"></span>
             </div>
           </div>
+        </div>
+        <div class="search">
+
           <div class="search-entry">
-            <input id="ixbrl-search" type="text" />
+            <div class="search-input">
+              <input id="ixbrl-search" type="text" />
+              <div class="filter-toggle"></div>
+            </div>
+            <div class="search-filters">
+              <h4>Filter</h4>
+              <div class="checkboxes">
+                <div>
+                  <label>
+                    <input type="checkbox"></input> Hidden Facts
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    <input type="checkbox"></input> Visible Facts
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="search-results">
+            <div class="scrollable results fact-list">
+            </div>
+            <div class="search-overlay">
+                <div class="search-overlay-icon"></div>
+                <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
+            </div>
           </div>
         </div>
         <div class="inspector-body">
@@ -84,14 +113,6 @@ limitations under the License.
                    <div class="collapsible-body footnote-facts fact-list">
                    </div>
               </div>
-          </div>
-          <div class="search-results">
-            <div class="scrollable results fact-list">
-            </div>
-            <div class="search-overlay">
-                <div class="search-overlay-icon"></div>
-                <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
-            </div>
           </div>
         </div>
       </div>

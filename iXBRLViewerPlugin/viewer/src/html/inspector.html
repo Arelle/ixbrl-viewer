@@ -31,92 +31,94 @@ limitations under the License.
       </div>
     </div>
     <div id="inspector">
-      <div class="inspector-content">
-        <div id="ixbrl-controls-top">
-          <div class="title">
-            <h1 class="fact-properties">Fact Properties</h1>
-            <h1 class="footnote-properties">Footnote Properties</h1>
-            <div class="back">
-            </div>
-          </div>
-          <div class="controls">
-            <div class="search-button">
-              <span class="icon-search"></span>
-            </div>
-            <div class="next-prev">
-                <span class="ixbrl-prev-tag"></span><span class="ixbrl-next-tag"></span>
-            </div>
+      <div id="inspector-head">
+        <div class="title">
+          <h1 class="footnote-mode-off">Fact Properties</h1>
+          <h1 class="footnote-mode-only">Footnote Properties</h1>
+          <div class="back search-mode-only">
           </div>
         </div>
-        <div class="search">
+        <div class="controls">
+          <div class="search-button">
+            <span class="icon-search"></span>
+          </div>
+          <div class="next-prev">
+              <span class="ixbrl-prev-tag"></span><span class="ixbrl-next-tag"></span>
+          </div>
+        </div>
 
-          <div class="search-entry">
-            <div class="search-input">
-              <input id="ixbrl-search" type="text" />
-              <div class="filter-toggle"></div>
-            </div>
-            <div class="search-filters">
-              <h4>Filter</h4>
-              <div class="checkboxes">
-                <div>
-                  <label>
-                    <input type="checkbox"></input> Hidden Facts
-                  </label>
-                </div>
-                <div>
-                  <label>
-                    <input type="checkbox"></input> Visible Facts
-                  </label>
-                </div>
+        <div class="search-controls search-mode-only">
+          <div class="search-input">
+            <input id="ixbrl-search" type="text" />
+            <div class="filter-toggle"></div>
+          </div>
+          <div class="search-filters">
+            <h4>Filter</h4>
+            <div class="checkboxes">
+              <div>
+                <label>
+                  <input type="checkbox"></input> Hidden Facts
+                </label>
+              </div>
+              <div>
+                <label>
+                  <input type="checkbox"></input> Visible Facts
+                </label>
               </div>
             </div>
           </div>
-          <div class="search-results">
-            <div class="scrollable results fact-list">
-            </div>
-            <div class="search-overlay">
-                <div class="search-overlay-icon"></div>
-                <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
-            </div>
-          </div>
         </div>
-        <div class="inspector-body">
+      </div> <!-- inspector-head -->
+
+      <div class="inspector-body scrollable">
+        <div class="fact-mode-only">
           <div class="no-fact-overlay">
             <div class="no-fact-overlay-icon"></div>
             <p class="title">No Fact Selected</p>
           </div>
-          <div class="collapsible-section">
-            <div class="fact-inspector collapsible-body">
-            </div>
-          </div>
-          <div class="fact-details no-fact-selected">
+          <div class="fact-selected-only">
             <div class="collapsible-section">
-               <h3 class="collapsible-header">References</h3>
-               <div class="collapsible-body references">
-               </div>
-            </div>
-            <div class="collapsible-section">
-                   <h3 class="collapsible-header">Calculations</h3>
-                   <div class="collapsible-body calculations">
-                     <div class="tree"></div>
-                   </div>
-            </div>
-            <div class="collapsible-section">
-               <h3 class="collapsible-header">Footnotes</h3>
-               <div class="collapsible-body footnotes">
-               </div>
-            </div>
-          </div>
-          <div class="footnote-details">
-              <div class="collapsible-section">
-                  <h3 class="collapsible-header">Associated facts</h3>
-                   <div class="collapsible-body footnote-facts fact-list">
-                   </div>
+              <div class="fact-inspector collapsible-body">
               </div>
+            </div>
+            <div class="footnote-mode-off">
+              <div class="collapsible-section">
+                 <h3 class="collapsible-header">References</h3>
+                 <div class="collapsible-body references">
+                 </div>
+              </div>
+              <div class="collapsible-section">
+                <h3 class="collapsible-header">Calculations</h3>
+                <div class="collapsible-body calculations">
+                  <div class="tree"></div>
+                </div>
+              </div>
+              <div class="collapsible-section">
+                 <h3 class="collapsible-header">Footnotes</h3>
+                 <div class="collapsible-body footnotes">
+                 </div>
+              </div>
+            </div>
+            <div class="footnote-details footnote-mode-only">
+              <div class="collapsible-section">
+                <h3 class="collapsible-header">Associated facts</h3>
+                 <div class="collapsible-body footnote-facts fact-list">
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-results search-mode-only">
+          <div class="results fact-list">
+          </div>
+          <div class="search-overlay">
+            <div class="search-overlay-icon"></div>
+            <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
           </div>
         </div>
       </div>
-      <div class="powered-by">
+      <div class="inspector-foot powered-by">
         Powered by
         <a href="https://www.workiva.co.uk/solutions/xbrl-and-ixbrl" target="_blank"><img src="../img/workiva.svg" /></a>
       </div>

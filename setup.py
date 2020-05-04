@@ -18,7 +18,7 @@ setup(
     ],
     install_requires=[
         'isodate==0.6.0',
-        'numpy==1.18.3',
+        'numpy==1.18.4',
         'pycountry==19.8.18'
     ],
 )

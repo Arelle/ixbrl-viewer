@@ -86,6 +86,14 @@ Inspector.prototype.setViewer = function (viewer) {
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
+    $('#search-visible-fact-filter').change(function () { 
+        inspector._search.showVisibleFacts = $(this).prop('checked');
+        inspector.updateSearchResults(); 
+    });
+    $('#search-hidden-fact-filter').change(function () { 
+        inspector._search.showHiddenFacts = $(this).prop('checked');
+        inspector.updateSearchResults(); 
+    });
 }
 
 /*
@@ -173,7 +181,12 @@ Inspector.prototype.factListRow = function(f) {
 }
 
 Inspector.prototype.search = function (s) {
-    var results = this._search.search(s);
+    this._search.searchString = s.trim();
+    this.updateSearchResults();
+}
+
+Inspector.prototype.updateSearchResults = function() {
+    var results = this._search.searchResults();
     var viewer = this._viewer;
     var container = $('#inspector .search-results .results');
     $('div', container).remove();
@@ -189,7 +202,7 @@ Inspector.prototype.search = function (s) {
         });
     }
     else {
-        if (s.trim() != "") {
+        if (this._search.searchString != "") {
             $(".title", overlay).text("No Match Found");
             $(".text", overlay).text("Try again with different keywords");
         }

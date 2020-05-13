@@ -18,6 +18,9 @@ import $ from 'jquery'
 export function ReportSearch (report) {
     this._report = report;
     this.buildSearchIndex();
+    this.searchString = '';
+    this.showHiddenFacts = true;
+    this.showVisibleFacts = true;
 }
 
 ReportSearch.prototype.buildSearchIndex = function () {
@@ -53,20 +56,24 @@ ReportSearch.prototype.buildSearchIndex = function () {
     })
 }
 
-ReportSearch.prototype.search = function(s) {
-    var rr = this._searchIndex.search(s);
+ReportSearch.prototype.searchResults = function () {
+    var rr = this._searchIndex.search(this.searchString);
     var results = []
     var searchIndex = this;
 
-    if (s == "") {
+    if (this._searchString == "") {
         return [];
     }
 
-    rr.forEach((r,i) => 
-        results.push({
-            "fact": searchIndex._report.getItemById(r.ref),
-            "score": r.score
-        })
+    rr.forEach((r,i) => {
+            var item = searchIndex._report.getItemById(r.ref);
+            if ((!item.isHidden() && this.showVisibleFacts) || (item.isHidden() && this.showHiddenFacts)) {
+                results.push({
+                    "fact": item,
+                    "score": r.score
+                })
+            }
+        }
     );
     return results;
 }

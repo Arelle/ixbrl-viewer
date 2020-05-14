@@ -71,6 +71,7 @@ Inspector.prototype.initialize = function (report) {
         report.setViewerOptions(inspector._viewerOptions);
         inspector._iv.setProgress("Building search index").then(() => {
             inspector._search = new ReportSearch(report);
+            inspector.setupSearchControls();
             inspector.buildDisplayOptionsMenu();
             resolve();
         });
@@ -85,6 +86,12 @@ Inspector.prototype.setViewer = function (viewer) {
     viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
+
+}
+
+
+Inspector.prototype.setupSearchControls = function (viewer) {
+    var inspector = this;
     $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
     $('#search-visible-fact-filter').change(function () { 
         inspector._search.showVisibleFacts = $(this).prop('checked');
@@ -94,6 +101,19 @@ Inspector.prototype.setViewer = function (viewer) {
         inspector._search.showHiddenFacts = $(this).prop('checked');
         inspector.updateSearchResults(); 
     });
+    $("#search-filter-period")
+        .empty()
+        .append($('<option value="*">ALL</option>'))
+        .change(function () {
+            inspector._search.periodFilter = $(this).val();
+            inspector.updateSearchResults(); 
+        });
+    for (const key in this._search.periods) {
+        $("<option>")
+            .attr("value", key)
+            .text(this._search.periods[key])
+            .appendTo('#search-filter-period');
+    }
 }
 
 /*

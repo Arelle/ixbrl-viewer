@@ -21,12 +21,15 @@ export function ReportSearch (report) {
     this.searchString = '';
     this.showHiddenFacts = true;
     this.showVisibleFacts = true;
+    this.periodFilter = '*';
+
 }
 
 ReportSearch.prototype.buildSearchIndex = function () {
     var docs = [];
     var dims = {};
     var facts = this._report.facts();
+    this.periods = {};
     for (var i = 0; i < facts.length; i++) {
         var f = facts[i];
         var doc = { "id": f.id };
@@ -41,6 +44,12 @@ ReportSearch.prototype.buildSearchIndex = function () {
         doc.label = l;
         doc.ref = f.concept().referenceValuesAsString();
         docs.push(doc);
+
+        var p = f.period();
+        if (p) {
+            this.periods[p.key()] = p.toString();
+        }
+
     }
     this._searchIndex = lunr(function () {
       this.ref('id');
@@ -67,11 +76,13 @@ ReportSearch.prototype.searchResults = function () {
 
     rr.forEach((r,i) => {
             var item = searchIndex._report.getItemById(r.ref);
-            if ((!item.isHidden() && this.showVisibleFacts) || (item.isHidden() && this.showHiddenFacts)) {
+            if (
+                ((!item.isHidden() && this.showVisibleFacts) || (item.isHidden() && this.showHiddenFacts)) &&
+                (this.periodFilter == '*' || item.period().key() == this.periodFilter)) {
                 results.push({
                     "fact": item,
                     "score": r.score
-                })
+                });
             }
         }
     );

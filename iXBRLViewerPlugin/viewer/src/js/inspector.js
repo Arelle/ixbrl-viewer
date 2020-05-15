@@ -101,6 +101,7 @@ Inspector.prototype.searchSpec = function () {
 Inspector.prototype.setupSearchControls = function (viewer) {
     var inspector = this;
     $('.search-controls input, .search-controls select').change(() => this.search());
+    $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
     $("#search-filter-period")
         .empty()
         .append($('<option value="*">ALL</option>'));

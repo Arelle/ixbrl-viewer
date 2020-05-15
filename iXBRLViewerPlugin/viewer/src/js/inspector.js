@@ -94,6 +94,7 @@ Inspector.prototype.searchSpec = function () {
     spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
     spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
     spec.periodFilter = $('#search-filter-period').val();
+    spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     return spec;
 }
 

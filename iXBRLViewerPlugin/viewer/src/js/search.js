@@ -73,7 +73,10 @@ ReportSearch.prototype.search = function (s) {
             var item = searchIndex._report.getItemById(r.ref);
             if (
                 ((!item.isHidden() && s.showVisibleFacts) || (item.isHidden() && s.showHiddenFacts)) &&
-                (s.periodFilter == '*' || item.period().key() == s.periodFilter)) {
+                (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
+                (s.conceptTypeFilter == '*' || 
+                    (s.conceptTypeFilter == 'numeric' && item.isNumeric()) || 
+                    (s.conceptTypeFilter == 'text' && !item.isNumeric()))) {
                 results.push({
                     "fact": item,
                     "score": r.score

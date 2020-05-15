@@ -18,11 +18,6 @@ import $ from 'jquery'
 export function ReportSearch (report) {
     this._report = report;
     this.buildSearchIndex();
-    this.searchString = '';
-    this.showHiddenFacts = true;
-    this.showVisibleFacts = true;
-    this.periodFilter = '*';
-
 }
 
 ReportSearch.prototype.buildSearchIndex = function () {
@@ -65,20 +60,20 @@ ReportSearch.prototype.buildSearchIndex = function () {
     })
 }
 
-ReportSearch.prototype.searchResults = function () {
-    var rr = this._searchIndex.search(this.searchString);
+ReportSearch.prototype.search = function (s) {
+    var rr = this._searchIndex.search(s.searchString);
     var results = []
     var searchIndex = this;
 
-    if (this._searchString == "") {
+    if (s.searchString == "") {
         return [];
     }
 
     rr.forEach((r,i) => {
             var item = searchIndex._report.getItemById(r.ref);
             if (
-                ((!item.isHidden() && this.showVisibleFacts) || (item.isHidden() && this.showHiddenFacts)) &&
-                (this.periodFilter == '*' || item.period().key() == this.periodFilter)) {
+                ((!item.isHidden() && s.showVisibleFacts) || (item.isHidden() && s.showHiddenFacts)) &&
+                (s.periodFilter == '*' || item.period().key() == s.periodFilter)) {
                 results.push({
                     "fact": item,
                     "score": r.score

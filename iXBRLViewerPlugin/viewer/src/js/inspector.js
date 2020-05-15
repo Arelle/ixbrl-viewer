@@ -86,28 +86,23 @@ Inspector.prototype.setViewer = function (viewer) {
     viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
     $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
     $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
-
 }
 
+Inspector.prototype.searchSpec = function () {
+    var spec = {};
+    spec.searchString = $('#ixbrl-search').val();
+    spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
+    spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
+    spec.periodFilter = $('#search-filter-period').val();
+    return spec;
+}
 
 Inspector.prototype.setupSearchControls = function (viewer) {
     var inspector = this;
-    $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
-    $('#search-visible-fact-filter').change(function () { 
-        inspector._search.showVisibleFacts = $(this).prop('checked');
-        inspector.updateSearchResults(); 
-    });
-    $('#search-hidden-fact-filter').change(function () { 
-        inspector._search.showHiddenFacts = $(this).prop('checked');
-        inspector.updateSearchResults(); 
-    });
+    $('.search-controls input, .search-controls select').change(() => this.search());
     $("#search-filter-period")
         .empty()
-        .append($('<option value="*">ALL</option>'))
-        .change(function () {
-            inspector._search.periodFilter = $(this).val();
-            inspector.updateSearchResults(); 
-        });
+        .append($('<option value="*">ALL</option>'));
     for (const key in this._search.periods) {
         $("<option>")
             .attr("value", key)
@@ -200,13 +195,8 @@ Inspector.prototype.factListRow = function(f) {
     return row;
 }
 
-Inspector.prototype.search = function (s) {
-    this._search.searchString = s.trim();
-    this.updateSearchResults();
-}
-
-Inspector.prototype.updateSearchResults = function() {
-    var results = this._search.searchResults();
+Inspector.prototype.search = function() {
+    var results = this._search.search(this.searchSpec());
     var viewer = this._viewer;
     var container = $('#inspector .search-results .results');
     $('div', container).remove();

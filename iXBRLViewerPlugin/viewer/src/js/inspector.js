@@ -165,7 +165,7 @@ Inspector.prototype.highlightAllTags = function (checked) {
 Inspector.prototype.factListRow = function(f) {
     var row = $('<div class="fact-list-item"></div>')
         .click(() => this.selectItem(f.id))
-        .dblclick(function () { $('#inspector').removeClass("search-mode"); })
+        .dblclick(() => $('#inspector').removeClass("search-mode"))
         .mousedown(function (e) { 
             /* Prevents text selection via double click without
              * disabling click+drag text selection (which user-select:
@@ -178,12 +178,19 @@ Inspector.prototype.factListRow = function(f) {
         .mouseenter(() => this._viewer.linkedHighlightFact(f))
         .mouseleave(() => this._viewer.clearLinkedHighlightFact(f))
         .data('ivid', f.id);
+    $('<div class="select-icon"></div>')
+        .click(() => {
+            this.selectItem(f.id);
+            $('#inspector').removeClass("search-mode");
+        })
+        .appendTo(row)
     $('<div class="title"></div>')
         .text(f.getLabel("std") || f.conceptName())
         .appendTo(row);
     $('<div class="dimension"></div>')
         .text(f.period().toString())
         .appendTo(row);
+
     var dims = f.dimensions();
     for (var d in dims) {
         $('<div class="dimension"></div>')

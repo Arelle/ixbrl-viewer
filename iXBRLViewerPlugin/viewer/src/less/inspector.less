@@ -37,7 +37,7 @@
   &,
   table {
     .default-font();
-    .text-sm();
+    .text-md();
   }
 
   #ixv-progress {
@@ -375,6 +375,18 @@
               font-size: x-large;
             }
           }
+        }
+        .select-icon {
+            float: right;
+            .square-button();
+
+            &:first-of-type {
+                margin-left: 0.5rem;
+            }
+
+            &::before {
+                .icon-select();
+            }
         }
       } /* search results */
     } /* inspector body */

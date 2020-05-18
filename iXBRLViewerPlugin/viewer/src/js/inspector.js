@@ -505,7 +505,7 @@ Inspector.prototype.update = function () {
         $('#inspector').addClass('no-fact-selected');
     } 
     else { 
-        $('#inspector').removeClass('no-fact-selected');
+        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact");
 
         $('#inspector .fact-inspector')
             .empty()
@@ -534,7 +534,9 @@ Inspector.prototype.update = function () {
             $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
 
             this.getPeriodIncrease(cf);
-
+            if (cf.isHidden()) {
+                $('#inspector').addClass('hidden-fact');
+            }
         }
         else if (cf instanceof Footnote) {
             $('#inspector').addClass('footnote-mode');

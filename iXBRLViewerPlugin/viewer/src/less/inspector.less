@@ -16,6 +16,7 @@
 @import "fonts.less";
 @import "colours.less";
 @import "common.less";
+@import (reference) "components.less";
 @import "form-controls.less";
 @import (reference) "icons.less";
 @import "chart.less";
@@ -448,6 +449,14 @@
       top: 1px;
     }
 
+    .hidden-fact-tag {
+        .tag();
+
+        position: absolute;
+        top: 1.33rem;
+        right: 0.9rem;
+    }
+
     table.fact-properties {
       table-layout: fixed;
       width: 100%;
@@ -648,6 +657,12 @@
       }
     }
 
+    &:not(.hidden-fact) {
+        .hidden-fact-tag {
+            display: none;
+        }
+    }
+
     &.search-mode {
       #inspector-head {
         .controls {
@@ -718,13 +733,7 @@
       }
 
       .hidden {
-        display: table;
-        text-transform: uppercase;
-        font-weight: bold;
-        background-color: @background-tag;
-        padding: 0.15em 0.5em;
-        color: #fff;
-        border-radius: 0.3em;
+          .tag();
       }
 
       &.selected {

@@ -53,7 +53,7 @@ export function Inspector(iv) {
     $("#inspector .controls .search-button").click(function () {
         $(this).closest("#inspector").toggleClass("search-mode");
     });
-    $("#inspector #ixbrl-controls-top .back").click(function () {
+    $("#inspector-head .back").click(function () {
         $(this).closest("#inspector").removeClass("search-mode");
     });
     this._optionsMenu = new Menu($("#display-options-menu"));

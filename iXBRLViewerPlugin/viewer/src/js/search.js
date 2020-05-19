@@ -65,10 +65,6 @@ ReportSearch.prototype.search = function (s) {
     var results = []
     var searchIndex = this;
 
-    if (s.searchString == "") {
-        return [];
-    }
-
     rr.forEach((r,i) => {
             var item = searchIndex._report.getItemById(r.ref);
             if (

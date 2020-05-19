@@ -80,12 +80,12 @@ Inspector.prototype.initialize = function (report) {
 
 Inspector.prototype.setViewer = function (viewer) {
     this._viewer = viewer;
-    var inspector = this;
-    viewer.onSelect.add(function (id, eltSet) { inspector.selectItem(id, eltSet) });
-    viewer.onMouseEnter.add(function (id) { inspector.viewerMouseEnter(id) });
-    viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
-    $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
-    $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
+    viewer.onSelect.add((id, eltSet) => this.selectItem(id, eltSet));
+    viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
+    viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
+    $('.ixbrl-next-tag').click(() => viewer.selectNextTag());
+    $('.ixbrl-prev-tag').click(() => viewer.selectPrevTag());
+    this.search();
 }
 
 Inspector.prototype.searchSpec = function () {
@@ -213,12 +213,15 @@ Inspector.prototype.search = function() {
     var overlay = $('#inspector .search-results .search-overlay');
     if (results.length > 0) {
         overlay.hide();
-        $.each(results, (i,r) => {
-            var f = r.fact;
-            if (i < 100) {
-                this.factListRow(f).appendTo(container);
+        for (const [i, r] of results.entries()) {
+            if (i > 100) {
+                $('<div class="fact-list-item"></div>')
+                    .text((results.length - 1) + " results not shown")
+                    .appendTo(container);
+                break;
             }
-        });
+            this.factListRow(r.fact).appendTo(container);
+        }
     }
     else {
         if (this._search.searchString != "") {

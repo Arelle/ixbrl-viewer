@@ -29,7 +29,6 @@
 @import "block-list.less";
 
 @top-bar-height: 35px;
-@powered-by-footer-height: 30px;
 
 #ixv {
   /* Specify these here, not on body in case the iXBRL document has its own
@@ -287,6 +286,10 @@
           display: none;
         }
 
+        &.show-filters .filter-toggle {
+          color: @primary;
+        }
+
         .search-filters {
           position: relative;
 
@@ -389,6 +392,7 @@
         .select-icon {
           float: right;
           .square-button();
+          .clickable();
 
           &:first-of-type {
             margin-left: 0.5rem;
@@ -706,11 +710,12 @@
       .text-sm();
 
       text-align: center;
+      flex-shrink: 0;
       background: #fff;
       width: 100%;
-      height: @powered-by-footer-height;
+      height: 3rem;
       padding-top: 5px;
-      margin: 0 10px;
+      margin: 0;
       box-sizing: border-box;
       border-top: @simple-border;
 

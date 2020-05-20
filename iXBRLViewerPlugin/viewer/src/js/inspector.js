@@ -104,6 +104,7 @@ Inspector.prototype.setupSearchControls = function (viewer) {
     var inspector = this;
     $('.search-controls input, .search-controls select').change(() => this.search());
     $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
+    $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
     $("#search-filter-period")
         .empty()
         .append($('<option value="*">ALL</option>'));
@@ -113,6 +114,14 @@ Inspector.prototype.setupSearchControls = function (viewer) {
             .text(this._search.periods[key])
             .appendTo('#search-filter-period');
     }
+}
+
+Inspector.prototype.resetSearchFilters = function () {
+    $("#search-filter-period").val("*");
+    $("#search-filter-concept-type").val("*");
+    $("#search-hidden-fact-filter").prop("checked", true);
+    $("#search-visible-fact-filter").prop("checked", true);
+    this.search();
 }
 
 /*

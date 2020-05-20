@@ -288,6 +288,15 @@
         }
 
         .search-filters {
+          position: relative;
+          .reset {
+            .clickable();
+
+            position: absolute;
+            right: 0;
+            top: 0;
+          }
+
           h3 {
             border: none;
             font-weight: bold;
@@ -390,9 +399,9 @@
         }
 
         .more-results {
-            padding: 1rem;
-            text-align: center;
-            cursor: pointer;
+          .clickable();
+          padding: 1rem;
+          text-align: center;
         }
 
       } /* search results */

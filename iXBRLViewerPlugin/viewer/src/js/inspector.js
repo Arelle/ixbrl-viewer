@@ -25,6 +25,8 @@ import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
 
+const SEARCH_PAGE_SIZE = 100
+
 export function Inspector(iv) {
     /* Insert HTML and CSS styles into body */
     $(require('../html/inspector.html')).prependTo('body');
@@ -204,6 +206,20 @@ Inspector.prototype.factListRow = function(f) {
     return row;
 }
 
+Inspector.prototype.addResults = function(container, results, offset) {
+    $('.more-results', container).remove();
+    for (var i = offset; i < results.length; i++ ) {
+        if (i - offset >= SEARCH_PAGE_SIZE) {
+            $('<div class="more-results"></div>')
+                .text("Show more results")
+                .click(() => this.addResults(container, results, i))
+                .appendTo(container);
+            break;
+        }
+        this.factListRow(results[i].fact).appendTo(container);
+    }
+}
+
 Inspector.prototype.search = function() {
     var results = this._search.search(this.searchSpec());
     var viewer = this._viewer;
@@ -213,15 +229,7 @@ Inspector.prototype.search = function() {
     var overlay = $('#inspector .search-results .search-overlay');
     if (results.length > 0) {
         overlay.hide();
-        for (const [i, r] of results.entries()) {
-            if (i > 100) {
-                $('<div class="fact-list-item"></div>')
-                    .text((results.length - 1) + " results not shown")
-                    .appendTo(container);
-                break;
-            }
-            this.factListRow(r.fact).appendTo(container);
-        }
+        this.addResults(container, results, 0);
     }
     else {
         if (this._search.searchString != "") {

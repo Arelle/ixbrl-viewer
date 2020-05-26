@@ -90,39 +90,6 @@ Inspector.prototype.setViewer = function (viewer) {
     this.search();
 }
 
-Inspector.prototype.searchSpec = function () {
-    var spec = {};
-    spec.searchString = $('#ixbrl-search').val();
-    spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
-    spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
-    spec.periodFilter = $('#search-filter-period').val();
-    spec.conceptTypeFilter = $('#search-filter-concept-type').val();
-    return spec;
-}
-
-Inspector.prototype.setupSearchControls = function (viewer) {
-    var inspector = this;
-    $('.search-controls input, .search-controls select').change(() => this.search());
-    $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
-    $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
-    $("#search-filter-period")
-        .empty()
-        .append($('<option value="*">ALL</option>'));
-    for (const key in this._search.periods) {
-        $("<option>")
-            .attr("value", key)
-            .text(this._search.periods[key])
-            .appendTo('#search-filter-period');
-    }
-}
-
-Inspector.prototype.resetSearchFilters = function () {
-    $("#search-filter-period").val("*");
-    $("#search-filter-concept-type").val("*");
-    $("#search-hidden-fact-filter").prop("checked", true);
-    $("#search-visible-fact-filter").prop("checked", true);
-    this.search();
-}
 
 /*
  * Check for fragment identifier pointing to a specific fact and select it if
@@ -229,8 +196,43 @@ Inspector.prototype.addResults = function(container, results, offset) {
     }
 }
 
+Inspector.prototype.searchSpec = function () {
+    var spec = {};
+    spec.searchString = $('#ixbrl-search').val();
+    spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
+    spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
+    spec.periodFilter = $('#search-filter-period').val();
+    spec.conceptTypeFilter = $('#search-filter-concept-type').val();
+    return spec;
+}
+
+Inspector.prototype.setupSearchControls = function (viewer) {
+    var inspector = this;
+    $('.search-controls input, .search-controls select').change(() => this.search());
+    $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
+    $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
+    $("#search-filter-period")
+        .empty()
+        .append($('<option value="*">ALL</option>'));
+    for (const key in this._search.periods) {
+        $("<option>")
+            .attr("value", key)
+            .text(this._search.periods[key])
+            .appendTo('#search-filter-period');
+    }
+}
+
+Inspector.prototype.resetSearchFilters = function () {
+    $("#search-filter-period").val("*");
+    $("#search-filter-concept-type").val("*");
+    $("#search-hidden-fact-filter").prop("checked", true);
+    $("#search-visible-fact-filter").prop("checked", true);
+    this.search();
+}
+
 Inspector.prototype.search = function() {
-    var results = this._search.search(this.searchSpec());
+    var spec = this.searchSpec();
+    var results = this._search.search(spec);
     var viewer = this._viewer;
     var container = $('#inspector .search-results .results');
     $('div', container).remove();
@@ -241,18 +243,14 @@ Inspector.prototype.search = function() {
         this.addResults(container, results, 0);
     }
     else {
-        if (this._search.searchString != "") {
-            $(".title", overlay).text("No Match Found");
-            $(".text", overlay).text("Try again with different keywords");
-        }
-        else {
-            $(".title", overlay).text("Fact Search");
-            $(".text", overlay).text("Please enter some search terms");
-        }
-
+        $(".title", overlay).text("No Match Found");
+        $(".text", overlay).text("Try again with different keywords");
         overlay.show();
     }
-    viewer.highlightRelatedFacts($.map(results, function (r) { return r.fact } ));
+    /* Don't highlight search results if there's no search string */
+    if (spec.searchString != "") {
+        viewer.highlightRelatedFacts($.map(results, r =>  r.fact ));
+    }
 }
 
 Inspector.prototype.updateCalculation = function (fact, elr) {

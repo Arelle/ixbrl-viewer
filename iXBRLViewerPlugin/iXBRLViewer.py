@@ -188,10 +188,11 @@ class IXBRLViewerBuilder:
         dts = self.dts
         iv = iXBRLViewer(dts)
         idGen = 0
-        self.roleMap.getPrefix(XbrlConst.standardLabel,"std")
-        self.roleMap.getPrefix(XbrlConst.documentationLabel,"doc")
-        self.roleMap.getPrefix(XbrlConst.summationItem,"calc")
-        self.roleMap.getPrefix(XbrlConst.parentChild,"pres")
+        self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
+        self.roleMap.getPrefix(XbrlConst.documentationLabel, "doc")
+        self.roleMap.getPrefix(XbrlConst.summationItem, "calc")
+        self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
+        self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
 
         for f in dts.facts:
             if f.id is None:

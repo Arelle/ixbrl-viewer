@@ -336,8 +336,8 @@
     .inspector-body {
       flex-grow: 1;
       width: 100%;
-      overflow-y: auto;
       position: relative;
+      overflow: hidden;
 
       .no-fact-overlay {
         display: block;
@@ -360,7 +360,15 @@
         }
       }
 
+      .inspector-body-fact {
+        overflow-y: auto;
+        height: 100%;
+      }
+
       .search-results {
+        overflow-y: auto;
+        height: 100%;
+
         .search-overlay {
           transform: translate(-50%, -50%);
           position: absolute;

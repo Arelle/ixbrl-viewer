@@ -25,6 +25,8 @@ from arelle.ModelRelationshipSet import ModelRelationshipSet
 from .xhtmlserialize import XHTMLSerializer
 import os
 
+WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
+
 class NamespaceMap:
     """
     Class for building a 1:1 map of prefixes to namespace URIs
@@ -161,7 +163,7 @@ class IXBRLViewerBuilder:
 
         for baseSetKey, baseSetModelLinks  in self.dts.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
-            if arcrole == XbrlConst.summationItem and ELR is not None:
+            if arcrole in (XbrlConst.summationItem, WIDER_NARROWER_ARCROLE) and ELR is not None:
                 self.addELR(ELR)
                 rr = dict()
                 relSet = self.dts.relationshipSet(arcrole, ELR)

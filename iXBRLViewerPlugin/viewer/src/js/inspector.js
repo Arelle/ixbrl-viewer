@@ -261,6 +261,21 @@ Inspector.prototype.updateFootnotes = function (fact) {
     $('.footnotes').empty().append(this._footnotesHTML(fact));
 }
 
+Inspector.prototype.updateAnchoring = function (fact) {
+    if (!this._report.usesAnchoring()) {
+        $('.anchoring').hide();
+    }
+    else {
+        $('.anchoring').show();
+        $('.anchoring .collapsible-body').empty();
+        const wider = fact.widerConcepts();
+        for (const c of wider) {
+            $("<p></p>").text(c).appendTo($('.anchoring .collapsible-body'));
+        }
+    }
+
+}
+
 Inspector.prototype._referencesHTML = function (fact) {
     var c = fact.concept();
     var a = new Accordian();
@@ -541,6 +556,7 @@ Inspector.prototype.update = function () {
 
             this.updateCalculation(cf);
             this.updateFootnotes(cf);
+            this.updateAnchoring(cf);
             $('div.references').empty().append(this._referencesHTML(cf));
             $('#inspector .search-results .fact-list-item').removeClass('selected');
             $('#inspector .search-results .fact-list-item').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');

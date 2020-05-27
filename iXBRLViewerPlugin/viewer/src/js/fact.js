@@ -251,3 +251,19 @@ Fact.prototype.footnotes = function () {
 Fact.prototype.isHidden = function () {
     return this._ixNode.wrapperNode.length == 0;
 }
+
+Fact.prototype.widerConcepts = function () {
+    if (!this._report.usesAnchoring()) {
+        return [];
+    }
+    var concepts = [];
+    const wn = this._report.data.rels["w-n"];
+    for (const elr in wn) {
+        for (const src in wn[elr]) {
+            if ($.map(wn[elr][src], (target) => target.t).includes(this.conceptName())) {
+                concepts.push(src);
+            }
+        }
+    }
+    return concepts;
+}

@@ -210,3 +210,7 @@ iXBRLReport.prototype.documentSetFiles = function() {
 iXBRLReport.prototype.isDocumentSet = function() {
     return this.data.docSetFiles !== undefined;
 }
+
+iXBRLReport.prototype.usesAnchoring = function() {
+    return this.data.rels["w-n"] !== undefined;
+}

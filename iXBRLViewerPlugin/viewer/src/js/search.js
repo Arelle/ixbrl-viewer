@@ -68,11 +68,9 @@ ReportSearch.prototype.search = function (s) {
     rr.forEach((r,i) => {
             var item = searchIndex._report.getItemById(r.ref);
             if (
-                ((!item.isHidden() && s.showVisibleFacts) || (item.isHidden() && s.showHiddenFacts)) &&
+                (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
                 (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
-                (s.conceptTypeFilter == '*' || 
-                    (s.conceptTypeFilter == 'numeric' && item.isNumeric()) || 
-                    (s.conceptTypeFilter == 'text' && !item.isNumeric()))) {
+                (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
                 results.push({
                     "fact": item,
                     "score": r.score

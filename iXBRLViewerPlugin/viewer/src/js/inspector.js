@@ -270,7 +270,7 @@ Inspector.prototype.updateAnchoring = function (fact) {
         $('.anchoring .collapsible-body').empty();
         const wider = fact.widerConcepts();
         for (const c of wider) {
-            $("<p></p>").text(c).appendTo($('.anchoring .collapsible-body'));
+            $("<p></p>").text(this._report.getLabel(c, "std", true)).appendTo($('.anchoring .collapsible-body'));
         }
     }
 

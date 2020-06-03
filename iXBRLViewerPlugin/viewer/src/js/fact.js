@@ -267,3 +267,22 @@ Fact.prototype.widerConcepts = function () {
     }
     return concepts;
 }
+
+Fact.prototype.narrowerConcepts = function () {
+    if (!this._report.usesAnchoring()) {
+        return [];
+    }
+    var concepts = [];
+    const wn = this._report.data.rels["w-n"];
+    for (const elr in wn) {
+        for (const src in wn[elr]) {
+            if (src == this.conceptName()) {
+                for (const target of wn[elr][src]) {
+                    concepts.push(target.t)
+                }
+            }
+        }
+    }
+    return concepts;
+}
+

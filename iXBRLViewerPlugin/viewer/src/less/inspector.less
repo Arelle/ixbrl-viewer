@@ -640,7 +640,7 @@
           position: relative;
           line-height: 1.8rem;
 
-          &:not(.fact-link, .total) .concept-name {
+          &:not(.calc-fact-link, .total) .concept-name {
             color: #777;
           }
 
@@ -649,7 +649,7 @@
             margin-left: 15px;
           }
 
-          &.fact-link {
+          &.calc-fact-link {
             cursor: pointer;
 
             .concept-name {
@@ -663,7 +663,7 @@
           }
 
           &.linked-highlight,
-          &.fact-link:hover {
+          &.calc-fact-link:hover {
             .linked-highlight-text();
           }
 
@@ -671,16 +671,6 @@
             border-top: solid 1px @border-grey;
             padding-bottom: 1.2rem;
           }
-        }
-      }
-
-      .year-on-year-fact-link {
-        cursor: pointer;
-        color: @primary;
-
-        &:hover {
-          outline: solid 2px @linked-fact;
-          outline-offset: 1px;
         }
       }
     }
@@ -748,12 +738,14 @@
     }
   }
 
-  #period {
-    margin-top: 10px;
-  }
+  .fact-link {
+    cursor: pointer;
+    color: @primary;
 
-  #value {
-    margin-top: 10px;
+    &:hover {
+      outline: solid 2px @linked-fact;
+      outline-offset: 1px;
+    }
   }
 
   .fact-list {

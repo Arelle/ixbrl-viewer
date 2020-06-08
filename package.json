@@ -33,7 +33,7 @@
     "core-js": "^3.6.4",
     "css-loader": "^3.4.2",
     "dateformat": "^3.0.3",
-    "exceljs": "^3.8.0",
+    "exceljs": "^4.0.1",
     "file-saver": "^2.0.2",
     "html-loader": "^0.5.5",
     "interactjs": "^1.8.5",

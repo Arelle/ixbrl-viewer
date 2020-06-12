@@ -13,14 +13,15 @@
 // limitations under the License.
 
 .block-list-item {
-  margin: 0.9rem 0;
+  margin: 0.5rem 0;
   padding: 0.3rem 0.9rem;
   background-color: @button-background;
   cursor: pointer;
   position: relative;
+  border-left: solid 0.4rem @button-background;
 
   & > * {
-    margin: 0.6rem 0;
+    margin: 0.8rem 0;
   }
 
   &:hover {
@@ -28,6 +29,7 @@
   }
 
   &.selected {
+    border-left: solid 0.4rem #0085e6;
     background-color: @background-selected;
   }
 

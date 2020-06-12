@@ -25,6 +25,8 @@ import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
 
+const SEARCH_PAGE_SIZE = 100
+
 export function Inspector(iv) {
     /* Insert HTML and CSS styles into body */
     $(require('../html/inspector.html')).prependTo('body');
@@ -53,7 +55,7 @@ export function Inspector(iv) {
     $("#inspector .controls .search-button").click(function () {
         $(this).closest("#inspector").toggleClass("search-mode");
     });
-    $("#inspector #ixbrl-controls-top .back").click(function () {
+    $("#inspector-head .back").click(function () {
         $(this).closest("#inspector").removeClass("search-mode");
     });
     this._optionsMenu = new Menu($("#display-options-menu"));
@@ -71,6 +73,7 @@ Inspector.prototype.initialize = function (report) {
         report.setViewerOptions(inspector._viewerOptions);
         inspector._iv.setProgress("Building search index").then(() => {
             inspector._search = new ReportSearch(report);
+            inspector.setupSearchControls();
             inspector.buildDisplayOptionsMenu();
             resolve();
         });
@@ -79,14 +82,14 @@ Inspector.prototype.initialize = function (report) {
 
 Inspector.prototype.setViewer = function (viewer) {
     this._viewer = viewer;
-    var inspector = this;
-    viewer.onSelect.add(function (id, eltSet) { inspector.selectItem(id, eltSet) });
-    viewer.onMouseEnter.add(function (id) { inspector.viewerMouseEnter(id) });
-    viewer.onMouseLeave.add(function (id) { inspector.viewerMouseLeave(id) });
-    $('.ixbrl-next-tag').click(function () { viewer.selectNextTag() } );
-    $('.ixbrl-prev-tag').click(function () { viewer.selectPrevTag() } );
-    $('#ixbrl-search').change(function () { inspector.search($(this).val()) });
+    viewer.onSelect.add((id, eltSet) => this.selectItem(id, eltSet));
+    viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
+    viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
+    $('.ixbrl-next-tag').click(() => viewer.selectNextTag());
+    $('.ixbrl-prev-tag').click(() => viewer.selectPrevTag());
+    this.search();
 }
+
 
 /*
  * Check for fragment identifier pointing to a specific fact and select it if
@@ -140,7 +143,7 @@ Inspector.prototype.highlightAllTags = function (checked) {
 Inspector.prototype.factListRow = function(f) {
     var row = $('<div class="fact-list-item"></div>')
         .click(() => this.selectItem(f.id))
-        .dblclick(function () { $('#inspector').removeClass("search-mode"); })
+        .dblclick(() => $('#inspector').removeClass("search-mode"))
         .mousedown(function (e) { 
             /* Prevents text selection via double click without
              * disabling click+drag text selection (which user-select:
@@ -153,23 +156,83 @@ Inspector.prototype.factListRow = function(f) {
         .mouseenter(() => this._viewer.linkedHighlightFact(f))
         .mouseleave(() => this._viewer.clearLinkedHighlightFact(f))
         .data('ivid', f.id);
+    $('<div class="select-icon"></div>')
+        .click(() => {
+            this.selectItem(f.id);
+            $('#inspector').removeClass("search-mode");
+        })
+        .appendTo(row)
     $('<div class="title"></div>')
         .text(f.getLabel("std") || f.conceptName())
         .appendTo(row);
     $('<div class="dimension"></div>')
         .text(f.period().toString())
         .appendTo(row);
+
     var dims = f.dimensions();
     for (var d in dims) {
         $('<div class="dimension"></div>')
             .text(f.report().getLabel(dims[d], "std", true) || dims[d])
             .appendTo(row);
     }
+    if (f.isHidden()) {
+        $('<div class="hidden">Hidden fact</div>')
+            .appendTo(row);
+    }
     return row;
 }
 
-Inspector.prototype.search = function (s) {
-    var results = this._search.search(s);
+Inspector.prototype.addResults = function(container, results, offset) {
+    $('.more-results', container).remove();
+    for (var i = offset; i < results.length; i++ ) {
+        if (i - offset >= SEARCH_PAGE_SIZE) {
+            $('<div class="more-results"></div>')
+                .text("Show more results")
+                .click(() => this.addResults(container, results, i))
+                .appendTo(container);
+            break;
+        }
+        this.factListRow(results[i].fact).appendTo(container);
+    }
+}
+
+Inspector.prototype.searchSpec = function () {
+    var spec = {};
+    spec.searchString = $('#ixbrl-search').val();
+    spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
+    spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
+    spec.periodFilter = $('#search-filter-period').val();
+    spec.conceptTypeFilter = $('#search-filter-concept-type').val();
+    return spec;
+}
+
+Inspector.prototype.setupSearchControls = function (viewer) {
+    var inspector = this;
+    $('.search-controls input, .search-controls select').change(() => this.search());
+    $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
+    $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
+    $("#search-filter-period")
+        .empty()
+        .append($('<option value="*">ALL</option>'));
+    for (const key in this._search.periods) {
+        $("<option>")
+            .attr("value", key)
+            .text(this._search.periods[key])
+            .appendTo('#search-filter-period');
+    }
+}
+
+Inspector.prototype.resetSearchFilters = function () {
+    $("#search-filter-period").val("*");
+    $("#search-filter-concept-type").val("*");
+    $("#search-hidden-fact-filter").prop("checked", true);
+    $("#search-visible-fact-filter").prop("checked", true);
+    this.search();
+}
+
+Inspector.prototype.search = function() {
+    var spec = this.searchSpec();
+    var results = this._search.search(spec);
     var viewer = this._viewer;
     var container = $('#inspector .search-results .results');
     $('div', container).remove();
@@ -177,26 +240,17 @@ Inspector.prototype.search = function (s) {
     var overlay = $('#inspector .search-results .search-overlay');
     if (results.length > 0) {
         overlay.hide();
-        $.each(results, (i,r) => {
-            var f = r.fact;
-            if (i < 100) {
-                this.factListRow(f).appendTo(container);
-            }
-        });
+        this.addResults(container, results, 0);
     }
     else {
-        if (s.trim() != "") {
-            $(".title", overlay).text("No Match Found");
-            $(".text", overlay).text("Try again with different keywords");
-        }
-        else {
-            $(".title", overlay).text("Fact Search");
-            $(".text", overlay).text("Please enter some search terms");
-        }
-
+        $(".title", overlay).text("No Match Found");
+        $(".text", overlay).text("Try again with different keywords");
         overlay.show();
     }
-    viewer.highlightRelatedFacts($.map(results, function (r) { return r.fact } ));
+    /* Don't highlight search results if there's no search string */
+    if (spec.searchString != "") {
+        viewer.highlightRelatedFacts($.map(results, r =>  r.fact ));
+    }
 }
 
 Inspector.prototype.updateCalculation = function (fact, elr) {
@@ -473,10 +527,10 @@ Inspector.prototype.update = function () {
     var cf = inspector._currentItem;
     if (!cf) {
         $('#inspector').removeClass('footnote-mode');
-        $('#inspector .inspector-body').addClass('no-fact-selected');
+        $('#inspector').addClass('no-fact-selected');
     } 
     else { 
-        $('#inspector .inspector-body').removeClass('no-fact-selected');
+        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact");
 
         $('#inspector .fact-inspector')
             .empty()
@@ -488,8 +542,8 @@ Inspector.prototype.update = function () {
             this.updateCalculation(cf);
             this.updateFootnotes(cf);
             $('div.references').empty().append(this._referencesHTML(cf));
-            $('#inspector .search-results .result').removeClass('selected');
-            $('#inspector .search-results .result').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+            $('#inspector .search-results .fact-list-item').removeClass('selected');
+            $('#inspector .search-results .fact-list-item').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
 
             var duplicates = cf.duplicates();
             var n = 0;
@@ -505,7 +559,9 @@ Inspector.prototype.update = function () {
             $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
 
             this.getPeriodIncrease(cf);
-
+            if (cf.isHidden()) {
+                $('#inspector').addClass('hidden-fact');
+            }
         }
         else if (cf instanceof Footnote) {
             $('#inspector').addClass('footnote-mode');

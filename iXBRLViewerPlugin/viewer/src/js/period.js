@@ -102,3 +102,7 @@ Period.prototype.isEquivalentDuration = function (op) {
     }
     return false;
 }
+
+Period.prototype.key = function () {
+    return this._p;
+}

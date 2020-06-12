@@ -24,6 +24,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
     var docs = [];
     var dims = {};
     var facts = this._report.facts();
+    this.periods = {};
     for (var i = 0; i < facts.length; i++) {
         var f = facts[i];
         var doc = { "id": f.id };
@@ -38,6 +39,12 @@ ReportSearch.prototype.buildSearchIndex = function () {
         doc.label = l;
         doc.ref = f.concept().referenceValuesAsString();
         docs.push(doc);
+
+        var p = f.period();
+        if (p) {
+            this.periods[p.key()] = p.toString();
+        }
+
     }
     this._searchIndex = lunr(function () {
       this.ref('id');
@@ -53,20 +60,23 @@ ReportSearch.prototype.buildSearchIndex = function () {
     })
 }
 
-ReportSearch.prototype.search = function(s) {
-    var rr = this._searchIndex.search(s);
+ReportSearch.prototype.search = function (s) {
+    var rr = this._searchIndex.search(s.searchString);
     var results = []
     var searchIndex = this;
 
-    if (s == "") {
-        return [];
-    }
-
-    rr.forEach((r,i) => 
-        results.push({
-            "fact": searchIndex._report.getItemById(r.ref),
-            "score": r.score
-        })
+    rr.forEach((r,i) => {
+            var item = searchIndex._report.getItemById(r.ref);
+            if (
+                (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
+                (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
+                (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
+                results.push({
+                    "fact": item,
+                    "score": r.score
+                });
+            }
+        }
     );
     return results;
 }

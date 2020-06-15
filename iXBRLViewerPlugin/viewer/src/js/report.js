@@ -146,6 +146,14 @@ iXBRLReport.prototype.getChildRelationships = function(c, arcrole) {
     return rels;
 }
 
+/* 
+ * Build and cache an inverse map of relationships for a given arcrole for
+ * efficient lookup of parents concept from a child.
+ *
+ * Map is arcrole => elr => target => [ rel, ... ]
+ *
+ * "rel" is modified to have a "src" property with the source concept.
+ */
 iXBRLReport.prototype._reverseRelationships = function(arcrole) {
     if (!(arcrole in this._reverseRelationshipCache)) {
         const rrc = {};

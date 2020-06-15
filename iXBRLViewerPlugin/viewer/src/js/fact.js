@@ -253,36 +253,19 @@ Fact.prototype.isHidden = function () {
 }
 
 Fact.prototype.widerConcepts = function () {
-    if (!this._report.usesAnchoring()) {
-        return [];
-    }
     var concepts = [];
-    const wn = this._report.data.rels["w-n"];
-    for (const elr in wn) {
-        for (const src in wn[elr]) {
-            if ($.map(wn[elr][src], (target) => target.t).includes(this.conceptName())) {
-                concepts.push(src);
-            }
-        }
+    const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");
+    for (const elr in parentsByELR) {
+        concepts.push(...$.map(parentsByELR[elr], (rel) => rel.src));
     }
     return concepts;
 }
 
 Fact.prototype.narrowerConcepts = function () {
-    if (!this._report.usesAnchoring()) {
-        return [];
-    }
     var concepts = [];
-    const wn = this._report.data.rels["w-n"];
-    for (const elr in wn) {
-        for (const src in wn[elr]) {
-            if (src == this.conceptName()) {
-                for (const target of wn[elr][src]) {
-                    concepts.push(target.t)
-                }
-            }
-        }
+    const childrenByELR = this._report.getChildRelationships(this.conceptName(), "w-n");
+    for (const elr in childrenByELR) {
+        concepts.push(...$.map(childrenByELR[elr], (rel) => rel.t));
     }
     return concepts;
 }
-

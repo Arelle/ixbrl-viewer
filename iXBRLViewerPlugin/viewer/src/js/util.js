@@ -129,3 +129,10 @@ export function xbrlDateToMoment(dateString) {
 export function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
+
+export function setDefault(obj, key, def) {
+    if (!obj.hasOwnProperty(key)) {
+        obj[key] = def;
+    }
+    return obj[key];
+}

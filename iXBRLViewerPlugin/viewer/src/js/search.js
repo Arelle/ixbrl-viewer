@@ -29,6 +29,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
         var f = facts[i];
         var doc = { "id": f.id };
         var l = f.getLabel("std");
+        doc.concept = f.conceptQName().localname;
         doc.doc = f.getLabel("doc");
         doc.date = f.periodTo();
         doc.startDate = f.periodFrom();
@@ -38,6 +39,12 @@ ReportSearch.prototype.buildSearchIndex = function () {
         }
         doc.label = l;
         doc.ref = f.concept().referenceValuesAsString();
+        const wider = f.widerConcepts();
+        if (wider.length > 0) {
+            doc.widerConcept = this._report.qname(wider[0]).localname;
+            doc.widerLabel = this._report.getLabel(wider[0],"std");
+            doc.widerDoc = this._report.getLabel(wider[0],"doc");
+        }
         docs.push(doc);
 
         var p = f.period();
@@ -49,10 +56,14 @@ ReportSearch.prototype.buildSearchIndex = function () {
     this._searchIndex = lunr(function () {
       this.ref('id');
       this.field('label');
+      this.field('concept');
       this.field('startDate');
       this.field('date');
       this.field('doc');
       this.field('ref');
+      this.field('widerLabel');
+      this.field('widerDoc');
+      this.field('widerConcept');
 
       docs.forEach(function (doc) {
         this.add(doc);

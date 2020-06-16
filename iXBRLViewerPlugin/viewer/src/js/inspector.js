@@ -261,6 +261,43 @@ Inspector.prototype.updateFootnotes = function (fact) {
     $('.footnotes').empty().append(this._footnotesHTML(fact));
 }
 
+
+Inspector.prototype._anchorList = function (fact, anchors) {
+    var html = $("<ul></ul>");
+    if (anchors.length > 0) {
+        for (const c of anchors) {
+            const otherFacts = this._report.getAlignedFacts(fact, { "c": c });
+            const label = this._report.getLabel(c, "std", true);
+
+            $("<li></li>")
+                .appendTo(html)
+                .append(this.factLinkHTML(label, otherFacts));
+        }
+    }
+    else {
+        $("<li><i>None</i></li>").appendTo(html);
+    }
+    return html;
+}
+
+Inspector.prototype.updateAnchoring = function (fact) {
+    if (!this._report.usesAnchoring()) {
+        $('.anchoring').hide();
+    }
+    else {
+        $('.anchoring').show();
+
+        $('.anchoring .collapsible-body .anchors-wider')
+            .empty()
+            .append(this._anchorList(fact, fact.widerConcepts()));
+
+        $('.anchoring .collapsible-body .anchors-narrower')
+            .empty()
+            .append(this._anchorList(fact, fact.narrowerConcepts()));
+    }
+
+}
+
 Inspector.prototype._referencesHTML = function (fact) {
     var c = fact.concept();
     var a = new Accordian();
@@ -310,7 +347,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
                 .appendTo(calcBody);
 
             if (r.facts) {
-                itemHTML.addClass("fact-link");
+                itemHTML.addClass("calc-fact-link");
                 itemHTML.data('ivid', r.facts);
                 itemHTML.click(function () { inspector.selectItem(Object.values(r.facts)[0].id ) });
                 itemHTML.mouseenter(function () { $.each(r.facts, function (k,f) { viewer.linkedHighlightFact(f); })});
@@ -375,6 +412,18 @@ Inspector.prototype.describeChange = function (oldFact, newFact) {
 
 }
 
+Inspector.prototype.factLinkHTML = function (label, factList) {
+    var html = $("<span></span>").text(label);
+    if (factList.length > 0) {
+        html
+        .addClass("fact-link")
+        .click(() => this.selectItem(factList[0].id))
+        .mouseenter(() => $.each(factList, (i,f) => this._viewer.linkedHighlightFact(f)))
+        .mouseleave(() => $.each(factList, (i,f) => this._viewer.clearLinkedHighlightFact(f)));
+    }
+    return html;
+}
+
 Inspector.prototype.getPeriodIncrease = function (fact) {
     var viewer = this._viewer;
     var inspector = this;
@@ -391,13 +440,9 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
         var s = "";
         if (mostRecent) {
             var allMostRecent = this._report.getAlignedFacts(mostRecent);
-            s = $("<span></span>").text(this.describeChange(mostRecent, fact));
-            $("<span></span>").text(mostRecent.periodString())
-            .addClass("year-on-year-fact-link")
-            .appendTo(s)
-            .click(() => inspector.selectItem(mostRecent.id))
-            .mouseenter(() => $.each(allMostRecent, (i,f) => viewer.linkedHighlightFact(f)))
-            .mouseleave(() => $.each(allMostRecent, (i,f) => viewer.clearLinkedHighlightFact(f)));
+            s = $("<span></span>")
+                    .text(this.describeChange(mostRecent, fact))
+                    .append(this.factLinkHTML(mostRecent.periodString(), allMostRecent));
 
         }
         else {
@@ -541,6 +586,7 @@ Inspector.prototype.update = function () {
 
             this.updateCalculation(cf);
             this.updateFootnotes(cf);
+            this.updateAnchoring(cf);
             $('div.references').empty().append(this._referencesHTML(cf));
             $('#inspector .search-results .fact-list-item').removeClass('selected');
             $('#inspector .search-results .fact-list-item').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');

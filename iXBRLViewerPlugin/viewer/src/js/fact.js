@@ -251,3 +251,21 @@ Fact.prototype.footnotes = function () {
 Fact.prototype.isHidden = function () {
     return this._ixNode.wrapperNode.length == 0;
 }
+
+Fact.prototype.widerConcepts = function () {
+    var concepts = [];
+    const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");
+    for (const elr in parentsByELR) {
+        concepts.push(...$.map(parentsByELR[elr], (rel) => rel.src));
+    }
+    return concepts;
+}
+
+Fact.prototype.narrowerConcepts = function () {
+    var concepts = [];
+    const childrenByELR = this._report.getChildRelationships(this.conceptName(), "w-n");
+    for (const elr in childrenByELR) {
+        concepts.push(...$.map(childrenByELR[elr], (rel) => rel.t));
+    }
+    return concepts;
+}

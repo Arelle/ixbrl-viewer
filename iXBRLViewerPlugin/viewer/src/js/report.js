@@ -17,6 +17,7 @@ import { Footnote } from "./footnote.js"
 import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
 import { ViewerOptions } from "./viewerOptions.js";
+import { setDefault } from "./util.js";
 import $ from 'jquery'
 
 export function iXBRLReport (data) {
@@ -25,6 +26,7 @@ export function iXBRLReport (data) {
     this._items = {};
     this._ixNodeMap = {};
     this._viewerOptions = new ViewerOptions();
+    this._reverseRelationshipCache = {};
 }
 
 /*
@@ -133,18 +135,51 @@ iXBRLReport.prototype.qname = function(v) {
     return new QName(this.prefixMap(), v);
 }
 
-iXBRLReport.prototype.getChildConcepts = function(c,arcrole) {
+iXBRLReport.prototype.getChildRelationships = function(c, arcrole) {
     var rels = {}
-    if (this.data.rels.hasOwnProperty(arcrole)) {
-        $.each(this.data.rels[arcrole], function (elr, rr) {
-            if (rr.hasOwnProperty(c)) {
-                rels[elr] = rr[c]
-            }
-        })
+    const elrs = this.data.rels[arcrole] || {};
+    for (const elr in elrs) {
+        if (c in elrs[elr]) {
+            rels[elr] = elrs[elr][c];
+        }
     }
     return rels;
 }
 
+/* 
+ * Build and cache an inverse map of relationships for a given arcrole for
+ * efficient lookup of parents concept from a child.
+ *
+ * Map is arcrole => elr => target => [ rel, ... ]
+ *
+ * "rel" is modified to have a "src" property with the source concept.
+ */
+iXBRLReport.prototype._reverseRelationships = function(arcrole) {
+    if (!(arcrole in this._reverseRelationshipCache)) {
+        const rrc = {};
+        const elrs = this.data.rels[arcrole] || {};
+        for (const [elr, relSet] of Object.entries(elrs)) {
+            for (const [src, rels] of Object.entries(relSet)) {
+                for (const r of rels) {
+                    r.src = src;
+                    setDefault(setDefault(rrc, elr, {}), r.t, []).push(r);
+                }
+            }
+        }
+        this._reverseRelationshipCache[arcrole] = rrc;
+    }
+    return this._reverseRelationshipCache[arcrole];
+}
+
+iXBRLReport.prototype.getParentRelationships = function(c, arcrole) {
+    var rels = {}
+    for (const [elr, relSet] of Object.entries(this._reverseRelationships(arcrole))) {
+        if (c in relSet) {
+            rels[elr] = relSet[c];
+        }
+    }
+    return rels;
+}
 
 iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
     var all = this.facts();
@@ -209,4 +244,8 @@ iXBRLReport.prototype.documentSetFiles = function() {
 
 iXBRLReport.prototype.isDocumentSet = function() {
     return this.data.docSetFiles !== undefined;
+}
+
+iXBRLReport.prototype.usesAnchoring = function() {
+    return this.data.rels["w-n"] !== undefined;
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import $ from 'jquery';
+import { setDefault } from './util.js';
 
 export function Calculation(fact) {
     this._fact = fact;
@@ -25,16 +26,13 @@ Calculation.prototype.calculationFacts = function () {
     var fact = this._fact;
     var report = fact.report();
     if (!this._conceptToFact) {
-        var rels = report.getChildConcepts(fact.conceptName(), "calc")
+        var rels = report.getChildRelationships(fact.conceptName(), "calc")
         var ctf = {};
         $.each(rels, function (elr, rr) {
             ctf[elr] = {};
             if (rr.length > 0) {
-                var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, function (r,i) { return r.t }) });
-                $.each(otherFacts, function (i,ff) {
-                    ctf[elr][ff.conceptName()] = ctf[elr][ff.conceptName()] || {};
-                    ctf[elr][ff.conceptName()][ff.id] = ff;
-                });
+                var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
+                $.each(otherFacts, (i,ff) => setDefault(ctf[elr], ff.conceptName(), {})[ff.id] = ff);
             }
         });
         this._conceptToFact = ctf;
@@ -93,7 +91,7 @@ Calculation.prototype.bestELRForFactSet = function(facts) {
 Calculation.prototype.resolvedCalculation = function(elr) {
     var calc = [];
     var calcFacts = this.calculationFacts()[elr];
-    var rels = this._fact.report().getChildConcepts(this._fact.conceptName(), "calc")[elr];
+    var rels = this._fact.report().getChildRelationships(this._fact.conceptName(), "calc")[elr];
     $.each(rels, function (i, r) {
         var s;
         if (r.w == 1) {

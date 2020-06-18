@@ -130,6 +130,8 @@ class IXBRLViewerBuilder:
             self.taxonomyData["roleDefs"].setdefault(prefix,{})["en"] = label
 
     def addConcept(self, concept):
+        if concept is None:
+            return
         labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
         labels = labelsRelationshipSet.fromModelObject(concept)
         conceptName = self.nsmap.qname(concept.qname)

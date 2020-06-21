@@ -123,12 +123,11 @@ Inspector.prototype.updateURLFragment = function () {
 }
 
 Inspector.prototype.buildDisplayOptionsMenu = function () {
-    var inspector = this;
     this._optionsMenu.reset();
     this._optionsMenu.addCheckboxItem("Highlight", function (checked) { inspector.highlightAllTags(checked)}, "highlight-tags");
     if (this._report) {
         var dl = this.selectDefaultLanguage();
-        this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, function (lang) { inspector.setLanguage(lang) }, "select-language");
+        this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
         this.setLanguage(dl);
     }
     this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
@@ -678,5 +677,4 @@ Inspector.prototype.selectDefaultLanguage = function () {
 
 Inspector.prototype.setLanguage = function (lang) {
     this._viewerOptions.language = lang;
-    this.update();
 }

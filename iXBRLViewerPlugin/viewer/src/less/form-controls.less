@@ -30,7 +30,7 @@ button {
   color: @icon-grey;
   box-sizing: border-box;
   cursor: pointer;
-  padding: 0.1rem;
+  padding: 0;
   font-size: 2.2rem;
   line-height: 3.2rem;
   user-select: none;
@@ -44,10 +44,59 @@ button {
   border: solid 0.1rem @border-grey;
   background-color: @button-background;
   line-height: 3rem;
+  margin: 0 0.5rem;
+
+  &:last-of-type {
+    margin-right: 0;
+  }
+
+  &:first-of-type {
+    margin-left: 0;
+  }
 }
 
 .square-button.primary {
   color: #fff;
   border-color: @button-primary-border;
   background-color: @button-primary-bg;
+}
+
+label.checkbox {
+  display: block;
+  position: relative;
+  padding-left: 2.6rem;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1.8rem;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark {
+    position: absolute;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 0.4rem;
+    border: solid 0.1rem @border-grey;
+  }
+
+  input:checked ~ .checkmark::before {
+    content: "";
+    position: absolute;
+    top: -0.1rem;
+    left: 0.5rem;
+    width: 0.4rem;
+    height: 1.3rem;
+    border: solid @primary;
+    border-width: 0 0.2rem 0.2rem 0;
+    transform: rotate(45deg);
+  }
 }

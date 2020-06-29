@@ -88,7 +88,7 @@ iXBRLViewer.prototype._reparentDocument = function () {
     doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
     doc.close();
 
-    $('head').children().not("script").not("style#ixv-style").appendTo($(iframe).contents().find('head'));
+    $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
     
     /* Due to self-closing tags, our script tags may not be a direct child of
      * the body tag in an HTML DOM, so move them so that they are */

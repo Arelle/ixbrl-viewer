@@ -106,90 +106,120 @@ Viewer.prototype._addDocumentSetTabs = function() {
         for (var i = 0; i < ds.length; i++) {
             $('<div class="tab">')
                 .text(ds[i])
+                .prop('title', ds[i])
                 .data('ix-doc-id', i)
                 .click(function () { 
                     viewer.selectDocument($(this).data('ix-doc-id'))
                 })
-                .appendTo($('#ixv #viewer-pane .ixds-tabs'));
+                .appendTo($('#ixv #viewer-pane .ixds-tabs .tab-area'));
         }
-        $('#ixv #viewer-pane .ixds-tabs .tab').eq(0).addClass("active");
+        $('#ixv #viewer-pane .ixds-tabs .tab-area .tab').eq(0).addClass("active");
     }
 }
 
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
-  var elt;
-  var name = localName(n.nodeName).toUpperCase();
-  var isFootnote = (name == 'FOOTNOTE');
-  if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
-    /* Is the element the only significant content within a <td> or <th> ? If
-     * so, use that as the wrapper element. */
-    var node = $(n).closest("td,th,span").eq(0);    
-    if (node.length == 1) {
-        if (node.css('display') == 'none') {
-            node = node.parent();
-            node.addClass('ixbrl-cellblock');
-        }
-        else {
-            var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
-            if (node.text().match(regex) == null) {
-                node = null;
+    var elt;
+    var name = localName(n.nodeName).toUpperCase();
+    var isFootnote = (name == 'FOOTNOTE');
+    if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
+        var node = $();
+        var id = n.getAttribute("id");
+        if (!inHidden) {
+            /* Is the element the only significant content within a <td> or <th> ? If
+             * so, use that as the wrapper element. */
+            node = $(n).closest("td,th,span").eq(0);
+            if (node.length == 1) {
+                if (node.css('display') == 'none') {
+                    node = node.parent();
+                    node.addClass('ixbrl-cellblock');
+                } else {
+                    var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
+                    if (node.text().match(regex) == null) {
+                        node = $();
+                    } 
+                }
             }
-        } 
-    }
-    /* Otherwise, insert a <span> as wrapper */
-    if (node == null || node.length == 0) {
-        var wrapper = "<span>";
-        var nn = n.getElementsByTagName("*");
-        for (var i = 0; i < nn.length; i++) {
-          if($(nn[i]).css("display") === "block") {
-            wrapper = '<div>';
-            break;
-          }
+            /* Otherwise, insert a <span> as wrapper */
+            if (node.length == 0) {
+                var wrapper = "<span>";
+                var nn = n.getElementsByTagName("*");
+                for (var i = 0; i < nn.length; i++) {
+                    if($(nn[i]).css("display") === "block") {
+                        wrapper = '<div>';
+                        break;
+                    }
+                }
+                $(n).wrap(wrapper);
+                node = $(n).parent();
+            }
+            node.addClass("ixbrl-element").data('ivid', id);
         }
-        $(n).wrap(wrapper);
-        node = $(n).parent();
-    }
-    var id = n.getAttribute("id");    
-    node.addClass("ixbrl-element").data('ivid', id);
-    var ixn = new IXNode(id, node, docIndex);
-    this._ixNodeMap[id] = ixn;
-    if (n.getAttribute("continuedAt")) {
-        this._continuedAtMap[id] = { 
-            "isFact": name != 'CONTINUATION',
-            "continuedAt": n.getAttribute("continuedAt")
+        /* We may have already created an IXNode for this ID from a -sec-ix-hidden
+         * element */
+        var ixn = this._ixNodeMap[id];
+        if (!ixn) {
+            ixn = new IXNode(id, node, docIndex);
+            this._ixNodeMap[id] = ixn;
+        }
+        if (n.getAttribute("continuedAt")) {
+            this._continuedAtMap[id] = { 
+                "isFact": name != 'CONTINUATION',
+                "continuedAt": n.getAttribute("continuedAt")
+            }
+        }
+        if (name == 'CONTINUATION') {
+            $(node).addClass("ixbrl-continuation");
+        }
+        if (name == 'NONFRACTION') {
+            $(node).addClass("ixbrl-element-nonfraction");
+        }
+        if (name == 'NONNUMERIC') {
+            $(node).addClass("ixbrl-element-nonnumeric");
+            if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
+                ixn.escaped = true;
+            }
+        }
+        if (isFootnote) {
+            $(node).addClass("ixbrl-element-footnote");
+            ixn.footnote = true;
+        }
+        if (elt) {
+            var concept = n.getAttribute("name");
+            if (elt.children().first().text() == "") {
+                elt.children().first().html("<i>no content</i>");
+            }
+            var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
+            $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
         }
     }
-    if (localName(n.nodeName) == 'CONTINUATION') {
-        node.addClass("ixbrl-continuation");
+    else if(n.nodeType == 1 && name == 'HIDDEN') {
+        inHidden = true;
     }
-    if (localName(n.nodeName) == 'NONFRACTION') {
-      $(node).addClass("ixbrl-element-nonfraction");
+    else if(n.nodeType == 1) {
+        if (n.hasAttribute('style')) {
+            const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+            var m = n.getAttribute('style').match(re);
+            if (m) {
+                var id = m[1];
+                node = $(n);
+                node.addClass("ixbrl-element").data('ivid', id);
+                /* We may have already seen the corresponding ix element in the hidden
+                 * section */
+                var ixn = this._ixNodeMap[id];
+                if (ixn) {
+                    /* ... if so, update the node and docIndex so we can navigate to it */
+                    ixn.wrapperNode = node;
+                    ixn.docIndex = docIndex;
+                }
+                else {
+                    this._ixNodeMap[id] = new IXNode(id, node, docIndex);
+                }
+            }
+        }
     }
-    if (localName(n.nodeName) == 'NONNUMERIC') {
-      $(node).addClass("ixbrl-element-nonnumeric");
-      if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-          ixn.escaped = true;
-      }
+    for (var i=0; i < n.childNodes.length; i++) {
+        this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
     }
-    if (isFootnote) {
-      $(node).addClass("ixbrl-element-footnote");
-      ixn.footnote = true;
-    }
-    if (elt) {
-      var concept = n.getAttribute("name");
-      if(elt.children().first().text() == "") {
-        elt.children().first().html("<i>no content</i>");
-      }
-      var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
-      $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
-    }
-  }
-  else if(n.nodeType == 1 && localName(n.nodeName) == 'HIDDEN') {
-    inHidden = true;
-  }
-  for (var i=0; i < n.childNodes.length; i++) {
-    this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
-  }
 }
 
 Viewer.prototype._postProcessiXBRL = function(container) {
@@ -275,6 +305,10 @@ Viewer.prototype._bindHandlers = function () {
         })
         .mouseenter(function (e) { viewer._mouseEnter($(this)) })
         .mouseleave(function (e) { viewer._mouseLeave($(this)) });
+    $("body", this._contents)
+        .click(function (e) {
+            viewer.selectElement(null);
+        });
     
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
@@ -324,6 +358,10 @@ Viewer.prototype.showAndSelectElement = function(e) {
     this.scrollIfNotVisible(e);
 }
 
+Viewer.prototype.clearHighlighting = function () {
+    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+}
+
 /*
  * Update the currently highlighted fact, but do not trigger a change in the
  * inspector.
@@ -331,7 +369,7 @@ Viewer.prototype.showAndSelectElement = function(e) {
  * Used to switch facts when the selection corresponds to multiple facts.
  */
 Viewer.prototype.highlightElements = function (ee) {
-    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    this.clearHighlighting();
     ee.addClass("ixbrl-selected");
 }
 
@@ -350,8 +388,13 @@ Viewer.prototype._ixIdForElement = function (e) {
  * falls within.  If omitted, it's treated as a click on a non-nested fact.
  */
 Viewer.prototype.selectElement = function (e, factIdList) {
-    var factId = this._ixIdForElement(e);
-    this.onSelect.fire(factId, factIdList);
+    if (e !== null) {
+        var factId = this._ixIdForElement(e);
+        this.onSelect.fire(factId, factIdList);
+    }
+    else {
+        this.onSelect.fire(null);
+    }
 }
 
 Viewer.prototype.selectElementByClick = function (e) {
@@ -411,10 +454,13 @@ Viewer.prototype.highlightItem = function(factId) {
 }
 
 Viewer.prototype.showItemById = function (id) {
-    let elt = this.elementForItemId(id);
-    this.showDocumentForItemId(id);
-    if (elt) {
-        this.showElement(elt);
+    if (id !== null) {
+        let elt = this.elementForItemId(id);
+        this.showDocumentForItemId(id);
+        /* Hidden elements will return an empty node list */
+        if (elt.length > 0) {
+            this.showElement(elt);
+        }
     }
 }
 

@@ -190,3 +190,9 @@ export function escapeHtml(unsafe) {
     return getScrollParent(getParentNode(element));
   }
   // end code fragment
+export function setDefault(obj, key, def) {
+    if (!obj.hasOwnProperty(key)) {
+        obj[key] = def;
+    }
+    return obj[key];
+}

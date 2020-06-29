@@ -36,6 +36,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
                 self.addToLog("Package added", messageCode="info", file=pi.get("URL"))
             else:
                 self.addToLog("Failed to load package", messageCode="error", file=p)
+        PackageManager.rebuildRemappings(self)
     
     def createViewer(self, f, scriptUrl=None, outPath=None):
         if os.path.isdir(f):

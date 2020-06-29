@@ -85,8 +85,11 @@ Fact.prototype.readableValue = function() {
     if (this.isNumeric()) {
         var d = this.decimals();
         var formattedNumber;
-        if (d === undefined) {
-            formattedNumber= v;
+        if (this.isNil()) {
+            formattedNumber = "nil";
+        }
+        else if (d === undefined) {
+            formattedNumber = v;
         }
         else {
             if (d < 0) {
@@ -199,8 +202,12 @@ Fact.prototype.duplicates = function () {
     return this._report.getAlignedFacts(this);
 }
 
+Fact.prototype.isNil = function() {
+    return this.f.v === null
+}
+
 Fact.prototype.readableAccuracy = function () {
-    if (!this.isNumeric()) {
+    if (!this.isNumeric() || this.isNil()) {
         return "n/a";
     }
     var d = this.decimals();
@@ -256,5 +263,27 @@ Fact.prototype.footnotes = function () {
 Fact.prototype.scale = function() {
     var scale = this._ixNode.wrapperNode.find('[scale]').attr('scale');
     if (scale)
-        return parseInt(scale);    
+        return parseInt(scale); 
+}
+
+Fact.prototype.isHidden = function () {
+    return this._ixNode.wrapperNode.length == 0;
+}
+
+Fact.prototype.widerConcepts = function () {
+    var concepts = [];
+    const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");
+    for (const elr in parentsByELR) {
+        concepts.push(...$.map(parentsByELR[elr], (rel) => rel.src));
+    }
+    return concepts;
+}
+
+Fact.prototype.narrowerConcepts = function () {
+    var concepts = [];
+    const childrenByELR = this._report.getChildRelationships(this.conceptName(), "w-n");
+    for (const elr in childrenByELR) {
+        concepts.push(...$.map(childrenByELR[elr], (rel) => rel.t));
+    }
+    return concepts;
 }

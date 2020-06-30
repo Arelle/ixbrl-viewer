@@ -152,8 +152,8 @@ iXBRLReport.prototype.getChildRelationships = function(c, arcrole) {
 iXBRLReport.prototype.getAnchors = function(concept) {
     var res = [];
     var report = this;
-    if (this.data.rels.hasOwnProperty("wider-narrower")) {
-        $.each(this.data.rels["wider-narrower"], function (elr, rr) {
+    if (this.usesAnchoring()) {
+        $.each(this.data.rels["w-n"], function (elr, rr) {
             $.each(rr, function(c, r) {
                 if (concept.name == c) {
                     $.each(r, function(i, v) { 

@@ -36,9 +36,9 @@ export function Inspector(iv) {
         .prop("type", "text/css")
         .text(inspector_css)
         .appendTo('head');
-    $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+    /*$('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
         .attr('href', require('../img/favicon.ico'))
-        .appendTo('head');
+        .appendTo('head');*/
     this._iv = iv;
     this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()
@@ -290,43 +290,6 @@ Inspector.prototype.updateValidationResults = function (fact) {
    
 Inspector.prototype.updateFootnotes = function (fact) {
     $('.footnotes').empty().append(this._footnotesHTML(fact));
-}
-
-
-Inspector.prototype._anchorList = function (fact, anchors) {
-    var html = $("<ul></ul>");
-    if (anchors.length > 0) {
-        for (const c of anchors) {
-            const otherFacts = this._report.getAlignedFacts(fact, { "c": c });
-            const label = this._report.getLabel(c, "std", true);
-
-            $("<li></li>")
-                .appendTo(html)
-                .append(this.factLinkHTML(label, otherFacts));
-        }
-    }
-    else {
-        $("<li><i>None</i></li>").appendTo(html);
-    }
-    return html;
-}
-
-Inspector.prototype.updateAnchoring = function (fact) {
-    if (!this._report.usesAnchoring()) {
-        $('.anchoring').hide();
-    }
-    else {
-        $('.anchoring').show();
-
-        $('.anchoring .collapsible-body .anchors-wider')
-            .empty()
-            .append(this._anchorList(fact, fact.widerConcepts()));
-
-        $('.anchoring .collapsible-body .anchors-narrower')
-            .empty()
-            .append(this._anchorList(fact, fact.narrowerConcepts()));
-    }
-
 }
 
 Inspector.prototype._referencesHTML = function (fact) {
@@ -643,7 +606,7 @@ Inspector.prototype.update = function () {
 
             this.updateCalculation(cf);
             this.updateFootnotes(cf);
-            this.updateAnchoring(cf);
+            //this.updateAnchoring(cf);
             $('div.references').empty().append(this._referencesHTML(cf));
             $('#inspector .search-results .fact-list-item').removeClass('selected');
             $('#inspector .search-results .fact-list-item').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');

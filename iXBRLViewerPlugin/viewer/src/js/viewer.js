@@ -31,6 +31,7 @@ export function Viewer(iv, iframes, report) {
     this._ixNodeMap = {};
     this._continuedAtMap = {};        
     this._currentShowElement = null;
+    this._mzInit = false;
 }
 
 Viewer.prototype.initialize = function() {
@@ -498,13 +499,43 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     }
 }
 
-Viewer.prototype._zoom = function () {
-    var viewTop = this._contents.scrollTop();
-    var height = $("html",this._contents).height();
-    $('body', this._contents).css('zoom',this.scale);
+// The firefox browser does not support CSS zoom style,
+//      instead of is we should use -moz-transform and -moz-transform-origin styles
+// The problem that these styles can't be simply applied to the tag 'body' like the zoom style
+Viewer.prototype._initZoom = function() {
+    var container = $('body', this._contents);
+    var generator = $('meta[name=generator]', this._contents).attr("content");
+    if (generator === 'pdf2htmlEX') {
+        container = $('#page-container', this._contents);                
+    }
+    container.contents().wrapAll('<div id="zoom-container"></div>');
+    this._mzInit = true;    
+}
 
-    var newHeight = $("html", this._contents).height();
-    this._contents.scrollTop(newHeight * (viewTop)/height );
+Viewer.prototype._zoom = function () {
+    if (/Firefox/.test(window.navigator.userAgent)) {
+        if (!this._mzInit) {
+            this._initZoom();            
+        }
+        var container = $('#zoom-container', this._contents);
+        var scrollParent = $(getScrollParent(container[0]));
+        var viewTop = scrollParent.scrollTop();
+        var viewLeft = scrollParent.scrollLeft();
+        var rc = container[0].getBoundingClientRect();
+        container.css({
+            '-moz-transform-origin': 'left top',
+            '-moz-transform': 'scale(' + this.scale + ')'
+        }); 
+        var rcNew = container[0].getBoundingClientRect();        
+        scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
+        scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);   
+    } else {        
+        var viewTop = this._contents.scrollTop();
+        var height = $("html",this._contents).height();    
+        $('body', this._contents).css('zoom',this.scale);
+        var newHeight = $("html", this._contents).height();
+        this._contents.scrollTop(newHeight * (viewTop)/height);    
+    }
 }
 
 Viewer.prototype.zoomIn = function () {

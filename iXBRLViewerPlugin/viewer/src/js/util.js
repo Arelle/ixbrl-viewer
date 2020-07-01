@@ -175,10 +175,9 @@ export function escapeHtml(unsafe) {
       case 'HTML':
       case 'html':
       case 'BODY':
-      case 'body':
-        return element.ownerDocument.body
+      case 'body':        
       case '#document':
-        return element.body
+        return element.ownerDocument.body;
     }
   
     // Firefox want us to check `-x` and `-y` variations as well

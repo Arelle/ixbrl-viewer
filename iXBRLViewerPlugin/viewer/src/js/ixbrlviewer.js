@@ -178,15 +178,15 @@ iXBRLViewer.prototype.load = function() {
                             },
                         })
                         .on('resizestart', function (event) {
-                            $('#ixv').css("pointer-events", "none");
+                            $('#ixv').css({"pointer-events": "none", "-moz-user-select": "none"});
                         })
-                        .on('resizemove', function (event) {                            
+                        .on('resizemove', function (event) {                                                    
                             event.target.style.width = `${event.rect.width}px`;
                             iv._width = window.innerWidth-event.rect.width;
                             $('#inspector').css('width', `${iv._width}px`);
                         })
                         .on('resizeend', function (event) {
-                            $('#ixv').css("pointer-events", "auto");
+                            $('#ixv').css({"pointer-events": "auto", "-moz-user-select": "all"});
                         });
                         $('#ixv .loader').remove();
 

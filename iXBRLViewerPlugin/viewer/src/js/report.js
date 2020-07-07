@@ -65,7 +65,12 @@ iXBRLReport.prototype._initialize = function () {
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptions) {
     rolePrefix = rolePrefix || 'std';
     var lang = this._viewerOptions.language;
-    var labels = this.data.concepts[c].labels[rolePrefix]
+    const concept = this.data.concepts[c];
+    if (concept === undefined) {
+        console.log("Attempt to get label for undefined concept: " + c);
+        return "<no label>";
+    }
+    const labels = concept.labels[rolePrefix]
     if (labels === undefined) {
         return undefined;
     }

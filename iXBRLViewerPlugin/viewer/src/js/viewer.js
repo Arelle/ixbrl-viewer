@@ -16,6 +16,7 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex, escapeHtml, getScrollParent, getStyleComputedProperty } from './util.js'
 import { IXNode } from './ixnode.js';
+import { Fact } from './fact.js';
 
 import 'bootstrap/js/dist/tooltip';
 
@@ -228,7 +229,7 @@ Viewer.prototype._postProcessiXBRL = function(container) {
     $(container).find('.ixbrl-element').each(function (_, node) { 
         var id = $(node).data('ivid');
         var fact = viewer._report.getItemById(id);
-        if (fact) {
+        if (fact && fact instanceof Fact) {
             viewer._postProcessiXBRLNode(container, node, fact);
             var ixNode = fact._ixNode;
             ixNode.continuations.forEach(c => 

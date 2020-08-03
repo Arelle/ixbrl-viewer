@@ -178,6 +178,7 @@ class IXBRLViewerBuilder:
                         rel['w'] = r.weight
                     rr.setdefault(fromKey, []).append(rel)
                     self.addConcept(r.toModelObject)
+                    self.addConcept(r.fromModelObject)
 
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels

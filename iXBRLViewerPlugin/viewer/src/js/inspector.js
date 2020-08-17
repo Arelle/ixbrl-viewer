@@ -124,7 +124,7 @@ Inspector.prototype.updateURLFragment = function () {
 
 Inspector.prototype.buildDisplayOptionsMenu = function () {
     this._optionsMenu.reset();
-    this._optionsMenu.addCheckboxItem("Highlight", function (checked) { inspector.highlightAllTags(checked)}, "highlight-tags");
+    this._optionsMenu.addCheckboxItem("Highlight", (checked) => this.highlightAllTags(checked), "highlight-tags");
     if (this._report) {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");

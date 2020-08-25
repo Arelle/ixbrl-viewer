@@ -474,9 +474,9 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
         $('tr.value', context).removeClass('truncated');
     }
 
-    $('tr.value td .value', context).empty().text(v);
+    var valueSpan = $('tr.value td .value', context).empty().text(v);
     if (item instanceof Fact && item.isNil()) {
-        $('tr.value td .value', context).wrapInner("<i></i>");
+        valueSpan.wrapInner("<i></i>");
     }
 
 }
@@ -538,9 +538,9 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             this._updateEntityIdentifier(fact, factHTML);
             this._updateValue(fact, false, factHTML);
 
-            $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
+            var accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
             if (!fact.isNumeric() || fact.isNil()) {
-                $('tr.accuracy td', factHTML).wrapInner("<i></i>");
+                accuracyTD.wrapInner("<i></i>");
             }
 
             $('#dimensions', factHTML).empty();

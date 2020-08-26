@@ -13,63 +13,64 @@
 // limitations under the License.
 
 #ixv {
-  #top-bar {
-    .menu {
+  .menu {
+    position: absolute;
+    right: 0;
+    top: 0;
+    line-height: @top-bar-height;
+    cursor: pointer;
+
+    .menu-title {
+      padding-right: 3.2rem;
+      position: relative;
+    }
+
+    .menu-title::after {
+      .icon-chevron-down();
+
+      font-size: 1.8rem;
       position: absolute;
+      right: 1rem;
+    }
+
+    .content-container {
+      // Fixed position so that we can scroll if the menu is taller than the
+      // remaining page space, but this means we need to calculate the top
+      // position manually.
+      position: fixed;
+      top: (@top-bar-height + 3.2rem + 2 * 0.8rem);
       right: 0;
-      top: 0;
-      line-height: @top-bar-height;
-      cursor: pointer;
+      bottom: 0;
+      display: none;
+      z-index: 5;
 
-      .title {
-        padding-right: 3.2rem;
-        position: relative;
-      }
+      .content {
+        line-height: initial;
+        background: #fff;
+        border: solid 1px @border-grey;
+        max-height: 100%;
+        overflow-y: auto;
 
-      .title::after {
-        .icon-chevron-down();
+        .group {
+          border-bottom: solid 1px @border-grey;
+          border-top: solid 1px @border-grey;
+        }
 
-        font-size: 1.8rem;
-        position: absolute;
-        right: 1rem;
-      }
+        .item {
+          position: relative;
+          padding: 10px 25px 10px 30px;
+          white-space: nowrap;
 
-      .content-container {
-        position: fixed;
-        top: @top-bar-height;
-        right: 0;
-        bottom: 0;
-        display: none;
-
-        .content {
-          line-height: initial;
-          background: #fff;
-          z-index: 5;
-          border: solid 1px @border-grey;
-          max-height: 100%;
-          overflow-y: auto;
-
-          .group {
-            border-bottom: solid 1px @border-grey;
-            border-top: solid 1px @border-grey;
+          &:hover {
+            background: @border-grey;
           }
 
-          .item {
-            position: relative;
-            padding: 10px 25px 10px 30px;
-            white-space: nowrap;
+          &.checkbox.checked::before {
+            .icon-tick();
 
-            &:hover {
-              background: @border-grey;
-            }
-
-            &.checkbox.checked::before {
-              .icon-tick();
-
-              position: absolute;
-              top: 12px;
-              left: 9px;
-            }
+            position: absolute;
+            top: 12px;
+            left: 9px;
           }
         }
       }

@@ -18,7 +18,7 @@ export function Menu(elt) {
     this._elt = elt;
     var menu = this;
 
-    elt.find(".title").click(function (e) {
+    elt.find(".menu-title").click(function (e) {
         elt.find(".content-container").toggle();
         /* Stop an opening click from also being treated as an "out-of-menu"
          * closing click */

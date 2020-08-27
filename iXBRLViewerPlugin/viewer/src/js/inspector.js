@@ -58,6 +58,9 @@ export function Inspector(iv) {
     $("#inspector-head .back").click(function () {
         $(this).closest("#inspector").removeClass("search-mode");
     });
+    this._toolbarMenu = new Menu($("#toolbar-menu"));
+    this.buildToolbarMenu();
+
     this._optionsMenu = new Menu($("#display-options-menu"));
     this.buildDisplayOptionsMenu();
 
@@ -75,6 +78,7 @@ Inspector.prototype.initialize = function (report) {
             inspector._search = new ReportSearch(report);
             inspector.setupSearchControls();
             inspector.buildDisplayOptionsMenu();
+            inspector.buildToolbarMenu();
             resolve();
         });
     });
@@ -131,6 +135,13 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
         this.setLanguage(dl);
     }
     this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
+}
+
+Inspector.prototype.buildToolbarMenu = function () {
+    this._toolbarMenu.reset();
+    this._toolbarMenu.addCheckboxItem("Highlight", (checked) => this.highlightAllTags(checked), "highlight-tags");
+    this._toolbarMenu.addCheckboxItem("Untagged", (checked) => this.highlightAllTags(checked), "highlight-foo-tags");
+    this._iv.callPluginMethod("extendToolbarMenu", this._toolbarMenu);
 
 }
 

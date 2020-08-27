@@ -60,17 +60,34 @@
           position: relative;
           padding: 10px 25px 10px 30px;
           white-space: nowrap;
+          text-align: left;
 
           &:hover {
             background: @border-grey;
           }
 
-          &.checkbox.checked::before {
-            .icon-tick();
+          &.menu-checkbox {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            display: block;
 
-            position: absolute;
-            top: 12px;
-            left: 9px;
+            // Hide the standard checkbox
+            input {
+              position: absolute;
+              opacity: 0;
+              cursor: pointer;
+              height: 0;
+              width: 0;
+            }
+
+            input:checked ~ .menu-checkmark::before {
+              .icon-tick();
+
+              position: absolute;
+              top: 1.1rem;
+              left: 1rem;
+            }
           }
         }
       }

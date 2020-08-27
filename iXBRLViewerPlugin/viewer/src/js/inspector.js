@@ -58,7 +58,7 @@ export function Inspector(iv) {
     $("#inspector-head .back").click(function () {
         $(this).closest("#inspector").removeClass("search-mode");
     });
-    this._toolbarMenu = new Menu($("#toolbar-menu"));
+    this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
     this.buildToolbarMenu();
 
     this._optionsMenu = new Menu($("#display-options-menu"));
@@ -128,7 +128,6 @@ Inspector.prototype.updateURLFragment = function () {
 
 Inspector.prototype.buildDisplayOptionsMenu = function () {
     this._optionsMenu.reset();
-    this._optionsMenu.addCheckboxItem("Highlight", (checked) => this.highlightAllTags(checked), "highlight-tags");
     if (this._report) {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
@@ -139,8 +138,7 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
 
 Inspector.prototype.buildToolbarMenu = function () {
     this._toolbarMenu.reset();
-    this._toolbarMenu.addCheckboxItem("Highlight", (checked) => this.highlightAllTags(checked), "highlight-tags");
-    this._toolbarMenu.addCheckboxItem("Untagged", (checked) => this.highlightAllTags(checked), "highlight-foo-tags");
+    this._toolbarMenu.addCheckboxItem("XBRL Elements", (checked) => this.highlightAllTags(checked), "highlight-tags");
     this._iv.callPluginMethod("extendToolbarMenu", this._toolbarMenu);
 
 }

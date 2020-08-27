@@ -73,7 +73,7 @@ Menu.prototype.addCheckboxItem = function(name, callback, itemName, after) {
                     menu.close(); 
                 })
         )
-        .append($("<span></span>").addClass("menu-checkmark"));
+        .append($("<span></span>").addClass("checkmark"));
     this._add(item, after);
 }
 
@@ -95,7 +95,7 @@ Menu.prototype.addCheckboxGroup = function(values, names, def, callback, name, a
                         menu.close(); 
                     })
             )
-            .append($("<span></span>").addClass("menu-checkmark"))
+            .append($("<span></span>").addClass("checkmark"))
             .appendTo(group);
 
         if (v == def) {

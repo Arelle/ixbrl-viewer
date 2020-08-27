@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+@import "form-controls.less";
+
 #ixv {
   .menu {
     position: absolute;
@@ -81,7 +83,7 @@
               width: 0;
             }
 
-            input:checked ~ .menu-checkmark::before {
+            input:checked ~ .checkmark::before {
               .icon-tick();
 
               position: absolute;
@@ -91,6 +93,14 @@
           }
         }
       }
+    }
+  }
+
+  .toolbar-menu {
+    .menu-checkbox {
+      .wk-checkbox();
+
+      margin-left: 1.8rem;
     }
   }
 }

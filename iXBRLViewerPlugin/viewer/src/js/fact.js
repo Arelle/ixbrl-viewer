@@ -92,6 +92,9 @@ Fact.prototype.readableValue = function() {
             v = formattedNumber + " " + this.unit().valueLabel();
         }
     }
+    else if (this.isNil()) {
+        v = "nil";
+    }
     else if (this.escaped()) {
         var html = $("<div>").append($($.parseHTML(v, null, false)));
         /* Insert an extra space at the beginning and end of block elements to

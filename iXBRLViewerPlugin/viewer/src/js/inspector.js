@@ -455,7 +455,8 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 }
 
-Inspector.prototype._updateValue = function (text, showAll, context) {
+Inspector.prototype._updateValue = function (item, showAll, context) {
+    const text = item.readableValue();
     var v = text;
     if (!showAll) {
         var fullLabel = text;
@@ -473,7 +474,11 @@ Inspector.prototype._updateValue = function (text, showAll, context) {
         $('tr.value', context).removeClass('truncated');
     }
 
-    $('tr.value td .value', context).text(v);
+    var valueSpan = $('tr.value td .value', context).empty().text(v);
+    if (item instanceof Fact && item.isNil()) {
+        valueSpan.wrapInner("<i></i>");
+    }
+
 }
 
 Inspector.prototype._updateEntityIdentifier = function (fact, context) {
@@ -531,8 +536,13 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                 );
             }
             this._updateEntityIdentifier(fact, factHTML);
-            this._updateValue(fact.readableValue(), false, factHTML);
-            $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
+            this._updateValue(fact, false, factHTML);
+
+            var accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
+            if (!fact.isNumeric() || fact.isNil()) {
+                accuracyTD.wrapInner("<i></i>");
+            }
+
             $('#dimensions', factHTML).empty();
             var dims = fact.dimensions();
             for (var d in dims) {
@@ -554,7 +564,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         }
         else if (fact instanceof Footnote) {
             factHTML = $(require('../html/footnote-details.html')); 
-            this._updateValue(fact.textContent(), false, factHTML);
+            this._updateValue(fact, false, factHTML);
         }
         a.addCard(
             title,

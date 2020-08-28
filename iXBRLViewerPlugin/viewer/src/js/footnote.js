@@ -26,3 +26,7 @@ Footnote.prototype.addFact = function (f) {
 Footnote.prototype.textContent = function () {
     return this._ixNode.textContent();
 }
+
+Footnote.prototype.readableValue = function () {
+    return this.textContent();
+}

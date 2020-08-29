@@ -59,7 +59,7 @@ export function Inspector(iv) {
         $(this).closest("#inspector").removeClass("search-mode");
     });
     this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
-    this.buildToolbarMenu();
+    this.buildToolbarHighlightMenu();
 
     this._optionsMenu = new Menu($("#display-options-menu"));
     this.buildDisplayOptionsMenu();
@@ -78,7 +78,7 @@ Inspector.prototype.initialize = function (report) {
             inspector._search = new ReportSearch(report);
             inspector.setupSearchControls();
             inspector.buildDisplayOptionsMenu();
-            inspector.buildToolbarMenu();
+            inspector.buildToolbarHighlightMenu();
             resolve();
         });
     });
@@ -136,11 +136,10 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
     this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
 }
 
-Inspector.prototype.buildToolbarMenu = function () {
+Inspector.prototype.buildToolbarHighlightMenu = function () {
     this._toolbarMenu.reset();
     this._toolbarMenu.addCheckboxItem("XBRL Elements", (checked) => this.highlightAllTags(checked), "highlight-tags");
-    this._iv.callPluginMethod("extendToolbarMenu", this._toolbarMenu);
-
+    this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
 }
 
 Inspector.prototype.highlightAllTags = function (checked) {

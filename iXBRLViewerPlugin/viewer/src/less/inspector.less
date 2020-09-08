@@ -28,7 +28,7 @@
 @import (reference) "text-mixins.less";
 @import "block-list.less";
 
-@top-bar-height: 35px;
+@top-bar-height: 3.5rem;
 
 #ixv {
   /* Specify these here, not on body in case the iXBRL document has its own
@@ -157,6 +157,13 @@
       height: @top-bar-height;
       overflow: hidden;
     }
+
+    .top-bar-controls {
+      position: absolute;
+      right: 1.8rem;
+      top: 0;
+      line-height: @top-bar-height;
+    }
   }
 
   #inspector {
@@ -215,6 +222,18 @@
 
           &::before {
             .icon-chevron-left();
+          }
+        }
+
+        .menu {
+          top: 0;
+          right: 0;
+          position: absolute;
+
+          .menu-title::before {
+            .icon-cog();
+
+            font-size: 2rem;
           }
         }
       }

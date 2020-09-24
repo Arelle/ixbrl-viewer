@@ -25,6 +25,10 @@ from arelle.ModelRelationshipSet import ModelRelationshipSet
 from .xhtmlserialize import XHTMLSerializer
 import os
 
+import io
+import zipfile
+from arelle.PythonUtil import attrdict
+
 WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
 
 class NamespaceMap:
@@ -130,35 +134,35 @@ class IXBRLViewerBuilder:
             self.taxonomyData["roleDefs"].setdefault(prefix,{})["en"] = label
 
     def addConcept(self, concept):
-        if concept is None:
-            return
-        labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
-        labels = labelsRelationshipSet.fromModelObject(concept)
-        conceptName = self.nsmap.qname(concept.qname)
-        if conceptName not in self.taxonomyData["concepts"]:
-            conceptData = {
-                "labels": {  }
-            }
-            for lr in labels:
-                l = lr.toModelObject
-                conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
-                self.addLanguage(l.xmlLang.lower());
-
-            refData = []
-            for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
-                ref = []
-                for _refPart in _refRel.toModelObject.iterchildren():
-                    ref.append([_refPart.localName, _refPart.stringValue.strip()])
-                refData.append(ref)
-
-            if len(refData) > 0:
-                conceptData['r'] = refData
-
-            self.taxonomyData["concepts"][conceptName] = conceptData
+        if concept is not None:
+            labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
+            labels = labelsRelationshipSet.fromModelObject(concept)
+            conceptName = self.nsmap.qname(concept.qname)
+            if conceptName not in self.taxonomyData["concepts"]:
+                conceptData = {
+                    "labels": {  }
+                }
+                for lr in labels:
+                    l = lr.toModelObject
+                    conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+                    self.addLanguage(l.xmlLang.lower());
+    
+                refData = []
+                for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
+                    ref = []
+                    for _refPart in _refRel.toModelObject.iterchildren():
+                        ref.append([_refPart.localName, _refPart.stringValue.strip()])
+                    refData.append(ref)
+    
+                if len(refData) > 0:
+                    conceptData['r'] = refData
+    
+                self.taxonomyData["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):
         for r in rels.fromModelObject(item):
-            self.treeWalk(rels, r.toModelObject, indent + 1)
+            if r.toModelObject is not None:
+                self.treeWalk(rels, r.toModelObject, indent + 1)
 
     def getRelationships(self):
         rels = {}
@@ -170,15 +174,16 @@ class IXBRLViewerBuilder:
                 rr = dict()
                 relSet = self.dts.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
-                    fromKey = self.nsmap.qname(r.fromModelObject.qname)
-                    rel = {
-                        "t": self.nsmap.qname(r.toModelObject.qname),
-                    }
-                    if r.weight is not None:
-                        rel['w'] = r.weight
-                    rr.setdefault(fromKey, []).append(rel)
-                    self.addConcept(r.toModelObject)
-                    self.addConcept(r.fromModelObject)
+                    if r.fromModelObject is not None and r.toModelObject is not None:
+                        fromKey = self.nsmap.qname(r.fromModelObject.qname)
+                        rel = {
+                            "t": self.nsmap.qname(r.toModelObject.qname),
+                        }
+                        if r.weight is not None:
+                            rel['w'] = r.weight
+                        rr.setdefault(fromKey, []).append(rel)
+                        self.addConcept(r.toModelObject)
+                        self.addConcept(r.fromModelObject)
 
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
@@ -252,10 +257,12 @@ class IXBRLViewerBuilder:
             frels = self.footnoteRelationshipSet.fromModelObject(f)
             if frels:
                 for frel in frels:
-                    factData.setdefault("fn", []).append(frel.toModelObject.id)
+                    if frel.toModelObject is not None:
+                        factData.setdefault("fn", []).append(frel.toModelObject.id)
 
             self.taxonomyData["facts"][f.id] = factData
-            self.addConcept(f.concept)
+            if f.concept is not None:
+                self.addConcept(f.concept)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
@@ -315,15 +322,25 @@ class iXBRLViewer:
     def addFile(self, ivf):
         self.files.append(ivf)
 
-    def save(self, outPath):
+    def save(self, outPath, outBasenameSuffix="", outzipFilePrefix=""):
         """
         Save the iXBRL viewer
         """
-        if os.path.isdir(outPath):
+        if isinstance(outPath, io.BytesIO): # zip output stream
+            # zipfile may be cumulatively added to by inline extraction, EdgarRenderer etc
+            _outPrefix = outzipFilePrefix + ("/" if outzipFilePrefix and outzipFilePrefix[-1] not in ("/", "\\") else "")
+            with zipfile.ZipFile(outPath, "a", zipfile.ZIP_DEFLATED, True) as zout:
+                for f in self.files:
+                    self.dts.info("viewer:info", "Saving in output zip %s" % f.filename)
+                    fout = attrdict(write=lambda s: zout.writestr(_outPrefix + f.filename, s))
+                    writer = XHTMLSerializer()
+                    writer.serialize(f.xmlDocument, fout)
+                zout.write(os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"), _outPrefix + "ixbrlviewer.js")
+        elif os.path.isdir(outPath):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
             for f in self.files:
-                filename = os.path.join(outPath, f.filename)
+                filename = os.path.join(outPath, "{0[0]}{1}{0[1]}".format(os.path.splitext(f.filename), outBasenameSuffix))
                 self.dts.info("viewer:info", "Writing %s" % filename)
                 with open(filename, "wb") as fout:
                     writer = XHTMLSerializer()
@@ -340,6 +357,6 @@ class iXBRLViewer:
                 self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(outPath)))
             else:
                 self.dts.info("viewer:info", "Writing %s" % outPath)
-                with open(outPath, "wb") as fout:
+                with open("{0[0]}{1}{0[1]}".format(os.path.splitext(outPath), outBasenameSuffix), "wb") as fout:
                     writer = XHTMLSerializer()
                     writer.serialize(self.files[0].xmlDocument, fout)

@@ -135,6 +135,6 @@ __pluginInfo__ = {
     'CntlrCmdLine.Options': commandLineOptionExtender,
     'CntlrCmdLine.Xbrl.Run': commandLineRun,
     'CntlrWinMain.Menu.Tools': toolsMenuExtender,
-'CntlrWinMain.Menu.View': viewMenuExtender,
+    'CntlrWinMain.Menu.View': viewMenuExtender,
     'CntlrWinMain.Xbrl.Loaded': guiRun,
 }

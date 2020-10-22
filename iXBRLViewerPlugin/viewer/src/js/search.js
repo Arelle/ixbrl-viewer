@@ -76,16 +76,20 @@ ReportSearch.prototype.search = function (s) {
     var results = []
     var searchIndex = this;
 
-    rr.forEach((r,i) => {
-            var item = searchIndex._report.getItemById(r.ref);
-            if (
-                (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
-                (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
-                (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
-                results.push({
-                    "fact": item,
-                    "score": r.score
-                });
+    rr.forEach((r,i) => {            
+            try {
+                var item = searchIndex._report.getItemById(r.ref);
+                if (
+                    (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
+                    (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
+                    (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
+                    results.push({
+                        "fact": item,
+                        "score": r.score
+                    });
+                }
+            } catch (err) {
+                console.error(err);
             }
         }
     );

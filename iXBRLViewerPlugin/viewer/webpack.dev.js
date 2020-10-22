@@ -21,7 +21,7 @@ module.exports = merge(common, {
   devtool: 'inline-source-map',
   watch: false,
   output: {
-    filename: 'ixbrlviewer.dev.js',
+    filename: 'ixbrlviewer.js',
     path: path.resolve(__dirname, 'dist')
   },
 });

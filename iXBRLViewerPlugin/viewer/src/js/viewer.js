@@ -128,7 +128,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 const outerText = $(node).text();
                 const start = outerText.indexOf(innerText);
                 const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
-                if (/[0-9A-Za-z]/.exec(wrapper) !== null) {
+                if (/[0-9A-Za-z]/.test(wrapper)) {
                     node = $();
                 } 
             }

@@ -35,7 +35,14 @@ ReportSearch.prototype.buildSearchIndex = function () {
         doc.startDate = f.periodFrom();
         var dims = f.dimensions();
         for (var d in dims) {
-            l += " " + this._report.getLabel(dims[d],"std");
+            if (this._report.getConcept(d).isTypedDimension) {
+                if (d !== null) {
+                    l += " " + d;
+                }
+            }
+            else {
+                l += " " + this._report.getLabel(dims[d],"std");
+            }
         }
         doc.label = l;
         doc.ref = f.concept().referenceValuesAsString();

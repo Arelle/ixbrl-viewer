@@ -53,10 +53,22 @@ Aspect.prototype.equalTo = function(a) {
     return a !== undefined && this._aspect == a._aspect && this._value == a._value;
 }
 
+
+Aspect.prototype.isTaxonomyDefined = function() {
+    return (this._aspect.indexOf(":") > -1);
+}
+
 Aspect.prototype.valueLabel = function(rolePrefix) {
-    /* Taxonomy-defined dimension, treat as explicit - or concept */
-    if (this._aspect.indexOf(":") > -1 || this._aspect == 'c') {
+    if (this._aspect == 'c') {
         return this._report.getLabel(this._value, rolePrefix) || this._value;
+    }
+    if (this.isTaxonomyDefined()) {
+        if (this._report.getConcept(this._aspect).isTypedDimension()) {
+            return this._value === null ? "<null>" : this._value;
+        }
+        else {
+            return this._report.getLabel(this._value, rolePrefix) || this._value;
+        }
     }
     else if (this._aspect == 'u') {
         if (this._value === null) {

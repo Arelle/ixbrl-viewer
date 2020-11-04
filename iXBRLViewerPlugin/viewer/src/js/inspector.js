@@ -168,11 +168,12 @@ Inspector.prototype.factListRow = function(f) {
         .text(f.period().toString())
         .appendTo(row);
 
-    var dims = f.dimensions();
-    for (var d in dims) {
-        $('<div class="dimension"></div>')
-            .text(f.report().getLabel(dims[d], "std", true) || dims[d])
-            .appendTo(row);
+    for (const [key, aspect] of Object.entries(f.aspects())) {
+        if (aspect.isTaxonomyDefined()) {
+            $('<div class="dimension"></div>')
+                .text(aspect.valueLabel())
+                .appendTo(row);
+        }
     }
     if (f.isHidden()) {
         $('<div class="hidden">Hidden fact</div>')
@@ -534,21 +535,23 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             this._updateValue(fact.readableValue(), false, factHTML);
             $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
             $('#dimensions', factHTML).empty();
-            var dims = fact.dimensions();
-            for (var d in dims) {
+            for (const [key, aspect] of Object.entries(fact.aspects())) {
+                if (!aspect.isTaxonomyDefined()) {
+                    continue;
+                }
                 var h = $('<div class="dimension"></div>')
-                    .text(fact.report().getLabel(d, "std", true) || d)
+                    .text(aspect.label() || d)
                     .appendTo($('#dimensions', factHTML));
                 if (fact.isNumeric()) {
                     h.append(
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
-                            .click(() => this._chart.analyseDimension(fact,[d]))
+                            .click(() => this._chart.analyseDimension(fact,[a]))
                     )
                 }
                 $('<div class="dimension-value"></div>')
-                    .text(fact.report().getLabel(dims[d], "std", true) || dims[d])
+                    .text(aspect.valueLabel())
                     .appendTo(h);
             }
         }

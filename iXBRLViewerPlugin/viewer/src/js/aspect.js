@@ -64,7 +64,7 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
     }
     if (this.isTaxonomyDefined()) {
         if (this._report.getConcept(this._aspect).isTypedDimension()) {
-            return this._value === null ? "<null>" : this._value;
+            return this._value === null ? "<nil>" : this._value;
         }
         else {
             return this._report.getLabel(this._value, rolePrefix) || this._value;

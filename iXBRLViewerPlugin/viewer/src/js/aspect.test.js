@@ -34,6 +34,22 @@ var testReportData = {
                     "en": "English label for concept two"
                 }
             }
+        },
+        "eg:ExplicitDimension": {
+            "labels": {
+                "std": {
+                    "en": "Explicit dimension"
+                }
+            },
+            "d": "e"
+        },
+        "eg:TypedDimension": {
+            "labels": {
+                "std": {
+                    "en": "Typed dimension"
+                }
+            },
+            "d": "t"
         }
     }
 };
@@ -77,9 +93,22 @@ test("Entity aspect labels - unknown scheme", () => {
 });
 
 test("Taxonomy defined dimension labels", () => {
-    var tda = new Aspect("eg:Concept1", "eg:Concept2", testReport);
-    expect(tda.label()).toBe("English label");  
+    var tda = new Aspect("eg:ExplicitDimension", "eg:Concept2", testReport);
+    expect(tda.label()).toBe("Explicit dimension");  
     expect(tda.valueLabel()).toBe("English label for concept two");  
+
+    tda = new Aspect("eg:TypedDimension", "eg:Concept2", testReport);
+    expect(tda.label()).toBe("Typed dimension");  
+    // "eg:Concept2" should be treated as a string, not a member name
+    expect(tda.valueLabel()).toBe("eg:Concept2");  
+
+    tda = new Aspect("eg:TypedDimension", "1 2 3 4", testReport);
+    expect(tda.label()).toBe("Typed dimension");  
+    expect(tda.valueLabel()).toBe("1 2 3 4");  
+
+    tda = new Aspect("eg:TypedDimension", null, testReport);
+    expect(tda.label()).toBe("Typed dimension");  
+    expect(tda.valueLabel()).toBe("<nil>");  
 });
 
 describe("AspectSet", () => {

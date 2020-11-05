@@ -121,9 +121,14 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             /* Is the element the only significant content within a <td> or <th> ? If
              * so, use that as the wrapper element. */
             node = $(n).closest("td,th").eq(0);
-            if (node.length == 1) {
-                var regex = "^[^0-9A-Za-z]*" + escapeRegex($(n).text()) + "[^0-9A-Za-z]*$";
-                if (node.text().match(regex) == null) {
+            const innerText = $(n).text();
+            if (node.length == 1 && innerText.length > 0) {
+                // Use indexOf rather than a single regex because innerText may
+                // be too long for the regex engine 
+                const outerText = $(node).text();
+                const start = outerText.indexOf(innerText);
+                const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
+                if (/[0-9A-Za-z]/.test(wrapper)) {
                     node = $();
                 } 
             }

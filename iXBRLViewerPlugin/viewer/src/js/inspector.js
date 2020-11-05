@@ -168,7 +168,7 @@ Inspector.prototype.factListRow = function(f) {
         .text(f.period().toString())
         .appendTo(row);
 
-    for (const [key, aspect] of Object.entries(f.aspects())) {
+    for (const aspect of f.aspects()) {
         if (aspect.isTaxonomyDefined()) {
             $('<div class="dimension"></div>')
                 .text(aspect.valueLabel())
@@ -535,7 +535,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             this._updateValue(fact.readableValue(), false, factHTML);
             $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
             $('#dimensions', factHTML).empty();
-            for (const [key, aspect] of Object.entries(fact.aspects())) {
+            for (const aspect of fact.aspects()) {
                 if (!aspect.isTaxonomyDefined()) {
                     continue;
                 }

@@ -127,7 +127,7 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
         return null;
     }
     var allAspectsMap = {};
-    for (var i = 0; i < facts.length; i++) {
+    for (const fact of facts) {
         for (const a of fact.aspects()) {
             allAspectsMap[a.name()] = 1;
         }
@@ -139,7 +139,7 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
         var a = allAspects[i];
         constantAspects[a] = facts[0].aspect(a);
         for (var j = 1; j < facts.length; j++) {
-            if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspects(a))) {
+            if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspect(a))) {
                 delete constantAspects[a];
             }
         }

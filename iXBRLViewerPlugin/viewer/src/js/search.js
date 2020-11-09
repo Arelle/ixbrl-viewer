@@ -41,7 +41,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
                 }
             }
             else {
-                l += " " + this._report.getLabel(dims[d],"std");
+                l += " " + this._report.getLabel(dims[d], "std");
             }
         }
         doc.label = l;
@@ -49,8 +49,8 @@ ReportSearch.prototype.buildSearchIndex = function () {
         const wider = f.widerConcepts();
         if (wider.length > 0) {
             doc.widerConcept = this._report.qname(wider[0]).localname;
-            doc.widerLabel = this._report.getLabel(wider[0],"std");
-            doc.widerDoc = this._report.getLabel(wider[0],"doc");
+            doc.widerLabel = this._report.getLabel(wider[0], "std");
+            doc.widerDoc = this._report.getLabel(wider[0], "doc");
         }
         docs.push(doc);
 

@@ -58,6 +58,9 @@ export function Inspector(iv) {
     $("#inspector-head .back").click(function () {
         $(this).closest("#inspector").removeClass("search-mode");
     });
+    this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
+    this.buildToolbarHighlightMenu();
+
     this._optionsMenu = new Menu($("#display-options-menu"));
     this.buildDisplayOptionsMenu();
 
@@ -75,6 +78,7 @@ Inspector.prototype.initialize = function (report) {
             inspector._search = new ReportSearch(report);
             inspector.setupSearchControls();
             inspector.buildDisplayOptionsMenu();
+            inspector.buildToolbarHighlightMenu();
             resolve();
         });
     });
@@ -124,14 +128,18 @@ Inspector.prototype.updateURLFragment = function () {
 
 Inspector.prototype.buildDisplayOptionsMenu = function () {
     this._optionsMenu.reset();
-    this._optionsMenu.addCheckboxItem("Highlight", (checked) => this.highlightAllTags(checked), "highlight-tags");
     if (this._report) {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
         this.setLanguage(dl);
     }
     this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
+}
 
+Inspector.prototype.buildToolbarHighlightMenu = function () {
+    this._toolbarMenu.reset();
+    this._toolbarMenu.addCheckboxItem("XBRL Elements", (checked) => this.highlightAllTags(checked), "highlight-tags");
+    this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
 }
 
 Inspector.prototype.highlightAllTags = function (checked) {
@@ -455,7 +463,8 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 }
 
-Inspector.prototype._updateValue = function (text, showAll, context) {
+Inspector.prototype._updateValue = function (item, showAll, context) {
+    const text = item.readableValue();
     var v = text;
     if (!showAll) {
         var fullLabel = text;
@@ -473,7 +482,11 @@ Inspector.prototype._updateValue = function (text, showAll, context) {
         $('tr.value', context).removeClass('truncated');
     }
 
-    $('tr.value td .value', context).text(v);
+    var valueSpan = $('tr.value td .value', context).empty().text(v);
+    if (item instanceof Fact && item.isNil()) {
+        valueSpan.wrapInner("<i></i>");
+    }
+
 }
 
 Inspector.prototype._updateEntityIdentifier = function (fact, context) {
@@ -531,8 +544,13 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                 );
             }
             this._updateEntityIdentifier(fact, factHTML);
-            this._updateValue(fact.readableValue(), false, factHTML);
-            $('tr.accuracy td', factHTML).text(fact.readableAccuracy());
+            this._updateValue(fact, false, factHTML);
+
+            var accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
+            if (!fact.isNumeric() || fact.isNil()) {
+                accuracyTD.wrapInner("<i></i>");
+            }
+
             $('#dimensions', factHTML).empty();
             var dims = fact.dimensions();
             for (var d in dims) {
@@ -554,7 +572,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         }
         else if (fact instanceof Footnote) {
             factHTML = $(require('../html/footnote-details.html')); 
-            this._updateValue(fact.textContent(), false, factHTML);
+            this._updateValue(fact, false, factHTML);
         }
         a.addCard(
             title,

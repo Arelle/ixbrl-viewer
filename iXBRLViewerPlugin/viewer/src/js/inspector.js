@@ -169,7 +169,7 @@ Inspector.prototype.factListRow = function(f) {
         .appendTo(row);
 
     for (const aspect of f.aspects()) {
-        if (aspect.isTaxonomyDefined()) {
+        if (aspect.isTaxonomyDefined() && !aspect.isNil()) {
             $('<div class="dimension"></div>')
                 .text(aspect.valueLabel())
                 .appendTo(row);
@@ -550,9 +550,12 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                             .click(() => this._chart.analyseDimension(fact,[a]))
                     )
                 }
-                $('<div class="dimension-value"></div>')
+                var s = $('<div class="dimension-value"></div>')
                     .text(aspect.valueLabel())
                     .appendTo(h);
+                if (aspect.isNil()) {
+                    s.wrapInner("<i></i>");
+                }
             }
         }
         else if (fact instanceof Footnote) {

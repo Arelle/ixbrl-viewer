@@ -58,13 +58,17 @@ Aspect.prototype.isTaxonomyDefined = function() {
     return (this._aspect.indexOf(":") > -1);
 }
 
+Aspect.prototype.isNil = function() {
+    return this._value === null;
+}
+
 Aspect.prototype.valueLabel = function(rolePrefix) {
     if (this._aspect == 'c') {
         return this._report.getLabel(this._value, rolePrefix) || this._value;
     }
     if (this.isTaxonomyDefined()) {
         if (this._report.getConcept(this._aspect).isTypedDimension()) {
-            return this._value === null ? "<nil>" : this._value;
+            return this._value === null ? "nil" : this._value;
         }
         return this._report.getLabel(this._value, rolePrefix) || this._value;
     }

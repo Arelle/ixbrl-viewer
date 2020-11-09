@@ -37,7 +37,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
         for (var d in dims) {
             if (this._report.getConcept(d).isTypedDimension) {
                 if (dims[d] !== null) {
-                    l += " " + d;
+                    l += " " + dims[d];
                 }
             }
             else {

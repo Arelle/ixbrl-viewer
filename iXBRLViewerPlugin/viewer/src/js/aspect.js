@@ -66,9 +66,7 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
         if (this._report.getConcept(this._aspect).isTypedDimension()) {
             return this._value === null ? "<nil>" : this._value;
         }
-        else {
-            return this._report.getLabel(this._value, rolePrefix) || this._value;
-        }
+        return this._report.getLabel(this._value, rolePrefix) || this._value;
     }
     else if (this._aspect == 'u') {
         if (this._value === null) {

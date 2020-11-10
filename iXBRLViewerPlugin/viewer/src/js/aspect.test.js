@@ -94,21 +94,21 @@ test("Entity aspect labels - unknown scheme", () => {
 
 test("Taxonomy defined dimension labels", () => {
     var tda = new Aspect("eg:ExplicitDimension", "eg:Concept2", testReport);
-    expect(tda.label()).toBe("Explicit dimension");  
-    expect(tda.valueLabel()).toBe("English label for concept two");  
+    expect(tda.label()).toBe("Explicit dimension");
+    expect(tda.valueLabel()).toBe("English label for concept two");
 
     tda = new Aspect("eg:TypedDimension", "eg:Concept2", testReport);
-    expect(tda.label()).toBe("Typed dimension");  
+    expect(tda.label()).toBe("Typed dimension");
     // "eg:Concept2" should be treated as a string, not a member name
-    expect(tda.valueLabel()).toBe("eg:Concept2");  
+    expect(tda.valueLabel()).toBe("eg:Concept2");
 
     tda = new Aspect("eg:TypedDimension", "1 2 3 4", testReport);
-    expect(tda.label()).toBe("Typed dimension");  
-    expect(tda.valueLabel()).toBe("1 2 3 4");  
+    expect(tda.label()).toBe("Typed dimension");
+    expect(tda.valueLabel()).toBe("1 2 3 4");
 
     tda = new Aspect("eg:TypedDimension", null, testReport);
-    expect(tda.label()).toBe("Typed dimension");  
-    expect(tda.valueLabel()).toBe("<nil>");  
+    expect(tda.label()).toBe("Typed dimension");
+    expect(tda.valueLabel()).toBe("nil");
 });
 
 describe("AspectSet", () => {
@@ -121,7 +121,6 @@ describe("AspectSet", () => {
         expect(uv).toHaveLength(2);
         expect(uv.map(x => x.value())).toEqual(expect.arrayContaining(["eg:Concept1", "eg:Concept2"]));
     });
-    
 });
 
 

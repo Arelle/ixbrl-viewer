@@ -139,9 +139,7 @@ Fact.prototype.isMonetaryValue = function () {
 }
 
 Fact.prototype.aspects = function () {
-    var aspects = [];
-    $.each(this.f.a, (k,v) => { aspects.push(this.aspect(k) ) } );
-    return aspects;
+    return Object.keys(this.f.a).map(k => this.aspect(k));
 }
 
 Fact.prototype.aspect = function (a) {

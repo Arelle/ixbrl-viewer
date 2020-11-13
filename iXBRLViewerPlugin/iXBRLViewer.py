@@ -129,7 +129,7 @@ class IXBRLViewerBuilder:
                 label = rt[0].definition
             self.taxonomyData["roleDefs"].setdefault(prefix,{})["en"] = label
 
-    def addConcept(self, concept):
+    def addConcept(self, concept, dimensionType = None):
         if concept is None:
             return
         labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
@@ -153,6 +153,9 @@ class IXBRLViewerBuilder:
 
             if len(refData) > 0:
                 conceptData['r'] = refData
+
+            if dimensionType is not None:
+                conceptData["d"] = dimensionType
 
             self.taxonomyData["concepts"][conceptName] = conceptData
 
@@ -233,11 +236,12 @@ class IXBRLViewerBuilder:
 
             for d, v in f.context.qnameDims.items():
                 if v.memberQname is None:
-                    # Typed dimension, not yet supported.
-                    continue
-                aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
-                self.addConcept(v.dimension)
-                self.addConcept(v.member)
+                    aspects[self.nsmap.qname(v.dimensionQname)] = v.typedMember.text
+                    self.addConcept(v.dimension, dimensionType = "t")
+                else:
+                    aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
+                    self.addConcept(v.member)
+                    self.addConcept(v.dimension, dimensionType = "e")
 
             if f.context.isForeverPeriod:
                 aspects["p"] = "f"

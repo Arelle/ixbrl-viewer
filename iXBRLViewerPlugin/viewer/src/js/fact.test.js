@@ -42,6 +42,21 @@ var testReportData = {
                     "en": "English label for concept three"
                 }
             }
+        },
+        "eg:Dimension1": {
+            "labels": {
+                "std": {
+                    "en": "Dimension One"
+                }
+            },
+            "d": "e"
+        },
+        "eg:Member1": {
+            "labels": {
+                "std": {
+                    "en": "Member One"
+                }
+            }
         }
     },
     "facts": {
@@ -485,4 +500,23 @@ describe("Get Label", () => {
         expect(f.getLabel("doc")).toBeUndefined();
     });
 
+});
+
+describe("Aspect methods", () => {
+    var f = testFact({
+            "d": -3,
+            "v": 1000,
+            "a": {
+                "c": "eg:Concept1",
+                "u": "iso4217:USD", 
+                "p": "2018-01-01/2019-01-01",
+                "eg:Dimension1": "eg:Member1"
+            }});
+    test("Get aspects", () => {
+        expect(f.aspects().length).toEqual(4);
+        expect(f.aspects().filter(a => a.isTaxonomyDefined()).length).toEqual(1);
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].label()).toEqual("Dimension One");
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].valueLabel()).toEqual("Member One");
+        expect(f.aspect("eg:Dimension1").value()).toEqual("eg:Member1");
+    });
 });

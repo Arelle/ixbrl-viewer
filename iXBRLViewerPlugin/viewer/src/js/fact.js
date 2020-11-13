@@ -142,16 +142,14 @@ Fact.prototype.isMonetaryValue = function () {
 }
 
 Fact.prototype.aspects = function () {
-    var aspects = {};
-    var fact = this;
-    $.each(this.f.a, function (k,v) {
-        aspects[k] = fact.aspect(k);
-    });
-    return aspects;
+    return Object.keys(this.f.a).map(k => this.aspect(k));
 }
 
 Fact.prototype.aspect = function (a) {
-    return new Aspect(a, this.f.a[a], this._report);
+    if (this.f.a[a] !== undefined) {
+        return new Aspect(a, this.f.a[a], this._report);
+    }
+    return undefined;
 }
 
 Fact.prototype.isAligned = function (of, coveredAspects) {

@@ -45,3 +45,8 @@ Concept.prototype.references = function () {
         });
     }
 }
+
+Concept.prototype.isTypedDimension = function () {
+    return this._c.d == "t";
+}
+

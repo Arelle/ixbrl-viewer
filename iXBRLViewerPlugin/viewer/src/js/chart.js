@@ -120,10 +120,10 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
     var set2av = new AspectSet();
     $.each(facts, function (i,f) {
         if (dims[0]) {
-            set1av.add(f.aspects()[dims[0]]);
+            set1av.add(f.aspect(dims[0]));
         }
         if (dims[1]) {
-            set2av.add(f.aspects()[dims[1]]);
+            set2av.add(f.aspect(dims[1]));
         }
     });
     var uv1 = set1av.uniqueValues();
@@ -169,7 +169,7 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
     /* Create controls for adding or removing aspects for analysis */
     $(".other-aspects", c).empty();
     var unselectedAspects = [];
-    $.each(fact.aspects(), function (a,av) {
+    for (const av of fact.aspects()) {
         /* Don't show concept in list of additional aspects */
         if (av.name() != 'c') {
             var a = $("<div>")
@@ -191,7 +191,7 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
                 }
             }
         }
-    });
+    }
 
     if (!dims[1]) {
         if (!dims[0]) {

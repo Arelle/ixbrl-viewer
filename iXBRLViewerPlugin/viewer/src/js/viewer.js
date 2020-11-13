@@ -145,7 +145,11 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 $(n).wrap(wrapper);
                 node = $(n).parent();
             }
-            node.addClass("ixbrl-element").data('ivid', id);
+            /* If we use an enclosing table cell as the wrapper, we may have
+             * multiple tags in a single element. */
+            var ivids = node.data('ivid') || [];
+            ivids.push(id);
+            node.addClass("ixbrl-element").data('ivid', ivids);
         }
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */
@@ -195,7 +199,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             if (m) {
                 var id = m[1];
                 node = $(n);
-                node.addClass("ixbrl-element").data('ivid', id);
+                node.addClass("ixbrl-element").data('ivid', [id]);
                 /* We may have already seen the corresponding ix element in the hidden
                  * section */
                 var ixn = this._ixNodeMap[id];
@@ -242,9 +246,11 @@ Viewer.prototype._selectAdjacentTag = function (offset) {
         next = elements.last();
     }
     
-    this.showDocumentForItemId(next.data('ivid'));
+    this.showDocumentForItemId(next.data('ivid')[0]);
     this.showElement(next);
-    this.selectElement(next);
+    /* If this is a table cell with multiple nested tags pass all tags so that
+     * all are shown in the inspector. */
+    this.selectElement(next, this._ixIdsForElement(next));
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -263,7 +269,6 @@ Viewer.prototype._bindHandlers = function () {
     
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
-
 
     TableExport.addHandles(this._contents, this._report);
 }
@@ -305,12 +310,20 @@ Viewer.prototype.highlightElements = function (ee) {
     ee.addClass("ixbrl-selected");
 }
 
-Viewer.prototype._ixIdForElement = function (e) {
-    var id = e.data('ivid');
+Viewer.prototype._ixIdsForElement = function (e) {
+    var ids = e.data('ivid');
     if (e.hasClass("ixbrl-continuation")) {
-        id = this._continuedAtMap[id].continuationOf;
+        ids = [...ids];
+        /* If any of the ids are continuations, replace them with the IDs of
+         * their underlying facts */
+        for (var i = 0; i < ids.length; i++) {
+            const cof = this._continuedAtMap[ids[i]];
+            if (cof !== undefined) {
+                ids[i] = cof.continuationOf;
+            }
+        }
     }
-    return id;
+    return ids;
 }
 
 /*
@@ -321,7 +334,7 @@ Viewer.prototype._ixIdForElement = function (e) {
  */
 Viewer.prototype.selectElement = function (e, factIdList) {
     if (e !== null) {
-        var factId = this._ixIdForElement(e);
+        var factId = this._ixIdsForElement(e)[0];
         this.onSelect.fire(factId, factIdList);
     }
     else {
@@ -333,18 +346,18 @@ Viewer.prototype.selectElementByClick = function (e) {
     var eltSet = [];
     var viewer = this;
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet.unshift(viewer._ixIdForElement($(this))); 
+        eltSet = eltSet.concat(viewer._ixIdsForElement($(this))); 
     });
     this.selectElement(e, eltSet);
 }
 
 Viewer.prototype._mouseEnter = function (e) {
-    var id = e.data('ivid');
+    var id = e.data('ivid')[0];
     this.onMouseEnter.fire(id);
 }
 
 Viewer.prototype._mouseLeave = function (e) {
-    var id = e.data('ivid');
+    var id = e.data('ivid')[0];
     this.onMouseLeave.fire(id);
 }
 
@@ -405,7 +418,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var viewer = this;
     if (on) {
         $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
-            var factId = $(this).data('ivid');
+            var factId = $(this).data('ivid')[0];
             var ixn = viewer._ixNodeMap[factId];
             var elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
             elements.addClass("ixbrl-highlight");
@@ -448,7 +461,7 @@ Viewer.prototype.factsInSameTable = function (fact) {
     var e = this.elementForFact(fact);
     var facts = [];
     e.closest("table").find(".ixbrl-element").each(function (i,e) {
-        facts.push($(this).data('ivid'));
+        facts = facts.concat($(this).data('ivid'));
     });
     return facts;
 }

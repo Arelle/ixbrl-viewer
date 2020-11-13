@@ -134,30 +134,31 @@ class IXBRLViewerBuilder:
             self.taxonomyData["roleDefs"].setdefault(prefix,{})["en"] = label
 
     def addConcept(self, concept):
-        if concept is not None:
-            labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
-            labels = labelsRelationshipSet.fromModelObject(concept)
-            conceptName = self.nsmap.qname(concept.qname)
-            if conceptName not in self.taxonomyData["concepts"]:
-                conceptData = {
-                    "labels": {  }
-                }
-                for lr in labels:
-                    l = lr.toModelObject
-                    conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
-                    self.addLanguage(l.xmlLang.lower());
-    
-                refData = []
-                for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
-                    ref = []
-                    for _refPart in _refRel.toModelObject.iterchildren():
-                        ref.append([_refPart.localName, _refPart.stringValue.strip()])
-                    refData.append(ref)
-    
-                if len(refData) > 0:
-                    conceptData['r'] = refData
-    
-                self.taxonomyData["concepts"][conceptName] = conceptData
+        if concept is None:
+            return
+        labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
+        labels = labelsRelationshipSet.fromModelObject(concept)
+        conceptName = self.nsmap.qname(concept.qname)
+        if conceptName not in self.taxonomyData["concepts"]:
+            conceptData = {
+                "labels": {  }
+            }
+            for lr in labels:
+                l = lr.toModelObject
+                conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+                self.addLanguage(l.xmlLang.lower());
+
+            refData = []
+            for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
+                ref = []
+                for _refPart in _refRel.toModelObject.iterchildren():
+                    ref.append([_refPart.localName, _refPart.stringValue.strip()])
+                refData.append(ref)
+
+            if len(refData) > 0:
+                conceptData['r'] = refData
+
+            self.taxonomyData["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):
         for r in rels.fromModelObject(item):

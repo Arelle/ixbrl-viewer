@@ -214,6 +214,7 @@ class TestIXBRLViewer(unittest.TestCase):
 
         self.modelXbrl_1 = Mock(
             relationshipSet=relationshipSet_effect,
+            relationshipSets={},
             baseSets=baseSets,
             roleTypes=roleTypes,
             facts=[fact_1],
@@ -222,6 +223,7 @@ class TestIXBRLViewer(unittest.TestCase):
         )
         self.modelXbrl_2 = Mock(
             relationshipSet=relationshipSet_effect,
+            relationshipSets={},
             baseSets=baseSets,
             roleTypes=roleTypes,
             facts=[fact_2],
@@ -246,7 +248,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_simple_case(self):
-        modelXbrl = Mock(baseSets=defaultdict(list))
+        modelXbrl = Mock(baseSets=defaultdict(list), relationshipSets={})
         builder = IXBRLViewerBuilder(modelXbrl)
         result = builder.getRelationships()
         self.assertDictEqual(result, {})

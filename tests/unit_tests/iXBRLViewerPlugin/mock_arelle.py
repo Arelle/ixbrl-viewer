@@ -22,12 +22,16 @@ def mock_arelle():
     # patch the wrong Mock instance.
     if 'arelle' not in sys.modules:
         sys.modules['arelle'] = Mock()
-        sys.modules['arelle.XbrlConst'] = Mock()
+        sys.modules['arelle.FileSource'] = Mock()
+        sys.modules['arelle.LocalViewer'] = Mock()
         sys.modules['arelle.ModelDocument'] = Mock()
         sys.modules['arelle.ModelRelationshipSet'] = Mock(ModelRelationshipSet = mrs_effect)
         sys.modules['arelle.ModelValue'] = Mock(
             QName=qname_effect
         )
+        sys.modules['arelle.PythonUtil'] = Mock()
         sys.modules['arelle.ValidateXbrlCalcs'] = Mock(
             inferredDecimals=inferredDecimals_effect
         )
+        sys.modules['arelle.webserver.bottle'] = Mock()
+        sys.modules['arelle.XbrlConst'] = Mock()

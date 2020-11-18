@@ -558,7 +558,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                     continue;
                 }
                 var h = $('<div class="dimension"></div>')
-                    .text(aspect.label() || d)
+                    .text(aspect.label())
                     .appendTo($('#dimensions', factHTML));
                 if (fact.isNumeric()) {
                     h.append(

@@ -1,6 +1,7 @@
 import lxml
 import sys
 import unittest
+import json
 from collections import defaultdict
 from unittest.mock import Mock, patch
 from .mock_arelle import mock_arelle
@@ -91,6 +92,20 @@ class TestNamespaceMap(unittest.TestCase):
 class TestIXBRLViewer(unittest.TestCase):
 
     def setUp(self):
+        self.usd_qname = Mock(
+            localName='USD',
+            prefix='iso4217',
+            namespaceURI='http://www.xbrl.org/2003/iso4217'
+        )
+
+        self.usd_unit = Mock(
+            measures = ([self.usd_qname],[])
+        )
+
+        self.null_units = Mock(
+            measures = ([],[])
+        )
+
         self.cash_concept = Mock(
             qname=Mock(
                 localName='Cash',
@@ -163,7 +178,7 @@ class TestIXBRLViewer(unittest.TestCase):
         )
 
         fact_1 = Mock(
-            id='fact_id',
+            id='fact_id1',
             qname=self.cash_concept.qname,
             value=100,
             isNumeric=False,
@@ -173,12 +188,25 @@ class TestIXBRLViewer(unittest.TestCase):
         )
 
         fact_2 = Mock(
-            id='fact_id',
+            id='fact_id2',
             qname=self.cash_concept.qname,
             concept=self.cash_concept,
             context=context_2,
             isNumeric=True,
-            unit=None,
+            unit=self.usd_unit,
+            value=None,
+            decimals=None,
+            precision=None,
+            format=None
+        )
+
+        fact_3 = Mock(
+            id='fact_id3',
+            qname=self.cash_concept.qname,
+            concept=self.cash_concept,
+            context=context_2,
+            isNumeric=True,
+            unit=self.null_units,
             value=None,
             decimals=None,
             precision=None,
@@ -226,7 +254,7 @@ class TestIXBRLViewer(unittest.TestCase):
             relationshipSets={},
             baseSets=baseSets,
             roleTypes=roleTypes,
-            facts=[fact_2],
+            facts=[fact_2, fact_3],
             info=info_effect,
             modelDocument=self.modelDocument
         )
@@ -314,3 +342,10 @@ class TestIXBRLViewer(unittest.TestCase):
         self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
         self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
         self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+
+        jsdata = json.loads(body[2].text)
+        facts = jsdata["facts"]
+        self.assertEqual(facts.keys(), {"fact_id2", "fact_id3"})
+        self.assertEqual(facts["fact_id2"]["a"]["u"], "iso4217:USD")
+        self.assertEqual(facts["fact_id3"]["a"]["u"], None)
+

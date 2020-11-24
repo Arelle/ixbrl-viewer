@@ -153,7 +153,8 @@ class TestIXBRLViewer(unittest.TestCase):
         dimension_missing_member = Mock(
             dimensionQname=dimension_concept.qname,
             memberQname=None,
-            dimension=dimension_concept
+            dimension=dimension_concept,
+            typedMember=None
         )
 
         def isoformat_effect():

@@ -158,6 +158,20 @@ class TestIXBRLViewer(unittest.TestCase):
             member=member_concept
         )
 
+        typed_dimension = Mock(
+            dimensionQname=dimension_concept.qname,
+            memberQname=None,
+            dimension=dimension_concept,
+            typedMember=Mock(text='typedDimension')
+        )
+
+        dimension_missing_member = Mock(
+            dimensionQname=dimension_concept.qname,
+            memberQname=None,
+            dimension=dimension_concept,
+            typedMember=None
+        )
+
         def isoformat_effect():
             return '01-01-19T00:00:00'
 
@@ -175,6 +189,24 @@ class TestIXBRLViewer(unittest.TestCase):
             qnameDims={},
             isInstantPeriod=None,
             isStartEndPeriod=None
+        )
+
+        context_with_typed_dimension = Mock(
+            entityIdentifier=('scheme', 'ident'),
+            qnameDims={'d': typed_dimension},
+            isInstantPeriod=False,
+            isStartEndPeriod=True,
+            startDatetime=Mock(isoformat=isoformat_effect),
+            endDatetime=Mock(isoformat=isoformat_effect)
+        )
+
+        context_with_missing_member_on_dimension = Mock(
+            entityIdentifier=('scheme', 'ident'),
+            qnameDims={'d': dimension_missing_member},
+            isInstantPeriod=False,
+            isStartEndPeriod=True,
+            startDatetime=Mock(isoformat=isoformat_effect),
+            endDatetime=Mock(isoformat=isoformat_effect)
         )
 
         fact_1 = Mock(
@@ -213,6 +245,26 @@ class TestIXBRLViewer(unittest.TestCase):
             format=None
         )
 
+        fact_with_typed_dimension = Mock(
+            id='fact_typed_dimension',
+            qname=self.cash_concept.qname,
+            value=10,
+            isNumeric=False,
+            context=context_with_typed_dimension,
+            concept=self.cash_concept,
+            format='format'
+        )
+
+        fact_with_missing_member_on_dimension = Mock(
+            id='fact_dimension_missing_member',
+            qname=self.cash_concept.qname,
+            value=1000,
+            isNumeric=False,
+            context=context_with_missing_member_on_dimension,
+            concept=self.cash_concept,
+            format='format'
+        )
+
         def fromModelObjects_effect(concept):
             return []
 
@@ -245,7 +297,7 @@ class TestIXBRLViewer(unittest.TestCase):
             relationshipSets={},
             baseSets=baseSets,
             roleTypes=roleTypes,
-            facts=[fact_1],
+            facts=[fact_1, fact_with_typed_dimension, fact_with_missing_member_on_dimension],
             info=info_effect,
             modelDocument=self.modelDocument
         )

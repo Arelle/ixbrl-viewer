@@ -241,13 +241,13 @@ class IXBRLViewerBuilder:
                     factData["d"] = d
 
             for d, v in f.context.qnameDims.items():
-                if v.memberQname is None:
-                    aspects[self.nsmap.qname(v.dimensionQname)] = v.typedMember.text
-                    self.addConcept(v.dimension, dimensionType = "t")
-                else:
+                if v.memberQname is not None:
                     aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
                     self.addConcept(v.member)
                     self.addConcept(v.dimension, dimensionType = "e")
+                elif v.typedMember is not None:
+                    aspects[self.nsmap.qname(v.dimensionQname)] = v.typedMember.text
+                    self.addConcept(v.dimension, dimensionType = "t")
 
             if f.context.isForeverPeriod:
                 aspects["p"] = "f"

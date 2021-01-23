@@ -80,14 +80,27 @@ iXBRLViewer.prototype.pluginPromise = function (methodName, ...args) {
 iXBRLViewer.prototype._reparentDocument = function () {
     var iframeContainer = $('#ixv #iframe-container');
     
-    var iframe = $('<iframe />').appendTo(iframeContainer)[0];
+    var iframe = $('<iframe title="iXBRL document view"/>').appendTo(iframeContainer)[0];
 
     var doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
     doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
     doc.close();
 
+    var docTitle = $('title').text();
+    if (docTitle != "") {
+        docTitle = "Inline Viewer - " + docTitle;
+    }
+    else {
+        docTitle = "Inline Viewer";
+    }
+    if ($('html').attr("lang") === undefined) {
+        $('html').attr("lang", "en-US");
+    }
+
     $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
+
+    $('<title>').text(docTitle != "" ? "Inline Viewer - " + docTitle : "Inline Viewer").appendTo($('head'));
     
     /* Due to self-closing tags, our script tags may not be a direct child of
      * the body tag in an HTML DOM, so move them so that they are */

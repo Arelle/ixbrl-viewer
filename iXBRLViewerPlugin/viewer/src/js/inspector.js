@@ -660,6 +660,16 @@ Inspector.prototype.selectItem = function (id, itemIdList) {
         }
     }
     this.switchItem(id);
+    this.notifySelectItem(id);
+}
+
+/*
+ * AMANA extension: notify external host about selecting the new item
+ */
+Inspector.prototype.notifySelectItem = function (id) {
+    if (typeof boundEvent !== "undefined") { 
+        boundEvent.updateSelection(id);
+    }
 }
 
 /*

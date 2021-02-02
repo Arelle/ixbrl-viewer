@@ -589,3 +589,12 @@ Viewer.prototype.selectDocument = function (docIndex) {
         .height("100%");
     this._setTitle(docIndex);
 }
+
+/*
+ * AMANA extension: notify external host about viewer is ready
+ */
+Viewer.prototype.notifyReady = function () {
+    if (typeof boundEvent !== "undefined") { 
+        boundEvent.ready();
+    }
+}

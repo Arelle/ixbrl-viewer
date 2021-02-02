@@ -78,6 +78,11 @@ iXBRLViewer.prototype.pluginPromise = function (methodName, ...args) {
     });
 }
 
+iXBRLViewer.prototype._getChromeVersion = function() {
+    var raw = navigator.userAgent.match(/Chrom(e|ium)\/(\d+)\./);
+    return raw ? parseInt(raw[2], 10) : null;
+}
+
 iXBRLViewer.prototype._reparentDocument = function () {
     var iframeContainer = $('#ixv #iframe-container');
     
@@ -97,6 +102,22 @@ iXBRLViewer.prototype._reparentDocument = function () {
 
     /* Avoid any inline styles on the old body interfering with the inspector */
     $('body').removeAttr('style');
+
+    /* fix chrome 88 content-visibility issue */ 
+    var chromeVersion = this._getChromeVersion()
+    if (chromeVersion && chromeVersion == 88 && 
+        !doc.URL.endsWith("group-2020-12-31_preview.xhtml")) { // Giving a chance for Google to fix this
+        var pageContainer = $(iframe).contents().find("div#page-container"); // PDF
+        if (pageContainer.length > 0) {
+            pageContainer.find("div.pf").css("content-visibility", "");
+        } else {
+            pageContainer =  $(iframe).contents().find("div.box"); // IDML
+            if (pageContainer.length > 0) {
+                pageContainer.find("div.page_A4").css("content-visibility", "");
+            }
+        }
+    }
+
     return iframe;
 }
 
@@ -198,7 +219,8 @@ iXBRLViewer.prototype.load = function() {
 
                         /* Focus on fact specified in URL fragment, if any */
                         inspector.handleFactDeepLink();
-                    });
+                    })
+                    .then(() => viewer.notifyReady());
             }
         });
     }, 0);

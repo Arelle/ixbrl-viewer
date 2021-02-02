@@ -15,7 +15,15 @@
 import $ from 'jquery'
 import { iXBRLViewer } from "./ixbrlviewer.js";
 
+function bindEvents() { // AMANA extension
+    if (typeof CefSharp !== "undefined") { 
+        CefSharp.BindObjectAsync("boundEvent");
+    }
+}
+
 $(function () {
+    bindEvents();
     var iv = new iXBRLViewer();
     iv.load();
 });
+

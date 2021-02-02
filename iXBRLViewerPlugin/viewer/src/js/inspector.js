@@ -58,6 +58,7 @@ export function Inspector(iv) {
     $("#inspector-head .back").click(function () {
         $(this).closest("#inspector").removeClass("search-mode");
     });
+    $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
     this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
     this.buildToolbarHighlightMenu();
 
@@ -79,6 +80,7 @@ Inspector.prototype.initialize = function (report) {
             inspector.setupSearchControls();
             inspector.buildDisplayOptionsMenu();
             inspector.buildToolbarHighlightMenu();
+            inspector.buildHighlightKey();
             resolve();
         });
     });
@@ -140,6 +142,18 @@ Inspector.prototype.buildToolbarHighlightMenu = function () {
     this._toolbarMenu.reset();
     this._toolbarMenu.addCheckboxItem("XBRL Elements", (checked) => this.highlightAllTags(checked), "highlight-tags");
     this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
+}
+
+Inspector.prototype.buildHighlightKey = function () {
+    $(".highlight-key .items").empty();
+    var nsGroups = this._report.namespaceGroups();
+    for (var i = 0; i < nsGroups.length; i++) {
+        $("<div>")
+            .addClass("item")
+            .append($("<span></span>").addClass("sample").addClass("sample-" + i))
+            .append($("<span></span>").text(nsGroups[i]))
+            .appendTo($(".highlight-key .items"));
+    }
 }
 
 Inspector.prototype.highlightAllTags = function (checked) {

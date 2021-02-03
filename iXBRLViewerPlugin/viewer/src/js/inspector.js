@@ -146,12 +146,14 @@ Inspector.prototype.buildToolbarHighlightMenu = function () {
 
 Inspector.prototype.buildHighlightKey = function () {
     $(".highlight-key .items").empty();
-    var nsGroups = this._report.namespaceGroups();
-    for (var i = 0; i < nsGroups.length; i++) {
+    var key = this._report.namespaceGroups();
+    this._iv.callPluginMethod("extendHighlightKey", key);
+
+    for (var i = 0; i < key.length; i++) {
         $("<div>")
             .addClass("item")
             .append($("<span></span>").addClass("sample").addClass("sample-" + i))
-            .append($("<span></span>").text(nsGroups[i]))
+            .append($("<span></span>").text(key[i]))
             .appendTo($(".highlight-key .items"));
     }
 }

@@ -683,7 +683,6 @@ Inspector.prototype.switchItem = function (id) {
         this._viewer.clearHighlighting();
     }
     this.update();
-    this.update();
 }
 
 Inspector.prototype.selectDefaultLanguage = function () {

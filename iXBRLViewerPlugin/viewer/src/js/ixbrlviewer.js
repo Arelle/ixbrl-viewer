@@ -46,6 +46,11 @@ export function iXBRLViewer() {
  * Called when the display options menu is created or recreated.  menu is a
  * Menu object, and can be modified to add additional menu items.
  *
+ * extendHighlightKey(key)
+ *
+ * Called when the highlight color key is created.  key is an array of labels,
+ * which can be modified or extended.
+ *
  */
 iXBRLViewer.prototype.registerPlugin = function (plugin) {
     this._plugins.push(plugin);

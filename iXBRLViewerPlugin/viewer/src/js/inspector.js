@@ -470,7 +470,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
         }
         else {
-            s = $("<i>").text("No prior fact");
+            s = $("<i>").text("No prior fact in this report");
         }
     }
     else {

@@ -17,6 +17,8 @@ import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
+import i18next from 'i18next';
+import jqueryI18next from 'jquery-i18next';
 import { ViewerOptions } from './viewerOptions.js';
 import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
@@ -28,46 +30,258 @@ import { Footnote } from './footnote.js';
 const SEARCH_PAGE_SIZE = 100
 
 export function Inspector(iv) {
-    /* Insert HTML and CSS styles into body */
-    $(require('../html/inspector.html')).prependTo('body');
-    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
-    $('<style id="ixv-style"></style>')
-        .prop("type", "text/css")
-        .text(inspector_css)
-        .appendTo('head');
-    $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-        .attr('href', require('../img/favicon.ico'))
-        .appendTo('head');
-    this._iv = iv;
-    this._chart = new IXBRLChart();
-    this._viewerOptions = new ViewerOptions()
-    
-    $(".collapsible-header").click(function () { 
-        var d = $(this).closest(".collapsible-section");
-        d.toggleClass("collapsed"); 
-        if (d.hasClass("collapsed")) {
-            d.find(".collapsible-body").slideUp(250);
-        }
-        else {
-            d.find(".collapsible-body").slideDown(250);
-        }
-    });
-    $("#inspector .controls .search-button").click(function () {
-        $(this).closest("#inspector").toggleClass("search-mode");
-    });
-    $("#inspector-head .back").click(function () {
-        $(this).closest("#inspector").removeClass("search-mode");
-    });
-    $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
-    this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
-    this.buildToolbarHighlightMenu();
 
-    this._optionsMenu = new Menu($("#display-options-menu"));
-    this.buildDisplayOptionsMenu();
 
-    var inspector = this;
-    // Listen to messages posted to this window
-    $(window).on("message", function(e) { inspector.handleMessage(e) });
+    i18next.init({
+        lng: 'es',
+        debug: true,
+        resources: {
+            en: {
+                translation: {
+                    toolbar: {
+                        "xbrlElements": "XBRL Elements"
+                    },
+                    search: {
+                        "showMoreResults": "Show more results",
+                        "buildingSearchIndex": "Building search index",
+                        "hiddenFact": "Hidden fact",
+                        "all": "ALL",
+                        "noMatchFound": "No match found",
+                        "tryAgainDifferentKeywords": "Try again with different keywords",
+                        "reset": "Reset",
+                        "conceptType": "Concept Type" ,
+                        "filter": "Filter" 
+                    },
+                    common: {
+                        "notAvailable": "n/a",
+                        "unspecified": "Unspecified",
+                        "none": "None"
+                    },
+                    factDetails: {
+                        "concept": "Concept",
+                        "dimensions": "Dimensions",
+                        "date": "Date",
+                        "factValue": "Fact Value",
+                        "accuracy": "Accuracy",
+                        "change": "Change",
+                        "entity": "Entity",
+                        "duplicatesCount": "{{current}} of {{total}}",
+                        "changePercentageIncrease": "{{increase}}% increase on ",
+                        "changePercentageDecrease": "{{decrease}}% increase on ",
+                        "changeFromIn": "From {{from}} in ",
+                        "noPriorFactInThisReport": "No prior fact in this report",
+                        "noUnit": "<NOUNIT>"
+                    },
+                    referenceParts: {
+                        "Name": "Name",
+                        "Number": "Number",
+                        "IssueDate": "IssueDate",
+                        "Paragraph": "Paragraph",
+                        "Subparagraph": "Subparagraph",
+                        "URI": "URI",
+                        "URIDate": "URIDate",
+                        "Note": "Note"
+                    },
+                    currencies: {
+                        "unitFormatGBP": "\u00A3",
+                        "unitFormatUSD": "US \u0024",
+                        "unitFormatEUR": "\u20AC",
+                        "unitFormatMXN": "MXN \u0024",
+                        "centsUSD": "cents",
+                        "centsEUR": "cents",
+                        "centsAUD": "cents",
+                        "centsZAR": "cents",
+                        "centsMXN": "cents",
+                        "centsGBP": "pence",
+                        "accuracy3": "mil\u00E9simos",
+                        "accuracy2": "cent\u00E9simos",
+                        "accuracy0":  "unidades",
+                        "accuracy-1":  "d\u00E9cimos",
+                        "accuracy-2":  "cientos",
+                        "accuracy-3":  "miles",
+                        "accuracy-6":  "millones",
+                        "accuracy-9":  "billones",
+                        "accuracyInfinite": "Infinite precision"
+                    },
+                    footnotes: {
+                        "footnote": "Footnote"
+                    },
+                    inspector: {
+                        "loadingViewer": "Loading iXBRL Viewer",
+                        "highlight": "Highlight",
+                        "factProperties": "Fact Properties",
+                        "footNoteProperties": "Footnote Properties",
+                        "allOption": "ALL",
+                        "numericOption": "Numeric",
+                        "textOption": "Text",
+                        "period": "Period",
+                        "hiddenFacts": "Hidden Facts",
+                        "visibleFacts": "Visible Facts",
+                        "noFactSelected": "No Fact Selected",
+                        "hiddenFact": "Hidden Fact",
+                        "anchoring": "Anchoring",
+                        "widerAnchor": "Wider anchor",
+                        "narrowerAnchor": "Narrower anchors",
+                        "references": "References",
+                        "calculations": "Calculations",
+                        "footnotes": "Footnotes",
+                        "associatedFacts": "Associated facts",
+                        "factSearch": "Fact Search",
+                        "poweredBy": "Powered by"
+                    }
+                }
+            },
+            es: {
+                translation: {
+                    toolbar: {
+                        "xbrlElements": "Elementos XBRL"
+                    },
+                    search: {
+                        "showMoreResults": "Mostrar m\u00E1s resultados",
+                        "buildingSearchIndex": "Construyendo \u00EDndice de b\u00FAsqueda",
+                        "hiddenFact": "Hecho oculto",
+                        "all": "TODOS",
+                        "noMatchFound": "No se encontr\u00F3 ninguna coincidencia",
+                        "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
+                        "reset": "Limpiar",
+                        "conceptType": "Tipo de concepto",
+                        "filter": "Filtro" 
+                    },
+                    common: {
+                        "notAvailable": "n/d",
+                        "unspecified": "Sin especificar",
+                        "none": "Ninguno"
+                    },
+                    factDetails: {
+                        "concept": "Concepto",
+                        "dimensions": "Dimensiones",
+                        "date": "Fecha",
+                        "factValue": "Valor del hecho",
+                        "accuracy": "Precisión",
+                        "change": "Cambio",
+                        "change": "Entidad",
+                        "duplicatesCount": "{{current}} de {{total}}",
+                        "changePercentageIncrease": "{{increase}}% m\u00E1s que en ",
+                        "changePercentageDecrease": "{{decrease}}% menos que en ",
+                        "changeFromIn": "Anteriormente {{from}} en ",
+                        "noPriorFactInThisReport": "No hay un hecho previo",
+                        "noUnit": "Sin unidad"
+                    },
+                    referenceParts: {
+                        "Name": "Nombre",
+                        "Number": "N\u00FAmero",
+                        "IssueDate": "Fecha de Emisi\u00F3n",
+                        "Paragraph": "P\u00E1rrafo",
+                        "Subparagraph": "Subp\u00E1rrafo",
+                        "URI": "URI",
+                        "URIDate": "Fecha de URI",
+                        "Note": "Nota"
+                    },
+                    currencies: {
+                        "unitFormatGBP": "\u00A3",
+                        "unitFormatUSD": "US \u0024",
+                        "unitFormatEUR": "\u20AC",
+                        "unitFormatMXN": "MXN \u0024",
+                        "centsUSD": "centavos",
+                        "centsEUR": "centavos",
+                        "centsAUD": "centavos",
+                        "centsZAR": "centavos",
+                        "centsMXN": "centavos",
+                        "centsGBP": "centavos",
+                        "accuracy3": "mil\u00E9simos",
+                        "accuracy2": "cent\u00E9simos",
+                        "accuracy0":  "unidades",
+                        "accuracy-1":  "d\u00E9cimos",
+                        "accuracy-2":  "cientos",
+                        "accuracy-3":  "miles",
+                        "accuracy-6":  "millones",
+                        "accuracy-9":  "billones",
+                        "accuracyInfinite": "Precisi\u00F3 infinita"
+                    },
+                    footnotes: {
+                        "footnote": "Nota al pie de p\u00E1gina"
+                    },
+                    inspector: {
+                        "loadingViewer": "Preparando el visor iXBRL",
+                        "highlight": "Destacar",
+                        "factProperties": "Propiedades del hecho",
+                        "footNoteProperties": "Propiedades de la nota al pie de p\u00E1gina",
+                        "allOption": "TODOS",
+                        "numericOption": "Num\u00E9rico",
+                        "textOption": "Texto",
+                        "period": "Periodo",
+                        "hiddenFacts": "Hechos ocultos",
+                        "visibleFacts": "Hechos visibles",
+                        "noFactSelected": "Ning\u00FAn hecho seleccionado",
+                        "hiddenFact": "Hecho oculto",
+                        "anchoring": "Anclaje",
+                        "widerAnchor": "Anclaje amplio",
+                        "narrowerAnchor": "Anclaje angosto",
+                        "references": "Referencias",
+                        "calculations": "C\u00E1lculos",
+                        "footnotes": "Notas al pie de p\u00E1gina",
+                        "associatedFacts": "Hechos asociados",
+                        "factSearch": "B\u00FAsqueda de hechos",
+                        "poweredBy": "Con tecnolog\u00EDa de "
+                    }
+                }
+            }
+        }
+    }).then((t) => {
+        jqueryI18next.init(i18next, $, {
+            tName: 't', // --> appends $.t = i18next.t
+            i18nName: 'i18n', // --> appends $.i18n = i18next
+            handleName: 'localize', // --> appends $(selector).localize(opts);
+            selectorAttr: 'data-i18n', // selector for translating elements
+            targetAttr: 'i18n-target', // data-() attribute to grab target element to translate (if different than itself)
+            optionsAttr: 'i18n-options', // data-() attribute that contains options, will load/set if useOptionsAttr = true
+            useOptionsAttr: false, // see optionsAttr
+            parseDefaultValueFromContent: true // parses default values from content ele.val or ele.text
+        });
+
+        /* Insert HTML and CSS styles into body */
+        $(require('../html/inspector.html')).prependTo('body');
+        var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
+        $('<style id="ixv-style"></style>')
+            .prop("type", "text/css")
+            .text(inspector_css)
+            .appendTo('head');
+        $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+            .attr('href', require('../img/favicon.ico'))
+            .appendTo('head');
+        this._iv = iv;
+        this._chart = new IXBRLChart();
+        this._viewerOptions = new ViewerOptions()
+        
+        $(".collapsible-header").on("click", function () { 
+            var d = $(this).closest(".collapsible-section");
+            d.toggleClass("collapsed"); 
+            if (d.hasClass("collapsed")) {
+                d.find(".collapsible-body").slideUp(250);
+            }
+            else {
+                d.find(".collapsible-body").slideDown(250);
+            }
+        });
+        $("#inspector .controls .search-button").on("click", function () {
+            $(this).closest("#inspector").toggleClass("search-mode");
+        });
+        $("#inspector-head .back").on("click", function () {
+            $(this).closest("#inspector").removeClass("search-mode");
+        });
+        $(".popup-trigger").on("hover", function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
+        this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
+        this.buildToolbarHighlightMenu();
+
+        this._optionsMenu = new Menu($("#display-options-menu"));
+        this.buildDisplayOptionsMenu();
+
+        $("#ixv").localize();
+
+        var inspector = this;
+        // Listen to messages posted to this window
+        $(window).on("message", function(e) { inspector.handleMessage(e) });
+    });
 }
 
 Inspector.prototype.initialize = function (report) {
@@ -75,7 +289,7 @@ Inspector.prototype.initialize = function (report) {
     return new Promise(function (resolve, reject) {
         inspector._report = report;
         report.setViewerOptions(inspector._viewerOptions);
-        inspector._iv.setProgress("Building search index").then(() => {
+        inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
             inspector._search = new ReportSearch(report);
             inspector.setupSearchControls();
             inspector.buildDisplayOptionsMenu();
@@ -140,7 +354,7 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
 
 Inspector.prototype.buildToolbarHighlightMenu = function () {
     this._toolbarMenu.reset();
-    this._toolbarMenu.addCheckboxItem("XBRL Elements", (checked) => this.highlightAllTags(checked), "highlight-tags");
+    this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags");
     this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
 }
 
@@ -200,7 +414,7 @@ Inspector.prototype.factListRow = function(f) {
         }
     }
     if (f.isHidden()) {
-        $('<div class="hidden">Hidden fact</div>')
+        $(`<div class="hidden">${i18next.t("search.hiddenFact")}</div>`)
             .appendTo(row);
     }
     return row;
@@ -211,8 +425,8 @@ Inspector.prototype.addResults = function(container, results, offset) {
     for (var i = offset; i < results.length; i++ ) {
         if (i - offset >= SEARCH_PAGE_SIZE) {
             $('<div class="more-results"></div>')
-                .text("Show more results")
-                .click(() => this.addResults(container, results, i))
+                .text(i18next.t("search.showMoreResults"))
+                .on('click', () => this.addResults(container, results, i))
                 .appendTo(container);
             break;
         }
@@ -267,8 +481,8 @@ Inspector.prototype.search = function() {
         this.addResults(container, results, 0);
     }
     else {
-        $(".title", overlay).text("No Match Found");
-        $(".text", overlay).text("Try again with different keywords");
+        $(".title", overlay).text(i18next.t("search.noMatchFound"));
+        $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
         overlay.show();
     }
     /* Don't highlight search results if there's no search string */
@@ -299,7 +513,7 @@ Inspector.prototype._anchorList = function (fact, anchors) {
         }
     }
     else {
-        $("<li><i>None</i></li>").appendTo(html);
+        $(`<li><i>${i18next.t("common.none")}</i></li>`).appendTo(html);
     }
     return html;
 }
@@ -331,7 +545,7 @@ Inspector.prototype._referencesHTML = function (fact) {
         var tbody = body.find("tbody");
         $.each(r, function (j,p) {
             var row = $("<tr>")
-                .append($("<th></th>").text(p.part))
+                .append($("<th></th>").text(i18next.t(`referenceParts.${p.part}`, {defaultValue: p.part})))
                 .append($("<td></td>").text(p.value))
                 .appendTo(tbody);
             if (p.part == 'URI') {
@@ -423,17 +637,16 @@ Inspector.prototype.describeChange = function (oldFact, newFact) {
         var x = (newFact.value() - oldFact.value()) * 100 / oldFact.value();
         var t;
         if (x >= 0) {
-            t = formatNumber(x,1) + "% increase on ";
+            t = i18next.t('factDetails.changePercentageIncrease', { increase: formatNumber(x,1)});
         }
         else {
-            t = formatNumber(-1 * x,1) + "% decrease on ";
+            t = i18next.t('factDetails.changePercentageDecrease', { decrease: formatNumber(-1 * x,1)});
         }
         return t;
     }
     else {
-        return "From " + oldFact.readableValue() + " in "; 
+        return i18next.t('factDetails.changeFromIn', { from: oldFact.readableValue()}); 
     }
-
 }
 
 Inspector.prototype.factLinkHTML = function (label, factList) {
@@ -470,7 +683,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
         }
         else {
-            s = $("<i>").text("No prior fact in this report");
+            s = $("<i>").text(i18next.t('factDetails.noPriorFactInThisReport'));
         }
     }
     else {
@@ -638,7 +851,7 @@ Inspector.prototype.update = function () {
                     n = i;
                 }
             }
-            $('.duplicates .text').text((n + 1) + " of " + ndup);
+            $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
             var viewer = this._viewer;
             $('.duplicates .prev').off().click(() => inspector.selectItem(duplicates[(n+ndup-1) % ndup].id));
             $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
@@ -652,6 +865,7 @@ Inspector.prototype.update = function () {
             $('#inspector').addClass('footnote-mode');
             $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML());
         }
+        $('.fact-details').localize();
     }
     this.updateURLFragment();
 }

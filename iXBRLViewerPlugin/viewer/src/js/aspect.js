@@ -14,6 +14,7 @@
 
 import { QName } from './qname.js';
 import $ from 'jquery';
+import i18next from 'i18next';
 import { Period } from './period.js';
 import { Identifiers } from './identifiers.js';
 
@@ -74,19 +75,11 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
     }
     else if (this._aspect == 'u') {
         if (this._value === null) {
-            return "<NOUNIT>";
+            return i18next.t("factDetails.noUnit");
         }
         var qname = this._report.qname(this._value);
         if (qname.namespace == "http://www.xbrl.org/2003/iso4217") {
-            if (qname.localname == 'GBP') {
-                return "£";
-            }
-            else if (qname.localname == 'USD') {
-                return "US $";
-            }
-            else if (qname.localname == 'EUR') {
-                return "€";
-            }
+            return i18next.t(`currencies.unitFormat${qname.localname}`, {defaultValue: qname.localname + ' '});
         }
         return this._value;
     }

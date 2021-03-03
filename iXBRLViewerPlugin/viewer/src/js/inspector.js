@@ -159,7 +159,7 @@ export function Inspector(iv) {
                         "factValue": "Valor del hecho",
                         "accuracy": "Precisión",
                         "change": "Cambio",
-                        "change": "Entidad",
+                        "entity": "Entidad",
                         "duplicatesCount": "{{current}} de {{total}}",
                         "changePercentageIncrease": "{{increase}}% m\u00E1s que en ",
                         "changePercentageDecrease": "{{decrease}}% menos que en ",
@@ -701,7 +701,9 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
         var vv = wrapLabel(text, 120);
         if (vv.length > 1) {
             $('tr.value', context).addClass("truncated");
-            $('tr.value .show-all', context).off().click(() => this._updateValue(text, true, context));
+            $('tr.value .show-all', context).off('click').on('click', () => { 
+                this._updateValue(item, true, context) 
+            });
         }
         else {
             $('tr.value', context).removeClass('truncated');

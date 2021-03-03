@@ -159,17 +159,27 @@ TableExport.prototype._writeTable = function (data) {
 
             var cc = ws.getRow(i+1).getCell(j+1);
             if (cell.type == 'fact') {
-                cc.value = Number(cell.fact.value());
-                cc.numFmt = '#,##0';
+                var numValue = Number(cell.fact.value());
+                if (Number.isNaN(numValue)) {
+                    cc.value = cell.fact.value();
+                    if (/<\/?[a-z][\s\S]*>/i.test(cc.value))  {
+                        cc.value = strInputCode.replace(/<\/?[^>]+(>|$)/g, "");
+                    }
+                }
+                else
+                {
+                    cc.value = numValue;
+                    cc.numFmt = '#,##0';
+                    /* Make this an option - apply presentation signs */
+                    if (cell.negative) {
+                        cc.value = Math.abs(cc.value) * -1;
+                    }
+                    else {
+                        cc.value = Math.abs(cc.value);
+                    }
+                }
                 ws.getColumn(j+1).width = 18;
-                /* Make this an option - apply presentation signs */
-                if (cell.negative) {
-                    cc.value = Math.abs(cc.value) * -1;
-                }
-                else {
-                    cc.value = Math.abs(cc.value);
-                }
-                cc.border = {};
+                cc.border = {}; 
                 if (cell.topBorder) {
                     cc.border.top = {style: "medium", color: { argb: 'FF000000' }};
                 }
@@ -188,6 +198,7 @@ TableExport.prototype._writeTable = function (data) {
     }
     return wb;
 }
+
 
 TableExport.prototype.exportTable = function () {
 

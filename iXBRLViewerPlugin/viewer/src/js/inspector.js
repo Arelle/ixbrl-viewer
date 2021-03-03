@@ -794,7 +794,9 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
-                            .click(() => this._chart.analyseDimension(fact,[a]))
+                            .on("click", () => {
+                                this._chart.analyseDimension(fact, [ aspect.name() ])
+                            })
                     )
                 }
                 var s = $('<div class="dimension-value"></div>')

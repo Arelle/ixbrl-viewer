@@ -105,7 +105,7 @@ iXBRLViewer.prototype._reparentDocument = function () {
 
     /* fix chrome 88 content-visibility issue */ 
     var chromeVersion = this._getChromeVersion()
-    if (chromeVersion && chromeVersion == 88 && 
+    if (chromeVersion && chromeVersion >= 88 && 
         !doc.URL.endsWith("group-2020-12-31_preview.xhtml")) { // Giving a chance for Google to fix this
         var pageContainer = $(iframe).contents().find("div#page-container"); // PDF
         if (pageContainer.length > 0) {

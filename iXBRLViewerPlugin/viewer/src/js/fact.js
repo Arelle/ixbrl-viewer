@@ -77,7 +77,7 @@ Fact.prototype.readableValue = function() {
             formattedNumber = "nil";
         }
         else if (d === undefined) {
-            formattedNumber = v;
+            formattedNumber = formatNumber(v,0);
         }
         else {
             if (d < 0) {

@@ -36,6 +36,13 @@ export function momentToHuman(d, adjust) {
 }
 
 /*
+ * Format a number with a thousands separator, infinite decimal places
+ */
+export function numberWithCommas(v) {
+    return Number(v).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
+/*
  * Format a number with a thousands separator, and the specified number of
  * decimal places.
  */

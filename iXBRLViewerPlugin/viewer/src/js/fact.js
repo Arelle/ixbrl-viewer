@@ -16,7 +16,7 @@ import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
-import { formatNumber } from "./util.js";
+import { formatNumber, numberWithCommas } from "./util.js";
 import { Footnote } from "./footnote.js";
 import $ from 'jquery'
 
@@ -77,7 +77,7 @@ Fact.prototype.readableValue = function() {
             formattedNumber = "nil";
         }
         else if (d === undefined) {
-            formattedNumber = formatNumber(v,0);
+            formattedNumber = numberWithCommas(v);
         }
         else {
             if (d < 0) {

@@ -40,7 +40,9 @@ export function momentToHuman(d, adjust) {
  * decimal places.
  */
 export function formatNumber(v, d) {
-    return Number(v).toFixed(d).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+    var n = Number(v);
+    var s = d === undefined ? n.toString() : n.toFixed(Math.max(0, d));
+    return s.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
 /* 

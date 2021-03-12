@@ -76,13 +76,7 @@ Fact.prototype.readableValue = function() {
         if (this.isNil()) {
             formattedNumber = "nil";
         }
-        else if (d === undefined) {
-            formattedNumber = v;
-        }
         else {
-            if (d < 0) {
-                d = 0;
-            }
             formattedNumber = formatNumber(v,d);
         }
         if (this.isMonetaryValue()) {

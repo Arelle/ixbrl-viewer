@@ -121,17 +121,17 @@ describe("Simple fact properties", () => {
 
     test("Numeric (infinite precision)", () => {
         var f = testFact({
-                "v": 0.0125,
+                "v": 1000000.0125,
                 "a": {
                     "c": "eg:Concept1",
                     "u": "eg:USD", 
                     "p": "2018-01-01/2019-01-01",
                 }});
-        expect(f.value()).toEqual(0.0125);
+        expect(f.value()).toEqual(1000000.0125);
         expect(f.decimals()).toBeUndefined();
         expect(f.isNumeric()).toBeTruthy();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("0.0125 eg:USD");
+        expect(f.readableValue()).toEqual("1,000,000.0125 eg:USD");
         expect(f.unit().value()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");

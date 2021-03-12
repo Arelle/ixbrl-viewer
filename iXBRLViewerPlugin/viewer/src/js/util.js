@@ -36,18 +36,13 @@ export function momentToHuman(d, adjust) {
 }
 
 /*
- * Format a number with a thousands separator, infinite decimal places
- */
-export function numberWithCommas(v) {
-    return Number(v).toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
-}
-
-/*
  * Format a number with a thousands separator, and the specified number of
  * decimal places.
  */
 export function formatNumber(v, d) {
-    return Number(v).toFixed(d).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+    var n = Number(v);
+    var s = d === undefined ? n.toString() : n.toFixed(Math.max(0, d));
+    return s.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
 /* 

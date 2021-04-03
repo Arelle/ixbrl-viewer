@@ -31,7 +31,8 @@ const SEARCH_PAGE_SIZE = 100
 
 export function Inspector(iv) {
     i18next.init({
-        lng: 'en',
+        lng: this.preferredLanguages()[0],
+        fallbackLng: 'en',
         debug: true,
         resources: {
             en: require('../i18n/en.json'),
@@ -729,10 +730,21 @@ Inspector.prototype.switchItem = function (id) {
     this.update();
 }
 
+Inspector.prototype.preferredLanguages = function () {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("lang")) {
+        return [ urlParams.get("lang") ];
+    }
+    var langs = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
+    if (langs.length == 0) {
+        return ["en"];
+    }
+    return langs;
+}
+
 Inspector.prototype.selectDefaultLanguage = function () {
-    var preferredLanguages = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
     var al = this._report.availableLanguages();
-    $.each(preferredLanguages, function (i, pl) {
+    $.each(this.preferredLanguages(), function (i, pl) {
         $.each(al, function (j, l) {
             if (l.toLowerCase() == pl.toLowerCase()) {
                 return l;

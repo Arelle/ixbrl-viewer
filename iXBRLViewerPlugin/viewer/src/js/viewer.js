@@ -347,10 +347,7 @@ Viewer.prototype.scrollIntoViewIfNeeded = function(e) {
         var eTop = e.offset().top;
         var eBottom = eTop + e.height();
         if (eTop < viewTop || eBottom > viewBottom) {
-            var scrollParent = getScrollParent(e[0]);                   
-            if (getStyleComputedProperty(scrollParent, 'position') !== 'absolute')
-                scrollParent = this._iframes.contents();
-            $(scrollParent).scrollTop(e.offset().top - this._iframes.height()/2);            
+            e[0].scrollIntoView({block: "center"});
         }
     }        
 }

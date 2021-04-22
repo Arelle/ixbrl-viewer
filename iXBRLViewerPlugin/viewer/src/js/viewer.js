@@ -281,13 +281,35 @@ Viewer.prototype.selectPrevTag = function () {
     this._selectAdjacentTag(-1);
 }
 
+/* Make the specified element visible by scrolling any scrollable ancestors */
 Viewer.prototype.showElement = function(e) {
-    var viewTop = this._iframes.contents().scrollTop();
-    var viewBottom = viewTop + this._iframes.height();
-    var eTop = e.offset().top;
-    var eBottom = eTop + e.height();
-    if (eTop < viewTop || eBottom > viewBottom) {
-        this._iframes.contents().scrollTop(e.offset().top - this._iframes.height()/2);
+    /* offsetTop gives the position relative to the nearest positioned element.
+     * Scrollable elements are not necessarily positioned. */
+    var ee = e.get(0);
+    var lastPositionedElement = ee;
+    var currentChild = ee;
+    var childOffset = ee.offsetTop;
+    /* Iterate through ancestors looking for scrollable or position element */
+    while (ee.parentElement !== null) {
+        ee = ee.parentElement;
+        if (ee == lastPositionedElement.offsetParent) {
+            /* This is a positioned element.  Add offset to our child's offset */
+            lastPositionedElement = ee;
+            childOffset += ee.offsetTop;
+        }
+        if (ee.clientHeight > 0 && ee.clientHeight < ee.scrollHeight) {
+            /* This is a scrollable element.  Calculate the position of the
+             * child we're trying to show within it. */
+            var childPosition = childOffset - ee.offsetTop;
+            /* Is any part of the child visible? */
+            if (childPosition + currentChild.clientHeight < ee.scrollTop || childPosition > ee.scrollTop + ee.clientHeight) {
+                /* No => center the child within this element */
+                ee.scrollTop = childPosition - ee.clientHeight/2 + currentChild.clientHeight/2;
+            }
+            /* Now make sure that this scrollable element is visible */
+            childOffset = ee.offsetTop;
+            currentChild = ee;
+        }
     }
 }
 

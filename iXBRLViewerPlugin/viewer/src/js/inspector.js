@@ -225,7 +225,8 @@ Inspector.prototype.factListRow = function(f) {
         }
     }
     if (f.isHidden()) {
-        $(`<div class="hidden">${i18next.t("search.hiddenFact")}</div>`)
+        $('<div class="hidden"></div>')
+            .text(i18next.t("search.hiddenFact"))
             .appendTo(row);
     }
     return row;
@@ -324,7 +325,9 @@ Inspector.prototype._anchorList = function (fact, anchors) {
         }
     }
     else {
-        $(`<li><i>${i18next.t("common.none")}</i></li>`).appendTo(html);
+        $('<li></li>')
+            .append($('<i></i>').text(i18next.t("common.none")))
+            .appendTo(html);
     }
     return html;
 }

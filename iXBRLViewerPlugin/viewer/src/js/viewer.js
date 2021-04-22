@@ -286,10 +286,13 @@ Viewer.prototype.showElement = function(e) {
     /* offsetTop gives the position relative to the nearest positioned element.
      * Scrollable elements are not necessarily positioned. */
     var ee = e.get(0);
+    while (ee.offsetParent === null && ee.parentElement !== null) {
+        ee = ee.parentElement;
+    }
     var lastPositionedElement = ee;
     var currentChild = ee;
     var childOffset = ee.offsetTop;
-    /* Iterate through ancestors looking for scrollable or position element */
+    /* Iterate through ancestors looking for scrollable or positioned element */
     while (ee.parentElement !== null) {
         ee = ee.parentElement;
         if (ee == lastPositionedElement.offsetParent) {

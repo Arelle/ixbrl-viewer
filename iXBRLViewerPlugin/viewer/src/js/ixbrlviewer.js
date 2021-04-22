@@ -19,9 +19,9 @@ import { Viewer } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer() {
-	this._plugins = [];
-	this.inspector = new Inspector(this);
-	this.viewer = null;
+    this._plugins = [];
+    this.inspector = new Inspector(this);
+    this.viewer = null;
 }
 
 /*
@@ -53,173 +53,173 @@ export function iXBRLViewer() {
  *
  */
 iXBRLViewer.prototype.registerPlugin = function (plugin) {
-	this._plugins.push(plugin);
+    this._plugins.push(plugin);
 }
 
 iXBRLViewer.prototype.callPluginMethod = function (methodName, ...args) {
-	var iv = this;
-	$.each(iv._plugins, function (n, p) {
-		if (typeof p[methodName] === 'function') {
-			p[methodName](...args);
-		}
-	});
+    var iv = this;
+    $.each(iv._plugins, function (n, p) {
+        if (typeof p[methodName] === 'function') {
+            p[methodName](...args);
+        }
+    });
 }
 
 iXBRLViewer.prototype.pluginPromise = function (methodName, ...args) {
-	var iv = this;
-	return new Promise(function (resolve, reject) {
-		/* Call promises in turn */
-		(async function () {
-			for (var n = 0; n < iv._plugins.length; n++) {
-				var p = iv._plugins[n];
-				if (typeof p[methodName] === 'function') {
-					await p[methodName](...args);
-				}
-			}
-		})().then(() => {
-			resolve();
-		});
-	});
+    var iv = this;
+    return new Promise(function (resolve, reject) {
+        /* Call promises in turn */
+        (async function () {
+            for (var n = 0; n < iv._plugins.length; n++) {
+                var p = iv._plugins[n];
+                if (typeof p[methodName] === 'function') {
+                    await p[methodName](...args);
+                }
+            }
+        })().then(() => {
+            resolve();
+        });
+    });
 }
 
 iXBRLViewer.prototype._reparentDocument = function () {
-	var iframeContainer = $('#ixv #iframe-container');
+    var iframeContainer = $('#ixv #iframe-container');
 
-	var iframe = $('<iframe title="iXBRL document view"/>').appendTo(iframeContainer)[0];
+    var iframe = $('<iframe title="iXBRL document view"/>').appendTo(iframeContainer)[0];
 
-	var doc = iframe.contentDocument || iframe.contentWindow.document;
-	doc.open();
-	doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
-	doc.close();
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
+    doc.close();
 
-	var docTitle = $('title').text();
-	if (docTitle != "") {
-		docTitle = "Inline Viewer - " + docTitle;
-	}
-	else {
-		docTitle = "Inline Viewer";
-	}
-	if ($('html').attr("lang") === undefined) {
-		$('html').attr("lang", "en-US");
-	}
+    var docTitle = $('title').text();
+    if (docTitle != "") {
+        docTitle = "Inline Viewer - " + docTitle;
+    }
+    else {
+        docTitle = "Inline Viewer";
+    }
+    if ($('html').attr("lang") === undefined) {
+        $('html').attr("lang", "en-US");
+    }
 
-	$('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
+    $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
 
-	$('<title>').text(docTitle).appendTo($('head'));
+    $('<title>').text(docTitle).appendTo($('head'));
 
-	/* Due to self-closing tags, our script tags may not be a direct child of
-	 * the body tag in an HTML DOM, so move them so that they are */
-	$('body script').appendTo($('body'));
-	$('body').children().not("script").not('#ixv').not(iframeContainer).appendTo($(iframe).contents().find('body'));
+    /* Due to self-closing tags, our script tags may not be a direct child of
+     * the body tag in an HTML DOM, so move them so that they are */
+    $('body script').appendTo($('body'));
+    $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo($(iframe).contents().find('body'));
 
-	/* Avoid any inline styles on the old body interfering with the inspector */
-	$('body').removeAttr('style');
-	return iframe;
+    /* Avoid any inline styles on the old body interfering with the inspector */
+    $('body').removeAttr('style');
+    return iframe;
 }
 
 iXBRLViewer.prototype._getTaxonomyData = function () {
-	for (var i = document.body.children.length - 1; i >= 0; i--) {
-		var elt = document.body.children[i];
-		if (elt.tagName.toUpperCase() == 'SCRIPT' && elt.getAttribute("type") == 'application/x.ixbrl-viewer+json') {
-			return elt.innerHTML;
-		}
-	}
-	return null;
+    for (var i = document.body.children.length - 1; i >= 0; i--) {
+        var elt = document.body.children[i];
+        if (elt.tagName.toUpperCase() == 'SCRIPT' && elt.getAttribute("type") == 'application/x.ixbrl-viewer+json') {
+            return elt.innerHTML;
+        }
+    }
+    return null;
 }
 
 iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function () {
-	if (document.location.protocol == 'file:') {
-		alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
-	}
+    if (document.location.protocol == 'file:') {
+        alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
+    }
 }
 
 iXBRLViewer.prototype.load = function () {
-	var iv = this;
-	var inspector = this.inspector;
-	setTimeout(function () {
+    var iv = this;
+    var inspector = this.inspector;
+    setTimeout(function () {
 
-		var iframes = $(iv._reparentDocument());
+        var iframes = $(iv._reparentDocument());
 
-		var taxonomyData = iv._getTaxonomyData();
-		if (taxonomyData === null) {
-			$('#ixv .loader .text').text("Error: Could not find viewer data");
-			$('#ixv .loader').removeClass("loading");
-			return;
-		}
-		var report = new iXBRLReport(JSON.parse(taxonomyData));
-		if (report.isDocumentSet()) {
-			var ds = report.documentSetFiles();
-			for (var i = 1; i < ds.length; i++) {
-				var iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
-				iframes = iframes.add(iframe);
-			}
-			iv._checkDocumentSetBrowserSupport();
-		}
+        var taxonomyData = iv._getTaxonomyData();
+        if (taxonomyData === null) {
+            $('#ixv .loader .text').text("Error: Could not find viewer data");
+            $('#ixv .loader').removeClass("loading");
+            return;
+        }
+        var report = new iXBRLReport(JSON.parse(taxonomyData));
+        if (report.isDocumentSet()) {
+            var ds = report.documentSetFiles();
+            for (var i = 1; i < ds.length; i++) {
+                var iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
+                iframes = iframes.add(iframe);
+            }
+            iv._checkDocumentSetBrowserSupport();
+        }
 
-		/* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
-		var timer = setInterval(function () {
-			var complete = true;
-			iframes.each(function (n) {
-				var iframe = this;
-				var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-				if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
-					complete = false;
-				}
-			});
-			if (complete) {
-				clearInterval(timer);
+        /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
+        var timer = setInterval(function () {
+            var complete = true;
+            iframes.each(function (n) {
+                var iframe = this;
+                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
+                    complete = false;
+                }
+            });
+            if (complete) {
+                clearInterval(timer);
 
-				var viewer = iv.viewer = new Viewer(iv, iframes, report);
+                var viewer = iv.viewer = new Viewer(iv, iframes, report);
 
-				viewer.initialize()
-					.then(() => inspector.initialize(report))
-					.then(() => {
-						inspector.setViewer(viewer);
-						interact('#viewer-pane').resizable({
-							edges: { left: false, right: ".resize", bottom: false, top: false },
-							restrictEdges: {
-								outer: 'parent',
-								endOnly: true,
-							},
-							restrictSize: {
-								min: { width: 100 }
-							},
-						})
-							.on('resizestart', function (event) {
-								$('#ixv').css("pointer-events", "none");
-							})
-							.on('resizemove', function (event) {
-								var target = event.target;
-								var w = 100 * event.rect.width / $(target).parent().width();
-								target.style.width = w + '%';
-								$('#inspector').css('width', (100 - w) + '%');
-							})
-							.on('resizeend', function (event) {
-								$('#ixv').css("pointer-events", "auto");
-							});
-						$('#ixv .loader').remove();
+                viewer.initialize()
+                    .then(() => inspector.initialize(report))
+                    .then(() => {
+                        inspector.setViewer(viewer);
+                        interact('#viewer-pane').resizable({
+                            edges: { left: false, right: ".resize", bottom: false, top: false },
+                            restrictEdges: {
+                                outer: 'parent',
+                                endOnly: true,
+                            },
+                            restrictSize: {
+                                min: { width: 100 }
+                            },
+                        })
+                            .on('resizestart', function (event) {
+                                $('#ixv').css("pointer-events", "none");
+                            })
+                            .on('resizemove', function (event) {
+                                var target = event.target;
+                                var w = 100 * event.rect.width / $(target).parent().width();
+                                target.style.width = w + '%';
+                                $('#inspector').css('width', (100 - w) + '%');
+                            })
+                            .on('resizeend', function (event) {
+                                $('#ixv').css("pointer-events", "auto");
+                            });
+                        $('#ixv .loader').remove();
 
-						/* Focus on fact specified in URL fragment, if any */
-						inspector.handleFactDeepLink();
-					});
-			}
-		});
-	}, 0);
+                        /* Focus on fact specified in URL fragment, if any */
+                        inspector.handleFactDeepLink();
+                    });
+            }
+        });
+    }, 0);
 }
 
 /* Update the progress message during initial load.  Returns a Promise which
  * resolves once the message is actually displayed */
 iXBRLViewer.prototype.setProgress = function (msg) {
-	return new Promise((resolve, reject) => {
-		/* We need to do a double requestAnimationFrame, as we need to get the
-		 * message up before the ensuing thread-blocking work
-		 * https://bugs.chromium.org/p/chromium/issues/detail?id=675795 
-		 */
-		window.requestAnimationFrame(function () {
-			$('#ixv .loader .text').text(msg);
-			window.requestAnimationFrame(function () {
-				resolve();
-			});
-		});
-	});
+    return new Promise((resolve, reject) => {
+        /* We need to do a double requestAnimationFrame, as we need to get the
+         * message up before the ensuing thread-blocking work
+         * https://bugs.chromium.org/p/chromium/issues/detail?id=675795 
+         */
+        window.requestAnimationFrame(function () {
+            $('#ixv .loader .text').text(msg);
+            window.requestAnimationFrame(function () {
+                resolve();
+            });
+        });
+    });
 }

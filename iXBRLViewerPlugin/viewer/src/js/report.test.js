@@ -124,7 +124,10 @@ describe("Concept labels", () => {
     test("With prefix", () => {
         vo.language = 'fr';
         expect(testReport.getLabel('eg:Concept3', 'std', true)).toBe("(eg) Concept trois");
+        expect(testReport.getLabelOrName('eg:Concept3', 'std', true)).toBe("(eg) Concept trois");
+
         expect(testReport.getLabel('eg:Concept3', 'doc', true)).toBeUndefined();
+        expect(testReport.getLabelOrName('eg:Concept3', 'doc', true)).toBe("eg:Concept3");
     });
 
 });

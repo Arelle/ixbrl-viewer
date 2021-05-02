@@ -62,7 +62,7 @@ iXBRLReport.prototype._initialize = function () {
     }
 }
 
-iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptions) {
+iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     rolePrefix = rolePrefix || 'std';
     var lang = this._viewerOptions.language;
     const concept = this.data.concepts[c];

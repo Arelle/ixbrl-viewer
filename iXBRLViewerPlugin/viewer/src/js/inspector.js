@@ -186,7 +186,7 @@ Inspector.prototype.factListRow = function(f) {
         })
         .appendTo(row)
     $('<div class="title"></div>')
-        .text(f.getLabel("std") || f.conceptName())
+        .text(f.getLabelOrName("std"))
         .appendTo(row);
     $('<div class="dimension"></div>')
         .text(f.period().toString())
@@ -547,7 +547,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         var title = fs.minimallyUniqueLabel(fact);
         if (fact instanceof Fact) {
             factHTML = $(require('../html/fact-details.html')); 
-            $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
+            $('.std-label', factHTML).text(fact.getLabelOrName("std", true));
             $('.documentation', factHTML).text(fact.getLabel("doc") || "");
             $('tr.concept td', factHTML).text(fact.conceptName());
             $('tr.period td', factHTML)

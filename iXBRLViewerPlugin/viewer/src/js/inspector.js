@@ -367,7 +367,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
             var itemHTML = $("<div></div>")
                 .addClass("item")
                 .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
-                .append($("<span></span>").addClass("concept-name").text(report.getLabel(r.concept, "std")))
+                .append($("<span></span>").addClass("concept-name").text(report.getLabelOrName(r.concept, "std")))
                 .appendTo(calcBody);
 
             if (r.facts) {
@@ -381,7 +381,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
         });
         $("<div></div>").addClass("item").addClass("total")
             .append($("<span></span>").addClass("weight"))
-            .append($("<span></span>").addClass("concept-name").text(fact.getLabel("std")))
+            .append($("<span></span>").addClass("concept-name").text(fact.getLabelOrName("std")))
             .appendTo(calcBody);
 
         a.addCard($("<span></span>").text(label), calcBody, e == elr);

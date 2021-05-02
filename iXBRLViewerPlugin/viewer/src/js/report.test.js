@@ -107,14 +107,18 @@ describe("Concept labels", () => {
     test("Label fallback", () => {
         vo.language = 'fr';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept trois");
+        expect(testReport.getLabelOrName('eg:Concept3', 'std')).toBe("Concept trois");
         vo.language = 'es';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept cuatro");
+        expect(testReport.getLabelOrName('eg:Concept3', 'std')).toBe("Concept cuatro");
         // No English label, so fall back on German (de is first alphabetically)
         vo.language = 'en';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept vier");
+        expect(testReport.getLabelOrName('eg:Concept3', 'std')).toBe("Concept vier");
 
         // Attempt to get an undefined label type 
         expect(testReport.getLabel('eg:Concept3', 'doc')).toBeUndefined();
+        expect(testReport.getLabelOrName('eg:Concept3', 'doc')).toBe('eg:Concept3');
     });
 
     test("With prefix", () => {

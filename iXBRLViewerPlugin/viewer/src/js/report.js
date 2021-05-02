@@ -95,6 +95,14 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     }
 }
 
+iXBRLReport.prototype.getLabelOrName = function(c, rolePrefix, showPrefix) {
+    const label = this.getLabel(c, rolePrefix, showPrefix);
+    if (label === undefined) {
+        return c;
+    }
+    return label;
+}
+
 iXBRLReport.prototype.availableLanguages = function() {
     if (!this._availableLanguages) {
         var map = {};

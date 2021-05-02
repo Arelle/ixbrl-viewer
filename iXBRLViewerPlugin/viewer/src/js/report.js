@@ -71,7 +71,7 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
         return "<no label>";
     }
     const labels = concept.labels[rolePrefix]
-    if (labels === undefined) {
+    if (labels === undefined || Object.keys(labels).length == 0) {
         return undefined;
     }
     else {
@@ -80,7 +80,8 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
             label = labels[lang];
         }
         else {
-            label = labels["en"] || labels["en-us"];
+            // Fall back on English, then any label deterministically.
+            label = labels["en"] || labels["en-us"] || labels[Object.keys(labels).sort()[0]];
         }
         if (label === undefined) {
             return undefined;

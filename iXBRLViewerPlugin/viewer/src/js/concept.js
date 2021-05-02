@@ -15,7 +15,7 @@
 import $ from 'jquery'
 
 export function Concept(report, name) {
-    this._c = report.data.concepts[name]
+    this._c = report.data.concepts[name];
 }
 
 /*

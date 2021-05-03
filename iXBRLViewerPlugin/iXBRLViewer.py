@@ -281,8 +281,7 @@ class IXBRLViewerBuilder:
                         factData.setdefault("fn", []).append(frel.toModelObject.id)
 
             self.taxonomyData["facts"][f.id] = factData
-            if f.concept is not None:
-                self.addConcept(f.concept)
+            self.addConcept(f.concept)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap

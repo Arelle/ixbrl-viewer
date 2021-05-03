@@ -203,6 +203,10 @@ Inspector.prototype.factListRow = function(f) {
         $('<div class="hidden">Hidden fact</div>')
             .appendTo(row);
     }
+    else if (f.isHTMLHidden()) {
+        $('<div class="hidden">Concealed fact</div>')
+            .appendTo(row);
+    }
     return row;
 }
 
@@ -614,7 +618,7 @@ Inspector.prototype.update = function () {
         $('#inspector').addClass('no-fact-selected');
     } 
     else { 
-        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact");
+        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("concealed-fact");
 
         $('#inspector .fact-inspector')
             .empty()
@@ -646,6 +650,9 @@ Inspector.prototype.update = function () {
             this.getPeriodIncrease(cf);
             if (cf.isHidden()) {
                 $('#inspector').addClass('hidden-fact');
+            }
+            else if (cf.isHTMLHidden()) {
+                $('#inspector').addClass('concealed-fact');
             }
         }
         else if (cf instanceof Footnote) {

@@ -158,6 +158,9 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             ixn = new IXNode(id, node, docIndex);
             this._ixNodeMap[id] = ixn;
         }
+        if (node.is(':hidden')) {
+            ixn.visible = false;
+        }
         if (n.getAttribute("continuedAt")) {
             this._continuedAtMap[id] = { 
                 "isFact": name != 'CONTINUATION',

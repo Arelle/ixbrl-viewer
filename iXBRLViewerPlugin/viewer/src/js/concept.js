@@ -50,3 +50,6 @@ Concept.prototype.isTypedDimension = function () {
     return this._c.d == "t";
 }
 
+Concept.prototype.isEnumeration = function () {
+    return Boolean(this._c.e);
+}

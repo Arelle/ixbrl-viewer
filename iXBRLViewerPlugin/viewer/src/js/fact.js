@@ -100,6 +100,13 @@ Fact.prototype.readableValue = function() {
         /* Replace runs of whitespace (including nbsp) with a single space */
         v = html.text().replace(/[\u00a0\s]+/g, " ").trim();
     }
+    else if (this.isEnumeration()) {
+        var labels = [];
+        for (const qn of v.split(' ')) {
+            labels.push(this._report.getLabel(qn, 'std') || qn);
+        }
+        v = labels.join(', ');
+    }
     return v;
 }
 
@@ -237,6 +244,10 @@ Fact.prototype.identifier = function () {
 
 Fact.prototype.escaped = function () {
     return this._ixNode.escaped;
+}
+
+Fact.prototype.isEnumeration = function() {
+    return this.concept().isEnumeration();
 }
 
 Fact.prototype.footnotes = function () {

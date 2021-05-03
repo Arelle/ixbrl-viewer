@@ -45,10 +45,6 @@
             "Note": "Nota"
         },
         "currencies": {
-            "unitFormatGBP": "\u00A3",
-            "unitFormatUSD": "US \u0024",
-            "unitFormatEUR": "\u20AC",
-            "unitFormatMXN": "MXN \u0024",
             "centsUSD": "centavos",
             "centsEUR": "centavos",
             "centsAUD": "centavos",

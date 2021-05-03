@@ -43,6 +43,14 @@ var testReportData = {
                 }
             }
         },
+        "eg:EnumConcept": {
+            "labels": {
+                "std": {
+                    "en": "Enumeration concept"
+                }
+            },
+            "e": true
+        },
         "eg:Dimension1": {
             "labels": {
                 "std": {
@@ -56,6 +64,17 @@ var testReportData = {
                 "std": {
                     "en": "Member One"
                 }
+            }
+        },
+        "eg:Member2": {
+            "labels": {
+                "std": {
+                    "en": "Member Two"
+                }
+            }
+        },
+        "eg:UnlabelledMember": {
+            "labels": {
             }
         }
     },
@@ -74,6 +93,7 @@ function testReport(facts, ixData) {
 
 function testFact(factData, ixData) {
     factData.a = factData.a || {};
+    factData.a.c = factData.a.c || 'eg:Concept1';
     ixData = ixData || {};
     return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
 }
@@ -153,6 +173,51 @@ describe("Simple fact properties", () => {
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
+    });
+
+    test("Enumeration", () => {
+        var f = testFact({
+            "v": "eg:Member1",
+            "a": {
+                "c": "eg:EnumConcept",
+                "p": "2018-01-01/2019-01-01",
+            }});
+        expect(f.value()).toEqual("eg:Member1");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One");
+
+        f.f.v = "eg:Member1 eg:Member2";
+        expect(f.value()).toEqual("eg:Member1 eg:Member2");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One, Member Two");
+
+        f.f.v = "eg:Member1 eg:NotDefined";
+        expect(f.value()).toEqual("eg:Member1 eg:NotDefined");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One, <no label>");
+
+        f.f.v = "eg:Member1 eg:UnlabelledMember";
+        expect(f.value()).toEqual("eg:Member1 eg:UnlabelledMember");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One, eg:UnlabelledMember");
+
+        // Switch to a non-enumeration concept.
+        // Values should be treated as strings
+        f.f.a.c = "eg:Concept1";
+        f.f.v = "eg:Member1 eg:NotDefined";
+        expect(f.value()).toEqual("eg:Member1 eg:NotDefined");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("eg:Member1 eg:NotDefined");
     });
 
 });

@@ -113,8 +113,10 @@ iXBRLViewer.prototype._reparentDocument = function () {
     const iframeBody = $(iframe).contents().find('body');
     $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
 
-    for (const bodyAttr of $('body').prop("attributes")) {
+    /* Move all attributes on the body tag to the new body */
+    for (const bodyAttr of [...$('body').prop("attributes")]) {
         iframeBody.attr(bodyAttr.name, bodyAttr.value); 
+        $('body').removeAttr(bodyAttr.name);
     }
 
     /* Avoid any inline styles on the old body interfering with the inspector */

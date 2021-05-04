@@ -62,7 +62,7 @@ iXBRLReport.prototype._initialize = function () {
     }
 }
 
-iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptions) {
+iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     rolePrefix = rolePrefix || 'std';
     var lang = this._viewerOptions.language;
     const concept = this.data.concepts[c];
@@ -71,7 +71,7 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptio
         return "<no label>";
     }
     const labels = concept.labels[rolePrefix]
-    if (labels === undefined) {
+    if (labels === undefined || Object.keys(labels).length == 0) {
         return undefined;
     }
     else {
@@ -80,7 +80,8 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptio
             label = labels[lang];
         }
         else {
-            label = labels["en"] || labels["en-us"];
+            // Fall back on English, then any label deterministically.
+            label = labels["en"] || labels["en-us"] || labels[Object.keys(labels).sort()[0]];
         }
         if (label === undefined) {
             return undefined;
@@ -92,6 +93,14 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix, viewerOptio
         s += label;
         return s;
     }
+}
+
+iXBRLReport.prototype.getLabelOrName = function(c, rolePrefix, showPrefix) {
+    const label = this.getLabel(c, rolePrefix, showPrefix);
+    if (label === undefined) {
+        return c;
+    }
+    return label;
 }
 
 iXBRLReport.prototype.availableLanguages = function() {

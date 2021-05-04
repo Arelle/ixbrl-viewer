@@ -15,7 +15,7 @@
 import $ from 'jquery'
 
 export function Concept(report, name) {
-    this._c = report.data.concepts[name]
+    this._c = report.data.concepts[name];
 }
 
 /*
@@ -28,7 +28,9 @@ Concept.prototype.referenceValuesAsString = function() {
     }
     else {
         return $.map(this._c.r, function (r,j) {
-                    return $.map(r, function (p,i) { return p[1] }).join(" ")
+            return $.map(r, function (p,i) { 
+                return p[1] 
+            }).join(" ")
         }).join(" ");
     }
 }

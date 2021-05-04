@@ -35,6 +35,10 @@ Fact.prototype.getLabel = function(rolePrefix, withPrefix) {
     return this._report.getLabel(this.f.a.c, rolePrefix, withPrefix);
 }
 
+Fact.prototype.getLabelOrName = function(rolePrefix, withPrefix) {
+    return this._report.getLabelOrName(this.f.a.c, rolePrefix, withPrefix);
+}
+
 Fact.prototype.conceptName = function() {
     return this.f.a.c;
 }

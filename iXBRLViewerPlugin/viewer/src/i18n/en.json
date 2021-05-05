@@ -15,7 +15,7 @@
             "filter": "Filter" 
         },
         "common": {
-            "notAvailable": "n/a",
+            "notApplicable": "n/a",
             "unspecified": "Unspecified",
             "none": "None"
         },

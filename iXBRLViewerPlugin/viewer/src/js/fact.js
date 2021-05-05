@@ -192,7 +192,7 @@ Fact.prototype.isNil = function() {
 
 Fact.prototype.readableAccuracy = function () {
     if (!this.isNumeric() || this.isNil()) {
-        return i18next.t("common.notAvailable");
+        return i18next.t("common.notApplicable");
     }
     var d = this.decimals();
     if (d === undefined) {

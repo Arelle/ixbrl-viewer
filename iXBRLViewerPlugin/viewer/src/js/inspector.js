@@ -39,7 +39,7 @@ Inspector.prototype.i18nInit = function () {
     return i18next.init({
         lng: this.preferredLanguages()[0],
         fallbackLng: 'en',
-        debug: true,
+        debug: false,
         resources: {
             en: require('../i18n/en.json'),
             es: require('../i18n/es.json')

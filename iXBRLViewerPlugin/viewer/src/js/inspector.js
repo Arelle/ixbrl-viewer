@@ -186,7 +186,7 @@ Inspector.prototype.factListRow = function(f) {
         })
         .appendTo(row)
     $('<div class="title"></div>')
-        .text(f.getLabel("std") || f.conceptName())
+        .text(f.getLabelOrName("std"))
         .appendTo(row);
     $('<div class="dimension"></div>')
         .text(f.period().toString())
@@ -367,7 +367,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
             var itemHTML = $("<div></div>")
                 .addClass("item")
                 .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
-                .append($("<span></span>").addClass("concept-name").text(report.getLabel(r.concept, "std")))
+                .append($("<span></span>").addClass("concept-name").text(report.getLabelOrName(r.concept, "std")))
                 .appendTo(calcBody);
 
             if (r.facts) {
@@ -381,7 +381,7 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
         });
         $("<div></div>").addClass("item").addClass("total")
             .append($("<span></span>").addClass("weight"))
-            .append($("<span></span>").addClass("concept-name").text(fact.getLabel("std")))
+            .append($("<span></span>").addClass("concept-name").text(fact.getLabelOrName("std")))
             .appendTo(calcBody);
 
         a.addCard($("<span></span>").text(label), calcBody, e == elr);
@@ -547,7 +547,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         var title = fs.minimallyUniqueLabel(fact);
         if (fact instanceof Fact) {
             factHTML = $(require('../html/fact-details.html')); 
-            $('.std-label', factHTML).text(fact.getLabel("std", true) || fact.conceptName());
+            $('.std-label', factHTML).text(fact.getLabelOrName("std", true));
             $('.documentation', factHTML).text(fact.getLabel("doc") || "");
             $('tr.concept td', factHTML).text(fact.conceptName());
             $('tr.period td', factHTML)

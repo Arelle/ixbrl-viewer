@@ -110,7 +110,14 @@ iXBRLViewer.prototype._reparentDocument = function () {
     /* Due to self-closing tags, our script tags may not be a direct child of
      * the body tag in an HTML DOM, so move them so that they are */
     $('body script').appendTo($('body'));
-    $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo($(iframe).contents().find('body'));
+    const iframeBody = $(iframe).contents().find('body');
+    $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
+
+    /* Move all attributes on the body tag to the new body */
+    for (const bodyAttr of [...$('body').prop("attributes")]) {
+        iframeBody.attr(bodyAttr.name, bodyAttr.value); 
+        $('body').removeAttr(bodyAttr.name);
+    }
 
     /* Avoid any inline styles on the old body interfering with the inspector */
     $('body').removeAttr('style');

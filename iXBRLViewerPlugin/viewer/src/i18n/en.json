@@ -72,7 +72,7 @@
             "loadingViewer": "Loading iXBRL Viewer",
             "highlight": "Highlight",
             "factProperties": "Fact Properties",
-            "footNoteProperties": "Footnote Properties",
+            "footnoteProperties": "Footnote Properties",
             "allOption": "ALL",
             "numericOption": "Numeric",
             "textOption": "Text",

@@ -29,7 +29,7 @@
             "entity": "Entity",
             "duplicatesCount": "{{current}} of {{total}}",
             "changePercentageIncrease": "{{increase}}% increase on ",
-            "changePercentageDecrease": "{{decrease}}% increase on ",
+            "changePercentageDecrease": "{{decrease}}% decrease on ",
             "changeFromIn": "From {{from}} in ",
             "noPriorFactInThisReport": "No prior fact in this report",
             "noUnit": "<NOUNIT>"

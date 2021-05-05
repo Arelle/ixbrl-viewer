@@ -233,8 +233,8 @@ Viewer.prototype.contents = function() {
 
 
 Viewer.prototype._selectAdjacentTag = function (offset) {
-    var elements = $(".ixbrl-element", this._contents);
-    var current = $(".ixbrl-selected", this._contents);
+    var elements = $(".ixbrl-element:not(.ixbrl-continuation)", this._contents);
+    var current = $(".ixbrl-selected:not(.ixbrl-continuation)", this._contents);
     var next;
     if (current.length == 1) {
         next = elements.eq((elements.index(current.first()) + offset) % elements.length);

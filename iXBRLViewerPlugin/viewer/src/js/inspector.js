@@ -732,7 +732,7 @@ Inspector.prototype.preferredLanguages = function () {
         return [ urlParams.get("lang") ];
     }
     var langs = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
-    if (langs.length == 0) {
+    if (langs.length == 0 || !langs[0]) {
         return ["en"];
     }
     return langs;

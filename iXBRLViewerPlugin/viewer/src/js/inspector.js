@@ -30,7 +30,13 @@ import { Footnote } from './footnote.js';
 const SEARCH_PAGE_SIZE = 100
 
 export function Inspector(iv) {
-    i18next.init({
+    this._iv = iv;
+    this._chart = new IXBRLChart();
+    this._viewerOptions = new ViewerOptions()
+}
+
+Inspector.prototype.i18nInit = function () {
+    return i18next.init({
         lng: this.preferredLanguages()[0],
         fallbackLng: 'en',
         debug: true,
@@ -49,49 +55,6 @@ export function Inspector(iv) {
             useOptionsAttr: false, // see optionsAttr
             parseDefaultValueFromContent: true // parses default values from content ele.val or ele.text
         });
-
-        /* Insert HTML and CSS styles into body */
-        $(require('../html/inspector.html')).prependTo('body');
-        var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
-        $('<style id="ixv-style"></style>')
-            .prop("type", "text/css")
-            .text(inspector_css)
-            .appendTo('head');
-        $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-            .attr('href', require('../img/favicon.ico'))
-            .appendTo('head');
-        this._iv = iv;
-        this._chart = new IXBRLChart();
-        this._viewerOptions = new ViewerOptions()
-        
-        $(".collapsible-header").on("click", function () { 
-            var d = $(this).closest(".collapsible-section");
-            d.toggleClass("collapsed"); 
-            if (d.hasClass("collapsed")) {
-                d.find(".collapsible-body").slideUp(250);
-            }
-            else {
-                d.find(".collapsible-body").slideDown(250);
-            }
-        });
-        $("#inspector .controls .search-button").on("click", function () {
-            $(this).closest("#inspector").toggleClass("search-mode");
-        });
-        $("#inspector-head .back").on("click", function () {
-            $(this).closest("#inspector").removeClass("search-mode");
-        });
-        $(".popup-trigger").on("hover", function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
-        this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
-        this.buildToolbarHighlightMenu();
-
-        this._optionsMenu = new Menu($("#display-options-menu"));
-        this.buildDisplayOptionsMenu();
-
-        $("#ixv").localize();
-
-        var inspector = this;
-        // Listen to messages posted to this window
-        $(window).on("message", function(e) { inspector.handleMessage(e) });
     });
 }
 
@@ -99,14 +62,44 @@ Inspector.prototype.initialize = function (report) {
     var inspector = this;
     return new Promise(function (resolve, reject) {
         inspector._report = report;
-        report.setViewerOptions(inspector._viewerOptions);
-        inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
-            inspector._search = new ReportSearch(report);
-            inspector.setupSearchControls();
-            inspector.buildDisplayOptionsMenu();
+        inspector.i18nInit().then((t) => {
+            
+            $(".collapsible-header").on("click", function () { 
+                var d = $(this).closest(".collapsible-section");
+                d.toggleClass("collapsed"); 
+                if (d.hasClass("collapsed")) {
+                    d.find(".collapsible-body").slideUp(250);
+                }
+                else {
+                    d.find(".collapsible-body").slideDown(250);
+                }
+            });
+            $("#inspector .controls .search-button").on("click", function () {
+                $(this).closest("#inspector").toggleClass("search-mode");
+            });
+            $("#inspector-head .back").on("click", function () {
+                $(this).closest("#inspector").removeClass("search-mode");
+            });
+            $(".popup-trigger").on("hover", function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
+            inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
             inspector.buildToolbarHighlightMenu();
-            inspector.buildHighlightKey();
-            resolve();
+
+            inspector._optionsMenu = new Menu($("#display-options-menu"));
+            inspector.buildDisplayOptionsMenu();
+
+            $("#ixv").localize();
+
+            // Listen to messages posted to this window
+            $(window).on("message", (e) => inspector.handleMessage(e));
+            report.setViewerOptions(inspector._viewerOptions);
+            inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
+                inspector._search = new ReportSearch(report);
+                inspector.setupSearchControls();
+                inspector.buildDisplayOptionsMenu();
+                inspector.buildToolbarHighlightMenu();
+                inspector.buildHighlightKey();
+                resolve();
+            });
         });
     });
 }

@@ -82,6 +82,19 @@ iXBRLViewer.prototype.pluginPromise = function (methodName, ...args) {
     });
 }
 
+iXBRLViewer.prototype._loadInspectorHTML = function () {
+    /* Insert HTML and CSS styles into body */
+    $(require('../html/inspector.html')).prependTo('body');
+    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
+    $('<style id="ixv-style"></style>')
+        .prop("type", "text/css")
+        .text(inspector_css)
+        .appendTo('head');
+    $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+        .attr('href', require('../img/favicon.ico'))
+        .appendTo('head');
+}
+
 iXBRLViewer.prototype._reparentDocument = function () {
     var iframeContainer = $('#ixv #iframe-container');
 
@@ -138,6 +151,7 @@ iXBRLViewer.prototype.load = function () {
     var inspector = this.inspector;
     setTimeout(function () {
 
+        iv._loadInspectorHTML();
         var iframes = $(iv._reparentDocument());
 
         var taxonomyData = iv._getTaxonomyData();

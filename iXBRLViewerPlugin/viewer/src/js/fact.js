@@ -107,7 +107,7 @@ Fact.prototype.readableValue = function() {
     else if (this.isEnumeration()) {
         var labels = [];
         for (const qn of v.split(' ')) {
-            labels.push(this._report.getLabel(qn, 'std') || qn);
+            labels.push(this._report.getLabelOrName(qn, 'std'));
         }
         v = labels.join(', ');
     }

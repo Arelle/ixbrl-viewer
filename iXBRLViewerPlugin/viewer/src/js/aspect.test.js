@@ -14,6 +14,7 @@
 
 import { Aspect, AspectSet } from "./aspect.js";
 import { iXBRLReport } from "./report.js";
+import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
     "prefixes": {
@@ -54,6 +55,11 @@ var testReportData = {
     }
 };
 
+var insp = new TestInspector();
+beforeAll(() => {
+    return insp.i18nInit();
+});
+
 var testReport = new iXBRLReport(testReportData);
 
 test("Concept aspect labels", () => {
@@ -82,8 +88,8 @@ test("Unit aspects label - known currency (EUR)", () => {
 
 test("Unit aspects label - unknown currency", () => {
     var unitAspect = new Aspect("u", "iso4217:ZAR", testReport);
-    expect(unitAspect.label()).toBe("Unit");  
-    expect(unitAspect.valueLabel()).toBe("iso4217:ZAR");  
+    expect(unitAspect.label()).toBe("Unit");
+    expect(unitAspect.valueLabel()).toBe("ZAR ");
 });
 
 test("Entity aspect labels - unknown scheme", () => {

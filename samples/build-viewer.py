@@ -52,9 +52,13 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         fs = arelle.FileSource.openFileSource(f, self)
         xbrl = self.modelManager.load(fs)
 
-        viewerBuilder = iXBRLViewerPlugin.IXBRLViewerBuilder(xbrl)
-        viewer = viewerBuilder.createViewer(scriptUrl = scriptUrl)
-        viewer.save(outPath)
+        try:
+            viewerBuilder = iXBRLViewerPlugin.IXBRLViewerBuilder(xbrl)
+            viewer = viewerBuilder.createViewer(scriptUrl = scriptUrl)
+            viewer.save(outPath)
+        except IXBRLViewerBuilderError as e:
+            print(e.message)
+            sys.exit(1)
 
 parser = argparse.ArgumentParser(description="Create iXBRL Viewer instances")
 parser.add_argument("--package-dir", "-p", help="Path to directory containing taxonomy packages")
@@ -70,7 +74,7 @@ cntlr.startLogging(
     logFormat="[%(messageCode)s] %(message)s - %(file)s",
     logLevel="DEBUG",
     logRefObjectProperties=True,
-    logToBuffer=False
+    logToBuffer=True
 )
 PluginManager.addPluginModule("inlineXbrlDocumentSet")
 if args.package_dir:

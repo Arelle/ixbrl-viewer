@@ -26,6 +26,8 @@ import { Accordian } from './accordian.js';
 import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
+import { ValidationReport } from './validationreport.js';
+import { MessageBox } from './messagebox.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -762,4 +764,17 @@ Inspector.prototype.selectDefaultLanguage = function () {
 
 Inspector.prototype.setLanguage = function (lang) {
     this._viewerOptions.language = lang;
+}
+
+Inspector.prototype.showValidationWarning = function () {
+    if (this._report.hasValidationErrors()) {
+        var message = $("<div></div>").append("<p>This report contains <b>XBRL validation errors</b>.  These errors may prevent this document from opening correctly in other XBRL software.</p>");
+        var mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
+        mb.show(
+            () => {
+                const vr = new ValidationReport();
+                vr.show(this._report.data.validation);
+            }
+        );
+    }
 }

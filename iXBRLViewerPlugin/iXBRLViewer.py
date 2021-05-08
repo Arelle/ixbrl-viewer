@@ -23,8 +23,9 @@ import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from .xhtmlserialize import XHTMLSerializer
-import os
 
+import os
+import logging
 import io
 import zipfile
 from arelle.PythonUtil import attrdict
@@ -70,6 +71,8 @@ class NamespaceMap:
     def qname(self, qname):
         return "%s:%s" % (self.getPrefix(qname.namespaceURI, qname.prefix), qname.localName)
 
+class IXBRLViewerBuilderError(Exception):
+    pass
 
 class IXBRLViewerBuilder:
 
@@ -195,12 +198,33 @@ class IXBRLViewerBuilder:
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
 
+    def validationErrors(self):
+        dts = self.dts
+
+        logHandler = dts.modelManager.cntlr.logHandler
+
+        if not hasattr(logHandler, "logRecordBuffer"):
+            raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
+
+        errors = []
+
+        for logRec in getattr(logHandler, "logRecordBuffer"):
+            if logRec.levelno > logging.INFO:
+                errors.append({
+                    "sev": logRec.levelname.title().upper(),
+                    "code": getattr(logRec, "messageCode", ""),
+                    "msg": logRec.getMessage()
+                })
+
+        return errors
+
     def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js"):
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added
         """
 
         dts = self.dts
+
         iv = iXBRLViewer(dts)
         idGen = 0
         self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
@@ -288,6 +312,7 @@ class IXBRLViewerBuilder:
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
         self.taxonomyData["rels"] = self.getRelationships()
+        self.taxonomyData["validation"] = self.validationErrors()
 
         dts.info("viewer:info", "Creating iXBRL viewer")
 

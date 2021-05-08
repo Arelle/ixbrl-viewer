@@ -15,21 +15,30 @@
 .dialog {
   z-index: 15;
   position: absolute;
-  top: 5rem;
-  left: 5rem;
-  bottom: 5rem;
-  right: 5rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   border: solid 1px #000;
   background-color: #fff;
   display: none;
 
-  // Use this instead of padding so that we can absolutely position elements within it.
+  &.full-screen {
+    width: calc(100vw - 5em);
+    height: calc(100vh - 5em);
+  }
+
+  &.message-box {
+    max-width: 800px;
+    width: 100%;
+    
+  }
+
   .contents {
-    position: absolute;
-    left: 2rem;
-    right: 2rem;
-    top: 2rem;
-    bottom: 2rem;
+    padding: 2rem;
+    position: relative;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
   }
 
   .close {
@@ -49,6 +58,29 @@
 
     &:hover {
       opacity: 1;
+    }
+  }
+
+  .title {
+    margin-top: 0;
+  }
+
+  .buttons {
+    button {
+      border-radius: 0;
+      min-width: 10rem;
+      margin-right: 1.5rem;
+      border: solid 0.1rem @border-grey;
+      color: @text;
+      background-color: @button-background;
+      cursor: pointer;
+
+
+      &.dialog-button-primary {
+        color: #fff;
+        background-color: @workiva-green;
+        border: none;
+      }
     }
   }
 }

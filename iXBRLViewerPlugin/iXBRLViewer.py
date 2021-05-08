@@ -24,6 +24,8 @@ import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from .xhtmlserialize import XHTMLSerializer
+from lxml import etree
+import os
 
 import os
 import logging
@@ -201,6 +203,7 @@ class IXBRLViewerBuilder:
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
 
+<<<<<<< HEAD
     def validationErrors(self):
         dts = self.dts
 
@@ -327,7 +330,11 @@ class IXBRLViewerBuilder:
                 return True
         return False
 
-    def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js", showValidations = True):
+    def getStubDocument(self):
+        with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
+            return etree.parse(fin)
+
+    def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js", useStubViewer = False, showValidations = True):
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added
         """
@@ -365,6 +372,13 @@ class IXBRLViewerBuilder:
                 iv.addFile(iXBRLViewerFile(filename, xmlDocument))
 
             xmlDocument = next(iter(xmlDocsByFilename.values()))
+
+        elif useStubViewer:
+            xmlDocument = self.getStubDocument()
+            filename = os.path.basename(dts.modelDocument.filepath)
+            self.taxonomyData["docSetFiles"] = [ filename ]
+            iv.addFile(iXBRLViewerFile("ixbrlviewer.html", xmlDocument))
+            iv.addFile(iXBRLViewerFile(filename, dts.modelDocument.xmlDocument))
 
         else:
             xmlDocument = deepcopy(dts.modelDocument.xmlDocument)

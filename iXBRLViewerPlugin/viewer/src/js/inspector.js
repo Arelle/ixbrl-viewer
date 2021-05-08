@@ -223,7 +223,8 @@ Inspector.prototype.factListRow = function(f) {
             .appendTo(row);
     }
     else if (f.isHTMLHidden()) {
-        $('<div class="hidden">Concealed fact</div>')
+        $('<div class="hidden"></div>')
+            .text(i18next.t("search.concealedFact"))
             .appendTo(row);
     }
     return row;

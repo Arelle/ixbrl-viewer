@@ -1,0 +1,96 @@
+{
+    "translation": {
+        "toolbar": {
+            "xbrlElements": "XBRL Elements"
+        },
+        "search": {
+            "showMoreResults": "Show more results",
+            "buildingSearchIndex": "Building search index",
+            "hiddenFact": "Hidden fact",
+            "all": "ALL",
+            "noMatchFound": "No match found",
+            "tryAgainDifferentKeywords": "Try again with different keywords",
+            "reset": "Reset",
+            "conceptType": "Concept Type" ,
+            "filter": "Filter" 
+        },
+        "common": {
+            "notApplicable": "n/a",
+            "unspecified": "Unspecified",
+            "none": "None"
+        },
+        "factDetails": {
+            "concept": "Concept",
+            "dimensions": "Dimensions",
+            "date": "Date",
+            "factValue": "Fact Value",
+            "accuracy": "Accuracy",
+            "change": "Change",
+            "entity": "Entity",
+            "duplicatesCount": "{{current}} of {{total}}",
+            "changePercentageIncrease": "{{increase}}% increase on ",
+            "changePercentageDecrease": "{{decrease}}% decrease on ",
+            "changeFromIn": "From {{from}} in ",
+            "noPriorFactInThisReport": "No prior fact in this report",
+            "noUnit": "<NOUNIT>"
+        },
+        "referenceParts": {
+            "Name": "Name",
+            "Number": "Number",
+            "IssueDate": "IssueDate",
+            "Paragraph": "Paragraph",
+            "Subparagraph": "Subparagraph",
+            "URI": "URI",
+            "URIDate": "URIDate",
+            "Note": "Note"
+        },
+        "currencies": {
+            "unitFormatGBP": "\u00A3",
+            "unitFormatUSD": "US \u0024",
+            "unitFormatEUR": "\u20AC",
+            "unitFormatMXN": "MXN \u0024",
+            "centsUSD": "cents",
+            "centsEUR": "cents",
+            "centsAUD": "cents",
+            "centsZAR": "cents",
+            "centsMXN": "cents",
+            "centsGBP": "pence",
+            "accuracy3": "thousandths",
+            "accuracy2": "hundredths",
+            "accuracy0":  "ones",
+            "accuracy-1":  "tens",
+            "accuracy-2":  "hundreds",
+            "accuracy-3":  "thousands",
+            "accuracy-6":  "millions",
+            "accuracy-9":  "billions",
+            "accuracyInfinite": "Infinite precision"
+        },
+        "footnotes": {
+            "footnote": "Footnote"
+        },
+        "inspector": {
+            "loadingViewer": "Loading iXBRL Viewer",
+            "highlight": "Highlight",
+            "factProperties": "Fact Properties",
+            "footnoteProperties": "Footnote Properties",
+            "allOption": "ALL",
+            "numericOption": "Numeric",
+            "textOption": "Text",
+            "period": "Period",
+            "hiddenFacts": "Hidden Facts",
+            "visibleFacts": "Visible Facts",
+            "noFactSelected": "No Fact Selected",
+            "hiddenFact": "Hidden Fact",
+            "anchoring": "Anchoring",
+            "widerAnchor": "Wider anchor",
+            "narrowerAnchor": "Narrower anchors",
+            "references": "References",
+            "calculations": "Calculations",
+            "footnotes": "Footnotes",
+            "associatedFacts": "Associated facts",
+            "factSearch": "Fact Search",
+            "poweredBy": "Powered by"
+        }
+    }
+}
+

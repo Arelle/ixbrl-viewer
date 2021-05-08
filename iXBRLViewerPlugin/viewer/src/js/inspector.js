@@ -17,6 +17,8 @@ import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
+import i18next from 'i18next';
+import jqueryI18next from 'jquery-i18next';
 import { ViewerOptions } from './viewerOptions.js';
 import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
@@ -28,60 +30,76 @@ import { Footnote } from './footnote.js';
 const SEARCH_PAGE_SIZE = 100
 
 export function Inspector(iv) {
-    /* Insert HTML and CSS styles into body */
-    $(require('../html/inspector.html')).prependTo('body');
-    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
-    $('<style id="ixv-style"></style>')
-        .prop("type", "text/css")
-        .text(inspector_css)
-        .appendTo('head');
-    $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-        .attr('href', require('../img/favicon.ico'))
-        .appendTo('head');
     this._iv = iv;
     this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()
-    
-    $(".collapsible-header").click(function () { 
-        var d = $(this).closest(".collapsible-section");
-        d.toggleClass("collapsed"); 
-        if (d.hasClass("collapsed")) {
-            d.find(".collapsible-body").slideUp(250);
-        }
-        else {
-            d.find(".collapsible-body").slideDown(250);
-        }
-    });
-    $("#inspector .controls .search-button").click(function () {
-        $(this).closest("#inspector").toggleClass("search-mode");
-    });
-    $("#inspector-head .back").click(function () {
-        $(this).closest("#inspector").removeClass("search-mode");
-    });
-    $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
-    this._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
-    this.buildToolbarHighlightMenu();
+}
 
-    this._optionsMenu = new Menu($("#display-options-menu"));
-    this.buildDisplayOptionsMenu();
-
-    var inspector = this;
-    // Listen to messages posted to this window
-    $(window).on("message", function(e) { inspector.handleMessage(e) });
+Inspector.prototype.i18nInit = function () {
+    return i18next.init({
+        lng: this.preferredLanguages()[0],
+        fallbackLng: 'en',
+        debug: false,
+        resources: {
+            en: require('../i18n/en.json'),
+            es: require('../i18n/es.json')
+        }
+    }).then((t) => {
+        jqueryI18next.init(i18next, $, {
+            tName: 't', // --> appends $.t = i18next.t
+            i18nName: 'i18n', // --> appends $.i18n = i18next
+            handleName: 'localize', // --> appends $(selector).localize(opts);
+            selectorAttr: 'data-i18n', // selector for translating elements
+            targetAttr: 'i18n-target', // data-() attribute to grab target element to translate (if different than itself)
+            optionsAttr: 'i18n-options', // data-() attribute that contains options, will load/set if useOptionsAttr = true
+            useOptionsAttr: false, // see optionsAttr
+            parseDefaultValueFromContent: true // parses default values from content ele.val or ele.text
+        });
+    });
 }
 
 Inspector.prototype.initialize = function (report) {
     var inspector = this;
     return new Promise(function (resolve, reject) {
         inspector._report = report;
-        report.setViewerOptions(inspector._viewerOptions);
-        inspector._iv.setProgress("Building search index").then(() => {
-            inspector._search = new ReportSearch(report);
-            inspector.setupSearchControls();
-            inspector.buildDisplayOptionsMenu();
+        inspector.i18nInit().then((t) => {
+            
+            $(".collapsible-header").on("click", function () { 
+                var d = $(this).closest(".collapsible-section");
+                d.toggleClass("collapsed"); 
+                if (d.hasClass("collapsed")) {
+                    d.find(".collapsible-body").slideUp(250);
+                }
+                else {
+                    d.find(".collapsible-body").slideDown(250);
+                }
+            });
+            $("#inspector .controls .search-button").on("click", function () {
+                $(this).closest("#inspector").toggleClass("search-mode");
+            });
+            $("#inspector-head .back").on("click", function () {
+                $(this).closest("#inspector").removeClass("search-mode");
+            });
+            $(".popup-trigger").on("hover", function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
+            inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
             inspector.buildToolbarHighlightMenu();
-            inspector.buildHighlightKey();
-            resolve();
+
+            inspector._optionsMenu = new Menu($("#display-options-menu"));
+            inspector.buildDisplayOptionsMenu();
+
+            $("#ixv").localize();
+
+            // Listen to messages posted to this window
+            $(window).on("message", (e) => inspector.handleMessage(e));
+            report.setViewerOptions(inspector._viewerOptions);
+            inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
+                inspector._search = new ReportSearch(report);
+                inspector.setupSearchControls();
+                inspector.buildDisplayOptionsMenu();
+                inspector.buildToolbarHighlightMenu();
+                inspector.buildHighlightKey();
+                resolve();
+            });
         });
     });
 }
@@ -140,7 +158,7 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
 
 Inspector.prototype.buildToolbarHighlightMenu = function () {
     this._toolbarMenu.reset();
-    this._toolbarMenu.addCheckboxItem("XBRL Elements", (checked) => this.highlightAllTags(checked), "highlight-tags");
+    this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags");
     this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
 }
 
@@ -200,7 +218,8 @@ Inspector.prototype.factListRow = function(f) {
         }
     }
     if (f.isHidden()) {
-        $('<div class="hidden">Hidden fact</div>')
+        $('<div class="hidden"></div>')
+            .text(i18next.t("search.hiddenFact"))
             .appendTo(row);
     }
     else if (f.isHTMLHidden()) {
@@ -215,8 +234,8 @@ Inspector.prototype.addResults = function(container, results, offset) {
     for (var i = offset; i < results.length; i++ ) {
         if (i - offset >= SEARCH_PAGE_SIZE) {
             $('<div class="more-results"></div>')
-                .text("Show more results")
-                .click(() => this.addResults(container, results, i))
+                .text(i18next.t("search.showMoreResults"))
+                .on('click', () => this.addResults(container, results, i))
                 .appendTo(container);
             break;
         }
@@ -271,8 +290,8 @@ Inspector.prototype.search = function() {
         this.addResults(container, results, 0);
     }
     else {
-        $(".title", overlay).text("No Match Found");
-        $(".text", overlay).text("Try again with different keywords");
+        $(".title", overlay).text(i18next.t("search.noMatchFound"));
+        $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
         overlay.show();
     }
     /* Don't highlight search results if there's no search string */
@@ -303,7 +322,9 @@ Inspector.prototype._anchorList = function (fact, anchors) {
         }
     }
     else {
-        $("<li><i>None</i></li>").appendTo(html);
+        $('<li></li>')
+            .append($('<i></i>').text(i18next.t("common.none")))
+            .appendTo(html);
     }
     return html;
 }
@@ -335,7 +356,7 @@ Inspector.prototype._referencesHTML = function (fact) {
         var tbody = body.find("tbody");
         $.each(r, function (j,p) {
             var row = $("<tr>")
-                .append($("<th></th>").text(p.part))
+                .append($("<th></th>").text(i18next.t(`referenceParts.${p.part}`, {defaultValue: p.part})))
                 .append($("<td></td>").text(p.value))
                 .appendTo(tbody);
             if (p.part == 'URI') {
@@ -427,17 +448,16 @@ Inspector.prototype.describeChange = function (oldFact, newFact) {
         var x = (newFact.value() - oldFact.value()) * 100 / oldFact.value();
         var t;
         if (x >= 0) {
-            t = formatNumber(x,1) + "% increase on ";
+            t = i18next.t('factDetails.changePercentageIncrease', { increase: formatNumber(x,1)});
         }
         else {
-            t = formatNumber(-1 * x,1) + "% decrease on ";
+            t = i18next.t('factDetails.changePercentageDecrease', { decrease: formatNumber(-1 * x,1)});
         }
         return t;
     }
     else {
-        return "From " + oldFact.readableValue() + " in "; 
+        return i18next.t('factDetails.changeFromIn', { from: oldFact.readableValue()}); 
     }
-
 }
 
 Inspector.prototype.factLinkHTML = function (label, factList) {
@@ -474,7 +494,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
         }
         else {
-            s = $("<i>").text("No prior fact in this report");
+            s = $("<i>").text(i18next.t('factDetails.noPriorFactInThisReport'));
         }
     }
     else {
@@ -492,7 +512,9 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
         var vv = wrapLabel(text, 120);
         if (vv.length > 1) {
             $('tr.value', context).addClass("truncated");
-            $('tr.value .show-all', context).off().click(() => this._updateValue(text, true, context));
+            $('tr.value .show-all', context).off('click').on('click', () => { 
+                this._updateValue(item, true, context) 
+            });
         }
         else {
             $('tr.value', context).removeClass('truncated');
@@ -585,7 +607,9 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
-                            .click(() => this._chart.analyseDimension(fact,[a]))
+                            .on("click", () => {
+                                this._chart.analyseDimension(fact, [ aspect.name() ])
+                            })
                     )
                 }
                 var s = $('<div class="dimension-value"></div>')
@@ -642,7 +666,7 @@ Inspector.prototype.update = function () {
                     n = i;
                 }
             }
-            $('.duplicates .text').text((n + 1) + " of " + ndup);
+            $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
             var viewer = this._viewer;
             $('.duplicates .prev').off().click(() => inspector.selectItem(duplicates[(n+ndup-1) % ndup].id));
             $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
@@ -659,6 +683,7 @@ Inspector.prototype.update = function () {
             $('#inspector').addClass('footnote-mode');
             $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML());
         }
+        $('.fact-details').localize();
     }
     this.updateURLFragment();
 }
@@ -708,10 +733,21 @@ Inspector.prototype.switchItem = function (id) {
     this.update();
 }
 
+Inspector.prototype.preferredLanguages = function () {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("lang")) {
+        return [ urlParams.get("lang") ];
+    }
+    var langs = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
+    if (langs.length == 0 || !langs[0]) {
+        return ["en"];
+    }
+    return langs;
+}
+
 Inspector.prototype.selectDefaultLanguage = function () {
-    var preferredLanguages = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
     var al = this._report.availableLanguages();
-    $.each(preferredLanguages, function (i, pl) {
+    $.each(this.preferredLanguages(), function (i, pl) {
         $.each(al, function (j, l) {
             if (l.toLowerCase() == pl.toLowerCase()) {
                 return l;

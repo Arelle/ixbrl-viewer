@@ -14,6 +14,7 @@
 
 import { Fact } from "./fact.js";
 import { iXBRLReport } from "./report.js";
+import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
     "prefixes": {
@@ -77,6 +78,11 @@ function testFact(factData, ixData) {
     ixData = ixData || {};
     return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
 }
+
+var insp = new TestInspector();
+beforeAll(() => {
+    return insp.i18nInit();
+});
 
 describe("Simple fact properties", () => {
     test("Monetary", () => {

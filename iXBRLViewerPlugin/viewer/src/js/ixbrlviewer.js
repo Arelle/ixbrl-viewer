@@ -165,7 +165,14 @@ iXBRLViewer.prototype.load = function () {
     setTimeout(function () {
 
         iv._loadInspectorHTML();
-        var iframes = $(iv._reparentDocument());
+        var iframes;
+        const stubViewer = $('body').hasClass('ixv-stub-viewer');
+        if (!stubViewer) {
+            iframes = $(iv._reparentDocument());
+        } 
+        else {
+            iframes = $();
+        }
 
         var taxonomyData = iv._getTaxonomyData();
         if (taxonomyData === null) {
@@ -176,7 +183,7 @@ iXBRLViewer.prototype.load = function () {
         var report = new iXBRLReport(JSON.parse(taxonomyData));
         if (report.isDocumentSet()) {
             var ds = report.documentSetFiles();
-            for (var i = 1; i < ds.length; i++) {
+            for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {
                 var iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
                 iframes = iframes.add(iframe);
             }

@@ -99,7 +99,7 @@ function localName(e) {
 }
 
 Viewer.prototype._addDocumentSetTabs = function() {
-    if (this._report.isDocumentSet()) {
+    if (this._report.isDocumentSet() && this._report.documentSetFiles().length > 1) {
         $('#ixv .ixds-tabs').show();
         var ds = this._report.documentSetFiles();
         var viewer = this;

@@ -49,8 +49,10 @@ localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
 def launchLocalViewer(cntlr, modelXbrl):
     from arelle import LocalViewer
     try:
-        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js", showValidations = False)
+        ixds = cntlr.modelManager.modelXbrl.type == Type.INLINEXBRLDOCUMENTSET:
+        basenameSuffix = '' if xds else VIEWER_BASENAME_SUFFIX
+        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl, basenameSuffix = basenameSuffix, showValidations = False)
+        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js")
         # first check if source file was in an archive (e.g., taxonomy package)
         _archiveFilenameParts = archiveFilenameParts(modelXbrl.modelDocument.filepath)
         if _archiveFilenameParts is not None:
@@ -59,16 +61,16 @@ def launchLocalViewer(cntlr, modelXbrl):
             outDir = modelXbrl.modelDocument.filepathdir
         _localhost = localViewer.init(cntlr, outDir)
         # for IXDS, outPath must be a directory name, suffix is applied in saving files
-        if len(iv.files) > 1:
+        if ixds:
             # save files in a separate directory from source files
             _localhost += "/" + VIEWER_BASENAME_SUFFIX
             outDir = os.path.join(outDir, VIEWER_BASENAME_SUFFIX)
             os.makedirs(outDir, exist_ok=True)
-            iv.save(outDir) # no changes to html inline files so inter-file refereences still can work
+            iv.save(outDir) 
             htmlFile = iv.files[0].filename
         else:
-            iv.save(outDir, outBasenameSuffix=VIEWER_BASENAME_SUFFIX)
-            htmlFile = "{0[0]}{1}{0[1]}".format(os.path.splitext(modelXbrl.modelDocument.basename), VIEWER_BASENAME_SUFFIX)
+            iv.save(outDir)
+            htmlFile = viewerBuilder.outputFilename(modelXbrl.modelDocument.basename)
         import webbrowser
         webbrowser.open(url="{}/{}".format(_localhost, htmlFile))
     except Exception as ex:

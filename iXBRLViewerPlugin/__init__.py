@@ -64,6 +64,11 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       action="store_true",
                       dest="useStubViewer",
                       help="Use stub viewer for faster loading of inspector")
+    parser.add_option("--viewer-suffix",
+                      action="store",
+                      default="",
+                      dest="viewerBasenameSuffix",
+                      help="Suffix for basename of viewer files")
 
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     # extend XBRL-loaded run processing for this option
@@ -80,7 +85,7 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
             iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL, showValidations = options.validationMessages, useStubViewer=options.useStubViewer)
             if iv is not None:
-                iv.save(out, outBasenameSuffix=VIEWER_BASENAME_SUFFIX, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
+                iv.save(out, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
     except IXBRLViewerBuilderError as ex:
         print(ex.message)
     except Exception as ex:

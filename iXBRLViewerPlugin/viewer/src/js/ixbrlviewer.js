@@ -190,34 +190,37 @@ iXBRLViewer.prototype.load = function () {
             iv._checkDocumentSetBrowserSupport();
         }
 
-        /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
-        var timer = setInterval(function () {
-            var complete = true;
-            iframes.each(function (n) {
-                var iframe = this;
-                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
-                    complete = false;
-                }
-            });
-            if (complete) {
-                clearInterval(timer);
+        const progress = stubViewer ? 'Loading iXBRL Report' : 'Loading iXBRL Viewer';
+        iv.setProgress(progress).then(() => {
+            /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
+            var timer = setInterval(function () {
+                var complete = true;
+                iframes.each(function (n) {
+                    var iframe = this;
+                    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
+                        complete = false;
+                    }
+                });
+                if (complete) {
+                    clearInterval(timer);
 
-                var viewer = iv.viewer = new Viewer(iv, iframes, report);
+                    var viewer = iv.viewer = new Viewer(iv, iframes, report);
 
-                viewer.initialize()
-                    .then(() => inspector.initialize(report, viewer))
-                    .then(() => {
-                        interact('#viewer-pane').resizable({
-                            edges: { left: false, right: ".resize", bottom: false, top: false },
-                            restrictEdges: {
-                                outer: 'parent',
-                                endOnly: true,
-                            },
-                            restrictSize: {
-                                min: { width: 100 }
-                            },
-                        })
+                    viewer.initialize()
+                        .then(() => inspector.initialize(report, viewer))
+                        .then(() => {
+                            inspector.setViewer(viewer);
+                            interact('#viewer-pane').resizable({
+                                edges: { left: false, right: ".resize", bottom: false, top: false},
+                                restrictEdges: {
+                                    outer: 'parent',
+                                    endOnly: true,
+                                },
+                                restrictSize: {
+                                    min: { width: 100 }
+                                },
+                            })
                             .on('resizestart', function (event) {
                                 $('#ixv').css("pointer-events", "none");
                             })
@@ -230,26 +233,26 @@ iXBRLViewer.prototype.load = function () {
                             .on('resizeend', function (event) {
                                 $('#ixv').css("pointer-events", "auto");
                             });
-                        $('#ixv .loader').remove();
-
-                        /* Focus on fact specified in URL fragment, if any */
-                        inspector.handleFactDeepLink();
-                        if (iv.options.showValidationWarningOnStart) {
-                            inspector.showValidationWarning();
-                        }
-                    })
-                    .catch(err => {
-                        if (err instanceof DocumentTooLargeError) {
                             $('#ixv .loader').remove();
-                            $('#inspector').addClass('failed-to-load');
-                        }
-                        else {
-                            throw err;
-                        }
 
-                    })
-            }
-        }, 250);
+                            /* Focus on fact specified in URL fragment, if any */
+                            inspector.handleFactDeepLink();
+                            if (iv.options.showValidationWarningOnStart) {
+                                inspector.showValidationWarning();
+                            }
+                        })
+                        .catch(err => {
+                            if (err instanceof DocumentTooLargeError) {
+                                $('#ixv .loader').remove();
+                                $('#inspector').addClass('failed-to-load');
+                            }
+                            else {
+                                throw err;
+                            }
+
+                        });
+                }
+            });
     }, 0);
 }
 

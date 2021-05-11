@@ -26,7 +26,7 @@ import { Accordian } from './accordian.js';
 import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
-import { ValidationReport } from './validationreport.js';
+import { ValidationReportDialog } from './validationreport.js';
 import { MessageBox } from './messagebox.js';
 
 const SEARCH_PAGE_SIZE = 100
@@ -772,8 +772,9 @@ Inspector.prototype.showValidationWarning = function () {
         var mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
         mb.show(
             () => {
-                const vr = new ValidationReport();
-                vr.show(this._report.data.validation);
+                const vr = new ValidationReportDialog();
+                vr.displayErrors(this._report.data.validation);
+                vr.show();
             }
         );
     }

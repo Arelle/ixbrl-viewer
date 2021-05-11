@@ -14,18 +14,16 @@
 
 import $ from 'jquery';
 
-export function ValidationReport() {
-    this._dialog = $('#ixv #validation-report');
-    var c = this;
-    $('.close', this._dialog).click(function () { c.close() });
-    $(document).bind("keyup",function (e) {
-        if (e.keyCode === 27) {
-            c.close();
-        }
-    });
+import { Dialog } from './dialog.js';
+
+export function ValidationReportDialog() {
+    Dialog.call(this, "#ixv #validation-report");
+    this.addButton("Dismiss", true);
 }
 
-ValidationReport.prototype.displayErrors = function (errors) {
+ValidationReportDialog.prototype = Object.create(Dialog.prototype);
+
+ValidationReportDialog.prototype.displayErrors = function (errors) {
     var tbody = this._dialog.find("tbody");
     tbody.empty();
     for (const m of errors) {
@@ -35,17 +33,6 @@ ValidationReport.prototype.displayErrors = function (errors) {
             .append($("<td></td>").text(m.msg))
             .appendTo(tbody);
     }
-}
-
-ValidationReport.prototype.close = function () {
-    $('.dialog-mask').hide(); 
-    this._dialog.hide() ;
-}
-
-ValidationReport.prototype.show = function (errors) {
-    this.displayErrors(errors);
-    $('.dialog-mask').hide(); 
-    this._dialog.show();
 }
 
 

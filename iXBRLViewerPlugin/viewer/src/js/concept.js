@@ -23,7 +23,7 @@ export function Concept(report, name) {
  * the concept has none.
  */
 Concept.prototype.referenceValuesAsString = function() {
-    if (!this._c.r) {
+    if (!this._c || !this._c.r) {
         return "";
     }
     else {
@@ -36,7 +36,7 @@ Concept.prototype.referenceValuesAsString = function() {
 }
 
 Concept.prototype.references = function () {
-    if (!this._c.r) {
+    if (!this._c || !this._c.r) {
         return  [];
     }
     else {

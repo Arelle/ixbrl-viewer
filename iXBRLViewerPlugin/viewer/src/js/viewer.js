@@ -159,7 +159,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             this._ixNodeMap[id] = ixn;
         }
         if (node.is(':hidden')) {
-            ixn.visible = false;
+            ixn.htmlHidden = true;
         }
         if (n.getAttribute("continuedAt")) {
             this._continuedAtMap[id] = { 

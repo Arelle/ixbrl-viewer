@@ -643,7 +643,7 @@ Inspector.prototype.update = function () {
         $('#inspector').addClass('no-fact-selected');
     } 
     else { 
-        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("concealed-fact");
+        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("html-hidden-fact");
 
         $('#inspector .fact-inspector')
             .empty()
@@ -677,7 +677,7 @@ Inspector.prototype.update = function () {
                 $('#inspector').addClass('hidden-fact');
             }
             else if (cf.isHTMLHidden()) {
-                $('#inspector').addClass('concealed-fact');
+                $('#inspector').addClass('html-hidden-fact');
             }
         }
         else if (cf instanceof Footnote) {

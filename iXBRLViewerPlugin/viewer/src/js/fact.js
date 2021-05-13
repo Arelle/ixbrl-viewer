@@ -234,7 +234,7 @@ Fact.prototype.isHidden = function () {
 }
 
 Fact.prototype.isHTMLHidden = function () {
-    return !this._ixNode.visible;
+    return this._ixNode.htmlHidden;
 }
 
 Fact.prototype.widerConcepts = function () {

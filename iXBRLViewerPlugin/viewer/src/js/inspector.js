@@ -31,7 +31,6 @@ const SEARCH_PAGE_SIZE = 100
 
 export function Inspector(iv) {
     this._iv = iv;
-    this._chart = new IXBRLChart();
     this._viewerOptions = new ViewerOptions()
 }
 
@@ -61,6 +60,7 @@ Inspector.prototype.i18nInit = function () {
 Inspector.prototype.initialize = function (report) {
     var inspector = this;
     return new Promise(function (resolve, reject) {
+        inspector._chart = new IXBRLChart();
         inspector._report = report;
         inspector.i18nInit().then((t) => {
             

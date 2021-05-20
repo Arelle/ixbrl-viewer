@@ -35,7 +35,7 @@ ReportSearch.prototype.buildSearchIndex = function () {
         doc.startDate = f.periodFrom();
         var dims = f.dimensions();
         for (var d in dims) {
-            if (this._report.getConcept(d).isTypedDimension) {
+            if (this._report.getConcept(d).isTypedDimension()) {
                 if (dims[d] !== null) {
                     l += " " + dims[d];
                 }

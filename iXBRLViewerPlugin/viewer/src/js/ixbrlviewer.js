@@ -82,9 +82,22 @@ iXBRLViewer.prototype.pluginPromise = function (methodName, ...args) {
     });
 }
 
+iXBRLViewer.prototype._loadInspectorHTML = function () {
+    /* Insert HTML and CSS styles into body */
+    $(require('../html/inspector.html')).prependTo('body');
+    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
+    $('<style id="ixv-style"></style>')
+        .prop("type", "text/css")
+        .text(inspector_css)
+        .appendTo('head');
+    $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+        .attr('href', require('../img/favicon.ico'))
+        .appendTo('head');
+}
+
 iXBRLViewer.prototype._reparentDocument = function () {
     var iframeContainer = $('#ixv #iframe-container');
-    
+
     var iframe = $('<iframe title="iXBRL document view"/>').appendTo(iframeContainer)[0];
 
     var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -106,7 +119,7 @@ iXBRLViewer.prototype._reparentDocument = function () {
     $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
 
     $('<title>').text(docTitle).appendTo($('head'));
-    
+
     /* Due to self-closing tags, our script tags may not be a direct child of
      * the body tag in an HTML DOM, so move them so that they are */
     $('body script').appendTo($('body'));
@@ -124,7 +137,7 @@ iXBRLViewer.prototype._reparentDocument = function () {
     return iframe;
 }
 
-iXBRLViewer.prototype._getTaxonomyData = function() {
+iXBRLViewer.prototype._getTaxonomyData = function () {
     for (var i = document.body.children.length - 1; i >= 0; i--) {
         var elt = document.body.children[i];
         if (elt.tagName.toUpperCase() == 'SCRIPT' && elt.getAttribute("type") == 'application/x.ixbrl-viewer+json') {
@@ -134,17 +147,18 @@ iXBRLViewer.prototype._getTaxonomyData = function() {
     return null;
 }
 
-iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function() {
+iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function () {
     if (document.location.protocol == 'file:') {
         alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
     }
 }
 
-iXBRLViewer.prototype.load = function() {
+iXBRLViewer.prototype.load = function () {
     var iv = this;
     var inspector = this.inspector;
-    setTimeout(function(){
+    setTimeout(function () {
 
+        iv._loadInspectorHTML();
         var iframes = $(iv._reparentDocument());
 
         var taxonomyData = iv._getTaxonomyData();
@@ -183,7 +197,7 @@ iXBRLViewer.prototype.load = function() {
                     .then(() => {
                         inspector.setViewer(viewer);
                         interact('#viewer-pane').resizable({
-                            edges: { left: false, right: ".resize", bottom: false, top: false},
+                            edges: { left: false, right: ".resize", bottom: false, top: false },
                             restrictEdges: {
                                 outer: 'parent',
                                 endOnly: true,
@@ -192,18 +206,18 @@ iXBRLViewer.prototype.load = function() {
                                 min: { width: 100 }
                             },
                         })
-                        .on('resizestart', function (event) {
-                            $('#ixv').css("pointer-events", "none");
-                        })
-                        .on('resizemove', function (event) {
-                            var target = event.target;
-                            var w = 100 * event.rect.width / $(target).parent().width();
-                            target.style.width = w + '%';
-                            $('#inspector').css('width', (100 - w) + '%');
-                        })
-                        .on('resizeend', function (event) {
-                            $('#ixv').css("pointer-events", "auto");
-                        });
+                            .on('resizestart', function (event) {
+                                $('#ixv').css("pointer-events", "none");
+                            })
+                            .on('resizemove', function (event) {
+                                var target = event.target;
+                                var w = 100 * event.rect.width / $(target).parent().width();
+                                target.style.width = w + '%';
+                                $('#inspector').css('width', (100 - w) + '%');
+                            })
+                            .on('resizeend', function (event) {
+                                $('#ixv').css("pointer-events", "auto");
+                            });
                         $('#ixv .loader').remove();
 
                         /* Focus on fact specified in URL fragment, if any */

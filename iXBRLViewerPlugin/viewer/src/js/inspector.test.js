@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Inspector } from "./inspector.js";
 import { Fact } from "./fact.js";
 import { iXBRLReport } from "./report.js";
+import { TestInspector } from "./test-utils.js";
 
-function TestInspector() {
-
-}
-
-TestInspector.prototype = Object.create(Inspector.prototype);
 
 var testReportData = {
     "prefixes": {
@@ -88,6 +83,9 @@ function toFact(value) {
 
 describe("Describe changes", () => {
     var insp = new TestInspector();
+    beforeAll(() => {
+        return insp.i18nInit();
+    });
 
     test("Simple changes", () => {
         expect(insp.describeChange(fromFact(1000), toFact(2000))).toBe("100.0% increase on ");

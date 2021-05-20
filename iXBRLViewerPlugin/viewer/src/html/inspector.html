@@ -16,13 +16,13 @@ limitations under the License.
 
 <div id="ixv" xmlns="http://www.w3.org/1999/xhtml">
   <div class="loader loading">
-     <span class="text">Loading iXBRL Viewer</span>
+     <span class="text" data-i18n="inspector.loadingViewer">Loading iXBRL Viewer</span>
   </div>
   <div id="top-bar">
     <img class="header" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
     <div class="document-title"></div>
     <div class="top-bar-controls" id="toolbar-highlight-menu">
-        <b>Highlight:</b><span class="highlight-key popup-trigger"><div class="popup-content" >
+        <b data-i18n="inspector.highlight">Highlight:</b><span class="highlight-key popup-trigger"><div class="popup-content" >
                 <div class="arrow"></div>
                 <div class="items"></div>
         </div></span><span class="content"></span>
@@ -31,8 +31,8 @@ limitations under the License.
   <div id="inspector" class="no-fact-selected">
     <div id="inspector-head">
       <div class="title">
-        <h1 class="footnote-mode-off">Fact Properties</h1>
-        <h1 class="footnote-mode-only">Footnote Properties</h1>
+        <h1 class="footnote-mode-off" data-i18n="inspector.factProperties">Fact Properties</h1>
+        <h1 class="footnote-mode-only" data-i18n="inspector.footnoteProperties">Footnote Properties</h1>
         <div class="back search-mode-only">
         </div>
         <div class="menu" id='display-options-menu'>
@@ -57,17 +57,17 @@ limitations under the License.
           <div class="filter-toggle"></div>
         </div>
         <div class="search-filters">
-          <div class="reset">Reset</div>
-          <h3>Filter</h3>
-          <div class="control-label">
+          <div class="reset" data-i18n="inspector.reset">Reset</div>
+          <h3 data-i18n="inspector.filter">Filter</h3>
+          <div class="control-label" data-i18n="inspector.conceptType">
               Concept Type
           </div>
           <select id="search-filter-concept-type">
-              <option value="*">ALL</option>
-              <option value="numeric">Numeric</option>
-              <option value="text">Text</option>
+              <option value="*" data-i18n="inspector.allOption">ALL</option>
+              <option value="numeric" data-i18n="inspector.numericOption">Numeric</option>
+              <option value="text" data-i18n="inspector.textOption">Text</option>
           </select>
-          <div class="control-label">
+          <div class="control-label" data-i18n="inspector.period">
               Period
           </div>
           <select id="search-filter-period">
@@ -76,13 +76,13 @@ limitations under the License.
           <div class="checkboxes">
             <div>
               <label class="checkbox">
-                <input id="search-hidden-fact-filter" type="checkbox" checked="checked"/> Hidden Facts
+                <input id="search-hidden-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.hiddenFacts">Hidden Facts</span>
                 <span class="checkmark"></span>
               </label>
             </div>
             <div>
               <label class="checkbox">
-                <input id="search-visible-fact-filter" type="checkbox" checked="checked"/> Visible Facts
+                <input id="search-visible-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.visibleFacts">Visible Facts</span>
                 <span class="checkmark"></span>
               </label>
             </div>
@@ -95,46 +95,46 @@ limitations under the License.
       <div class="fact-mode-only inspector-body-fact">
         <div class="no-fact-overlay">
           <div class="no-fact-overlay-icon"></div>
-          <p class="title">No Fact Selected</p>
+          <p class="title" data-i18n="inspector.noFactSelected">No Fact Selected</p>
         </div>
         <div class="fact-selected-only">
-          <div class="hidden-fact-tag">Hidden Fact</div>
+          <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>
           <div class="collapsible-section">
             <div class="fact-inspector collapsible-body">
             </div>
           </div>
           <div class="footnote-mode-off">
             <div class="collapsible-section anchoring">
-               <h3 class="collapsible-header">Anchoring</h3>
+               <h3 class="collapsible-header" data-i18n="inspector.anchoring">Anchoring</h3>
                <div class="collapsible-body">
-                   <h4>Wider anchor</h4>
+                   <h4 data-i18n="inspector.widerAnchor">Wider anchor</h4>
                    <div class="anchors-wider">
                    </div>
-                   <h4>Narrower anchors</h4>
+                   <h4 data-i18n="inspector.narrowerAnchor">Narrower anchors</h4>
                    <div class="anchors-narrower">
                    </div>
                </div>
             </div>
             <div class="collapsible-section">
-               <h3 class="collapsible-header">References</h3>
+               <h3 class="collapsible-header" data-i18n="inspector.references">References</h3>
                <div class="collapsible-body references">
                </div>
             </div>
             <div class="collapsible-section">
-              <h3 class="collapsible-header">Calculations</h3>
+              <h3 class="collapsible-header" data-i18n="inspector.calculations">Calculations</h3>
               <div class="collapsible-body calculations">
                 <div class="tree"></div>
               </div>
             </div>
             <div class="collapsible-section">
-               <h3 class="collapsible-header">Footnotes</h3>
+               <h3 class="collapsible-header" data-i18n="inspector.footnotes">Footnotes</h3>
                <div class="collapsible-body footnotes">
                </div>
             </div>
           </div>
           <div class="footnote-details footnote-mode-only">
             <div class="collapsible-section">
-              <h3 class="collapsible-header">Associated facts</h3>
+              <h3 class="collapsible-header" data-i18n="inspector.associatedFacts">Associated facts</h3>
                <div class="collapsible-body footnote-facts fact-list">
                </div>
             </div>
@@ -147,12 +147,12 @@ limitations under the License.
         </div>
         <div class="search-overlay">
           <div class="search-overlay-icon"></div>
-          <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
+          <div class="search-overlay-text"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
         </div>
       </div>
     </div>
     <div class="inspector-foot powered-by">
-        Powered by
+        <span data-i18n="inspector.poweredBy">Powered by</span>
         <a href="https://www.workiva.co.uk/solutions/xbrl-and-ixbrl" target="_blank"><img alt="Workiva logo (opens in new window)" src="../img/workiva.svg" /></a>
     </div>
   </div>

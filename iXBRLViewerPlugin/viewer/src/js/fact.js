@@ -19,6 +19,7 @@ import { Period } from './period.js';
 import { formatNumber } from "./util.js";
 import { Footnote } from "./footnote.js";
 import $ from 'jquery'
+import i18next from "i18next";
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
@@ -195,38 +196,23 @@ Fact.prototype.isNil = function() {
 
 Fact.prototype.readableAccuracy = function () {
     if (!this.isNumeric() || this.isNil()) {
-        return "n/a";
+        return i18next.t("common.notApplicable");
     }
     var d = this.decimals();
     if (d === undefined) {
-        return "Infinite precision"
+        return i18next.t("currencies.accuracyInfinite")
     }
     else if (d === null) {
-        return "Unspecified";
+        return i18next.t("common.unspecified");
     }
-    var names = {
-        "3": "thousandths",
-        "2": "hundredths",
-        "0":  "ones",
-        "-1":  "tens",
-        "-2":  "hundreds",
-        "-3":  "thousands",
-        "-6":  "millions",
-        "-9":  "billions",
-    }    
-    var name = names[d];
+    var name = i18next.t(`currencies.accuracy${d}`, {defaultValue:"noName"});
     if (this.isMonetaryValue()) {
         var currency = this.report().qname(this.unit().value()).localname;
         if (d == 2) {
-            if (currency == 'USD' || currency == 'EUR' || currency == 'AUD' || currency == 'ZAR') {
-                name = "cents";
-            }
-            else if (currency == 'GBP') {
-                name = "pence";
-            }
+            var name = i18next.t(`currencies.cents${currency}`, {defaultValue: name});
         }
     }
-    if (name) {
+    if (name !== "noName") {
         d += " ("+name+")";
     }
     else {

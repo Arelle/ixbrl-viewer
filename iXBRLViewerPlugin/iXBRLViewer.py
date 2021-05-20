@@ -161,6 +161,9 @@ class IXBRLViewerBuilder:
             if dimensionType is not None:
                 conceptData["d"] = dimensionType
 
+            if concept.isEnumeration:
+                conceptData["e"] = True
+
             self.taxonomyData["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):
@@ -219,9 +222,21 @@ class IXBRLViewerBuilder:
             }
 
             factData = {
-                "v": f.value if not f.isNil else None,
                 "a": aspects,
             }
+
+            if f.isNil:
+                factData["v"] = None
+            elif f.concept is not None and f.concept.isEnumeration:
+                qnEnums = f.xValue
+                if not isinstance(qnEnums, list):
+                    qnEnums = (qnEnums,)
+                factData["v"] = " ".join(self.nsmap.qname(qn) for qn in qnEnums)
+                for qn in qnEnums:
+                    self.addConcept(dts.qnameConcepts.get(qn))
+            else:
+                factData["v"] = f.value 
+
             if f.format is not None:
                 factData["f"] = str(f.format)
 
@@ -266,8 +281,7 @@ class IXBRLViewerBuilder:
                         factData.setdefault("fn", []).append(frel.toModelObject.id)
 
             self.taxonomyData["facts"][f.id] = factData
-            if f.concept is not None:
-                self.addConcept(f.concept)
+            self.addConcept(f.concept)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap

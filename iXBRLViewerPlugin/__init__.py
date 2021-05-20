@@ -40,6 +40,9 @@ from .iXBRLViewer import IXBRLViewerBuilder
 from .localviewer import launchLocalViewer, VIEWER_BASENAME_SUFFIX
 from arelle.ModelDocument import Type
 
+import traceback
+import sys
+
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer",
                       action="store",

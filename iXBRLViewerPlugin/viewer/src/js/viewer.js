@@ -14,17 +14,23 @@
 
 import $ from 'jquery'
 import { TableExport } from './tableExport.js'
-import { escapeRegex, escapeHtml, getScrollParent, getStyleComputedProperty } from './util.js'
+import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
 import { IXNode } from './ixnode.js';
 import { Fact } from './fact.js';
 
 import 'bootstrap/js/dist/tooltip';
 
-export function Viewer(iv, iframes, report) {
+export function Viewer(iv, iframes, report, useFrames) {
     this._iv = iv;
     this._report = report;
     this._iframes = iframes;
-    this._contents = iframes.contents();
+    this._useFrames = useFrames;
+    if (useFrames) {
+        this._contents = iframes.contents();
+    } else {
+        this._contents = iframes;
+    }    
+
     this.onSelect = $.Callbacks();
     this.onMouseEnter = $.Callbacks();
     this.onMouseLeave = $.Callbacks();
@@ -270,14 +276,13 @@ Viewer.prototype._applyStyles = function () {
     var stlyeElts = $("<style>")
         .prop("type", "text/css")
         .text(require('css-loader!less-loader!../less/viewer.less').toString())
-        .appendTo(this._iframes.contents().find("head"));
+        .appendTo(this._contents.find("head"));
     this._iv.callPluginMethod("updateViewerStyleElements", stlyeElts);
 }
 
 Viewer.prototype.contents = function() {
-    return this._iframes.contents();
+    return this._contents;
 }
-
 
 Viewer.prototype._selectAdjacentTag = function (offset) {
     var elements = $(".ixbrl-element:not(.ixbrl-continuation)", this._contents);
@@ -309,7 +314,9 @@ Viewer.prototype._bindHandlers = function () {
         .mouseleave(function (e) { viewer._mouseLeave($(this)) });
     $("body", this._contents)
         .click(function (e) {
-            viewer.selectElement(null);
+            var target = $(e.target);
+            if (viewer._useFrames || target.closest("#iframe-div").length != 0)
+                viewer.selectElement(null);
         });
     
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
@@ -342,7 +349,7 @@ Viewer.prototype.scrollIntoViewIfNeeded = function(e) {
     if (Element.prototype.scrollIntoViewIfNeeded)
        e[0].scrollIntoViewIfNeeded(true);
     else {
-        var viewTop = this._iframes.contents().scrollTop();
+        var viewTop = this._contents.scrollTop();
         var viewBottom = viewTop + this._iframes.height();
         var eTop = e.offset().top;
         var eBottom = eTop + e.height();
@@ -358,7 +365,7 @@ Viewer.prototype.showAndSelectElement = function(e) {
 }
 
 Viewer.prototype.clearHighlighting = function () {
-    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    $("body", this._contents).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
 }
 
 /*
@@ -511,29 +518,27 @@ Viewer.prototype._initZoom = function() {
 }
 
 Viewer.prototype._zoom = function () {
-    if (/Firefox/.test(window.navigator.userAgent)) {
-        if (!this._mzInit) {
-            this._initZoom();            
-        }
-        var container = $('#zoom-container', this._contents);
-        var scrollParent = $(getScrollParent(container[0]));
-        var viewTop = scrollParent.scrollTop();
-        var viewLeft = scrollParent.scrollLeft();
-        var rc = container[0].getBoundingClientRect();
-        container.css({
-            '-moz-transform-origin': 'left top',
-            '-moz-transform': 'scale(' + this.scale + ')'
-        }); 
-        var rcNew = container[0].getBoundingClientRect();        
-        scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
-        scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);   
-    } else {        
-        var viewTop = this._contents.scrollTop();
-        var height = $("html",this._contents).height();    
-        $('body', this._contents).css('zoom',this.scale);
-        var newHeight = $("html", this._contents).height();
-        this._contents.scrollTop(newHeight * (viewTop)/height);    
+    if (!this._mzInit) {
+        this._initZoom();            
     }
+    var container = $('#zoom-container', this._contents);
+    var scrollParent;
+    if (this._useFrames)
+        scrollParent = $('html', this._contents);
+    else
+        scrollParent = $(getScrollParent(container[0]));
+    var viewTop = scrollParent.scrollTop();
+    var viewLeft = scrollParent.scrollLeft();
+    var rc = container[0].getBoundingClientRect();
+    container.css({
+        '-moz-transform-origin': 'center top',
+        '-moz-transform': 'scale(' + this.scale + ')',
+        'transform-origin': 'center top',
+        'transform': 'scale(' + this.scale + ')'
+    }); 
+    var rcNew = container[0].getBoundingClientRect();        
+    scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
+    scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);   
 }
 
 Viewer.prototype.zoomIn = function () {

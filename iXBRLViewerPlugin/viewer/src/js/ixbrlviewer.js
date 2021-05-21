@@ -83,10 +83,22 @@ iXBRLViewer.prototype._getChromeVersion = function() {
     return raw ? parseInt(raw[2], 10) : null;
 }
 
+iXBRLViewer.prototype._detectPDF = function() {
+    var generator = $('meta[name=generator]', this._contents).attr("content");
+    if (generator === 'pdf2htmlEX') 
+        return true;
+    var pageContainer = $("div#page-container"); 
+    if (pageContainer.length > 0) {
+        if (pageContainer.find("div.pf[style*='content-visibility']").length > 0)
+            return true;
+    }
+    return false;
+}
+
 iXBRLViewer.prototype._reparentDocument = function () {
     var iframeContainer = $('#ixv #iframe-container');
-    
-    var iframe = $('<iframe />').appendTo(iframeContainer)[0];
+    var iframe = $('<iframe />')[0];
+     $('#iframe-div').replaceWith(iframe);
 
     var doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
@@ -102,23 +114,28 @@ iXBRLViewer.prototype._reparentDocument = function () {
 
     /* Avoid any inline styles on the old body interfering with the inspector */
     $('body').removeAttr('style');
-
-    /* fix chrome 88 content-visibility issue */ 
-    var chromeVersion = this._getChromeVersion()
-    if (chromeVersion && chromeVersion >= 88 && 
-        !doc.URL.endsWith("group-2020-12-31_preview.xhtml")) { // Giving a chance for Google to fix this
-        var pageContainer = $(iframe).contents().find("div#page-container"); // PDF
-        if (pageContainer.length > 0) {
-            pageContainer.find("div.pf").css("content-visibility", "");
-        } else {
-            pageContainer =  $(iframe).contents().find("div.box"); // IDML
-            if (pageContainer.length > 0) {
-                pageContainer.find("div.page_A4").css("content-visibility", "");
-            }
-        }
-    }
-
+    
     return iframe;
+}
+
+iXBRLViewer.prototype._reparentDocumentWithoutIFrame = function () {
+    var iframeContainer = $('#ixv #iframe-container');
+    var iframediv = $('#iframe-div');
+                
+    /* Due to self-closing tags, our script tags may not be a direct child of
+     * the body tag in an HTML DOM, so move them so that they are */
+    $('body script').appendTo($('body'));
+    $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo(iframediv);
+
+    /* Avoid any inline styles on the old body interfering with the inspector */
+    $('body').removeAttr('style');
+
+    $('<style></style>')
+        .prop('type','text/css')
+        .html('.checked { background: none; }')
+        .appendTo($('head'));
+
+    return $.makeArray(document);
 }
 
 iXBRLViewer.prototype._getTaxonomyData = function() {
@@ -141,8 +158,12 @@ iXBRLViewer.prototype.load = function() {
     var iv = this;
     var inspector = this.inspector;
     setTimeout(function(){
-
-        var iframes = $(iv._reparentDocument());
+        
+        /* AMANA: In the chromium, pdf files do not use frames in case of content-visibility CSS style  */
+        var useFrames = !iv._detectPDF();
+        var iframes = useFrames 
+            ? $(iv._reparentDocument())
+            :  $(iv._reparentDocumentWithoutIFrame());
 
         /* AMANA extension: In a case of multifile iXBRL attach JSON into every HTML page is too expensive --> */
         var report;
@@ -160,7 +181,7 @@ iXBRLViewer.prototype.load = function() {
             var report = new iXBRLReport(JSON.parse(taxonomyData));
         }
 
-        if (report.isDocumentSet()) {
+        if (useFrames && report.isDocumentSet()) {
             var ds = report.documentSetFiles();
             for (var i = 1; i < ds.length; i++) {
                 var iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
@@ -172,17 +193,19 @@ iXBRLViewer.prototype.load = function() {
         /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
         var timer = setInterval(function () {
             var complete = true;
-            iframes.each(function (n) {
-                var iframe = this;
-                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
-                    complete = false;
-                }
-            });
+            if (useFrames) {
+                iframes.each(function (n) {
+                    var iframe = this;
+                    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
+                        complete = false;
+                    }
+                });
+            }
             if (complete) {
                 clearInterval(timer);
 
-                var viewer = iv.viewer = new Viewer(iv, iframes, report);
+                var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames);
 
                 viewer.initialize()
                     .then(() => inspector.initialize(report))

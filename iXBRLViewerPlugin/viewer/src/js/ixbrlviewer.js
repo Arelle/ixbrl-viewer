@@ -224,7 +224,7 @@ iXBRLViewer.prototype.load = function () {
                         inspector.handleFactDeepLink();
                     });
             }
-        });
+        }, 250);
     }, 0);
 }
 

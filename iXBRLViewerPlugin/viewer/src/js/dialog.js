@@ -15,7 +15,7 @@
 import $ from 'jquery';
 
 export function Dialog(selector) {
-    this._dialog = $(selector);
+    this._dialog = $(selector).clone().appendTo("#ixv #dialog-container");
 
     $('.close', this._dialog).click(() => this.close());
     $(document).bind("keyup",(e) => {

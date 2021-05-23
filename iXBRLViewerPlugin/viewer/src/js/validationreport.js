@@ -17,7 +17,7 @@ import $ from 'jquery';
 import { Dialog } from './dialog.js';
 
 export function ValidationReportDialog() {
-    Dialog.call(this, "#ixv #validation-report");
+    Dialog.call(this, "#ixv .dialog.validation-report");
     this.addButton("Dismiss", true);
 }
 

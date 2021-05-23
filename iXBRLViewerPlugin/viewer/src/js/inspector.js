@@ -766,16 +766,17 @@ Inspector.prototype.setLanguage = function (lang) {
     this._viewerOptions.language = lang;
 }
 
+Inspector.prototype.showValidationReport = function () {
+    const vr = new ValidationReportDialog();
+    vr.displayErrors(this._report.data.validation);
+    vr.show();
+}
+
 Inspector.prototype.showValidationWarning = function () {
     if (this._report.hasValidationErrors()) {
+        $("#ixv .validation-warning").show().on("click", () => this.showValidationReport());
         var message = $("<div></div>").append("<p>This report contains <b>XBRL validation errors</b>.  These errors may prevent this document from opening correctly in other XBRL software.</p>");
         var mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
-        mb.show(
-            () => {
-                const vr = new ValidationReportDialog();
-                vr.displayErrors(this._report.data.validation);
-                vr.show();
-            }
-        );
+        mb.show(() => this.showValidationReport());
     }
 }

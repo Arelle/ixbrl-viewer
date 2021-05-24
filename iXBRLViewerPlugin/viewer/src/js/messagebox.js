@@ -13,33 +13,24 @@
 // limitations under the License.
 
 import $ from 'jquery';
+import { Dialog } from './dialog.js';
 
 export function MessageBox(title, message, okText, cancelText) {
-    this._dialog = $('#ixv #message-box');
+    Dialog.call(this, ".dialog.message-box");
     this.title = title;
     this.message = message;
     this.okText = okText;
     this.cancelText = cancelText;
-
-    $('.close', this._dialog).click(() => this.close());
-    $(document).bind("keyup",(e) => {
-        if (e.keyCode === 27) {
-            this.close();
-        }
-    });
 }
 
-MessageBox.prototype.close = function () {
-    $('.dialog-mask').hide(); 
-    this._dialog.hide() ;
-}
+MessageBox.prototype = Object.create(Dialog.prototype);
 
 MessageBox.prototype.show = function (onOK, onCancel) {
-    this._dialog.find('.title').text(this.title);
-    this._dialog.find('.message')
+    this.node.find('.title').text(this.title);
+    this.node.find('.message')
         .empty()
         .append(this.message);
-    var buttons = this._dialog.find('.buttons').empty();
+    var buttons = this.node.find('.buttons').empty();
     var okButton = $("<button></button>").text(this.okText).addClass("dialog-button-primary");
     buttons.append(okButton);
     okButton.on("click", () => {
@@ -59,8 +50,7 @@ MessageBox.prototype.show = function (onOK, onCancel) {
         });
     }
 
-    $('.dialog-mask').show(); 
-    this._dialog.show();
+    Dialog.prototype.show.call(this);
 }
 
 

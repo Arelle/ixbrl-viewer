@@ -588,7 +588,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                     $("<span></span>") 
                         .addClass("analyse")
                         .text("")
-                        .click(() => this._chart.analyseDimension(fact,["p"]))
+                        .click(() => this.analyseDimension(fact, ["p"]))
                 );
             }
             this._updateEntityIdentifier(fact, factHTML);
@@ -612,9 +612,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
-                            .on("click", () => {
-                                this._chart.analyseDimension(fact, [ aspect.name() ])
-                            })
+                            .on("click", () => this.analyseDimension(fact,[a]))
                     )
                 }
                 var s = $('<div class="dimension-value"></div>')
@@ -637,6 +635,11 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         );
     });
     return a;
+}
+
+Inspector.prototype.analyseDimension = function(fact, dimensions) {
+    var chart = new IXBRLChart();
+    chart.analyseDimension(fact, dimensions);
 }
 
 Inspector.prototype.update = function () {

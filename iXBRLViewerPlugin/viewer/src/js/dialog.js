@@ -15,9 +15,9 @@
 import $ from 'jquery';
 
 export function Dialog(selector) {
-    this._dialog = $(selector).clone().appendTo("#ixv #dialog-container");
+    this.node = $("#dialog-templates").find(selector).clone().appendTo("#ixv #dialog-container");
 
-    $('.close', this._dialog).click(() => this.close());
+    $('.close', this.node).click(() => this.close());
     $(document).bind("keyup",(e) => {
         if (e.keyCode === 27) {
             this.close();
@@ -26,7 +26,7 @@ export function Dialog(selector) {
 }
 
 Dialog.prototype.addButton = function(text, primary, callback) {
-    var buttons = this._dialog.find('.buttons');
+    var buttons = this.node.find('.buttons');
     var button = $("<button></button>").text(text).addClass(primary ? "dialog-button-primary" : "dialog-button-cancel");
     buttons.append(button);
     button.on("click", () => {
@@ -39,11 +39,11 @@ Dialog.prototype.addButton = function(text, primary, callback) {
 
 Dialog.prototype.close = function () {
     $('.dialog-mask').hide(); 
-    this._dialog.hide() ;
+    this.node.remove() ;
 }
 
 Dialog.prototype.show = function () {
     $('.dialog-mask').show(); 
-    this._dialog.show();
+    this.node.show();
 }
 

@@ -16,23 +16,13 @@ import $ from 'jquery';
 import Chart from 'chart.js';
 import { AspectSet } from './aspect.js';
 import { wrapLabel } from "./util.js";
+import { Dialog } from './dialog.js';
 
 export function IXBRLChart() {
-    this._chart = $('#ixv #chart');
-    var c = this;
-    $('.close', this._chart).click(function () { c.close() });
-    $(document).bind("keyup",function (e) {
-        if (e.keyCode === 27) {
-            c.close();
-        }
-    });
+    Dialog.call(this, ".dialog.chart");
 }
 
-IXBRLChart.prototype.close = function () {
-    $('.dialog-mask').hide(); 
-    this._chart.hide() ;
-}
-
+IXBRLChart.prototype = Object.create(Dialog.prototype);
 
 IXBRLChart.prototype._multiplierDescription = function(m) {
     var desc = {
@@ -93,11 +83,10 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
     var fact = this._analyseFact;
     var dims = this._analyseDims;
     var co = this;
-    var c = this._chart;
+    var c = this.node;
     $("canvas",c).remove();
     $("<canvas>").appendTo($(".chart-container",c));
-    $('.dialog-mask').show();
-    c.show();
+    this.show();
 
     /* Find all facts that are aligned with the current fact, except for the
      * two dimensions that we're breaking down by */
@@ -242,7 +231,7 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
 }
 
 IXBRLChart.prototype.setChartSize = function () {
-    var c = this._chart;
+    var c = this.node;
     var nh = c.height() - $('.other-aspects').height() - 16;
     $('.chart-container',c).height(nh);
     $('canvas',c).attr('height',nh).height(nh);

@@ -161,38 +161,40 @@ limitations under the License.
   <div class="dialog-mask">
   </div>
   <div id="dialog-container"></div>
-  <div id="chart" class="dialog full-screen">
-    <div class="close"></div>
-    <div class="contents">
-      <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
-      <div class="other-aspects"></div>
+  <div id="dialog-templates">
+    <div class="dialog full-screen chart">
+      <div class="close"></div>
+      <div class="contents">
+        <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
+        <div class="other-aspects"></div>
+      </div>
     </div>
-  </div>
-  <div class="dialog validation-report">
-    <div class="close"></div>
-    <div class="contents">
-        <h2>Validation results</h2>
-        <table>
-            <thead>
-                <th>Severity</th>
-                <th>Code</th>
-                <th>Message</th>
-            </thead>
-            <tbody>
+    <div class="dialog validation-report">
+      <div class="close"></div>
+      <div class="contents">
+          <h2>Validation results</h2>
+          <table>
+              <thead>
+                  <th>Severity</th>
+                  <th>Code</th>
+                  <th>Message</th>
+              </thead>
+              <tbody>
 
-            </tbody>
-        </table>
+              </tbody>
+          </table>
+          <div class="buttons">
+          </div>
+      </div>
+    </div>
+    <div class="dialog message-box">
+      <div class="close"></div>
+      <div class="contents">
+        <h2 class="title"></h2>
+        <div class="message">
+        </div>
         <div class="buttons">
         </div>
-    </div>
-  </div>
-  <div id="message-box" class="dialog message-box">
-    <div class="close"></div>
-    <div class="contents">
-      <h2 class="title"></h2>
-      <div class="message">
-      </div>
-      <div class="buttons">
       </div>
     </div>
   </div>

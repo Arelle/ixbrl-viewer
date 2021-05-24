@@ -17,14 +17,14 @@ import $ from 'jquery';
 import { Dialog } from './dialog.js';
 
 export function ValidationReportDialog() {
-    Dialog.call(this, "#ixv .dialog.validation-report");
+    Dialog.call(this, ".dialog.validation-report");
     this.addButton("Dismiss", true);
 }
 
 ValidationReportDialog.prototype = Object.create(Dialog.prototype);
 
 ValidationReportDialog.prototype.displayErrors = function (errors) {
-    var tbody = this._dialog.find("tbody");
+    var tbody = this.node.find("tbody");
     tbody.empty();
     for (const m of errors) {
         $("<tr></tr>")

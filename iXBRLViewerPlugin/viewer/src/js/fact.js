@@ -248,6 +248,10 @@ Fact.prototype.isHidden = function () {
     return this._ixNode.wrapperNode.length == 0;
 }
 
+Fact.prototype.isHTMLHidden = function () {
+    return this._ixNode.htmlHidden;
+}
+
 Fact.prototype.widerConcepts = function () {
     var concepts = [];
     const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");

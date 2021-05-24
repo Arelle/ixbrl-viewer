@@ -222,6 +222,11 @@ Inspector.prototype.factListRow = function(f) {
             .text(i18next.t("search.hiddenFact"))
             .appendTo(row);
     }
+    else if (f.isHTMLHidden()) {
+        $('<div class="hidden"></div>')
+            .text(i18next.t("search.concealedFact"))
+            .appendTo(row);
+    }
     return row;
 }
 
@@ -638,7 +643,7 @@ Inspector.prototype.update = function () {
         $('#inspector').addClass('no-fact-selected');
     } 
     else { 
-        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact");
+        $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("html-hidden-fact");
 
         $('#inspector .fact-inspector')
             .empty()
@@ -670,6 +675,9 @@ Inspector.prototype.update = function () {
             this.getPeriodIncrease(cf);
             if (cf.isHidden()) {
                 $('#inspector').addClass('hidden-fact');
+            }
+            else if (cf.isHTMLHidden()) {
+                $('#inspector').addClass('html-hidden-fact');
             }
         }
         else if (cf instanceof Footnote) {

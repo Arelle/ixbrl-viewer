@@ -452,6 +452,7 @@
       .inspector-body-fact {
         overflow-y: auto;
         height: 100%;
+        position: relative;
       }
 
       .search-results {
@@ -578,12 +579,17 @@
       top: 1px;
     }
 
-    .hidden-fact-tag {
+    .hidden-fact-tag,
+    .html-hidden-fact-tag {
       .tag();
 
       position: absolute;
-      top: 1.33rem;
+      top: 1.5rem;
       right: 0.9rem;
+
+      &.html-hidden-fact-tag {
+        background-color: #c63018;
+      }
     }
 
     table.fact-properties {
@@ -778,6 +784,12 @@
 
     &:not(.hidden-fact) {
       .hidden-fact-tag {
+        display: none;
+      }
+    }
+
+    &:not(.html-hidden-fact) {
+      .html-hidden-fact-tag {
         display: none;
       }
     }

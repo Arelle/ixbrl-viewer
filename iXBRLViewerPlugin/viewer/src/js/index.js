@@ -16,6 +16,6 @@ import $ from 'jquery'
 import { iXBRLViewer } from "./ixbrlviewer.js";
 
 $(function () {
-    var iv = new iXBRLViewer();
+    var iv = new iXBRLViewer({ showValidationWarningOnStart: true });
     iv.load();
 });

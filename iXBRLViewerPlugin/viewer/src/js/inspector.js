@@ -101,6 +101,7 @@ Inspector.prototype.initialize = function (report, viewer) {
                 inspector.buildDisplayOptionsMenu();
                 inspector.buildToolbarHighlightMenu();
                 inspector.buildHighlightKey();
+                inspector.setupValidationReportIcon();
                 inspector.initializeViewer();
                 resolve();
             });
@@ -775,9 +776,14 @@ Inspector.prototype.showValidationReport = function () {
     vr.show();
 }
 
-Inspector.prototype.showValidationWarning = function () {
+Inspector.prototype.setupValidationReportIcon = function () {
     if (this._report.hasValidationErrors()) {
         $("#ixv .validation-warning").show().on("click", () => this.showValidationReport());
+    }
+}
+
+Inspector.prototype.showValidationWarning = function () {
+    if (this._report.hasValidationErrors()) {
         var message = $("<div></div>").append("<p>This report contains <b>XBRL validation errors</b>.  These errors may prevent this document from opening correctly in other XBRL software.</p>");
         var mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
         mb.show(() => this.showValidationReport());

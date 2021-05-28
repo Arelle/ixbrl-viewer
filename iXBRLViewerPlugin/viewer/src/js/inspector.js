@@ -30,12 +30,14 @@ const SEARCH_PAGE_SIZE = 100
 
 export function Inspector(iv) {
     /* Insert HTML and CSS styles into body */
-    $(require('../html/inspector.html')).prependTo('body');
-    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
-    $('<style id="ixv-style"></style>')
-        .prop("type", "text/css")
-        .text(inspector_css)
-        .appendTo('head');
+    if ($('#ixv #iframe-container').length == 0) { /* AMANA: Portal extensions. Checking if inspector.html already loaded as part of portal template */
+        $(require('../html/inspector.html')).prependTo('body');
+        var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
+        $('<style id="ixv-style"></style>')
+            .prop("type", "text/css")
+            .text(inspector_css)
+            .appendTo('head');
+    }    
     /*$('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
         .attr('href', require('../img/favicon.ico'))
         .appendTo('head');*/

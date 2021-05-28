@@ -339,7 +339,12 @@ Viewer.prototype.showElement = function(e) {
         this._currentShowElement = e[0];
         var span = e.find('span').first();
         if (span.length)
+        {
+            if (span.css('display') == 'none') {
+                span = span.parent();
+            }
             this.scrollIntoViewIfNeeded(span);
+        }
         else
             this.scrollIntoViewIfNeeded(e);
     }
@@ -509,8 +514,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
 // The problem that these styles can't be simply applied to the tag 'body' like the zoom style
 Viewer.prototype._initZoom = function() {
     var container = $('body', this._contents);
-    var generator = $('meta[name=generator]', this._contents).attr("content");
-    if (generator === 'pdf2htmlEX') {
+    if (!this._useFrames) {
         container = $('#page-container', this._contents);                
     }
     container.contents().wrapAll('<div id="zoom-container"></div>');

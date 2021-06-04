@@ -334,8 +334,8 @@ Viewer.prototype.selectPrevTag = function () {
     this._selectAdjacentTag(-1);
 }
 
-Viewer.prototype.showElement = function(e) {
-    if (e[0] != this._currentShowElement) {
+Viewer.prototype.showElement = function(e, force) {
+    if (e[0] != this._currentShowElement || force) {
         this._currentShowElement = e[0];
         var span = e.find('span').first();
         if (span.length)
@@ -464,13 +464,13 @@ Viewer.prototype.highlightItem = function(factId) {
     this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
 }
 
-Viewer.prototype.showItemById = function (id) {
+Viewer.prototype.showItemById = function (id, force) {
     if (id !== null) {
         let elt = this.elementForItemId(id);
         this.showDocumentForItemId(id);
         /* Hidden elements will return an empty node list */
         if (elt.length > 0) {
-            this.showElement(elt);
+            this.showElement(elt, force);
         }
     }
 }
@@ -511,38 +511,42 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
 
 // The firefox browser does not support CSS zoom style,
 //      instead of is we should use -moz-transform and -moz-transform-origin styles
-// The problem that these styles can't be simply applied to the tag 'body' like the zoom style
-Viewer.prototype._initZoom = function() {
-    var container = $('body', this._contents);
-    if (!this._useFrames) {
-        container = $('#page-container', this._contents);                
-    }
-    container.contents().wrapAll('<div id="zoom-container"></div>');
-    this._mzInit = true;    
-}
-
 Viewer.prototype._zoom = function () {
-    if (!this._mzInit) {
-        this._initZoom();            
-    }
-    var container = $('#zoom-container', this._contents);
-    var scrollParent;
-    if (this._useFrames)
-        scrollParent = $('html', this._contents);
-    else
-        scrollParent = $(getScrollParent(container[0]));
-    var viewTop = scrollParent.scrollTop();
-    var viewLeft = scrollParent.scrollLeft();
-    var rc = container[0].getBoundingClientRect();
-    container.css({
-        '-moz-transform-origin': 'center top',
-        '-moz-transform': 'scale(' + this.scale + ')',
-        'transform-origin': 'center top',
-        'transform': 'scale(' + this.scale + ')'
-    }); 
-    var rcNew = container[0].getBoundingClientRect();        
-    scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
-    scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);   
+    var iv = this;    
+    $('html', this._contents).each(function () {
+        var container, scrollParent;
+        if (!iv._useFrames) {            
+            if (!iv._mzInit) {
+                let pagecontainer = $('#page-container');
+                pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');
+                iv._mzInit = true;
+            }
+            container = $('#zoom-container');
+            scrollParent = $(getScrollParent(container[0]));            
+        } else {
+            container = $(this.ownerDocument.body);
+            scrollParent = $(this);
+        }
+        var viewTop = scrollParent.scrollTop();
+        var viewLeft = scrollParent.scrollLeft();
+        var rc = container[0].getBoundingClientRect();
+        container.css({
+            '-moz-transform-origin': '50% 0',
+            '-moz-transform': 'scale(' + iv.scale + ')',
+            'transform-origin': '50% 0',
+            'transform': 'scale(' + iv.scale + ')',
+        }).promise().done(function() {
+            var rcNew = container[0].getBoundingClientRect();
+            container.css({
+                'margin-top': 0,
+                'margin-left': (rcNew.width - container[0].clientWidth)/2,
+                'margin-bottom': rcNew.height - container[0].clientHeight, 
+                'margin-right': (rcNew.width - container[0].clientWidth)/2,
+            });        
+            scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
+            scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);       
+        });
+    });    
 }
 
 Viewer.prototype.zoomIn = function () {

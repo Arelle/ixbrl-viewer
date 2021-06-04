@@ -147,6 +147,7 @@ iXBRLViewer.prototype._reparentDocument = function (source, useFrames) {
         
         if (!source[0].isSameNode(document)) {
             $('head', source).children('style').appendTo($('head'));
+            $('head title').replaceWith($('head title', source));
         }
 
         $('<style></style>')

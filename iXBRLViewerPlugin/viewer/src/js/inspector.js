@@ -109,7 +109,7 @@ Inspector.prototype.handleMessage = function (event) {
     var data = JSON.parse(jsonString);
 
     if (data.task == 'SHOW_FACT') {
-        this.selectItem(data.factId);
+        this.selectItem(data.factId, undefined, true);
     }
     else {
         console.log("Not handling unsupported task message: " + jsonString);
@@ -651,7 +651,7 @@ Inspector.prototype.update = function () {
  * If itemIdList is omitted, the currently selected item list is reset to just
  * the primary item.
  */
-Inspector.prototype.selectItem = function (id, itemIdList) {
+Inspector.prototype.selectItem = function (id, itemIdList, force) {
     if (itemIdList === undefined) {
         this._currentItemList = [ this._report.getItemById(id) ];
     }
@@ -661,7 +661,7 @@ Inspector.prototype.selectItem = function (id, itemIdList) {
             this._currentItemList.push(this._report.getItemById(itemIdList[i]));
         }
     }
-    this.switchItem(id);
+    this.switchItem(id, force);
     this.notifySelectItem(id);
 }
 
@@ -682,10 +682,10 @@ Inspector.prototype.notifySelectItem = function (id) {
  *
  * For footnotes, we currently only support a single footnote being selected.
  */
-Inspector.prototype.switchItem = function (id) {
+Inspector.prototype.switchItem = function (id, force) {
     if (id !== null) {
         this._currentItem = this._report.getItemById(id);
-        this._viewer.showItemById(id);
+        this._viewer.showItemById(id, force);
         this._viewer.highlightItem(id);
     }
     else {

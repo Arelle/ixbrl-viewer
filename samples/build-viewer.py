@@ -16,6 +16,7 @@
 
 import arelle.FileSource
 from arelle import PackageManager, Cntlr, PluginManager
+from arelle.ModelFormulaObject import FormulaOptions
 import os
 import sys
 import glob
@@ -51,6 +52,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
                 return None
         fs = arelle.FileSource.openFileSource(f, self)
         xbrl = self.modelManager.load(fs)
+        self.modelManager.validate()
 
         try:
             viewerBuilder = iXBRLViewerPlugin.IXBRLViewerBuilder(xbrl)
@@ -76,6 +78,10 @@ cntlr.startLogging(
     logRefObjectProperties=True,
     logToBuffer=True
 )
+cntlr.modelManager.validateInferDecimals = True
+cntlr.modelManager.validateCalcLB = True
+cntlr.modelManager.formulaOptions = FormulaOptions()
+
 PluginManager.addPluginModule("inlineXbrlDocumentSet")
 if args.package_dir:
     cntlr.loadPackagesFromDir(args.package_dir)

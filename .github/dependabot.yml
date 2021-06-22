@@ -1,16 +1,4 @@
 version: 2
-registries:
-  python-index-workivaeast-jfrog-io-workivaeast-api-pypi-pypi-prod:
-    type: python-index
-    url: https://workivaeast.jfrog.io/workivaeast/api/pypi/pypi-prod/simple
-    replaces-base: true
-    username: "${{secrets.WORKIVA_ARTIFACTORY_JFROG_USERNAME}}"
-    password: "${{secrets.WORKIVA_ARTIFACTORY_JFROG_PASSWORD}}"
-  npm-registry-workivaeast-jfrog-io-workivaeast-api-npm-prod:
-    type: npm-registry
-    url: https://workivaeast.jfrog.io/workivaeast/api/npm-prod/
-    username: "${{secrets.WORKIVA_ARTIFACTORY_JFROG_USERNAME}}"
-    password: "${{secrets.WORKIVA_ARTIFACTORY_JFROG_PASSWORD}}"
 
 updates:
 - package-ecosystem: npm
@@ -45,11 +33,8 @@ updates:
   - dependency-name: webpack-merge
     versions:
     - ">=5"
-  registries:
-  - npm-registry-workivaeast-jfrog-io-workivaeast-api-npm-prod
 - package-ecosystem: pip
   directory: "/"
-  insecure-external-code-execution: allow
   schedule:
     interval: weekly
     day: sunday
@@ -62,5 +47,3 @@ updates:
   - dependency-name: numpy
     versions:
     - ">=1.20"
-  registries:
-  - python-index-workivaeast-jfrog-io-workivaeast-api-pypi-pypi-prod

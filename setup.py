@@ -1,6 +1,19 @@
 import os
 from setuptools import setup, find_packages
 
+
+def get_requirements():
+    """
+    Get the requirements from a file.
+
+    :return: A list of requirements.
+    :rtype: list
+    """
+    with open('requirements.txt') as f:
+        requirements = f.read().splitlines()
+        return requirements
+
+
 setup(
     name='ixbrl_viewer',
     version='0.0.0',
@@ -16,9 +29,5 @@ setup(
         'Copyright :: Workiva Inc. :: 2019'
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=[
-        'isodate==0.6.0',
-        'numpy==1.19.5',
-        'pycountry==20.7.3'
-    ],
+    install_requires=get_requirements(),
 )

@@ -13,10 +13,11 @@ RUN pip install -r requirements-dev.txt
 WORKDIR /build/
 ADD . /build/
 
-# The following command replaces the @VERSION@ string in setup.py with the tagged version number from GIT_TAG
-RUN sed -i s/@VERSION@/$GIT_TAG/ setup.py
-# Update line 3 in package.json
-RUN sed -i "3 s/0.0.0/${GIT_TAG:-0.0.0}/" package.json
+# The following command replaces the version string in setup.py and package.json
+# with the tagged version number from GIT_TAG or `0.0.0` if GIT_TAG is not set
+ARG VERSION=${GIT_TAG:-0.0.0}
+RUN sed -i "s+version=\'0.0.0\'+version=\'$VERSION\'+" setup.py
+RUN sed -i "s+\"version\": \"0.0.0\"+\"version\": \"$VERSION\"+" package.json
 
 # build ixbrlviewer.js
 RUN apt-get update && apt-get install -y curl && \

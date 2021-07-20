@@ -80,7 +80,7 @@ Inspector.prototype.initialize = function (report) {
             $("#inspector-head .back").on("click", function () {
                 $(this).closest("#inspector").removeClass("search-mode");
             });
-            $(".popup-trigger").on("hover", function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
+            $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
             inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
             inspector.buildToolbarHighlightMenu();
 

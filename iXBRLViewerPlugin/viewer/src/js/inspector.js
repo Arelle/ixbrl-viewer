@@ -57,8 +57,9 @@ Inspector.prototype.i18nInit = function () {
     });
 }
 
-Inspector.prototype.initialize = function (report) {
+Inspector.prototype.initialize = function (report, viewer) {
     var inspector = this;
+    this._viewer = viewer;
     return new Promise(function (resolve, reject) {
         inspector._chart = new IXBRLChart();
         inspector._report = report;
@@ -98,14 +99,15 @@ Inspector.prototype.initialize = function (report) {
                 inspector.buildDisplayOptionsMenu();
                 inspector.buildToolbarHighlightMenu();
                 inspector.buildHighlightKey();
+                inspector.initializeViewer();
                 resolve();
             });
         });
     });
 }
 
-Inspector.prototype.setViewer = function (viewer) {
-    this._viewer = viewer;
+Inspector.prototype.initializeViewer = function () {
+    var viewer = this._viewer;
     viewer.onSelect.add((id, eltSet) => this.selectItem(id, eltSet));
     viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
     viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
@@ -158,7 +160,7 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
 
 Inspector.prototype.buildToolbarHighlightMenu = function () {
     this._toolbarMenu.reset();
-    this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags");
+    this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
     this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
 }
 

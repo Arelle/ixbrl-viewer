@@ -59,7 +59,7 @@ Menu.prototype._add = function(item, after) {
     }
 }
 
-Menu.prototype.addCheckboxItem = function(name, callback, itemName, after) {
+Menu.prototype.addCheckboxItem = function(name, callback, itemName, after, onByDefault) {
     var menu = this;
     var item = $("<label></label>")
         .addClass("menu-checkbox")
@@ -68,6 +68,7 @@ Menu.prototype.addCheckboxItem = function(name, callback, itemName, after) {
         .data("iv-menu-item-name", itemName)
         .prepend(
             $('<input type="checkbox"></input>')
+                .prop("checked", onByDefault)
                 .change(function () {
                     callback($(this).prop("checked"));
                     menu.close(); 
@@ -75,6 +76,9 @@ Menu.prototype.addCheckboxItem = function(name, callback, itemName, after) {
         )
         .append($("<span></span>").addClass("checkmark"));
     this._add(item, after);
+    if (onByDefault) {
+        callback(true);
+    }
 }
 
 Menu.prototype.addCheckboxGroup = function(values, names, def, callback, name, after) {

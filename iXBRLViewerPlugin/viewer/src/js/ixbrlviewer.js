@@ -18,10 +18,11 @@ import { iXBRLReport } from "./report.js";
 import { Viewer } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
-export function iXBRLViewer() {
+export function iXBRLViewer(options) {
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
+    this.options = options || {};
 }
 
 /*
@@ -193,9 +194,8 @@ iXBRLViewer.prototype.load = function () {
                 var viewer = iv.viewer = new Viewer(iv, iframes, report);
 
                 viewer.initialize()
-                    .then(() => inspector.initialize(report))
+                    .then(() => inspector.initialize(report, viewer))
                     .then(() => {
-                        inspector.setViewer(viewer);
                         interact('#viewer-pane').resizable({
                             edges: { left: false, right: ".resize", bottom: false, top: false },
                             restrictEdges: {

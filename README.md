@@ -33,22 +33,22 @@ contains all of the javascript that runs the viewer functionality.
 2. Download and install [Arelle][arelle-download]
 
 
-## Accessing the javascript viewer application
+# Accessing the javascript viewer application
 
-### Accessing via the CDN
+## Accessing via the CDN
 In order to make things as easy as possible Workiva is now hosting the javascript 
 via a CDN. It can be accessed via the followng CDN url: 
 ```
 https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js
 ```
-Where `<tagged version>` is the current version of ixbrl-viewer you are using. For instance `0.1.58`.
+Where `<tagged version>` is the current version of ixbrl-viewer you are using. For instance [1.0.0][CDN].
 
-### Accessing via Github
+## Accessing via Github
 When a new version of ixbrl-viewer is released, the javascript is included as a 
 release asset. The asset can be found on the releases [page][ixbrlviewer-github-releases] for each version of
 the ixbrl-viewer.  
 
-### Building the javascript locally
+## Building the javascript locally
 
 1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
 2. Install the dependencies for javascript by running: `npm install`.  This
@@ -58,9 +58,17 @@ the ixbrl-viewer.
    iXBRLViewerPlugin/viewer/dist directory.
 
 [ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
+[CDN]: https://cdn-prod.wdesk.org/ixbrl-viewer/1.0.0/ixbrlviewer.js
 [ixbrlviewer-github-releases]: https://github.com/Workiva/ixbrl-viewer/releases/tag/0.1.58
 [arelle-git]: https://github.com/Arelle/Arelle
 [arelle-download]: http://arelle.org/pub
+
+# Javascript Versioning
+
+The ixbrl-viewer plugin embeds processed XBRL metadata in the HTML that has a specific format read 
+by the JavaScript. The metadata produced by version `MAJOR.MINOR.PATCH` is supported by any version
+of the JavaScript version `MAJOR.MINOR` and >= `PATCH`.
+
 
 # Producing an ixbrl-viewer via the Arelle GUI
 

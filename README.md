@@ -22,21 +22,16 @@ the Arelle plugin.  The preparation process updates the iXBRL file to include:
 Once prepared, the resulting file provides an entirely standalone viewer.  Once
 prepared, the viewer is entirely standalone, and does not require access to the
 taxonomy, or to any online services.  The only dependency is on the javascript
-viewer application, which is a single file which can be accessed directly online or stored locally.
+viewer application, which is a single file which can be accessed directly online, downloaded or built locally.
 
 The javascript viewer application is a single Javascript file called ixbrlviewer.js. It
 contains all of the javascript that runs the viewer functionality.
 
-## Quick Start
-Follow these steps in order to start producing the ixbrl-viewer quickly:
+## Installation
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
 2. Download and install [Arelle][arelle-download]
-3. Run the following command by supplementing the required information in the angled brackets.
-```
-python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
 
-```
 
 ## Accessing the javascript viewer application
 
@@ -50,21 +45,20 @@ Where `<tagged version>` is the current version of ixbrl-viewer you are using. F
 
 ### Accessing via Github
 When a new version of ixbrl-viewer is released, the javascript is included as a 
-release asset. The asset can be found on the releases [page][ixbrlviewer-gitthub-releases] for each version of
+release asset. The asset can be found on the releases [page][ixbrlviewer-github-releases] for each version of
 the ixbrl-viewer.  
 
 ### Building the javascript locally
 
-1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
-2. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
-3. Install the dependencies for javascript by running: `npm install`.  This
+1. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
+2. Install the dependencies for javascript by running: `npm install`.  This
    command must be run from within the `ixbrl-viewer directory` (i.e. the root
    of your checkout of the repository).
-4. Run `npm run prod`. This will create the ixbrlviewer.js in the
+3. Run `npm run prod`. This will create the ixbrlviewer.js in the
    iXBRLViewerPlugin/viewer/dist directory.
 
 [ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
-[ixbrlviewer-gitthub-releases]: https://github.com/Workiva/ixbrl-viewer/releases/tag/0.1.57
+[ixbrlviewer-github-releases]: https://github.com/Workiva/ixbrl-viewer/releases/tag/0.1.58
 [arelle-git]: https://github.com/Arelle/Arelle
 [arelle-download]: http://arelle.org/pub
 
@@ -87,9 +81,8 @@ the ixbrl-viewer.
    2. A relative url to the downloaded ixviewer.js from github
    3. A relative url to the locally built ixviewer.js 
 
-9. Save the viewer iXBRL file to a new file in the newly created
-   directory by selecting **Browse**, browsing to the directory, and providing a
-   file name.
+9. Save the viewer iXBRL file to a new file in the newly created directory by
+   selecting **Browse**, browsing to the directory, and providing a file name.
 
 10. You should now be able to open the created file in Chrome, and the iXBRL viewer
     should load.

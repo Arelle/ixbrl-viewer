@@ -39,7 +39,7 @@ contains all of the javascript that runs the viewer functionality.
 In order to make things as easy as possible Workiva is now hosting the javascript 
 via a CDN. It can be accessed via the followng CDN url: 
 ```
-https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js
+https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
 ```
 Where `<tagged version>` is the current version of ixbrl-viewer you are using. For instance [1.0.0][CDN].
 
@@ -58,7 +58,7 @@ the ixbrl-viewer.
    iXBRLViewerPlugin/viewer/dist directory.
 
 [ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
-[CDN]: https://cdn-prod.wdesk.org/ixbrl-viewer/1.0.0/ixbrlviewer.js
+[CDN]: https://cdn-prod.wdesk.com/ixbrl-viewer/1.0.0/ixbrlviewer.js
 [ixbrlviewer-github-releases]: https://github.com/Workiva/ixbrl-viewer/releases/tag/0.1.58
 [arelle-git]: https://github.com/Arelle/Arelle
 [arelle-download]: http://arelle.org/pub
@@ -66,9 +66,10 @@ the ixbrl-viewer.
 # Javascript Versioning
 
 The ixbrl-viewer plugin embeds processed XBRL metadata in the HTML that has a specific format read 
-by the JavaScript. The metadata produced by version `MAJOR.MINOR.PATCH` is supported by any version
-of the JavaScript version `MAJOR.MINOR` and >= `PATCH`.
-
+by the JavaScript. The metadata produced by a version will be broken if a major version bump is 
+released. The new javascript won't necessarily work with older versions of the generated metadata.
+if a minor version bump is released, then the metadata format was updated, any ixbrl-viewer produced
+on that minor version will have to use at least that minor version for the javascript.
 
 # Producing an ixbrl-viewer via the Arelle GUI
 
@@ -85,7 +86,7 @@ of the JavaScript version `MAJOR.MINOR` and >= `PATCH`.
    
    This url can be one of the following:
    
-   1. `https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
+   1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
    2. A relative url to the downloaded ixviewer.js from github
    3. A relative url to the locally built ixviewer.js 
 
@@ -108,7 +109,7 @@ output location, rather than a file.
 The plugin can also be used on the command line:
 
 ```
-python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js
+python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
 
 ```
 
@@ -118,7 +119,7 @@ Notes:
 * The plugin path needs to an absolute file path to the ixbrl-viewer plugin
 * The viewer url can be one of the following:
 
-  1. `https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
+  1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js 
 
@@ -140,7 +141,7 @@ The iXBRL Viewer supports Inline XBRL document sets.  This requires the `inlineX
 The output must be specified as a directory.  For example:
 
 ```
-python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url ixbrlviewer.js
+python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
 ```
 
 Notes:
@@ -151,7 +152,7 @@ Notes:
 * The plugin path needs to an absolute file path to the ixbrl-viewer plugin
 * The viewer url can be one of the following:
  
-  1. `https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
+  1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js 
 

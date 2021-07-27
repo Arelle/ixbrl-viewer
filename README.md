@@ -41,7 +41,7 @@ via a CDN. It can be accessed via the followng CDN url:
 ```
 https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
 ```
-Where `<tagged version>` is the current version of ixbrl-viewer you are using. For instance [1.0.0][CDN].
+Where `<version tag>` is the current version of ixbrl-viewer you are using. For instance [1.0.0][CDN].
 
 ## Accessing via Github
 When a new version of ixbrl-viewer is released, the javascript is included as a 

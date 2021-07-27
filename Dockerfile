@@ -35,6 +35,11 @@ RUN npm run stylelint
 # Upload ixbrlviewer.js to github artifacts
 ARG BUILD_ARTIFACTS_GITHUB_RELEASE_ASSETS=/build/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 
+# Host ixviewer.js on CDN
+RUN mkdir /static_release
+RUN tar -czf /static_release/assets.tar.gz -C /build/iXBRLViewerPlugin/viewer/dist/ .
+ARG BUILD_ARTIFACTS_CDN=/static_release/assets.tar.gz
+
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml
 RUN mkdir /test_reports

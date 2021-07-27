@@ -21,15 +21,39 @@ the Arelle plugin.  The preparation process updates the iXBRL file to include:
 
 Once prepared, the resulting file provides an entirely standalone viewer.  Once
 prepared, the viewer is entirely standalone, and does not require access to the
-taxonomy, or to any online services.  The only dependency is on the Javascript
-viewer application, which is a single file which may be stored locally.
+taxonomy, or to any online services.  The only dependency is on the javascript
+viewer application, which is a single file which can be accessed directly online or stored locally.
 
-## Building the ixbrlviewer
+The javascript viewer application is a single Javascript file called ixbrlviewer.js. It
+contains all of the javascript that runs the viewer functionality.
 
-The viewer works using a single Javascript file called ixbrlviewer.js. It
-contains all of the javascript that runs the viewer functionality. In order to
-successfully build an ixbrl-viewer you need to first build the ixbrlviewer
-file.
+## Quick Start
+Follow these steps in order to start producing the ixbrl-viewer quickly:
+
+1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
+2. Download and install [Arelle][arelle-download]
+3. Run the following command by supplementing the required information in the angled brackets.
+```
+python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
+
+```
+
+## Accessing the javascript viewer application
+
+### Accessing via the CDN
+In order to make things as easy as possible Workiva is now hosting the javascript 
+via a CDN. It can be accessed via the followng CDN url: 
+```
+https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js
+```
+Where `<tagged version>` is the current version of ixbrl-viewer you are using. For instance `0.1.58`.
+
+### Accessing via Github
+When a new version of ixbrl-viewer is released, the javascript is included as a 
+release asset. The asset can be found on the releases [page][ixbrlviewer-gitthub-releases] for each version of
+the ixbrl-viewer.  
+
+### Building the javascript locally
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
 2. Install npm. Instructions can be found here: https://www.npmjs.com/get-npm
@@ -39,38 +63,36 @@ file.
 4. Run `npm run prod`. This will create the ixbrlviewer.js in the
    iXBRLViewerPlugin/viewer/dist directory.
 
-## Installing the Arelle plugin
-
-1. Download and install [Arelle][arelle-download]
-2. Open Arelle and select **Manage Plugins** from the **Help** menu.
-3. Press **Browse** under "Find plug-in modules".  
-4. Browse to the **iXBRLViewerPlugin** directory within your checkout of the iXBRL Viewer git repository and select the **\_\_init\_\_.py** file within it.
-5. Press **Close** and then **Yes** when prompted to restart Arelle.
-6. You should now have a **Save iXBRL Viewer instance** on the **Tools** menu.
-
 [ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
+[ixbrlviewer-gitthub-releases]: https://github.com/Workiva/ixbrl-viewer/releases/tag/0.1.57
 [arelle-git]: https://github.com/Arelle/Arelle
 [arelle-download]: http://arelle.org/pub
 
-## Preparing an iXBRL file using the Arelle GUI
+# Producing an ixbrl-viewer via the Arelle GUI
 
-To prepare an iXBRL file to work with the viewer, open the iXBRL file in
-Arelle, and then use the **Save iXBRL Viewer instance** option on the **Tools**
-menu.
+## Preparing an iXBRL file
 
-You will need to provide a URL to the **ixbrlviewer.js** file which can be
-found in the **viewer/dist** directory within the repository.  This can be 
-either an absolute URL, or a relative URL from the iXBRL viewer file to the 
-ixbrlviewer.js file.  The easiest way to do this is to create a new directory, 
-copy the **ixbrlviewer.js** file to that directory, and then specify the 
-**script URL** as just "ixbrlviewer.js".
+1. Open Arelle and select **Manage Plugins** from the **Help** menu.
+2. Press **Browse** under "Find plug-in modules".  
+3. Browse to the **iXBRLViewerPlugin** directory within your checkout of the iXBRL Viewer git repository and select the **\_\_init\_\_.py** file within it.
+4. Press **Close** and then **Yes** when prompted to restart Arelle.
+5. You should now have a **Save iXBRL Viewer instance** on the **Tools** menu.
+6. Open the ixbrl filing zip in Arelle
+7. Select **Save iXBRL Viewer instance** option on the **Tools** menu
+8. Provide a **script URL** to the **ixbrlviewer.js** file.
+   
+   This url can be one of the following:
+   
+   1. `https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
+   2. A relative url to the downloaded ixviewer.js from github
+   3. A relative url to the locally built ixviewer.js 
 
-You should now save the viewer iXBRL file to a new file in the newly created
-directory by selecting **Browse**, browsing to the directory, and providing a
-file name.
+9. Save the viewer iXBRL file to a new file in the newly created
+   directory by selecting **Browse**, browsing to the directory, and providing a
+   file name.
 
-You should now be able to open the created file in Chrome, and the iXBRL viewer
-should load.
+10. You should now be able to open the created file in Chrome, and the iXBRL viewer
+    should load.
 
 ## Preparing an iXBRL document set using the Arelle GUI
 
@@ -78,21 +100,28 @@ To prepare an iXBRL document set, open the document set in Arelle.  The process
 is as for a single file, except that a directory should be selected as the
 output location, rather than a file.
 
-## Preparing an iXBRL file using the Arelle command line
+# Producing an ixbrl-viewer via the Arelle command line 
+
+## Preparing an iXBRL file
 
 The plugin can also be used on the command line:
 
 ```
-python3 Arelle/arelleCmdLine.py --plugins=/path/to/iXBRLViewerPlugin -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url ixbrlviewer.js
+python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js
 
 ```
 
 Notes:
 
 * "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
-* The plugin path needs to an absolute file path
+* The plugin path needs to an absolute file path to the ixbrl-viewer plugin
+* The viewer url can be one of the following:
 
-## Preparing an iXBRL document set using the Arelle command line
+  1. `https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
+  2. A relative url to the downloaded ixviewer.js from github
+  3. A relative url to the locally built ixviewer.js 
+
+## Preparing an iXBRL document set
 
 The iXBRL Viewer supports Inline XBRL document sets.  This requires the `inlineXbrlDocumentSet` plugin.  The input is specified using JSON in the following form:
 
@@ -113,9 +142,17 @@ The output must be specified as a directory.  For example:
 python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url ixbrlviewer.js
 ```
 
-The first file specified is the "primary" file, and should be opened in a
-browser to use the viewer.  The other files will be loaded in separate tabs
-within the viewer.
+Notes:
+* The first file specified is the "primary" file, and should be opened in a
+  browser to use the viewer.  The other files will be loaded in separate tabs
+  within the viewer.
+* "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
+* The plugin path needs to an absolute file path to the ixbrl-viewer plugin
+* The viewer url can be one of the following:
+ 
+  1. `https://cdn-prod.wdesk.org/ixbrl-viewer/<tagged version>/ixbrlviewer.js`
+  2. A relative url to the downloaded ixviewer.js from github
+  3. A relative url to the locally built ixviewer.js 
 
 ## Using build-viewer.py
 
@@ -150,5 +187,3 @@ Run the following command to run javascript unit tests: `npm run test`
 In order to run the python unit tests make sure that you have pip installed requirements-dev.txt.
 
 Run the following command to run python unit tests: `nosetests`
-
-

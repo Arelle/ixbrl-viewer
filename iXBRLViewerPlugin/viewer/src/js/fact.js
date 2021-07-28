@@ -75,7 +75,10 @@ Fact.prototype.value = function() {
 
 Fact.prototype.readableValue = function() {
     var v = this.f.v;
-    if (this.isNumeric()) {
+    if (this.isInvalidIXValue()) {
+        v = "Invalid value";
+    }
+    else if (this.isNumeric()) {
         var d = this.decimals();
         var formattedNumber;
         if (this.isNil()) {
@@ -199,6 +202,10 @@ Fact.prototype.duplicates = function () {
 
 Fact.prototype.isNil = function() {
     return this.f.v === null
+}
+
+Fact.prototype.isInvalidIXValue = function() {
+    return this.f.err == 'INVALID_IX_VALUE';
 }
 
 Fact.prototype.readableAccuracy = function () {

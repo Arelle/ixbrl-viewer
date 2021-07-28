@@ -529,7 +529,7 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
     }
 
     var valueSpan = $('tr.value td .value', context).empty().text(v);
-    if (item instanceof Fact && item.isNil()) {
+    if (item instanceof Fact && (item.isNil() || item.isInvalidIXValue())) {
         valueSpan.wrapInner("<i></i>");
     }
 

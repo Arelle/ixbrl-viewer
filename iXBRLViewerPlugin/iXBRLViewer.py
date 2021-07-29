@@ -14,7 +14,7 @@
 
 from arelle import XbrlConst
 from arelle.ModelDocument import Type
-from arelle.ModelValue import QName
+from arelle.ModelValue import QName, INVALIDixVALUE
 from lxml import etree
 import json
 import math
@@ -236,6 +236,8 @@ class IXBRLViewerBuilder:
                     self.addConcept(dts.qnameConcepts.get(qn))
             else:
                 factData["v"] = f.value 
+                if f.value == INVALIDixVALUE:
+                    factData["err"] = 'INVALID_IX_VALUE'
 
             if f.format is not None:
                 factData["f"] = str(f.format)

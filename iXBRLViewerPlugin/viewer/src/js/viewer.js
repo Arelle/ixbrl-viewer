@@ -549,9 +549,9 @@ Viewer.prototype._zoom = function () {
         var viewLeft = scrollParent.scrollLeft();
         var rc = container[0].getBoundingClientRect();
         container.css({
-            '-moz-transform-origin': '50% 0',
+            '-moz-transform-origin': 'center 0',
             '-moz-transform': 'scale(' + iv.scale + ')',
-            'transform-origin': '50% 0',
+            'transform-origin': 'center 0',
             'transform': 'scale(' + iv.scale + ')',
         }).promise().done(function() {
             var rcNew = container[0].getBoundingClientRect();

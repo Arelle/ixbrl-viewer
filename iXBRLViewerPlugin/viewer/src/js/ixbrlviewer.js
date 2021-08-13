@@ -94,20 +94,25 @@ iXBRLViewer.prototype._inIframe = function() {
 iXBRLViewer.prototype._detectPDF = function(document) {    
     var pageContainer = $("div#page-container", document); 
     if (pageContainer.length > 0) {
-        if (pageContainer.find("div.pf[style*='content-visibility']").length > 0)
-            return true;
+        if (pageContainer.find("div.pf[style*='content-visibility']").length > 0) {
+            var generator = $('meta[name=generator]', this._contents).attr("content");
+            if (generator === 'pdf2htmlEX') {
+                return true;
+            }
+        }
     }
     return false;
 }
 
-iXBRLViewer.prototype._fixChromeBug = function(document) {
+iXBRLViewer.prototype._fixChromeBug = function(iframe) {
     var chromeVersion = this._getChromeVersion();
     if (chromeVersion && chromeVersion >= 88) { // Giving a chance for Google to fix this        
-        var pageContainer = $(document).find("div#page-container"); // PDF
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        var pageContainer = $(doc).find("div#page-container"); // PDF
         if (pageContainer.length > 0) {
             pageContainer.find("div.pf").css("content-visibility", "");
         } else {
-            pageContainer =  $(document).find("div.box"); // IDML
+            pageContainer =  $(doc).find("div.box"); // IDML
             if (pageContainer.length > 0) {
                 pageContainer.find("div.page_A4").css("content-visibility", "");
             }
@@ -243,7 +248,7 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
                 if (useFrames) {
                     iframes.each(function (n) {
                         /* fix chrome 88 content-visibility issue */ 
-                        iv._fixChromeBug($(this));
+                        iv._fixChromeBug(this);
                     });
                 }
 

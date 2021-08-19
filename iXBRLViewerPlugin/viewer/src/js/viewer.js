@@ -222,7 +222,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             if (m) {
                 var id = m[1];
                 node = $(n);
-                node.addClass("ixbrl-element").data('ivid', id);
+                node.addClass("ixbrl-element").data('ivid', [id]);
                 /* We may have already seen the corresponding ix element in the hidden
                  * section */
                 var ixn = this._ixNodeMap[id];

@@ -39,7 +39,7 @@
     "file-saver": "^2.0.2",
     "html-loader": "^0.5.5",
     "interactjs": "^1.8.5",
-    "jest": "^26.0.1",
+    "jest": "^27.2.0",
     "jquery": "^3.4.1",
     "less": "^3.11.1",
     "less-loader": "^6.0.0",

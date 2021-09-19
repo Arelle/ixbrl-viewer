@@ -28,7 +28,7 @@
     "babel-core": "^6.26.3",
     "babel-jest": "^26.0.1",
     "babel-preset-env": "^1.7.0",
-    "base64-inline-loader": "^1.1.1",
+    "base64-inline-loader": "^2.0.1",
     "i18next": "^20.3.2",
     "jquery-i18next": "^1.2.1",
     "chart.js": "^2.9.3",

@@ -94,12 +94,13 @@ iXBRLViewer.prototype._inIframe = function() {
 iXBRLViewer.prototype._detectPDF = function(document) {    
     var pageContainer = $("div#page-container", document); 
     if (pageContainer.length > 0) {
-        if (pageContainer.find("div.pf[style*='content-visibility']").length > 0) {
-            var generator = $('meta[name=generator]', this._contents).attr("content");
-            if (generator === 'pdf2htmlEX') {
-                return true;
-            }
+        var generator = $('meta[name=generator]', this._contents).attr("content");
+        if (generator === 'pdf2htmlEX') {
+            return true;
         }
+        if (pageContainer.find("div.pf[style*='content-visibility']").length > 0) {
+            return true;            
+        }        
     }
     return false;
 }
@@ -202,8 +203,9 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
 
     setTimeout(function(){
         
-        /* AMANA: In the chromium, pdf files do not use frames in case of content-visibility CSS style  */        
-        var useFrames = iv._inIframe() || !iv._detectPDF(ownerDocument);
+        /* AMANA: In the chromium, pdf files do not use frames in case of content-visibility CSS style  */  
+        var isPDF = iv._detectPDF(ownerDocument);     
+        var useFrames = iv._inIframe() || !isPDF;
         var iframes = $(iv._reparentDocument(ownerDocument, useFrames));
 
         /* AMANA extension: In a case of multifile iXBRL attach JSON into every HTML page is too expensive --> */
@@ -252,7 +254,7 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
                     });
                 }
 
-                var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames);
+                var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames, isPDF);
 
                 viewer.initialize()
                     .then(() => inspector.initialize(report))

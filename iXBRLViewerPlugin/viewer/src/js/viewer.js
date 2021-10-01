@@ -20,11 +20,13 @@ import { Fact } from './fact.js';
 
 import 'bootstrap/js/dist/tooltip';
 
-export function Viewer(iv, iframes, report, useFrames) {
+export function Viewer(iv, iframes, report, useFrames, isPDF) {
     this._iv = iv;
     this._report = report;
     this._iframes = iframes;
     this._useFrames = useFrames;
+    this._isPDF = isPDF;
+
     if (useFrames) {
         this._contents = iframes.contents();
     } else {
@@ -135,7 +137,10 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         if (!inHidden) {
             /* Is the element the only significant content within a <td> or <th> ? If
              * so, use that as the wrapper element. */
-            node = $(n).closest("td,th,span,div").eq(0);
+            node = $(n).closest("td,th").eq(0);
+            if (node.length == 0 && name == 'NONFRACTION') {
+                node = $(n).closest("span,div").eq(0);                
+            }
             const innerText = $(n).text();
             if (node.length == 1 && innerText.length > 0) {
                 if (node.css('display') == 'none') {
@@ -542,8 +547,18 @@ Viewer.prototype._zoom = function () {
             container = $('#zoom-container');
             scrollParent = $(getScrollParent(container[0]));            
         } else {
-            container = $(this.ownerDocument.body);
-            scrollParent = $(this);
+            if (iv._isPDF) {
+                if (!iv._mzInit) {
+                    let pagecontainer = $('#page-container', $(this));
+                    pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');
+                    iv._mzInit = true;
+                }
+                container = $('#zoom-container', $(this));
+                scrollParent = $(getScrollParent(container[0]));
+            } else {            
+                container = $(this.ownerDocument.body);
+                scrollParent = $(this);
+            }
         }
         var viewTop = scrollParent.scrollTop();
         var viewLeft = scrollParent.scrollLeft();

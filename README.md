@@ -9,11 +9,13 @@ The [Workiva](https://www.workiva.com) iXBRL Viewer allows [Inline XBRL](https:/
 * Produce on-the-fly graphs using XBRL data
 
 The AMANA Fork implements the additional features and improvements:
-* Implemented tagging highlight nonFraction for non-HTML-tables (old viewer did expected <td>/<th>).
+* Implemented tagging highlight of ix:nonFraction for non-HTML-tables (old viewer did expected <td>/<th>).
 * Implemented displaying ESEF anchoring in the tag inspector.
-* Show validation results on tag inspector.
-* Support CSS content-visibilty:auto by no longer using <iframe>, supports PDF converted reports in Chrome.
+* Implemented displaying validation results on tag inspector (injected by XBRL processor).
+* Support CSS content-visibilty:auto by no longer using <iframe>, supports large PDF converted reports in Chrome.
+* Enhanced embedding of the Viewer into existing HTML pages.
 * Improved zooming and 'jump to next fact' compatibilty for Safari and Firefox.
+* New click event for inline tags.
 
 The viewer project consists of two components:
 

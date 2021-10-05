@@ -12,6 +12,7 @@ The AMANA Fork implements the additional features and improvements:
 * Implemented tagging highlight of ix:nonFraction for non-HTML-tables (old viewer did expected &lt;td&gt;/&lt;th&gt;).
 * Implemented displaying ESEF anchoring in the tag inspector.
 * Implemented displaying validation results on tag inspector (injected by XBRL processor).
+* Implemented tooltips over highlighted facts.
 * Support CSS content-visibilty:auto by no longer using <iframe>, supports large PDF converted reports in Chrome.
 * Enhanced embedding of the Viewer into existing HTML pages.
 * Improved zooming and 'jump to next fact' compatibilty for Safari and Firefox.

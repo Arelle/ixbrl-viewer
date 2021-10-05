@@ -12,6 +12,9 @@ updates:
   reviewers:
   - Workiva/xt
   ignore:
+  - dependency-name: babel-jest
+    versions:
+    - ">=27"
   - dependency-name: chart.js
     versions:
     - ">=3"
@@ -21,6 +24,12 @@ updates:
   - dependency-name: html-loader
     versions:
     - ">=1"
+  - dependency-name: i18next
+    versions:
+    - ">=21"
+  - dependency-name: jest
+    versions:
+    - ">=27"
   - dependency-name: less
     versions:
     - ">=4"

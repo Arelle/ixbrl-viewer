@@ -96,10 +96,14 @@ iXBRLViewer.prototype._detectPDF = function(document) {
     if (pageContainer.length > 0) {
         var generator = $('meta[name=generator]', this._contents).attr("content");
         if (generator === 'pdf2htmlEX') {
-            return true;
+            if (pageContainer.css('position') == 'absolute') {
+                return true;
+            }
         }
         if (pageContainer.find("div.pf[style*='content-visibility']").length > 0) {
-            return true;            
+            if (pageContainer.css('position') == 'absolute') {
+                return true;            
+            }            
         }        
     }
     return false;

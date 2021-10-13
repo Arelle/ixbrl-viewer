@@ -157,6 +157,12 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                     } 
                 }
             }
+            if (node.length == 0) {
+                var parent = $(n).parent('div.amanablock');
+                if (parent.length > 0) {                    
+                    node = parent;
+                }
+            }
             /* Otherwise, insert a <span> as wrapper */
             if (node.length == 0) {
                 var wrapper = "<span>";
@@ -538,27 +544,17 @@ Viewer.prototype._zoom = function () {
     var iv = this;    
     $('html', this._contents).each(function () {
         var container, scrollParent;
-        if (!iv._useFrames) {            
+        if (iv._isPDF) {
             if (!iv._mzInit) {
-                let pagecontainer = $('#page-container');
+                let pagecontainer = $('#page-container', $(this));
                 pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');
                 iv._mzInit = true;
             }
-            container = $('#zoom-container');
-            scrollParent = $(getScrollParent(container[0]));            
-        } else {
-            if (iv._isPDF) {
-                if (!iv._mzInit) {
-                    let pagecontainer = $('#page-container', $(this));
-                    pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');
-                    iv._mzInit = true;
-                }
-                container = $('#zoom-container', $(this));
-                scrollParent = $(getScrollParent(container[0]));
-            } else {            
-                container = $(this.ownerDocument.body);
-                scrollParent = $(this);
-            }
+            container = $('#zoom-container', $(this));
+            scrollParent = $(getScrollParent(container[0]));
+        } else {            
+            container = $(this.ownerDocument.body);
+            scrollParent = $(this);
         }
         var viewTop = scrollParent.scrollTop();
         var viewLeft = scrollParent.scrollLeft();

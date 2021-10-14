@@ -149,12 +149,12 @@ iXBRLReport.prototype.qname = function(v) {
     return new QName(this.prefixMap(), v);
 }
 
-iXBRLReport.prototype.getChildRelationships = function(c, arcrole) {
+iXBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
     var rels = {}
     const elrs = this.data.rels[arcrole] || {};
     for (const elr in elrs) {
-        if (c in elrs[elr]) {
-            rels[elr] = elrs[elr][c];
+        if (conceptName in elrs[elr]) {
+            rels[elr] = elrs[elr][conceptName];
         }
     }
     return rels;
@@ -185,11 +185,11 @@ iXBRLReport.prototype._reverseRelationships = function(arcrole) {
     return this._reverseRelationshipCache[arcrole];
 }
 
-iXBRLReport.prototype.getParentRelationships = function(c, arcrole) {
+iXBRLReport.prototype.getParentRelationships = function(conceptName, arcrole) {
     var rels = {}
     for (const [elr, relSet] of Object.entries(this._reverseRelationships(arcrole))) {
-        if (c in relSet) {
-            rels[elr] = relSet[c];
+        if (conceptName in relSet) {
+            rels[elr] = relSet[conceptName];
         }
     }
     return rels;

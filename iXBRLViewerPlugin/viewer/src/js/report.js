@@ -195,6 +195,20 @@ iXBRLReport.prototype.getParentRelationships = function(conceptName, arcrole) {
     return rels;
 }
 
+iXBRLReport.prototype.relationshipGroups = function(arcrole) {
+    return Object.keys(this.data.rels[arcrole] || {});
+}
+
+iXBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
+    var roots = [];
+    for (const conceptName in this.data.rels[arcrole][elr]) {
+        if (!(elr in this.getParentRelationships(conceptName, arcrole))) {
+            roots.push(conceptName);
+        }
+    }
+    return roots;
+}
+
 iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
     var all = this.facts();
     var aligned = [];

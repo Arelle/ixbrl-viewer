@@ -15,7 +15,7 @@
 import $ from 'jquery'
 
 export function DocumentOutline(report) {
-    this.report = report;
+    this._report = report;
     var facts = report.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
     var runLength = {};
     var runStart = {};
@@ -54,9 +54,44 @@ export function DocumentOutline(report) {
         console.log(report.data.roles[elr] + ": " + longestRun[elr] + " " + longestRunStart[elr].conceptName() + " " + longestRunStart[elr].id);
     }
     this.sections = longestRunStart;
+    this.dimensionMap();
+}
+
+DocumentOutline.prototype.dimensionMap = function () {
+    const groups = this._report.relationshipGroups("pres");
+    var dimensionMap = {};
+    for (const elr of groups) {
+        console.log("ELR: " + this._report.getRoleLabel(elr));
+        dimensionMap[elr] = {};
+        for (const root of this._report.relationshipGroupRoots("pres", elr)) {
+            console.log("  Root: " + root);
+            this.buildDimensionMap(dimensionMap[elr], "pres", elr, null, root);
+        }
+    }
+}
+
+DocumentOutline.prototype.buildDimensionMap = function(dimensionMap, arcrole, elr, dimension, conceptName) {
+    var children = this._report.getChildRelationships(conceptName, arcrole);
+    if (!(elr in children)) {
+        return
+    }
+    const c = this._report.getConcept(conceptName);
+    if (c.isDimension()) {
+        dimension = conceptName;
+        dimensionMap[dimension] = {};
+        console.log("  Dimension: " + dimension)
+    }
+    for (var rel of children[elr]) {
+        if (dimension) {
+            dimensionMap[rel.t] = 1;
+            console.log("    Member: " + rel.t);
+        }
+        this.buildDimensionMap(dimensionMap, arcrole, elr, dimension, rel.t);
+    }
+
 }
 
 DocumentOutline.prototype.sortedSections = function () {
     var sections = Object.keys(this.sections);
-    return sections.sort((a, b) => this.report.getRoleLabel(a).localeCompare(this.report.getRoleLabel(b)));
+    return sections.sort((a, b) => this._report.getRoleLabel(a).localeCompare(this._report.getRoleLabel(b)));
 }

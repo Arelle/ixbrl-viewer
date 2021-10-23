@@ -77,7 +77,10 @@ Inspector.prototype.initialize = function (report, viewer) {
                 }
             });
             $("#inspector .controls .search-button").on("click", function () {
-                $(this).closest("#inspector").toggleClass("search-mode");
+                $(this).closest("#inspector").removeClass("outline-mode").toggleClass("search-mode");
+            });
+            $("#inspector .controls .outline-button").on("click", function () {
+                $(this).closest("#inspector").removeClass("search-mode").toggleClass("outline-mode");
             });
             $("#inspector-head .back").on("click", function () {
                 $(this).closest("#inspector").removeClass("search-mode");
@@ -95,6 +98,7 @@ Inspector.prototype.initialize = function (report, viewer) {
             $(window).on("message", (e) => inspector.handleMessage(e));
             report.setViewerOptions(inspector._viewerOptions);
             inspector.outline = new DocumentOutline(report);
+            inspector.createOutline();
             inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
                 inspector._search = new ReportSearch(report);
                 inspector.setupSearchControls();
@@ -309,20 +313,23 @@ Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
 }
 
-Inspector.prototype.updateOutline = function (cf) {
-    $('.outline').empty();
+Inspector.prototype.createOutline = function () {
+    var container = $('<div class="fact-list"></div>').appendTo($('.outline'));
     for (const elr of this.outline.sortedSections()) {
-        $("<div></div>")
+        $('<div class="fact-list-item"></div>')
             .text(this._report.getRoleLabel(elr))
             .click(() => this.selectItem(this.outline.sections[elr].id))
-            .appendTo($('.outline'));
+            .appendTo(container);
     }
-    $("<div><b>Fact Groups:</b></div>").appendTo($('.outline'));
+}
+
+Inspector.prototype.updateOutline = function (cf) {
+    $('.fact-groups').empty();
     for (const elr of this.outline.groupsForFact(cf)) {
         $("<div></div>")
             .text(this._report.getRoleLabel(elr))
             .click(() => this.selectItem(this.outline.sections[elr].id))
-            .appendTo($('.outline'));
+            .appendTo($('.fact-groups'));
     }
 
 }

@@ -327,6 +327,20 @@
           }
         }
 
+        .outline-button {
+          .square-button();
+
+          position: absolute;
+          top: 0;
+          left: 3.6rem;
+
+          &::before {
+            .icon-chevron-down();
+
+            position: relative;
+          }
+        }
+
         .next-prev {
           position: absolute;
           top: 0;
@@ -804,6 +818,15 @@
       }
     }
 
+    &.outline-mode {
+      #inspector-head {
+        .controls {
+          .outline-button {
+            .square-button.primary();
+          }
+        }
+      }
+    }
     .powered-by {
       .text-sm();
 
@@ -826,7 +849,12 @@
       display: none;
     }
 
-    &.search-mode .fact-mode-only {
+    &:not(.outline-mode) .outline-mode-only {
+      display: none;
+    }
+
+    &.search-mode .fact-mode-only,
+    &.outline-mode .fact-mode-only {
       display: none;
     }
 

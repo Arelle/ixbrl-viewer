@@ -21,20 +21,25 @@ export function DocumentOutline(report) {
     var runStart = {};
     var longestRun = {};
     var longestRunStart = {};
+    this.dimensionMap = this.buildDimensionMap();
+    const elrs = report.relationshipGroups("pres");
     for (const f of facts) {
         if (f.isHidden()) {
             continue;
         }
-        const rels = report.getParentRelationships(f.conceptName(), "pres");
-        for (const elr in rels) {
-            if (!(elr in runLength)) {
-                runLength[elr] = 0;
-                runStart[elr] = f;
+        // Find the ELRs that this fact has a presentation parent in
+        // (roots are abstract, so don't worry about it being a root)
+        for (const elr of elrs) {
+            if (this.factInGroup(f, elr)) {
+                if (!(elr in runLength)) {
+                    // Start counting a run
+                    runLength[elr] = 0;
+                    runStart[elr] = f;
+                }
+                runLength[elr]++;
             }
-            runLength[elr]++;
-        }
-        for (const elr in runLength) {
-            if (!(elr in rels)) {
+            else if (elr in runLength) { 
+                // End of a run
                 if (!(elr in longestRun) || longestRun[elr] < runLength[elr]) {
                     longestRun[elr] = runLength[elr];
                     longestRunStart[elr] = runStart[elr];
@@ -44,20 +49,34 @@ export function DocumentOutline(report) {
             }
         }
     }
+
+    // End of document, check if any current runs are the longest run for the
+    // ELR.
     for (const elr in runLength) {
         if (!(elr in longestRun) || longestRun[elr] < runLength[elr]) {
             longestRun[elr] = runLength[elr];
             longestRunStart[elr] = runStart[elr];
         }
     }
-    for (const elr in longestRun) {
-        console.log(report.data.roles[elr] + ": " + longestRun[elr] + " " + longestRunStart[elr].conceptName() + " " + longestRunStart[elr].id);
-    }
+
     this.sections = longestRunStart;
-    this.dimensionMap();
 }
 
-DocumentOutline.prototype.dimensionMap = function () {
+DocumentOutline.prototype.factInGroup = function (fact, elr) {
+    if (this._report.getParentRelationshipsInGroup(fact.conceptName(), "pres", elr).length == 0) {
+        return false;
+    }
+    const fd = fact.dimensions();
+    const dm = this.dimensionMap[elr];
+    for (const [dim, spec] of Object.entries(dm)) {
+        if ((!(dim in fd) && !spec.allowDefault) && !(fd[dim] in spec.members)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+DocumentOutline.prototype.buildDimensionMap = function () {
     const groups = this._report.relationshipGroups("pres");
     var dimensionMap = {};
     for (const elr of groups) {
@@ -65,12 +84,13 @@ DocumentOutline.prototype.dimensionMap = function () {
         dimensionMap[elr] = {};
         for (const root of this._report.relationshipGroupRoots("pres", elr)) {
             console.log("  Root: " + root);
-            this.buildDimensionMap(dimensionMap[elr], "pres", elr, null, root);
+            this.buildDimensionMapFromSubTree(dimensionMap[elr], "pres", elr, null, root);
         }
     }
+    return dimensionMap;
 }
 
-DocumentOutline.prototype.buildDimensionMap = function(dimensionMap, arcrole, elr, dimension, conceptName) {
+DocumentOutline.prototype.buildDimensionMapFromSubTree = function(dimensionMap, arcrole, elr, dimension, conceptName) {
     var children = this._report.getChildRelationships(conceptName, arcrole);
     if (!(elr in children)) {
         return
@@ -78,17 +98,32 @@ DocumentOutline.prototype.buildDimensionMap = function(dimensionMap, arcrole, el
     const c = this._report.getConcept(conceptName);
     if (c.isDimension()) {
         dimension = conceptName;
-        dimensionMap[dimension] = {};
+        dimensionMap[dimension] = { members: {}, allowDefault: false};
         console.log("  Dimension: " + dimension)
     }
     for (var rel of children[elr]) {
         if (dimension) {
-            dimensionMap[rel.t] = 1;
-            console.log("    Member: " + rel.t);
+            if (this._report.dimensionDefault(dimension) == rel.t) {
+                dimensionMap[dimension].allowDefault = true;
+                console.log("    Member " + rel.t + " is default");
+            }
+            else {
+                dimensionMap[dimension].members[rel.t] = 1;
+                console.log("    Member: " + rel.t);
+            }
         }
-        this.buildDimensionMap(dimensionMap, arcrole, elr, dimension, rel.t);
+        this.buildDimensionMapFromSubTree(dimensionMap, arcrole, elr, dimension, rel.t);
     }
+}
 
+DocumentOutline.prototype.groupsForFact = function(fact) {
+    var factGroups = [];
+    for (const group of this._report.relationshipGroups("pres")) {
+        if (this.factInGroup(fact, group)) {
+            factGroups.push(group);
+        }
+    }
+    return factGroups;
 }
 
 DocumentOutline.prototype.sortedSections = function () {

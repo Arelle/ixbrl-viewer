@@ -195,6 +195,23 @@ iXBRLReport.prototype.getParentRelationships = function(conceptName, arcrole) {
     return rels;
 }
 
+iXBRLReport.prototype.getParentRelationshipsInGroup = function(conceptName, arcrole, elr) {
+    var rels = {}
+    const relSet = this._reverseRelationships(arcrole)[elr] || {};
+    return relSet[conceptName] || [];
+}
+
+iXBRLReport.prototype.dimensionDefault = function(dimensionName) {
+    // ELR is irrelevant for dimension-default relationships, so check all of
+    // them, and return the first (illegal for there to be more than one
+    for (const rel of Object.values(this.data.rels["d-d"] || {})) {
+        if (dimensionName in rel) {
+            return rel[dimensionName][0].t;
+        }
+    }
+    return undefined;
+}
+
 iXBRLReport.prototype.relationshipGroups = function(arcrole) {
     return Object.keys(this.data.rels[arcrole] || {});
 }

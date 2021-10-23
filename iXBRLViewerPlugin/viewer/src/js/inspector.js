@@ -309,7 +309,7 @@ Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
 }
 
-Inspector.prototype.updateOutline = function () {
+Inspector.prototype.updateOutline = function (cf) {
     $('.outline').empty();
     for (const elr of this.outline.sortedSections()) {
         $("<div></div>")
@@ -317,6 +317,14 @@ Inspector.prototype.updateOutline = function () {
             .click(() => this.selectItem(this.outline.sections[elr].id))
             .appendTo($('.outline'));
     }
+    $("<div><b>Fact Groups:</b></div>").appendTo($('.outline'));
+    for (const elr of this.outline.groupsForFact(cf)) {
+        $("<div></div>")
+            .text(this._report.getRoleLabel(elr))
+            .click(() => this.selectItem(this.outline.sections[elr].id))
+            .appendTo($('.outline'));
+    }
+
 }
 
 Inspector.prototype.updateFootnotes = function (fact) {
@@ -667,7 +675,7 @@ Inspector.prototype.update = function () {
             $('#inspector').removeClass('footnote-mode');
 
             this.updateCalculation(cf);
-            this.updateOutline();
+            this.updateOutline(cf);
             this.updateFootnotes(cf);
             this.updateAnchoring(cf);
             $('div.references').empty().append(this._referencesHTML(cf));

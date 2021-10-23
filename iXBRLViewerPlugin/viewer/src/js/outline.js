@@ -128,5 +128,7 @@ DocumentOutline.prototype.groupsForFact = function(fact) {
 
 DocumentOutline.prototype.sortedSections = function () {
     var sections = Object.keys(this.sections);
-    return sections.sort((a, b) => this._report.getRoleLabel(a).localeCompare(this._report.getRoleLabel(b)));
+    const re = /\(parenthetical\)\s*$/i;
+    var filteredSections = sections.filter(s => !re.test(this._report.getRoleLabel(s)));
+    return filteredSections.sort((a, b) => this._report.getRoleLabel(a).localeCompare(this._report.getRoleLabel(b)));
 }

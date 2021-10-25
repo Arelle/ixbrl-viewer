@@ -83,10 +83,8 @@ DocumentOutline.prototype.buildDimensionMap = function () {
     const groups = this._report.relationshipGroups("pres");
     var dimensionMap = {};
     for (const elr of groups) {
-        console.log("ELR: " + this._report.getRoleLabel(elr));
         dimensionMap[elr] = {};
         for (const root of this._report.relationshipGroupRoots("pres", elr)) {
-            console.log("  Root: " + root);
             this.buildDimensionMapFromSubTree(dimensionMap[elr], "pres", elr, null, root);
         }
     }
@@ -102,17 +100,14 @@ DocumentOutline.prototype.buildDimensionMapFromSubTree = function(dimensionMap, 
     if (c.isDimension()) {
         dimension = conceptName;
         dimensionMap[dimension] = { members: {}, allowDefault: false};
-        console.log("  Dimension: " + dimension)
     }
     for (var rel of children[elr]) {
         if (dimension) {
             if (this._report.dimensionDefault(dimension) == rel.t) {
                 dimensionMap[dimension].allowDefault = true;
-                console.log("    Member " + rel.t + " is default");
             }
             else {
                 dimensionMap[dimension].members[rel.t] = 1;
-                console.log("    Member: " + rel.t);
             }
         }
         this.buildDimensionMapFromSubTree(dimensionMap, arcrole, elr, dimension, rel.t);

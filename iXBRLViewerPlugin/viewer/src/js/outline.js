@@ -68,8 +68,11 @@ DocumentOutline.prototype.factInGroup = function (fact, elr) {
     }
     const fd = fact.dimensions();
     const dm = this.dimensionMap[elr];
+    // Check all dimensions specified in this ELR
     for (const [dim, spec] of Object.entries(dm)) {
-        if ((!(dim in fd) && !spec.allowDefault) && !(fd[dim] in spec.members)) {
+        // If a fact has a dimension, it must be in the list of permitted
+        // members, otherwise, the default member must be allowed
+        if ((dim in fd) ? !(fd[dim] in spec.members) : !spec.allowDefault) {
             return false;
         }
     }

@@ -134,10 +134,7 @@ iXBRLReport.prototype.getIXNodeForItemId = function(id) {
 
 iXBRLReport.prototype.facts = function() {
     var allItems = [];
-    var report = this;
-    $.each(this.data.facts, function (id, f) {
-        allItems.push(report.getItemById(id));
-    });
+    $.each(this.data.facts, (id, f) => allItems.push(this.getItemById(id)));
     return allItems;
 }
 

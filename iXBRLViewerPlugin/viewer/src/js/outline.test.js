@@ -39,45 +39,7 @@ const testReportData = {
             en: "003 Group 3"
         },
     },
-    concepts: {
-        "eg:Root1": {
-            labels: {
-                std: {
-                    en: "Root 1"
-                }
-            }
-        },
-        "eg:Dimension1": {
-            labels: {
-                std: {
-                    en: "Dimension 1"
-                }
-            },
-            d: "e"
-        },
-        "eg:Dimension2": {
-            labels: {
-                std: {
-                    en: "Dimension 2"
-                }
-            },
-            d: "e"
-        },
-        "eg:LineItem1": {
-            labels: {
-                std: {
-                    en: "Line Item 1"
-                }
-            }
-        },
-        "eg:LineItem2": {
-            labels: {
-                std: {
-                    en: "Line Item 2"
-                }
-            }
-        },
-    },
+    concepts: {},
     rels: {
         pres: {
             elr1: {
@@ -86,7 +48,14 @@ const testReportData = {
                 ],
             },
             elr2: {
-
+                "eg:Root1": [
+                    { t: "eg:Dimension1" },
+                    { t: "eg:LineItem1" }
+                ],
+                "eg:Dimension1": [
+                    { t: "eg:Member1" },
+                    { t: "eg:Member2" },
+                ]
             },
             elr3: {
                 "eg:Root1": [
@@ -97,6 +66,35 @@ const testReportData = {
     }
 };
 
+function addTestConcept(r, label) {
+    r.concepts["eg:" + label.replace(/ /g, "")] = {
+            labels: {
+                std: {
+                    en: label
+                }
+            }
+        };
+}
+
+function addTestDimension(r, label) {
+    r.concepts["eg:" + label.replace(/ /g, "")] = {
+            labels: {
+                std: {
+                    en: label
+                }
+            },
+            "d": "e"
+        };
+}
+
+addTestConcept(testReportData, "Root 1");
+addTestConcept(testReportData, "Line Item 1");
+addTestConcept(testReportData, "Line Item 2");
+addTestConcept(testReportData, "Line Item Dim 1");
+addTestConcept(testReportData, "Member 1");
+addTestDimension(testReportData, "Dimension 1");
+addTestDimension(testReportData, "Dimension 2");
+
 const testFacts =  {
         f1: {
             a: {
@@ -106,6 +104,12 @@ const testFacts =  {
         f2: {
             a: {
                 c: "eg:LineItem2"
+            }
+        },
+        f3: {
+            a: {
+                c: "eg:LineItem1",
+                "eg:Dimension1": "eg:Member1"
             }
         },
     };
@@ -151,4 +155,35 @@ describe("Section filtering", () => {
         var outline = new DocumentOutline(report);
         expect(outline.sortedSections()).toEqual(["elr3"]);
     });
+});
+
+describe("Dimensional filtering", () => {
+    test("Simple", () => {
+        var report = testReport(["f3"]);
+        var outline = new DocumentOutline(report);
+        // ELR1 does not mention Dimension 1, so f3 is included.
+        expect(outline.factInGroup(report.getItemById("f3"), "elr1")).toBe(true);
+        // ELR1 includes Dimension 1 with specified member, so included
+        expect(outline.factInGroup(report.getItemById("f3"), "elr2")).toBe(true);
+        expect(outline.factInGroup(report.getItemById("f3"), "elr3")).toBe(false);
+
+        expect(outline.sortedSections()).toEqual(["elr1", "elr2"]);
+
+        report.data.rels.pres.elr2['eg:Dimension1'] = [
+            { "t": "eg:Member2" }
+        ];
+        report._reverseRelationshipCache = {}; 
+
+        outline = new DocumentOutline(report);
+
+        // ELR1 does not mention Dimension 1, so f3 is included.
+        expect(outline.factInGroup(report.getItemById("f3"), "elr1")).toBe(true);
+        // ELR1 includes Dimension 1 but specified member is now removed
+        expect(outline.factInGroup(report.getItemById("f3"), "elr2")).toBe(false);
+        expect(outline.factInGroup(report.getItemById("f3"), "elr3")).toBe(false);
+
+        expect(outline.sortedSections()).toEqual(["elr1"]);
+
+    });
+
 });

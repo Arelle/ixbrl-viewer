@@ -124,6 +124,10 @@ DocumentOutline.prototype.groupsForFact = function(fact) {
     return factGroups;
 }
 
+DocumentOutline.prototype.hasOutline = function () {
+    return Object.keys(this.sections).length > 0;
+}
+
 DocumentOutline.prototype.sortedSections = function () {
     var sections = Object.keys(this.sections);
     const re = /\(parenthetical\)\s*$/i;

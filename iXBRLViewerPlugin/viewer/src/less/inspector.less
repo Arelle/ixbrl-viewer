@@ -335,7 +335,7 @@
           left: 3.6rem;
 
           &::before {
-            .icon-chevron-down();
+            .icon-outline();
 
             position: relative;
           }
@@ -442,7 +442,7 @@
       position: relative;
       overflow: hidden;
 
-      .no-fact-overlay {
+      .no-fact-overlay, .no-outline-overlay {
         display: block;
         position: absolute;
         left: 50%;
@@ -454,6 +454,12 @@
 
         .no-fact-overlay-icon::before {
           .icon-tag();
+
+          font-size: 10rem;
+        }
+
+        .no-outline-overlay-icon::before {
+          .icon-outline();
 
           font-size: 10rem;
         }

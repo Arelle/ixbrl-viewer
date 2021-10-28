@@ -83,7 +83,7 @@ Inspector.prototype.initialize = function (report, viewer) {
                 $(this).closest("#inspector").removeClass("search-mode").toggleClass("outline-mode");
             });
             $("#inspector-head .back").on("click", function () {
-                $(this).closest("#inspector").removeClass("search-mode");
+                $(this).closest("#inspector").removeClass("search-mode").removeClass("outline-mode");
             });
             $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
             inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
@@ -314,12 +314,15 @@ Inspector.prototype.updateCalculation = function (fact, elr) {
 }
 
 Inspector.prototype.createOutline = function () {
-    var container = $('<div class="fact-list"></div>').appendTo($('.outline'));
-    for (const elr of this.outline.sortedSections()) {
-        $('<div class="fact-list-item"></div>')
-            .text(this._report.getRoleLabel(elr))
-            .click(() => this.selectItem(this.outline.sections[elr].id))
-            .appendTo(container);
+    if (this.outline.hasOutline()) {
+        $('.outline .no-outline-overlay').hide();
+        var container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
+        for (const elr of this.outline.sortedSections()) {
+            $('<div class="fact-list-item"></div>')
+                .text(this._report.getRoleLabel(elr))
+                .click(() => this.selectItem(this.outline.sections[elr].id))
+                .appendTo(container);
+        }
     }
 }
 

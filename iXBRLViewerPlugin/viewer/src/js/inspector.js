@@ -83,7 +83,7 @@ Inspector.prototype.initialize = function (report, viewer) {
                 $(this).closest("#inspector").removeClass("search-mode").toggleClass("outline-mode");
             });
             $("#inspector-head .back").on("click", function () {
-                $(this).closest("#inspector").removeClass("search-mode");
+                $(this).closest("#inspector").removeClass("search-mode").removeClass("outline-mode");
             });
             $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
             inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));

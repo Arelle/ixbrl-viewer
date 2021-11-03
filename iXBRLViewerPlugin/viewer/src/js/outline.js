@@ -14,6 +14,10 @@
 
 import $ from 'jquery'
 
+// DocumentOutline chooses a fact for each presentation group (ELR) that
+// represents the start of that ELR.  This is done by deciding which ELRs each
+// fact participates in (see factInGroup()) and then finding the longest
+// continuous run of facts in document order that participate in each ELR.
 export function DocumentOutline(report) {
     this._report = report;
     var facts = report.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
@@ -21,14 +25,12 @@ export function DocumentOutline(report) {
     var runStart = {};
     var longestRun = {};
     var longestRunStart = {};
-    this.dimensionMap = this.buildDimensionMap();
+    this.dimensionMap = this._buildDimensionMap();
     const elrs = report.relationshipGroups("pres");
     for (const f of facts) {
         if (f.isHidden()) {
             continue;
         }
-        // Find the ELRs that this fact has a presentation parent in
-        // (roots are abstract, so don't worry about it being a root)
         for (const elr of elrs) {
             if (this.factInGroup(f, elr)) {
                 if (!(elr in runLength)) {
@@ -62,7 +64,10 @@ export function DocumentOutline(report) {
     this.sections = longestRunStart;
 }
 
+// Returns true of a fact participates in the given presentation group.
 DocumentOutline.prototype.factInGroup = function (fact, elr) {
+    // Roots are abstract so no need to check for concepts with outgoing
+    // relationships only.
     if (this._report.getParentRelationshipsInGroup(fact.conceptName(), "pres", elr).length == 0) {
         return false;
     }
@@ -79,7 +84,18 @@ DocumentOutline.prototype.factInGroup = function (fact, elr) {
     return true;
 }
 
-DocumentOutline.prototype.buildDimensionMap = function () {
+// Build a map of ELRs to dimensional information:
+//   { elr: 
+//      { dimensionQName: 
+//          { 
+//              allowDefault: true, 
+//              members: { 
+//                  memberQName: 1 
+//              } 
+//          } 
+//      } 
+//   } 
+DocumentOutline.prototype._buildDimensionMap = function () {
     const groups = this._report.relationshipGroups("pres");
     var dimensionMap = {};
     for (const elr of groups) {
@@ -114,6 +130,7 @@ DocumentOutline.prototype.buildDimensionMapFromSubTree = function(dimensionMap, 
     }
 }
 
+// Returns a list of presentation groups that this fact participates in
 DocumentOutline.prototype.groupsForFact = function(fact) {
     var factGroups = [];
     for (const group of this._report.relationshipGroups("pres")) {

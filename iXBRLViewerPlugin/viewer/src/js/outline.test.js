@@ -92,6 +92,7 @@ addTestConcept(testReportData, "Line Item 1");
 addTestConcept(testReportData, "Line Item 2");
 addTestConcept(testReportData, "Line Item Dim 1");
 addTestConcept(testReportData, "Member 1");
+addTestConcept(testReportData, "Member 2");
 addTestDimension(testReportData, "Dimension 1");
 addTestDimension(testReportData, "Dimension 2");
 
@@ -210,7 +211,7 @@ describe("Dimensional filtering", () => {
         // ELR1 does not mention Dimension 1, so f3 is included.
         var f3 = report.getItemById("f3");
         expect(outline.factInGroup(f3, "elr1")).toBe(true);
-        // ELR1 includes Dimension 1 with specified member, so included
+        // ELR1 includes Dimension 2 with specified member, so included
         expect(outline.factInGroup(f3, "elr2")).toBe(true);
         expect(outline.factInGroup(f3, "elr3")).toBe(false);
 
@@ -234,6 +235,33 @@ describe("Dimensional filtering", () => {
 
         expect(outline.sortedSections()).toEqual(["elr1"]);
         expect(outline.groupsForFact(f3)).toEqual(["elr1"]);
+
+    });
+
+    test("Defaults", () => {
+        // Make Member1 the default for Dimension1
+        var report = testReport(["f1", "f2", "f3"]);
+        report.data.rels["d-d"] = { elr1: { 'eg:Dimension1': [ { t: 'eg:Member1' } ] } };
+
+        var outline = new DocumentOutline(report);
+        var f1 = report.getItemById("f1");
+        expect(outline.factInGroup(f1, "elr1")).toBe(true);
+        // f1 is now included in elr2 because the default member is in ELR2
+        expect(outline.factInGroup(f1, "elr2")).toBe(true);
+        expect(outline.factInGroup(f1, "elr3")).toBe(false);
+
+        // This should be unchanged
+        var f1 = report.getItemById("f2");
+        expect(outline.factInGroup(report.getItemById("f2"), "elr1")).toBe(false);
+        expect(outline.factInGroup(report.getItemById("f2"), "elr2")).toBe(false);
+        expect(outline.factInGroup(report.getItemById("f2"), "elr3")).toBe(true);
+
+        // f3 is now technically illegal because it includes the default value for a dimension
+        var f3 = report.getItemById("f3");
+        expect(outline.factInGroup(f3, "elr1")).toBe(true);
+        // ELR2 now excludeds f3 because the default must be omitted
+        expect(outline.factInGroup(f3, "elr2")).toBe(false);
+        expect(outline.factInGroup(f3, "elr3")).toBe(false);
 
     });
 

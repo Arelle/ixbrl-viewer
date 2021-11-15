@@ -64,7 +64,7 @@ export function DocumentOutline(report) {
     this.sections = longestRunStart;
 }
 
-// Returns true of a fact participates in the given presentation group.
+// Returns true if a fact participates in the given presentation group.
 DocumentOutline.prototype.factInGroup = function (fact, elr) {
     // Roots are abstract so no need to check for concepts with outgoing
     // relationships only.

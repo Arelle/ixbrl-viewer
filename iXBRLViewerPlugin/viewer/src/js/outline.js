@@ -90,7 +90,7 @@ DocumentOutline.prototype.factInGroup = function (fact, elr) {
 //          { 
 //              allowDefault: true, 
 //              members: { 
-//                  memberQName: 1 
+//                  memberQName: true
 //              } 
 //          } 
 //      } 
@@ -123,7 +123,7 @@ DocumentOutline.prototype.buildDimensionMapFromSubTree = function(dimensionMap, 
                 dimensionMap[dimension].allowDefault = true;
             }
             else {
-                dimensionMap[dimension].members[rel.t] = 1;
+                dimensionMap[dimension].members[rel.t] = true;
             }
         }
         this.buildDimensionMapFromSubTree(dimensionMap, arcrole, elr, dimension, rel.t);

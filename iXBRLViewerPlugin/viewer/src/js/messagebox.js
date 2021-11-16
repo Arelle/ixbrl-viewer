@@ -52,5 +52,3 @@ MessageBox.prototype.show = function (onOK, onCancel) {
 
     Dialog.prototype.show.call(this);
 }
-
-

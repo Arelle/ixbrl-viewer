@@ -202,12 +202,10 @@ class IXBRLViewerBuilder:
         dts = self.dts
 
         logHandler = dts.modelManager.cntlr.logHandler
-
         if not hasattr(logHandler, "logRecordBuffer"):
             raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
 
         errors = []
-
         for logRec in getattr(logHandler, "logRecordBuffer"):
             if logRec.levelno > logging.INFO:
                 errors.append({
@@ -224,7 +222,6 @@ class IXBRLViewerBuilder:
         """
 
         dts = self.dts
-
         iv = iXBRLViewer(dts)
         idGen = 0
         self.roleMap.getPrefix(XbrlConst.standardLabel, "std")

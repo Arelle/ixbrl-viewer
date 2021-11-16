@@ -34,5 +34,3 @@ ValidationReportDialog.prototype.displayErrors = function (errors) {
             .appendTo(tbody);
     }
 }
-
-

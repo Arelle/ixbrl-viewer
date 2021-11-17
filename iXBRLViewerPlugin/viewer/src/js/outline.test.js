@@ -38,6 +38,9 @@ const testReportData = {
         elr3: {
             en: "003 Group 3"
         },
+        elr4: {
+            en: "004 Group 4"
+        },
     },
     concepts: {},
     rels: {
@@ -61,6 +64,12 @@ const testReportData = {
                 "eg:Root1": [
                     { t: "eg:LineItem2" }
                 ],
+            },
+            elr4: {
+                "eg:Root1": [
+                    { t: "eg:LineItem1" },
+                    { t: "eg:TypedDimension1" }
+                ],
             }
         }
     }
@@ -76,14 +85,14 @@ function addTestConcept(r, label) {
         };
 }
 
-function addTestDimension(r, label) {
+function addTestDimension(r, label, typed) {
     r.concepts["eg:" + label.replace(/ /g, "")] = {
             labels: {
                 std: {
                     en: label
                 }
             },
-            "d": "e"
+            "d": typed ? "t" : "e"
         };
 }
 
@@ -95,6 +104,7 @@ addTestConcept(testReportData, "Member 1");
 addTestConcept(testReportData, "Member 2");
 addTestDimension(testReportData, "Dimension 1");
 addTestDimension(testReportData, "Dimension 2");
+addTestDimension(testReportData, "Typed Dimension 1", true);
 
 const testFacts =  {
         f1: {
@@ -158,6 +168,13 @@ const testFacts =  {
                 p: "2022-01-01"
             }
         },
+        ft: {
+            a: {
+                c: "eg:LineItem1",
+                p: "2022-01-01",
+                "eg:TypedDimension1": "1234"
+            }
+        },
     };
 
 function testReport(factList) {
@@ -214,6 +231,8 @@ describe("Dimensional filtering", () => {
         // ELR1 includes Dimension 2 with specified member, so included
         expect(outline.factInGroup(f3, "elr2")).toBe(true);
         expect(outline.factInGroup(f3, "elr3")).toBe(false);
+        // Missing required TypedDimensions1
+        expect(outline.factInGroup(f3, "elr4")).toBe(false);
 
         expect(outline.sortedSections()).toEqual(["elr1", "elr2"]);
 
@@ -232,10 +251,24 @@ describe("Dimensional filtering", () => {
         // ELR1 includes Dimension 1 but specified member is now removed
         expect(outline.factInGroup(f3, "elr2")).toBe(false);
         expect(outline.factInGroup(f3, "elr3")).toBe(false);
+        // Missing required TypedDimensions1
+        expect(outline.factInGroup(f3, "elr4")).toBe(false);
 
         expect(outline.sortedSections()).toEqual(["elr1"]);
         expect(outline.groupsForFact(f3)).toEqual(["elr1"]);
 
+    });
+
+    test("Typed Dimensions", () => {
+        var report = testReport(["ft"]);
+        var outline = new DocumentOutline(report);
+        var ft = report.getItemById("ft");
+        expect(outline.factInGroup(ft, "elr1")).toBe(true);
+        // Missing required Dimension1
+        expect(outline.factInGroup(ft, "elr2")).toBe(false);
+        // Wrong concept
+        expect(outline.factInGroup(ft, "elr3")).toBe(false);
+        expect(outline.factInGroup(ft, "elr4")).toBe(true);
     });
 
     test("Defaults", () => {

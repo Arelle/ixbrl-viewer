@@ -52,6 +52,10 @@ Concept.prototype.isTypedDimension = function () {
     return this._c && this._c.d == "t";
 }
 
+Concept.prototype.isExplicitDimension = function () {
+    return this._c && this._c.d == "e";
+}
+
 Concept.prototype.isDimension = function () {
     return this._c && "d" in this._c;
 }

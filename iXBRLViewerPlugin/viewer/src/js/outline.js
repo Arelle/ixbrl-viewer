@@ -77,7 +77,12 @@ DocumentOutline.prototype.factInGroup = function (fact, elr) {
     for (const [dim, spec] of Object.entries(dm)) {
         // If a fact has a dimension, it must be in the list of permitted
         // members, otherwise, the default member must be allowed
-        if ((dim in fd) ? !(fd[dim] in spec.members) : !spec.allowDefault) {
+        if (spec.typed) {
+            if (!(dim in fd)) {
+                return false;
+            }
+        }
+        else if ((dim in fd) ? !(fd[dim] in spec.members) : !spec.allowDefault) {
             return false;
         }
     }
@@ -108,14 +113,18 @@ DocumentOutline.prototype._buildDimensionMap = function () {
 }
 
 DocumentOutline.prototype.buildDimensionMapFromSubTree = function(dimensionMap, arcrole, elr, dimension, conceptName) {
+    const c = this._report.getConcept(conceptName);
+    if (c.isTypedDimension()) {
+        dimensionMap[conceptName] = { typed: true };
+        return
+    }
+    else if (c.isExplicitDimension()) {
+        dimension = conceptName;
+        dimensionMap[dimension] = { members: {}, allowDefault: false};
+    }
     var children = this._report.getChildRelationships(conceptName, arcrole);
     if (!(elr in children)) {
         return
-    }
-    const c = this._report.getConcept(conceptName);
-    if (c.isDimension()) {
-        dimension = conceptName;
-        dimensionMap[dimension] = { members: {}, allowDefault: false};
     }
     for (var rel of children[elr]) {
         if (dimension) {

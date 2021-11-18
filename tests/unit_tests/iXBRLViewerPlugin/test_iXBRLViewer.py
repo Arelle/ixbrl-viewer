@@ -292,6 +292,14 @@ class TestIXBRLViewer(unittest.TestCase):
             filepath=''
         )
 
+        self.modelManager = Mock(
+            cntlr = Mock(
+                logHandler = Mock (
+                    logRecordBuffer = []
+                )
+            )
+        )
+
         self.modelXbrl_1 = Mock(
             relationshipSet=relationshipSet_effect,
             relationshipSets={},
@@ -299,7 +307,8 @@ class TestIXBRLViewer(unittest.TestCase):
             roleTypes=roleTypes,
             facts=[fact_1, fact_with_typed_dimension, fact_with_missing_member_on_dimension],
             info=info_effect,
-            modelDocument=self.modelDocument
+            modelDocument=self.modelDocument,
+            modelManager = self.modelManager
         )
         self.modelXbrl_2 = Mock(
             relationshipSet=relationshipSet_effect,
@@ -308,7 +317,8 @@ class TestIXBRLViewer(unittest.TestCase):
             roleTypes=roleTypes,
             facts=[fact_2, fact_3],
             info=info_effect,
-            modelDocument=self.modelDocument
+            modelDocument=self.modelDocument,
+            modelManager = self.modelManager
         )
 
         self.cash_concept.modelXbrl = self.modelXbrl_1

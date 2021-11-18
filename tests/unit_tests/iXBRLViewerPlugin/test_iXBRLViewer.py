@@ -2,6 +2,7 @@ import lxml
 import sys
 import unittest
 import json
+import logging
 from collections import defaultdict
 from unittest.mock import Mock, patch
 from .mock_arelle import mock_arelle
@@ -292,10 +293,14 @@ class TestIXBRLViewer(unittest.TestCase):
             filepath=''
         )
 
+        error1 = logging.LogRecord("arelle", logging.ERROR, "", 0, "Error message", {}, None)    
+        error1.messageCode = "code1"
         self.modelManager = Mock(
             cntlr = Mock(
                 logHandler = Mock (
-                    logRecordBuffer = []
+                    logRecordBuffer = [
+                        error1
+                    ]
                 )
             )
         )
@@ -387,6 +392,10 @@ class TestIXBRLViewer(unittest.TestCase):
         self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
         self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
         self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+
+        jsdata = json.loads(body[2].text)
+        errors = jsdata["validation"]
+        self.assertEqual(errors, [{"sev": "ERROR", "msg": "Error message", "code": "code1" }])
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')

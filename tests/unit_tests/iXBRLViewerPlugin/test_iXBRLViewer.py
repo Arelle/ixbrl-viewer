@@ -408,6 +408,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     @patch('arelle.XbrlConst.standardLabel', 'http://www.xbrl.org/2003/role/label')
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
+    @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
     def test_createViewer(self):
         js_uri = 'ixbrlviewer.js'
         result = self.builder_2.createViewer(js_uri, showValidations = False)

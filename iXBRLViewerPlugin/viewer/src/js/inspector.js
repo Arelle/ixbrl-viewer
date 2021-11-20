@@ -336,7 +336,7 @@ Inspector.prototype.createOutline = function () {
 Inspector.prototype.updateOutline = function (cf) {
     $('.fact-groups').empty();
     for (const elr of this.outline.groupsForFact(cf)) {
-        $("<div></div>")
+        $('<div class="fact-list-item"></div>')
             .text(this._report.getRoleLabel(elr))
             .click(() => this.selectItem(this.outline.sections[elr].id))
             .appendTo($('.fact-groups'));

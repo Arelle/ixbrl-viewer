@@ -193,7 +193,7 @@ Inspector.prototype.factListRow = function(f) {
     var row = $('<div class="fact-list-item"></div>')
         .click(() => this.selectItem(f.id))
         .dblclick(() => $('#inspector').removeClass("search-mode"))
-        .mousedown(function (e) { 
+        .mousedown((e) => { 
             /* Prevents text selection via double click without
              * disabling click+drag text selection (which user-select:
              * none would )
@@ -321,6 +321,13 @@ Inspector.prototype.createOutline = function () {
             $('<div class="fact-list-item"></div>')
                 .text(this._report.getRoleLabel(elr))
                 .click(() => this.selectItem(this.outline.sections[elr].id))
+                .dblclick(() => $('#inspector').removeClass("outline-mode"))
+                .mousedown((e) => {
+                    // Prevent text selection by double click
+                    if (e.detail > 1) { 
+                        e.preventDefault() 
+                    } 
+                })
                 .appendTo(container);
         }
     }

@@ -55,6 +55,10 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       dest="viewerURL",
                       default="js/dist/ixbrlviewer.js",
                       help="Specify the URL to ixbrlviewer.js")
+    parser.add_option("--viewer-validation-messages",
+                      dest="validationMessages",
+                      action="store_true",
+                      help="Include validation messages in the viewer")
     # Force logging to use a buffer so that messages are retained and can be
     # retrieved for inclusion with the viewer.
     parser.add_option("--logToBuffer", action="store_true", dest="logToBuffer", default=True, help=argparse.SUPPRESS)
@@ -71,7 +75,7 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     try:
         out = getattr(options, 'saveViewerFile') or kwargs.get("responseZipStream")
         if out:
-            viewerBuilder = IXBRLViewerBuilder(modelXbrl)
+            viewerBuilder = IXBRLViewerBuilder(modelXbrl, validationMessages = options.validationMessages)
             iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL)
             if iv is not None:
                 iv.save(out, outBasenameSuffix=VIEWER_BASENAME_SUFFIX, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
@@ -92,7 +96,7 @@ def iXBRLViewerMenuCommand(cntlr):
         return
     dialog = SaveViewerDialog(cntlr)
     if dialog.accepted and dialog.filename():
-        viewerBuilder = IXBRLViewerBuilder(modelXbrl)
+        viewerBuilder = IXBRLViewerBuilder(modelXbrl, validationMessages = True)
         iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl())
         iv.save(dialog.filename())
 

@@ -76,10 +76,11 @@ class IXBRLViewerBuilderError(Exception):
 
 class IXBRLViewerBuilder:
 
-    def __init__(self, dts):
+    def __init__(self, dts, validationMessages = False):
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.dts = dts
+        self.includeValidationMessages = validationMessages
         self.taxonomyData = {
             "concepts": {},
             "languages": {},
@@ -309,7 +310,9 @@ class IXBRLViewerBuilder:
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
         self.taxonomyData["rels"] = self.getRelationships()
-        self.taxonomyData["validation"] = self.validationErrors()
+
+        if self.includeValidationMessages:
+            self.taxonomyData["validation"] = self.validationErrors()
 
         dts.info("viewer:info", "Creating iXBRL viewer")
 

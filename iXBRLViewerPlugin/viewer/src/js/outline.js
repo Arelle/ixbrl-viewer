@@ -25,7 +25,7 @@ export function DocumentOutline(report) {
     var runStart = {};
     var longestRun = {};
     var longestRunStart = {};
-    this.dimensionMap = this._buildDimensionMap();
+    this._buildDimensionMap();
     const elrs = report.relationshipGroups("pres");
     for (const f of facts) {
         if (f.isHidden()) {
@@ -100,27 +100,33 @@ DocumentOutline.prototype.factInGroup = function (fact, elr) {
 //          } 
 //      } 
 //   } 
+//
+//   Note that all dimensional information (other than dimension defaults) is
+//   inferred from the presentation tree, rather than definitional/dimensional
+//   relationships.  This assumes that the presentation follows SEC/EFM rules.
+//   Using dimensional relationships would require assuming a correspondence
+//   between presentation and dimensional ELRs.
+//
 DocumentOutline.prototype._buildDimensionMap = function () {
     const groups = this._report.relationshipGroups("pres");
-    var dimensionMap = {};
+    this.dimensionMap = {};
     for (const elr of groups) {
-        dimensionMap[elr] = {};
+        this.dimensionMap[elr] = {};
         for (const root of this._report.relationshipGroupRoots("pres", elr)) {
-            this.buildDimensionMapFromSubTree(dimensionMap[elr], "pres", elr, null, root);
+            this.buildDimensionMapFromSubTree("pres", elr, null, root);
         }
     }
-    return dimensionMap;
 }
 
-DocumentOutline.prototype.buildDimensionMapFromSubTree = function(dimensionMap, arcrole, elr, dimension, conceptName) {
+DocumentOutline.prototype.buildDimensionMapFromSubTree = function(arcrole, elr, dimension, conceptName) {
     const c = this._report.getConcept(conceptName);
     if (c.isTypedDimension()) {
-        dimensionMap[conceptName] = { typed: true };
+        this.dimensionMap[elr][conceptName] = { typed: true };
         return
     }
     else if (c.isExplicitDimension()) {
         dimension = conceptName;
-        dimensionMap[dimension] = { members: {}, allowDefault: false};
+        this.dimensionMap[elr][dimension] = { members: {}, allowDefault: false};
     }
     var children = this._report.getChildRelationships(conceptName, arcrole);
     if (!(elr in children)) {
@@ -129,13 +135,13 @@ DocumentOutline.prototype.buildDimensionMapFromSubTree = function(dimensionMap, 
     for (var rel of children[elr]) {
         if (dimension) {
             if (this._report.dimensionDefault(dimension) == rel.t) {
-                dimensionMap[dimension].allowDefault = true;
+                this.dimensionMap[elr][dimension].allowDefault = true;
             }
             else {
-                dimensionMap[dimension].members[rel.t] = true;
+                this.dimensionMap[elr][dimension].members[rel.t] = true;
             }
         }
-        this.buildDimensionMapFromSubTree(dimensionMap, arcrole, elr, dimension, rel.t);
+        this.buildDimensionMapFromSubTree(arcrole, elr, dimension, rel.t);
     }
 }
 

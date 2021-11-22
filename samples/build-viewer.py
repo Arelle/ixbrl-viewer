@@ -55,7 +55,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         self.modelManager.validate()
 
         try:
-            viewerBuilder = iXBRLViewerPlugin.IXBRLViewerBuilder(xbrl, validationMessages = True)
+            viewerBuilder = iXBRLViewerPlugin.IXBRLViewerBuilder(xbrl)
             viewer = viewerBuilder.createViewer(scriptUrl = scriptUrl)
             viewer.save(outPath)
         except IXBRLViewerBuilderError as e:

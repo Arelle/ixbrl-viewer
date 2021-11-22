@@ -75,8 +75,8 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     try:
         out = getattr(options, 'saveViewerFile') or kwargs.get("responseZipStream")
         if out:
-            viewerBuilder = IXBRLViewerBuilder(modelXbrl, validationMessages = options.validationMessages)
-            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL)
+            viewerBuilder = IXBRLViewerBuilder(modelXbrl)
+            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL, showValidations = options.validationMessages)
             if iv is not None:
                 iv.save(out, outBasenameSuffix=VIEWER_BASENAME_SUFFIX, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
     except IXBRLViewerBuilderError as ex:
@@ -96,7 +96,7 @@ def iXBRLViewerMenuCommand(cntlr):
         return
     dialog = SaveViewerDialog(cntlr)
     if dialog.accepted and dialog.filename():
-        viewerBuilder = IXBRLViewerBuilder(modelXbrl, validationMessages = True)
+        viewerBuilder = IXBRLViewerBuilder(modelXbrl)
         iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl())
         iv.save(dialog.filename())
 

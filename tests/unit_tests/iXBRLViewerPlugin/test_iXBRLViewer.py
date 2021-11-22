@@ -331,7 +331,7 @@ class TestIXBRLViewer(unittest.TestCase):
         from_concept.modelXbrl = self.modelXbrl_1
         dimension_concept.modelXbrl = self.modelXbrl_1
         member_concept.modelXbrl = self.modelXbrl_1
-        self.builder_1 = IXBRLViewerBuilder(self.modelXbrl_1, validationMessages = True)
+        self.builder_1 = IXBRLViewerBuilder(self.modelXbrl_1)
         self.builder_2 = IXBRLViewerBuilder(self.modelXbrl_1)
         self.builder_3 = IXBRLViewerBuilder(self.modelXbrl_2)
 
@@ -407,7 +407,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
     def test_createViewer(self):
         js_uri = 'ixbrlviewer.js'
-        result = self.builder_2.createViewer(js_uri)
+        result = self.builder_2.createViewer(js_uri, showValidations = False)
         self.assertEqual(len(result.files),1)
         body = result.files[0].xmlDocument.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')

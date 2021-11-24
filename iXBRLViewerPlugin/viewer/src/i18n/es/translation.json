@@ -1,63 +1,64 @@
 {
-    "toolbar": {
-        "xbrlElements": "Elementos XBRL"
-    },
-    "search": {
-        "showMoreResults": "Mostrar m\u00E1s resultados",
-        "buildingSearchIndex": "Construyendo \u00EDndice de b\u00FAsqueda",
-        "hiddenFact": "Hecho oculto",
-        "all": "TODOS",
-        "noMatchFound": "No se encontr\u00F3 ninguna coincidencia",
-        "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
-        "reset": "Limpiar",
-        "conceptType": "Tipo de concepto",
-        "filter": "Filtro" 
-    },
-    "common": {
-        "notApplicable": "n/d",
-        "unspecified": "Sin especificar",
-        "none": "Ninguno",
-        "accuracyInfinite": "Precisi\u00F3 infinita"
-    },
-    "factDetails": {
-        "concept": "Concepto",
-        "dimensions": "Dimensiones",
-        "date": "Fecha",
-        "factValue": "Valor del hecho",
-        "accuracy": "Precisión",
-        "change": "Cambio",
-        "entity": "Entidad",
-        "duplicatesCount": "{{current}} de {{total}}",
-        "changePercentageIncrease": "{{increase}}% m\u00E1s que en ",
-        "changePercentageDecrease": "{{decrease}}% menos que en ",
-        "changeFromIn": "Anteriormente {{from}} en ",
-        "noPriorFactInThisReport": "No hay un hecho previo",
-        "noUnit": "Sin unidad"
-    },
-    "footnotes": {
-        "footnote": "Nota al pie de p\u00E1gina"
-    },
-    "inspector": {
-        "loadingViewer": "Preparando el visor iXBRL",
-        "highlight": "Destacar",
-        "factProperties": "Propiedades del hecho",
-        "footnoteProperties": "Propiedades de la nota al pie de p\u00E1gina",
-        "allOption": "TODOS",
-        "numericOption": "Num\u00E9rico",
-        "textOption": "Texto",
-        "period": "Periodo",
-        "hiddenFacts": "Hechos ocultos",
-        "visibleFacts": "Hechos visibles",
-        "noFactSelected": "Ning\u00FAn hecho seleccionado",
-        "hiddenFact": "Hecho oculto",
-        "anchoring": "Anclaje",
-        "widerAnchor": "Anclaje amplio",
-        "narrowerAnchor": "Anclaje angosto",
-        "references": "Referencias",
-        "calculations": "C\u00E1lculos",
-        "footnotes": "Notas al pie de p\u00E1gina",
-        "associatedFacts": "Hechos asociados",
-        "factSearch": "B\u00FAsqueda de hechos",
-        "poweredBy": "Con tecnolog\u00EDa de "
-    }
+  "factDetails": {
+    "concept": "Concepto",
+    "dimensions": "Dimensiones",
+    "date": "Fecha",
+    "factValue": "Valor del hecho",
+    "accuracy": "Precisión",
+    "change": "Cambio",
+    "entity": "Entidad",
+    "noUnit": "Sin unidad",
+    "changePercentageIncrease": "{{increase}}% más que en ",
+    "changePercentageDecrease": "{{decrease}}% menos que en ",
+    "changeFromIn": "Anteriormente {{from}} en ",
+    "noPriorFactInThisReport": "No hay un hecho previo",
+    "duplicatesCount": "{{current}} de {{total}}"
+  },
+  "footnotes": {
+    "footnote": "Nota al pie de página"
+  },
+  "inspector": {
+    "loadingViewer": "Preparando el visor iXBRL",
+    "highlight": "Destacar",
+    "factProperties": "Propiedades del hecho",
+    "footnoteProperties": "Propiedades de la nota al pie de página",
+    "reset": "",
+    "filter": "",
+    "conceptType": "",
+    "allOption": "TODOS",
+    "numericOption": "Numérico",
+    "textOption": "Texto",
+    "period": "Periodo",
+    "hiddenFacts": "Hechos ocultos",
+    "visibleFacts": "Hechos visibles",
+    "noFactSelected": "Ningún hecho seleccionado",
+    "hiddenFact": "Hecho oculto",
+    "concealedFact": "",
+    "anchoring": "Anclaje",
+    "widerAnchor": "Anclaje amplio",
+    "narrowerAnchor": "Anclaje angosto",
+    "references": "Referencias",
+    "calculations": "Cálculos",
+    "footnotes": "Notas al pie de página",
+    "associatedFacts": "Hechos asociados",
+    "factSearch": "Búsqueda de hechos",
+    "poweredBy": "Con tecnología de "
+  },
+  "common": {
+    "notApplicable": "n/d",
+    "accuracyInfinite": "Precisió infinita",
+    "unspecified": "Sin especificar",
+    "none": "Ninguno"
+  },
+  "search": {
+    "buildingSearchIndex": "Construyendo índice de búsqueda",
+    "hiddenFact": "Hecho oculto",
+    "concealedFact": "",
+    "showMoreResults": "Mostrar más resultados",
+    "noMatchFound": "No se encontró ninguna coincidencia",
+    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
+  },
+  "toolbar": {
+    "xbrlElements": "Elementos XBRL"
+  }
 }

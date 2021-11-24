@@ -40,8 +40,8 @@ Inspector.prototype.i18nInit = function () {
         fallbackLng: 'en',
         debug: false,
         resources: {
-            en: require('../i18n/en.json'),
-            es: require('../i18n/es.json')
+            en: { translation: require('../i18n/en.json') },
+            es: { translation: require('../i18n/es.json') }
         }
     }).then((t) => {
         jqueryI18next.init(i18next, $, {

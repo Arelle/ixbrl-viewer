@@ -17,7 +17,8 @@
     "common": {
         "notApplicable": "n/a",
         "unspecified": "Unspecified",
-        "none": "None"
+        "none": "None",
+        "accuracyInfinite": "Infinite precision"
     },
     "factDetails": {
         "concept": "Concept",
@@ -33,37 +34,6 @@
         "changeFromIn": "From {{from}} in ",
         "noPriorFactInThisReport": "No prior fact in this report",
         "noUnit": "<NOUNIT>"
-    },
-    "referenceParts": {
-        "Name": "Name",
-        "Number": "Number",
-        "IssueDate": "IssueDate",
-        "Paragraph": "Paragraph",
-        "Subparagraph": "Subparagraph",
-        "URI": "URI",
-        "URIDate": "URIDate",
-        "Note": "Note"
-    },
-    "currencies": {
-        "unitFormatGBP": "\u00A3",
-        "unitFormatUSD": "US \u0024",
-        "unitFormatEUR": "\u20AC",
-        "unitFormatMXN": "MXN \u0024",
-        "centsUSD": "cents",
-        "centsEUR": "cents",
-        "centsAUD": "cents",
-        "centsZAR": "cents",
-        "centsMXN": "cents",
-        "centsGBP": "pence",
-        "accuracy3": "thousandths",
-        "accuracy2": "hundredths",
-        "accuracy0":  "ones",
-        "accuracy-1":  "tens",
-        "accuracy-2":  "hundreds",
-        "accuracy-3":  "thousands",
-        "accuracy-6":  "millions",
-        "accuracy-9":  "billions",
-        "accuracyInfinite": "Infinite precision"
     },
     "footnotes": {
         "footnote": "Footnote"

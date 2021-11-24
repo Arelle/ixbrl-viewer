@@ -16,7 +16,8 @@
     "common": {
         "notApplicable": "n/d",
         "unspecified": "Sin especificar",
-        "none": "Ninguno"
+        "none": "Ninguno",
+        "accuracyInfinite": "Precisi\u00F3 infinita"
     },
     "factDetails": {
         "concept": "Concepto",
@@ -32,33 +33,6 @@
         "changeFromIn": "Anteriormente {{from}} en ",
         "noPriorFactInThisReport": "No hay un hecho previo",
         "noUnit": "Sin unidad"
-    },
-    "referenceParts": {
-        "Name": "Nombre",
-        "Number": "N\u00FAmero",
-        "IssueDate": "Fecha de Emisi\u00F3n",
-        "Paragraph": "P\u00E1rrafo",
-        "Subparagraph": "Subp\u00E1rrafo",
-        "URI": "URI",
-        "URIDate": "Fecha de URI",
-        "Note": "Nota"
-    },
-    "currencies": {
-        "centsUSD": "centavos",
-        "centsEUR": "centavos",
-        "centsAUD": "centavos",
-        "centsZAR": "centavos",
-        "centsMXN": "centavos",
-        "centsGBP": "centavos",
-        "accuracy3": "mil\u00E9simos",
-        "accuracy2": "cent\u00E9simos",
-        "accuracy0":  "unidades",
-        "accuracy-1":  "d\u00E9cimos",
-        "accuracy-2":  "cientos",
-        "accuracy-3":  "miles",
-        "accuracy-6":  "millones",
-        "accuracy-9":  "billones",
-        "accuracyInfinite": "Precisi\u00F3 infinita"
     },
     "footnotes": {
         "footnote": "Nota al pie de p\u00E1gina"

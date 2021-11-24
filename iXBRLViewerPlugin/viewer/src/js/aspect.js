@@ -79,7 +79,7 @@ Aspect.prototype.valueLabel = function(rolePrefix) {
         }
         var qname = this._report.qname(this._value);
         if (qname.namespace == "http://www.xbrl.org/2003/iso4217") {
-            return i18next.t(`currencies.unitFormat${qname.localname}`, {defaultValue: qname.localname + ' '});
+            return i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname + ' '});
         }
         return this._value;
     }

@@ -11,7 +11,7 @@
     "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
     "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
-    "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js iXBRLViewerPlugin/viewer/src/js/\\*.js iXBRLViewerPlugin/viewer/src/html/\\*.html"
+    "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js"
   },
   "repository": {
     "type": "git",

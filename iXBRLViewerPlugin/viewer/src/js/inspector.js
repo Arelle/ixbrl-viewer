@@ -325,8 +325,8 @@ Inspector.prototype.search = function() {
     }
 }
 
-Inspector.prototype.updateCalculation = function (fact, elr) {
-    $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
+Inspector.prototype.updateCalculation = function (fact) {
+    $('.calculations .tree').empty().append(this._calculationHTML(fact));
 }
 
 Inspector.prototype.createOutline = function () {
@@ -439,28 +439,27 @@ Inspector.prototype._referencesHTML = function (fact) {
     return a.contents();
 }
 
-Inspector.prototype._calculationHTML = function (fact, selectedELR) {
-    var calc = new Calculation(fact);
+Inspector.prototype._calculationHTML = function (fact) {
+    const calc = new Calculation(fact);
     if (!calc.hasCalculations()) {
         return "";
     }
 
     // XXX: should we use the new document outline functionality for this?
-    var tableFacts = this._viewer.factsInSameTable(fact);
-    if (!selectedELR) {
-        selectedELR = calc.bestELRForFactSet(tableFacts);
-    }
-    var report = this._report;
-    var viewer = this._viewer;
-    var a = new Accordian();
+    const tableFacts = this._viewer.factsInSameTable(fact);
+    const selectedELR = calc.bestELRForFactSet(tableFacts);
+
+    const report = this._report;
+    const viewer = this._viewer;
+    const a = new Accordian();
 
     for (const elr of calc.elrs()) {
-        var label = report.getRoleLabel(elr, inspector._viewerOptions);
+        const label = report.getRoleLabel(elr, inspector._viewerOptions);
 
-        var rCalc = calc.resolvedCalculation(elr);
-        var calcBody = $('<div></div>');
+        const rCalc = calc.resolvedCalculation(elr);
+        const calcBody = $('<div></div>');
         for (const [i, r] of Object.entries(rCalc)) {
-            var itemHTML = $("<div></div>")
+            const itemHTML = $("<div></div>")
                 .addClass("item")
                 .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
                 .append($("<span></span>").addClass("concept-name").text(report.getLabelOrName(r.concept, "std")))

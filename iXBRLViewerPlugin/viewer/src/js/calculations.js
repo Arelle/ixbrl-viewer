@@ -23,11 +23,11 @@ export function Calculation(fact) {
  * (ELR->conceptName->fact id->fact object) */
 
 Calculation.prototype.calculationFacts = function () {
-    var fact = this._fact;
-    var report = fact.report();
+    const fact = this._fact;
+    const report = fact.report();
     if (!this._conceptToFact) {
-        var rels = report.getChildRelationships(fact.conceptName(), "calc")
-        var ctf = {};
+        const rels = report.getChildRelationships(fact.conceptName(), "calc")
+        const ctf = {};
         $.each(rels, function (elr, rr) {
             ctf[elr] = {};
             if (rr.length > 0) {
@@ -41,13 +41,13 @@ Calculation.prototype.calculationFacts = function () {
 }
 
 Calculation.prototype.hasCalculations = function () {
-    var ctf = this.calculationFacts();
+    const ctf = this.calculationFacts();
     return Object.keys(ctf).length > 0;
 }
 
 Calculation.prototype.elrs = function () {
-    var ctf = this.calculationFacts();
-    var elrs = [];
+    const ctf = this.calculationFacts();
+    const elrs = [];
     for (const [elr, concepts] of Object.entries(ctf)) {
         if (Object.keys(concepts).length > 0) {
             elrs.push(elr);

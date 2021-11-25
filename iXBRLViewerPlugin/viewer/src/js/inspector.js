@@ -439,26 +439,27 @@ Inspector.prototype._referencesHTML = function (fact) {
     return a.contents();
 }
 
-Inspector.prototype._calculationHTML = function (fact, elr) {
+Inspector.prototype._calculationHTML = function (fact, selectedELR) {
     var calc = new Calculation(fact);
     if (!calc.hasCalculations()) {
         return "";
     }
+
+    // XXX: should we use the new document outline functionality for this?
     var tableFacts = this._viewer.factsInSameTable(fact);
-    if (!elr) {
-        elr = calc.bestELRForFactSet(tableFacts);
+    if (!selectedELR) {
+        selectedELR = calc.bestELRForFactSet(tableFacts);
     }
     var report = this._report;
     var viewer = this._viewer;
-    var inspector = this;
     var a = new Accordian();
 
-    $.each(calc.elrs(), function (e, rolePrefix) {
-        var label = report.getRoleLabel(rolePrefix, inspector._viewerOptions);
+    for (const elr of calc.elrs()) {
+        var label = report.getRoleLabel(elr, inspector._viewerOptions);
 
-        var rCalc = calc.resolvedCalculation(e);
+        var rCalc = calc.resolvedCalculation(elr);
         var calcBody = $('<div></div>');
-        $.each(rCalc, function (i, r) {
+        for (const [i, r] of Object.entries(rCalc)) {
             var itemHTML = $("<div></div>")
                 .addClass("item")
                 .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
@@ -468,20 +469,20 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
             if (r.facts) {
                 itemHTML.addClass("calc-fact-link");
                 itemHTML.data('ivid', r.facts);
-                itemHTML.click(function () { inspector.selectItem(Object.values(r.facts)[0].id ) });
-                itemHTML.mouseenter(function () { $.each(r.facts, function (k,f) { viewer.linkedHighlightFact(f); })});
-                itemHTML.mouseleave(function () { $.each(r.facts, function (k,f) { viewer.clearLinkedHighlightFact(f); })});
-                $.each(r.facts, function (k,f) { viewer.highlightRelatedFact(f); });
+                itemHTML.click(() => this.selectItem(Object.values(r.facts)[0].id));
+                itemHTML.mouseenter(() => $.each(r.facts, (k,f) => viewer.linkedHighlightFact(f)));
+                itemHTML.mouseleave(() => $.each(r.facts, (k,f) => viewer.clearLinkedHighlightFact(f)));
+                $.each(r.facts, (k,f) => viewer.highlightRelatedFact(f));
             }
-        });
+        }
         $("<div></div>").addClass("item").addClass("total")
             .append($("<span></span>").addClass("weight"))
             .append($("<span></span>").addClass("concept-name").text(fact.getLabelOrName("std")))
             .appendTo(calcBody);
 
-        a.addCard($("<span></span>").text(label), calcBody, e == elr);
+        a.addCard($("<span></span>").text(label), calcBody, elr == selectedELR);
 
-    });
+    }
     return a.contents();
 }
 

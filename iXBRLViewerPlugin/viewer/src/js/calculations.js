@@ -47,12 +47,12 @@ Calculation.prototype.hasCalculations = function () {
 
 Calculation.prototype.elrs = function () {
     var ctf = this.calculationFacts();
-    var elrs = {};
-    $.each(ctf, function (k,v) {
-        if (Object.keys(v).length > 0) {
-            elrs[k] = k.match(/[^\/]*$/)[0];
+    var elrs = [];
+    for (const [elr, concepts] of Object.entries(ctf)) {
+        if (Object.keys(concepts).length > 0) {
+            elrs.push(elr);
         }
-    }); 
+    } 
     return elrs;
 }
 

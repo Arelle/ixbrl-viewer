@@ -28,13 +28,13 @@ Calculation.prototype.calculationFacts = function () {
     if (!this._conceptToFact) {
         const rels = report.getChildRelationships(fact.conceptName(), "calc")
         const ctf = {};
-        $.each(rels, function (elr, rr) {
+        for (const [elr, rr] of Object.entries(rels)) {
             ctf[elr] = {};
             if (rr.length > 0) {
                 var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
-                $.each(otherFacts, (i,ff) => setDefault(ctf[elr], ff.conceptName(), {})[ff.id] = ff);
+                otherFacts.forEach(ff => setDefault(ctf[elr], ff.conceptName(), {})[ff.id] = ff);
             }
-        });
+        }
         this._conceptToFact = ctf;
     }
     return this._conceptToFact;
@@ -106,6 +106,10 @@ Calculation.prototype.resolvedCalculation = function(elr) {
         calc.push({ weightSign: s, weight: r.w, facts: calcFacts[r.t], concept: r.t });
     });
     return calc;
-    
 }
+
+Calculation.prototype.calculatedTotalInterval = function(elr) {
+
+}
+
 

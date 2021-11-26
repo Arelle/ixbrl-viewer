@@ -15,8 +15,8 @@
 import Decimal from 'decimal.js';
 
 export function Interval(a, b) {
-    this.a = a;
-    this.b = b;
+    this.a = typeof a == 'object' ? a : new Decimal(a);
+    this.b = typeof b == 'object' ? b : new Decimal(b);
 }
 
 Interval.fromFact = function(fact) {
@@ -29,3 +29,21 @@ Interval.fromFact = function(fact) {
     const value = new Decimal(fact.value());
     return new Interval(value.minus(width), value.plus(width));
 }
+
+Interval.prototype.intersection = function(other) {
+    const a = Decimal.max(this.a, other.a);
+    const b = Decimal.min(this.b, other.b);
+    if (b.lessThan(a)) {
+        return undefined;
+    }
+    return new Interval(a, b);
+}
+
+Interval.prototype.plus = function(other) {
+    return new Interval(this.a.plus(other.a), this.b.plus(other.b));
+}
+
+Interval.prototype.times = function(x) {
+    return x > 0 ? new Interval(this.a.times(x), this.b.times(x)) : new Interval(this.b.times(x), this.a.times(x));
+}
+

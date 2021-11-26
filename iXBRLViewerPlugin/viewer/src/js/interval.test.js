@@ -77,3 +77,59 @@ describe("From facts", () => {
 });
 
 
+describe("Intersect", () => {
+    test("Intersecting", () => {
+        var x = new Interval(5, 15);
+        var y = new Interval(10, 25);
+        var ii = x.intersection(y);
+        expect(ii.a).toEqualDecimal(10);
+        expect(ii.b).toEqualDecimal(15);
+        ii = y.intersection(x);
+        expect(ii.a).toEqualDecimal(10);
+        expect(ii.b).toEqualDecimal(15);
+
+        y = new Interval(15, 25);
+        ii = x.intersection(y);
+        expect(ii.a).toEqualDecimal(15);
+        expect(ii.b).toEqualDecimal(15);
+    });
+
+    test("No intersection", () => {
+        var x = new Interval(5, 15);
+        expect(x.intersection(new Interval(20, 25))).toBeUndefined();
+        expect(x.intersection(new Interval(1, 4.99))).toBeUndefined();
+    });
+})
+
+describe("Arithmetic", () => {
+    test("Add", () => {
+        var i = new Interval(5, 15);
+        var ii = i.plus(new Interval(10, 20));
+        expect(ii.a).toEqualDecimal(15);
+        expect(ii.b).toEqualDecimal(35);
+    });
+
+    test("Multiply", () => {
+        var i = new Interval(5, 15);
+        var ii = i.times(2);
+        expect(ii.a).toEqualDecimal(10);
+        expect(ii.b).toEqualDecimal(30);
+
+        ii = i.times(-2);
+        expect(ii.a).toEqualDecimal(-30);
+        expect(ii.b).toEqualDecimal(-10);
+
+        i = new Interval(-10, -5);
+        ii = i.times(2);
+        expect(ii.a).toEqualDecimal(-20);
+        expect(ii.b).toEqualDecimal(-10);
+
+        ii = i.times(-2);
+        expect(ii.a).toEqualDecimal(10);
+        expect(ii.b).toEqualDecimal(20);
+
+    });
+
+});
+
+

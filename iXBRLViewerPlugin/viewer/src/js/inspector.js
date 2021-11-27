@@ -29,6 +29,7 @@ import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
+import { Interval } from './interval.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -448,6 +449,12 @@ Inspector.prototype._calculationHTML = function (fact) {
     // XXX: should we use the new document outline functionality for this?
     const tableFacts = this._viewer.factsInSameTable(fact);
     const selectedELR = calc.bestELRForFactSet(tableFacts);
+
+    const total = calc.calculatedTotalInterval(selectedELR);
+    console.log(total.a.toString());
+    console.log(total.b.toString());
+
+    console.log(Interval.fromFact(fact).intersection(total) !== undefined ? "Consistent" : "Inconsistent");
 
     const report = this._report;
     const viewer = this._viewer;

@@ -84,6 +84,11 @@ describe("Intersect", () => {
         var ii = x.intersection(y);
         expect(ii.a).toEqualDecimal(10);
         expect(ii.b).toEqualDecimal(15);
+
+        ii = Interval.intersection(x, y);
+        expect(ii.a).toEqualDecimal(10);
+        expect(ii.b).toEqualDecimal(15);
+
         ii = y.intersection(x);
         expect(ii.a).toEqualDecimal(10);
         expect(ii.b).toEqualDecimal(15);
@@ -92,12 +97,25 @@ describe("Intersect", () => {
         ii = x.intersection(y);
         expect(ii.a).toEqualDecimal(15);
         expect(ii.b).toEqualDecimal(15);
+
+        x = new Interval(10, 20);
+        y = new Interval(15, 25);
+        var z = new Interval(18, 30);
+        ii = Interval.intersection(x, y, z);
+        expect(ii.a).toEqualDecimal(18);
+        expect(ii.b).toEqualDecimal(20);
+
     });
 
     test("No intersection", () => {
         var x = new Interval(5, 15);
         expect(x.intersection(new Interval(20, 25))).toBeUndefined();
         expect(x.intersection(new Interval(1, 4.99))).toBeUndefined();
+
+        x = new Interval(10, 20);
+        var y = new Interval(15, 25);
+        var z = new Interval(21, 30);
+        expect(Interval.intersection(x, y, z)).toBeUndefined();
     });
 })
 

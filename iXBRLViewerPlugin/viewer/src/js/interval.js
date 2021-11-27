@@ -39,6 +39,17 @@ Interval.prototype.intersection = function(other) {
     return new Interval(a, b);
 }
 
+Interval.intersection = function(...intervals) {
+    const aa = intervals.map(x => x.a);
+    const bb = intervals.map(x => x.b);
+    const a = Decimal.max(...aa);
+    const b = Decimal.min(...bb);
+    if (b.lessThan(a)) {
+        return undefined;
+    }
+    return new Interval(a, b);
+}
+
 Interval.prototype.plus = function(other) {
     return new Interval(this.a.plus(other.a), this.b.plus(other.b));
 }

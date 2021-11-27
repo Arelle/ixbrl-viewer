@@ -14,6 +14,7 @@
 
 import $ from 'jquery';
 import { setDefault } from './util.js';
+import { Interval } from './interval.js';
 
 export function Calculation(fact) {
     this._fact = fact;
@@ -109,7 +110,19 @@ Calculation.prototype.resolvedCalculation = function(elr) {
 }
 
 Calculation.prototype.calculatedTotalInterval = function(elr) {
-
+    const calc = this.resolvedCalculation(elr);
+    let total = new Interval(0, 0);
+    for (const item of calc) {
+        if (item.facts !== undefined) {
+            const duplicates = Object.values(item.facts).map(fact => Interval.fromFact(fact));
+            const intersection = Interval.intersection(...duplicates);
+            if (intersection === undefined) {
+                return undefined;
+            }
+            total = total.plus(intersection.times(item.weight));
+        }
+    }
+    return total;
 }
 
 

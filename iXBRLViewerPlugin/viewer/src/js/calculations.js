@@ -16,113 +16,126 @@ import $ from 'jquery';
 import { setDefault } from './util.js';
 import { Interval } from './interval.js';
 
-export function Calculation(fact) {
-    this._fact = fact;
-}
-
-/* Resolve calculation relationships to a map of maps of maps 
- * (ELR->conceptName->fact id->fact object) */
-
-Calculation.prototype.calculationFacts = function () {
-    const fact = this._fact;
-    const report = fact.report();
-    if (!this._conceptToFact) {
-        const rels = report.getChildRelationships(fact.conceptName(), "calc")
-        const ctf = {};
-        for (const [elr, rr] of Object.entries(rels)) {
-            ctf[elr] = {};
-            if (rr.length > 0) {
-                var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
-                otherFacts.forEach(ff => setDefault(ctf[elr], ff.conceptName(), {})[ff.id] = ff);
-            }
-        }
-        this._conceptToFact = ctf;
+export class Calculation {
+    
+    constructor(fact) {
+        this.fact = fact;
     }
-    return this._conceptToFact;
-}
 
-Calculation.prototype.hasCalculations = function () {
-    const ctf = this.calculationFacts();
-    return Object.keys(ctf).length > 0;
-}
-
-Calculation.prototype.elrs = function () {
-    const ctf = this.calculationFacts();
-    const elrs = [];
-    for (const [elr, concepts] of Object.entries(ctf)) {
-        if (Object.keys(concepts).length > 0) {
-            elrs.push(elr);
+    /* Resolve calculation relationships to a map of maps of maps 
+     * (ELR->conceptName->fact id->fact object) */
+    calculationFacts() {
+        const fact = this.fact;
+        const report = fact.report();
+        if (!this._conceptToFact) {
+            const rels = report.getChildRelationships(fact.conceptName(), "calc")
+            const ctf = {};
+            for (const [elr, rr] of Object.entries(rels)) {
+                ctf[elr] = {};
+                if (rr.length > 0) {
+                    var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
+                    otherFacts.forEach(ff => setDefault(ctf[elr], ff.conceptName(), {})[ff.id] = ff);
+                }
+            }
+            this._conceptToFact = ctf;
         }
-    } 
-    return elrs;
-}
+        return this._conceptToFact;
+    }
 
-/*
- * Select the ELR which is the best match for a given array of facts
- */
-Calculation.prototype.bestELRForFactSet = function(facts) {
-    var ctf = this.calculationFacts();
-    var bestMatchELR = "";
-    var bestMatchCount = -1;
-    $.each(ctf, function (elr, rr) {
-        var matchCount = 0;
-        $.each(rr, function (concept, ff) {
-            var matched = 0;
-            $.each(ff, function (fid, calcFact) {
-                if ($.inArray(fid, facts) >  -1) {
-                    matched = 1;
-                } 
+    hasCalculations() {
+        const ctf = this.calculationFacts();
+        return Object.keys(ctf).length > 0;
+    }
+
+    resolvedCalculations() {
+        const calculations = [];
+        const ctf = this.calculationFacts();
+        for (const [elr, concepts] of Object.entries(ctf)) {
+            if (Object.keys(concepts).length > 0) {
+                calculations.push(this.resolvedCalculation(elr));
+            }
+        } 
+        return calculations;
+    }
+
+    /*
+     * Select the ELR which is the best match for a given array of facts
+     */
+    bestELRForFactSet(facts) {
+        var ctf = this.calculationFacts();
+        var bestMatchELR = "";
+        var bestMatchCount = -1;
+        $.each(ctf, function (elr, rr) {
+            var matchCount = 0;
+            $.each(rr, function (concept, ff) {
+                var matched = 0;
+                $.each(ff, function (fid, calcFact) {
+                    if ($.inArray(fid, facts) >  -1) {
+                        matched = 1;
+                    } 
+                });
+                matchCount += matched;
             });
-            matchCount += matched;
-        });
-        if (matchCount/Object.keys(rr).length > bestMatchCount) {
-            bestMatchCount = matchCount/Object.keys(rr).length;    
-            bestMatchELR = elr;
+            if (matchCount/Object.keys(rr).length > bestMatchCount) {
+                bestMatchCount = matchCount/Object.keys(rr).length;    
+                bestMatchELR = elr;
+            }
+        }); 
+        return bestMatchELR;
+    }
+
+    /*
+     * Returns a list of objects with properties:
+     *   weight (calc weight)
+     *   facts (undefined, or a map of fact IDs to fact objects)
+     *   concept (conceptName)
+     */
+    resolvedCalculation(elr) {
+        var calc = [];
+        var calcFacts = this.calculationFacts()[elr];
+        var rels = this.fact.report().getChildRelationships(this.fact.conceptName(), "calc")[elr];
+        const resolvedCalculation = new ResolvedCalculation(elr, this.fact);
+        for (const r of rels) {
+            resolvedCalculation.addRow(r.t, r.w, calcFacts[r.t]);
         }
-    }); 
-    return bestMatchELR;
+        return resolvedCalculation;
+    }
 }
 
-/*
- * Returns a list of objects with properties:
- *   weight (calc weight)
- *   facts (undefined, or a map of fact IDs to fact objects)
- *   concept (conceptName)
- */
-Calculation.prototype.resolvedCalculation = function(elr) {
-    var calc = [];
-    var calcFacts = this.calculationFacts()[elr];
-    var rels = this._fact.report().getChildRelationships(this._fact.conceptName(), "calc")[elr];
-    $.each(rels, function (i, r) {
+
+class ResolvedCalculation {
+    constructor(elr, fact) {
+        this.totalFact = fact;
+        this.elr = elr;
+        this.rows = [];
+    }
+
+    addRow(concept, weight, facts) {
         var s;
-        if (r.w == 1) {
+        if (weight == 1) {
             s = '+';
         }
-        else if (r.w == -1) {
+        else if (weight == -1) {
             s = '-';
         }
         else {
-            s = r.w;
+            s = weight;
         }
-        calc.push({ weightSign: s, weight: r.w, facts: calcFacts[r.t], concept: r.t });
-    });
-    return calc;
-}
-
-Calculation.prototype.calculatedTotalInterval = function(elr) {
-    const calc = this.resolvedCalculation(elr);
-    let total = new Interval(0, 0);
-    for (const item of calc) {
-        if (item.facts !== undefined) {
-            const duplicates = Object.values(item.facts).map(fact => Interval.fromFact(fact));
-            const intersection = Interval.intersection(...duplicates);
-            if (intersection === undefined) {
-                return undefined;
-            }
-            total = total.plus(intersection.times(item.weight));
-        }
+        this.rows.push({ weightSign: s, weight: weight, facts: facts, concept: concept});
     }
-    return total;
+
+    calculatedTotalInterval() {
+        let total = new Interval(0, 0);
+        for (const item of this.rows) {
+            if (item.facts !== undefined) {
+                const duplicates = Object.values(item.facts).map(fact => Interval.fromFact(fact));
+                const intersection = Interval.intersection(...duplicates);
+                if (intersection === undefined) {
+                    return undefined;
+                }
+                total = total.plus(intersection.times(item.weight));
+            }
+        }
+        return total;
+    }
 }
-
-

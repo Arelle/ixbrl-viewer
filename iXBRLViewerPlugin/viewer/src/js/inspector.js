@@ -30,6 +30,7 @@ import { ValidationReportDialog } from './validationreport.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
 import { Interval } from './interval.js';
+import { CalculationInspector } from './calculationinspector.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -450,22 +451,15 @@ Inspector.prototype._calculationHTML = function (fact) {
     const tableFacts = this._viewer.factsInSameTable(fact);
     const selectedELR = calc.bestELRForFactSet(tableFacts);
 
-    const total = calc.calculatedTotalInterval(selectedELR);
-    console.log(total.a.toString());
-    console.log(total.b.toString());
-
-    console.log(Interval.fromFact(fact).intersection(total) !== undefined ? "Consistent" : "Inconsistent");
 
     const report = this._report;
     const viewer = this._viewer;
     const a = new Accordian();
 
-    for (const elr of calc.elrs()) {
-        const label = report.getRoleLabel(elr, inspector._viewerOptions);
-
-        const rCalc = calc.resolvedCalculation(elr);
+    for (const rCalc of calc.resolvedCalculations()) {
+        const label = report.getRoleLabel(rCalc.elr, inspector._viewerOptions);
         const calcBody = $('<div></div>');
-        for (const [i, r] of Object.entries(rCalc)) {
+        for (const r of Object.values(rCalc.rows)) {
             const itemHTML = $("<div></div>")
                 .addClass("item")
                 .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
@@ -486,10 +480,23 @@ Inspector.prototype._calculationHTML = function (fact) {
             .append($("<span></span>").addClass("concept-name").text(fact.getLabelOrName("std")))
             .appendTo(calcBody);
 
-        a.addCard($("<span></span>").text(label), calcBody, elr == selectedELR);
+        a.addCard($("<span></span>").text(label), calcBody, rCalc.elr == selectedELR);
+
+        console.log(rCalc.elr);
+        const total = rCalc.calculatedTotalInterval();
+        console.log(total.a.toString());
+        console.log(total.b.toString());
+
+        console.log(Interval.fromFact(fact).intersection(total) !== undefined ? "Consistent" : "Inconsistent");
 
     }
-    return a.contents();
+    return $("<div></div>")
+        .append(a.contents())
+        .append($("<p>details</p>").click(() => { 
+            let dialog = new CalculationInspector();
+            dialog.displayCalculation(calc.resolvedCalculations()[0]);
+            dialog.show();
+        }));
 }
 
 Inspector.prototype._footnotesHTML = function (fact) {

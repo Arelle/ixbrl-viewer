@@ -16,7 +16,7 @@ export function Footnote(report, footnoteId, title) {
     this.id = footnoteId;
     this.facts = [];
     this.title = title;
-    this._ixNode = report.getIXNodeForItemId(footnoteId);
+    this.ixNode = report.getIXNodeForItemId(footnoteId);
 }
 
 Footnote.prototype.addFact = function (f) {
@@ -24,7 +24,7 @@ Footnote.prototype.addFact = function (f) {
 }
 
 Footnote.prototype.textContent = function () {
-    return this._ixNode.textContent();
+    return this.ixNode.textContent();
 }
 
 Footnote.prototype.readableValue = function () {

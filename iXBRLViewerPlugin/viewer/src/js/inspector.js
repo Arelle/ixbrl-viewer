@@ -459,20 +459,20 @@ Inspector.prototype._calculationHTML = function (fact) {
     for (const rCalc of calc.resolvedCalculations()) {
         const label = report.getRoleLabel(rCalc.elr, inspector._viewerOptions);
         const calcBody = $('<div></div>');
-        for (const r of Object.values(rCalc.rows)) {
+        for (const r of rCalc.rows) {
             const itemHTML = $("<div></div>")
                 .addClass("item")
                 .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
                 .append($("<span></span>").addClass("concept-name").text(report.getLabelOrName(r.concept, "std")))
                 .appendTo(calcBody);
 
-            if (r.facts) {
+            if (!r.facts.isEmpty()) {
                 itemHTML.addClass("calc-fact-link");
-                itemHTML.data('ivid', r.facts);
-                itemHTML.click(() => this.selectItem(Object.values(r.facts)[0].id));
-                itemHTML.mouseenter(() => $.each(r.facts, (k,f) => viewer.linkedHighlightFact(f)));
-                itemHTML.mouseleave(() => $.each(r.facts, (k,f) => viewer.clearLinkedHighlightFact(f)));
-                $.each(r.facts, (k,f) => viewer.highlightRelatedFact(f));
+                itemHTML.data('ivid', r.facts.items.map(f => f.id));
+                itemHTML.click(() => this.selectItem(r.facts.items[0].id));
+                itemHTML.mouseenter(() => r.facts.items.forEach(f => viewer.linkedHighlightFact(f)));
+                itemHTML.mouseleave(() => r.facts.items.forEach(f => viewer.clearLinkedHighlightFact(f)));
+                r.facts.items.forEach(f => viewer.highlightRelatedFact(f));
             }
         }
         $("<div></div>").addClass("item").addClass("total")
@@ -520,7 +520,7 @@ Inspector.prototype._footnotesHTML = function (fact) {
 
 Inspector.prototype.viewerMouseEnter = function (id) {
     $('.calculations .item').filter(function () {   
-        return $.inArray(id, $.map($(this).data('ivid'), f => f.id )) > -1 
+        return ($(this).data('ivid') || []).includes(id);
     }).addClass('linked-highlight');
     $('#inspector .search .results tr').filter(function () {   
         return $(this).data('ivid') == id;
@@ -756,7 +756,7 @@ Inspector.prototype.update = function () {
             this.updateAnchoring(cf);
             $('div.references').empty().append(this._referencesHTML(cf));
             $('#inspector .search-results .fact-list-item').removeClass('selected');
-            $('#inspector .search-results .fact-list-item').filter(function () { return $(this).data('ivid') == cf.id }).addClass('selected');
+            $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.id).addClass('selected');
 
             var duplicates = cf.duplicates();
             var n = 0;

@@ -16,6 +16,7 @@ import { Fact } from "./fact.js";
 import { Interval } from "./interval.js";
 import { iXBRLReport } from "./report.js";
 import Decimal from 'decimal.js';
+import './test-utils.js';
 
 function testReport(facts) {
     return new iXBRLReport({
@@ -28,27 +29,14 @@ function testReport(facts) {
 function testFact(factData) {
     factData.a = factData.a || {};
     factData.a.c = factData.a.c || 'eg:Concept1';
+    if (!('u' in factData.a)) {
+        factData.a.u = 'eg:pure';
+    }
+    else if (factData.a.u === undefined) {
+        delete factData.a.u;
+    }
     return new Fact(testReport({"f1": factData}), "f1");
 }
-
-expect.extend({
-    toEqualDecimal(received, expected) {
-        const options = {
-              comment: 'decimal.js equality',
-              isNot: this.isNot,
-              promise: this.promise,
-        };
-        const pass = received.equals(expected);
-        const message = () =>
-              this.utils.matcherHint('toEqualDecimals', undefined, undefined, options) +
-              '\n\n' +
-              `Expected: ${this.isNot ? '(not) ' : ''}${this.utils.printExpected(new Decimal(expected))}\n` +
-              `Received: ${this.utils.printReceived(received)}`;
-
-        return {actual: received, message, pass};
-        
-    }
-});
 
 describe("From facts", () => {
     test("Infinite precision", () => {
@@ -73,6 +61,15 @@ describe("From facts", () => {
         i = Interval.fromFact(testFact({v: -20.123, d: -1}));
         expect(i.a).toEqualDecimal(-25.123);
         expect(i.b).toEqualDecimal(-15.123);
+    });
+
+    test("Non numeric", () => {
+        var i = Interval.fromFact(testFact({v: 20, a: {u: undefined}}));
+        expect(i).toBeUndefined();
+
+        // This would be invalid XBRL
+        i = Interval.fromFact(testFact({v: "abc" }));
+        expect(i).toBeUndefined();
     });
 });
 

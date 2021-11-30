@@ -15,6 +15,7 @@
 import $ from 'jquery';
 import { setDefault } from './util.js';
 import { Interval } from './interval.js';
+import { FactSet } from './factset.js';
 
 export class Calculation {
     
@@ -96,7 +97,7 @@ export class Calculation {
         var rels = this.fact.report().getChildRelationships(this.fact.conceptName(), "calc")[elr];
         const resolvedCalculation = new ResolvedCalculation(elr, this.fact);
         for (const r of rels) {
-            resolvedCalculation.addRow(r.t, r.w, calcFacts[r.t]);
+            resolvedCalculation.addRow(r.t, r.w, new FactSet(Object.values(calcFacts[r.t] || {})));
         }
         return resolvedCalculation;
     }
@@ -110,7 +111,7 @@ class ResolvedCalculation {
         this.rows = [];
     }
 
-    addRow(concept, weight, facts) {
+    addRow(concept, weight, factset) {
         var s;
         if (weight == 1) {
             s = '+';
@@ -121,15 +122,14 @@ class ResolvedCalculation {
         else {
             s = weight;
         }
-        this.rows.push({ weightSign: s, weight: weight, facts: facts, concept: concept});
+        this.rows.push({ weightSign: s, weight: weight, facts: factset, concept: concept});
     }
 
     calculatedTotalInterval() {
         let total = new Interval(0, 0);
         for (const item of this.rows) {
             if (item.facts !== undefined) {
-                const duplicates = Object.values(item.facts).map(fact => Interval.fromFact(fact));
-                const intersection = Interval.intersection(...duplicates);
+                const intersection = item.facts.valueIntersection();
                 if (intersection === undefined) {
                     return undefined;
                 }

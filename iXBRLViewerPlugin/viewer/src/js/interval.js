@@ -20,26 +20,34 @@ export function Interval(a, b) {
 }
 
 Interval.fromFact = function(fact) {
+    if (!fact.isNumeric()) {
+        return undefined;
+    }
     const decimals = fact.decimals();
     let width = 0;
     if (decimals !== undefined) {
         const x = new Decimal(10);
         width = x.pow(0-decimals).times(0.5);
     }
-    const value = new Decimal(fact.value());
-    return new Interval(value.minus(width), value.plus(width));
+    try {
+        const value = new Decimal(fact.value());
+        return new Interval(value.minus(width), value.plus(width));
+    } catch (e) {
+        if (e instanceof Error && /DecimalError/.test(e.message)) {
+            return undefined;
+        }
+        throw e;
+    }
 }
 
 Interval.prototype.intersection = function(other) {
-    const a = Decimal.max(this.a, other.a);
-    const b = Decimal.min(this.b, other.b);
-    if (b.lessThan(a)) {
-        return undefined;
-    }
-    return new Interval(a, b);
+    return Interval.intersection(this, other);
 }
 
 Interval.intersection = function(...intervals) {
+    if (intervals.includes(undefined)) {
+        return undefined;
+    }
     const aa = intervals.map(x => x.a);
     const bb = intervals.map(x => x.b);
     const a = Decimal.max(...aa);

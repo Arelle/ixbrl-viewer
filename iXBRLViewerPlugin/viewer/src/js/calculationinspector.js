@@ -28,8 +28,8 @@ export class CalculationInspector extends Dialog {
         tbody.empty();
         for (const row of resolvedCalculation.rows) {
             let factText = "";
-            if (row.facts) {
-                let f = row.facts[Object.keys(row.facts)[0]];
+            if (!row.facts.isEmpty()) {
+                let f = row.facts.items[0];
                 factText = f.readableValue();
             }
             $("<tr></tr>")

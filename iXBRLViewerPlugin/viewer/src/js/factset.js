@@ -14,16 +14,17 @@
 
 import { Fact } from "./fact.js";
 import { Footnote } from "./footnote.js";
+import { Interval } from './interval.js';
 
 export class FactSet {
-    constructor(items) {
-        this._items = items;
+    constructor (items) {
+        this.items = items;
     }
 
     /* Returns the union of dimensions present on facts in the set */
     _allDimensions() {
         var dims = {};
-        var facts = this._items.filter((item) => item instanceof Fact);
+        var facts = this.items.filter((item) => item instanceof Fact);
         for (var i = 0; i < facts.length; i++) {
             var dd = Object.keys(facts[i].dimensions());
             for (var j = 0; j < dd.length; j++) {
@@ -42,7 +43,7 @@ export class FactSet {
      */
     minimallyUniqueLabel(fact) {
         if (!this._minimallyUniqueLabels) {
-            var facts = this._items.filter((item) => item instanceof Fact);
+            var facts = this.items.filter((item) => item instanceof Fact);
             var allLabels = {};
             var allAspects = ["c", "p"].concat(this._allDimensions());
             /* Assemble a map of arrays of all aspect labels for all facts, in a
@@ -98,12 +99,28 @@ export class FactSet {
                 }
             }
 
-            this._items.filter((item) => item instanceof Footnote).forEach((fn) => {
+            // If there are any footnotes in the set, given them the footnote
+            // title as a label
+            this.items.filter((item) => item instanceof Footnote).forEach((fn) => {
                 uniqueLabels[fn.id] = [fn.title];
             });
 
             this._minimallyUniqueLabels = uniqueLabels;
         }
         return this._minimallyUniqueLabels[fact.id].join(", ");
+    }
+
+    isEmpty() {
+        return this.items.length == 0;
+    }
+
+    valueIntersection() {
+        const duplicates = Object.values(this.items).map(fact => Interval.fromFact(fact));
+        return Interval.intersection(...duplicates);
+    }
+
+    isConsistent() {
+        const duplicates = Object.values(this.items).map(fact => Interval.fromFact(fact));
+        return Interval.intersection(...duplicates) !== undefined;
     }
 }

@@ -15,6 +15,7 @@
 import { Fact } from "./fact.js";
 import { FactSet } from "./factset.js";
 import { iXBRLReport } from "./report.js";
+import './test-utils.js';
 
 var i = 0;
 
@@ -210,4 +211,43 @@ describe("Minimally unique labels (missing labels)", () => {
     expect(fs.minimallyUniqueLabel(f1)).toEqual("Concept 1");
     expect(fs.minimallyUniqueLabel(f2)).toEqual("eg:Concept4");
   });
+});
+
+function numericTestFact(value, decimals) {
+    var factData = { "d": decimals, "v": value, "a": { "c": "eg:Concept1", "u": "eg:pure" }};
+    return factData;
+}
+
+describe("Consistency", () => {
+    var report = testReport({ 
+        "f1": numericTestFact(150, -1), // 145-155
+        "f2": numericTestFact(200, -2), // 150-250
+        "f3": numericTestFact(140, -1), // 135-145
+    });
+
+    var f1 = new Fact(report, "f1");
+    var f2 = new Fact(report, "f2");
+    var f3 = new Fact(report, "f3");
+    var f3 = new Fact(report, "f3");
+
+    test("Inconsistent fact set", () => {
+      var factSet = new FactSet([f1, f2, f3]);
+      expect(factSet.valueIntersection()).toBeUndefined();
+      expect(factSet.isConsistent()).toBeFalsy();
+    });
+
+    test("Consistent fact sets", () => {
+      var factSet = new FactSet([f1, f2]);
+      var intersection = factSet.valueIntersection();
+      expect(intersection.a).toEqualDecimal(150);
+      expect(intersection.b).toEqualDecimal(155);
+      expect(factSet.isConsistent()).toBeTruthy();
+
+      var factSet = new FactSet([f1, f3]);
+      var intersection = factSet.valueIntersection();
+      expect(intersection.a).toEqualDecimal(145);
+      expect(intersection.b).toEqualDecimal(145);
+      expect(factSet.isConsistent()).toBeTruthy();
+    });
+  
 });

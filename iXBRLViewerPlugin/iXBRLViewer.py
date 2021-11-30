@@ -300,7 +300,8 @@ class IXBRLViewerBuilder:
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='%s' type='text/javascript'  />" % scriptUrl)
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='text/javascript' />")
+                e.set("src", scriptUrl)
                 # Don't self close
                 e.text = ''
                 child.append(e)

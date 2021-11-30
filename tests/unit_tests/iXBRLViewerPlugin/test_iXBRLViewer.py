@@ -280,6 +280,8 @@ class TestIXBRLViewer(unittest.TestCase):
 
         baseSets = defaultdict(list)
         baseSets[('http://www.xbrl.org/2003/arcrole/summation-item', 'ELR', 'linkqname', 'arcqname')] = []
+        baseSets[("http://xbrl.org/int/dim/arcrole/dimension-default", 'ELR', 'linkqname', 'arcqname')] = []
+        baseSets[("http://www.xbrl.org/2003/arcrole/parent-child", 'ELR', 'linkqname', 'arcqname')] = []
 
         roleTypes = defaultdict(list)
         roleTypes['ELR'] = [Mock(definition = "ELR Label")]
@@ -363,6 +365,7 @@ class TestIXBRLViewer(unittest.TestCase):
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
+    @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     @patch('arelle.XbrlConst.standardLabel', 'http://www.xbrl.org/2003/role/label')
@@ -381,6 +384,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
+    @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     @patch('arelle.XbrlConst.standardLabel', 'http://www.xbrl.org/2003/role/label')
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')

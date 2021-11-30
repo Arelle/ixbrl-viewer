@@ -23,7 +23,7 @@ import i18next from "i18next";
 
 export function Fact(report, factId) {
     this.f = report.data.facts[factId];
-    this._ixNode = report.getIXNodeForItemId(factId);
+    this.ixNode = report.getIXNodeForItemId(factId);
     this._report = report;
     this.id = factId;
 }
@@ -240,7 +240,7 @@ Fact.prototype.identifier = function () {
 }
 
 Fact.prototype.escaped = function () {
-    return this._ixNode.escaped;
+    return this.ixNode.escaped;
 }
 
 Fact.prototype.isEnumeration = function() {
@@ -252,11 +252,11 @@ Fact.prototype.footnotes = function () {
 }
 
 Fact.prototype.isHidden = function () {
-    return this._ixNode.wrapperNode.length == 0;
+    return this.ixNode.wrapperNode.length == 0;
 }
 
 Fact.prototype.isHTMLHidden = function () {
-    return this._ixNode.htmlHidden;
+    return this.ixNode.htmlHidden;
 }
 
 Fact.prototype.widerConcepts = function () {

@@ -459,6 +459,7 @@ Inspector.prototype._calculationHTML = function (fact) {
     for (const rCalc of calc.resolvedCalculations()) {
         const label = report.getRoleLabel(rCalc.elr, inspector._viewerOptions);
         const calcBody = $('<div></div>');
+
         for (const r of rCalc.rows) {
             const itemHTML = $("<div></div>")
                 .addClass("item")
@@ -481,14 +482,6 @@ Inspector.prototype._calculationHTML = function (fact) {
             .appendTo(calcBody);
 
         a.addCard($("<span></span>").text(label), calcBody, rCalc.elr == selectedELR);
-
-        console.log(rCalc.elr);
-        const total = rCalc.calculatedTotalInterval();
-        console.log(total.a.toString());
-        console.log(total.b.toString());
-
-        console.log(Interval.fromFact(fact).intersection(total) !== undefined ? "Consistent" : "Inconsistent");
-
     }
     return $("<div></div>")
         .append(a.contents())

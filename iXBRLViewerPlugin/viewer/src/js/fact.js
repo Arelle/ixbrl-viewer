@@ -20,6 +20,9 @@ import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
 import { Footnote } from "./footnote.js";
+import $ from 'jquery'
+import i18next from "i18next";
+import Decimal from 'decimal.js';
 
 export class Fact {
     
@@ -286,3 +289,12 @@ export class Fact {
     }
 }
 
+Fact.prototype.roundedValue = function() {
+    Decimal.rounding = Decimal.ROUND_HALF_UP;
+    const v = new Decimal(this.value());
+    const d = this.decimals();
+    if (d === undefined) {
+        return v;
+    }
+    return v.mul(10 ** d).round().mul(10 ** (0-d));
+}

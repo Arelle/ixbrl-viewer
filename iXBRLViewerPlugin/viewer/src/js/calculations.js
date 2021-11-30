@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import $ from 'jquery';
+import Decimal from 'decimal.js';
 import { setDefault } from './util.js';
 import { Interval } from './interval.js';
 import { FactSet } from './factset.js';
@@ -137,5 +138,30 @@ class ResolvedCalculation {
             }
         }
         return total;
+    }
+
+    isConsistent() {
+        return this.calculatedTotalInterval().intersection(Interval.fromFact(this.totalFact)) !== undefined;
+    }
+
+    calculatedTotalLegacy() {
+        let total = new Decimal(0);
+
+        for (const row of this.rows) {
+            // XXX need to check for exact duplicates
+            if (!row.facts.isConsistent()) {
+                return undefined;
+            }
+            if (!row.facts.isEmpty()) {
+                total = total.plus(row.facts.items[0].roundedValue().times(row.weight));
+            }
+        }
+        return total;
+    }
+
+    isConsistentLegacy() {
+        // XXX needs rounding
+        console.log(this.calculatedTotalLegacy().toString());
+        return this.calculatedTotalLegacy().equals(this.totalFact.roundedValue());
     }
 }

@@ -38,6 +38,8 @@ export function Inspector(iv) {
 Inspector.prototype.i18nInit = function () {
     return i18next.init({
         lng: this.preferredLanguages()[0],
+        // Do not apply translations that are present but with an empty string
+        returnEmptyString: false,
         fallbackLng: 'en',
         debug: false,
         resources: {

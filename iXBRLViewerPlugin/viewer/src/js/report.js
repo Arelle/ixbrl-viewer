@@ -134,10 +134,7 @@ iXBRLReport.prototype.getIXNodeForItemId = function(id) {
 
 iXBRLReport.prototype.facts = function() {
     var allItems = [];
-    var report = this;
-    $.each(this.data.facts, function (id, f) {
-        allItems.push(report.getItemById(id));
-    });
+    $.each(this.data.facts, (id, f) => allItems.push(this.getItemById(id)));
     return allItems;
 }
 
@@ -149,12 +146,12 @@ iXBRLReport.prototype.qname = function(v) {
     return new QName(this.prefixMap(), v);
 }
 
-iXBRLReport.prototype.getChildRelationships = function(c, arcrole) {
+iXBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
     var rels = {}
     const elrs = this.data.rels[arcrole] || {};
     for (const elr in elrs) {
-        if (c in elrs[elr]) {
-            rels[elr] = elrs[elr][c];
+        if (conceptName in elrs[elr]) {
+            rels[elr] = elrs[elr][conceptName];
         }
     }
     return rels;
@@ -185,14 +182,45 @@ iXBRLReport.prototype._reverseRelationships = function(arcrole) {
     return this._reverseRelationshipCache[arcrole];
 }
 
-iXBRLReport.prototype.getParentRelationships = function(c, arcrole) {
+iXBRLReport.prototype.getParentRelationships = function(conceptName, arcrole) {
     var rels = {}
     for (const [elr, relSet] of Object.entries(this._reverseRelationships(arcrole))) {
-        if (c in relSet) {
-            rels[elr] = relSet[c];
+        if (conceptName in relSet) {
+            rels[elr] = relSet[conceptName];
         }
     }
     return rels;
+}
+
+iXBRLReport.prototype.getParentRelationshipsInGroup = function(conceptName, arcrole, elr) {
+    var rels = {}
+    const relSet = this._reverseRelationships(arcrole)[elr] || {};
+    return relSet[conceptName] || [];
+}
+
+iXBRLReport.prototype.dimensionDefault = function(dimensionName) {
+    // ELR is irrelevant for dimension-default relationships, so check all of
+    // them, and return the first (illegal for there to be more than one
+    for (const rel of Object.values(this.data.rels["d-d"] || {})) {
+        if (dimensionName in rel) {
+            return rel[dimensionName][0].t;
+        }
+    }
+    return undefined;
+}
+
+iXBRLReport.prototype.relationshipGroups = function(arcrole) {
+    return Object.keys(this.data.rels[arcrole] || {});
+}
+
+iXBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
+    var roots = [];
+    for (const conceptName in this.data.rels[arcrole][elr]) {
+        if (!(elr in this.getParentRelationships(conceptName, arcrole))) {
+            roots.push(conceptName);
+        }
+    }
+    return roots;
 }
 
 iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {

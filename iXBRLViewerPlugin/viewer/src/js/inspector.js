@@ -28,6 +28,7 @@ import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
 import { MessageBox } from './messagebox.js';
+import { DocumentOutline } from './outline.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -78,10 +79,13 @@ Inspector.prototype.initialize = function (report, viewer) {
                 }
             });
             $("#inspector .controls .search-button").on("click", function () {
-                $(this).closest("#inspector").toggleClass("search-mode");
+                $(this).closest("#inspector").removeClass("outline-mode").toggleClass("search-mode");
+            });
+            $("#inspector .controls .outline-button").on("click", function () {
+                $(this).closest("#inspector").removeClass("search-mode").toggleClass("outline-mode");
             });
             $("#inspector-head .back").on("click", function () {
-                $(this).closest("#inspector").removeClass("search-mode");
+                $(this).closest("#inspector").removeClass("search-mode").removeClass("outline-mode");
             });
             $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
             inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
@@ -95,6 +99,8 @@ Inspector.prototype.initialize = function (report, viewer) {
             // Listen to messages posted to this window
             $(window).on("message", (e) => inspector.handleMessage(e));
             report.setViewerOptions(inspector._viewerOptions);
+            inspector.outline = new DocumentOutline(report);
+            inspector.createOutline();
             inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
                 inspector._search = new ReportSearch(report);
                 inspector.setupSearchControls();
@@ -190,7 +196,7 @@ Inspector.prototype.factListRow = function(f) {
     var row = $('<div class="fact-list-item"></div>')
         .click(() => this.selectItem(f.id))
         .dblclick(() => $('#inspector').removeClass("search-mode"))
-        .mousedown(function (e) { 
+        .mousedown((e) => { 
             /* Prevents text selection via double click without
              * disabling click+drag text selection (which user-select:
              * none would )
@@ -308,6 +314,37 @@ Inspector.prototype.search = function() {
 
 Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
+}
+
+Inspector.prototype.createOutline = function () {
+    if (this.outline.hasOutline()) {
+        $('.outline .no-outline-overlay').hide();
+        var container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
+        for (const elr of this.outline.sortedSections()) {
+            $('<div class="fact-list-item"></div>')
+                .text(this._report.getRoleLabel(elr))
+                .click(() => this.selectItem(this.outline.sections[elr].id))
+                .dblclick(() => $('#inspector').removeClass("outline-mode"))
+                .mousedown((e) => {
+                    // Prevent text selection by double click
+                    if (e.detail > 1) { 
+                        e.preventDefault() 
+                    } 
+                })
+                .appendTo(container);
+        }
+    }
+}
+
+Inspector.prototype.updateOutline = function (cf) {
+    $('.fact-groups').empty();
+    for (const elr of this.outline.groupsForFact(cf)) {
+        $('<div class="fact-list-item"></div>')
+            .text(this._report.getRoleLabel(elr))
+            .click(() => this.selectItem(this.outline.sections[elr].id))
+            .appendTo($('.fact-groups'));
+    }
+
 }
 
 Inspector.prototype.updateFootnotes = function (fact) {
@@ -661,6 +698,7 @@ Inspector.prototype.update = function () {
             $('#inspector').removeClass('footnote-mode');
 
             this.updateCalculation(cf);
+            this.updateOutline(cf);
             this.updateFootnotes(cf);
             this.updateAnchoring(cf);
             $('div.references').empty().append(this._referencesHTML(cf));

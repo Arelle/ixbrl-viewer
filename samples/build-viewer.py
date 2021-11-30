@@ -82,7 +82,9 @@ cntlr.modelManager.validateInferDecimals = True
 cntlr.modelManager.validateCalcLB = True
 cntlr.modelManager.formulaOptions = FormulaOptions()
 
+PluginManager.addPluginModule("transforms/SEC")
 PluginManager.addPluginModule("inlineXbrlDocumentSet")
+cntlr.modelManager.loadCustomTransforms()
 if args.package_dir:
     cntlr.loadPackagesFromDir(args.package_dir)
 

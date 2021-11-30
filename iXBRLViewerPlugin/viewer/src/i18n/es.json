@@ -12,7 +12,7 @@
             "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
             "reset": "Limpiar",
             "conceptType": "Tipo de concepto",
-            "filter": "Filtro" 
+            "filter": "Filtro"
         },
         "common": {
             "notApplicable": "n/d",
@@ -85,7 +85,8 @@
             "footnotes": "Notas al pie de p\u00E1gina",
             "associatedFacts": "Hechos asociados",
             "factSearch": "B\u00FAsqueda de hechos",
-            "poweredBy": "Con tecnolog\u00EDa de "
+            "poweredBy": "Con tecnolog\u00EDa de ",
+            "searchTitle": "B\u00FAsqueda de hechos"
         }
     }
 }

@@ -291,3 +291,7 @@ iXBRLReport.prototype.isDocumentSet = function() {
 iXBRLReport.prototype.usesAnchoring = function() {
     return this.data.rels["w-n"] !== undefined;
 }
+
+iXBRLReport.prototype.hasValidationErrors = function() {
+    return this.data.validation !== undefined && this.data.validation.length > 0;
+}

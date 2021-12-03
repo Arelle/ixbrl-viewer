@@ -26,6 +26,8 @@ import { Accordian } from './accordian.js';
 import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
+import { ValidationReportDialog } from './validationreport.js';
+import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
 
 const SEARCH_PAGE_SIZE = 100
@@ -105,6 +107,7 @@ Inspector.prototype.initialize = function (report, viewer) {
                 inspector.buildDisplayOptionsMenu();
                 inspector.buildToolbarHighlightMenu();
                 inspector.buildHighlightKey();
+                inspector.setupValidationReportIcon();
                 inspector.initializeViewer();
                 resolve();
             });
@@ -623,7 +626,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                     $("<span></span>") 
                         .addClass("analyse")
                         .text("")
-                        .click(() => this._chart.analyseDimension(fact,["p"]))
+                        .click(() => this.analyseDimension(fact, ["p"]))
                 );
             }
             this._updateEntityIdentifier(fact, factHTML);
@@ -647,9 +650,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
-                            .on("click", () => {
-                                this._chart.analyseDimension(fact, [ aspect.name() ])
-                            })
+                            .on("click", () => this.analyseDimension(fact, [aspect.name()]))
                     )
                 }
                 var s = $('<div class="dimension-value"></div>')
@@ -672,6 +673,11 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         );
     });
     return a;
+}
+
+Inspector.prototype.analyseDimension = function(fact, dimensions) {
+    var chart = new IXBRLChart();
+    chart.analyseDimension(fact, dimensions);
 }
 
 Inspector.prototype.update = function () {
@@ -800,4 +806,24 @@ Inspector.prototype.selectDefaultLanguage = function () {
 
 Inspector.prototype.setLanguage = function (lang) {
     this._viewerOptions.language = lang;
+}
+
+Inspector.prototype.showValidationReport = function () {
+    const vr = new ValidationReportDialog();
+    vr.displayErrors(this._report.data.validation);
+    vr.show();
+}
+
+Inspector.prototype.setupValidationReportIcon = function () {
+    if (this._report.hasValidationErrors()) {
+        $("#ixv .validation-warning").show().on("click", () => this.showValidationReport());
+    }
+}
+
+Inspector.prototype.showValidationWarning = function () {
+    if (this._report.hasValidationErrors()) {
+        var message = $("<div></div>").append("<p>This report contains <b>XBRL validation errors</b>.  These errors may prevent this document from opening correctly in other XBRL software.</p>");
+        var mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
+        mb.show(() => this.showValidationReport());
+    }
 }

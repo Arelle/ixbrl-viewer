@@ -2,6 +2,7 @@ import lxml
 import sys
 import unittest
 import json
+import logging
 from collections import defaultdict
 from unittest.mock import Mock, patch
 from .mock_arelle import mock_arelle
@@ -294,6 +295,18 @@ class TestIXBRLViewer(unittest.TestCase):
             filepath=''
         )
 
+        error1 = logging.LogRecord("arelle", logging.ERROR, "", 0, "Error message", {}, None)    
+        error1.messageCode = "code1"
+        self.modelManager = Mock(
+            cntlr = Mock(
+                logHandler = Mock (
+                    logRecordBuffer = [
+                        error1
+                    ]
+                )
+            )
+        )
+
         self.modelXbrl_1 = Mock(
             relationshipSet=relationshipSet_effect,
             relationshipSets={},
@@ -301,7 +314,8 @@ class TestIXBRLViewer(unittest.TestCase):
             roleTypes=roleTypes,
             facts=[fact_1, fact_with_typed_dimension, fact_with_missing_member_on_dimension],
             info=info_effect,
-            modelDocument=self.modelDocument
+            modelDocument=self.modelDocument,
+            modelManager = self.modelManager
         )
         self.modelXbrl_2 = Mock(
             relationshipSet=relationshipSet_effect,
@@ -310,7 +324,8 @@ class TestIXBRLViewer(unittest.TestCase):
             roleTypes=roleTypes,
             facts=[fact_2, fact_3],
             info=info_effect,
-            modelDocument=self.modelDocument
+            modelDocument=self.modelDocument,
+            modelManager = self.modelManager
         )
 
         self.cash_concept.modelXbrl = self.modelXbrl_1
@@ -319,7 +334,8 @@ class TestIXBRLViewer(unittest.TestCase):
         dimension_concept.modelXbrl = self.modelXbrl_1
         member_concept.modelXbrl = self.modelXbrl_1
         self.builder_1 = IXBRLViewerBuilder(self.modelXbrl_1)
-        self.builder_2 = IXBRLViewerBuilder(self.modelXbrl_2)
+        self.builder_2 = IXBRLViewerBuilder(self.modelXbrl_1)
+        self.builder_3 = IXBRLViewerBuilder(self.modelXbrl_2)
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -370,7 +386,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     @patch('arelle.XbrlConst.standardLabel', 'http://www.xbrl.org/2003/role/label')
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
-    def test_createViewer(self):
+    def test_createViewerWithValidation(self):
         js_uri = 'ixbrlviewer.js'
         result = self.builder_1.createViewer(js_uri)
         self.assertEqual(len(result.files),1)
@@ -381,6 +397,33 @@ class TestIXBRLViewer(unittest.TestCase):
         self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
         self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
 
+        jsdata = json.loads(body[2].text)
+        errors = jsdata["validation"]
+        self.assertEqual(errors, [{"sev": "ERROR", "msg": "Error message", "code": "code1" }])
+        self.assertEqual(set(jsdata["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+
+    @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
+    @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
+    @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
+    @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
+    @patch('arelle.XbrlConst.standardLabel', 'http://www.xbrl.org/2003/role/label')
+    @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
+    @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
+    def test_createViewer(self):
+        js_uri = 'ixbrlviewer.js'
+        result = self.builder_2.createViewer(js_uri, showValidations = False)
+        self.assertEqual(len(result.files),1)
+        body = result.files[0].xmlDocument.getroot()[0]
+        self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
+        self.assertEqual(body[1].attrib.get('src'), js_uri)
+        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
+        self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
+        self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+
+        jsdata = json.loads(body[2].text)
+        self.assertNotIn("validation", jsdata)
+        self.assertEqual(set(jsdata["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
@@ -390,7 +433,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
     def test_createViewer_bad_path(self):
         js_uri = 'ixbrlviewer.js'
-        result = self.builder_2.createViewer(js_uri)
+        result = self.builder_3.createViewer(js_uri)
         self.assertEqual(len(result.files),1)
         body = result.files[0].xmlDocument.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')

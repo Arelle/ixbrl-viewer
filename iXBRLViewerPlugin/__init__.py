@@ -34,11 +34,13 @@
 #
 #     In the zip, the iXBRLViewer files are in a subdirectory VIEWER_BASENAME_SUFFIX to separate them from possible EdgarRenderer and other output files
 #
-from .iXBRLViewer import IXBRLViewerBuilder
-
+from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 
 from .localviewer import launchLocalViewer, VIEWER_BASENAME_SUFFIX
 from arelle.ModelDocument import Type
+import argparse
+import traceback
+import sys
 
 import traceback
 import sys
@@ -53,7 +55,13 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       dest="viewerURL",
                       default="js/dist/ixbrlviewer.js",
                       help="Specify the URL to ixbrlviewer.js")
-
+    parser.add_option("--viewer-validation-messages",
+                      dest="validationMessages",
+                      action="store_true",
+                      help="Include validation messages in the viewer")
+    # Force logging to use a buffer so that messages are retained and can be
+    # retrieved for inclusion with the viewer.
+    parser.add_option("--logToBuffer", action="store_true", dest="logToBuffer", default=True, help=argparse.SUPPRESS)
 
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     # extend XBRL-loaded run processing for this option
@@ -68,8 +76,11 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
         out = getattr(options, 'saveViewerFile') or kwargs.get("responseZipStream")
         if out:
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL)
-            iv.save(out, outBasenameSuffix=VIEWER_BASENAME_SUFFIX, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
+            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL, showValidations = options.validationMessages)
+            if iv is not None:
+                iv.save(out, outBasenameSuffix=VIEWER_BASENAME_SUFFIX, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
+    except IXBRLViewerBuilderError as ex:
+        print(ex.message)
     except Exception as ex:
         cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
 

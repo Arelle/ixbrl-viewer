@@ -19,6 +19,7 @@ import { Viewer } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer(options) {
+    this.options = options || {};
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
@@ -222,6 +223,9 @@ iXBRLViewer.prototype.load = function () {
 
                         /* Focus on fact specified in URL fragment, if any */
                         inspector.handleFactDeepLink();
+                        if (iv.options.showValidationWarningOnStart) {
+                            inspector.showValidationWarning();
+                        }
                     });
             }
         }, 250);

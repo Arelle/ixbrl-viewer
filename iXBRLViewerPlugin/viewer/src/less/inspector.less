@@ -27,6 +27,7 @@
 @import "tabs.less";
 @import (reference) "text-mixins.less";
 @import "block-list.less";
+@import "validation-report.less";
 
 @top-bar-height: 3.5rem;
 
@@ -231,6 +232,17 @@
               background: @highlight-2;
             }
           }
+        }
+      }
+
+      .validation-warning {
+        margin-left: 0.5rem;
+        font-size: 1.6rem;
+        display: none;
+        cursor: pointer;
+
+        &::before {
+          .icon-warning();
         }
       }
     }

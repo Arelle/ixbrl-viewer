@@ -23,8 +23,9 @@ import pycountry
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from .xhtmlserialize import XHTMLSerializer
-import os
 
+import os
+import logging
 import io
 import zipfile
 from arelle.PythonUtil import attrdict
@@ -70,6 +71,8 @@ class NamespaceMap:
     def qname(self, qname):
         return "%s:%s" % (self.getPrefix(qname.namespaceURI, qname.prefix), qname.localName)
 
+class IXBRLViewerBuilderError(Exception):
+    pass
 
 class IXBRLViewerBuilder:
 
@@ -195,14 +198,130 @@ class IXBRLViewerBuilder:
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
 
-    def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js"):
+    def validationErrors(self):
+        dts = self.dts
+
+        logHandler = dts.modelManager.cntlr.logHandler
+        if not hasattr(logHandler, "logRecordBuffer"):
+            raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
+
+        errors = []
+        for logRec in getattr(logHandler, "logRecordBuffer"):
+            if logRec.levelno > logging.INFO:
+                errors.append({
+                    "sev": logRec.levelname.title().upper(),
+                    "code": getattr(logRec, "messageCode", ""),
+                    "msg": logRec.getMessage()
+                })
+
+        return errors
+
+    def addFact(self, f):
+        if f.id is None:
+            f.set("id","ixv-%d" % (self.idGen))
+
+        self.idGen += 1
+        conceptName = self.nsmap.qname(f.qname)
+        scheme, ident = f.context.entityIdentifier
+
+        aspects = {
+            "c": conceptName,
+            "e": self.nsmap.qname(QName(self.nsmap.getPrefix(scheme,"e"), scheme, ident)),
+        }
+
+        factData = {
+            "a": aspects,
+        }
+
+        if f.isNil:
+            factData["v"] = None
+        elif f.concept is not None and f.concept.isEnumeration:
+            qnEnums = f.xValue
+            if not isinstance(qnEnums, list):
+                qnEnums = (qnEnums,)
+            factData["v"] = " ".join(self.nsmap.qname(qn) for qn in qnEnums)
+            for qn in qnEnums:
+                self.addConcept(self.dts.qnameConcepts.get(qn))
+        else:
+            factData["v"] = f.value 
+            if f.value == INVALIDixVALUE:
+                factData["err"] = 'INVALID_IX_VALUE'
+
+        if f.format is not None:
+            factData["f"] = str(f.format)
+
+        if f.isNumeric:
+            if f.unit is not None and len(f.unit.measures[0]):
+                # XXX does not support complex units
+                unit = self.nsmap.qname(f.unit.measures[0][0])
+                aspects["u"] = unit
+            else:
+                # The presence of the unit aspect is used by the viewer to
+                # identify numeric facts.  If the fact has no unit (invalid
+                # XBRL, but we want to support it for draft documents),
+                # include the unit aspect with a null value.
+                aspects["u"] = None
+            d = inferredDecimals(f)
+            if d != float("INF") and not math.isnan(d):
+                factData["d"] = d
+
+        for d, v in f.context.qnameDims.items():
+            if v.memberQname is not None:
+                aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
+                self.addConcept(v.member)
+                self.addConcept(v.dimension, dimensionType = "e")
+            elif v.typedMember is not None:
+                aspects[self.nsmap.qname(v.dimensionQname)] = v.typedMember.text
+                self.addConcept(v.dimension, dimensionType = "t")
+
+        if f.context.isForeverPeriod:
+            aspects["p"] = "f"
+        elif f.context.isInstantPeriod and f.context.instantDatetime is not None:
+            aspects["p"] = self.dateFormat(f.context.instantDatetime.isoformat())
+        elif f.context.isStartEndPeriod and f.context.startDatetime is not None and f.context.endDatetime is not None:
+            aspects["p"] = "%s/%s" % (
+                self.dateFormat(f.context.startDatetime.isoformat()),
+                self.dateFormat(f.context.endDatetime.isoformat())
+            )
+
+        frels = self.footnoteRelationshipSet.fromModelObject(f)
+        if frels:
+            for frel in frels:
+                if frel.toModelObject is not None:
+                    factData.setdefault("fn", []).append(frel.toModelObject.id)
+
+        self.taxonomyData["facts"][f.id] = factData
+        self.addConcept(f.concept)
+
+    def addViewerToXMLDocument(self, xmlDocument, scriptUrl):
+        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
+
+        for child in xmlDocument.getroot():
+            if child.tag == '{http://www.w3.org/1999/xhtml}body':
+                child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
+
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='text/javascript' />")
+                e.set("src", scriptUrl)
+                # Don't self close
+                e.text = ''
+                child.append(e)
+
+                # Putting this in the header can interfere with character set
+                # auto detection
+                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='application/x.ixbrl-viewer+json'></script>")
+                e.text = taxonomyDataJSON
+                child.append(e)
+                child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
+                break
+
+    def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js", showValidations = True):
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added
         """
 
         dts = self.dts
         iv = iXBRLViewer(dts)
-        idGen = 0
+        self.idGen = 0
         self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
         self.roleMap.getPrefix(XbrlConst.documentationLabel, "doc")
         self.roleMap.getPrefix(XbrlConst.summationItem, "calc")
@@ -211,84 +330,14 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
 
         for f in dts.facts:
-            if f.id is None:
-                f.set("id","ixv-%d" % (idGen))
-            idGen += 1
-            conceptName = self.nsmap.qname(f.qname)
-            scheme, ident = f.context.entityIdentifier
-
-            aspects = {
-                "c": conceptName,
-                "e": self.nsmap.qname(QName(self.nsmap.getPrefix(scheme,"e"), scheme, ident)),
-            }
-
-            factData = {
-                "a": aspects,
-            }
-
-            if f.isNil:
-                factData["v"] = None
-            elif f.concept is not None and f.concept.isEnumeration:
-                qnEnums = f.xValue
-                if not isinstance(qnEnums, list):
-                    qnEnums = (qnEnums,)
-                factData["v"] = " ".join(self.nsmap.qname(qn) for qn in qnEnums)
-                for qn in qnEnums:
-                    self.addConcept(dts.qnameConcepts.get(qn))
-            else:
-                factData["v"] = f.value 
-                if f.value == INVALIDixVALUE:
-                    factData["err"] = 'INVALID_IX_VALUE'
-
-            if f.format is not None:
-                factData["f"] = str(f.format)
-
-            if f.isNumeric:
-                if f.unit is not None and len(f.unit.measures[0]):
-                    # XXX does not support complex units
-                    unit = self.nsmap.qname(f.unit.measures[0][0])
-                    aspects["u"] = unit
-                else:
-                    # The presence of the unit aspect is used by the viewer to
-                    # identify numeric facts.  If the fact has no unit (invalid
-                    # XBRL, but we want to support it for draft documents),
-                    # include the unit aspect with a null value.
-                    aspects["u"] = None
-                d = inferredDecimals(f)
-                if d != float("INF") and not math.isnan(d):
-                    factData["d"] = d
-
-            for d, v in f.context.qnameDims.items():
-                if v.memberQname is not None:
-                    aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
-                    self.addConcept(v.member)
-                    self.addConcept(v.dimension, dimensionType = "e")
-                elif v.typedMember is not None:
-                    aspects[self.nsmap.qname(v.dimensionQname)] = v.typedMember.text
-                    self.addConcept(v.dimension, dimensionType = "t")
-
-            if f.context.isForeverPeriod:
-                aspects["p"] = "f"
-            elif f.context.isInstantPeriod and f.context.instantDatetime is not None:
-                aspects["p"] = self.dateFormat(f.context.instantDatetime.isoformat())
-            elif f.context.isStartEndPeriod and f.context.startDatetime is not None and f.context.endDatetime is not None:
-                aspects["p"] = "%s/%s" % (
-                    self.dateFormat(f.context.startDatetime.isoformat()),
-                    self.dateFormat(f.context.endDatetime.isoformat())
-                )
-
-            frels = self.footnoteRelationshipSet.fromModelObject(f)
-            if frels:
-                for frel in frels:
-                    if frel.toModelObject is not None:
-                        factData.setdefault("fn", []).append(frel.toModelObject.id)
-
-            self.taxonomyData["facts"][f.id] = factData
-            self.addConcept(f.concept)
+            self.addFact(f)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
         self.taxonomyData["rels"] = self.getRelationships()
+
+        if showValidations:
+            self.taxonomyData["validation"] = self.validationErrors()
 
         dts.info("viewer:info", "Creating iXBRL viewer")
 
@@ -308,24 +357,7 @@ class IXBRLViewerBuilder:
             filename = os.path.basename(dts.modelDocument.filepath)
             iv.addFile(iXBRLViewerFile(filename, xmlDocument))
 
-        taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
-
-        for child in xmlDocument.getroot():
-            if child.tag == '{http://www.w3.org/1999/xhtml}body':
-                child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
-
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' src='%s' type='text/javascript'  />" % scriptUrl)
-                # Don't self close
-                e.text = ''
-                child.append(e)
-
-                # Putting this in the header can interfere with character set
-                # auto detection
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='application/x.ixbrl-viewer+json'></script>")
-                e.text = taxonomyDataJSON
-                child.append(e)
-                child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
-                break
+        self.addViewerToXMLDocument(xmlDocument, scriptUrl)
 
         return iv
 

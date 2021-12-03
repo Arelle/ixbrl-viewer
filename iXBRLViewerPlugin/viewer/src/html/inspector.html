@@ -26,6 +26,7 @@ limitations under the License.
                 <div class="arrow"></div>
                 <div class="items"></div>
         </div></span><span class="content"></span>
+        <span class="validation-warning" title="Report has validation errors"></span>
     </div>
   </div>
   <div id="inspector" class="no-fact-selected">
@@ -177,11 +178,42 @@ limitations under the License.
   </div>
   <div class="dialog-mask">
   </div>
-  <div id="chart" class="dialog">
-    <div class="close"></div>
-    <div class="contents">
-      <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
-      <div class="other-aspects"></div>
+  <div id="dialog-container"></div>
+  <div id="dialog-templates">
+    <div class="dialog full-screen chart">
+      <div class="close"></div>
+      <div class="contents">
+        <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
+        <div class="other-aspects"></div>
+      </div>
+    </div>
+    <div class="dialog validation-report">
+      <div class="close"></div>
+      <div class="contents">
+          <h2 data-i18n="inspector.validationResults">Validation results</h2>
+          <table>
+              <thead>
+                  <th data-i18n="inspector.validationSeverity">Severity</th>
+                  <th data-i18n="inpsector.validationCode">Code</th>
+                  <th data-i18n="inspector.validationMessage">Message</th>
+              </thead>
+              <tbody>
+
+              </tbody>
+          </table>
+          <div class="buttons">
+          </div>
+      </div>
+    </div>
+    <div class="dialog message-box">
+      <div class="close"></div>
+      <div class="contents">
+        <h2 class="title"></h2>
+        <div class="message">
+        </div>
+        <div class="buttons">
+        </div>
+      </div>
     </div>
   </div>
   <div id="viewer-pane" >

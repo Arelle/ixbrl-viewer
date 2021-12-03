@@ -1,0 +1,70 @@
+{
+  "common": {
+    "accuracyInfinite": "Infinite precision",
+    "none": "None",
+    "notApplicable": "n/a",
+    "unspecified": "Unspecified"
+  },
+  "factDetails": {
+    "accuracy": "Accuracy",
+    "change": "Change",
+    "changeFromIn": "From {{from}} in ",
+    "changePercentageDecrease": "{{decrease}}% decrease on ",
+    "changePercentageIncrease": "{{increase}}% increase on ",
+    "concept": "Concept",
+    "date": "Date",
+    "dimensions": "Dimensions",
+    "duplicatesCount": "{{current}} of {{total}}",
+    "entity": "Entity",
+    "factValue": "Fact Value",
+    "noPriorFactInThisReport": "No prior fact in this report",
+    "noUnit": "<NOUNIT>"
+  },
+  "footnotes": {
+    "footnote": "Footnote"
+  },
+  "inspector": {
+    "allOption": "ALL",
+    "anchoring": "Anchoring",
+    "associatedFacts": "Associated facts",
+    "calculations": "Calculations",
+    "concealedFact": "Concealed fact",
+    "conceptType": "Concept Type",
+    "documentOutline": "Document outline",
+    "fact-groups": "",
+    "factProperties": "Fact Properties",
+    "factSearch": "Fact Search",
+    "filter": "Filter",
+    "footnoteProperties": "Footnote Properties",
+    "footnotes": "Footnotes",
+    "hiddenFact": "Hidden Fact",
+    "hiddenFacts": "Hidden Facts",
+    "highlight": "Highlight",
+    "loadingViewer": "Loading iXBRL Viewer",
+    "narrowerAnchor": "Narrower anchors",
+    "nextTag": "Next tag",
+    "noFactSelected": "No Fact Selected",
+    "numericOption": "Numeric",
+    "outlineUnavailable": "",
+    "period": "Period",
+    "poweredBy": "Powered by",
+    "previousTag": "Previous tag",
+    "references": "References",
+    "reset": "Reset",
+    "searchTitle": "Search",
+    "textOption": "Text",
+    "visibleFacts": "Visible Facts",
+    "widerAnchor": "Wider anchor"
+  },
+  "search": {
+    "buildingSearchIndex": "Building search index",
+    "concealedFact": "Concealed fact",
+    "hiddenFact": "Hidden fact",
+    "noMatchFound": "No match found",
+    "showMoreResults": "Show more results",
+    "tryAgainDifferentKeywords": "Try again with different keywords"
+  },
+  "toolbar": {
+    "xbrlElements": "XBRL Elements"
+  }
+}

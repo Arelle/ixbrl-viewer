@@ -1,0 +1,70 @@
+{
+  "common": {
+    "accuracyInfinite": "Precisió infinita",
+    "none": "Ninguno",
+    "notApplicable": "n/d",
+    "unspecified": "Sin especificar"
+  },
+  "factDetails": {
+    "accuracy": "Precisión",
+    "change": "Cambio",
+    "changeFromIn": "Anteriormente {{from}} en ",
+    "changePercentageDecrease": "{{decrease}}% menos que en ",
+    "changePercentageIncrease": "{{increase}}% más que en ",
+    "concept": "Concepto",
+    "date": "Fecha",
+    "dimensions": "Dimensiones",
+    "duplicatesCount": "{{current}} de {{total}}",
+    "entity": "Entidad",
+    "factValue": "Valor del hecho",
+    "noPriorFactInThisReport": "No hay un hecho previo",
+    "noUnit": "Sin unidad"
+  },
+  "footnotes": {
+    "footnote": "Nota al pie de página"
+  },
+  "inspector": {
+    "allOption": "TODOS",
+    "anchoring": "Anclaje",
+    "associatedFacts": "Hechos asociados",
+    "calculations": "Cálculos",
+    "concealedFact": "",
+    "conceptType": "Tipo de concepto",
+    "documentOutline": "",
+    "fact-groups": "",
+    "factProperties": "Propiedades del hecho",
+    "factSearch": "Búsqueda de hechos",
+    "filter": "Filtro",
+    "footnoteProperties": "Propiedades de la nota al pie de página",
+    "footnotes": "Notas al pie de página",
+    "hiddenFact": "Hecho oculto",
+    "hiddenFacts": "Hechos ocultos",
+    "highlight": "Destacar",
+    "loadingViewer": "Preparando el visor iXBRL",
+    "narrowerAnchor": "Anclaje angosto",
+    "nextTag": "",
+    "noFactSelected": "Ningún hecho seleccionado",
+    "numericOption": "Numérico",
+    "outlineUnavailable": "",
+    "period": "Periodo",
+    "poweredBy": "Con tecnología de ",
+    "previousTag": "",
+    "references": "Referencias",
+    "reset": "Limpiar",
+    "searchTitle": "Búsqueda de hechos",
+    "textOption": "Texto",
+    "visibleFacts": "Hechos visibles",
+    "widerAnchor": "Anclaje amplio"
+  },
+  "search": {
+    "buildingSearchIndex": "Construyendo índice de búsqueda",
+    "concealedFact": "",
+    "hiddenFact": "Hecho oculto",
+    "noMatchFound": "No se encontró ninguna coincidencia",
+    "showMoreResults": "Mostrar más resultados",
+    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
+  },
+  "toolbar": {
+    "xbrlElements": "Elementos XBRL"
+  }
+}

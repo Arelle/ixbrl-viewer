@@ -214,16 +214,16 @@ Fact.prototype.readableAccuracy = function () {
     }
     var d = this.decimals();
     if (d === undefined) {
-        return i18next.t("currencies.accuracyInfinite")
+        return i18next.t("common.accuracyInfinite")
     }
     else if (d === null) {
         return i18next.t("common.unspecified");
     }
-    var name = i18next.t(`currencies.accuracy${d}`, {defaultValue:"noName"});
+    var name = i18next.t(`currencies:accuracy${d}`, {defaultValue:"noName"});
     if (this.isMonetaryValue()) {
         var currency = this.report().qname(this.unit().value()).localname;
         if (d == 2) {
-            var name = i18next.t(`currencies.cents${currency}`, {defaultValue: name});
+            var name = i18next.t(`currencies:cents${currency}`, {defaultValue: name});
         }
     }
     if (name !== "noName") {

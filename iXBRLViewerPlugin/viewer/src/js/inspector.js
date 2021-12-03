@@ -40,11 +40,21 @@ export function Inspector(iv) {
 Inspector.prototype.i18nInit = function () {
     return i18next.init({
         lng: this.preferredLanguages()[0],
+        // Do not apply translations that are present but with an empty string
+        returnEmptyString: false,
         fallbackLng: 'en',
         debug: false,
         resources: {
-            en: require('../i18n/en.json'),
-            es: require('../i18n/es.json')
+            en: { 
+                translation: require('../i18n/en/translation.json'),
+                referenceParts: require('../i18n/en/referenceparts.json'),
+                currencies: require('../i18n/en/currencies.json')
+            },
+            es: { 
+                translation: require('../i18n/es/translation.json'),
+                referenceParts: require('../i18n/es/referenceparts.json'),
+                currencies: require('../i18n/es/currencies.json')
+            }
         }
     }).then((t) => {
         jqueryI18next.init(i18next, $, {
@@ -53,7 +63,6 @@ Inspector.prototype.i18nInit = function () {
             handleName: 'localize', // --> appends $(selector).localize(opts);
             selectorAttr: 'data-i18n', // selector for translating elements
             targetAttr: 'i18n-target', // data-() attribute to grab target element to translate (if different than itself)
-            optionsAttr: 'i18n-options', // data-() attribute that contains options, will load/set if useOptionsAttr = true
             useOptionsAttr: false, // see optionsAttr
             parseDefaultValueFromContent: true // parses default values from content ele.val or ele.text
         });
@@ -399,7 +408,7 @@ Inspector.prototype._referencesHTML = function (fact) {
         var tbody = body.find("tbody");
         $.each(r, function (j,p) {
             var row = $("<tr>")
-                .append($("<th></th>").text(i18next.t(`referenceParts.${p.part}`, {defaultValue: p.part})))
+                .append($("<th></th>").text(i18next.t(`referenceParts:${p.part}`, {defaultValue: p.part})))
                 .append($("<td></td>").text(p.value))
                 .appendTo(tbody);
             if (p.part == 'URI') {

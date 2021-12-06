@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import $ from 'jquery';
+import i18next from 'i18next';
 
 import { Dialog } from './dialog.js';
 
@@ -21,6 +22,18 @@ export class CalculationInspector extends Dialog {
         super();
         Dialog.call(this, ".dialog.calculation-inspector");
         this.addButton("Dismiss", true);
+    }
+
+    duplicateFactIcons(factset) {
+        const icons = $("<td></td>").addClass("icons");
+        if (factset.size() > 1) {
+            icons.append(
+                $("<span></span>")
+                .addClass("duplicate-facts")
+                .attr("title", i18next.t('calculation.duplicate-facts-present'))
+            );
+        }
+        return icons;
     }
 
     displayCalculation(resolvedCalculation) {
@@ -33,11 +46,18 @@ export class CalculationInspector extends Dialog {
                 factText = f.readableValue();
             }
             $("<tr></tr>")
-                .append($("<td></td>").text(row.concept))
-                .append($("<td></td>").text(factText))
+                .append($("<td></td>").addClass("weight").text(row.weightSign))
+                .append($("<td></td>").text(row.concept.label()))
+                .append($("<td></td>").addClass("figure").text(factText))
+                .append(this.duplicateFactIcons(row.facts))
                 .appendTo(tbody);
-
         }
+        const fact = resolvedCalculation.totalFact;
+        $("<tr></tr>").addClass("total")
+            .append($("<td></td>"))
+            .append($("<td></td>").text(fact.concept().label()))
+            .append($("<td></td>").text(fact.readableValue()).addClass("figure"))
+            .appendTo(tbody);
     }
 }
 

@@ -95,10 +95,11 @@ export class Calculation {
     resolvedCalculation(elr) {
         var calc = [];
         var calcFacts = this.calculationFacts()[elr];
-        var rels = this.fact.report().getChildRelationships(this.fact.conceptName(), "calc")[elr];
+        const report = this.fact.report();
+        var rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
         const resolvedCalculation = new ResolvedCalculation(elr, this.fact);
         for (const r of rels) {
-            resolvedCalculation.addRow(r.t, r.w, new FactSet(Object.values(calcFacts[r.t] || {})));
+            resolvedCalculation.addRow(report.getConcept(r.t), r.w, new FactSet(Object.values(calcFacts[r.t] || {})));
         }
         return resolvedCalculation;
     }

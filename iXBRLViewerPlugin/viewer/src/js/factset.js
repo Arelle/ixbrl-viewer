@@ -123,4 +123,8 @@ export class FactSet {
         const duplicates = Object.values(this.items).map(fact => Interval.fromFact(fact));
         return Interval.intersection(...duplicates) !== undefined;
     }
+
+    size() {
+        return this.items.length;
+    }
 }

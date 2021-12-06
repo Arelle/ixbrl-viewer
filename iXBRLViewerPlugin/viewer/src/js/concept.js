@@ -17,6 +17,8 @@ import $ from 'jquery'
 export class Concept {
     constructor(report, name) {
         this._c = report.data.concepts[name];
+        this.name = name;
+        this.report = report;
     }
 
     /*
@@ -62,4 +64,8 @@ export class Concept {
     isEnumeration() {
         return Boolean(this._c && this._c.e);
     }
+}
+
+Concept.prototype.label = function () {
+    return this.report.getLabelOrName(this.name);
 }

@@ -187,23 +187,37 @@ Profit Loss double tagged: {{ monetary eg:ProfitLoss[] }}{{ monetary eg:ProfitLo
         <h3>Calculations</h3>
             
 
+        {{ default period=cur }}
         <table class="accounts">
-            {{ column-aspects static [period=cur] [period=prev] [period=cur3mo] [period=prev3mo] }}
-            {{ column-styles "" "figure" "figure" "figure" "figure" }}
             <thead>
                 <tr>
-                    <th></th>
-                    <th>2018</th>
-                    <th>2017</th>
-                    <th>3 months to <br></br>31 Dec 2018</th>
-                    <th>3 months to <br></br>31 Dec 2017</th>
+                    <th>Exact calculations</th>
                 </tr>
-
             </thead>
             <tbody>
-            {{ row "" eg:CalculationItem1[] "Item 1" "123,000" "99,000" "35,000" "22,000" }}
-            {{ row "" eg:CalculationItem2[] "Item 2" "88,000" "(67,000)" "(35,000)" "(22,000)" }}
-            {{ row "" eg:CalculationTotal[] "Total" "88,000" "(67,000)" "(35,000)" "(22,000)" }}
+                <tr><td>Item 4</td><td class="figure">{{ monetary eg:CalculationItem4[decimals="-3"] }}150,000{{end}}</td><td /></tr>
+                <tr><td>Item 5</td><td class="figure">{{ monetary eg:CalculationItem5[decimals="-3"] }}(25,000){{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Sub Total</td><td class="figure">{{ monetary eg:CalculationSubTotal[decimals="-3"] }}125,000{{end}}</td><td /></tr>
+                <tr><td>Item 1 (with complete duplicate)</td><td class="figure">{{ monetary eg:CalculationItem1[decimals="-3"] }}1,100,000{{end}}</td><td>{{ monetary eg:CalculationItem1[decimals="-3"] }}1,100,000{{end}}</td></tr>
+                <tr><td>Item 3</td><td class="figure">{{ monetary eg:CalculationItem3[decimals="-3"] }}200,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}1,025,500{{end}}</td><td /></tr>
+            </tbody>
+        </table>
+
+        {{ default period=prev }}
+        <table class="accounts">
+            <thead>
+                <tr>
+                    <th>Consistent</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Item 4</td><td class="figure">{{ monetary eg:CalculationItem4[decimals="-3"] }}100,000{{end}}</td><td /></tr>
+                <tr><td>Item 5</td><td class="figure">{{ monetary eg:CalculationItem5[decimals="-3"] }}24,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Sub Total (consistent but not exact)</td><td class="figure">{{ monetary eg:CalculationSubTotal[decimals="-3"] }}125,000{{end}}</td><td /></tr>
+                <tr><td>Item 1 (consistent duplicate)</td><td class="figure">{{ monetary eg:CalculationItem1[decimals="-3"] }}107,000{{end}}</td><td>{{ monetary eg:CalculationItem1[decimals="-5"] }}1,100,000{{end}}</td></tr>
+                <tr><td>Item 3</td><td class="figure">{{ monetary eg:CalculationItem3[decimals="-3"] }}200,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}1,025,000{{end}}</td><td /></tr>
             </tbody>
         </table>
         

@@ -1,4 +1,7 @@
 {
+  "calculation": {
+    "duplicate-facts-present": "Duplicate facts present"
+  },
   "common": {
     "accuracyInfinite": "Infinite precision",
     "none": "None",
@@ -27,6 +30,7 @@
     "allOption": "ALL",
     "anchoring": "Anchoring",
     "associatedFacts": "Associated facts",
+    "calculationDetails": "",
     "calculations": "Calculations",
     "concealedFact": "Concealed fact",
     "conceptType": "Concept Type",
@@ -54,6 +58,10 @@
     "reset": "Reset",
     "searchTitle": "Search",
     "textOption": "Text",
+    "validationCode": "Code",
+    "validationMessage": "Message",
+    "validationResults": "Validation results",
+    "validationSeverity": "Severity",
     "visibleFacts": "Visible Facts",
     "widerAnchor": "Wider anchor"
   },

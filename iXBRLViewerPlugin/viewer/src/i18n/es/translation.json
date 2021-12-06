@@ -1,4 +1,7 @@
 {
+  "calculation": {
+    "duplicate-facts-present": ""
+  },
   "common": {
     "accuracyInfinite": "Precisió infinita",
     "none": "Ninguno",
@@ -27,6 +30,7 @@
     "allOption": "TODOS",
     "anchoring": "Anclaje",
     "associatedFacts": "Hechos asociados",
+    "calculationDetails": "",
     "calculations": "Cálculos",
     "concealedFact": "",
     "conceptType": "Tipo de concepto",
@@ -54,6 +58,10 @@
     "reset": "Limpiar",
     "searchTitle": "Búsqueda de hechos",
     "textOption": "Texto",
+    "validationCode": "",
+    "validationMessage": "",
+    "validationResults": "",
+    "validationSeverity": "",
     "visibleFacts": "Hechos visibles",
     "widerAnchor": "Anclaje amplio"
   },

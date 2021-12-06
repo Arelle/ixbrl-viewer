@@ -1,6 +1,7 @@
 {
   "calculation": {
-    "duplicate-facts-present": ""
+    "consistent-duplicate-facts-present": "",
+    "inconsistent-duplicate-facts-present": ""
   },
   "common": {
     "accuracyInfinite": "Precisió infinita",

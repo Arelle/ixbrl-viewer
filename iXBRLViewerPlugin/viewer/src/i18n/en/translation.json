@@ -1,6 +1,7 @@
 {
   "calculation": {
-    "duplicate-facts-present": "Duplicate facts present"
+    "consistent-duplicate-facts-present": "{{count}} consistent duplicate facts present",
+    "inconsistent-duplicate-facts-present": "{{count}} inconsistent duplicate facts present"
   },
   "common": {
     "accuracyInfinite": "Infinite precision",

@@ -26,12 +26,21 @@ export class CalculationInspector extends Dialog {
 
     duplicateFactIcons(factset) {
         const icons = $("<td></td>").addClass("icons");
-        if (factset.size() > 1) {
-            icons.append(
-                $("<span></span>")
-                .addClass("duplicate-facts")
-                .attr("title", i18next.t('calculation.duplicate-facts-present'))
-            );
+        if (factset.size() > 1 && !factset.completeDuplicates()) {
+            if (factset.isConsistent()) {
+                icons.append(
+                    $("<span></span>")
+                    .addClass("duplicate-facts")
+                    .attr("title", i18next.t('calculation.consistent-duplicate-facts-present', {count: factset.size()}))
+                );
+            }
+            else {
+                icons.append(
+                    $("<span></span>")
+                    .addClass("duplicate-facts")
+                    .attr("title", i18next.t('calculation.inconsistent-duplicate-facts-present', {count: factset.size()}))
+                );
+            }
         }
         return icons;
     }

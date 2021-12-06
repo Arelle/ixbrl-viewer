@@ -298,3 +298,7 @@ Fact.prototype.roundedValue = function() {
     }
     return v.mul(10 ** d).round().mul(10 ** (0-d));
 }
+
+Fact.prototype.isCompleteDuplicate = function(other) {
+    return this.value() === other.value() && this.decimals() === other.decimals();
+}

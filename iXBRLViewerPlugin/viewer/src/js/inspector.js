@@ -481,15 +481,21 @@ Inspector.prototype._calculationHTML = function (fact) {
             .append($("<span></span>").addClass("concept-name").text(fact.concept().label()))
             .appendTo(calcBody);
 
-        a.addCard($("<span></span>").text(label), calcBody, rCalc.elr == selectedELR);
+        const cardTitle = $("<span></span>")
+            .text(label)
+            .append($("<span></span>")
+                .addClass("calculation-details-link")
+                .attr("title", i18next.t('factDetails.viewCalculationDetails'))
+                .click(() => {
+                    let dialog = new CalculationInspector();
+                    dialog.displayCalculation(rCalc);
+                    dialog.show();
+                })
+            );
+
+        a.addCard(cardTitle, calcBody, rCalc.elr == selectedELR);
     }
-    return $("<div></div>")
-        .append(a.contents())
-        .append($("<p>details</p>").click(() => { 
-            let dialog = new CalculationInspector();
-            dialog.displayCalculation(calc.resolvedCalculations()[0]);
-            dialog.show();
-        }));
+    return a.contents();
 }
 
 Inspector.prototype._footnotesHTML = function (fact) {
@@ -580,7 +586,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
         }
     }
     else {
-        s = $("<i>").text("n/a").attr("title", "non-numeric fact");
+        s = $("<i>").text("n/a").attr("title", i18next.t('factDetails.nonNumericFact'));
     }
     $(".fact-properties tr.change td").html(s);
 

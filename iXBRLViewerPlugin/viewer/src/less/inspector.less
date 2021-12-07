@@ -810,6 +810,22 @@
       }
 
       .calculations {
+        .card .title {
+          position: relative;
+
+          .calculation-details-link {
+            position: absolute;
+            right: 1.4rem;
+            top: 1.4rem;
+            color: @primary;
+            font-weight: normal;
+
+            &::before {
+              .icon-calculator();
+            }
+          }
+        }
+
         .item {
           padding: 5px 0;
           position: relative;

@@ -31,14 +31,14 @@ export class CalculationInspector extends Dialog {
                 icons.append(
                     $("<span></span>")
                     .addClass("duplicate-facts")
-                    .attr("title", i18next.t('calculation.consistent-duplicate-facts-present', {count: factset.size()}))
+                    .attr("title", i18next.t('calculation.consistent-duplicate-facts-present', {nfacts: factset.size()}))
                 );
             }
             else {
                 icons.append(
                     $("<span></span>")
                     .addClass("duplicate-facts")
-                    .attr("title", i18next.t('calculation.inconsistent-duplicate-facts-present', {count: factset.size()}))
+                    .attr("title", i18next.t('calculation.inconsistent-duplicate-facts-present', {nfacts: factset.size()}))
                 );
             }
         }

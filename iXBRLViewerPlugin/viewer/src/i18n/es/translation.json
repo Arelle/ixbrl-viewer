@@ -21,8 +21,10 @@
     "duplicatesCount": "{{current}} de {{total}}",
     "entity": "Entidad",
     "factValue": "Valor del hecho",
+    "nonNumericFact": "",
     "noPriorFactInThisReport": "No hay un hecho previo",
-    "noUnit": "Sin unidad"
+    "noUnit": "Sin unidad",
+    "viewCalculationDetails": ""
   },
   "footnotes": {
     "footnote": "Nota al pie de página"

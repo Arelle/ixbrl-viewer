@@ -1,7 +1,7 @@
 {
   "calculation": {
-    "consistent-duplicate-facts-present": "{{count}} consistent duplicate facts present",
-    "inconsistent-duplicate-facts-present": "{{count}} inconsistent duplicate facts present"
+    "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
+    "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present"
   },
   "common": {
     "accuracyInfinite": "Infinite precision",
@@ -21,8 +21,10 @@
     "duplicatesCount": "{{current}} of {{total}}",
     "entity": "Entity",
     "factValue": "Fact Value",
+    "nonNumericFact": "non-numeric fact",
     "noPriorFactInThisReport": "No prior fact in this report",
-    "noUnit": "<NOUNIT>"
+    "noUnit": "<NOUNIT>",
+    "viewCalculationDetails": "View calculation details"
   },
   "footnotes": {
     "footnote": "Footnote"

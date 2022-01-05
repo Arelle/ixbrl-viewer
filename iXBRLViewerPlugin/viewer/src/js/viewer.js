@@ -327,17 +327,6 @@ Viewer.prototype.clearHighlighting = function () {
     $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
 }
 
-/*
- * Update the currently highlighted fact, but do not trigger a change in the
- * inspector.
- * 
- * Used to switch facts when the selection corresponds to multiple facts.
- */
-Viewer.prototype.highlightElements = function (ee) {
-    this.clearHighlighting();
-    ee.addClass("ixbrl-selected");
-}
-
 Viewer.prototype._ixIdsForElement = function (e) {
     var ids = e.data('ivid');
     if (e.hasClass("ixbrl-continuation")) {
@@ -390,20 +379,17 @@ Viewer.prototype._mouseLeave = function (e) {
 }
 
 Viewer.prototype.highlightRelatedFact = function (f) {
-    var e = this.elementForFact(f);
-    e.addClass("ixbrl-related");
+    this.changeItemClass(f.id, "ixbrl-related");
 }
 
 Viewer.prototype.highlightRelatedFacts = function (facts) {
-    this.elementsForFacts(facts).addClass("ixbrl-related");
+    for (const f of facts) {
+        this.changeItemClass(f.id, "ixbrl-related");
+    }
 }
 
 Viewer.prototype.clearRelatedHighlighting = function (f) {
     $(".ixbrl-related", this._contents).removeClass("ixbrl-related");
-}
-
-Viewer.prototype.elementForFact = function (fact) {
-    return this.elementForItemId(fact.id);
 }
 
 Viewer.prototype.elementForItemId = function (factId) {
@@ -417,13 +403,26 @@ Viewer.prototype.elementsForItemIds = function (ids) {
     }));
 }
 
-Viewer.prototype.elementsForFacts = function (facts) {
-    return this.elementsForItemIds($.map(facts, function (f) { return f.id }));
+/*
+ * Add or remove a class to an item (fact or footnote) and any continuation elements
+ */
+Viewer.prototype.changeItemClass = function(itemId, highlightClass, removeClass) {
+    const continuations = this._ixNodeMap[itemId].continuationIds();
+    const elements = this.elementsForItemIds([itemId].concat(continuations));
+    if (removeClass) {
+        elements.removeClass(highlightClass);
+    }
+    else {
+        elements.addClass(highlightClass);
+    }
 }
 
+/*
+ * Change the currently highlighted item
+ */
 Viewer.prototype.highlightItem = function(factId) {
-    var continuations = this._ixNodeMap[factId].continuationIds();
-    this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
+    this.clearHighlighting();
+    this.changeItemClass(factId, "ixbrl-selected");
 }
 
 Viewer.prototype.showItemById = function (id) {
@@ -486,7 +485,7 @@ Viewer.prototype.zoomOut = function () {
 }
 
 Viewer.prototype.factsInSameTable = function (fact) {
-    var e = this.elementForFact(fact);
+    var e = this.elementForItemId(fact.id);
     var facts = [];
     e.closest("table").find(".ixbrl-element").each(function (i,e) {
         facts = facts.concat($(this).data('ivid'));
@@ -495,13 +494,11 @@ Viewer.prototype.factsInSameTable = function (fact) {
 }
 
 Viewer.prototype.linkedHighlightFact = function (f) {
-    var e = this.elementForFact(f);
-    e.addClass("ixbrl-linked-highlight");
+    this.changeItemClass(f.id, "ixbrl-linked-highlight");
 }
 
 Viewer.prototype.clearLinkedHighlightFact = function (f) {
-    var e = this.elementForFact(f);
-    e.removeClass("ixbrl-linked-highlight");
+    this.changeItemClass(f.id, "ixbrl-linked-highlight", true);
 }
 
 Viewer.prototype._setTitle = function (docIndex) {

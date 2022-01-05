@@ -470,13 +470,15 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
 Inspector.prototype._footnotesHTML = function (fact) {
     var html = $("<div></div>");
     $.each(fact.footnotes(), (n, fn) => {
-        $("<div></div>")
-            .addClass("block-list-item")
-            .appendTo(html)
-            .text(truncateLabel(fn.textContent(), 120))
-            .mouseenter(() => this._viewer.linkedHighlightFact(fn))
-            .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
-            .click(() => this.selectItem(fn.id));
+        if (fn instanceof Footnote) {
+            $("<div></div>")
+                .addClass("block-list-item")
+                .appendTo(html)
+                .text(truncateLabel(fn.textContent(), 120))
+                .mouseenter(() => this._viewer.linkedHighlightFact(fn))
+                .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
+                .click(() => this.selectItem(fn.id));
+        }
     });
     return html;
 }

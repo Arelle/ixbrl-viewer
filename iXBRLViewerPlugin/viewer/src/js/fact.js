@@ -276,3 +276,10 @@ Fact.prototype.narrowerConcepts = function () {
     }
     return concepts;
 }
+
+// Called if the document contains fact-fact footnote relationships.  Viewer
+// support not yet implemented.
+Fact.prototype.addFact = function (f) {
+    return
+}
+

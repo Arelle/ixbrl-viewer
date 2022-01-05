@@ -468,16 +468,19 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
 }
 
 Inspector.prototype._footnotesHTML = function (fact) {
-    var html = $("<div></div>");
+    var html = $("<div></div>").addClass("fact-list");
     $.each(fact.footnotes(), (n, fn) => {
         if (fn instanceof Footnote) {
             $("<div></div>")
                 .addClass("block-list-item")
-                .appendTo(html)
                 .text(truncateLabel(fn.textContent(), 120))
                 .mouseenter(() => this._viewer.linkedHighlightFact(fn))
                 .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
-                .click(() => this.selectItem(fn.id));
+                .click(() => this.selectItem(fn.id))
+                .appendTo(html);
+        }
+        else if (fn instanceof Fact) {
+            html.append(this.factListRow(fn));
         }
     });
     return html;

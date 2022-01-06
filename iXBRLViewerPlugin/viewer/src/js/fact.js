@@ -26,6 +26,7 @@ export function Fact(report, factId) {
     this.ixNode = report.getIXNodeForItemId(factId);
     this._report = report;
     this.id = factId;
+    this.linkedFacts = [];
 }
 
 Fact.prototype.report = function() {
@@ -277,9 +278,7 @@ Fact.prototype.narrowerConcepts = function () {
     return concepts;
 }
 
-// Called if the document contains fact-fact footnote relationships.  Viewer
-// support not yet implemented.
-Fact.prototype.addFact = function (f) {
-    return
+Fact.prototype.addLinkedFact = function (f) {
+    this.linkedFacts.push(f);
 }
 

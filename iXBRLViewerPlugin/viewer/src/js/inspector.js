@@ -357,7 +357,21 @@ Inspector.prototype.updateOutline = function (cf) {
 }
 
 Inspector.prototype.updateFootnotes = function (fact) {
+    // Outbound fact->footnote and fact->fact links
     $('.footnotes').empty().append(this._footnotesHTML(fact));
+
+    // Inbound fact->fact footnote links.  Not widely used, so only show the
+    // section if we have some. 
+    if (fact.linkedFacts.length > 0) {
+        $('#inspector .footnote-facts-section')
+            .show()
+            .find('.footnote-facts')
+            .empty()
+            .append(this._footnoteFactsHTML(fact));
+    }
+    else {
+        $('#inspector .footnote-facts-section').hide();
+    }
 }
 
 
@@ -602,10 +616,10 @@ Inspector.prototype._updateEntityIdentifier = function (fact, context) {
     }
 }
 
-Inspector.prototype._footnoteFactsHTML = function() {
+Inspector.prototype._footnoteFactsHTML = function(fact) {
     var html = $('<div></div>');
-    this._currentItem.facts.forEach((fact) =>  {
-        html.append(this.factListRow(fact));
+    fact.linkedFacts.forEach((linkedFact) =>  {
+        html.append(this.factListRow(linkedFact));
     });
     return html;
 }
@@ -739,10 +753,11 @@ Inspector.prototype.update = function () {
             else if (cf.isHTMLHidden()) {
                 $('#inspector').addClass('html-hidden-fact');
             }
+
         }
         else if (cf instanceof Footnote) {
             $('#inspector').addClass('footnote-mode');
-            $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML());
+            $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML(cf));
         }
         $('.fact-details').localize();
     }

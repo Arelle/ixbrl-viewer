@@ -27,7 +27,7 @@ setup(
     classifiers=[
         'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
         'Copyright :: Workiva Inc. :: 2019'
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.9',
     ],
     install_requires=get_requirements(),
 )

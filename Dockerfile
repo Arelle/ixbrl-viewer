@@ -1,4 +1,4 @@
-FROM python:3.6-buster as build
+FROM python:3.9-buster as build
 
 ARG PIP_INDEX_URL
 ARG NPM_CONFIG__AUTH

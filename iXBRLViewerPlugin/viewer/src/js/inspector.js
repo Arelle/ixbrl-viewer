@@ -321,8 +321,9 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
     if (!calc.hasCalculations()) {
         return "";
     }
-    var tableFacts = this._viewer.factsInSameTable(fact);
-    if (!elr) {
+
+    if (fact.tableHashCode() && !elr) {
+        var tableFacts = this._viewer.factsInSameTable(fact);
         elr = calc.bestELRForFactSet(tableFacts);
     }
     var report = this._report;
@@ -331,6 +332,9 @@ Inspector.prototype._calculationHTML = function (fact, elr) {
     var a = new Accordian();
 
     $.each(calc.elrs(), function (e, rolePrefix) {
+        if (elr && elr != e)
+            return;
+            
         var label = report.getRoleLabel(rolePrefix, inspector._viewerOptions);
 
         var rCalc = calc.resolvedCalculation(e);

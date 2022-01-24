@@ -80,6 +80,12 @@ Fact.prototype.getValidationResults = function() {
     });
 }
 
+Fact.prototype.tableHashCode = function() {
+    if ("zr" in this.f) {
+        return this.f.zr;
+    }    
+}
+
 Fact.prototype.readableValue = function() {
     var v = this.f.v;
     if (this.isNumeric()) {

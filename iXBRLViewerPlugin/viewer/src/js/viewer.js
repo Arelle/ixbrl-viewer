@@ -40,7 +40,7 @@ export function Viewer(iv, iframes, report, useFrames, isPDF) {
     this._ixNodeMap = {};
     this._continuedAtMap = {};        
     this._currentShowElement = null;
-    this._mzInit = false;
+    this._mzInit = false;    
 }
 
 Viewer.prototype.initialize = function() {
@@ -268,6 +268,7 @@ Viewer.prototype._postProcessiXBRL = function(container) {
 }
 
 Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
+    const self = this;
     if (fact && fact.hasValidationResults())
         $(node).addClass("inline-fact-with-message");
     var htmlTooltip;
@@ -283,8 +284,7 @@ Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
     } else {
         console.log(`Fact with id '${id}' is not found in the report data`);
     }
-
-    $(node).tooltip({            
+    $(node).tooltip({     
         html: htmlTooltip,
         container: container,
         title: function() {
@@ -589,11 +589,16 @@ Viewer.prototype.zoomOut = function () {
 }
 
 Viewer.prototype.factsInSameTable = function (fact) {
-    var e = this.elementForFact(fact);
     var facts = [];
-    e.closest("table").find(".ixbrl-element").each(function (i,e) {
-        facts.push($(this).data('ivid'));
-    });
+    var tableHashCode = fact.tableHashCode();
+    if (tableHashCode)
+    {
+        for (const f of this._report.facts()) {
+            if (f.tableHashCode() == tableHashCode) {
+                facts.push(f.id);
+            }
+        }
+    } 
     return facts;
 }
 

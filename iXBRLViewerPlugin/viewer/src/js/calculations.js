@@ -66,16 +66,14 @@ Calculation.prototype.bestELRForFactSet = function(facts) {
     $.each(ctf, function (elr, rr) {
         var matchCount = 0;
         $.each(rr, function (concept, ff) {
-            var matched = 0;
             $.each(ff, function (fid, calcFact) {
                 if ($.inArray(fid, facts) >  -1) {
-                    matched = 1;
+                    matchCount += 1;
                 } 
             });
-            matchCount += matched;
         });
-        if (matchCount/Object.keys(rr).length > bestMatchCount) {
-            bestMatchCount = matchCount/Object.keys(rr).length;    
+        if (matchCount > bestMatchCount) {
+            bestMatchCount = matchCount;    
             bestMatchELR = elr;
         }
     }); 

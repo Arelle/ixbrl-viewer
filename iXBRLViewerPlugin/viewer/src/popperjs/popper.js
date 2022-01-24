@@ -1356,7 +1356,7 @@ function computeStyle(data, options) {
     var invertLeft = sideB === 'right' ? -1 : 1;
     styles[sideA] = top * invertTop;
     styles[sideB] = left * invertLeft;
-    styles.willChange = sideA + ', ' + sideB;
+    //styles.willChange = `${sideA}, ${sideB}`;
   }
 
   // Attributes
@@ -2317,7 +2317,7 @@ var modifiers = {
      * If true, it uses the CSS 3D transformation to position the popper.
      * Otherwise, it will use the `top` and `left` properties
      */
-    gpuAcceleration: true,
+    gpuAcceleration: false,
     /**
      * @prop {string} [x='bottom']
      * Where to anchor the X axis (`bottom` or `top`). AKA X offset origin.

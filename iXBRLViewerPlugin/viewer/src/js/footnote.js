@@ -19,6 +19,7 @@ export function Footnote(report, footnoteId, title) {
     this.ixNode = report.getIXNodeForItemId(footnoteId);
 }
 
+// Facts that are the source of relationships to this fact.
 Footnote.prototype.addLinkedFact = function (f) {
     this.linkedFacts.push(f); 
 }

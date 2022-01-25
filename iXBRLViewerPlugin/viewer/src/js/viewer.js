@@ -110,6 +110,39 @@ Viewer.prototype._addDocumentSetTabs = function() {
     }
 }
 
+/*
+ * Rewrite hyperlinks in the iXBRL.
+ *
+ * Relative links to other files in the same document set are handled by
+ * JavaScript to switch tabs within the viewer
+ *
+ * All other links are forced to open in a new tab
+ *
+ */
+Viewer.prototype._updateLink = function(n) {
+    const url = $(n).attr("href");
+    if (url !== undefined) {
+        const [file, fragment] = url.split('#', 2);
+        const docSetFiles = this._report.documentSetFiles();
+        if (this._report.isDocumentSet() && !url.includes('/') && docSetFiles.includes(file)) {
+            $(n).click((e) => { 
+                const index = docSetFiles.indexOf(file);
+                this.selectDocument(index); 
+                if (fragment !== undefined && fragment != "") {
+                    const ee = this._iframes.eq(index).contents().find('#' + fragment);
+                    if (ee.length > 0) {
+                        this.showElement(ee.eq(0));
+                    }
+                }
+                e.preventDefault(); 
+            });
+        }
+        else {
+            $(n).attr("target", "_blank");
+        }
+    }
+}
+
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     var elt;
     var name = localName(n.nodeName).toUpperCase();
@@ -215,6 +248,9 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                     this._ixNodeMap[id] = new IXNode(id, node, docIndex);
                 }
             }
+        }
+        if (name == 'A') {
+            this._updateLink(n);
         }
     }
     for (var i=0; i < n.childNodes.length; i++) {

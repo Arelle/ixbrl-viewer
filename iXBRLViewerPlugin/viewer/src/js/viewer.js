@@ -129,7 +129,8 @@ Viewer.prototype._updateLink = function(n) {
                 const index = docSetFiles.indexOf(file);
                 this.selectDocument(index); 
                 if (fragment !== undefined && fragment != "") {
-                    const ee = this._iframes.eq(index).contents().find('#' + fragment);
+                    const f = $.escapeSelector(fragment);
+                    const ee = this._iframes.eq(index).contents().find('#' + f + ', a[name="' + f + '"]');
                     if (ee.length > 0) {
                         this.showElement(ee.eq(0));
                     }

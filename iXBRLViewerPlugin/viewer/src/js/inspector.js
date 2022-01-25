@@ -447,7 +447,12 @@ Inspector.prototype._calculationHTML = function (fact) {
         return "";
     }
 
-    // XXX: should we use the new document outline functionality for this?
+    
+    // Find facts in the same HTML table, and then find the calculation ELR
+    // with the best match for that set of facts.  This is used to pre-select
+    // the most relevant ELR in the inspector.
+    // This could potentially be replaced with the document outline
+    // functionality.
     const tableFacts = this._viewer.factsInSameTable(fact);
     const selectedELR = calc.bestELRForFactSet(tableFacts);
 

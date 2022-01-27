@@ -110,6 +110,23 @@ Viewer.prototype._addDocumentSetTabs = function() {
     }
 }
 
+
+/*
+ * Select the document within the current document set identified docIndex, and
+ * if specified, the element identified by fragment (via id or a.name
+ * attribute)
+ */
+Viewer.prototype._showDocumentAndElement = function (docIndex, fragment) {
+    this.selectDocument(docIndex); 
+    if (fragment !== undefined && fragment != "") {
+        const f = $.escapeSelector(fragment);
+        const ee = this._iframes.eq(docIndex).contents().find('#' + f + ', a[name="' + f + '"]');
+        if (ee.length > 0) {
+            this.showElement(ee.eq(0));
+        }
+    }
+}
+
 /*
  * Rewrite hyperlinks in the iXBRL.
  *
@@ -123,22 +140,17 @@ Viewer.prototype._updateLink = function(n) {
     const url = $(n).attr("href");
     if (url !== undefined) {
         const [file, fragment] = url.split('#', 2);
-        const docSetFiles = this._report.documentSetFiles();
-        if (this._report.isDocumentSet() && !url.includes('/') && docSetFiles.includes(file)) {
+        const docIndex = this._report.documentSetFiles().indexOf(file);
+        if (!url.includes('/') && docIndex != -1) {
             $(n).click((e) => { 
-                const index = docSetFiles.indexOf(file);
-                this.selectDocument(index); 
-                if (fragment !== undefined && fragment != "") {
-                    const f = $.escapeSelector(fragment);
-                    const ee = this._iframes.eq(index).contents().find('#' + f + ', a[name="' + f + '"]');
-                    if (ee.length > 0) {
-                        this.showElement(ee.eq(0));
-                    }
-                }
+                this._showDocumentAndElement(docIndex, fragment);
                 e.preventDefault(); 
             });
         }
         else {
+            // Open target in a new browser tab.  Without this, links will
+            // replace the contents of the current iframe in the viewer, which
+            // leaves the viewer in a confusing state.
             $(n).attr("target", "_blank");
         }
     }

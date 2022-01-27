@@ -119,10 +119,15 @@ Viewer.prototype._addDocumentSetTabs = function() {
 Viewer.prototype._showDocumentAndElement = function (docIndex, fragment) {
     this.selectDocument(docIndex); 
     if (fragment !== undefined && fragment != "") {
-        const f = $.escapeSelector(fragment);
-        const ee = this._iframes.eq(docIndex).contents().find('#' + f + ', a[name="' + f + '"]');
-        if (ee.length > 0) {
-            this.showElement(ee.eq(0));
+        // As per HTML spec, try fragment, then try %-decoded fragment
+        // https://html.spec.whatwg.org/multipage/browsing-the-web.html#the-indicated-part-of-the-document
+        for (const fragment_option of [fragment, decodeURIComponent(fragment)]) {
+            const f = $.escapeSelector(fragment_option);
+            const ee = this._iframes.eq(docIndex).contents().find('#' + f + ', a[name="' + f + '"]');
+            if (ee.length > 0) {
+                this.showElement(ee.eq(0));
+                return
+            }
         }
     }
 }

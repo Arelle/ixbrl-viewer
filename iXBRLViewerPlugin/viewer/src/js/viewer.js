@@ -234,26 +234,44 @@ Viewer.prototype.contents = function() {
     return this._iframes.contents();
 }
 
+// Move by offset (+1 or -1) through the tags in the document in document
+// order.
+//
+// Each element may have one or more tags associated with it, so we need to
+// move through the list of tags associated with the current element before
+// moving to the next/prev element
+//
+Viewer.prototype._selectAdjacentTag = function (offset, currentFact) {
+    const elements = $(".ixbrl-element:not(.ixbrl-continuation)", this._contents);
+    const currentElement = $(".ixbrl-selected:not(.ixbrl-continuation)", this._contents);
+    var nextId;
 
-Viewer.prototype._selectAdjacentTag = function (offset) {
-    var elements = $(".ixbrl-element:not(.ixbrl-continuation)", this._contents);
-    var current = $(".ixbrl-selected:not(.ixbrl-continuation)", this._contents);
-    var next;
-    if (current.length == 1) {
-        next = elements.eq((elements.index(current.first()) + offset) % elements.length);
+    if (currentElement.length == 1 && currentFact !== undefined) {
+        // The next ID may be on the current element in the case of double-tagged table cells
+        // Build a window of item IDs consisting of all IDs for the previous,
+        // current and next elements, find the position of the current item ID,
+        // and move by "offset"
+
+        const prev = elements.eq((elements.index(currentElement.first()) - 1) % elements.length);
+        const next = elements.eq((elements.index(currentElement.first()) + 1) % elements.length);
+        const idWindow = prev.data('ivid').concat(currentElement.first().data('ivid'), next.data('ivid'));
+        nextId = idWindow[idWindow.indexOf(currentFact.id) + offset];
     }
     else if (offset > 0) {
-        next = elements.first();
+        const next = elements.first();
+        nextId = next.data('ivid')[0];
     } 
     else {
-        next = elements.last();
+        const next = elements.last();
+        nextId = next.data('ivid')[elements.last().data('ivid').length - 1];
     }
     
-    this.showDocumentForItemId(next.data('ivid')[0]);
-    this.showElement(next);
+    this.showDocumentForItemId(nextId);
+    const nextElement = this.elementForItemId(nextId);
+    this.showElement(nextElement);
     /* If this is a table cell with multiple nested tags pass all tags so that
      * all are shown in the inspector. */
-    this.selectElement(next, this._ixIdsForElement(next));
+    this.selectElement(nextElement, this._ixIdsForElement(nextElement));
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -276,12 +294,12 @@ Viewer.prototype._bindHandlers = function () {
     TableExport.addHandles(this._contents, this._report);
 }
 
-Viewer.prototype.selectNextTag = function () {
-    this._selectAdjacentTag(1);
+Viewer.prototype.selectNextTag = function (currentFact) {
+    this._selectAdjacentTag(1, currentFact);
 }
 
-Viewer.prototype.selectPrevTag = function () {
-    this._selectAdjacentTag(-1);
+Viewer.prototype.selectPrevTag = function (currentFact) {
+    this._selectAdjacentTag(-1, currentFact);
 }
 
 /* Make the specified element visible by scrolling any scrollable ancestors */

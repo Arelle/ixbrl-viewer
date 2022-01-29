@@ -129,8 +129,8 @@ Inspector.prototype.initializeViewer = function () {
     viewer.onSelect.add((id, eltSet) => this.selectItem(id, eltSet));
     viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
     viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
-    $('.ixbrl-next-tag').click(() => viewer.selectNextTag());
-    $('.ixbrl-prev-tag').click(() => viewer.selectPrevTag());
+    $('.ixbrl-next-tag').click(() => viewer.selectNextTag(this._currentItem));
+    $('.ixbrl-prev-tag').click(() => viewer.selectPrevTag(this._currentItem));
     this.search();
 }
 

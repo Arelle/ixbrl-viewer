@@ -239,14 +239,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             $(node).addClass("ixbrl-element-footnote");
             ixn.footnote = true;
         }
-        if (elt) {
-            var concept = n.getAttribute("name");
-            if (elt.children().first().text() == "") {
-                elt.children().first().html("<i>no content</i>");
-            }
-            var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
-            $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
-        }
     }
     else if(n.nodeType == 1 && name == 'HIDDEN') {
         inHidden = true;

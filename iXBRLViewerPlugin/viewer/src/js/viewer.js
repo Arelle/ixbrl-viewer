@@ -161,46 +161,51 @@ Viewer.prototype._updateLink = function(n) {
     }
 }
 
+Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
+    /* Is the element the only significant content within a <td> or <th> ? If
+     * so, use that as the wrapper element. */
+    var node = $(domNode).closest("td,th").eq(0);
+    const innerText = $(domNode).text();
+    if (node.length == 1 && innerText.length > 0) {
+        // Use indexOf rather than a single regex because innerText may
+        // be too long for the regex engine 
+        const outerText = $(node).text();
+        const start = outerText.indexOf(innerText);
+        const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
+        if (/[0-9A-Za-z]/.test(wrapper)) {
+            node = $();
+        } 
+    }
+    /* Otherwise, insert a <span> as wrapper */
+    if (node.length == 0) {
+        var wrapper = "<span>";
+        var nn = domNode.getElementsByTagName("*");
+        for (var i = 0; i < nn.length; i++) {
+            if($(nn[i]).css("display") === "block") {
+                wrapper = '<div>';
+                break;
+            }
+        }
+        $(domNode).wrap(wrapper);
+        node = $(domNode).parent();
+    }
+    /* If we use an enclosing table cell as the wrapper, we may have
+     * multiple tags in a single element. */
+    var ivids = node.data('ivid') || [];
+    ivids.push(domNode.getAttribute("id"));
+    node.addClass("ixbrl-element").data('ivid', ivids);
+    return node;
+}
+
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     var elt;
     var name = localName(n.nodeName).toUpperCase();
     var isFootnote = (name == 'FOOTNOTE');
     if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
         var node = $();
-        var id = n.getAttribute("id");
+        const id = n.getAttribute("id");
         if (!inHidden) {
-            /* Is the element the only significant content within a <td> or <th> ? If
-             * so, use that as the wrapper element. */
-            node = $(n).closest("td,th").eq(0);
-            const innerText = $(n).text();
-            if (node.length == 1 && innerText.length > 0) {
-                // Use indexOf rather than a single regex because innerText may
-                // be too long for the regex engine 
-                const outerText = $(node).text();
-                const start = outerText.indexOf(innerText);
-                const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
-                if (/[0-9A-Za-z]/.test(wrapper)) {
-                    node = $();
-                } 
-            }
-            /* Otherwise, insert a <span> as wrapper */
-            if (node.length == 0) {
-                var wrapper = "<span>";
-                var nn = n.getElementsByTagName("*");
-                for (var i = 0; i < nn.length; i++) {
-                    if($(nn[i]).css("display") === "block") {
-                        wrapper = '<div>';
-                        break;
-                    }
-                }
-                $(n).wrap(wrapper);
-                node = $(n).parent();
-            }
-            /* If we use an enclosing table cell as the wrapper, we may have
-             * multiple tags in a single element. */
-            var ivids = node.data('ivid') || [];
-            ivids.push(id);
-            node.addClass("ixbrl-element").data('ivid', ivids);
+            node = this._findOrCreateWrapperNode(n);
         }
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */
@@ -251,7 +256,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
             var m = n.getAttribute('style').match(re);
             if (m) {
-                var id = m[1];
+                const id = m[1];
                 node = $(n);
                 node.addClass("ixbrl-element").data('ivid', [id]);
                 /* We may have already seen the corresponding ix element in the hidden

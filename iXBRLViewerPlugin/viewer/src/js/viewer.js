@@ -271,7 +271,7 @@ Viewer.prototype._selectAdjacentTag = function (offset, currentFact) {
     this.showElement(nextElement);
     /* If this is a table cell with multiple nested tags pass all tags so that
      * all are shown in the inspector. */
-    this.selectElement(nextElement, this._ixIdsForElement(nextElement));
+    this.selectElement(nextId, this._ixIdsForElement(nextElement));
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -378,23 +378,34 @@ Viewer.prototype._ixIdsForElement = function (e) {
  * Takes an optional list of factIds corresponding to all facts that a click
  * falls within.  If omitted, it's treated as a click on a non-nested fact.
  */
-Viewer.prototype.selectElement = function (e, factIdList) {
-    if (e !== null) {
-        var factId = this._ixIdsForElement(e)[0];
-        this.onSelect.fire(factId, factIdList);
+Viewer.prototype.selectElement = function (itemId, itemIdList) {
+    if (itemId !== null) {
+        this.onSelect.fire(itemId, itemIdList);
     }
     else {
         this.onSelect.fire(null);
     }
 }
 
+// Handle a mouse click to select.  This finds all tagged elements that the
+// mouse click is within, and returns a list of item IDs for the items that
+// they're tagging.
+// The selected element is the highest ancestor which has the same content as
+// the clicked element.  This is so that when we have double tagged elements,
+// we select the first of the set, but where we have nested elements, we select
+// the innermost.
 Viewer.prototype.selectElementByClick = function (e) {
-    var eltSet = [];
+    var itemIDList = [];
     var viewer = this;
+    var sameContentAncestorId;
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet = eltSet.concat(viewer._ixIdsForElement($(this))); 
+        const ids = viewer._ixIdsForElement($(this));
+        itemIDList = itemIDList.concat(ids); 
+        if ($(this).text() == e.text() && sameContentAncestorId === undefined) {
+            sameContentAncestorId = ids[0];
+        }
     });
-    this.selectElement(e, eltSet);
+    this.selectElement(sameContentAncestorId, itemIDList);
 }
 
 Viewer.prototype._mouseEnter = function (e) {

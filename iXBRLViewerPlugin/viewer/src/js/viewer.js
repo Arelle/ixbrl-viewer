@@ -198,9 +198,8 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
 }
 
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
-    var elt;
-    var name = localName(n.nodeName).toUpperCase();
-    var isFootnote = (name == 'FOOTNOTE');
+    const name = localName(n.nodeName).toUpperCase();
+    const isFootnote = (name == 'FOOTNOTE');
     if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
         var node = $();
         const id = n.getAttribute("id");

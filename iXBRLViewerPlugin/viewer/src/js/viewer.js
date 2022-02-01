@@ -389,11 +389,13 @@ Viewer.prototype.selectElement = function (itemId, itemIdList) {
 
 // Handle a mouse click to select.  This finds all tagged elements that the
 // mouse click is within, and returns a list of item IDs for the items that
-// they're tagging.
-// The selected element is the highest ancestor which has the same content as
-// the clicked element.  This is so that when we have double tagged elements,
-// we select the first of the set, but where we have nested elements, we select
-// the innermost.
+// they're tagging.  This is so the inspector can show all items that were
+// under the click.
+// The initially selected element is the highest ancestor which is tagging
+// exactly the same content as the clicked element.  This is so that when we
+// have double tagged elements, we select the first of the set, but where we
+// have nested elements, we select the innermost, as this gives the most
+// intuitive behaviour when clicking "next".
 Viewer.prototype.selectElementByClick = function (e) {
     var itemIDList = [];
     var viewer = this;

@@ -44,12 +44,19 @@ iXBRLReport.prototype._initialize = function () {
     var fnorder = Object.keys(this._ixNodeMap).filter((id) => this._ixNodeMap[id].footnote);
     fnorder.sort((a,b) => this._ixNodeMap[a].docOrderindex - this._ixNodeMap[b].docOrderindex);
 
-    // Create footnote objects for all footnotes, and associate facts with
-    // those footnotes to allow 2 way fact <-> footnote navigation.
-    for (var id in this.data.facts) {
-        var f = new Fact(this, id);
-        this._items[id] = f;
-        var fns = this.data.facts[id].fn || [];
+    // Create Fact objects for all facts.  
+    for (const id in this.data.facts) {
+        this._items[id] = new Fact(this, id);
+    }
+
+    // Now resolve footnote references, creating footnote objects for "normal"
+    // footnotes, and finding Fact objects for fact->fact footnotes.  
+    //
+    // Associate source facts with target footnote/facts to allow two way
+    // navigation.
+    for (const id in this.data.facts) {
+        const f = this._items[id];
+        const fns = this.data.facts[id].fn || [];
         fns.forEach((fnid) => {
             var fn = this._items[fnid];
             if (fn === undefined) {
@@ -57,7 +64,7 @@ iXBRLReport.prototype._initialize = function () {
                 this._items[fnid] = fn;
             }
             // Associate fact with footnote
-            fn.addFact(f);
+            fn.addLinkedFact(f);
         });
     }
 }

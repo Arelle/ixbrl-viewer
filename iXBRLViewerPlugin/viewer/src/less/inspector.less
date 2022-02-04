@@ -491,6 +491,7 @@
       .search-results {
         overflow-y: auto;
         height: 100%;
+        .panel-indent();
 
         .search-overlay {
           transform: translate(-50%, -50%);
@@ -544,6 +545,10 @@
       .outline {
         overflow-y: auto;
         height: 100%;
+      }
+
+      .body {
+        .panel-indent();
       }
     } /* inspector body */
 
@@ -732,8 +737,7 @@
 
     .collapsible-section {
       .collapsible-body {
-        padding-left: 0.9rem;
-        padding-right: 0.9rem;
+        .panel-indent();
       }
 
       .collapsible-header {
@@ -903,9 +907,6 @@
   }
 
   .fact-list {
-    margin-left: 0.9rem;
-    margin-right: 0.9rem;
-
     .fact-list-item {
       .block-list-item();
 

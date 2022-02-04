@@ -288,6 +288,9 @@ iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
 }
 
 iXBRLReport.prototype.documentSetFiles = function() {
+    if (this.data.docSetFiles === undefined) {
+        return []
+    }
     return this.data.docSetFiles;
 }
 

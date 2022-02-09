@@ -28,6 +28,7 @@ export function Viewer(iv, iframes, report) {
 
     this._ixNodeMap = {};
     this._continuedAtMap = {};
+    this._docOrderIDIndex = [];
 }
 
 
@@ -35,6 +36,7 @@ Viewer.prototype.initialize = function() {
     return new Promise((resolve, reject) => {
         var viewer = this;
         viewer._iframes.each(function (docIndex) { 
+            $(this).data("selected", docIndex == 0);
             viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
         });
 
@@ -159,6 +161,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             var ivids = node.data('ivid') || [];
             ivids.push(id);
             node.addClass("ixbrl-element").data('ivid', ivids);
+            this._docOrderIDIndex.push(id);
         }
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */
@@ -205,6 +208,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         inHidden = true;
     }
     else if(n.nodeType == 1) {
+        // Handle SEC/ESEF links-to-hidden
         if (n.hasAttribute('style')) {
             const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
             var m = n.getAttribute('style').match(re);
@@ -212,6 +216,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 var id = m[1];
                 node = $(n);
                 node.addClass("ixbrl-element").data('ivid', [id]);
+                this._docOrderIDIndex.push(id);
                 /* We may have already seen the corresponding ix element in the hidden
                  * section */
                 var ixn = this._ixNodeMap[id];
@@ -250,22 +255,15 @@ Viewer.prototype.contents = function() {
 // move through the list of tags associated with the current element before
 // moving to the next/prev element
 //
-Viewer.prototype._selectAdjacentTag = function (offset, currentFact) {
-    const elements = $(".ixbrl-element:not(.ixbrl-continuation)", this._contents);
-    const currentElement = $(".ixbrl-selected:not(.ixbrl-continuation)", this._contents);
+Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
+    const elements = $(".ixbrl-element:not(.ixbrl-continuation)", this.currentDocument().contents());
     var nextId;
 
-    if (currentElement.length == 1 && currentFact !== undefined) {
-        // The next ID may be on the current element in the case of double-tagged table cells
-        // Build a window of item IDs consisting of all IDs for the previous,
-        // current and next elements, find the position of the current item ID,
-        // and move by "offset"
-
-        const prev = elements.eq((elements.index(currentElement.first()) - 1) % elements.length);
-        const next = elements.eq((elements.index(currentElement.first()) + 1) % elements.length);
-        const idWindow = prev.data('ivid').concat(currentElement.first().data('ivid'), next.data('ivid'));
-        nextId = idWindow[idWindow.indexOf(currentFact.id) + offset];
+    if (currentItem !== null) {
+        const l = this._docOrderIDIndex.length;
+        nextId = this._docOrderIDIndex[(this._docOrderIDIndex.indexOf(currentItem.id) + offset + l) % l];
     }
+    // If no fact selected go to the first or last in the current document
     else if (offset > 0) {
         const next = elements.first();
         nextId = next.data('ivid')[0];
@@ -278,8 +276,8 @@ Viewer.prototype._selectAdjacentTag = function (offset, currentFact) {
     this.showDocumentForItemId(nextId);
     const nextElement = this.elementForItemId(nextId);
     this.showElement(nextElement);
-    /* If this is a table cell with multiple nested tags pass all tags so that
-     * all are shown in the inspector. */
+    // If this is a table cell with multiple nested tags pass all tags so that
+    // all are shown in the inspector. 
     this.selectElement(nextId, this._ixIdsForElement(nextElement));
 }
 
@@ -552,6 +550,10 @@ Viewer.prototype.showDocumentForItemId = function(factId) {
     this.selectDocument(this._ixNodeMap[factId].docIndex);
 }
 
+Viewer.prototype.currentDocument = function () {
+    return this._iframes.filter(function () { return $(this).data("selected") });
+}
+
 Viewer.prototype.selectDocument = function (docIndex) {
     $('#ixv #viewer-pane .ixds-tabs .tab')
         .removeClass("active")
@@ -561,7 +563,9 @@ Viewer.prototype.selectDocument = function (docIndex) {
      * delay when switching tabs on large, slow-to-render documents. */
     this._iframes
         .height(0)
+        .data("selected", false)
         .eq(docIndex)
-        .height("100%");
+        .height("100%")
+        .data("selected", true);
     this._setTitle(docIndex);
 }

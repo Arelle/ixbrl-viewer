@@ -35,6 +35,7 @@ const SEARCH_PAGE_SIZE = 100
 export function Inspector(iv) {
     this._iv = iv;
     this._viewerOptions = new ViewerOptions()
+    this._currentItem = null;
 }
 
 Inspector.prototype.i18nInit = function () {

@@ -110,6 +110,24 @@ Viewer.prototype._addDocumentSetTabs = function() {
     }
 }
 
+
+// Wrap a node in a div or span.  If the node or any descendent has display:
+// block, a div is used, otherwise a span.
+// Returns the wrapper node
+Viewer.prototype._wrapNode = function(n) {
+    var wrapper = "<span>";
+    var nn = n.getElementsByTagName("*");
+    for (var i = 0; i < nn.length; i++) {
+        if($(nn[i]).css("display") === "block") {
+            wrapper = '<div>';
+            break;
+        }
+    }
+    $(n).wrap(wrapper);
+    return $(n).parent();
+}
+    
+
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     var elt;
     var name = localName(n.nodeName).toUpperCase();
@@ -132,18 +150,9 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                     node = $();
                 } 
             }
-            /* Otherwise, insert a <span> as wrapper */
+            // Otherwise, wrap in a div or span
             if (node.length == 0) {
-                var wrapper = "<span>";
-                var nn = n.getElementsByTagName("*");
-                for (var i = 0; i < nn.length; i++) {
-                    if($(nn[i]).css("display") === "block") {
-                        wrapper = '<div>';
-                        break;
-                    }
-                }
-                $(n).wrap(wrapper);
-                node = $(n).parent();
+                node = this._wrapNode(n);
             }
             /* If we use an enclosing table cell as the wrapper, we may have
              * multiple tags in a single element. */

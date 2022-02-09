@@ -161,7 +161,9 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             var ivids = node.data('ivid') || [];
             ivids.push(id);
             node.addClass("ixbrl-element").data('ivid', ivids);
-            this._docOrderIDIndex.push(id);
+            if (name != 'CONTINUATION') {
+                this._docOrderIDIndex.push(id);
+            }
         }
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */

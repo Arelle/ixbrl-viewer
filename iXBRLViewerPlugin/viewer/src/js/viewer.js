@@ -152,7 +152,7 @@ Viewer.prototype._updateLink = function(n) {
                 e.preventDefault(); 
             });
         }
-        else {
+        else if (file) {
             // Open target in a new browser tab.  Without this, links will
             // replace the contents of the current iframe in the viewer, which
             // leaves the viewer in a confusing state.

@@ -26,6 +26,7 @@ export function Fact(report, factId) {
     this.ixNode = report.getIXNodeForItemId(factId);
     this._report = report;
     this.id = factId;
+    this.linkedFacts = [];
 }
 
 Fact.prototype.report = function() {
@@ -276,3 +277,9 @@ Fact.prototype.narrowerConcepts = function () {
     }
     return concepts;
 }
+
+// Facts that are the source of relationships to this fact.
+Fact.prototype.addLinkedFact = function (f) {
+    this.linkedFacts.push(f);
+}
+

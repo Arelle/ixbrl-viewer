@@ -59,14 +59,17 @@
     top: @top-bar-height;
     bottom: 0;
     z-index: 0;
+    display: flex;
+    flex-flow: column;
 
     .ixds-tabs {
       display: none;
+      flex: 0 1 auto;
     }
 
     #iframe-container {
       position: relative;
-      height: 100%;
+      flex: 1 1 auto;
 
       & > iframe {
         width: 100%;
@@ -491,6 +494,7 @@
       .search-results {
         overflow-y: auto;
         height: 100%;
+        .panel-indent();
 
         .search-overlay {
           transform: translate(-50%, -50%);
@@ -544,6 +548,10 @@
       .outline {
         overflow-y: auto;
         height: 100%;
+      }
+
+      .body {
+        .panel-indent();
       }
     } /* inspector body */
 
@@ -732,8 +740,7 @@
 
     .collapsible-section {
       .collapsible-body {
-        padding-left: 0.9rem;
-        padding-right: 0.9rem;
+        .panel-indent();
       }
 
       .collapsible-header {
@@ -903,9 +910,6 @@
   }
 
   .fact-list {
-    margin-left: 0.9rem;
-    margin-right: 0.9rem;
-
     .fact-list-item {
       .block-list-item();
 

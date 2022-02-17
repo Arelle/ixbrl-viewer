@@ -28,6 +28,7 @@ export function Viewer(iv, iframes, report) {
 
     this._ixNodeMap = {};
     this._continuedAtMap = {};
+    this._docOrderIDIndex = [];
 }
 
 
@@ -35,6 +36,7 @@ Viewer.prototype.initialize = function() {
     return new Promise((resolve, reject) => {
         var viewer = this;
         viewer._iframes.each(function (docIndex) { 
+            $(this).data("selected", docIndex == 0);
             viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
         });
 
@@ -110,6 +112,21 @@ Viewer.prototype._addDocumentSetTabs = function() {
     }
 }
 
+// Wrap a node in a div or span.  If the node or any descendent has display:
+// block, a div is used, otherwise a span.
+// Returns the wrapper node
+Viewer.prototype._wrapNode = function(n) {
+    var wrapper = "<span>";
+    var nn = n.getElementsByTagName("*");
+    for (var i = 0; i < nn.length; i++) {
+        if($(nn[i]).css("display") === "block") {
+            wrapper = '<div>';
+            break;
+        }
+    }
+    $(n).wrap(wrapper);
+    return $(n).parent();
+}
 
 /*
  * Select the document within the current document set identified docIndex, and
@@ -178,16 +195,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
     }
     /* Otherwise, insert a <span> as wrapper */
     if (node.length == 0) {
-        var wrapper = "<span>";
-        var nn = domNode.getElementsByTagName("*");
-        for (var i = 0; i < nn.length; i++) {
-            if($(nn[i]).css("display") === "block") {
-                wrapper = '<div>';
-                break;
-            }
-        }
-        $(domNode).wrap(wrapper);
-        node = $(domNode).parent();
+        node = this._wrapNode(domNode);
     }
     /* If we use an enclosing table cell as the wrapper, we may have
      * multiple tags in a single element. */
@@ -225,6 +233,9 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         if (name == 'CONTINUATION') {
             $(node).addClass("ixbrl-continuation");
         }
+        else {
+            this._docOrderIDIndex.push(id);
+        }
         if (name == 'NONFRACTION') {
             $(node).addClass("ixbrl-element-nonfraction");
         }
@@ -243,6 +254,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         inHidden = true;
     }
     else if(n.nodeType == 1) {
+        // Handle SEC/ESEF links-to-hidden
         if (n.hasAttribute('style')) {
             const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
             var m = n.getAttribute('style').match(re);
@@ -250,6 +262,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 const id = m[1];
                 node = $(n);
                 node.addClass("ixbrl-element").data('ivid', [id]);
+                this._docOrderIDIndex.push(id);
                 /* We may have already seen the corresponding ix element in the hidden
                  * section */
                 var ixn = this._ixNodeMap[id];
@@ -284,26 +297,37 @@ Viewer.prototype.contents = function() {
     return this._iframes.contents();
 }
 
+// Move by offset (+1 or -1) through the tags in the document in document
+// order.
+//
+// Each element may have one or more tags associated with it, so we need to
+// move through the list of tags associated with the current element before
+// moving to the next/prev element
+//
+Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
+    const elements = $(".ixbrl-element:not(.ixbrl-continuation)", this.currentDocument().contents());
+    var nextId;
 
-Viewer.prototype._selectAdjacentTag = function (offset) {
-    var elements = $(".ixbrl-element:not(.ixbrl-continuation)", this._contents);
-    var current = $(".ixbrl-selected:not(.ixbrl-continuation)", this._contents);
-    var next;
-    if (current.length == 1) {
-        next = elements.eq((elements.index(current.first()) + offset) % elements.length);
+    if (currentItem !== null) {
+        const l = this._docOrderIDIndex.length;
+        nextId = this._docOrderIDIndex[(this._docOrderIDIndex.indexOf(currentItem.id) + offset + l) % l];
     }
+    // If no fact selected go to the first or last in the current document
     else if (offset > 0) {
-        next = elements.first();
+        const next = elements.first();
+        nextId = next.data('ivid')[0];
     } 
     else {
-        next = elements.last();
+        const next = elements.last();
+        nextId = next.data('ivid')[elements.last().data('ivid').length - 1];
     }
     
-    this.showDocumentForItemId(next.data('ivid')[0]);
-    this.showElement(next);
-    /* If this is a table cell with multiple nested tags pass all tags so that
-     * all are shown in the inspector. */
-    this.selectElement(next, this._ixIdsForElement(next));
+    this.showDocumentForItemId(nextId);
+    const nextElement = this.elementForItemId(nextId);
+    this.showElement(nextElement);
+    // If this is a table cell with multiple nested tags pass all tags so that
+    // all are shown in the inspector. 
+    this.selectElement(nextId, this._ixIdsForElement(nextElement));
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -326,12 +350,12 @@ Viewer.prototype._bindHandlers = function () {
     TableExport.addHandles(this._contents, this._report);
 }
 
-Viewer.prototype.selectNextTag = function () {
-    this._selectAdjacentTag(1);
+Viewer.prototype.selectNextTag = function (currentFact) {
+    this._selectAdjacentTag(1, currentFact);
 }
 
-Viewer.prototype.selectPrevTag = function () {
-    this._selectAdjacentTag(-1);
+Viewer.prototype.selectPrevTag = function (currentFact) {
+    this._selectAdjacentTag(-1, currentFact);
 }
 
 /* Make the specified element visible by scrolling any scrollable ancestors */
@@ -399,23 +423,36 @@ Viewer.prototype._ixIdsForElement = function (e) {
  * Takes an optional list of factIds corresponding to all facts that a click
  * falls within.  If omitted, it's treated as a click on a non-nested fact.
  */
-Viewer.prototype.selectElement = function (e, factIdList) {
-    if (e !== null) {
-        var factId = this._ixIdsForElement(e)[0];
-        this.onSelect.fire(factId, factIdList);
+Viewer.prototype.selectElement = function (itemId, itemIdList) {
+    if (itemId !== null) {
+        this.onSelect.fire(itemId, itemIdList);
     }
     else {
         this.onSelect.fire(null);
     }
 }
 
+// Handle a mouse click to select.  This finds all tagged elements that the
+// mouse click is within, and returns a list of item IDs for the items that
+// they're tagging.  This is so the inspector can show all items that were
+// under the click.
+// The initially selected element is the highest ancestor which is tagging
+// exactly the same content as the clicked element.  This is so that when we
+// have double tagged elements, we select the first of the set, but where we
+// have nested elements, we select the innermost, as this gives the most
+// intuitive behaviour when clicking "next".
 Viewer.prototype.selectElementByClick = function (e) {
-    var eltSet = [];
+    var itemIDList = [];
     var viewer = this;
+    var sameContentAncestorId;
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet = eltSet.concat(viewer._ixIdsForElement($(this))); 
+        const ids = viewer._ixIdsForElement($(this));
+        itemIDList = itemIDList.concat(ids); 
+        if ($(this).text() == e.text() && sameContentAncestorId === undefined) {
+            sameContentAncestorId = ids[0];
+        }
     });
-    this.selectElement(e, eltSet);
+    this.selectElement(sameContentAncestorId, itemIDList);
 }
 
 Viewer.prototype._mouseEnter = function (e) {
@@ -555,8 +592,12 @@ Viewer.prototype._setTitle = function (docIndex) {
     $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
 }
 
-Viewer.prototype.showDocumentForItemId = function(factId) {
-    this.selectDocument(this._ixNodeMap[factId].docIndex);
+Viewer.prototype.showDocumentForItemId = function(itemId) {
+    this.selectDocument(this._ixNodeMap[itemId].docIndex);
+}
+
+Viewer.prototype.currentDocument = function () {
+    return this._iframes.filter(function () { return $(this).data("selected") });
 }
 
 Viewer.prototype.selectDocument = function (docIndex) {
@@ -568,7 +609,9 @@ Viewer.prototype.selectDocument = function (docIndex) {
      * delay when switching tabs on large, slow-to-render documents. */
     this._iframes
         .height(0)
+        .data("selected", false)
         .eq(docIndex)
-        .height("100%");
+        .height("100%")
+        .data("selected", true);
     this._setTitle(docIndex);
 }

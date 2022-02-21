@@ -35,7 +35,7 @@
     "chart.js": "^2.9.3",
     "core-js": "^3.6.4",
     "css-loader": "^3.4.2",
-    "dateformat": "^4.5.1",
+    "dateformat": "^5.0.3",
     "exceljs": "^4.0.1",
     "file-saver": "^2.0.2",
     "html-loader": "^0.5.5",

@@ -53,7 +53,7 @@
     "webpack-merge": "^4.2.2"
   },
   "devDependencies": {
-    "i18next-parser": "^5.3.0"
+    "i18next-parser": "^6.0.0"
   },
   "license": "Apache-2.0"
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>iXBRLViewerPlugin</id>
+    <version>$version$</version>
+    <authors>mms solutions ag</authors>
+    <description>ixbrl viewer plugin package for deployment</description>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright (c) mms solutions ag</copyright>
+    <repository type="git" url="https://github.com/mmssolutionsio/taggingplus" />
+  </metadata>
+  <files>
+    <file src="iXBRLViewerPlugin\*.py" target="iXBRLViewerPlugin\" />
+    <file src="iXBRLViewerPlugin\viewer\dist\*.js" target="iXBRLViewerPlugin\viewer" />
+  </files>
+</package>

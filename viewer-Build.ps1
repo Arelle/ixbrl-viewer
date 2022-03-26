@@ -2,6 +2,7 @@ function viewer-Build {
 
     $npmPath = GetCheckedFullPathToNpm
 
+    Push-Location $PSScriptRoot
     try {
         Exec { . $npmPath install }
         Exec { . $npmPath run prod }
@@ -25,6 +26,7 @@ function viewer-Push {
 
     $nugetPath = GetCheckedFullPathToNuget
 
+    Push-Location $PSScriptRoot
     try {
         Exec { . $nugetPath pack -version $Version }
         Exec { . $nugetPath push iXBRLViewerPlugin.$Version.nupkg -ApiKey $ApiKey -Source 'https://nuget.pkg.github.com/mmssolutionsio/index.json' }

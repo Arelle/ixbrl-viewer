@@ -10,7 +10,7 @@
     <repository type="git" url="https://github.com/mmssolutionsio/taggingplus" />
   </metadata>
   <files>
-    <file src="iXBRLViewerPlugin\*.py" target="iXBRLViewerPlugin\" />
-    <file src="iXBRLViewerPlugin\viewer\dist\*.js" target="iXBRLViewerPlugin\viewer" />
+    <file src="iXBRLViewerPlugin\*.py" target=".\" />
+    <file src="iXBRLViewerPlugin\viewer\dist\*.js" target="viewer" />
   </files>
 </package>

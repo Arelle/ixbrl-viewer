@@ -300,17 +300,21 @@ class IXBRLViewerBuilder:
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='text/javascript' />")
+                # Insert <script> tags, and make sure that they are in the
+                # default namespace, so that browsers in HTML mode will find
+                # them.
+                nsmap = { None: "http://www.w3.org/1999/xhtml" }
+                e = etree.SubElement(child, "{http://www.w3.org/1999/xhtml}script", nsmap = nsmap)
+                e.set("type", "text/javascript")
                 e.set("src", scriptUrl)
                 # Don't self close
                 e.text = ''
-                child.append(e)
 
                 # Putting this in the header can interfere with character set
-                # auto detection
-                e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='application/x.ixbrl-viewer+json'></script>")
+                # auto detection due to its length
+                e = etree.SubElement(child, "{http://www.w3.org/1999/xhtml}script", nsmap = nsmap)
+                e.set("type", "application/x.ixbrl-viewer+json")
                 e.text = taxonomyDataJSON
-                child.append(e)
                 child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
                 break
 

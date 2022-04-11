@@ -3,6 +3,7 @@ import sys
 import unittest
 import json
 import logging
+from io import StringIO
 from collections import defaultdict
 from unittest.mock import Mock, patch
 from .mock_arelle import mock_arelle
@@ -437,8 +438,12 @@ class TestIXBRLViewer(unittest.TestCase):
         self.assertEqual(len(result.files),1)
         body = result.files[0].xmlDocument.getroot()[0]
         self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
+        self.assertEqual(body[1].tag, '{http://www.w3.org/1999/xhtml}script')
+        self.assertEqual(body[1].prefix, None)
         self.assertEqual(body[1].attrib.get('src'), js_uri)
         self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
+        self.assertEqual(body[2].tag, '{http://www.w3.org/1999/xhtml}script')
+        self.assertEqual(body[2].prefix, None)
         self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
         self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
 
@@ -447,4 +452,46 @@ class TestIXBRLViewer(unittest.TestCase):
         self.assertEqual(facts.keys(), {"fact_id2", "fact_id3"})
         self.assertEqual(facts["fact_id2"]["a"]["u"], "iso4217:USD")
         self.assertEqual(facts["fact_id3"]["a"]["u"], None)
+
+
+    def test_xhtmlNamespaceHandling(self):
+        # Check the prefix used for our inserted script tags
+        tests = ('''
+            <html xmlns="http://www.w3.org/1999/xhtml">
+                <body>
+                </body>
+            </html>
+        ''',
+        '''
+            <html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml">
+                <body>
+                </body>
+            </html>
+        ''',
+        # In this case we won't fix the root element to be in the default NS,
+        # but our <script> tags will be.
+        '''
+            <xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml">
+                <body>
+                </body>
+            </xhtml:html>
+        '''
+        )
+
+        for xmls in tests:
+            xml = lxml.etree.parse(StringIO(xmls))
+
+            js_uri = 'https://example.com/script-url'
+            result = self.builder_1.addViewerToXMLDocument(xml, js_uri)
+
+            body = xml.getroot()[0]
+            self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
+            self.assertEqual(body[1].tag, '{http://www.w3.org/1999/xhtml}script')
+            self.assertEqual(body[1].prefix, None)
+            self.assertEqual(body[1].attrib.get('src'), js_uri)
+            self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
+            self.assertEqual(body[2].tag, '{http://www.w3.org/1999/xhtml}script')
+            self.assertEqual(body[2].prefix, None)
+            self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
+            self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
 

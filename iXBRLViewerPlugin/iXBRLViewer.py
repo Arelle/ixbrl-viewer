@@ -298,6 +298,10 @@ class IXBRLViewerBuilder:
 
         for child in xmlDocument.getroot():
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
+                for body_child in child:
+                    if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type','') == 'application/x.ixbrl-viewer+json':
+                        self.dts.error("viewer:error", "File already contains iXBRL viewer")
+                        return False
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
                 e = etree.fromstring("<script xmlns='http://www.w3.org/1999/xhtml' type='text/javascript' />")
@@ -312,7 +316,8 @@ class IXBRLViewerBuilder:
                 e.text = taxonomyDataJSON
                 child.append(e)
                 child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
-                break
+                return True
+        return False
 
     def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js", showValidations = True):
         """
@@ -357,7 +362,8 @@ class IXBRLViewerBuilder:
             filename = os.path.basename(dts.modelDocument.filepath)
             iv.addFile(iXBRLViewerFile(filename, xmlDocument))
 
-        self.addViewerToXMLDocument(xmlDocument, scriptUrl)
+        if not self.addViewerToXMLDocument(xmlDocument, scriptUrl):
+            return None
 
         return iv
 

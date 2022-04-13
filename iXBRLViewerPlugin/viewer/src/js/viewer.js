@@ -358,6 +358,13 @@ Viewer.prototype.selectPrevTag = function (currentFact) {
     this._selectAdjacentTag(-1, currentFact);
 }
 
+
+Viewer.prototype.isScrollableElement = function (domNode) {
+    const overflow = $(domNode).css('overflow-y');
+    return (domNode.clientHeight > 0 && domNode.clientHeight < domNode.scrollHeight 
+        && (overflow == "auto" || overflow == 'scroll' || domNode.nodeName.toUpperCase() == 'HTML'));
+}
+
 /* Make the specified element visible by scrolling any scrollable ancestors */
 Viewer.prototype.showElement = function(e) {
     /* offsetTop gives the position relative to the nearest positioned element.
@@ -377,9 +384,7 @@ Viewer.prototype.showElement = function(e) {
             lastPositionedElement = ee;
             childOffset += ee.offsetTop;
         }
-        const overflow = $(ee).css('overflow-y');
-        if (ee.clientHeight > 0 && ee.clientHeight < ee.scrollHeight 
-            && (overflow == "auto" || overflow == 'scroll' || ee.nodeName.toUpperCase() == 'HTML')) {
+        if (this.isScrollableElement(ee)) {
             /* This is a scrollable element.  Calculate the position of the
              * child we're trying to show within it. */
             var childPosition = childOffset - ee.offsetTop;

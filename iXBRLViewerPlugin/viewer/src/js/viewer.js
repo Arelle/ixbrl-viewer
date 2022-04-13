@@ -377,7 +377,9 @@ Viewer.prototype.showElement = function(e) {
             lastPositionedElement = ee;
             childOffset += ee.offsetTop;
         }
-        if (ee.clientHeight > 0 && ee.clientHeight < ee.scrollHeight) {
+        const overflow = $(ee).css('overflow-y');
+        if (ee.clientHeight > 0 && ee.clientHeight < ee.scrollHeight 
+            && (overflow == "auto" || overflow == 'scroll' || ee.nodeName.toUpperCase() == 'HTML')) {
             /* This is a scrollable element.  Calculate the position of the
              * child we're trying to show within it. */
             var childPosition = childOffset - ee.offsetTop;

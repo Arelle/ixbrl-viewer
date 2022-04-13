@@ -208,7 +208,11 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     const name = localName(n.nodeName).toUpperCase();
     const isFootnote = (name == 'FOOTNOTE');
-    if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
+    // Ignore iXBRL elements that are not in the default target document, as
+    // the viewer builder does not handle these, and does not ensure that they
+    // have ID attributes.
+    if (n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)
+        && !n.hasAttribute("target")) {
         var node = $();
         const id = n.getAttribute("id");
         if (!inHidden) {

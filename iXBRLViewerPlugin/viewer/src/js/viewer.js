@@ -213,10 +213,12 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     // have ID attributes.
     if (n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)
         && !n.hasAttribute("target")) {
-        var node = $();
+        var node;
         const id = n.getAttribute("id");
         if (!inHidden) {
             node = this._findOrCreateWrapperNode(n);
+        } else {
+            node = $(n);
         }
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */
@@ -227,6 +229,9 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         }
         if (node.is(':hidden')) {
             ixn.htmlHidden = true;
+        }
+        if (inHidden) {
+            ixn.isHidden = true;
         }
         if (n.getAttribute("continuedAt")) {
             this._continuedAtMap[id] = { 

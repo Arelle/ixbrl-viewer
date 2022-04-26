@@ -351,21 +351,21 @@ describe("Section grouping", () => {
 
         // Make f1c hidden.  We now have ELR1*2 ELR3*1 ELR1*2
         // The first ELR1 run should be selected.
-        report.getItemById("f1c").ixNode.wrapperNode = $('');
+        report.getItemById("f1c").ixNode.isHidden = true;
         outline = new DocumentOutline(report);
         expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
         expect(outline.sections["elr1"].id).toEqual("f1a");
         expect(outline.sections["elr3"].id).toEqual("f2");
 
         // Make f1a hidden.  f1b-[f1c]-f1d is now the longest run.
-        report.getItemById("f1a").ixNode.wrapperNode = $('');
+        report.getItemById("f1a").ixNode.isHidden = true;
         outline = new DocumentOutline(report);
         expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
         expect(outline.sections["elr1"].id).toEqual("f1b");
         expect(outline.sections["elr3"].id).toEqual("f2");
 
         // Hide f2.  We now have a single run for ELR1
-        report.getItemById("f2").ixNode.wrapperNode = $('');
+        report.getItemById("f2").ixNode.isHidden = true;
         outline = new DocumentOutline(report);
         expect(outline.sortedSections()).toEqual(["elr1"]);
         expect(outline.sections["elr1"].id).toEqual("f1");

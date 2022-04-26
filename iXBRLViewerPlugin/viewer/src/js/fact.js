@@ -253,7 +253,7 @@ Fact.prototype.footnotes = function () {
 }
 
 Fact.prototype.isHidden = function () {
-    return this.ixNode.wrapperNode.length == 0;
+    return this.ixNode.isHidden;
 }
 
 Fact.prototype.isHTMLHidden = function () {

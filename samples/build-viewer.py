@@ -21,7 +21,7 @@ import os
 import sys
 import glob
 import argparse
-import iXBRLViewerPlugin
+import iXBRLViewerPlugin.iXBRLViewer
 from arelle.plugin import inlineXbrlDocumentSet
 
 class CntlrCreateViewer(Cntlr.Cntlr):
@@ -55,10 +55,10 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         self.modelManager.validate()
 
         try:
-            viewerBuilder = iXBRLViewerPlugin.IXBRLViewerBuilder(xbrl)
+            viewerBuilder = iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilder(xbrl)
             viewer = viewerBuilder.createViewer(scriptUrl = scriptUrl)
             viewer.save(outPath)
-        except IXBRLViewerBuilderError as e:
+        except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
             print(e.message)
             sys.exit(1)
 

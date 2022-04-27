@@ -215,10 +215,10 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         && !n.hasAttribute("target")) {
         var node;
         const id = n.getAttribute("id");
-        if (!inHidden) {
-            node = this._findOrCreateWrapperNode(n);
-        } else {
+        if (inHidden) {
             node = $(n);
+        } else {
+            node = this._findOrCreateWrapperNode(n);
         }
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */

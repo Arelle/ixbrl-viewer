@@ -1,0 +1,9 @@
+{
+    "http_//fasb_org/us-gaap/2022": "US GAAP 2022",
+    "http_//fasb_org/us-gaap/2021-01-31": "US GAAP 2021",
+    "http_//fasb_org/us-gaap/2020-01-31": "US GAAP 2020",
+    "http_//xbrl_ifrs_org/taxonomy/2022-03-24/ifrs-full": "IFRS 2021",
+    "http_//xbrl_ifrs_org/taxonomy/2021-03-24/ifrs-full": "IFRS 2021",
+    "http_//xbrl_ifrs_org/taxonomy/2020-03-16/ifrs-full": "IFRS 2020",
+    "http_//xbrl_ifrs_org/taxonomy/2019-03-27/ifrs-full": "IFRS 2019"
+}

@@ -49,12 +49,14 @@ Inspector.prototype.i18nInit = function () {
             en: { 
                 translation: require('../i18n/en/translation.json'),
                 referenceParts: require('../i18n/en/referenceparts.json'),
-                currencies: require('../i18n/en/currencies.json')
+                currencies: require('../i18n/en/currencies.json'),
+                taxonomies: require('../i18n/en/taxonomies.json')
             },
             es: { 
                 translation: require('../i18n/es/translation.json'),
                 referenceParts: require('../i18n/es/referenceparts.json'),
-                currencies: require('../i18n/es/currencies.json')
+                currencies: require('../i18n/es/currencies.json'),
+                taxonomies: require('../i18n/es/taxonomies.json')
             }
         }
     }).then((t) => {
@@ -689,6 +691,11 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                     s.wrapInner("<i></i>");
                 }
             }
+            const nsURI = fact.concept().qname().namespace;
+            const nsURIEscaped = nsURI.replaceAll(/[.:]/g,'_');
+            console.log(nsURIEscaped);
+            $('tr.taxonomy td', factHTML).text(i18next.t(`taxonomies:${nsURIEscaped}`, {defaultValue: nsURI}));
+
         }
         else if (fact instanceof Footnote) {
             factHTML = $(require('../html/footnote-details.html')); 

@@ -32,6 +32,7 @@ export function IXNode(id, wrapperNode, docIndex) {
     this.docIndex = docIndex;
     this.footnote = false;
     this.id = id;
+    this.isHidden = false;
     this.htmlHidden = false;
     this.docOrderindex = docOrderindex++;
 }

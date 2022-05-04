@@ -21,7 +21,7 @@ setup(
     long_description=open('README.md').read(),
     url='https://github.com/workiva/ixbrl-viewer',
     author='Workiva',
-    author_email='dave.casleton@workiva.com',
+    author_email='team-xt@workiva.com',
     include_package_data=True,
     packages=find_packages(),
     classifiers=[

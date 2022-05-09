@@ -815,8 +815,8 @@
 
           .calculation-details-link {
             position: absolute;
-            right: 1.4rem;
-            top: 1.4rem;
+            right: 0.9rem;
+            top: 1.2rem;
             color: @primary;
             font-weight: normal;
 
@@ -826,41 +826,42 @@
           }
         }
 
-        .item {
-          padding: 5px 0;
-          position: relative;
-          line-height: 1.8rem;
+        table.calculation-table {
+          width: 100%;
+          border-collapse: collapse;
 
-          &:not(.calc-fact-link, .total) .concept-name {
-            color: #777;
-          }
+          tr.item {
+            td {
+              padding: 5px 0;
+              line-height: 1.8rem;
 
-          .concept-name {
-            display: block;
-            margin-left: 15px;
-          }
-
-          &.calc-fact-link {
-            cursor: pointer;
-
-            .concept-name {
-              color: @primary;
+              &.value {
+                text-align: right;
+              }
             }
-          }
 
-          .weight {
-            display: block;
-            position: absolute;
-          }
+            &:not(.calc-fact-link, .total) .concept-name {
+              color: #777;
+            }
 
-          &.linked-highlight,
-          &.calc-fact-link:hover {
-            .linked-highlight-text();
-          }
+            &.calc-fact-link {
+              cursor: pointer;
 
-          &.total {
-            border-top: solid 1px @border-grey;
-            padding-bottom: 1.2rem;
+              .concept-name,
+              .value {
+                color: @primary;
+              }
+            }
+
+            &.linked-highlight,
+            &.calc-fact-link:hover {
+              .linked-highlight-text();
+            }
+
+            &.total td {
+              border-top: solid 1px @border-grey;
+              padding-bottom: 1.2rem;
+            }
           }
         }
       }

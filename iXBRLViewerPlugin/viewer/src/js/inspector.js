@@ -463,13 +463,14 @@ Inspector.prototype._calculationHTML = function (fact) {
 
     for (const rCalc of calc.resolvedCalculations()) {
         const label = report.getRoleLabel(rCalc.elr, inspector._viewerOptions);
-        const calcBody = $('<div></div>');
+        const calcBody = $('<table></table>').addClass("calculation-table");
 
         for (const r of rCalc.rows) {
-            const itemHTML = $("<div></div>")
+            const itemHTML = $("<tr></tr>")
                 .addClass("item")
-                .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
-                .append($("<span></span>").addClass("concept-name").text(r.concept.label()))
+                .append($("<td></td>").addClass("weight").text(r.weightSign + " "))
+                .append($("<td></td>").addClass("concept-name").text(r.concept.label()))
+                .append($("<td></td>").addClass("value"))
                 .appendTo(calcBody);
 
             if (!r.facts.isEmpty()) {
@@ -479,11 +480,13 @@ Inspector.prototype._calculationHTML = function (fact) {
                 itemHTML.mouseenter(() => r.facts.items.forEach(f => viewer.linkedHighlightFact(f)));
                 itemHTML.mouseleave(() => r.facts.items.forEach(f => viewer.clearLinkedHighlightFact(f)));
                 r.facts.items.forEach(f => viewer.highlightRelatedFact(f));
+                itemHTML.find(".value").text(r.facts.mostPrecise().readableValue());
             }
         }
-        $("<div></div>").addClass("item").addClass("total")
-            .append($("<span></span>").addClass("weight"))
-            .append($("<span></span>").addClass("concept-name").text(fact.concept().label()))
+        $("<tr></tr>").addClass("item").addClass("total")
+            .append($("<td></td>").addClass("weight"))
+            .append($("<td></td>").addClass("concept-name").text(fact.concept().label()))
+            .append($("<td></td>").addClass("value").text(fact.readableValue()))
             .appendTo(calcBody);
 
         const cardTitle = $("<span></span>")

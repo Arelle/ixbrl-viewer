@@ -87,10 +87,7 @@ export class Calculation {
     }
 
     /*
-     * Returns a list of objects with properties:
-     *   weight (calc weight)
-     *   facts (undefined, or a map of fact IDs to fact objects)
-     *   concept (conceptName)
+     * Returns a ResolvedCalculation object for the specified ELR
      */
     resolvedCalculation(elr) {
         var calc = [];
@@ -130,7 +127,7 @@ class ResolvedCalculation {
     calculatedTotalInterval() {
         let total = new Interval(0, 0);
         for (const item of this.rows) {
-            if (item.facts !== undefined) {
+            if (!item.facts.isEmpty()) {
                 const intersection = item.facts.valueIntersection();
                 if (intersection === undefined) {
                     return undefined;
@@ -141,6 +138,13 @@ class ResolvedCalculation {
         return total;
     }
 
+    binds() {
+        return this.rows.some((r) => !r.facts.isEmpty());
+    }
+
+    /*
+     * Is the calculation consistent under Calculations v1.1 rules?
+     */
     isConsistent() {
         return this.calculatedTotalInterval().intersection(Interval.fromFact(this.totalFact)) !== undefined;
     }

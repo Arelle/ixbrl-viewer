@@ -813,6 +813,14 @@
         .card .title {
           position: relative;
 
+          .inconsistent-flag {
+            padding-left: 0.5rem;
+
+            &::before {
+              .icon-warning();
+            }
+          }
+
           .calculation-details-link {
             position: absolute;
             right: 0.9rem;

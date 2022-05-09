@@ -11,6 +11,7 @@
   },
   "factDetails": {
     "accuracy": "Accuracy",
+    "calculationIsInconsistent": "Calculation is inconsistent",
     "change": "Change",
     "changeFromIn": "From {{from}} in ",
     "changePercentageDecrease": "{{decrease}}% decrease on ",

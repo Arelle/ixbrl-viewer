@@ -490,7 +490,15 @@ Inspector.prototype._calculationHTML = function (fact) {
             .appendTo(calcBody);
 
         const cardTitle = $("<span></span>")
-            .text(label)
+            .append($("<span></span>").text(label));
+        if (rCalc.binds() && !rCalc.isConsistent()) {
+            $("<span></span>")
+                .addClass("inconsistent-flag")
+                .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
+                .appendTo(cardTitle);
+        }
+
+        cardTitle
             .append($("<span></span>")
                 .addClass("calculation-details-link")
                 .attr("title", i18next.t('factDetails.viewCalculationDetails'))

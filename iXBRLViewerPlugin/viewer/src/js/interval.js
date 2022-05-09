@@ -45,7 +45,7 @@ Interval.prototype.intersection = function(other) {
 }
 
 Interval.intersection = function(...intervals) {
-    if (intervals.includes(undefined)) {
+    if (intervals.includes(undefined) || intervals.length == 0) {
         return undefined;
     }
     const aa = intervals.map(x => x.a);

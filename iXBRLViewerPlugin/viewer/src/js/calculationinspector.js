@@ -50,22 +50,50 @@ export class CalculationInspector extends Dialog {
         tbody.empty();
         for (const row of resolvedCalculation.rows) {
             let factText = "";
+            let minText = "";
+            let maxText = "";
+
             if (!row.facts.isEmpty()) {
                 let f = row.facts.items[0];
-                factText = f.readableValue();
+                const reportedInterval = row.facts.valueIntersection();
+                if (reportedInterval === undefined) {
+                    factText = "Inconsistent duplicates"; // XXX untested
+                }
+                else {
+                    factText = f.readableValue(reportedInterval.midpoint().toNumber());
+                    const contributionInterval = row.contributionInterval();
+                    minText = f.readableValue(contributionInterval.a.toNumber());
+                    maxText = f.readableValue(contributionInterval.b.toNumber());
+                }
             }
             $("<tr></tr>")
                 .append($("<td></td>").addClass("weight").text(row.weightSign))
                 .append($("<td></td>").text(row.concept.label()))
                 .append($("<td></td>").addClass("figure").text(factText))
                 .append(this.duplicateFactIcons(row.facts))
+                .append($("<td></td>").addClass("figure").text(minText))
+                .append($("<td></td>").addClass("figure").text(maxText))
                 .appendTo(tbody);
         }
         const fact = resolvedCalculation.totalFact;
+        const cvi = resolvedCalculation.calculatedTotalInterval();
         $("<tr></tr>").addClass("total")
             .append($("<td></td>"))
-            .append($("<td></td>").text(fact.concept().label()))
+            .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.calculated-total')})`))
+            .append($("<td></td>").text(fact.readableValue(cvi.midpoint().toNumber())).addClass("figure"))
+            .append($("<td></td>"))
+            .append($("<td></td>").text(fact.readableValue(cvi.a.toNumber())).addClass("figure"))
+            .append($("<td></td>").text(fact.readableValue(cvi.b.toNumber())).addClass("figure"))
+            .appendTo(tbody);
+
+        const rvi = fact.valueInterval();
+        $("<tr></tr>").addClass("total")
+            .append($("<td></td>"))
+            .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.reported-total')})`))
             .append($("<td></td>").text(fact.readableValue()).addClass("figure"))
+            .append($("<td></td>"))
+            .append($("<td></td>").text(fact.readableValue(rvi.a.toNumber())).addClass("figure"))
+            .append($("<td></td>").text(fact.readableValue(rvi.b.toNumber())).addClass("figure"))
             .appendTo(tbody);
     }
 }

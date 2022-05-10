@@ -1,7 +1,9 @@
 {
   "calculation": {
     "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
-    "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present"
+    "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
+    "reported-total": "Reported",
+    "calculated-total": "Calculated"
   },
   "common": {
     "accuracyInfinite": "Infinite precision",

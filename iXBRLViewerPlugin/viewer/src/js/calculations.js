@@ -96,43 +96,62 @@ export class Calculation {
         var rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
         const resolvedCalculation = new ResolvedCalculation(elr, this.fact);
         for (const r of rels) {
-            resolvedCalculation.addRow(report.getConcept(r.t), r.w, new FactSet(Object.values(calcFacts[r.t] || {})));
+            const factset = new FactSet(Object.values(calcFacts[r.t] || {}));
+            resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
         }
         return resolvedCalculation;
     }
 }
 
+class CalculationContribution {
+
+    constructor(concept, weight, facts) {
+        this.concept = concept;
+        this.weight = weight;
+        this.facts = facts;
+
+        if (weight == 1) {
+            this.weightSign = '+';
+        }
+        else if (weight == -1) {
+            this.weightSign = '-';
+        }
+        else {
+            this.WeightSign = weight;
+        }
+    }
+
+    contributionInterval() {
+        const intersection = this.facts.valueIntersection();
+        if (intersection === undefined) {
+            return undefined;
+        }
+        return intersection.times(this.weight); 
+    }
+}
 
 class ResolvedCalculation {
     constructor(elr, fact) {
-        this.totalFact = fact;
+        this.totalFact = fact; // XXX  this needs to be factset
         this.elr = elr;
         this.rows = [];
     }
 
-    addRow(concept, weight, factset) {
-        var s;
-        if (weight == 1) {
-            s = '+';
-        }
-        else if (weight == -1) {
-            s = '-';
-        }
-        else {
-            s = weight;
-        }
-        this.rows.push({ weightSign: s, weight: weight, facts: factset, concept: concept});
+    addRow(contribution) {
+        this.rows.push(contribution);
     }
 
     calculatedTotalInterval() {
         let total = new Interval(0, 0);
         for (const item of this.rows) {
             if (!item.facts.isEmpty()) {
-                const intersection = item.facts.valueIntersection();
-                if (intersection === undefined) {
+                const contribution = item.contributionInterval();
+                if (contribution === undefined) {
+                    // Inconsistent duplicates
                     return undefined;
                 }
-                total = total.plus(intersection.times(item.weight));
+
+                total = total.plus(contribution);
             }
         }
         return total;

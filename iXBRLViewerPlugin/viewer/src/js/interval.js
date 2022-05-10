@@ -66,3 +66,7 @@ Interval.prototype.times = function(x) {
     return x > 0 ? new Interval(this.a.times(x), this.b.times(x)) : new Interval(this.b.times(x), this.a.times(x));
 }
 
+Interval.prototype.midpoint = function() {
+    return Decimal.add(this.a, this.b).div(2);
+}
+

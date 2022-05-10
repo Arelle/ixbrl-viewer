@@ -20,6 +20,7 @@ import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
 import { Footnote } from "./footnote.js";
+import { Interval } from './interval.js';
 import $ from 'jquery'
 import i18next from "i18next";
 import Decimal from 'decimal.js';
@@ -80,7 +81,7 @@ export class Fact {
     }
 
     readableValue() {
-        let v = this.f.v;
+        let v = val === undefined ? this.f.v : val;
         if (this.isInvalidIXValue()) {
             v = "Invalid value";
         }
@@ -301,4 +302,13 @@ Fact.prototype.roundedValue = function() {
 
 Fact.prototype.isCompleteDuplicate = function(other) {
     return this.value() === other.value() && this.decimals() === other.decimals();
+}
+
+// Facts that are the source of relationships to this fact.
+Fact.prototype.addLinkedFact = function (f) {
+    this.linkedFacts.push(f);
+}
+
+Fact.prototype.valueInterval = function() {
+    return Interval.fromFact(this);
 }

@@ -130,10 +130,8 @@ class IXBRLViewerBuilder:
     def addELR(self, elr):
         prefix = self.roleMap.getPrefix(elr)
         if self.taxonomyData.setdefault("roleDefs",{}).get(prefix, None) is None:
-            rt = self.dts.roleTypes[elr]
-            label = elr
-            if len(rt) > 0:
-                label = rt[0].definition
+            rts = self.dts.roleTypes.get(elr, [])
+            label = next((rt.definition for rt in rts if rt.definition is not None), elr)
             self.taxonomyData["roleDefs"].setdefault(prefix,{})["en"] = label
 
     def addConcept(self, concept, dimensionType = None):

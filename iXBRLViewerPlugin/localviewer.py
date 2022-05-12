@@ -50,7 +50,7 @@ def launchLocalViewer(cntlr, modelXbrl):
     from arelle import LocalViewer
     try:
         viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js")
+        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js", showValidations = False)
         # first check if source file was in an archive (e.g., taxonomy package)
         _archiveFilenameParts = archiveFilenameParts(modelXbrl.modelDocument.filepath)
         if _archiveFilenameParts is not None:

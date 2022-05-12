@@ -149,6 +149,10 @@ iXBRLReport.prototype.prefixMap = function() {
     return this.data.prefixes;
 }
 
+iXBRLReport.prototype.roleMap = function() {
+    return this.data.roles;
+}
+
 iXBRLReport.prototype.qname = function(v) {
     return new QName(this.prefixMap(), v);
 }
@@ -283,8 +287,19 @@ iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
     /* This is currently hard-coded to "en" as the generator does not yet
      * support generic labels, and instead provides the (non-localisable) role
      * definition as a single "en" label.
+     *
+     * Returns the ELR URI if there is no label
      */
-    return this.data.roleDefs[rolePrefix]["en"];
+    const labels = this.data.roleDefs[rolePrefix];
+    if (labels !== undefined) {
+        const label = labels["en"];
+        // Earlier versions of the generator added a "null" label if no labels
+        // were available.
+        if (label !== undefined && label !== null) {
+            return label;
+        }
+    }
+    return this.roleMap()[rolePrefix];
 }
 
 iXBRLReport.prototype.documentSetFiles = function() {

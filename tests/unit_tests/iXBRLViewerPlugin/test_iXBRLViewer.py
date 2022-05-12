@@ -362,18 +362,16 @@ class TestIXBRLViewer(unittest.TestCase):
 
     def test_addELR_no_definition(self):
         """
-        Adding an ELR with no definition should result in an "en" label with
-        the roleURI as its value
+        Adding an ELR with no definition should result in no entry in the roleDefs map
         """
         elr = "http://example.com/unknownELR"
         self.builder_1.addELR(elr)
         elrPrefix = self.builder_1.roleMap.getPrefix(elr)
-        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix).get("en"), elr)
+        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix), None)
 
     def test_addELR_with_definition(self):
         """
-        Adding an ELR with no definition should result in an "en" label with
-        the roleURI as its value
+        Adding an ELR with a definition should result in an "en" label with the definition as its value.
         """
         elr = "ELR"
         self.builder_1.addELR(elr)

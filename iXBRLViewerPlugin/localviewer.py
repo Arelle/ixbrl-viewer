@@ -41,7 +41,7 @@ class iXBRLViewerLocalViewer(LocalViewer):
                 _file = os.path.filepart(_file)
             if not _fileExists:
                 self.cntlr.addToLog("http://localhost:{}/{}".format(self.port,file), messageCode="localViewer:fileNotFound",level=logging.DEBUG)
-            return static_file(_file, root=_fileDir, more_headers=self.noCacheHeaders) # extra_headers modification to py-bottle
+            return static_file(_file, root=_fileDir, headers=self.noCacheHeaders) # extra_headers modification to py-bottle
         return static_file(file, root="/") # probably can't get here unless path is wrong
 
 localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))

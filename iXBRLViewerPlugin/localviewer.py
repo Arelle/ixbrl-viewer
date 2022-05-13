@@ -41,7 +41,7 @@ class iXBRLViewerLocalViewer(LocalViewer):
                 _file = os.path.filepart(_file)
             if not _fileExists:
                 self.cntlr.addToLog("http://localhost:{}/{}".format(self.port,file), messageCode="localViewer:fileNotFound",level=logging.DEBUG)
-            return static_file(_file, root=_fileDir, more_headers=self.noCacheHeaders) # extra_headers modification to py-bottle
+            return static_file(_file, root=_fileDir, headers=self.noCacheHeaders) # extra_headers modification to py-bottle
         return static_file(file, root="/") # probably can't get here unless path is wrong
 
 localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
@@ -50,7 +50,7 @@ def launchLocalViewer(cntlr, modelXbrl):
     from arelle import LocalViewer
     try:
         viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js")
+        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js", showValidations = False)
         # first check if source file was in an archive (e.g., taxonomy package)
         _archiveFilenameParts = archiveFilenameParts(modelXbrl.modelDocument.filepath)
         if _archiveFilenameParts is not None:

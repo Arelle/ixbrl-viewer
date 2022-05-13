@@ -202,7 +202,7 @@ class IXBRLViewerBuilder:
         dts = self.dts
 
         logHandler = dts.modelManager.cntlr.logHandler
-        if not hasattr(logHandler, "logRecordBuffer"):
+        if getattr(logHandler, "logRecordBuffer") is None:
             raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
 
         errors = []

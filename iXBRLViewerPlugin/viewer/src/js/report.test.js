@@ -24,6 +24,17 @@ var testReportData = {
         "eg": "http://www.example.com",
         "iso4217": "http://www.xbrl.org/2003/iso4217"
     },
+    "roles": {
+        "role1": "https://www.example.com/role1",
+        "role2": "https://www.example.com/role2",
+        "role3": "https://www.example.com/role3",
+        "role4": "https://www.example.com/role4"
+    },
+    "roleDefs": {
+        "role1": { "en": "Role 1 Label" },
+        "role2": { "en": null },
+        "role3": {}
+    },
     "concepts": {
         "eg:Concept1": {
             "labels": {
@@ -128,6 +139,23 @@ describe("Concept labels", () => {
 
         expect(testReport.getLabel('eg:Concept3', 'doc', true)).toBeUndefined();
         expect(testReport.getLabelOrName('eg:Concept3', 'doc', true)).toBe("eg:Concept3");
+    });
+
+});
+
+describe("ELR labels", () => {
+    const testReport = new iXBRLReport(testReportData);
+    test("Present", () => {
+        expect(testReport.getRoleLabel("role1")).toBe("Role 1 Label");
+    });
+    test("Null", () => {
+        expect(testReport.getRoleLabel("role2")).toBe("https://www.example.com/role2");
+    });
+    test("No label", () => {
+        expect(testReport.getRoleLabel("role3")).toBe("https://www.example.com/role3");
+    });
+    test("Not present in roleDef", () => {
+        expect(testReport.getRoleLabel("role4")).toBe("https://www.example.com/role4");
     });
 
 });

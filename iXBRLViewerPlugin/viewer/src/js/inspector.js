@@ -628,84 +628,89 @@ Inspector.prototype._footnoteFactsHTML = function(fact) {
     return html;
 }
 
+Inspector.prototype._factSummaryHTML = function(fact, factset) {
+    var factHTML;
+    if (fact instanceof Fact) {
+        factHTML = $(require('../html/fact-details.html')); 
+        $('.std-label', factHTML).text(fact.getLabelOrName("std", true));
+        $('.documentation', factHTML).text(fact.getLabel("doc") || "");
+        $('tr.concept td', factHTML).text(fact.conceptName());
+        $('tr.period td', factHTML)
+            .text(fact.periodString());
+        if (fact.isNumeric()) {
+            $('tr.period td', factHTML).append(
+                $("<span></span>") 
+                    .addClass("analyse")
+                    .text("")
+                    .click(() => this.analyseDimension(fact, ["p"]))
+            );
+        }
+        this._updateEntityIdentifier(fact, factHTML);
+        this._updateValue(fact, false, factHTML);
+
+        var accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
+        if (!fact.isNumeric() || fact.isNil()) {
+            accuracyTD.wrapInner("<i></i>");
+        }
+
+        $('#dimensions', factHTML).empty();
+        for (const aspect of fact.aspects()) {
+            if (!aspect.isTaxonomyDefined()) {
+                continue;
+            }
+            const h = $('<div class="dimension"></div>')
+                .text(aspect.label() || aspect.name())
+                .appendTo($('#dimensions', factHTML));
+            if (fact.isNumeric()) {
+                h.append(
+                    $("<span></span>") 
+                        .addClass("analyse")
+                        .text("")
+                        .on("click", () => this.analyseDimension(fact, [aspect.name()]))
+                )
+            }
+            const s = $('<div class="dimension-value"></div>')
+                .text(aspect.valueLabel())
+                .appendTo(h);
+            if (aspect.isNil()) {
+                s.wrapInner("<i></i>");
+            }
+        }
+        const nsURI = fact.concept().qname().namespace;
+        $('tr.taxonomy td', factHTML).text(this._report.taxonomyNameForURI(nsURI, nsURI));
+    }
+    else if (fact instanceof Footnote) {
+        factHTML = $(require('../html/footnote-details.html')); 
+        this._updateValue(fact, false, factHTML);
+    }
+    return factHTML;
+}
+
 /* 
  * Build an accordian containing a summary of all nested facts/footnotes
  * corresponding to the current viewer selection.
  */
 Inspector.prototype._selectionSummaryAccordian = function() {
-    var cf = this._currentItem;
+    const cf = this._currentItem;
 
     // dissolveSingle => title not shown if only one item in accordian
-    var a = new Accordian({
+    const a = new Accordian({
         onSelect: (id) => this.switchItem(id),
         alwaysOpen: true,
         dissolveSingle: true,
     });
 
-    var fs = new FactSet(this._currentItemList);
-    $.each(this._currentItemList, (i, fact) => {
-        var factHTML;
-        var title = fs.minimallyUniqueLabel(fact);
-        if (fact instanceof Fact) {
-            factHTML = $(require('../html/fact-details.html')); 
-            $('.std-label', factHTML).text(fact.getLabelOrName("std", true));
-            $('.documentation', factHTML).text(fact.getLabel("doc") || "");
-            $('tr.concept td', factHTML).text(fact.conceptName());
-            $('tr.period td', factHTML)
-                .text(fact.periodString());
-            if (fact.isNumeric()) {
-                $('tr.period td', factHTML).append(
-                    $("<span></span>") 
-                        .addClass("analyse")
-                        .text("")
-                        .click(() => this.analyseDimension(fact, ["p"]))
-                );
-            }
-            this._updateEntityIdentifier(fact, factHTML);
-            this._updateValue(fact, false, factHTML);
-
-            var accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
-            if (!fact.isNumeric() || fact.isNil()) {
-                accuracyTD.wrapInner("<i></i>");
-            }
-
-            $('#dimensions', factHTML).empty();
-            for (const aspect of fact.aspects()) {
-                if (!aspect.isTaxonomyDefined()) {
-                    continue;
-                }
-                var h = $('<div class="dimension"></div>')
-                    .text(aspect.label() || aspect.name())
-                    .appendTo($('#dimensions', factHTML));
-                if (fact.isNumeric()) {
-                    h.append(
-                        $("<span></span>") 
-                            .addClass("analyse")
-                            .text("")
-                            .on("click", () => this.analyseDimension(fact, [aspect.name()]))
-                    )
-                }
-                var s = $('<div class="dimension-value"></div>')
-                    .text(aspect.valueLabel())
-                    .appendTo(h);
-                if (aspect.isNil()) {
-                    s.wrapInner("<i></i>");
-                }
-            }
-            const nsURI = fact.concept().qname().namespace;
-            $('tr.taxonomy td', factHTML).text(this._report.taxonomyNameForURI(nsURI, nsURI));
-        }
-        else if (fact instanceof Footnote) {
-            factHTML = $(require('../html/footnote-details.html')); 
-            this._updateValue(fact, false, factHTML);
-        }
+    const fs = new FactSet(this._currentItemList);
+    for (const fact of this._currentItemList) {
+        const factHTML = this._factSummaryHTML(fact);
+        const title = fs.minimallyUniqueLabel(fact);
         a.addCard(
             title,
             factHTML, 
             fact.id == cf.id,
             fact.id
         );
-    });
+    }
     return a;
 }
 

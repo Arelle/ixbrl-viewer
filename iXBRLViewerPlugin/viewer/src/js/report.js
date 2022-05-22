@@ -19,6 +19,7 @@ import { Concept } from "./concept.js";
 import { ViewerOptions } from "./viewerOptions.js";
 import { setDefault } from "./util.js";
 import $ from 'jquery'
+import i18next from 'i18next';
 
 export function iXBRLReport (data) {
     this.data = data;
@@ -264,6 +265,8 @@ iXBRLReport.prototype.setViewerOptions = function (vo) {
     this._viewerOptions = vo;
 }
 
+// Returns a list of namespace prefixes, ordered by number of times each
+// namespace is used in the report (descending)
 iXBRLReport.prototype.namespaceGroups = function () {
     var counts = {};
     $.each(this.facts(), function (i, f) {
@@ -304,4 +307,12 @@ iXBRLReport.prototype.usesAnchoring = function() {
 
 iXBRLReport.prototype.hasValidationErrors = function() {
     return this.data.validation !== undefined && this.data.validation.length > 0;
+}
+
+// Get a human-readable label for the provided namespace URI, from the i18n
+// taxonomies file.
+// Returns def if none available.
+iXBRLReport.prototype.taxonomyNameForURI = function(nsURI, def) {
+    const nsURIEscaped = nsURI.replaceAll(/[.:]/g,'_');
+    return i18next.t(`taxonomies:${nsURIEscaped}`, {defaultValue: def});
 }

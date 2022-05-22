@@ -190,11 +190,12 @@ Inspector.prototype.buildHighlightKey = function () {
     var key = this._report.namespaceGroups();
     this._iv.callPluginMethod("extendHighlightKey", key);
 
-    for (var i = 0; i < key.length; i++) {
+    for (const [i, ns] of key.entries()) {
+        const label = this._report.taxonomyNameForURI(this._report.prefixMap()[ns], ns);
         $("<div>")
             .addClass("item")
             .append($("<span></span>").addClass("sample").addClass("sample-" + i))
-            .append($("<span></span>").text(key[i]))
+            .append($("<span></span>").text(label))
             .appendTo($(".highlight-key .items"));
     }
 }
@@ -692,9 +693,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
                 }
             }
             const nsURI = fact.concept().qname().namespace;
-            const nsURIEscaped = nsURI.replaceAll(/[.:]/g,'_');
-            $('tr.taxonomy td', factHTML).text(i18next.t(`taxonomies:${nsURIEscaped}`, {defaultValue: nsURI}));
-
+            $('tr.taxonomy td', factHTML).text(this._report.taxonomyNameForURI(nsURI, nsURI));
         }
         else if (fact instanceof Footnote) {
             factHTML = $(require('../html/footnote-details.html')); 

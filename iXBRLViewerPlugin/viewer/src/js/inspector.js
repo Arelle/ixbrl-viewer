@@ -693,7 +693,6 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             }
             const nsURI = fact.concept().qname().namespace;
             const nsURIEscaped = nsURI.replaceAll(/[.:]/g,'_');
-            console.log(nsURIEscaped);
             $('tr.taxonomy td', factHTML).text(i18next.t(`taxonomies:${nsURIEscaped}`, {defaultValue: nsURI}));
 
         }

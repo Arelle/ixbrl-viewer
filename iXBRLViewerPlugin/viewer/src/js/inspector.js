@@ -628,7 +628,7 @@ Inspector.prototype._footnoteFactsHTML = function(fact) {
     return html;
 }
 
-Inspector.prototype._factSummaryHTML = function(fact, factset) {
+Inspector.prototype._factSummaryHTML = function(fact) {
     var factHTML;
     if (fact instanceof Fact) {
         factHTML = $(require('../html/fact-details.html')); 

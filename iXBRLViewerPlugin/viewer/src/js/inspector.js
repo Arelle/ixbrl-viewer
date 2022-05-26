@@ -190,8 +190,8 @@ Inspector.prototype.buildHighlightKey = function () {
     var key = this._report.namespaceGroups();
     this._iv.callPluginMethod("extendHighlightKey", key);
 
-    for (const [i, ns] of key.entries()) {
-        const label = this._report.taxonomyNameForURI(this._report.prefixMap()[ns], ns);
+    for (const [i, prefix] of key.entries()) {
+        const label = this._report.taxonomyNameForURI(this._report.prefixMap()[prefix], prefix);
         $("<div>")
             .addClass("item")
             .append($("<span></span>").addClass("sample").addClass("sample-" + i))

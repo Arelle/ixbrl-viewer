@@ -697,8 +697,6 @@ Inspector.prototype._itemSummaryHTML = function(item) {
  * corresponding to the current viewer selection.
  */
 Inspector.prototype._selectionSummaryAccordian = function() {
-    const cf = this._currentItem;
-
     // dissolveSingle => title not shown if only one item in accordian
     const a = new Accordian({
         onSelect: (id) => this.switchItem(id),
@@ -713,7 +711,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
         a.addCard(
             title,
             item, 
-            item.id == cf.id,
+            item.id == this._currentItem.id,
             item.id
         );
     }

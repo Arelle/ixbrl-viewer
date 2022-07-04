@@ -35,6 +35,12 @@ updates:
   - dependency-name: less-loader
     versions:
     - ">=7"
+  - dependency-name: stylelint
+    versions:
+    - ">=14"
+  - dependency-name: stylelint-config-standard
+    versions:
+    - ">=22"
   - dependency-name: webpack-cli
     versions:
     - ">=4"

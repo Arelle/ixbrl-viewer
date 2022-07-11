@@ -24,52 +24,21 @@
 }
 
 .ixbrl-highlight {
-  background-color: @highlight-default !important;
+  &, & span {
+    background-color: @highlight-default !important;
+  }
 
-  &.ixbrl-highlight-1 {
+  &.ixbrl-highlight-1, &.ixbrl-highlight-1 span {
     background-color: @highlight-1 !important;
   }
 
-  &.ixbrl-highlight-2 {
+  &.ixbrl-highlight-2, &.ixbrl-highlight-2 span {
     background-color: @highlight-2 !important;
   }
-  &.ixbrl-highlight-missing {
+  &.ixbrl-highlight-missing, &.ixbrl-highlight-missing span {
     background-color: rebeccapurple !important;
   }
 }
-
-span.ixbrl-highlight.ixbrl-element-nonnumeric {
-  background-color: @highlight-2 !important;
-}
-
-.ixbrl-highlight.ixbrl-element-footnote span {
-  background-color: @highlight-1 !important;
-}
-
-span.ixbrl-highlight.ixbrl-element-footnote {
- background-color: @highlight-1 !important;
-}
-
-span.ixbrl-highlight.ixbrl-continuation {
- background-color: @highlight-2 !important;
-}
-
-p.ixbrl-cellblock.ixbrl-highlight span {
-  background-color: @highlight-default !important;
-}
-
-p.ixbrl-cellblock.ixbrl-highlight-1 span {
-  background-color: @highlight-1 !important;
-}
-
-p.ixbrl-cellblock.ixbrl-highlight-2 span {
-  background-color: @highlight-2 !important;
-}
-
-p.ixbrl-cellblock.ixbrl-highlight-missing span {
-  background-color: rebeccapurple !important;
-}
-
 
 div,
 span {

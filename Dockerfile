@@ -13,6 +13,12 @@ RUN npm update --location=global && \
 
 COPY . /build/
 
+COPY package.json /build/
+RUN npm update --location=global && \
+    npm install --include=dev
+
+COPY . /build/
+
 # The following command replaces the version string in package.json
 ARG VERSION=${GIT_TAG:-0.0.0}
 RUN sed -i "s/\"version\": \"0\.0\.0\"/\"version\": \"$VERSION\"/" package.json
@@ -52,10 +58,6 @@ RUN pip install -U pip setuptools && \
 COPY . /build/
 COPY --from=node-build /build/iXBRLViewerPlugin/viewer/dist /build/iXBRLViewerPlugin/viewer/dist
 
-# The following command replaces the version string in setup.py
-ARG VERSION=${GIT_TAG:-0.0.0}
-RUN sed -i "s/version='0\.0\.0'/version='$VERSION'/" setup.py
-
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml
 RUN mkdir /test_reports
@@ -69,4 +71,4 @@ ARG BUILD_ARTIFACTS_AUDIT=/audit/*
 RUN mkdir /audit/
 RUN pip freeze > /audit/pip.lock
 
-FROM scratch
+# FROM scratch

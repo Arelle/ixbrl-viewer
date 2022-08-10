@@ -18,10 +18,12 @@
     "url": "git@github.com:Workiva/ixbrl-viewer.git"
   },
   "stylelint": {
+    "customSyntax": "postcss-less",
     "extends": "stylelint-config-standard",
     "rules": {
       "font-family-no-missing-generic-family-keyword": null,
-      "no-descending-specificity": null
+      "no-descending-specificity": null,
+      "property-no-vendor-prefix": null
     }
   },
   "author": "",
@@ -46,8 +48,9 @@
     "less-loader": "^6.0.0",
     "lunr": "^2.3.8",
     "moment": "^2.24.0",
-    "stylelint": "^13.13.1",
-    "stylelint-config-standard": "^21.0.0",
+    "postcss-less": "^6.0.0",
+    "stylelint": "^14.9.1",
+    "stylelint-config-standard": "^26.0.0",
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.11",
     "webpack-merge": "^4.2.2"

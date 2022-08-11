@@ -1,0 +1,7 @@
+.idea
+.github
+.vscode
+aviary.yaml
+CODEOWNERS
+Dockerfile
+node_modules

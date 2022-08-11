@@ -71,4 +71,4 @@ ARG BUILD_ARTIFACTS_AUDIT=/audit/*
 RUN mkdir /audit/
 RUN pip freeze > /audit/pip.lock
 
-# FROM scratch
+FROM scratch

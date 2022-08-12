@@ -13,10 +13,8 @@ RUN npm update --location=global && \
 
 COPY . /build/
 
-# The following command replaces the version string in setup.py and package.json
-# with the tagged version number from GIT_TAG or `0.0.0` if GIT_TAG is not set
+# The following command replaces the version string in package.json
 ARG VERSION=${GIT_TAG:-0.0.0}
-RUN sed -i "s/version='0\.0\.0'/version='$VERSION'/" setup.py
 RUN sed -i "s/\"version\": \"0\.0\.0\"/\"version\": \"$VERSION\"/" package.json
 
 # lint check .less files
@@ -53,6 +51,10 @@ RUN pip install -U pip setuptools && \
 
 COPY . /build/
 COPY --from=node-build /build/iXBRLViewerPlugin/viewer/dist /build/iXBRLViewerPlugin/viewer/dist
+
+# The following command replaces the version string in setup.py
+ARG VERSION=${GIT_TAG:-0.0.0}
+RUN sed -i "s/version='0\.0\.0'/version='$VERSION'/" setup.py
 
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml

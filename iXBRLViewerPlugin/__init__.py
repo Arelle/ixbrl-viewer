@@ -129,7 +129,7 @@ def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
         cntlr.saveConfig()
     erViewMenu = Menu(cntlr.menubar, tearoff=0)
     viewMenu.add_cascade(label=_("iXBRL Viewer"), menu=erViewMenu, underline=0)
-    cntlr.launchIXBRLViewer = BooleanVar(value=cntlr.config.get("Launch iXBRL Viewer", True))
+    cntlr.launchIXBRLViewer = BooleanVar(value=cntlr.config.get("LaunchIXBRLViewer", True))
     cntlr.launchIXBRLViewer.trace("w", setLaunchIXBRLViewer)
     erViewMenu.add_checkbutton(label=_("Launch viewer on load"), underline=0, variable=cntlr.launchIXBRLViewer, onvalue=True, offvalue=False)
 

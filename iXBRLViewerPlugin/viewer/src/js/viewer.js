@@ -394,9 +394,17 @@ Viewer.prototype.intersect = function(r1, r2) {
 }
 
 Viewer.prototype.isScrollableElement = function (domNode) {
-    const overflow = $(domNode).css('overflow-y');
-    return (domNode.clientHeight > 0 && domNode.clientHeight < domNode.scrollHeight
-        && (overflow == "auto" || overflow == 'scroll'));
+    const overflowy = $(domNode).css('overflow-y');
+    if (domNode.clientHeight > 0 && domNode.clientHeight < domNode.scrollHeight
+        && (overflowy == "auto" || overflowy == 'scroll')) {
+        return true;
+    }
+    const overflowx = $(domNode).css('overflow-x');
+    if (domNode.clientWidth > 0 && domNode.clientWidth < domNode.scrollWidth
+        && (overflowx == "auto" || overflowx == 'scroll')) {
+        return true;
+    }
+    return false;
 }
 
 /*
@@ -426,7 +434,7 @@ Viewer.prototype.isFullyVisible = function (node) {
 Viewer.prototype.showElement = function(e) {
     var ee = e.get(0);
     if (!this.isFullyVisible(ee)) {
-        ee.scrollIntoView({ block: "center" });
+        ee.scrollIntoView({ block: "center", inline: "center" });
     }
 }
 

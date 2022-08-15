@@ -378,50 +378,64 @@ Viewer.prototype.selectPrevTag = function (currentFact) {
     this._selectAdjacentTag(-1, currentFact);
 }
 
+/*
+ * Calculate the intersection of two rectangles
+ */
+Viewer.prototype.intersect = function(r1, r2) {
+    const r3 = {
+        left: Math.max(r1.left, r2.left),
+        top: Math.max(r1.top, r2.top),
+        right: Math.min(r1.right, r2.right),
+        bottom: Math.min(r1.bottom, r2.bottom)
+    };
+    r3.width = r3.right - r3.left;
+    r3.height = r3.bottom - r3.top;
+    return r3;
+}
 
 Viewer.prototype.isScrollableElement = function (domNode) {
-    const overflow = $(domNode).css('overflow-y');
-    return (domNode.clientHeight > 0 && domNode.clientHeight < domNode.scrollHeight 
-        && (overflow == "auto" || overflow == 'scroll' || domNode.nodeName.toUpperCase() == 'HTML'));
+    const overflowy = $(domNode).css('overflow-y');
+    if (domNode.clientHeight > 0 && domNode.clientHeight < domNode.scrollHeight
+        && (overflowy == "auto" || overflowy == 'scroll')) {
+        return true;
+    }
+    const overflowx = $(domNode).css('overflow-x');
+    if (domNode.clientWidth > 0 && domNode.clientWidth < domNode.scrollWidth
+        && (overflowx == "auto" || overflowx == 'scroll')) {
+        return true;
+    }
+    return false;
 }
 
-/* Make the specified element visible by scrolling any scrollable ancestors */
+/*
+ * Determine if the element is fully visible within all scrollable ancestors
+ */
+Viewer.prototype.isFullyVisible = function (node) {
+    var r1 = node.getBoundingClientRect();
+    const r2 = node.getBoundingClientRect();
+    var ancestor = $(node.parentElement);
+    while (!ancestor.is('body')) {
+        if (this.isScrollableElement(ancestor[0])) {
+            r1 = this.intersect(r1, ancestor[0].getBoundingClientRect());
+        }
+        // If the width or height of the intersection is less than the original
+        // element, then it's not fully visible.
+        if (r1.width < r2.width || r1.height < r2.height) {
+            return false;
+        }
+        ancestor = ancestor.parent();
+    } 
+    const de = ancestor.closest("html").get(0);
+    return r1.left > 0 && r1.top > 0 && r1.right < de.clientWidth && r1.bottom < de.clientHeight;
+}
+
+/* If the specified element is not fully visible, scroll it into the center of
+ * the viewport */
 Viewer.prototype.showElement = function(e) {
-    /* offsetTop gives the position relative to the nearest positioned element.
-     * Scrollable elements are not necessarily positioned. */
     var ee = e.get(0);
-    while (ee.offsetParent === null && ee.parentElement !== null) {
-        ee = ee.parentElement;
+    if (!this.isFullyVisible(ee)) {
+        ee.scrollIntoView({ block: "center", inline: "center" });
     }
-    var lastPositionedElement = ee;
-    var currentChild = ee;
-    var childOffset = ee.offsetTop;
-    /* Iterate through ancestors looking for scrollable or positioned element */
-    while (ee.parentElement !== null) {
-        ee = ee.parentElement;
-        if (ee == lastPositionedElement.offsetParent) {
-            /* This is a positioned element.  Add offset to our child's offset */
-            lastPositionedElement = ee;
-            childOffset += ee.offsetTop;
-        }
-        if (this.isScrollableElement(ee)) {
-            /* This is a scrollable element.  Calculate the position of the
-             * child we're trying to show within it. */
-            var childPosition = childOffset - ee.offsetTop;
-            /* Is any part of the child visible? */
-            if (childPosition + currentChild.clientHeight < ee.scrollTop || childPosition > ee.scrollTop + ee.clientHeight) {
-                /* No => center the child within this element */
-                ee.scrollTop = childPosition - ee.clientHeight/2 + currentChild.clientHeight/2;
-            }
-            /* Now make sure that this scrollable element is visible */
-            childOffset = ee.offsetTop;
-            currentChild = ee;
-        }
-    }
-}
-
-Viewer.prototype.showAndSelectElement = function(e) {
-    this.scrollIfNotVisible(e);
 }
 
 Viewer.prototype.clearHighlighting = function () {

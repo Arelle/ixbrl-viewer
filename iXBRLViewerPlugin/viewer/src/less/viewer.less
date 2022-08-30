@@ -47,6 +47,16 @@ span {
   }
 }
 
+span {
+  &.ixbrl-element {
+    display: inline-block;
+
+    & > * {
+      display: flex;
+    }
+  }
+}
+
 .ixbrl-element {
   cursor: pointer;
 }

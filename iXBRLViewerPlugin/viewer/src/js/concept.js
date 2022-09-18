@@ -16,6 +16,8 @@ import $ from 'jquery'
 
 export function Concept(report, name) {
     this._c = report.data.concepts[name];
+    this.report = report
+    this.name = name
 }
 
 /*
@@ -62,4 +64,8 @@ Concept.prototype.isDimension = function () {
 
 Concept.prototype.isEnumeration = function () {
     return Boolean(this._c.e);
+}
+
+Concept.prototype.qname = function() {
+    return this.report.qname(this.name)
 }

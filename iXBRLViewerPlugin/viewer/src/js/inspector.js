@@ -647,7 +647,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             factHTML = $(require('../html/fact-details.html')); 
             $('.std-label', factHTML).text(fact.getLabelOrName("std", true));
             $('.documentation', factHTML).text(fact.getLabel("doc") || "");
-            $('tr.concept td', factHTML).text(fact.conceptName());
+            $('tr.concept td', factHTML).text(fact.conceptName()).attr("title", fact.conceptName());
             $('tr.period td', factHTML)
                 .text(fact.periodString());
             if (fact.isNumeric()) {

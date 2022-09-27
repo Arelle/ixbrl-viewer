@@ -200,10 +200,6 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         node = node.find("*").addBack().filter(function () {
             return (this == node[0] || $(this).css("position") == "absolute");
         });
-
-        //if (absoluteNodes.length > 1) {
-        //    console.log(absoluteNodes);
-        //}
     }
     /* If we use an enclosing table cell as the wrapper, we may have
      * multiple tags in a single element. */

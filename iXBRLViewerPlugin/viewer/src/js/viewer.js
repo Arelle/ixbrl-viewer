@@ -232,10 +232,10 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
 //                         ixbrl-element.  These require separate highlighting.
 //   .ixbrl-no-highlight   a zero-height .ixbrl-element - no highlighting or 
 //                         borders applied
-//   .ixbrl-element-non-fraction,
-//   .ixbrl-element-non-numeric,
+//   .ixbrl-element-nonfraction,
+//   .ixbrl-element-nonnumeric,
 //   .ixbrl-continuation, 
-//   .ixbrl-footnote       
+//   .ixbrl-element-footnote       
 //                         Indicates type of element being wrapped
 //
 // All ixbrl-elements have "ivid" data added, which is a list of the ID
@@ -374,8 +374,7 @@ Viewer.prototype.contents = function() {
 // moving to the next/prev element
 //
 Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
-    // XXX needs review.  Is only used to establish first and last facts in document.
-    const elements = $(".ixbrl-element:not(.ixbrl-continuation)", this.currentDocument().contents());
+    const elements = $(".ixbrl-element-nonfraction, .ixbrl-element-nonnumeric, .ixbrl-element-footnote", this.currentDocument().contents());
     var nextId;
 
     if (currentItem !== null) {
@@ -631,8 +630,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var report = this._report;
     var viewer = this;
     if (on) {
-        // XXX Needs review.
-        $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
+        $(".ixbrl-element-nonfraction, .ixbrl-element-nonnumeric, .ixbrl-element-footnote", this._contents).each(function () {
             var factId = $(this).data('ivid')[0];
             var ixn = viewer._ixNodeMap[factId];
             var elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
@@ -675,7 +673,6 @@ Viewer.prototype.zoomOut = function () {
 Viewer.prototype.factsInSameTable = function (fact) {
     var facts = [];
     const e = this.elementsForItemId(fact.id);
-    // XXX does this de-duplicate?
     e.closest("table").find(".ixbrl-element").each(function () {
         facts = facts.concat($(this).data('ivid'));
     });

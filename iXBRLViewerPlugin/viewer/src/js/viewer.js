@@ -542,6 +542,9 @@ Viewer.prototype.selectElementByClick = function (e) {
     if (e.hasClass('ixbrl-sub-element')) {
         e = e.parents('.ixbrl-element:not(.ixbrl-sub-element)').first();
     }
+    // Now find all iXBRL IDs on all ancestors in document order, making a note
+    // of the first one (sameContentAncestorId) that has exactly the same
+    // content as "e"
     e.parents(".ixbrl-element").addBack().filter(':not(.ixbrl-sub-element)').each(function () { 
         const ids = viewer._ixIdsForElement($(this));
         itemIDList = itemIDList.concat(ids); 

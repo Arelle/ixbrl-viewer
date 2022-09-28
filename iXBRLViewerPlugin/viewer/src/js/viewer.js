@@ -196,6 +196,8 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
     /* Otherwise, insert a <span> as wrapper */
     if (node.length == 0) {
         node = this._wrapNode(domNode);
+        // Create a node set of current node and all absolutely positioned
+        // descendants.
         node = node.find("*").addBack().filter(function () {
             return (this == node[0] || $(this).css("position") == "absolute");
         });

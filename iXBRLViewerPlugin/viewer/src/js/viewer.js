@@ -31,7 +31,6 @@ export function Viewer(iv, iframes, report) {
     this._docOrderIDIndex = [];
 }
 
-
 Viewer.prototype.initialize = function() {
     return new Promise((resolve, reject) => {
         var viewer = this;
@@ -202,11 +201,13 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         });
     }
     node.each(function (i) {
-        $(this).addClass("ixbrl-element")
         if (this.getBoundingClientRect().height == 0) {
             $(this).addClass("ixbrl-no-highlight"); 
         }
-        if (i > 0) {
+        if (i == 0) {
+            $(this).addClass("ixbrl-element")
+        }
+        else {
             $(this).addClass("ixbrl-sub-element"); 
         }
     });
@@ -214,27 +215,24 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
 }
 
 
-// Adds the specified ID to the "ivid" data list on each element in the
-// provided jQuery node set
-Viewer.prototype._addIdToNodes = function(nodes, id) {
-    /* If we use an enclosing table cell as the wrapper, we may have
-     * multiple tags in a single element. */
-    nodes.each(function (i) {
-        const ivids = $(this).data('ivid') || [];
-        ivids.push(id);
-        $(this).data('ivid', ivids);
-    })
+// Adds the specified ID to the "ivid" data list on the given node
+Viewer.prototype._addIdToNode = function(node, id) {
+    const ivids = node.data('ivid') || [];
+    ivids.push(id);
+    node.data('ivid', ivids);
 }
 
 //
 // Traverse the DOM hierarchy to find IX elements, and build maps and add
 // wrapper nodes and classes.
 //
-// Classes:
-//
+// Primary classes, one of:
 //   .ixbrl-element        a wrapper for any ix: fact, footnote, or continuation
 //   .ixbrl-sub-element    an absolutely positioned element within an
 //                         ixbrl-element.  These require separate highlighting.
+//   .ixbrl-element-hidden an ix: element inside ix:hidden
+//
+// Additional classes:
 //   .ixbrl-no-highlight   a zero-height .ixbrl-element - no highlighting or 
 //                         borders applied
 //   .ixbrl-element-nonfraction,
@@ -274,7 +272,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         } else {
             nodes = this._findOrCreateWrapperNode(n);
         }
-        this._addIdToNodes(nodes, id);
+        this._addIdToNode(nodes.first(), id);
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */
         var ixn = this._ixNodeMap[id];
@@ -287,6 +285,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         }
         if (inHidden) {
             ixn.isHidden = true;
+            nodes.addClass("ixbrl-element-hidden");
         }
         if (n.getAttribute("continuedAt")) {
             this._continuedAtMap[id] = { 
@@ -296,6 +295,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         }
         if (name == 'CONTINUATION') {
             $(nodes).addClass("ixbrl-continuation");
+            ixn.isContinuation = true;
         }
         else {
             this._docOrderIDIndex.push(id);
@@ -380,7 +380,7 @@ Viewer.prototype.contents = function() {
 // moving to the next/prev element
 //
 Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
-    const elements = $(".ixbrl-element-nonfraction, .ixbrl-element-nonnumeric, .ixbrl-element-footnote", this.currentDocument().contents());
+    const elements = $(".ixbrl-element, .ixbrl-element-hidden", this.currentDocument().contents());
     var nextId;
 
     if (currentItem !== null) {
@@ -494,7 +494,7 @@ Viewer.prototype.showElement = function(e) {
 }
 
 Viewer.prototype.clearHighlighting = function () {
-    $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    $("body", this._iframes.contents()).find(".ixbrl-element, .ixbrl-sub-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
 }
 
 Viewer.prototype._ixIdsForElement = function (e) {
@@ -541,28 +541,31 @@ Viewer.prototype.selectElementByClick = function (e) {
     var itemIDList = [];
     var viewer = this;
     var sameContentAncestorId;
-    // If the user clicked on a sub-element, treat as if we clicked the first
-    // non-sub-element ancestor in the DOM hierarchy - which would typically be
+    // If the user clicked on a sub-element (and which is not also a proper
+    // ixbrl-element) treat as if we clicked the first non-sub-element
+    // ancestor in the DOM hierarchy - which would typically be
     // the corresponding ixbrl-element (or one of the corresponding
     // ixbrl-elements, in the case of nested tags)
     // This is important in order to guarantee that sameContentAncestorId gets
     // assigned below.
     // We can't just ignore clicks on sub elements altogether because they are
     // likely to be rendered outside the "enclosing" ixbrl-element.
-    if (e.hasClass('ixbrl-sub-element')) {
-        e = e.parents('.ixbrl-element:not(.ixbrl-sub-element)').first();
+    if (!e.hasClass(".ixbrl-element")) {
+        e = e.closest(".ixbrl-element");
     }
     // Now find all iXBRL IDs on all ancestors in document order, making a note
     // of the first one (sameContentAncestorId) that has exactly the same
     // content as "e"
-    e.parents(".ixbrl-element").addBack().filter(':not(.ixbrl-sub-element)').each(function () { 
+    e.parents(".ixbrl-element").addBack().each(function () { 
         const ids = viewer._ixIdsForElement($(this));
         itemIDList = itemIDList.concat(ids); 
         if ($(this).text() == e.text() && sameContentAncestorId === undefined) {
             sameContentAncestorId = ids[0];
         }
     });
-    this.selectElement(sameContentAncestorId, itemIDList);
+    // Uniquify IDs, maintain order, remove duplicates.
+    const uniqueItemIDList = itemIDList.filter((item, pos, arr) => arr.indexOf(item) == pos );
+    this.selectElement(sameContentAncestorId, uniqueItemIDList);
 }
 
 Viewer.prototype._mouseEnter = function (e) {
@@ -644,22 +647,24 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var report = this._report;
     var viewer = this;
     if (on) {
-        $(".ixbrl-element-nonfraction, .ixbrl-element-nonnumeric, .ixbrl-element-footnote", this._contents).each(function () {
-            var factId = $(this).data('ivid')[0];
-            var ixn = viewer._ixNodeMap[factId];
-            var elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
-            elements.addClass("ixbrl-highlight");
+        $(".ixbrl-element", this._contents).each(function () {
+            const factId = $(this).data('ivid')[0];
+            const ixn = viewer._ixNodeMap[factId];
+            if (!ixn.isContinuation) {
+                const elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
+                elements.addClass("ixbrl-highlight");
 
-            if (!ixn.footnote) {
-                var i = groups[report.getItemById(factId).conceptQName().prefix];
-                if (i !== undefined) {
-                    elements.addClass("ixbrl-highlight-" + i);
+                if (!ixn.footnote && !ixn.isContinuation) {
+                    const i = groups[report.getItemById(factId).conceptQName().prefix];
+                    if (i !== undefined) {
+                        elements.addClass("ixbrl-highlight-" + i);
+                    }
                 }
             }
         });
     }
     else {
-        $(".ixbrl-element", this._contents).removeClass (function (i, className) {
+        $(".ixbrl-element, .ixbrl-sub-element", this._contents).removeClass (function (i, className) {
             return (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ');
         });
     }

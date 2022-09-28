@@ -37,14 +37,18 @@ span {
       outline-offset: 1px;
     }
 
-    &.ixbrl-element:hover:not(.ixbrl-selected) {
-      outline: dashed 2px @primary-focus;
-      outline-offset: 1px;
+    &.ixbrl-element,
+    &.ixbrl-sub-element {
+      &:hover:not(.ixbrl-selected) {
+        outline: dashed 2px @primary-focus;
+        outline-offset: 1px;
+      }
     }
   }
 }
 
-.ixbrl-element:not(.ixbrl-no-highlight) {
+.ixbrl-element:not(.ixbrl-no-highlight),
+.ixbrl-sub-element:not(.ixbrl-no-highlight) {
   cursor: pointer;
 
   &.ixbrl-related {
@@ -60,7 +64,8 @@ th {
     outline-offset: -1px !important;
   }
 
-  &.ixbrl-element:hover:not(.ixbrl-selected) {
+  &.ixbrl-element:hover:not(.ixbrl-selected),
+  &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
     outline: dashed 2px @primary-focus !important;
     outline-offset: -1px !important;
   }

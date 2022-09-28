@@ -31,6 +31,7 @@ export function IXNode(id, wrapperNodes, docIndex) {
     this.continuations = [];
     this.docIndex = docIndex;
     this.footnote = false;
+    this.isContinuation = false;
     this.id = id;
     this.isHidden = false;
     this.htmlHidden = false;

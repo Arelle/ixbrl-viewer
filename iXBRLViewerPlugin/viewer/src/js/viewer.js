@@ -533,7 +533,10 @@ Viewer.prototype.selectElementByClick = function (e) {
     var sameContentAncestorId;
     // If the user clicked on a sub-element, treat as if we clicked the first
     // non-sub-element ancestor in the DOM hierarchy - which would typically be
-    // the corresponding ixbrl-element.
+    // the corresponding ixbrl-element (or one of the corresponding
+    // ixbrl-elements, in the case of nested tags)
+    // This is important in order to guarantee that sameContentAncestorId gets
+    // assigned below.
     if (e.hasClass('ixbrl-sub-element')) {
         e = e.parents('.ixbrl-element:not(.ixbrl-sub-element)').first();
     }

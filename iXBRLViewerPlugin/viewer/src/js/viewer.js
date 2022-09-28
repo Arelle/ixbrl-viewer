@@ -565,9 +565,7 @@ Viewer.prototype.selectElementByClick = function (e) {
             sameContentAncestorId = ids[0];
         }
     });
-    // Uniquify IDs, maintain order, remove duplicates.
-    const uniqueItemIDList = itemIDList.filter((item, pos, arr) => arr.indexOf(item) == pos );
-    this.selectElement(sameContentAncestorId, uniqueItemIDList);
+    this.selectElement(sameContentAncestorId, itemIDList);
 }
 
 Viewer.prototype._mouseEnter = function (e) {

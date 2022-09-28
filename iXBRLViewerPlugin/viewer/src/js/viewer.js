@@ -181,28 +181,28 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
     const v = this;
     /* Is the element the only significant content within a <td> or <th> ? If
      * so, use that as the wrapper element. */
-    var node = $(domNode).closest("td,th").eq(0);
+    var nodes = $(domNode).closest("td,th").eq(0);
     const innerText = $(domNode).text();
-    if (node.length == 1 && innerText.length > 0) {
+    if (nodes.length == 1 && innerText.length > 0) {
         // Use indexOf rather than a single regex because innerText may
         // be too long for the regex engine 
-        const outerText = $(node).text();
+        const outerText = $(nodes).text();
         const start = outerText.indexOf(innerText);
         const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
         if (/[0-9A-Za-z]/.test(wrapper)) {
-            node = $();
+            nodes = $();
         } 
     }
     /* Otherwise, insert a <span> as wrapper */
-    if (node.length == 0) {
-        node = this._wrapNode(domNode);
+    if (nodes.length == 0) {
+        nodes = this._wrapNode(domNode);
         // Create a node set of current node and all absolutely positioned
         // descendants.
-        node = node.find("*").addBack().filter(function () {
-            return (this == node[0] || $(this).css("position") == "absolute");
+        nodes = nodes.find("*").addBack().filter(function () {
+            return (this == nodes[0] || $(this).css("position") == "absolute");
         });
     }
-    node.each(function (i) {
+    nodes.each(function (i) {
         if (this.getBoundingClientRect().height == 0) {
             $(this).addClass("ixbrl-no-highlight"); 
         }
@@ -213,7 +213,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
             $(this).addClass("ixbrl-sub-element"); 
         }
     });
-    return node;
+    return nodes;
 }
 
 

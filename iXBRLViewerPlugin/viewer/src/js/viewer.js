@@ -537,6 +537,8 @@ Viewer.prototype.selectElementByClick = function (e) {
     // ixbrl-elements, in the case of nested tags)
     // This is important in order to guarantee that sameContentAncestorId gets
     // assigned below.
+    // We can't just ignore clicks on sub elements altogether because they are
+    // likely to be rendered outside the "enclosing" ixbrl-element.
     if (e.hasClass('ixbrl-sub-element')) {
         e = e.parents('.ixbrl-element:not(.ixbrl-sub-element)').first();
     }

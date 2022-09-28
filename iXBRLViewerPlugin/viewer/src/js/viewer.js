@@ -201,12 +201,8 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
             return (this == node[0] || $(this).css("position") == "absolute");
         });
     }
-    /* If we use an enclosing table cell as the wrapper, we may have
-     * multiple tags in a single element. */
     node.each(function (i) {
-        var ivids = $(this).data('ivid') || [];
-        ivids.push(domNode.getAttribute("id"));
-        $(this).addClass("ixbrl-element").data('ivid', ivids);
+        $(this).addClass("ixbrl-element")
         if (this.getBoundingClientRect().height == 0) {
             $(this).addClass("ixbrl-no-highlight"); 
         }
@@ -215,6 +211,19 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         }
     });
     return node;
+}
+
+
+// Adds the specified ID to the "ivid" data list on each element in the
+// provided jQuery node set
+Viewer.prototype._addIdToNodes = function(nodes, id) {
+    /* If we use an enclosing table cell as the wrapper, we may have
+     * multiple tags in a single element. */
+    nodes.each(function (i) {
+        const ivids = $(this).data('ivid') || [];
+        ivids.push(id);
+        $(this).data('ivid', ivids);
+    })
 }
 
 //
@@ -265,6 +274,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
         } else {
             nodes = this._findOrCreateWrapperNode(n);
         }
+        this._addIdToNodes(nodes, id);
         /* We may have already created an IXNode for this ID from a -sec-ix-hidden
          * element */
         var ixn = this._ixNodeMap[id];

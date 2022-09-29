@@ -649,6 +649,8 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     if (on) {
         $(".ixbrl-element", this._contents).each(function () {
             // Find the first ixn for this element that isn't a continuation.
+            // Choosint the first means that we're arbitrarily choosing a highlight
+            // color for an element that is double tagged in a table cell.
             const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.isContinuation)[0];
             if (ixn != undefined) {
                 const elements = viewer.elementsForItemIds([ixn.id].concat(ixn.continuationIds()));

@@ -648,14 +648,14 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var viewer = this;
     if (on) {
         $(".ixbrl-element", this._contents).each(function () {
-            const factId = $(this).data('ivid')[0];
-            const ixn = viewer._ixNodeMap[factId];
-            if (!ixn.isContinuation) {
-                const elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
+            // Find the first ixn for this element that isn't a continuation.
+            const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.isContinuation)[0];
+            if (ixn != undefined) {
+                const elements = viewer.elementsForItemIds([ixn.id].concat(ixn.continuationIds()));
                 elements.addClass("ixbrl-highlight");
 
-                if (!ixn.footnote && !ixn.isContinuation) {
-                    const i = groups[report.getItemById(factId).conceptQName().prefix];
+                if (!ixn.footnote) {
+                    const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
                     if (i !== undefined) {
                         elements.addClass("ixbrl-highlight-" + i);
                     }

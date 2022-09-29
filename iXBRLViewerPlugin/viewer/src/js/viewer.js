@@ -647,23 +647,22 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var report = this._report;
     var viewer = this;
     if (on) {
-        $(".ixbrl-element", this._contents).each(function () {
-            // Find the first ixn for this element that isn't a continuation.
-            // Choosint the first means that we're arbitrarily choosing a highlight
-            // color for an element that is double tagged in a table cell.
-            const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.isContinuation)[0];
-            if (ixn != undefined) {
-                const elements = viewer.elementsForItemIds([ixn.id].concat(ixn.continuationIds()));
-                elements.addClass("ixbrl-highlight");
-
-                if (!ixn.footnote) {
+        $(".ixbrl-element", this._contents)
+            .addClass("ixbrl-highlight")
+            .each(function () {
+                // Find the first ixn for this element that isn't a continuation or footnote.
+                // Choosing the first means that we're arbitrarily choosing a highlight
+                // color for an element that is double tagged in a table cell.
+                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.isContinuation && !ixn.footnote)[0];
+                if (ixn != undefined) {
+                    const elements = viewer.elementsForItemIds([ixn.id].concat(ixn.continuationIds()));
                     const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
                     if (i !== undefined) {
                         elements.addClass("ixbrl-highlight-" + i);
                     }
                 }
-            }
         });
+        $(".ixbrl-sub-element", this._contents).addClass("ixbrl-highlight");
     }
     else {
         $(".ixbrl-element, .ixbrl-sub-element", this._contents).removeClass (function (i, className) {

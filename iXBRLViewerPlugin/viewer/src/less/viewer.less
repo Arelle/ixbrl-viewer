@@ -17,12 +17,7 @@
 @import "common.less";
 @import (reference) "icons.less";
 
-.iv-ixbrl-fact {
-  background-color: yellow;
-  cursor: pointer;
-}
-
-.ixbrl-highlight {
+.ixbrl-highlight:not(.ixbrl-no-highlight) {
   background-color: @highlight-default !important;
 
   &.ixbrl-highlight-1 {
@@ -36,34 +31,41 @@
 
 div,
 span {
-  &.ixbrl-selected {
-    outline: solid 2px @primary-focus;
-    outline-offset: 1px;
-  }
+  &:not(.ixbrl-no-highlight) {
+    &.ixbrl-selected {
+      outline: solid 2px @primary-focus;
+      outline-offset: 1px;
+    }
 
-  &.ixbrl-element:hover:not(.ixbrl-selected) {
-    outline: dashed 2px @primary-focus;
-    outline-offset: 1px;
+    &.ixbrl-element,
+    &.ixbrl-sub-element {
+      &:hover:not(.ixbrl-selected) {
+        outline: dashed 2px @primary-focus;
+        outline-offset: 1px;
+      }
+    }
   }
 }
 
-.ixbrl-element {
+.ixbrl-element:not(.ixbrl-no-highlight),
+.ixbrl-sub-element:not(.ixbrl-no-highlight) {
   cursor: pointer;
-}
 
-.ixbrl-related {
-  outline: dashed 2px @related-fact;
-  outline-offset: 1px;
+  &.ixbrl-related {
+    outline: dashed 2px @related-fact;
+    outline-offset: 1px;
+  }
 }
 
 td,
 th {
-  &.ixbrl-selected {
+  &.ixbrl-selected:not(.ixbrl-no-highlight) {
     outline: solid 2px @primary-focus !important;
     outline-offset: -1px !important;
   }
 
-  &.ixbrl-element:hover:not(.ixbrl-selected) {
+  &.ixbrl-element:hover:not(.ixbrl-selected),
+  &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
     outline: dashed 2px @primary-focus !important;
     outline-offset: -1px !important;
   }

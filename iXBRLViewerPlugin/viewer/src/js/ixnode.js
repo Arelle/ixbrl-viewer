@@ -18,19 +18,20 @@
  * May correspond to either a nonNumeric/nonFraction element, or a continuation
  * element.
  * 
- * The wrapperNode property is a jQuery object for the "containing" element
- * which will either be an inserted div or span wrapper, or the nearest
- * enclosing td or th.
+ * The wrapperNodes property is a jQuery object for the "containing" elements
+ * which will be a node list containng an inserted div or span wrapper, any
+ * absolutely positioned elements or the nearest enclosing td or th.
  */
 
 var docOrderindex = 0;
 
-export function IXNode(id, wrapperNode, docIndex) {
-    this.wrapperNode = wrapperNode;
+export function IXNode(id, wrapperNodes, docIndex) {
+    this.wrapperNodes = wrapperNodes;
     this.escaped = false;
     this.continuations = [];
     this.docIndex = docIndex;
     this.footnote = false;
+    this.isContinuation = false;
     this.id = id;
     this.isHidden = false;
     this.htmlHidden = false;
@@ -41,8 +42,10 @@ IXNode.prototype.continuationIds = function () {
     return this.continuations.map(n => n.id);
 }
 
-IXNode.prototype.textContent = function () {
+IXNode.prototype.textContent = function () { 
     return [this].concat(this.continuations)
-        .map(n => n.wrapperNode.text())
+        // The first wrapperNode is always the wrapper for the actual IX node,
+        // so will give the full text content.
+        .map(n => n.wrapperNodes.first().text())
         .join(" ");
 }

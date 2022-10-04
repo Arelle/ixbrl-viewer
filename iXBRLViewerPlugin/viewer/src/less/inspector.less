@@ -708,6 +708,28 @@
       }
     }
 
+    .concept td > div {
+      display: flex;
+
+      span.text {
+        white-space: nowrap;
+        position: relative;
+        flex-shrink: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      span.filler {
+        width: 0.7rem;
+        display: inline-block;
+        flex-shrink: 1000;
+      }
+
+      span.copy-icon {
+        flex-shrink: 0;
+      }
+    }
+
     .documentation {
       margin-top: 10px;
       margin-left: 30px;
@@ -952,5 +974,21 @@
 
   .popup-content {
     display: none;
+  }
+
+  .copy-icon {
+    color: @primary;
+    border-radius: 0.3rem;
+
+    &:active {
+      background-color: @primary;
+      color: #fff;
+    }
+
+    &::before {
+      .icon-clipboard();
+
+      cursor: pointer;
+    }
   }
 }

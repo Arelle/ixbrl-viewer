@@ -96,6 +96,10 @@ describe("formatNumber", () => {
     test("Format number, add some decimals", () => {
         expect(formatNumber(12345678,4)).toBe("12,345,678.0000")
     });
+
+    test("Format number, add some decimals", () => {
+        expect(formatNumber("10000000000.00000003",undefined)).toBe("10,000,000,000.00000003")
+    });
 });
 
 describe("wrapLabel", () => {

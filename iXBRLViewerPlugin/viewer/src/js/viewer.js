@@ -27,7 +27,7 @@ export function Viewer(iv, iframes, report) {
     this.onMouseLeave = $.Callbacks();
 
     this._ixNodeMap = {};
-    this._continuedAtMap = {};
+    this._continuationMap = {};
     this._docOrderIDIndex = [];
 }
 
@@ -69,17 +69,17 @@ function localName(e) {
 }
 
 Viewer.prototype._buildContinuationMap = function() {
-    var continuations = Object.keys(this._continuedAtMap)
+    var continuations = Object.keys(this._continuationMap)
     for (var i = 0; i < continuations.length; i++) {
         var id = continuations[i];
-        if (this._continuedAtMap[id].isFact) {
+        if (this._continuationMap[id].isHead) {
             var parts = [];
             var nextId = id;
-            while (this._continuedAtMap[nextId].continuedAt !== undefined) {
-                nextId = this._continuedAtMap[nextId].continuedAt;
+            while (this._continuationMap[nextId].continuedAt !== undefined) {
+                nextId = this._continuationMap[nextId].continuedAt;
                 if (this._ixNodeMap[nextId] !== undefined) {
-                    this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
-                    this._continuedAtMap[nextId].continuationOf = id;
+                    this._continuationMap[nextId] = this._continuationMap[nextId] || {};
+                    this._continuationMap[nextId].continuationOf = id;
                     parts.push(this._ixNodeMap[nextId]);
                 }
                 else {
@@ -88,6 +88,29 @@ Viewer.prototype._buildContinuationMap = function() {
                 }
             }
             this._ixNodeMap[id].continuations = parts;
+        }
+    }
+    // The document may contain ix:continuations for facts or footnotes that
+    // are not in the default target document, which we need to ignore.
+    // We can't ignore these up-front, because ix:continuation doesn't have a
+    // target attribute - we need to first resolve the continuation chain.
+    // This strips all continuation elements in the map that we haven't found
+    // the head item for.
+    for (const [id, item] of Object.entries(this._continuationMap)) {
+        if (!item.isHead && item.continuationOf === undefined) {
+            const node = this._ixNodeMap[id].wrapperNodes.first();
+            const ivids = node.data('ivid').filter(item => item != id);
+            node.data('ivid', ivids);
+            if (ivids.length == 0) {
+                node.removeClass("ixbrl-continuation").removeClass("ixbrl-element");
+                // Remove the ixbrl-sub-element class from any sub elements
+                // that no longer have a ixbrl-element ancestor.
+                node.find(".ixbrl-sub-element").each(function () {
+                    if ($(this).parents().filter('.ixbrl-element').length == 0) {
+                        $(this).removeClass("ixbrl-sub-element").removeClass("ixbrl-continuation");
+                    }
+                });
+            }
         }
     }
 }
@@ -253,11 +276,13 @@ Viewer.prototype._addIdToNode = function(node, id) {
 // Viewer._docOrderIDIndex is a list of fact and footnote IDs in document
 // order, used to power next/prev tag.  continuations are excluded.
 //
-// Viewer._continuedAtMap is a map of IDs to objects containing:
+// Viewer._continuationMap is a map of IDs to objects containing:
 //     continuedAt - ID of next element in continuation chain
-//     isFact - whether the item is the first in the chain
+//     isHead - whether the item is the first in the chain
 //     continuationOf (added later) - ID of first element in chain (fact or
 //     footnote)
+// Contains an entry for every item with a continuedAt attribute, and every
+// ix:continuation.
 //
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     const name = localName(n.nodeName).toUpperCase();
@@ -289,10 +314,13 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             ixn.isHidden = true;
             nodes.addClass("ixbrl-element-hidden");
         }
-        if (n.getAttribute("continuedAt")) {
-            this._continuedAtMap[id] = { 
-                "isFact": name != 'CONTINUATION',
-                "continuedAt": n.getAttribute("continuedAt")
+        const continuedAt = n.getAttribute("continuedAt");
+        if (continuedAt !== null || name == 'CONTINUATION') {
+            this._continuationMap[id] = { 
+                "isHead": name != 'CONTINUATION',
+            }
+            if (continuedAt !== null) {
+                this._continuationMap[id].continuedAt = continuedAt;
             }
         }
         if (name == 'CONTINUATION') {
@@ -506,7 +534,7 @@ Viewer.prototype._ixIdsForElement = function (e) {
         /* If any of the ids are continuations, replace them with the IDs of
          * their underlying facts */
         for (var i = 0; i < ids.length; i++) {
-            const cof = this._continuedAtMap[ids[i]];
+            const cof = this._continuationMap[ids[i]];
             if (cof !== undefined) {
                 ids[i] = cof.continuationOf;
             }

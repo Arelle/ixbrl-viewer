@@ -232,7 +232,7 @@ IXBRLChart.prototype._showAnalyseDimensionChart = function() {
 
 IXBRLChart.prototype.setChartSize = function () {
     var c = this.node;
-    var nh = c.height() - $('.other-aspects').height() - 16;
+    var nh = c.height() - $('.other-aspects', this.node).outerHeight() - 16;
     $('.chart-container',c).height(nh);
     $('canvas',c).attr('height',nh).height(nh);
 

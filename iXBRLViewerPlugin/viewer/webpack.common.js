@@ -41,7 +41,7 @@ module.exports = {
                         loader: "less-loader",
                         options: {
                             lessOptions: {
-                                math: "parens"
+                                math: "parens-division"
                             }
                         }
                     }]

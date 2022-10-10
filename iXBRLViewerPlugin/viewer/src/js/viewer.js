@@ -16,6 +16,7 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
 import { IXNode } from './ixnode.js';
+import { setDefault } from './util.js';
 
 export function Viewer(iv, iframes, report) {
     this._iv = iv;
@@ -36,6 +37,7 @@ Viewer.prototype.initialize = function() {
         var viewer = this;
         viewer._iframes.each(function (docIndex) { 
             $(this).data("selected", docIndex == 0);
+            viewer._preProcessiXBRL1($(this).contents().find("body"), docIndex);
             viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
         });
 
@@ -47,7 +49,7 @@ Viewer.prototype.initialize = function() {
         })()
             .then(() => viewer._iv.setProgress("Preparing document") )
             .then(() => {
-                this._buildContinuationMap();
+                //this._buildContinuationMap();
                 this._report.setIXNodeMap(this._ixNodeMap);
                 this._applyStyles();
                 this._bindHandlers();
@@ -247,6 +249,38 @@ Viewer.prototype._addIdToNode = function(node, id) {
     node.data('ivid', ivids);
 }
 
+Viewer.prototype._preProcessiXBRL1 = function(body, docIndex, inHidden) {
+    // map of next item in continuation chain
+    const nextContinuationMap = {};
+    // map of items in default target document to all their continuations
+    const itemContinuationMap = {};
+    body.find('*').each(function () {
+        const name = localName(this.nodeName).toUpperCase();
+        if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
+            const continuedAtId = this.getAttribute("continuedAt");
+            if (continuedAtId !== null) {
+                nextContinuationMap[this.getAttribute('id')] = continuedAtId;
+            }
+            if (name != 'CONTINUATION' && this.getAttribute('target') === null) {
+                itemContinuationMap[this.getAttribute('id')] = [];
+            }
+        }
+    });
+
+    // Map of continuation IDs to list of (default target doc) items that
+    // they're continuations of
+    this.continuationOfMap = {};
+    for (const [itemId, itemContinuations] of Object.entries(itemContinuationMap)) {
+        var id = itemId;
+        while (nextContinuationMap[id] !== undefined) {
+            id = nextContinuationMap[id];
+            itemContinuations.push(id);
+            setDefault(this.continuationOfMap, id, []).push(itemId)
+        }
+    }
+    this.itemContinuationMap = itemContinuationMap;
+}
+
 //
 // Traverse the DOM hierarchy to find IX elements, and build maps and add
 // wrapper nodes and classes.
@@ -287,87 +321,85 @@ Viewer.prototype._addIdToNode = function(node, id) {
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     const name = localName(n.nodeName).toUpperCase();
     const isFootnote = (name == 'FOOTNOTE');
-    // Ignore iXBRL elements that are not in the default target document, as
-    // the viewer builder does not handle these, and does not ensure that they
-    // have ID attributes.
-    if (n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)
-        && !n.hasAttribute("target")) {
-        var nodes;
+    const isContinuation = (name == 'CONTINUATION');
+    const isFact = (name == 'NONNUMERIC' || name == 'NONFRACTION');
+    if (n.nodeType == 1) {
+        // Ignore iXBRL elements that are not in the default target document, as
+        // the viewer builder does not handle these, and does not ensure that they
+        // have ID attributes.
         const id = n.getAttribute("id");
-        if (inHidden) {
-            nodes = $(n);
-        } else {
-            nodes = this._findOrCreateWrapperNode(n);
-        }
-        this._addIdToNode(nodes.first(), id);
-        /* We may have already created an IXNode for this ID from a -sec-ix-hidden
-         * element */
-        var ixn = this._ixNodeMap[id];
-        if (!ixn) {
-            ixn = new IXNode(id, nodes, docIndex);
-            this._ixNodeMap[id] = ixn;
-        }
-        if (nodes.is(':hidden')) {
-            ixn.htmlHidden = true;
-        }
-        if (inHidden) {
-            ixn.isHidden = true;
-            nodes.addClass("ixbrl-element-hidden");
-        }
-        const continuedAt = n.getAttribute("continuedAt");
-        if (continuedAt !== null || name == 'CONTINUATION') {
-            this._continuationMap[id] = { 
-                "isHead": name != 'CONTINUATION',
+        if (((isFact || isFootnote) && !n.hasAttribute("target"))
+            || (isContinuation && this.continuationOfMap[id] !== undefined)) {
+            var nodes;
+            if (inHidden) {
+                nodes = $(n);
+            } else {
+                nodes = this._findOrCreateWrapperNode(n);
             }
-            if (continuedAt !== null) {
-                this._continuationMap[id].continuedAt = continuedAt;
-            }
-        }
-        if (name == 'CONTINUATION') {
-            $(nodes).addClass("ixbrl-continuation");
-            ixn.isContinuation = true;
-        }
-        else {
-            this._docOrderIDIndex.push(id);
-        }
-        if (name == 'NONFRACTION') {
-            $(nodes).addClass("ixbrl-element-nonfraction");
-        }
-        if (name == 'NONNUMERIC') {
-            $(nodes).addClass("ixbrl-element-nonnumeric");
-            if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-                ixn.escaped = true;
-            }
-        }
-        if (isFootnote) {
-            $(nodes).addClass("ixbrl-element-footnote");
-            ixn.footnote = true;
-        }
-    }
-    else if(n.nodeType == 1 && name == 'HIDDEN') {
-        inHidden = true;
-    }
-    else if(n.nodeType == 1) {
-        // Handle SEC/ESEF links-to-hidden
-        const id = this._getIXHiddenLinkStyle(n);
-        if (id !== null) {
-            nodes = $(n);
-            nodes.addClass("ixbrl-element").data('ivid', [id]);
-            this._docOrderIDIndex.push(id);
-            /* We may have already seen the corresponding ix element in the hidden
-             * section */
+
+            // For a continuation, store the IX ID of the item, not the continuation
+            const headId = isContinuation ? this.continuationOfMap[id] : id;
+            this._addIdToNode(nodes.first(), headId);
+            // We may have already created an IXNode for this ID from a -sec-ix-hidden
+            // element 
             var ixn = this._ixNodeMap[id];
-            if (ixn) {
-                /* ... if so, update the node and docIndex so we can navigate to it */
-                ixn.wrapperNodes = nodes;
-                ixn.docIndex = docIndex;
+            if (!ixn) {
+                ixn = new IXNode(id, nodes, docIndex);
+                this._ixNodeMap[id] = ixn;
+            }
+            if (nodes.is(':hidden')) {
+                ixn.htmlHidden = true;
+            }
+            if (inHidden) {
+                ixn.isHidden = true;
+                nodes.addClass("ixbrl-element-hidden");
+            }
+            if (isContinuation) {
+                $(nodes).addClass("ixbrl-continuation");
+                ixn.isContinuation = true;
             }
             else {
-                this._ixNodeMap[id] = new IXNode(id, nodes, docIndex);
+                this._docOrderIDIndex.push(id);
+            }
+            if (name == 'NONFRACTION') {
+                $(nodes).addClass("ixbrl-element-nonfraction");
+            }
+            if (name == 'NONNUMERIC') {
+                $(nodes).addClass("ixbrl-element-nonnumeric");
+                if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
+                    ixn.escaped = true;
+                }
+            }
+            if (isFootnote) {
+                $(nodes).addClass("ixbrl-element-footnote");
+                ixn.footnote = true;
             }
         }
-        if (name == 'A') {
-            this._updateLink(n);
+        else if(name == 'HIDDEN') {
+            inHidden = true;
+        }
+        else {
+            // Handle SEC/ESEF links-to-hidden
+            const id = this._getIXHiddenLinkStyle(n);
+            if (id !== null) {
+                nodes = $(n);
+                nodes.addClass("ixbrl-element").data('ivid', [id]);
+                this._docOrderIDIndex.push(id);
+                /* We may have already seen the corresponding ix element in the hidden
+                 * section */
+                var ixn = this._ixNodeMap[id];
+                if (ixn) {
+                    /* ... if so, update the node and docIndex so we can navigate to it */
+                    ixn.wrapperNodes = nodes;
+                    ixn.docIndex = docIndex;
+                }
+                else {
+                    this._ixNodeMap[id] = new IXNode(id, nodes, docIndex);
+                }
+            }
+            if (name == 'A') {
+                this._updateLink(n);
+            }
         }
     }
     this._preProcessChildNodes(n, docIndex, inHidden);
@@ -528,19 +560,7 @@ Viewer.prototype.clearHighlighting = function () {
 }
 
 Viewer.prototype._ixIdsForElement = function (e) {
-    var ids = e.data('ivid');
-    if (e.hasClass("ixbrl-continuation")) {
-        ids = [...ids];
-        /* If any of the ids are continuations, replace them with the IDs of
-         * their underlying facts */
-        for (var i = 0; i < ids.length; i++) {
-            const cof = this._continuationMap[ids[i]];
-            if (cof !== undefined) {
-                ids[i] = cof.continuationOf;
-            }
-        }
-    }
-    return ids;
+    return e.data('ivid');
 }
 
 /*
@@ -638,8 +658,8 @@ Viewer.prototype.elementsForItemIds = function (ids) {
  * Add or remove a class to an item (fact or footnote) and any continuation elements
  */
 Viewer.prototype.changeItemClass = function(itemId, highlightClass, removeClass) {
-    const continuations = this._ixNodeMap[itemId].continuationIds();
-    const elements = this.elementsForItemIds([itemId].concat(continuations));
+    const ixn = this._ixNodeMap[itemId];
+    const elements = this.elementsForItemIds(ixn.chainIXIds());
     if (removeClass) {
         elements.removeClass(highlightClass);
     }
@@ -683,7 +703,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
                 // color for an element that is double tagged in a table cell.
                 const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.isContinuation && !ixn.footnote)[0];
                 if (ixn != undefined) {
-                    const elements = viewer.elementsForItemIds([ixn.id].concat(ixn.continuationIds()));
+                    const elements = viewer.elementsForItemIds(ixn.chainIXIds());
                     const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
                     if (i !== undefined) {
                         elements.addClass("ixbrl-highlight-" + i);

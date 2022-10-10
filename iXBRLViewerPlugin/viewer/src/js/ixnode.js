@@ -42,6 +42,12 @@ IXNode.prototype.continuationIds = function () {
     return this.continuations.map(n => n.id);
 }
 
+// Return IX IDs for all IX elements in the continuation chain, including the
+// head.
+IXNode.prototype.chainIXIds = function () { 
+    return [this.id].concat(this.continuationIds());
+}
+
 IXNode.prototype.textContent = function () { 
     return [this].concat(this.continuations)
         // The first wrapperNode is always the wrapper for the actual IX node,

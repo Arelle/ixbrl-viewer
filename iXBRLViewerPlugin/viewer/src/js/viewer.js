@@ -28,7 +28,6 @@ export function Viewer(iv, iframes, report) {
     this.onMouseLeave = $.Callbacks();
 
     this._ixNodeMap = {};
-    this._continuationMap = {};
     this._docOrderIDIndex = [];
 }
 
@@ -37,7 +36,7 @@ Viewer.prototype.initialize = function() {
         var viewer = this;
         viewer._iframes.each(function (docIndex) { 
             $(this).data("selected", docIndex == 0);
-            viewer._preProcessiXBRL1($(this).contents().find("body"), docIndex);
+            viewer._buildContinuationMaps($(this).contents().find("body"), docIndex);
             viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
         });
 
@@ -49,7 +48,6 @@ Viewer.prototype.initialize = function() {
         })()
             .then(() => viewer._iv.setProgress("Preparing document") )
             .then(() => {
-                //this._buildContinuationMap();
                 this._report.setIXNodeMap(this._ixNodeMap);
                 this._applyStyles();
                 this._bindHandlers();
@@ -67,53 +65,6 @@ function localName(e) {
     }
     else {
         return e.substring(e.indexOf(':') + 1)
-    }
-}
-
-Viewer.prototype._buildContinuationMap = function() {
-    var continuations = Object.keys(this._continuationMap)
-    for (var i = 0; i < continuations.length; i++) {
-        var id = continuations[i];
-        if (this._continuationMap[id].isHead) {
-            var parts = [];
-            var nextId = id;
-            while (this._continuationMap[nextId].continuedAt !== undefined) {
-                nextId = this._continuationMap[nextId].continuedAt;
-                if (this._ixNodeMap[nextId] !== undefined) {
-                    this._continuationMap[nextId] = this._continuationMap[nextId] || {};
-                    this._continuationMap[nextId].continuationOf = id;
-                    parts.push(this._ixNodeMap[nextId]);
-                }
-                else {
-                    console.log("Unresolvable continuedAt reference: " + nextId);
-                    break;
-                }
-            }
-            this._ixNodeMap[id].continuations = parts;
-        }
-    }
-    // The document may contain ix:continuations for facts or footnotes that
-    // are not in the default target document, which we need to ignore.
-    // We can't ignore these up-front, because ix:continuation doesn't have a
-    // target attribute - we need to first resolve the continuation chain.
-    // This strips all continuation elements in the map that we haven't found
-    // the head item for.
-    for (const [id, item] of Object.entries(this._continuationMap)) {
-        if (!item.isHead && item.continuationOf === undefined) {
-            const node = this._ixNodeMap[id].wrapperNodes.first();
-            const ivids = node.data('ivid').filter(item => item != id);
-            node.data('ivid', ivids);
-            if (ivids.length == 0) {
-                node.removeClass("ixbrl-continuation").removeClass("ixbrl-element");
-                // Remove the ixbrl-sub-element class from any sub elements
-                // that no longer have a ixbrl-element ancestor.
-                node.find(".ixbrl-sub-element").each(function () {
-                    if ($(this).parents().filter('.ixbrl-element').length == 0) {
-                        $(this).removeClass("ixbrl-sub-element").removeClass("ixbrl-continuation");
-                    }
-                });
-            }
-        }
     }
 }
 
@@ -249,7 +200,7 @@ Viewer.prototype._addIdToNode = function(node, id) {
     node.data('ivid', ivids);
 }
 
-Viewer.prototype._preProcessiXBRL1 = function(body, docIndex, inHidden) {
+Viewer.prototype._buildContinuationMaps = function(body, docIndex, inHidden) {
     // map of next item in continuation chain
     const nextContinuationMap = {};
     // map of items in default target document to all their continuations
@@ -257,12 +208,13 @@ Viewer.prototype._preProcessiXBRL1 = function(body, docIndex, inHidden) {
     body.find('*').each(function () {
         const name = localName(this.nodeName).toUpperCase();
         if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
+            const nodeId = this.getAttribute('id');
             const continuedAtId = this.getAttribute("continuedAt");
             if (continuedAtId !== null) {
-                nextContinuationMap[this.getAttribute('id')] = continuedAtId;
+                nextContinuationMap[nodeId] = continuedAtId;
             }
-            if (name != 'CONTINUATION' && this.getAttribute('target') === null) {
-                itemContinuationMap[this.getAttribute('id')] = [];
+            if (name != 'CONTINUATION' && !this.hasAttribute('target')) {
+                itemContinuationMap[nodeId] = [];
             }
         }
     });
@@ -301,22 +253,14 @@ Viewer.prototype._preProcessiXBRL1 = function(body, docIndex, inHidden) {
 //                         Indicates type of element being wrapped
 //
 // All ixbrl-elements have "ivid" data added, which is a list of the ID
-// attribute(s) of corresponding IX element(s).  i.e. facts have fact IDs,
-// continuations have continuation IDs, footnotes have footnote IDs.  It's
-// possible for it to be a mix of different types.
+// attribute(s) of corresponding IX item(s).  Continuations have the IDs of
+// their head items (fact or footnotes).
+// "ivid" can be a mix of different types.
 //
 // Viewer._ixNodeMap is a map of these IDs to IXNode objects
 //
 // Viewer._docOrderIDIndex is a list of fact and footnote IDs in document
 // order, used to power next/prev tag.  continuations are excluded.
-//
-// Viewer._continuationMap is a map of IDs to objects containing:
-//     continuedAt - ID of next element in continuation chain
-//     isHead - whether the item is the first in the chain
-//     continuationOf (added later) - ID of first element in chain (fact or
-//     footnote)
-// Contains an entry for every item with a continuedAt attribute, and every
-// ix:continuation.
 //
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     const name = localName(n.nodeName).toUpperCase();
@@ -356,7 +300,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             }
             if (isContinuation) {
                 $(nodes).addClass("ixbrl-continuation");
-                ixn.isContinuation = true;
             }
             else {
                 this._docOrderIDIndex.push(id);
@@ -648,18 +591,14 @@ Viewer.prototype.elementsForItemId = function (factId) {
 }
 
 Viewer.prototype.elementsForItemIds = function (ids) {
-    var viewer = this;
-    return $($.map(ids, function (id, n) {
-        return viewer._ixNodeMap[id].wrapperNodes.get();
-    }));
+    return $(ids.map(id => this._ixNodeMap[id].wrapperNodes.get()).flat());
 }
 
 /*
  * Add or remove a class to an item (fact or footnote) and any continuation elements
  */
 Viewer.prototype.changeItemClass = function(itemId, highlightClass, removeClass) {
-    const ixn = this._ixNodeMap[itemId];
-    const elements = this.elementsForItemIds(ixn.chainIXIds());
+    const elements = this.elementsForItemIds([itemId].concat(this.itemContinuationMap[itemId]))
     if (removeClass) {
         elements.removeClass(highlightClass);
     }
@@ -698,10 +637,11 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
         $(".ixbrl-element", this._contents)
             .addClass("ixbrl-highlight")
             .each(function () {
-                // Find the first ixn for this element that isn't a continuation or footnote.
-                // Choosing the first means that we're arbitrarily choosing a highlight
-                // color for an element that is double tagged in a table cell.
-                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.isContinuation && !ixn.footnote)[0];
+                // Find the first ixn for this element that isn't a footnote.
+                // Choosing the first means that we're arbitrarily choosing a
+                // highlight color for an element that is double tagged in a
+                // table cell.
+                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(!ixn.footnote)[0];
                 if (ixn != undefined) {
                     const elements = viewer.elementsForItemIds(ixn.chainIXIds());
                     const i = groups[report.getItemById(ixn.id).conceptQName().prefix];

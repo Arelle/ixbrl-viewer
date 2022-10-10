@@ -641,7 +641,7 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
                 // Choosing the first means that we're arbitrarily choosing a
                 // highlight color for an element that is double tagged in a
                 // table cell.
-                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(!ixn.footnote)[0];
+                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
                 if (ixn != undefined) {
                     const elements = viewer.elementsForItemIds(ixn.chainIXIds());
                     const i = groups[report.getItemById(ixn.id).conceptQName().prefix];

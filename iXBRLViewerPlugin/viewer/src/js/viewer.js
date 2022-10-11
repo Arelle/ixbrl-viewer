@@ -482,7 +482,10 @@ Viewer.prototype.isFullyVisible = function (node) {
         }
         ancestor = ancestor.parent();
     } 
-    const de = ancestor.closest("html").get(0);
+    // In quirks mode, clientHeight of body is viewport height.  In standards
+    // mode, clientHeight of html is viewport height.
+    const quirksMode = node.ownerDocument.compatMode != 'CSS1Compat';
+    const de = quirksMode ? ancestor : ancestor.closest("html").get(0);
     return r1.left > 0 && r1.top > 0 && r1.right < de.clientWidth && r1.bottom < de.clientHeight;
 }
 

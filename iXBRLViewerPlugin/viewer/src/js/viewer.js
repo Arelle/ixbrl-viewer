@@ -29,6 +29,7 @@ export function Viewer(iv, iframes, report) {
 
     this._ixNodeMap = {};
     this._docOrderIDIndex = [];
+    this._currentDocumentIndex = 0;
 }
 
 Viewer.prototype.initialize = function() {
@@ -269,8 +270,8 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     const isFact = (name == 'NONNUMERIC' || name == 'NONFRACTION');
     if (n.nodeType == 1) {
         // Ignore iXBRL elements that are not in the default target document, as
-        // the viewer builder does not handle these, and does not ensure that they
-        // have ID attributes.
+        // the viewer builder does not handle these, and the builder does not
+        // ensure that they have ID attributes.
         const id = n.getAttribute("id");
         if (((isFact || isFootnote) && !n.hasAttribute("target"))
             || (isContinuation && this.continuationOfMap[id] !== undefined)) {
@@ -302,7 +303,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 $(nodes).addClass("ixbrl-continuation");
             }
             else {
-                this._docOrderIDIndex.push(id);
+                this._docOrderIDIndex.push({id: id, document: docIndex});
             }
             if (name == 'NONFRACTION') {
                 $(nodes).addClass("ixbrl-element-nonfraction");
@@ -327,7 +328,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             if (id !== null) {
                 nodes = $(n);
                 nodes.addClass("ixbrl-element").data('ivid', [id]);
-                this._docOrderIDIndex.push(id);
+                this._docOrderIDIndex.push({id: id, document: docIndex});
                 /* We may have already seen the corresponding ix element in the hidden
                  * section */
                 var ixn = this._ixNodeMap[id];
@@ -385,24 +386,21 @@ Viewer.prototype.contents = function() {
 // moving to the next/prev element
 //
 Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
-    const elements = $(".ixbrl-element, .ixbrl-element-hidden", this.currentDocument().contents());
     var nextId;
-
     if (currentItem !== null) {
         const l = this._docOrderIDIndex.length;
-        nextId = this._docOrderIDIndex[(this._docOrderIDIndex.indexOf(currentItem.id) + offset + l) % l];
+        const currentIndex = this._docOrderIDIndex.findIndex(n => n.id == currentItem.id);
+        nextId = this._docOrderIDIndex[(currentIndex + offset + l) % l].id;
+        this.showDocumentForItemId(nextId);
     }
     // If no fact selected go to the first or last in the current document
     else if (offset > 0) {
-        const next = elements.first();
-        nextId = next.data('ivid')[0];
+        nextId = this._docOrderIDIndex.filter(n => n.document == this._currentDocumentIndex)[0].id;
     } 
     else {
-        const next = elements.last();
-        nextId = next.data('ivid')[elements.last().data('ivid').length - 1];
+        nextId = this._docOrderIDIndex.filter(n => n.document == this._currentDocumentIndex).at(-1).id;
     }
     
-    this.showDocumentForItemId(nextId);
     const nextElement = this.elementsForItemId(nextId); 
     this.showElement(nextElement);
     // If this is a table cell with multiple nested tags pass all tags so that
@@ -708,6 +706,7 @@ Viewer.prototype.currentDocument = function () {
 }
 
 Viewer.prototype.selectDocument = function (docIndex) {
+    this._currentDocumentIndex = docIndex;
     $('#ixv #viewer-pane .ixds-tabs .tab')
         .removeClass("active")
         .eq(docIndex)

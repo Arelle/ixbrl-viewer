@@ -35,9 +35,9 @@ export function Viewer(iv, iframes, report) {
 Viewer.prototype.initialize = function() {
     return new Promise((resolve, reject) => {
         var viewer = this;
+        viewer._buildContinuationMaps();
         viewer._iframes.each(function (docIndex) { 
-            $(this).data("selected", docIndex == 0);
-            viewer._buildContinuationMaps($(this).contents().find("body"), docIndex);
+            $(this).data("selected", docIndex == viewer._currentDocumentIndex);
             viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
         });
 
@@ -201,12 +201,12 @@ Viewer.prototype._addIdToNode = function(node, id) {
     node.data('ivid', ivids);
 }
 
-Viewer.prototype._buildContinuationMaps = function(body, docIndex, inHidden) {
+Viewer.prototype._buildContinuationMaps = function() {
     // map of next item in continuation chain
     const nextContinuationMap = {};
     // map of items in default target document to all their continuations
     const itemContinuationMap = {};
-    body.find('*').each(function () {
+    this._iframes.contents().find("body *").each(function () {
         const name = localName(this.nodeName).toUpperCase();
         if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
             const nodeId = this.getAttribute('id');
@@ -699,10 +699,6 @@ Viewer.prototype._setTitle = function (docIndex) {
 
 Viewer.prototype.showDocumentForItemId = function(itemId) {
     this.selectDocument(this._ixNodeMap[itemId].docIndex);
-}
-
-Viewer.prototype.currentDocument = function () {
-    return this._iframes.filter(function () { return $(this).data("selected") });
 }
 
 Viewer.prototype.selectDocument = function (docIndex) {

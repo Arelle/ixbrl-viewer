@@ -1,14 +1,44 @@
 #ixv .dialog.calculation-inspector {
   .dialog.full-width();
 
-  table {
+  table.calculation-trace {
+    border-spacing: 1rem 0;
+
+    td {
+      padding: 1rem 0;
+    }
+
     td.figure {
       text-align: right;
     }
 
+    td.icons, th.icons {
+      border-right: solid 1px;
+    }
+
+    &.has-icons {
+      td.icons, th.icons {
+        padding-right: 1rem;
+      }
+    }
+
     tr.total {
-      td.figure {
+      td.figure, td.line-item {
         border-top: solid 1px;
+      }
+    }
+
+    td.status {
+      .message { 
+        font-style: italic;
+      }
+
+      &.consistent .icon::before {
+        .icon-circle-tick();
+      }
+
+      &.inconsistent .icon::before {
+        .icon-circle-tick();
       }
     }
 

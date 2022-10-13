@@ -46,8 +46,11 @@ export class CalculationInspector extends Dialog {
     }
 
     displayCalculation(resolvedCalculation) {
-        var tbody = this.node.find("tbody");
+        const table = this.node.find("table.calculation-trace");
+        const tbody = table.find("tbody");
+        var hasIcons = false;
         tbody.empty();
+        table.removeClass("has-icons");
         for (const row of resolvedCalculation.rows) {
             let factText = "";
             let minText = "";
@@ -66,11 +69,13 @@ export class CalculationInspector extends Dialog {
                     maxText = f.readableValue(contributionInterval.b.toNumber());
                 }
             }
+            const icons = this.duplicateFactIcons(row.facts);
+            hasIcons = hasIcons || icons.find("span").length > 0;
             $("<tr></tr>")
                 .append($("<td></td>").addClass("weight").text(row.weightSign))
-                .append($("<td></td>").text(row.concept.label()))
+                .append($("<td></td>").text(row.concept.label()).addClass("line-item"))
                 .append($("<td></td>").addClass("figure").text(factText))
-                .append(this.duplicateFactIcons(row.facts))
+                .append(icons)
                 .append($("<td></td>").addClass("figure").text(minText))
                 .append($("<td></td>").addClass("figure").text(maxText))
                 .appendTo(tbody);
@@ -79,22 +84,33 @@ export class CalculationInspector extends Dialog {
         const cvi = resolvedCalculation.calculatedTotalInterval();
         $("<tr></tr>").addClass("total")
             .append($("<td></td>"))
-            .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.calculated-total')})`))
+            .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.calculated-total')})`).addClass("line-item"))
             .append($("<td></td>").text(fact.readableValue(cvi.midpoint().toNumber())).addClass("figure"))
-            .append($("<td></td>"))
+            .append($("<td></td>").addClass("icons"))
             .append($("<td></td>").text(fact.readableValue(cvi.a.toNumber())).addClass("figure"))
             .append($("<td></td>").text(fact.readableValue(cvi.b.toNumber())).addClass("figure"))
             .appendTo(tbody);
 
         const rvi = fact.valueInterval();
-        $("<tr></tr>").addClass("total")
+        $("<tr></tr>")
             .append($("<td></td>"))
-            .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.reported-total')})`))
+            .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.reported-total')})`).addClass("line-item"))
             .append($("<td></td>").text(fact.readableValue()).addClass("figure"))
-            .append($("<td></td>"))
+            .append($("<td></td>").addClass("icons"))
             .append($("<td></td>").text(fact.readableValue(rvi.a.toNumber())).addClass("figure"))
             .append($("<td></td>").text(fact.readableValue(rvi.b.toNumber())).addClass("figure"))
             .appendTo(tbody);
+        if (hasIcons) {
+            table.addClass("has-icons");
+        }
+        const messageCell = table.find("td.status");
+        messageCell.removeClass("inconsistent").removeClass("consistent");
+        if (resolvedCalculation.isConsistent()) {
+            messageCell.addClass("consistent").find(".message").text("Calculation is consistent");
+        }
+        else {
+            messageCell.addClass("inconsistent").find(".message").text("Calculation is inconsistent");
+        }
     }
 }
 

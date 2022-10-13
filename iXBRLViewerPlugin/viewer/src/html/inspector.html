@@ -214,9 +214,24 @@ limitations under the License.
       <div class="close"></div>
       <div class="contents">
         <h2 data-i18n="inspector.calculationDetails">Calculation details</h2>
-        <table>
+        <table class="calculation-trace">
+          <thead>
+            <tr>
+              <th class="weight"></th>
+              <th class="line-item">Concept</th>
+              <th>Reported<br />Value</th>
+              <th class="icons"></th>
+              <th>Minimum<br />Contribution</th>
+              <th>Maximum<br />Contribution</th>
+            </tr>
+          </thead>
           <tbody>
           </tbody>
+          <tfoot>
+            <tr>
+                <td colspan="6" class="status"><span class="icon"></span> <span class="message"></span></td>
+            </tr>
+          </tfoot>
         </table>
         <div class="buttons">
         </div>

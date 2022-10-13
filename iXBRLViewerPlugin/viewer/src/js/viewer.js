@@ -202,7 +202,7 @@ Viewer.prototype._addIdToNode = function(node, id) {
 }
 
 Viewer.prototype._buildContinuationMaps = function() {
-    // map of next item in continuation chain
+    // map of element id to next element id in continuation chain
     const nextContinuationMap = {};
     // map of items in default target document to all their continuations
     const itemContinuationMap = {};

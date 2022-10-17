@@ -283,9 +283,15 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 nodes = this._findOrCreateWrapperNode(n);
             }
 
-            // For a continuation, store the IX ID of the item, not the continuation
-            const headId = isContinuation ? this.continuationOfMap[id] : id;
-            this._addIdToNode(nodes.first(), headId);
+            // For a continuation, store the IX ID(s) of the item(s), not the continuation
+            if (isContinuation) {
+                for (const headId of this.continuationOfMap[id]) {
+                    this._addIdToNode(nodes.first(), headId);
+                }
+            }
+            else {
+                this._addIdToNode(nodes.first(), id);
+            }
             // We may have already created an IXNode for this ID from a -sec-ix-hidden
             // element 
             var ixn = this._ixNodeMap[id];

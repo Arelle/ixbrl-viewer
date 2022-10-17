@@ -502,10 +502,11 @@ Inspector.prototype._calculationHTML = function (fact) {
             .append($("<span></span>")
                 .addClass("calculation-details-link")
                 .attr("title", i18next.t('factDetails.viewCalculationDetails'))
-                .click(() => {
+                .click((e) => {
                     let dialog = new CalculationInspector();
                     dialog.displayCalculation(rCalc);
                     dialog.show();
+                    e.stopPropagation();
                 })
             );
 

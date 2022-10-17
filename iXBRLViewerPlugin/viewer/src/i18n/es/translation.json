@@ -1,7 +1,13 @@
 {
   "calculation": {
+    "calculated-total": "",
+    "concept": "",
     "consistent-duplicate-facts-present": "",
-    "inconsistent-duplicate-facts-present": ""
+    "inconsistent-duplicate-facts-present": "",
+    "maximum-contribution": "",
+    "mininum-contribution": "",
+    "reported-total": "",
+    "reported-value": ""
   },
   "common": {
     "accuracyInfinite": "Precisió infinita",
@@ -11,6 +17,7 @@
   },
   "factDetails": {
     "accuracy": "Precisión",
+    "calculationIsInconsistent": "",
     "change": "Cambio",
     "changeFromIn": "Anteriormente {{from}} en ",
     "changePercentageDecrease": "{{decrease}}% menos que en ",

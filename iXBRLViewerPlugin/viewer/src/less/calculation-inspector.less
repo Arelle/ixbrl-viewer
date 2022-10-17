@@ -3,12 +3,19 @@
     border-spacing: 1rem 0;
     padding-bottom: 1.5rem;
 
+    th.value-column {
+      // Specify undersized column width to force line break in header, unless
+      // figures are really big.
+      width: 8rem;
+    }
+
     td {
       padding: 1rem 0;
     }
 
     td.figure {
       text-align: right;
+      white-space: nowrap;
     }
 
     td.icons,

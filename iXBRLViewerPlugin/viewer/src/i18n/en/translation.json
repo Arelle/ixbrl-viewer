@@ -1,9 +1,13 @@
 {
   "calculation": {
+    "calculated-total": "Calculated",
+    "concept": "Concept",
     "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
+    "maximum-contribution": "Maximum contribution",
+    "mininum-contribution": "Mininum contribution",
     "reported-total": "Reported",
-    "calculated-total": "Calculated"
+    "reported-value": "Reported value"
   },
   "common": {
     "accuracyInfinite": "Infinite precision",

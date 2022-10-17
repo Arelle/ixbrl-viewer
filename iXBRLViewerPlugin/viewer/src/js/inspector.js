@@ -13,12 +13,11 @@
 // limitations under the License.
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
-import { ReportSearch } from "./search.js";
-import { Calculation } from "./calculations.js";
-import { IXBRLChart } from './chart.js';
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
+import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
+import { ReportSearch } from "./search.js";
+import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
 import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
@@ -30,7 +29,8 @@ import { ValidationReportDialog } from './validationreport.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
 import { Interval } from './interval.js';
-import { CalculationInspector } from './calculationinspector.js';
+import { Calculation } from "./calculation.js";
+import { CalculationInspector } from './calculationInspector.js';
 
 const SEARCH_PAGE_SIZE = 100
 

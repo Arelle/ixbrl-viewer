@@ -1,8 +1,7 @@
 #ixv .dialog.calculation-inspector {
-  .dialog.full-width();
-
   table.calculation-trace {
     border-spacing: 1rem 0;
+    padding-bottom: 1.5rem;
 
     td {
       padding: 1rem 0;
@@ -12,33 +11,47 @@
       text-align: right;
     }
 
-    td.icons, th.icons {
+    td.icons,
+    th.icons {
       border-right: solid 1px;
     }
 
     &.has-icons {
-      td.icons, th.icons {
+      td.icons,
+      th.icons {
         padding-right: 1rem;
       }
     }
 
     tr.total {
-      td.figure, td.line-item {
+      td.figure,
+      td.line-item {
         border-top: solid 1px;
       }
     }
 
     td.status {
-      .message { 
+      .message {
         font-style: italic;
+      }
+
+      .icon::before {
+        position: relative;
+        top: 0.1rem;
+        padding-right: 0.1rem;
+        font-weight: bold;
       }
 
       &.consistent .icon::before {
         .icon-circle-tick();
+
+        color: @workiva-green;
       }
 
       &.inconsistent .icon::before {
-        .icon-circle-tick();
+        .icon-circle-cross();
+
+        color: @warning-orange;
       }
     }
 

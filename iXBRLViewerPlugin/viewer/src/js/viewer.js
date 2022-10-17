@@ -17,6 +17,7 @@ import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
 import { IXNode } from './ixnode.js';
 import { setDefault } from './util.js';
+import { DocOrderIndex } from './docOrderIndex.js';
 
 export function Viewer(iv, iframes, report) {
     this._iv = iv;
@@ -28,7 +29,7 @@ export function Viewer(iv, iframes, report) {
     this.onMouseLeave = $.Callbacks();
 
     this._ixNodeMap = {};
-    this._docOrderIDIndex = [];
+    this._docOrderItemIndex = new DocOrderIndex();
     this._currentDocumentIndex = 0;
 }
 
@@ -258,10 +259,10 @@ Viewer.prototype._buildContinuationMaps = function() {
 // their head items (fact or footnotes).
 // "ivid" can be a mix of different types.
 //
-// Viewer._ixNodeMap is a map of these IDs to IXNode objects
+// Viewer._ixNodeMap is a map of these IDs to IXNode objects.
 //
-// Viewer._docOrderIDIndex is a list of fact and footnote IDs in document
-// order, used to power next/prev tag.  continuations are excluded.
+// Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
+// fact and footnotes in document order.
 //
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     const name = localName(n.nodeName).toUpperCase();
@@ -303,7 +304,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 $(nodes).addClass("ixbrl-continuation");
             }
             else {
-                this._docOrderIDIndex.push({id: id, document: docIndex});
+                this._docOrderItemIndex.addItem(id, docIndex);
             }
             if (name == 'NONFRACTION') {
                 $(nodes).addClass("ixbrl-element-nonfraction");
@@ -328,7 +329,7 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             if (id !== null) {
                 nodes = $(n);
                 nodes.addClass("ixbrl-element").data('ivid', [id]);
-                this._docOrderIDIndex.push({id: id, document: docIndex});
+                this._docOrderItemIndex.addItem(id, docIndex);
                 /* We may have already seen the corresponding ix element in the hidden
                  * section */
                 var ixn = this._ixNodeMap[id];
@@ -388,17 +389,15 @@ Viewer.prototype.contents = function() {
 Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
     var nextId;
     if (currentItem !== null) {
-        const l = this._docOrderIDIndex.length;
-        const currentIndex = this._docOrderIDIndex.findIndex(n => n.id == currentItem.id);
-        nextId = this._docOrderIDIndex[(currentIndex + offset + l) % l].id;
+        nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.id, offset);
         this.showDocumentForItemId(nextId);
     }
     // If no fact selected go to the first or last in the current document
     else if (offset > 0) {
-        nextId = this._docOrderIDIndex.filter(n => n.document == this._currentDocumentIndex)[0].id;
+        nextId = this._docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
     } 
     else {
-        nextId = this._docOrderIDIndex.filter(n => n.document == this._currentDocumentIndex).at(-1).id;
+        nextId = this._docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
     }
     
     const nextElement = this.elementsForItemId(nextId); 

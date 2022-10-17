@@ -423,6 +423,7 @@ Viewer.prototype._bindHandlers = function () {
     
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
+    $('#iframe-container .print').click(function () { viewer._iframes[0].contentWindow.print() });
 
     TableExport.addHandles(this._contents, this._report);
 }

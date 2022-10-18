@@ -229,7 +229,10 @@ Viewer.prototype._buildContinuationMaps = function() {
         while (nextContinuationMap[id] !== undefined) {
             id = nextContinuationMap[id];
             itemContinuations.push(id);
-            setDefault(this.continuationOfMap, id, []).push(itemId)
+            if (this.continuationOfMap[id] !== undefined) {
+                console.log("Continuation '" + id + "' is a continuation of multiple items.");
+            }
+            this.continuationOfMap[id] = itemId;
         }
     }
     this.itemContinuationMap = itemContinuationMap;
@@ -284,14 +287,9 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             }
 
             // For a continuation, store the IX ID(s) of the item(s), not the continuation
-            if (isContinuation) {
-                for (const headId of this.continuationOfMap[id]) {
-                    this._addIdToNode(nodes.first(), headId);
-                }
-            }
-            else {
-                this._addIdToNode(nodes.first(), id);
-            }
+            const headId = isContinuation ? this.continuationOfMap[id] : id;
+            this._addIdToNode(nodes.first(), headId);
+
             // We may have already created an IXNode for this ID from a -sec-ix-hidden
             // element 
             var ixn = this._ixNodeMap[id];

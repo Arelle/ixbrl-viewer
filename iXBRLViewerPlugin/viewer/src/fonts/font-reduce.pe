@@ -20,10 +20,13 @@ SelectMore("ue974")
 SelectMore("ueb14") 
 SelectInvert()
 DetachAndRemoveGlyphs()
-Import("cog.svg")
-Copy()
+
 Select("ue97e")
-Paste()
+Import("cog.svg")
+
+Select("ue97f")
+Import("print.svg")
+
 Generate("Wdesk_Icons-min.woff")
 
 Open("Wdesk_Icons_Xbrl.woff")

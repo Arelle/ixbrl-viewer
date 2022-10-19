@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import $ from 'jquery'
+import i18next from "i18next";
 import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
 import { Footnote } from "./footnote.js";
-import $ from 'jquery'
-import i18next from "i18next";
 
 export class Fact {
     
@@ -77,18 +77,18 @@ export class Fact {
     }
 
     readableValue() {
-        var v = this.f.v;
+        let v = this.f.v;
         if (this.isInvalidIXValue()) {
             v = "Invalid value";
         }
         else if (this.isNumeric()) {
-            var d = this.decimals();
-            var formattedNumber;
+            const d = this.decimals();
+            let formattedNumber;
             if (this.isNil()) {
                 formattedNumber = "nil";
             }
             else {
-                formattedNumber = formatNumber(v,d);
+                formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
                 v = this.unit().valueLabel() + " " + formattedNumber;
@@ -101,7 +101,7 @@ export class Fact {
             v = "nil";
         }
         else if (this.escaped()) {
-            var html = $("<div>").append($($.parseHTML(v, null, false)));
+            const html = $("<div>").append($($.parseHTML(v, null, false)));
             /* Insert an extra space at the beginning and end of block elements to
              * preserve separation of sections of text. */
             html
@@ -112,7 +112,7 @@ export class Fact {
             v = html.text().replace(/[\u00a0\s]+/g, " ").trim();
         }
         else if (this.isEnumeration()) {
-            var labels = [];
+            const labels = [];
             for (const qn of v.split(' ')) {
                 labels.push(this._report.getLabelOrName(qn, 'std'));
             }
@@ -135,21 +135,21 @@ export class Fact {
     }
 
     dimensions() {
-        var dims = {};
-        $.each(this.f.a, function (k,v) {
+        const dims = {};
+        for (const [k, v] of Object.entries(this.f.a)) {
             if (k.indexOf(":") > -1) {
                 dims[k] = v;
             }
-        });
+        }
         return dims;
     }
 
     isMonetaryValue() {
-        var unit = this.unit();
+        const unit = this.unit();
         if (!unit || unit.value() === null) {
             return false;
         }
-        var q = this.report().qname(unit.value());
+        const q = this.report().qname(unit.value());
         return q.namespace == "http://www.xbrl.org/2003/iso4217";
     }
 
@@ -168,13 +168,13 @@ export class Fact {
         if (Object.keys(this.f.a).length != Object.keys(of.f.a).length) {
             return false;
         }
-        for (var a in this.f.a) {
+        for (const a in this.f.a) {
             if (coveredAspects.hasOwnProperty(a)) {
                 /* null => accept any value for this aspect */
                 if (coveredAspects[a] !== null) {
                     /* if value is an array, it's an array of allowed values */
                     if (coveredAspects[a].constructor === Array) {
-                        if ($.inArray(this.f.a[a], coveredAspects[a]) == -1) {
+                        if (!coveredAspects[a].includes(this.f.a[a])) {
                             return false;
                         }
                     }
@@ -204,7 +204,7 @@ export class Fact {
     }
 
     isNil() {
-        return this.f.v === null
+        return this.f.v === null;
     }
 
     isInvalidIXValue() {
@@ -215,7 +215,7 @@ export class Fact {
         if (!this.isNumeric() || this.isNil()) {
             return i18next.t("common.notApplicable");
         }
-        var d = this.decimals();
+        let d = this.decimals();
         if (d === undefined) {
             return i18next.t("common.accuracyInfinite")
         }

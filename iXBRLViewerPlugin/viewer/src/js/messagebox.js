@@ -29,8 +29,8 @@ export class MessageBox extends Dialog {
         this.node.find('.message')
             .empty()
             .append(this.message);
-        var buttons = this.node.find('.buttons').empty();
-        var okButton = $("<button></button>").text(this.okText).addClass("dialog-button-primary");
+        const buttons = this.node.find('.buttons').empty();
+        const okButton = $("<button></button>").text(this.okText).addClass("dialog-button-primary");
         buttons.append(okButton);
         okButton.on("click", () => {
             this.close();
@@ -39,7 +39,7 @@ export class MessageBox extends Dialog {
             }
         });
         if (this.cancelText) {
-            var cancelButton = $("<button></button>").text(this.cancelText).addClass("dialog-button-cancel");
+            const cancelButton = $("<button></button>").text(this.cancelText).addClass("dialog-button-cancel");
             buttons.append(cancelButton);
             cancelButton.on("click", () => {
                 this.close();

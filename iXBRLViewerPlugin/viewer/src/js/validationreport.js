@@ -16,21 +16,21 @@ import $ from 'jquery';
 
 import { Dialog } from './dialog.js';
 
-export function ValidationReportDialog() {
-    Dialog.call(this, ".dialog.validation-report");
-    this.addButton("Dismiss", true);
-}
+export class ValidationReportDialog extends Dialog {
+    constructor() {
+        super(".dialog.validation-report");
+        this.addButton("Dismiss", true);
+    }
 
-ValidationReportDialog.prototype = Object.create(Dialog.prototype);
-
-ValidationReportDialog.prototype.displayErrors = function (errors) {
-    var tbody = this.node.find("tbody");
-    tbody.empty();
-    for (const m of errors) {
-        $("<tr></tr>")
-            .append($("<td></td>").text(m.sev))
-            .append($("<td></td>").text(m.code))
-            .append($("<td></td>").text(m.msg))
-            .appendTo(tbody);
+    displayErrors(errors) {
+        const tbody = this.node.find("tbody");
+        tbody.empty();
+        for (const m of errors) {
+            $("<tr></tr>")
+                .append($("<td></td>").text(m.sev))
+                .append($("<td></td>").text(m.code))
+                .append($("<td></td>").text(m.msg))
+                .appendTo(tbody);
+        }
     }
 }

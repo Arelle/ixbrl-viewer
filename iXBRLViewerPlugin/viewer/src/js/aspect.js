@@ -56,7 +56,7 @@ Aspect.prototype.equalTo = function(a) {
 
 
 Aspect.prototype.isTaxonomyDefined = function() {
-    return (this._aspect.indexOf(":") > -1);
+    return this._aspect.includes(":");
 }
 
 Aspect.prototype.isNil = function() {

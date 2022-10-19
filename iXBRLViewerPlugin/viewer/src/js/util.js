@@ -39,10 +39,12 @@ export function momentToHuman(d, adjust) {
  * Format a number with a thousands separator, and the specified number of
  * decimal places.
  */
-export function formatNumber(v, d) {
-    var n = Number(v);
-    var s = d === undefined ? n.toString() : n.toFixed(Math.max(0, d));
-    return s.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+export function formatNumber(value, decimals) {
+    const n = Number(value);
+    const s = decimals === undefined ? n.toString() : n.toFixed(Math.max(0, decimals));
+    const parts = s.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join('.');
 }
 
 /* 

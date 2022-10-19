@@ -92,6 +92,10 @@ describe("formatNumber", () => {
     test("Format negative number number, add some decimals", () => {
         expect(formatNumber(-123456,3)).toBe("-123,456.000")
     });
+
+    test("Format number, add some decimals", () => {
+        expect(formatNumber(12345678,4)).toBe("12,345,678.0000")
+    });
 });
 
 describe("wrapLabel", () => {

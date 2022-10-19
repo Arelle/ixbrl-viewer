@@ -704,6 +704,10 @@ Viewer.prototype.showDocumentForItemId = function(itemId) {
     this.selectDocument(this._ixNodeMap[itemId].docIndex);
 }
 
+Viewer.prototype.currentDocument = function () {
+    return this._iframes.eq(this._currentDocumentIndex);
+}
+
 Viewer.prototype.selectDocument = function (docIndex) {
     this._currentDocumentIndex = docIndex;
     $('#ixv #viewer-pane .ixds-tabs .tab')

@@ -78,14 +78,14 @@ export class Aspect {
             if (this._value === null) {
                 return i18next.t("factDetails.noUnit");
             }
-            var qname = this._report.qname(this._value);
+            const qname = this._report.qname(this._value);
             if (qname.namespace === "http://www.xbrl.org/2003/iso4217") {
                 return i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname + ' '});
             }
             return this._value;
         }
         else if (this._aspect === 'p') {
-            var p = new Period(this._value);
+            const p = new Period(this._value);
             return p.toString();
         }
         else if (this._aspect === 'e') {

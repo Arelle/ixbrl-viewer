@@ -34,15 +34,9 @@ export class IXBRLChart extends Dialog {
     }
 
     _chooseMultiplier(facts) {
-        let max = 0;
-        $.each(facts, function (i, f) {
-            var v = Number(f.value());
-            if(v > max) {
-                max = v;
-            }
-        });
+        let max = Math.max(...facts.map(f => Math.abs(Number(f.value()))));
         let scale = 0;
-        while (max > 1000 && scale < 9) {
+        while (max >= 1000 && scale < 9) {
             max = max / 1000;
             scale += 3; 
         } 

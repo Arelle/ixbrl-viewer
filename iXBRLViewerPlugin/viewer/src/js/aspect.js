@@ -30,16 +30,16 @@ export class Aspect {
     }
 
     label() {
-        if (this._aspect == 'c') {
+        if (this._aspect === 'c') {
             return "Concept";
         }
-        else if (this._aspect == 'p') {
+        else if (this._aspect === 'p') {
             return "Period";
         }
-        else if (this._aspect == 'u') {
+        else if (this._aspect === 'u') {
             return "Unit";
         }
-        else if (this._aspect == 'e') {
+        else if (this._aspect === 'e') {
             return "Entity";
         }
         else {
@@ -52,7 +52,7 @@ export class Aspect {
     }
 
     equalTo(a) {
-        return a !== undefined && this._aspect == a._aspect && this._value == a._value;
+        return a !== undefined && this._aspect === a._aspect && this._value === a._value;
     }
 
 
@@ -65,7 +65,7 @@ export class Aspect {
     }
 
     valueLabel(rolePrefix) {
-        if (this._aspect == 'c') {
+        if (this._aspect === 'c') {
             return this._report.getLabel(this._value, rolePrefix) || this._value;
         }
         if (this.isTaxonomyDefined()) {
@@ -74,21 +74,21 @@ export class Aspect {
             }
             return this._report.getLabel(this._value, rolePrefix) || this._value;
         }
-        else if (this._aspect == 'u') {
+        else if (this._aspect === 'u') {
             if (this._value === null) {
                 return i18next.t("factDetails.noUnit");
             }
             var qname = this._report.qname(this._value);
-            if (qname.namespace == "http://www.xbrl.org/2003/iso4217") {
+            if (qname.namespace === "http://www.xbrl.org/2003/iso4217") {
                 return i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname + ' '});
             }
             return this._value;
         }
-        else if (this._aspect == 'p') {
+        else if (this._aspect === 'p') {
             var p = new Period(this._value);
             return p.toString();
         }
-        else if (this._aspect == 'e') {
+        else if (this._aspect === 'e') {
             return Identifiers.readableName(this._report.qname(this._value));
         }
         else {

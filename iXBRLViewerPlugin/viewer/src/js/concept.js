@@ -28,8 +28,8 @@ export class Concept {
             return "";
         }
         else {
-            return this._c.r.map(
-                r => r.map(p => p[1]).join(" ")
+            return this._c.r.flatMap(
+                r => r.map(p => p[1])
             ).join(" ");
         }
     }

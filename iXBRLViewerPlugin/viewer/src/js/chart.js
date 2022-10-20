@@ -57,13 +57,7 @@ export class IXBRLChart extends Dialog {
     }
 
     removeAspect(a) {
-        var newDims = [];
-        for (const d of this._analyseDims) {
-            if (d != a) { 
-                newDims.push(d) 
-            }
-        }
-        this._analyseDims = newDims;
+        this._analyseDims = this._analyseDims.filter(d => d != a);
         this._showAnalyseDimensionChart();
     }
 
@@ -86,7 +80,7 @@ export class IXBRLChart extends Dialog {
 
         /* Find all facts that are aligned with the current fact, except for the
          * two dimensions that we're breaking down by */
-        var covered = {};
+        const covered = {};
         if (dims[0]) {
             covered[dims[0]] = null;
         }
@@ -94,7 +88,7 @@ export class IXBRLChart extends Dialog {
             covered[dims[1]] = null;
         }
 
-        var facts = fact.report().deduplicate(fact.report().getAlignedFacts(fact, covered));
+        const facts = fact.report().deduplicate(fact.report().getAlignedFacts(fact, covered));
 
         /* Get the unique aspect values along each dimension.  This is to ensure
          * that we assign facts to datasets consistently (we have one dataset per value

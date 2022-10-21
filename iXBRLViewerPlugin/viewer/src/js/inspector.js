@@ -506,7 +506,7 @@ Inspector.prototype._footnotesHTML = function (fact) {
 
 Inspector.prototype.viewerMouseEnter = function (id) {
     $('.calculations .item').filter(function () {   
-        return $.inArray(id, $.map($(this).data('ivid'), function (f)  { return f.id })) > -1 
+        return $.inArray(id, $.map($(this).data('ivid'), f => f.id )) > -1 
     }).addClass('linked-highlight');
     $('#inspector .search .results tr').filter(function () {   
         return $(this).data('ivid') == id;

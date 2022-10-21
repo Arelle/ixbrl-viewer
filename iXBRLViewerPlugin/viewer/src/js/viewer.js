@@ -16,6 +16,8 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
 import { IXNode } from './ixnode.js';
+import { setDefault } from './util.js';
+import { DocOrderIndex } from './docOrderIndex.js';
 
 export function Viewer(iv, iframes, report) {
     this._iv = iv;
@@ -27,15 +29,16 @@ export function Viewer(iv, iframes, report) {
     this.onMouseLeave = $.Callbacks();
 
     this._ixNodeMap = {};
-    this._continuedAtMap = {};
-    this._docOrderIDIndex = [];
+    this._docOrderItemIndex = new DocOrderIndex();
+    this._currentDocumentIndex = 0;
 }
 
 Viewer.prototype.initialize = function() {
     return new Promise((resolve, reject) => {
         var viewer = this;
+        viewer._buildContinuationMaps();
         viewer._iframes.each(function (docIndex) { 
-            $(this).data("selected", docIndex == 0);
+            $(this).data("selected", docIndex == viewer._currentDocumentIndex);
             viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
         });
 
@@ -47,7 +50,6 @@ Viewer.prototype.initialize = function() {
         })()
             .then(() => viewer._iv.setProgress("Preparing document") )
             .then(() => {
-                this._buildContinuationMap();
                 this._report.setIXNodeMap(this._ixNodeMap);
                 this._applyStyles();
                 this._bindHandlers();
@@ -65,30 +67,6 @@ function localName(e) {
     }
     else {
         return e.substring(e.indexOf(':') + 1)
-    }
-}
-
-Viewer.prototype._buildContinuationMap = function() {
-    var continuations = Object.keys(this._continuedAtMap)
-    for (var i = 0; i < continuations.length; i++) {
-        var id = continuations[i];
-        if (this._continuedAtMap[id].isFact) {
-            var parts = [];
-            var nextId = id;
-            while (this._continuedAtMap[nextId].continuedAt !== undefined) {
-                nextId = this._continuedAtMap[nextId].continuedAt;
-                if (this._ixNodeMap[nextId] !== undefined) {
-                    this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
-                    this._continuedAtMap[nextId].continuationOf = id;
-                    parts.push(this._ixNodeMap[nextId]);
-                }
-                else {
-                    console.log("Unresolvable continuedAt reference: " + nextId);
-                    break;
-                }
-            }
-            this._ixNodeMap[id].continuations = parts;
-        }
     }
 }
 
@@ -224,6 +202,42 @@ Viewer.prototype._addIdToNode = function(node, id) {
     node.data('ivid', ivids);
 }
 
+Viewer.prototype._buildContinuationMaps = function() {
+    // map of element id to next element id in continuation chain
+    const nextContinuationMap = {};
+    // map of items in default target document to all their continuations
+    const itemContinuationMap = {};
+    this._iframes.contents().find("body *").each(function () {
+        const name = localName(this.nodeName).toUpperCase();
+        if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
+            const nodeId = this.getAttribute('id');
+            const continuedAtId = this.getAttribute("continuedAt");
+            if (continuedAtId !== null) {
+                nextContinuationMap[nodeId] = continuedAtId;
+            }
+            if (name != 'CONTINUATION' && !this.hasAttribute('target')) {
+                itemContinuationMap[nodeId] = [];
+            }
+        }
+    });
+
+    // Map of continuation IDs to list of (default target doc) items that
+    // they're continuations of
+    this.continuationOfMap = {};
+    for (const [itemId, itemContinuations] of Object.entries(itemContinuationMap)) {
+        var id = itemId;
+        while (nextContinuationMap[id] !== undefined) {
+            id = nextContinuationMap[id];
+            itemContinuations.push(id);
+            if (this.continuationOfMap[id] !== undefined) {
+                console.log("Continuation '" + id + "' is a continuation of multiple items.");
+            }
+            this.continuationOfMap[id] = itemId;
+        }
+    }
+    this.itemContinuationMap = itemContinuationMap;
+}
+
 //
 // Traverse the DOM hierarchy to find IX elements, and build maps and add
 // wrapper nodes and classes.
@@ -244,102 +258,97 @@ Viewer.prototype._addIdToNode = function(node, id) {
 //                         Indicates type of element being wrapped
 //
 // All ixbrl-elements have "ivid" data added, which is a list of the ID
-// attribute(s) of corresponding IX element(s).  i.e. facts have fact IDs,
-// continuations have continuation IDs, footnotes have footnote IDs.  It's
-// possible for it to be a mix of different types.
+// attribute(s) of corresponding IX item(s).  Continuations have the IDs of
+// their head items (fact or footnotes).
+// "ivid" can be a mix of different types.
 //
-// Viewer._ixNodeMap is a map of these IDs to IXNode objects
+// Viewer._ixNodeMap is a map of these IDs to IXNode objects.
 //
-// Viewer._docOrderIDIndex is a list of fact and footnote IDs in document
-// order, used to power next/prev tag.  continuations are excluded.
-//
-// Viewer._continuedAtMap is a map of IDs to objects containing:
-//     continuedAt - ID of next element in continuation chain
-//     isFact - whether the item is the first in the chain
-//     continuationOf (added later) - ID of first element in chain (fact or
-//     footnote)
+// Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
+// fact and footnotes in document order.
 //
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
     const name = localName(n.nodeName).toUpperCase();
     const isFootnote = (name == 'FOOTNOTE');
-    // Ignore iXBRL elements that are not in the default target document, as
-    // the viewer builder does not handle these, and does not ensure that they
-    // have ID attributes.
-    if (n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)
-        && !n.hasAttribute("target")) {
-        var nodes;
+    const isContinuation = (name == 'CONTINUATION');
+    const isFact = (name == 'NONNUMERIC' || name == 'NONFRACTION');
+    if (n.nodeType == 1) {
+        // Ignore iXBRL elements that are not in the default target document, as
+        // the viewer builder does not handle these, and the builder does not
+        // ensure that they have ID attributes.
         const id = n.getAttribute("id");
-        if (inHidden) {
-            nodes = $(n);
-        } else {
-            nodes = this._findOrCreateWrapperNode(n);
-        }
-        this._addIdToNode(nodes.first(), id);
-        /* We may have already created an IXNode for this ID from a -sec-ix-hidden
-         * element */
-        var ixn = this._ixNodeMap[id];
-        if (!ixn) {
-            ixn = new IXNode(id, nodes, docIndex);
-            this._ixNodeMap[id] = ixn;
-        }
-        if (nodes.is(':hidden')) {
-            ixn.htmlHidden = true;
-        }
-        if (inHidden) {
-            ixn.isHidden = true;
-            nodes.addClass("ixbrl-element-hidden");
-        }
-        if (n.getAttribute("continuedAt")) {
-            this._continuedAtMap[id] = { 
-                "isFact": name != 'CONTINUATION',
-                "continuedAt": n.getAttribute("continuedAt")
+        if (((isFact || isFootnote) && !n.hasAttribute("target"))
+            || (isContinuation && this.continuationOfMap[id] !== undefined)) {
+            var nodes;
+            if (inHidden) {
+                nodes = $(n);
+            } else {
+                nodes = this._findOrCreateWrapperNode(n);
             }
-        }
-        if (name == 'CONTINUATION') {
-            $(nodes).addClass("ixbrl-continuation");
-            ixn.isContinuation = true;
-        }
-        else {
-            this._docOrderIDIndex.push(id);
-        }
-        if (name == 'NONFRACTION') {
-            $(nodes).addClass("ixbrl-element-nonfraction");
-        }
-        if (name == 'NONNUMERIC') {
-            $(nodes).addClass("ixbrl-element-nonnumeric");
-            if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-                ixn.escaped = true;
-            }
-        }
-        if (isFootnote) {
-            $(nodes).addClass("ixbrl-element-footnote");
-            ixn.footnote = true;
-        }
-    }
-    else if(n.nodeType == 1 && name == 'HIDDEN') {
-        inHidden = true;
-    }
-    else if(n.nodeType == 1) {
-        // Handle SEC/ESEF links-to-hidden
-        const id = this._getIXHiddenLinkStyle(n);
-        if (id !== null) {
-            nodes = $(n);
-            nodes.addClass("ixbrl-element").data('ivid', [id]);
-            this._docOrderIDIndex.push(id);
-            /* We may have already seen the corresponding ix element in the hidden
-             * section */
+
+            // For a continuation, store the IX ID(s) of the item(s), not the continuation
+            const headId = isContinuation ? this.continuationOfMap[id] : id;
+            this._addIdToNode(nodes.first(), headId);
+
+            // We may have already created an IXNode for this ID from a -sec-ix-hidden
+            // element 
             var ixn = this._ixNodeMap[id];
-            if (ixn) {
-                /* ... if so, update the node and docIndex so we can navigate to it */
-                ixn.wrapperNodes = nodes;
-                ixn.docIndex = docIndex;
+            if (!ixn) {
+                ixn = new IXNode(id, nodes, docIndex);
+                this._ixNodeMap[id] = ixn;
+            }
+            if (nodes.is(':hidden')) {
+                ixn.htmlHidden = true;
+            }
+            if (inHidden) {
+                ixn.isHidden = true;
+                nodes.addClass("ixbrl-element-hidden");
+            }
+            if (isContinuation) {
+                $(nodes).addClass("ixbrl-continuation");
             }
             else {
-                this._ixNodeMap[id] = new IXNode(id, nodes, docIndex);
+                this._docOrderItemIndex.addItem(id, docIndex);
+            }
+            if (name == 'NONFRACTION') {
+                $(nodes).addClass("ixbrl-element-nonfraction");
+            }
+            if (name == 'NONNUMERIC') {
+                $(nodes).addClass("ixbrl-element-nonnumeric");
+                if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
+                    ixn.escaped = true;
+                }
+            }
+            if (isFootnote) {
+                $(nodes).addClass("ixbrl-element-footnote");
+                ixn.footnote = true;
             }
         }
-        if (name == 'A') {
-            this._updateLink(n);
+        else if(name == 'HIDDEN') {
+            inHidden = true;
+        }
+        else {
+            // Handle SEC/ESEF links-to-hidden
+            const id = this._getIXHiddenLinkStyle(n);
+            if (id !== null) {
+                nodes = $(n);
+                nodes.addClass("ixbrl-element").data('ivid', [id]);
+                this._docOrderItemIndex.addItem(id, docIndex);
+                /* We may have already seen the corresponding ix element in the hidden
+                 * section */
+                var ixn = this._ixNodeMap[id];
+                if (ixn) {
+                    /* ... if so, update the node and docIndex so we can navigate to it */
+                    ixn.wrapperNodes = nodes;
+                    ixn.docIndex = docIndex;
+                }
+                else {
+                    this._ixNodeMap[id] = new IXNode(id, nodes, docIndex);
+                }
+            }
+            if (name == 'A') {
+                this._updateLink(n);
+            }
         }
     }
     this._preProcessChildNodes(n, docIndex, inHidden);
@@ -382,24 +391,19 @@ Viewer.prototype.contents = function() {
 // moving to the next/prev element
 //
 Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
-    const elements = $(".ixbrl-element, .ixbrl-element-hidden", this.currentDocument().contents());
     var nextId;
-
     if (currentItem !== null) {
-        const l = this._docOrderIDIndex.length;
-        nextId = this._docOrderIDIndex[(this._docOrderIDIndex.indexOf(currentItem.id) + offset + l) % l];
+        nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.id, offset);
+        this.showDocumentForItemId(nextId);
     }
     // If no fact selected go to the first or last in the current document
     else if (offset > 0) {
-        const next = elements.first();
-        nextId = next.data('ivid')[0];
+        nextId = this._docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
     } 
     else {
-        const next = elements.last();
-        nextId = next.data('ivid')[elements.last().data('ivid').length - 1];
+        nextId = this._docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
     }
     
-    this.showDocumentForItemId(nextId);
     const nextElement = this.elementsForItemId(nextId); 
     this.showElement(nextElement);
     // If this is a table cell with multiple nested tags pass all tags so that
@@ -504,19 +508,7 @@ Viewer.prototype.clearHighlighting = function () {
 }
 
 Viewer.prototype._ixIdsForElement = function (e) {
-    var ids = e.data('ivid');
-    if (e.hasClass("ixbrl-continuation")) {
-        ids = [...ids];
-        /* If any of the ids are continuations, replace them with the IDs of
-         * their underlying facts */
-        for (var i = 0; i < ids.length; i++) {
-            const cof = this._continuedAtMap[ids[i]];
-            if (cof !== undefined) {
-                ids[i] = cof.continuationOf;
-            }
-        }
-    }
-    return ids;
+    return e.data('ivid');
 }
 
 /*
@@ -604,18 +596,14 @@ Viewer.prototype.elementsForItemId = function (factId) {
 }
 
 Viewer.prototype.elementsForItemIds = function (ids) {
-    var viewer = this;
-    return $($.map(ids, function (id, n) {
-        return viewer._ixNodeMap[id].wrapperNodes.get();
-    }));
+    return $(ids.map(id => this._ixNodeMap[id].wrapperNodes.get()).flat());
 }
 
 /*
  * Add or remove a class to an item (fact or footnote) and any continuation elements
  */
 Viewer.prototype.changeItemClass = function(itemId, highlightClass, removeClass) {
-    const continuations = this._ixNodeMap[itemId].continuationIds();
-    const elements = this.elementsForItemIds([itemId].concat(continuations));
+    const elements = this.elementsForItemIds([itemId].concat(this.itemContinuationMap[itemId]))
     if (removeClass) {
         elements.removeClass(highlightClass);
     }
@@ -654,12 +642,13 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
         $(".ixbrl-element", this._contents)
             .addClass("ixbrl-highlight")
             .each(function () {
-                // Find the first ixn for this element that isn't a continuation or footnote.
-                // Choosing the first means that we're arbitrarily choosing a highlight
-                // color for an element that is double tagged in a table cell.
-                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.isContinuation && !ixn.footnote)[0];
+                // Find the first ixn for this element that isn't a footnote.
+                // Choosing the first means that we're arbitrarily choosing a
+                // highlight color for an element that is double tagged in a
+                // table cell.
+                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
                 if (ixn != undefined) {
-                    const elements = viewer.elementsForItemIds([ixn.id].concat(ixn.continuationIds()));
+                    const elements = viewer.elementsForItemIds(ixn.chainIXIds());
                     const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
                     if (i !== undefined) {
                         elements.addClass("ixbrl-highlight-" + i);
@@ -720,10 +709,11 @@ Viewer.prototype.showDocumentForItemId = function(itemId) {
 }
 
 Viewer.prototype.currentDocument = function () {
-    return this._iframes.filter(function () { return $(this).data("selected") });
+    return this._iframes.eq(this._currentDocumentIndex);
 }
 
 Viewer.prototype.selectDocument = function (docIndex) {
+    this._currentDocumentIndex = docIndex;
     $('#ixv #viewer-pane .ixds-tabs .tab')
         .removeClass("active")
         .eq(docIndex)

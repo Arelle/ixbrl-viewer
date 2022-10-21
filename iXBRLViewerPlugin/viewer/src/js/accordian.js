@@ -24,14 +24,14 @@ export function Accordian(options) {
 }
 
 Accordian.prototype.addCard = function(title, body, selected, data) {
-    var a = this;
-    var card = $('<div class="card"></div>')
+    const a = this;
+    const card = $('<div class="card"></div>')
         .append($('<div class="title"></div>')
             .append(title)
             .click(function () {
                 var thisCard = $(this).closest(".card");
                 if (thisCard.hasClass("active")) {
-                    if (!options.alwaysOpen) {
+                    if (!a.options.alwaysOpen) {
                         thisCard.removeClass("active");
                     }
                 }

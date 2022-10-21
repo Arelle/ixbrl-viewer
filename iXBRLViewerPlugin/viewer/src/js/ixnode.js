@@ -31,7 +31,6 @@ export function IXNode(id, wrapperNodes, docIndex) {
     this.continuations = [];
     this.docIndex = docIndex;
     this.footnote = false;
-    this.isContinuation = false;
     this.id = id;
     this.isHidden = false;
     this.htmlHidden = false;
@@ -40,6 +39,12 @@ export function IXNode(id, wrapperNodes, docIndex) {
 
 IXNode.prototype.continuationIds = function () {
     return this.continuations.map(n => n.id);
+}
+
+// Return IX IDs for all IX elements in the continuation chain, including the
+// head.
+IXNode.prototype.chainIXIds = function () { 
+    return [this.id].concat(this.continuationIds());
 }
 
 IXNode.prototype.textContent = function () { 

@@ -79,7 +79,8 @@
       }
 
       .zoom-in,
-      .zoom-out {
+      .zoom-out,
+      .print {
         position: absolute;
         right: 30px;
         width: 20px;
@@ -102,8 +103,19 @@
         top: 40px;
       }
 
+      .print {
+        top: 75px;
+
+        &::after {
+          .icon-print();
+
+          font-size: 20px;
+        }
+      }
+
       .zoom-in:hover,
-      .zoom-out:hover {
+      .zoom-out:hover,
+      .print:hover {
         background-color: rgb(128 128 128 / 70%);
       }
     }

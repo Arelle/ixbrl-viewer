@@ -15,86 +15,88 @@
 import lunr from 'lunr'
 import $ from 'jquery'
 
-export function ReportSearch (report) {
-    this._report = report;
-    this.buildSearchIndex();
-}
+export class ReportSearch {
+    constructor(report) {
+        this._report = report;
+        this.buildSearchIndex();
+    }
 
-ReportSearch.prototype.buildSearchIndex = function () {
-    var docs = [];
-    var dims = {};
-    var facts = this._report.facts();
-    this.periods = {};
-    for (var i = 0; i < facts.length; i++) {
-        var f = facts[i];
-        var doc = { "id": f.id };
-        var l = f.getLabel("std");
-        doc.concept = f.conceptQName().localname;
-        doc.doc = f.getLabel("doc");
-        doc.date = f.periodTo();
-        doc.startDate = f.periodFrom();
-        var dims = f.dimensions();
-        for (var d in dims) {
-            if (this._report.getConcept(d).isTypedDimension()) {
-                if (dims[d] !== null) {
-                    l += " " + dims[d];
+    buildSearchIndex() {
+        var docs = [];
+        var dims = {};
+        var facts = this._report.facts();
+        this.periods = {};
+        for (var i = 0; i < facts.length; i++) {
+            var f = facts[i];
+            var doc = { "id": f.id };
+            var l = f.getLabel("std");
+            doc.concept = f.conceptQName().localname;
+            doc.doc = f.getLabel("doc");
+            doc.date = f.periodTo();
+            doc.startDate = f.periodFrom();
+            var dims = f.dimensions();
+            for (var d in dims) {
+                if (this._report.getConcept(d).isTypedDimension()) {
+                    if (dims[d] !== null) {
+                        l += " " + dims[d];
+                    }
+                }
+                else {
+                    l += " " + this._report.getLabel(dims[d], "std");
                 }
             }
-            else {
-                l += " " + this._report.getLabel(dims[d], "std");
+            doc.label = l;
+            doc.ref = f.concept().referenceValuesAsString();
+            const wider = f.widerConcepts();
+            if (wider.length > 0) {
+                doc.widerConcept = this._report.qname(wider[0]).localname;
+                doc.widerLabel = this._report.getLabel(wider[0], "std");
+                doc.widerDoc = this._report.getLabel(wider[0], "doc");
             }
-        }
-        doc.label = l;
-        doc.ref = f.concept().referenceValuesAsString();
-        const wider = f.widerConcepts();
-        if (wider.length > 0) {
-            doc.widerConcept = this._report.qname(wider[0]).localname;
-            doc.widerLabel = this._report.getLabel(wider[0], "std");
-            doc.widerDoc = this._report.getLabel(wider[0], "doc");
-        }
-        docs.push(doc);
+            docs.push(doc);
 
-        var p = f.period();
-        if (p) {
-            this.periods[p.key()] = p.toString();
-        }
+            var p = f.period();
+            if (p) {
+                this.periods[p.key()] = p.toString();
+            }
 
+        }
+        this._searchIndex = lunr(function () {
+          this.ref('id');
+          this.field('label');
+          this.field('concept');
+          this.field('startDate');
+          this.field('date');
+          this.field('doc');
+          this.field('ref');
+          this.field('widerLabel');
+          this.field('widerDoc');
+          this.field('widerConcept');
+
+          docs.forEach(function (doc) {
+            this.add(doc);
+          }, this)
+        })
     }
-    this._searchIndex = lunr(function () {
-      this.ref('id');
-      this.field('label');
-      this.field('concept');
-      this.field('startDate');
-      this.field('date');
-      this.field('doc');
-      this.field('ref');
-      this.field('widerLabel');
-      this.field('widerDoc');
-      this.field('widerConcept');
 
-      docs.forEach(function (doc) {
-        this.add(doc);
-      }, this)
-    })
-}
+    search(s) {
+        var rr = this._searchIndex.search(s.searchString);
+        var results = []
+        var searchIndex = this;
 
-ReportSearch.prototype.search = function (s) {
-    var rr = this._searchIndex.search(s.searchString);
-    var results = []
-    var searchIndex = this;
-
-    rr.forEach((r,i) => {
-            var item = searchIndex._report.getItemById(r.ref);
-            if (
-                (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
-                (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
-                (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
-                results.push({
-                    "fact": item,
-                    "score": r.score
-                });
+        rr.forEach((r,i) => {
+                var item = searchIndex._report.getItemById(r.ref);
+                if (
+                    (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
+                    (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
+                    (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
+                    results.push({
+                        "fact": item,
+                        "score": r.score
+                    });
+                }
             }
-        }
-    );
-    return results;
+        );
+        return results;
+    }
 }

@@ -14,6 +14,7 @@
 
 import dateFormat from "dateformat"
 import moment from "moment";
+import Decimal from "decimal.js";
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
@@ -40,8 +41,8 @@ export function momentToHuman(d, adjust) {
  * decimal places.
  */
 export function formatNumber(value, decimals) {
-    const n = Number(value);
-    const s = decimals === undefined ? n.toString() : n.toFixed(Math.max(0, decimals));
+    const n = Decimal(value);
+    const s = decimals === undefined ? n.toFixed() : n.toFixed(Math.max(0, decimals));
     const parts = s.split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join('.');

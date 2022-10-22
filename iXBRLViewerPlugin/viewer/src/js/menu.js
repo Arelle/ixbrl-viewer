@@ -14,98 +14,100 @@
 
 import $ from 'jquery'
 
-export function Menu(elt, attr) {
-    this._elt = elt;
-    var menu = this;
-    attr = attr || {};
-    this.type = attr.type || "dropdown";
+export class Menu {
+    constructor(elt, attr) {
+        this._elt = elt;
+        var menu = this;
+        attr = attr || {};
+        this.type = attr.type || "dropdown";
 
-    elt.find(".menu-title").click(function (e) {
-        elt.find(".content-container").toggle();
-        /* Stop an opening click from also being treated as an "out-of-menu"
-         * closing click */
-        e.stopPropagation();
-    });
+        elt.find(".menu-title").click(function (e) {
+            elt.find(".content-container").toggle();
+            /* Stop an opening click from also being treated as an "out-of-menu"
+             * closing click */
+            e.stopPropagation();
+        });
 
-    $('html').click(function(event) {
-        if ($(".content",elt).find($(event.target)).length === 0) {
-            menu.close();
-        }
-    });
-}
-
-Menu.prototype.reset = function() {
-    this._elt.find(".content").empty();
-}
-
-Menu.prototype.close = function() {
-    if (this.type == "dropdown") {
-        this._elt.find(".content-container").hide();
-    }
-}
-
-Menu.prototype._add = function(item, after) {
-    var i;
-    if (after !== undefined) {
-        i = this._elt.find(".content > div").filter(function () {
-            return $(this).data('iv-menu-item-name') == after;     
+        $('html').click(function(event) {
+            if ($(".content",elt).find($(event.target)).length === 0) {
+                menu.close();
+            }
         });
     }
-    if (i !== undefined && i.length > 0) {
-        i.after(item);
-    }
-    else {
-        item.appendTo(this._elt.find(".content"));
-    }
-}
 
-Menu.prototype.addCheckboxItem = function(name, callback, itemName, after, onByDefault) {
-    var menu = this;
-    var item = $("<label></label>")
-        .addClass("menu-checkbox")
-        .addClass("item")
-        .text(name)
-        .data("iv-menu-item-name", itemName)
-        .prepend(
-            $('<input type="checkbox"></input>')
-                .prop("checked", onByDefault)
-                .change(function () {
-                    callback($(this).prop("checked"));
-                    menu.close(); 
-                })
-        )
-        .append($("<span></span>").addClass("checkmark"));
-    this._add(item, after);
-    if (onByDefault) {
-        callback(true);
+    reset() {
+        this._elt.find(".content").empty();
     }
-}
 
-Menu.prototype.addCheckboxGroup = function(values, names, def, callback, name, after) {
-    var menu = this;
-    var group = $('<div class="group"></div>').data("iv-menu-item-name", name);
-    this._add(group, after);
+    close() {
+        if (this.type == "dropdown") {
+            this._elt.find(".content-container").hide();
+        }
+    }
 
-    $.each(values, function (i, v) {
+    _add(item, after) {
+        var i;
+        if (after !== undefined) {
+            i = this._elt.find(".content > div").filter(function () {
+                return $(this).data('iv-menu-item-name') == after;     
+            });
+        }
+        if (i !== undefined && i.length > 0) {
+            i.after(item);
+        }
+        else {
+            item.appendTo(this._elt.find(".content"));
+        }
+    }
+
+    addCheckboxItem(name, callback, itemName, after, onByDefault) {
+        var menu = this;
         var item = $("<label></label>")
             .addClass("menu-checkbox")
             .addClass("item")
-            .text(names[v])
+            .text(name)
+            .data("iv-menu-item-name", itemName)
             .prepend(
-                $('<input type="radio"></input>')
-                    .attr({ "name": name, "value": v})
+                $('<input type="checkbox"></input>')
+                    .prop("checked", onByDefault)
                     .change(function () {
-                        callback($(this).val())
+                        callback($(this).prop("checked"));
                         menu.close(); 
                     })
             )
-            .append($("<span></span>").addClass("checkmark"))
-            .appendTo(group);
-
-        if (v == def) {
-            item.find("input").prop("checked", true);
+            .append($("<span></span>").addClass("checkmark"));
+        this._add(item, after);
+        if (onByDefault) {
+            callback(true);
         }
+    }
 
-    });
-    
+    addCheckboxGroup(values, names, def, callback, name, after) {
+        var menu = this;
+        var group = $('<div class="group"></div>').data("iv-menu-item-name", name);
+        this._add(group, after);
+
+        $.each(values, function (i, v) {
+            var item = $("<label></label>")
+                .addClass("menu-checkbox")
+                .addClass("item")
+                .text(names[v])
+                .prepend(
+                    $('<input type="radio"></input>')
+                        .attr({ "name": name, "value": v})
+                        .change(function () {
+                            callback($(this).val())
+                            menu.close(); 
+                        })
+                )
+                .append($("<span></span>").addClass("checkmark"))
+                .appendTo(group);
+
+            if (v == def) {
+                item.find("input").prop("checked", true);
+            }
+
+        });
+        
+    }
 }

@@ -21,11 +21,11 @@ import $ from 'jquery'
 export class DocumentOutline {
     constructor(report) {
         this._report = report;
-        var facts = report.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
-        var runLength = {};
-        var runStart = {};
-        var longestRun = {};
-        var longestRunStart = {};
+        const facts = report.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
+        const runLength = {};
+        const runStart = {};
+        const longestRun = {};
+        const longestRunStart = {};
         this._buildDimensionMap();
         const elrs = report.relationshipGroups("pres");
         for (const f of facts) {
@@ -162,9 +162,9 @@ export class DocumentOutline {
     }
 
     sortedSections() {
-        var sections = Object.keys(this.sections);
+        const sections = Object.keys(this.sections);
         const re = /\(parenthetical\)\s*$/i;
-        var filteredSections = sections.filter(s => !re.test(this._report.getRoleLabel(s)));
+        const filteredSections = sections.filter(s => !re.test(this._report.getRoleLabel(s)));
         return filteredSections.sort((a, b) => this._report.getRoleLabel(a).localeCompare(this._report.getRoleLabel(b)));
     }
 }

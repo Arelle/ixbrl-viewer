@@ -34,11 +34,11 @@ export class Period {
     }
 
     toString() {
-        var s;
+        let s;
         if (!this._p) {
             s = "Undefined";
         }
-        else if (this._p == 'f') {
+        else if (this._p === 'f') {
             /* forever */
             s = "None";
         }
@@ -58,10 +58,9 @@ export class Period {
      * object
      */
     to() {
-        if (this._p && this._p != 'f') {
+        if (this._p && this._p !== 'f') {
             if (this._p.includes('/')) {
-                var r = this._p.split('/');
-                return xbrlDateToMoment(r[1]);
+                return xbrlDateToMoment(this._p.split('/')[1]);
             }
             else {
                 return xbrlDateToMoment(this._p);
@@ -75,15 +74,14 @@ export class Period {
      */
     from() {
         if (this._p && this._p.includes('/')) {
-            var r = this._p.split('/');
-            return xbrlDateToMoment(r[0]);
+            return xbrlDateToMoment(this._p.split('/')[0]);
         }
         return null;
     }
 
     isEquivalentDuration(op) {
-        var t1 = op.type();
-        var t2 = this.type();
+        const t1 = op.type();
+        const t2 = this.type();
         /* Undefined periods are never equivalent. */
         if (!t1 || !t2) {
             return false;
@@ -93,11 +91,11 @@ export class Period {
             return false;
         }
         /* Instants and forever are equivalent. */
-        if (t1 != 'd') {
+        if (t1 !== 'd') {
             return true;
         }
-        var d1 = op.to().toDate() - op.from().toDate();
-        var d2 = this.to().toDate() - this.from().toDate();
+        const d1 = op.to().toDate() - op.from().toDate();
+        const d2 = this.to().toDate() - this.from().toDate();
         if (Math.abs(d1-d2) < 0.1 * (d1+d2)) {
             return true;
         }

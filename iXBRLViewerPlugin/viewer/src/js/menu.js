@@ -17,20 +17,19 @@ import $ from 'jquery'
 export class Menu {
     constructor(elt, attr) {
         this._elt = elt;
-        var menu = this;
         attr = attr || {};
         this.type = attr.type || "dropdown";
 
-        elt.find(".menu-title").click(function (e) {
+        elt.find(".menu-title").click((e) => {
             elt.find(".content-container").toggle();
             /* Stop an opening click from also being treated as an "out-of-menu"
              * closing click */
             e.stopPropagation();
         });
 
-        $('html').click(function(event) {
-            if ($(".content",elt).find($(event.target)).length === 0) {
-                menu.close();
+        $('html').click((event) => {
+            if ($(".content", elt).find($(event.target)).length === 0) {
+                this.close();
             }
         });
     }
@@ -46,23 +45,19 @@ export class Menu {
     }
 
     _add(item, after) {
-        var i;
         if (after !== undefined) {
-            i = this._elt.find(".content > div").filter(function () {
-                return $(this).data('iv-menu-item-name') == after;     
-            });
+            const i = this._elt.find(".content > div").filter(() => $(this).data('iv-menu-item-name') === after);
+            if (i !== undefined && i.length > 0) {
+                i.after(item);
+                return;
+            }
         }
-        if (i !== undefined && i.length > 0) {
-            i.after(item);
-        }
-        else {
-            item.appendTo(this._elt.find(".content"));
-        }
+        item.appendTo(this._elt.find(".content"));
     }
 
     addCheckboxItem(name, callback, itemName, after, onByDefault) {
-        var menu = this;
-        var item = $("<label></label>")
+        const menu = this;
+        const item = $("<label></label>")
             .addClass("menu-checkbox")
             .addClass("item")
             .text(name)
@@ -83,12 +78,12 @@ export class Menu {
     }
 
     addCheckboxGroup(values, names, def, callback, name, after) {
-        var menu = this;
-        var group = $('<div class="group"></div>').data("iv-menu-item-name", name);
+        const menu = this;
+        const group = $('<div class="group"></div>').data("iv-menu-item-name", name);
         this._add(group, after);
 
-        $.each(values, function (i, v) {
-            var item = $("<label></label>")
+        for (const v of values) {
+            const item = $("<label></label>")
                 .addClass("menu-checkbox")
                 .addClass("item")
                 .text(names[v])
@@ -103,11 +98,9 @@ export class Menu {
                 .append($("<span></span>").addClass("checkmark"))
                 .appendTo(group);
 
-            if (v == def) {
+            if (v === def) {
                 item.find("input").prop("checked", true);
             }
-
-        });
-        
+        }
     }
 }

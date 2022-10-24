@@ -24,50 +24,45 @@ export class TableExport {
     } 
 
     static addHandles(iframe, report) {
-
         $('table', iframe).each(function () {
-            var table = $(this);
+            const table = $(this);
             if (table.find(".ixbrl-element").length > 0) {
                 table.css("position", "relative");
-                var exporter = new TableExport(table, report);
+                const exporter = new TableExport(table, report);
                 $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
                     .appendTo(table)
-                    .click(function () { exporter.exportTable() });
+                    .click(() => exporter.exportTable());
             }
         });
-
     }
 
-    _getRawTable(table) {
-        var table = this._table;
-        var report = this._report;
-        var maxRowLength = 0;
-        var rows = [];
-        var fact;
+    _getRawTable() {
+        const table = this._table;
+        const report = this._report;
+        let maxRowLength = 0;
+        const rows = [];
         table.find("tr:visible").each(function () {
-            var row = [];
+            const row = [];
             $(this).find("td:visible, th:visible").each(function () {
-                var colspan = $(this).attr("colspan");
+                const colspan = $(this).attr("colspan");
                 if (colspan) {
-                    for (var i=0; i < colspan-1; i++) {
+                    for (let i=0; i < colspan-1; i++) {
                         row.push({ type: "static", value: ""});
                     }
                 }
-                var v;
-                
-                var facts = $(this).find(".ixbrl-element").addBack(".ixbrl-element");
-                var id;
-                fact = null;
+
+                const facts = $(this).find(".ixbrl-element").addBack(".ixbrl-element");
+                let fact = null;
                 if (facts.length > 0) {
-                    var id = facts.first().data('ivid');
+                    const id = facts.first().data('ivid');
                     fact = report.getItemById(id);
                 }
                 if (fact instanceof Fact) {
-                    var cell = { type: "fact", fact: fact};
+                    const cell = { type: "fact", fact: fact};
                     
-                    var td = $(this)[0];
-                    var n = facts[0];
-                    var s = n.textContent;
+                    const td = $(this)[0];
+                    let n = facts[0];
+                    let s = n.textContent;
                     while (n !== td) {
                         if (n.previousSibling !== null) {
                             n = n.previousSibling;
@@ -88,7 +83,7 @@ export class TableExport {
                     
                 }
                 else {
-                    v = $(this).text();
+                    const v = $(this).text();
                     row.push({ type: "static", value: v});
                 }
             });
@@ -97,8 +92,7 @@ export class TableExport {
             }
             rows.push(row);
         });
-        for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
+        for (const row of rows) {
             while (row.length < maxRowLength) {
                 row.push({ type: "static", value: "" });
             }
@@ -107,41 +101,32 @@ export class TableExport {
     }
 
     _getFactsInSlice(slice) {
-        var facts = [];
-        for (var j = 0; j < slice.length; j++) {
-            var cell = slice[j];
-            if (cell.type == 'fact') {
-                facts.push(cell.fact);
-            }
-        }
-        return facts;
+        return slice.filter((cell) => cell.type === 'fact').map((cell) => cell.fact);
     }
 
     /* 
-     * Returns a map of aspect names to Aspect objects for aspects that are common
+     * Returns a Map of aspect names to Aspect objects for aspects that are common
      * to all facts in the given table slice.  Returns null if there are no facts
      * in the slice.
      */ 
     _getConstantAspectsForSlice(slice, aspects) {
-        var facts = this._getFactsInSlice(slice);
+        const facts = this._getFactsInSlice(slice);
         if (facts.length == 0) {
             return null;
         }
-        var allAspectsMap = {};
+        const allAspectNamesSet = new Set();
         for (const fact of facts) {
             for (const a of fact.aspects()) {
-                allAspectsMap[a.name()] = 1;
+                allAspectNamesSet.add(a.name());
             }
         }
-        var allAspects = Object.keys(allAspectsMap);
 
-        var constantAspects = {};
-        for (var i = 0; i < allAspects.length; i++) {
-            var a = allAspects[i];
-            constantAspects[a] = facts[0].aspect(a);
-            for (var j = 1; j < facts.length; j++) {
-                if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspect(a))) {
-                    delete constantAspects[a];
+        const constantAspects = new Map();
+        for (const a of allAspectNamesSet) {
+            constantAspects.set(a, facts[0].aspect(a));
+            for (let j = 1; j < facts.length; j++) {
+                if (constantAspects.get(a) === undefined || !constantAspects.get(a).equalTo(facts[j].aspect(a))) {
+                    constantAspects.delete(a);
                 }
             }
         }
@@ -149,17 +134,15 @@ export class TableExport {
     }
 
     _writeTable(data) {
-        var wb = new Excel.Workbook();
-        var ws = wb.addWorksheet('Table');
+        const wb = new Excel.Workbook();
+        const ws = wb.addWorksheet('Table');
         
-        var s = '';
-        for (var i = 0; i < data.length; i++) {
-            var row = data[i];
-            for (var j = 0; j < row.length; j++) {
-                var cell = row[j];
+        let s = '';
+        for (const [i, row] of data.entries()) {
+            for (const [j, cell] of row.entries()) {
+                const cc = ws.getRow(i+1).getCell(j+1);
 
-                var cc = ws.getRow(i+1).getCell(j+1);
-                if (cell.type == 'fact') {
+                if (cell.type === 'fact') {
                     cc.value = Number(cell.fact.value());
                     cc.numFmt = '#,##0';
                     ws.getColumn(j+1).width = 18;
@@ -178,7 +161,7 @@ export class TableExport {
                         cc.border.bottom = {style: "medium", color: { argb: 'FF000000' }};
                     }
                 }
-                else if (cell.type == 'aspectLabel') {
+                else if (cell.type === 'aspectLabel') {
                     cc.value = cell.value;
                 }
                 else {
@@ -192,56 +175,62 @@ export class TableExport {
 
     exportTable() {
 
-        var data = this._getRawTable(this._table);
-        var rowLength = 0;
+        const data = this._getRawTable();
+        let rowLength = 0;
 
-        var rowAspects = []; // array of aspect sets that are constant for each row
-        var allRowAspectsMap = {}; // map to record full set of aspect names that appear on rows
-        for (var i = 0; i < data.length; i++) {
-            var row = data[i];
-            var constantAspects = this._getConstantAspectsForSlice(row);
+        const rowAspects = []; // array of aspect sets that are constant for each row
+        const allRowAspectNamesSet = new Set(); // set to record full set of aspect names that appear on rows
+        for (const row of data) {
+            const constantAspects = this._getConstantAspectsForSlice(row);
             rowAspects.push(constantAspects);
-            $.each(constantAspects || {}, function (k,v) { allRowAspectsMap[k] = 1; });
+            if (constantAspects !== null) {
+                for (const [aspectName, value] of constantAspects) {
+                    allRowAspectNamesSet.add(aspectName)
+                }
+            }
             if (row.length > rowLength) {
                 rowLength = row.length;
             }
         }
 
-        var columnAspects = [];
-        var allColumnAspectsMap = {};
-        for (var i = 0; i < rowLength; i++) {
-            var slice = [];
-            for (var j = 0; j < data.length; j++) {
-                slice.push(data[j][i]);
-            }
-            var constantAspects = this._getConstantAspectsForSlice(slice);
+        const columnAspects = [];
+        const allColumnAspectNameSet = new Set();
+        for (let i = 0; i < rowLength; i++) {
+            const slice = data.map(row => row[i]);
+            const constantAspects = this._getConstantAspectsForSlice(slice);
             columnAspects.push(constantAspects);
-            $.each(constantAspects || {}, function (k,v) { allColumnAspectsMap[k] = 1; });
+            if (constantAspects !== null) {
+                for (const [aspectName, value] of constantAspects) {
+                    allColumnAspectNameSet.add(aspectName);
+                }
+            }
         }
+
         /* Attempt to remove unnecessary headers.  If an aspect is specified on all
          * columns that have facts (a universal column aspect), then don't include it
          * as a row aspect as well.  XXX: we should do the reverse, but need to be
          * careful not to delete aspects altogether. */
-        var universalColumnAspectMap = $.extend({}, allColumnAspectsMap);
-        $.each(allColumnAspectsMap, function (k,v) { 
-            $.each(columnAspects, function (i,ca) { 
-                if (ca !== null && !ca[k]) { delete universalColumnAspectMap[k] }
-            })}
-        );
-        $.each(universalColumnAspectMap, function (k,v) { delete allRowAspectsMap[k] });
-
-        var allRowAspects = Object.keys(allRowAspectsMap);
-        var allColumnAspects = Object.keys(allColumnAspectsMap);
-
-        for (var i = 0; i < allColumnAspects.length; i++) {
-            var newRow = [];
-            var aspect = allColumnAspects[i];
-            for (var k = 0; k < allRowAspects.length; k++) {
-                newRow.push("");
+        const universalColumnAspectSet = new Set(allColumnAspectNameSet);
+        for (const aspectName of allColumnAspectNameSet) {
+            for (const [i, ca] of Object.entries(columnAspects)) {
+                if (ca !== null && !ca.get(aspectName)) { 
+                    universalColumnAspectSet.delete(aspectName) 
+                }
             }
-            for (var k = 0; k < rowLength; k++) {
-                var ca = columnAspects[k] || {};
-                var v = ca[aspect];
+        }
+        
+        for (const aspectName of allColumnAspectNameSet) {
+            allRowAspectNamesSet.delete(aspectName);
+        }
+
+        /* Insert new rows at the top of the table with labels for column
+         * aspects */
+        for (const aspectName of allColumnAspectNameSet) {
+            /* Make space at the start of the new row for row aspects */
+            const newRow = Array.from(allRowAspectNamesSet).map(() => "");
+            for (let k = 0; k < rowLength; k++) {
+                const ca = columnAspects[k] || new Map();
+                let v = ca.get(aspectName);
                 if (v !== undefined) {
                     v = v.valueLabel("std");
                 }
@@ -250,22 +239,23 @@ export class TableExport {
             data.unshift(newRow);
         }
 
-        for (var k = allColumnAspects.length; k < data.length; k++) {
-            var newCols = [];
-            for (var i = 0; i < allRowAspects.length; i++) {
-                var aspect = allRowAspects[i];
-                var ra = rowAspects[k - allColumnAspects.length] || {};
-                var v = ra[aspect];
+        /* Iterate over rows, skip the column header rows added above. */
+        for (let k = allColumnAspectNameSet.size; k < data.length; k++) {
+            const newCols = [];
+            for (const aspectName of allRowAspectNamesSet) {
+                const ra = rowAspects[k - allColumnAspectNameSet.size] || new Map();
+                let v = ra.get(aspectName);
                 if (v !== undefined) {
                     v = v.valueLabel("std");
                 }
                 newCols.push({ type: 'aspectLabel', value : v || ""});
             }
+            /* Insert row labels at start of row */
             data[k] = newCols.concat(data[k]);
         }
 
 
-        var wb = this._writeTable(data);
+        const wb = this._writeTable(data);
         wb.xlsx.writeBuffer().then( data => {
           const blob = new Blob( [data], {type: "application/octet-stream"} );
           FileSaver.saveAs( blob, 'table.xlsx');

@@ -1,0 +1,16 @@
+{
+    "centsUSD": "centavos",
+    "centsEUR": "centavos",
+    "centsAUD": "centavos",
+    "centsZAR": "centavos",
+    "centsMXN": "centavos",
+    "centsGBP": "centavos",
+    "accuracy3": "mil\u00E9simos",
+    "accuracy2": "cent\u00E9simos",
+    "accuracy0":  "unidades",
+    "accuracy-1":  "d\u00E9cimos",
+    "accuracy-2":  "cientos",
+    "accuracy-3":  "miles",
+    "accuracy-6":  "millones",
+    "accuracy-9":  "billones"
+}

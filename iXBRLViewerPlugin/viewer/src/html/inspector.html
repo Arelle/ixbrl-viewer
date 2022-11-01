@@ -16,54 +16,62 @@ limitations under the License.
 
 <div id="ixv" xmlns="http://www.w3.org/1999/xhtml">
   <div class="loader loading">
-     <span class="text">Loading iXBRL Viewer</span>
+     <span class="text" data-i18n="inspector.loadingViewer">Loading iXBRL Viewer</span>
   </div>
   <div id="top-bar">
-    <div class="header">
-       <img src="../img/inline-viewer.svg" />
-    </div>
+    <img class="header" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
     <div class="document-title"></div>
-    <div class="menu" id='display-options-menu'>
-      <div class="title">Display Options</div>
-      <div class="content-container">
-        <div class="content"></div>
-      </div>
+    <div class="top-bar-controls" id="toolbar-highlight-menu">
+        <b data-i18n="inspector.highlight">Highlight:</b><span class="highlight-key popup-trigger"><div class="popup-content" >
+                <div class="arrow"></div>
+                <div class="items"></div>
+        </div></span><span class="content"></span>
+        <span class="validation-warning" title="Report has validation errors"></span>
     </div>
   </div>
-  <div id="inspector">
+  <div id="inspector" class="no-fact-selected">
     <div id="inspector-head">
       <div class="title">
-        <h1 class="footnote-mode-off">Fact Properties</h1>
-        <h1 class="footnote-mode-only">Footnote Properties</h1>
+        <h1 class="footnote-mode-off" data-i18n="inspector.factProperties">Fact Properties</h1>
+        <h1 class="footnote-mode-only" data-i18n="inspector.footnoteProperties">Footnote Properties</h1>
         <div class="back search-mode-only">
+        </div>
+        <div class="back outline-mode-only">
+        </div>
+        <div class="menu" id='display-options-menu'>
+          <div class="menu-title"></div>
+          <div class="content-container">
+            <div class="content"></div>
+          </div>
         </div>
       </div>
       <div class="controls">
-        <div class="search-button">
-          <span class="icon-search"></span>
+        <div class="outline-button" data-i18n="[title]inspector.documentOutline" title="Document outline">
+        </div>
+        <div class="search-button" data-i18n="[title]inspector.searchTitle" title="Search">
         </div>
         <div class="next-prev">
-            <span class="ixbrl-prev-tag"></span><span class="ixbrl-next-tag"></span>
+            <span class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag"></span><span class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag"></span>
         </div>
       </div>
 
       <div class="search-controls search-mode-only">
         <div class="search-input">
-          <input id="ixbrl-search" type="text" />
+          <input id="ixbrl-search" type="text" aria-label="Search iXBRL report"/>
           <div class="filter-toggle"></div>
         </div>
         <div class="search-filters">
-          <div class="reset">Reset</div>
-          <h3>Filter</h3>
-          <div class="control-label">
+          <div class="reset" data-i18n="inspector.reset">Reset</div>
+          <h3 data-i18n="inspector.filter">Filter</h3>
+          <div class="control-label" data-i18n="inspector.conceptType">
               Concept Type
           </div>
           <select id="search-filter-concept-type">
-              <option value="*">ALL</option>
-              <option value="numeric">Numeric</option>
-              <option value="text">Text</option>
+              <option value="*" data-i18n="inspector.allOption">ALL</option>
+              <option value="numeric" data-i18n="inspector.numericOption">Numeric</option>
+              <option value="text" data-i18n="inspector.textOption">Text</option>
           </select>
-          <div class="control-label">
+          <div class="control-label" data-i18n="inspector.period">
               Period
           </div>
           <select id="search-filter-period">
@@ -72,13 +80,13 @@ limitations under the License.
           <div class="checkboxes">
             <div>
               <label class="checkbox">
-                <input id="search-hidden-fact-filter" type="checkbox" checked="checked"/> Hidden Facts
+                <input id="search-hidden-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.hiddenFacts">Hidden Facts</span>
                 <span class="checkmark"></span>
               </label>
             </div>
             <div>
               <label class="checkbox">
-                <input id="search-visible-fact-filter" type="checkbox" checked="checked"/> Visible Facts
+                <input id="search-visible-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.visibleFacts">Visible Facts</span>
                 <span class="checkmark"></span>
               </label>
             </div>
@@ -91,10 +99,11 @@ limitations under the License.
       <div class="fact-mode-only inspector-body-fact">
         <div class="no-fact-overlay">
           <div class="no-fact-overlay-icon"></div>
-          <p class="title">No Fact Selected</p>
+          <p class="title" data-i18n="inspector.noFactSelected">No Fact Selected</p>
         </div>
         <div class="fact-selected-only">
-          <div class="hidden-fact-tag">Hidden Fact</div>
+          <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>
+          <div class="html-hidden-fact-tag" data-i18n="inspector.concealedFact">Concealed Fact</div>
           <div class="collapsible-section">
             <div class="fact-inspector collapsible-body">
             </div>
@@ -106,25 +115,35 @@ limitations under the License.
               </div>
            </div>            
             <div class="collapsible-section">
-               <h3 class="collapsible-header">References</h3>
+               <h3 class="collapsible-header" data-i18n="inspector.references">References</h3>
                <div class="collapsible-body references">
                </div>
             </div>
             <div class="collapsible-section">
-              <h3 class="collapsible-header">Calculations</h3>
+              <h3 class="collapsible-header" data-i18n="inspector.calculations">Calculations</h3>
               <div class="collapsible-body calculations">
                 <div class="tree"></div>
               </div>
             </div>
             <div class="collapsible-section">
-               <h3 class="collapsible-header">Footnotes</h3>
-               <div class="collapsible-body footnotes">
+               <h3 class="collapsible-header" data-i18n="inspector.footnotes">Footnotes</h3>
+               <div class="collapsible-body footnotes fact-list">
+               </div>
+            </div>
+            <div class="collapsible-section footnote-facts-section">
+               <h3 class="collapsible-header" data-i18n="inspector.associatedFacts">Associated Facts</h3>
+               <div class="collapsible-body footnote-facts fact-list">
+               </div>
+            </div>
+            <div class="collapsible-section">
+               <h3 class="collapsible-header" data-i18n="inspector.fact-groups">Sections</h3>
+               <div class="collapsible-body fact-groups fact-list">
                </div>
             </div>
           </div>
           <div class="footnote-details footnote-mode-only">
             <div class="collapsible-section">
-              <h3 class="collapsible-header">Associated facts</h3>
+              <h3 class="collapsible-header" data-i18n="inspector.associatedFacts">Associated facts</h3>
                <div class="collapsible-body footnote-facts fact-list">
                </div>
             </div>
@@ -137,9 +156,19 @@ limitations under the License.
         </div>
         <div class="search-overlay">
           <div class="search-overlay-icon"></div>
-          <div class="search-overlay-text"><p class="title">Fact Search</p><p class="text">Please enter some search terms</p></div>
+          <div class="search-overlay-text"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
         </div>
       </div>
+
+      <div class="outline outline-mode-only">
+        <div class="no-outline-overlay">
+          <div class="no-outline-overlay-icon"></div>
+          <p class="title" data-i18n="inspector.outlineUnavailable">Outline Unavailable</p>
+        </div>
+        <div class="body">
+        </div>
+      </div>
+
     </div>
     <!-- <div class="inspector-foot powered-by">
         Powered by
@@ -148,11 +177,42 @@ limitations under the License.
   </div>
   <div class="dialog-mask">
   </div>
-  <div id="chart" class="dialog">
-    <div class="close"></div>
-    <div class="contents">
-      <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
-      <div class="other-aspects"></div>
+  <div id="dialog-container"></div>
+  <div id="dialog-templates">
+    <div class="dialog full-screen chart">
+      <div class="close"></div>
+      <div class="contents">
+        <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
+        <div class="other-aspects"></div>
+      </div>
+    </div>
+    <div class="dialog validation-report">
+      <div class="close"></div>
+      <div class="contents">
+          <h2 data-i18n="inspector.validationResults">Validation results</h2>
+          <table>
+              <thead>
+                  <th data-i18n="inspector.validationSeverity">Severity</th>
+                  <th data-i18n="inpsector.validationCode">Code</th>
+                  <th data-i18n="inspector.validationMessage">Message</th>
+              </thead>
+              <tbody>
+
+              </tbody>
+          </table>
+          <div class="buttons">
+          </div>
+      </div>
+    </div>
+    <div class="dialog message-box">
+      <div class="close"></div>
+      <div class="contents">
+        <h2 class="title"></h2>
+        <div class="message">
+        </div>
+        <div class="buttons">
+        </div>
+      </div>
     </div>
   </div>
   <div id="viewer-pane" >

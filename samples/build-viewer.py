@@ -16,11 +16,12 @@
 
 import arelle.FileSource
 from arelle import PackageManager, Cntlr, PluginManager
+from arelle.ModelFormulaObject import FormulaOptions
 import os
 import sys
 import glob
 import argparse
-import iXBRLViewerPlugin
+import iXBRLViewerPlugin.iXBRLViewer
 from arelle.plugin import inlineXbrlDocumentSet
 
 class CntlrCreateViewer(Cntlr.Cntlr):
@@ -51,10 +52,15 @@ class CntlrCreateViewer(Cntlr.Cntlr):
                 return None
         fs = arelle.FileSource.openFileSource(f, self)
         xbrl = self.modelManager.load(fs)
+        self.modelManager.validate()
 
-        viewerBuilder = iXBRLViewerPlugin.IXBRLViewerBuilder(xbrl)
-        viewer = viewerBuilder.createViewer(scriptUrl = scriptUrl)
-        viewer.save(outPath)
+        try:
+            viewerBuilder = iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilder(xbrl)
+            viewer = viewerBuilder.createViewer(scriptUrl = scriptUrl)
+            viewer.save(outPath)
+        except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
+            print(e.message)
+            sys.exit(1)
 
 parser = argparse.ArgumentParser(description="Create iXBRL Viewer instances")
 parser.add_argument("--package-dir", "-p", help="Path to directory containing taxonomy packages")
@@ -70,9 +76,15 @@ cntlr.startLogging(
     logFormat="[%(messageCode)s] %(message)s - %(file)s",
     logLevel="DEBUG",
     logRefObjectProperties=True,
-    logToBuffer=False
+    logToBuffer=True
 )
+cntlr.modelManager.validateInferDecimals = True
+cntlr.modelManager.validateCalcLB = True
+cntlr.modelManager.formulaOptions = FormulaOptions()
+
+PluginManager.addPluginModule("transforms/SEC")
 PluginManager.addPluginModule("inlineXbrlDocumentSet")
+cntlr.modelManager.loadCustomTransforms()
 if args.package_dir:
     cntlr.loadPackagesFromDir(args.package_dir)
 

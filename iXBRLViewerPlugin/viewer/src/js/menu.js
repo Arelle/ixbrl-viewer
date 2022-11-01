@@ -14,11 +14,13 @@
 
 import $ from 'jquery'
 
-export function Menu(elt) {
+export function Menu(elt, attr) {
     this._elt = elt;
     var menu = this;
+    attr = attr || {};
+    this.type = attr.type || "dropdown";
 
-    elt.find(".title").click(function (e) {
+    elt.find(".menu-title").click(function (e) {
         elt.find(".content-container").toggle();
         /* Stop an opening click from also being treated as an "out-of-menu"
          * closing click */
@@ -37,7 +39,9 @@ Menu.prototype.reset = function() {
 }
 
 Menu.prototype.close = function() {
-    this._elt.find(".content-container").hide();
+    if (this.type == "dropdown") {
+        this._elt.find(".content-container").hide();
+    }
 }
 
 Menu.prototype._add = function(item, after) {
@@ -55,17 +59,26 @@ Menu.prototype._add = function(item, after) {
     }
 }
 
-Menu.prototype.addCheckboxItem = function(name, callback, itemName, after) {
+Menu.prototype.addCheckboxItem = function(name, callback, itemName, after, onByDefault) {
     var menu = this;
-    var item = $('<div class="item checkbox"></div>')
+    var item = $("<label></label>")
+        .addClass("menu-checkbox")
+        .addClass("item")
         .text(name)
         .data("iv-menu-item-name", itemName)
-        .click(function () {
-            $(this).toggleClass("checked");
-            callback($(this).hasClass("checked"));
-            menu.close(); 
-        });
+        .prepend(
+            $('<input type="checkbox"></input>')
+                .prop("checked", onByDefault)
+                .change(function () {
+                    callback($(this).prop("checked"));
+                    menu.close(); 
+                })
+        )
+        .append($("<span></span>").addClass("checkmark"));
     this._add(item, after);
+    if (onByDefault) {
+        callback(true);
+    }
 }
 
 Menu.prototype.addCheckboxGroup = function(values, names, def, callback, name, after) {
@@ -74,17 +87,23 @@ Menu.prototype.addCheckboxGroup = function(values, names, def, callback, name, a
     this._add(group, after);
 
     $.each(values, function (i, v) {
-        var item = $('<div class="item checkbox"></div>')
+        var item = $("<label></label>")
+            .addClass("menu-checkbox")
+            .addClass("item")
             .text(names[v])
-            .appendTo(group)
-            .click(function () {
-                group.find(".item.checkbox").removeClass("checked");
-                $(this).addClass("checked");
-                callback(v);
-                menu.close(); 
-            });
+            .prepend(
+                $('<input type="radio"></input>')
+                    .attr({ "name": name, "value": v})
+                    .change(function () {
+                        callback($(this).val())
+                        menu.close(); 
+                    })
+            )
+            .append($("<span></span>").addClass("checkmark"))
+            .appendTo(group);
+
         if (v == def) {
-            item.addClass("checked");
+            item.find("input").prop("checked", true);
         }
 
     });

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-input[type=text],
+input[type="text"],
 select,
 button {
-  padding: 7px 5px 7px 5px;
+  padding: 7px 5px;
   border: solid 1px @border-grey;
   border-radius: 5px;
   color: @text;
@@ -61,13 +61,13 @@ button {
   background-color: @button-primary-bg;
 }
 
+.wk-checkbox,
 label.checkbox {
-  display: block;
   position: relative;
-  padding-left: 2.6rem;
+  padding-left: 2.2rem;
   cursor: pointer;
   user-select: none;
-  line-height: 1.8rem;
+  line-height: 1.6rem;
 
   input {
     position: absolute;
@@ -82,8 +82,8 @@ label.checkbox {
     box-sizing: border-box;
     top: 0;
     left: 0;
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 1.6rem;
+    height: 1.6rem;
     border-radius: 0.4rem;
     border: solid 0.1rem @border-grey;
   }
@@ -91,10 +91,10 @@ label.checkbox {
   input:checked ~ .checkmark::before {
     content: "";
     position: absolute;
-    top: -0.1rem;
-    left: 0.5rem;
+    top: 0.1rem;
+    left: 0.4rem;
     width: 0.4rem;
-    height: 1.3rem;
+    height: 1.1rem;
     border: solid @primary;
     border-width: 0 0.2rem 0.2rem 0;
     transform: rotate(45deg);

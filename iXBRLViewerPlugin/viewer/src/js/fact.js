@@ -12,284 +12,300 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import $ from 'jquery'
+import i18next from "i18next";
 import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
 import { Footnote } from "./footnote.js";
-import $ from 'jquery'
 
-export function Fact(report, factId) {
-    this.f = report.data.facts[factId];
-    this._ixNode = report.getIXNodeForItemId(factId);
-    this._report = report;
-    this.id = factId;
-}
+export class Fact {
+    
+    constructor(report, factId) {
+        this.f = report.data.facts[factId];
+        this.ixNode = report.getIXNodeForItemId(factId);
+        this._report = report;
+        this.id = factId;
+        this.linkedFacts = [];
+    }
 
-Fact.prototype.report = function() {
-    return this._report;
-}
+    report() {
+        return this._report;
+    }
 
-Fact.prototype.getLabel = function(rolePrefix, withPrefix) {
-    return this._report.getLabel(this.f.a.c, rolePrefix, withPrefix);
-}
+    getLabel(rolePrefix, withPrefix) {
+        return this._report.getLabel(this.f.a.c, rolePrefix, withPrefix);
+    }
 
-Fact.prototype.conceptName = function() {
-    return this.f.a.c;
-}
+    getLabelOrName(rolePrefix, withPrefix) {
+        return this._report.getLabelOrName(this.f.a.c, rolePrefix, withPrefix);
+    }
 
-Fact.prototype.concept = function () {
-    return this._report.getConcept(this.f.a.c); 
-}
+    conceptName() {
+        return this.f.a.c;
+    }
 
-Fact.prototype.conceptQName = function() {
-    return this._report.qname(this.f.a.c);
-}
+    concept() {
+        return this._report.getConcept(this.f.a.c); 
+    }
 
-Fact.prototype.period = function (){
-    return new Period(this.f.a.p);
-}
+    conceptQName() {
+        return this._report.qname(this.f.a.c);
+    }
 
-Fact.prototype.periodString = function() {
-    return this.period().toString();
-}
+    period(){
+        return new Period(this.f.a.p);
+    }
+
+    periodString() {
+        return this.period().toString();
+    }
 
 
-Fact.prototype.periodTo = function() {
-    return this.period().to();
-}
+    periodTo() {
+        return this.period().to();
+    }
 
-Fact.prototype.periodFrom = function() {
-    return this.period().from();
-}
+    periodFrom() {
+        return this.period().from();
+    }
 
-Fact.prototype.value = function() {
-    return this.f.v;
-}
+    value() {
+        return this.f.v;
+    }
+    
+    
+    hasValidationResults() {
+        return "zv" in this.f;
+    }
 
-Fact.prototype.hasValidationResults = function() {
-    return "zv" in this.f && this.f.zv.find( function(v) {
-        return v["i"] === 2;
-    });
-}
+    getValidationResults() {
+        return this.f.zv.map( function (v) { 
+            return { ruleId: v["ri"], rule: v["r"], message: v["t"], severity: v["i"] };
+        });
+    }
 
-Fact.prototype.getValidationResults = function() {
-    return this.f.zv.map( function (v) { 
-        return { ruleId: v["ri"], rule: v["r"], message: v["t"], severity: v["i"] };
-    });
-}
+    tableHashCode() {
+        if ("zr" in this.f) {
+            return this.f.zr;
+        }    
+    }
 
-Fact.prototype.tableHashCode = function() {
-    if ("zr" in this.f) {
-        return this.f.zr;
-    }    
-}
-
-Fact.prototype.readableValue = function() {
-    var v = this.f.v;
-    if (this.isNumeric()) {
-        var d = this.decimals();
-        var formattedNumber;
-        if (this.isNil()) {
-            formattedNumber = "nil";
+    readableValue() {
+        let v = this.f.v;
+        if (this.isInvalidIXValue()) {
+            v = "Invalid value";
         }
-        else if (d === undefined) {
-            formattedNumber = v;
+        else if (this.isNumeric()) {
+            const d = this.decimals();
+            let formattedNumber;
+            if (this.isNil()) {
+                formattedNumber = "nil";
+            }
+            else {
+                formattedNumber = formatNumber(v, d);
+            }
+            if (this.isMonetaryValue()) {
+                v = this.unit().valueLabel() + " " + formattedNumber;
+            }
+            else {
+                v = formattedNumber + " " + this.unit().valueLabel();
+            }
+        }
+        else if (this.isNil()) {
+            v = "nil";
+        }
+        else if (this.escaped()) {
+            const html = $("<div>").append($($.parseHTML(v, null, false)));
+            /* Insert an extra space at the beginning and end of block elements to
+             * preserve separation of sections of text. */
+            html
+                .find("p, td, th, h1, h2, h3, h4, ol, ul, pre, blockquote, dl, div")
+                .append(document.createTextNode(' '))
+                .prepend(document.createTextNode(' '));
+            /* Replace runs of whitespace (including nbsp) with a single space */
+            v = html.text().replace(/[\u00a0\s]+/g, " ").trim();
+        }
+        else if (this.isEnumeration()) {
+            const labels = [];
+            for (const qn of v.split(' ')) {
+                labels.push(this._report.getLabelOrName(qn, 'std'));
+            }
+            v = labels.join(', ');
+        }
+        return v;
+    }
+
+    unit() {
+        if (this.isNumeric()) {
+            return this.aspect("u");
         }
         else {
-            if (d < 0) {
-                d = 0;
-            }            
-            formattedNumber = formatNumber(v,d);
-        }
-        if (this.isMonetaryValue()) {
-            v = this.unit().valueLabel() + " " + formattedNumber;
-        }
-        else {
-            v = formattedNumber + " " + this.unit().valueLabel();
+            return undefined;
         }
     }
-    else if (this.escaped()) {
-        var html = $("<div>").append($($.parseHTML(v, null, false)));
-        /* Insert an extra space at the beginning and end of block elements to
-         * preserve separation of sections of text. */
-        html
-            .find("p, td, th, h1, h2, h3, h4, ol, ul, pre, blockquote, dl, div")
-            .append(document.createTextNode(' '))
-            .prepend(document.createTextNode(' '));
-        /* Replace runs of whitespace (including nbsp) with a single space */
-        v = html.text().replace(/[\u00a0\s]+/g, " ").trim();
-    }
-    return v;
-}
 
-Fact.prototype.unit = function() {
-    if (this.isNumeric()) {
-        return this.aspect("u");
+    isNumeric() {
+        return this.f.a.u !== undefined;
     }
-    else {
+
+    dimensions() {
+        const dims = {};
+        for (const [k, v] of Object.entries(this.f.a)) {
+            if (k.indexOf(":") > -1) {
+                dims[k] = v;
+            }
+        }
+        return dims;
+    }
+
+    isMonetaryValue() {
+        const unit = this.unit();
+        if (!unit || unit.value() === null) {
+            return false;
+        }
+        const q = this.report().qname(unit.value());
+        return q.namespace == "http://www.xbrl.org/2003/iso4217";
+    }
+
+    aspects() {
+        return Object.keys(this.f.a).map(k => this.aspect(k));
+    }
+
+    aspect(a) {
+        if (this.f.a[a] !== undefined) {
+            return new Aspect(a, this.f.a[a], this._report);
+        }
         return undefined;
     }
-}
 
-Fact.prototype.isNumeric = function () {
-    return this.f.a.u !== undefined;
-}
-
-Fact.prototype.dimensions = function () {
-    var dims = {};
-    $.each(this.f.a, function (k,v) {
-        if (k.indexOf(":") > -1) {
-            dims[k] = v;
+    isAligned(of, coveredAspects) {
+        if (Object.keys(this.f.a).length != Object.keys(of.f.a).length) {
+            return false;
         }
-    });
-    return dims;
-}
-
-Fact.prototype.isMonetaryValue = function () {
-    var unit = this.unit();
-    if (!unit || unit.value() === null) {
-        return false;
-    }
-    var q = this.report().qname(unit.value());
-    return q.namespace == "http://www.xbrl.org/2003/iso4217";
-}
-
-Fact.prototype.aspects = function () {
-    var aspects = {};
-    var fact = this;
-    $.each(this.f.a, function (k,v) {
-        aspects[k] = fact.aspect(k);
-    });
-    return aspects;
-}
-
-Fact.prototype.aspect = function (a) {
-    return new Aspect(a, this.f.a[a], this._report);
-}
-
-Fact.prototype.isAligned = function (of, coveredAspects) {
-    if (Object.keys(this.f.a).length != Object.keys(of.f.a).length) {
-        return false;
-    }
-    for (var a in this.f.a) {
-        if (coveredAspects.hasOwnProperty(a)) {
-            /* null => accept any value for this aspect */
-            if (coveredAspects[a] !== null) {
-                /* if value is an array, it's an array of allowed values */
-                if (coveredAspects[a].constructor === Array) {
-                    if ($.inArray(this.f.a[a], coveredAspects[a]) == -1) {
+        for (const a in this.f.a) {
+            if (coveredAspects.hasOwnProperty(a)) {
+                /* null => accept any value for this aspect */
+                if (coveredAspects[a] !== null) {
+                    /* if value is an array, it's an array of allowed values */
+                    if (coveredAspects[a].constructor === Array) {
+                        if (!coveredAspects[a].includes(this.f.a[a])) {
+                            return false;
+                        }
+                    }
+                    /* Otherwise a single allowed value */
+                    else if (this.f.a[a] != coveredAspects[a]) {
                         return false;
                     }
                 }
-                /* Otherwise a single allowed value */
-                else if (this.f.a[a] != coveredAspects[a]) {
-                    return false;
-                }
+            }
+            else if (this.f.a[a] != of.f.a[a]) {
+                return false;
             }
         }
-        else if (this.f.a[a] != of.f.a[a]) {
-            return false;
+        return true;
+    }
+
+    isEquivalentDuration(of) {
+        return this.period().isEquivalentDuration(of.period());
+    }
+
+    decimals() {
+        return this.f.d;
+    }
+
+    duplicates() {
+        return this._report.getAlignedFacts(this);
+    }
+
+    isNil() {
+        return this.f.v === null;
+    }
+
+    isInvalidIXValue() {
+        return this.f.err == 'INVALID_IX_VALUE';
+    }
+
+    readableAccuracy() {
+        if (!this.isNumeric() || this.isNil()) {
+            return i18next.t("common.notApplicable");
         }
-    }
-    return true;
-}
-
-Fact.prototype.isEquivalentDuration = function (of) {
-    return this.period().isEquivalentDuration(of.period());
-}
-
-Fact.prototype.decimals = function () {
-    return this.f.d;
-}
-
-Fact.prototype.duplicates = function () {
-    return this._report.getAlignedFacts(this);
-}
-
-Fact.prototype.isNil = function() {
-    return this.f.v === null
-}
-
-Fact.prototype.readableAccuracy = function () {
-    if (!this.isNumeric() || this.isNil()) {
-        return "n/a";
-    }
-    var d = this.decimals();
-    if (d === undefined) {
-        return "Infinite precision"
-    }
-    else if (d === null) {
-        return "Unspecified";
-    }
-    var names = {
-        "3": "thousandths",
-        "2": "hundredths",
-        "0":  "ones",
-        "-1":  "tens",
-        "-2":  "hundreds",
-        "-3":  "thousands",
-        "-6":  "millions",
-        "-9":  "billions",
-    }    
-    var name = names[d];
-    if (this.isMonetaryValue()) {
-        var currency = this.report().qname(this.unit().value()).localname;
-        if (d == 2) {
-            if (currency == 'USD' || currency == 'EUR' || currency == 'AUD' || currency == 'ZAR') {
-                name = "cents";
-            }
-            else if (currency == 'GBP') {
-                name = "pence";
+        let d = this.decimals();
+        if (d === undefined) {
+            return i18next.t("common.accuracyInfinite")
+        }
+        else if (d === null) {
+            return i18next.t("common.unspecified");
+        }
+        var name = i18next.t(`currencies:accuracy${d}`, {defaultValue:"noName"});
+        if (this.isMonetaryValue()) {
+            var currency = this.report().qname(this.unit().value()).localname;
+            if (d == 2) {
+                var name = i18next.t(`currencies:cents${currency}`, {defaultValue: name});
             }
         }
+        if (name !== "noName") {
+            d += " ("+name+")";
+        }
+        else {
+            d += "";
+        }
+        return d;
     }
-    if (name) {
-        d += " ("+name+")";
+
+    identifier() {
+        return this._report.qname(this.f.a.e);
     }
-    else {
-        d += "";
+
+    escaped() {
+        return this.ixNode.escaped;
     }
-    return d;
-}
 
-Fact.prototype.identifier = function () {
-    return this._report.qname(this.f.a.e);
-}
-
-Fact.prototype.escaped = function () {
-    return this._ixNode.escaped;
-}
-
-Fact.prototype.footnotes = function () {
-    return $.map(this.f.fn || [], (fn, i) => this._report.getItemById(fn));
-}
-
-Fact.prototype.scale = function() {
-    var scale = this._ixNode.wrapperNode.find('[scale]').attr('scale');
-    if (scale)
-        return parseInt(scale); 
-}
-
-Fact.prototype.isHidden = function () {
-    return this._ixNode.wrapperNode.length == 0;
-}
-
-Fact.prototype.widerConcepts = function () {
-    var concepts = [];
-    const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");
-    for (const elr in parentsByELR) {
-        concepts.push(...$.map(parentsByELR[elr], (rel) => rel.src));
+    isEnumeration() {
+        return this.concept().isEnumeration();
     }
-    return concepts;
+
+    scale() {
+        var scale = this._ixNode.wrapperNode.find('[scale]').attr('scale');
+        if (scale)
+            return parseInt(scale); 
+    }
+
+    footnotes() {
+        return (this.f.fn || []).map((fn, i) => this._report.getItemById(fn));
+    }
+
+    isHidden() {
+        return this.ixNode.isHidden;
+    }
+
+    isHTMLHidden() {
+        return this.ixNode.htmlHidden;
+    }
+
+    widerConcepts() {
+        const concepts = [];
+        const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");
+        for (const elr in parentsByELR) {
+            concepts.push(...$.map(parentsByELR[elr], (rel) => rel.src));
+        }
+        return concepts;
+    }
+
+    narrowerConcepts() {
+        const concepts = [];
+        const childrenByELR = this._report.getChildRelationships(this.conceptName(), "w-n");
+        for (const elr in childrenByELR) {
+            concepts.push(...$.map(childrenByELR[elr], (rel) => rel.t));
+        }
+        return concepts;
+    }
+
+    // Facts that are the source of relationships to this fact.
+    addLinkedFact(f) {
+        this.linkedFacts.push(f);
+    }
 }
 
-Fact.prototype.narrowerConcepts = function () {
-    var concepts = [];
-    const childrenByELR = this._report.getChildRelationships(this.conceptName(), "w-n");
-    for (const elr in childrenByELR) {
-        concepts.push(...$.map(childrenByELR[elr], (rel) => rel.t));
-    }
-    return concepts;
-}

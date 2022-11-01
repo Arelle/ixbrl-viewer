@@ -31,9 +31,11 @@
               <xbrli:endDate>2017-12-31</xbrli:endDate>
             </xbrli:period>
           </xbrli:context>
+          <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/arcrole/factExplanatory-2009-12-16.xsd#fact-explanatoryFact" arcroleURI="http://www.xbrl.org/2009/arcrole/fact-explanatoryFact" />
           <ix:relationship fromRefs="f1" toRefs="fn1 fn2" />
           <ix:relationship fromRefs="f4" toRefs="fn2 fn4" />
           <ix:relationship fromRefs="f11" toRefs="fn3" />
+          <ix:relationship fromRefs="f1" toRefs="f4" arcrole="http://www.xbrl.org/2009/arcrole/fact-explanatoryFact" />
         </ix:resources>
       </ix:header>
     </div>
@@ -95,5 +97,20 @@
             which is split with continuations
             </ix:continuation>
         </p>
+
+        <ix:nonNumeric name="ifrs:DescriptionOfFundingPolicy" contextRef="c1"  id="f24" continuedAt="f23">This tag is continued in the table </ix:nonNumeric>
+
+        <table>
+            <tr>
+                <td>
+                    <ix:nonNumeric name="ifrs:DescriptionOfBiologicalAssets" contextRef="c1"  id="f20" ><ix:nonNumeric name="ifrs:DescriptionOfBiologicalAssets" contextRef="c2"  id="f21" >Double tagged table cell</ix:nonNumeric></ix:nonNumeric>
+                </td>
+                <td>
+                    <ix:nonNumeric name="ifrs:DescriptionOfBiologicalAssets" contextRef="c1"  id="f22" ><ix:continuation id="f23" >This is a text tag and a continuation</ix:continuation></ix:nonNumeric>
+                </td>
+            </tr>
+        </table>
+
+
   </body>
 </html>

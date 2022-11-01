@@ -34,6 +34,17 @@ module.exports = {
                             keepClosingSlash: true
                         }
                     }]
+                },
+                {
+                    test: /\.less$/,
+                    use: [ { 
+                        loader: "less-loader",
+                        options: {
+                            lessOptions: {
+                                math: "parens-division"
+                            }
+                        }
+                    }]
                 }
             ]
 

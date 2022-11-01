@@ -14,6 +14,7 @@
 
 import { Fact } from "./fact.js";
 import { iXBRLReport } from "./report.js";
+import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
     "prefixes": {
@@ -42,6 +43,40 @@ var testReportData = {
                     "en": "English label for concept three"
                 }
             }
+        },
+        "eg:EnumConcept": {
+            "labels": {
+                "std": {
+                    "en": "Enumeration concept"
+                }
+            },
+            "e": true
+        },
+        "eg:Dimension1": {
+            "labels": {
+                "std": {
+                    "en": "Dimension One"
+                }
+            },
+            "d": "e"
+        },
+        "eg:Member1": {
+            "labels": {
+                "std": {
+                    "en": "Member One"
+                }
+            }
+        },
+        "eg:Member2": {
+            "labels": {
+                "std": {
+                    "en": "Member Two"
+                }
+            }
+        },
+        "eg:UnlabelledMember": {
+            "labels": {
+            }
         }
     },
     "facts": {
@@ -59,9 +94,15 @@ function testReport(facts, ixData) {
 
 function testFact(factData, ixData) {
     factData.a = factData.a || {};
+    factData.a.c = factData.a.c || 'eg:Concept1';
     ixData = ixData || {};
     return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
 }
+
+var insp = new TestInspector();
+beforeAll(() => {
+    return insp.i18nInit();
+});
 
 describe("Simple fact properties", () => {
     test("Monetary", () => {
@@ -82,6 +123,7 @@ describe("Simple fact properties", () => {
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
+        expect(f.isInvalidIXValue()).toBeFalsy();
     });
 
     test("Numeric (non-monetary)", () => {
@@ -102,25 +144,27 @@ describe("Simple fact properties", () => {
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
+        expect(f.isInvalidIXValue()).toBeFalsy();
     });
 
     test("Numeric (infinite precision)", () => {
         var f = testFact({
-                "v": 0.0125,
+                "v": 1000000.0125,
                 "a": {
                     "c": "eg:Concept1",
                     "u": "eg:USD", 
                     "p": "2018-01-01/2019-01-01",
                 }});
-        expect(f.value()).toEqual(0.0125);
+        expect(f.value()).toEqual(1000000.0125);
         expect(f.decimals()).toBeUndefined();
         expect(f.isNumeric()).toBeTruthy();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("0.0125 eg:USD");
+        expect(f.readableValue()).toEqual("1,000,000.0125 eg:USD");
         expect(f.unit().value()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
+        expect(f.isInvalidIXValue()).toBeFalsy();
     });
 
     test("String", () => {
@@ -138,6 +182,57 @@ describe("Simple fact properties", () => {
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
+        expect(f.isInvalidIXValue()).toBeFalsy();
+    });
+
+    test("Enumeration", () => {
+        var f = testFact({
+            "v": "eg:Member1",
+            "a": {
+                "c": "eg:EnumConcept",
+                "p": "2018-01-01/2019-01-01",
+            }});
+        expect(f.value()).toEqual("eg:Member1");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One");
+        expect(f.isInvalidIXValue()).toBeFalsy();
+
+        f.f.v = "eg:Member1 eg:Member2";
+        expect(f.value()).toEqual("eg:Member1 eg:Member2");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One, Member Two");
+        expect(f.isInvalidIXValue()).toBeFalsy();
+
+        f.f.v = "eg:Member1 eg:NotDefined";
+        expect(f.value()).toEqual("eg:Member1 eg:NotDefined");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One, <no label>");
+        expect(f.isInvalidIXValue()).toBeFalsy();
+
+        f.f.v = "eg:Member1 eg:UnlabelledMember";
+        expect(f.value()).toEqual("eg:Member1 eg:UnlabelledMember");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("Member One, eg:UnlabelledMember");
+        expect(f.isInvalidIXValue()).toBeFalsy();
+
+        // Switch to a non-enumeration concept.
+        // Values should be treated as strings
+        f.f.a.c = "eg:Concept1";
+        f.f.v = "eg:Member1 eg:NotDefined";
+        expect(f.value()).toEqual("eg:Member1 eg:NotDefined");
+        expect(f.isNumeric()).toBeFalsy();
+        expect(f.decimals()).toBeUndefined();
+        expect(f.isMonetaryValue()).toBeFalsy();
+        expect(f.readableValue()).toEqual("eg:Member1 eg:NotDefined");
+        expect(f.isInvalidIXValue()).toBeFalsy();
     });
 
 });
@@ -485,4 +580,47 @@ describe("Get Label", () => {
         expect(f.getLabel("doc")).toBeUndefined();
     });
 
+});
+
+describe("Aspect methods", () => {
+    var f = testFact({
+            "d": -3,
+            "v": 1000,
+            "a": {
+                "c": "eg:Concept1",
+                "u": "iso4217:USD", 
+                "p": "2018-01-01/2019-01-01",
+                "eg:Dimension1": "eg:Member1"
+            }});
+    test("Get aspects", () => {
+        expect(f.aspects().length).toEqual(4);
+        expect(f.aspects().filter(a => a.isTaxonomyDefined()).length).toEqual(1);
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].label()).toEqual("Dimension One");
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].valueLabel()).toEqual("Member One");
+        expect(f.aspect("eg:Dimension1").value()).toEqual("eg:Member1");
+    });
+});
+
+describe("Fact errors", () => {
+    test("iXBRL Invalid", () => {
+        var f = testFact({
+                "d": -3,
+                "v": "abcd",
+                "err": "INVALID_IX_VALUE",
+                "a": {
+                    "c": "eg:Concept1",
+                    "u": "iso4217:USD", 
+                    "p": "2018-01-01/2019-01-01",
+                }});
+        expect(f.value()).toEqual("abcd");
+        expect(f.decimals()).toEqual(-3);
+        expect(f.isNumeric()).toBeTruthy();
+        expect(f.isMonetaryValue()).toBeTruthy();
+        expect(f.readableValue()).toEqual("Invalid value");
+        expect(f.unit().value()).toEqual("iso4217:USD");
+        expect(f.conceptQName().prefix).toEqual("eg");
+        expect(f.conceptQName().localname).toEqual("Concept1");
+        expect(f.conceptQName().namespace).toEqual("http://www.example.com");
+        expect(f.isInvalidIXValue()).toBeTruthy();
+    });
 });

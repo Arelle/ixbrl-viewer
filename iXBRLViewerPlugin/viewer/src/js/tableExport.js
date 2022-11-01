@@ -43,7 +43,7 @@ TableExport.prototype._getRawTable = function (table) {
     var maxRowLength = 0;
     var rows = [];
     var fact;
-    table.find("tr:visible").each(function () {
+    table.find("tr").each(function () {
         var row = [];
         $(this).find("td:visible, th:visible").each(function () {
             var colspan = $(this).attr("colspan");
@@ -127,10 +127,9 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
         return null;
     }
     var allAspectsMap = {};
-    for (var i = 0; i < facts.length; i++) {
-        var aa = Object.keys(facts[i].aspects());
-        for (var k = 0; k < aa.length; k++) {
-            allAspectsMap[aa[k]] = 1;
+    for (const fact of facts) {
+        for (const a of fact.aspects()) {
+            allAspectsMap[a.name()] = 1;
         }
     }
     var allAspects = Object.keys(allAspectsMap);
@@ -138,9 +137,9 @@ TableExport.prototype._getConstantAspectsForSlice = function (slice, aspects) {
     var constantAspects = {};
     for (var i = 0; i < allAspects.length; i++) {
         var a = allAspects[i];
-        constantAspects[a] = facts[0].aspects()[a];
+        constantAspects[a] = facts[0].aspect(a);
         for (var j = 1; j < facts.length; j++) {
-            if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspects()[a])) {
+            if (constantAspects[a] === undefined || !constantAspects[a].equalTo(facts[j].aspect(a))) {
                 delete constantAspects[a];
             }
         }

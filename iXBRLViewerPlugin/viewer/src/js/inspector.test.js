@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Inspector } from "./inspector.js";
 import { Fact } from "./fact.js";
 import { iXBRLReport } from "./report.js";
+import { TestInspector } from "./test-utils.js";
 
-function TestInspector() {
-
-}
-
-TestInspector.prototype = Object.create(Inspector.prototype);
 
 var testReportData = {
     "prefixes": {
@@ -88,6 +83,9 @@ function toFact(value) {
 
 describe("Describe changes", () => {
     var insp = new TestInspector();
+    beforeAll(() => {
+        return insp.i18nInit();
+    });
 
     test("Simple changes", () => {
         expect(insp.describeChange(fromFact(1000), toFact(2000))).toBe("100.0% increase on ");
@@ -96,13 +94,13 @@ describe("Describe changes", () => {
     });
 
     test("Sign changes", () => {
-        expect(insp.describeChange(fromFact(1000), toFact(-1000))).toBe("From US $ 1000 in ");
-        expect(insp.describeChange(fromFact(-1000000), toFact(1000))).toBe("From US $ -1000000 in ");
+        expect(insp.describeChange(fromFact(1000), toFact(-1000))).toBe("From US $ 1,000 in ");
+        expect(insp.describeChange(fromFact(-1000000), toFact(1000))).toBe("From US $ -1,000,000 in ");
     });
 
     test("From/to zero", () => {
         expect(insp.describeChange(fromFact(0), toFact(1000))).toBe("From US $ 0 in ");
         expect(insp.describeChange(fromFact(0), toFact(0))).toBe("From US $ 0 in ");
-        expect(insp.describeChange(fromFact(1000), toFact(0))).toBe("From US $ 1000 in ");
+        expect(insp.describeChange(fromFact(1000), toFact(0))).toBe("From US $ 1,000 in ");
     });
 });

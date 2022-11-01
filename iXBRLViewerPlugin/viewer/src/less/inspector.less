@@ -27,8 +27,9 @@
 @import "tabs.less";
 @import (reference) "text-mixins.less";
 @import "block-list.less";
+@import "validation-report.less";
 
-@top-bar-height: 35px;
+@top-bar-height: 3.5rem;
 
 #ixv {
   /* Specify these here, not on body in case the iXBRL document has its own
@@ -58,14 +59,17 @@
     top: @top-bar-height;
     bottom: 0;
     z-index: 0;
+    display: flex;
+    flex-flow: column;
 
     .ixds-tabs {
       display: none;
+      flex: 0 1 auto;
     }
 
     #iframe-container {
       position: relative;
-      height: 100%;
+      flex: 1 1 auto;
 
       & > iframe {
         width: 100%;
@@ -75,13 +79,14 @@
       }
 
       .zoom-in,
-      .zoom-out {
+      .zoom-out,
+      .print {
         position: absolute;
         right: 30px;
         width: 20px;
         height: 20px;
         border: solid 1px #bbb;
-        background-color: rgba(225, 225, 225, 0.7);
+        background-color: rgba(225, 225, 225, 70%);
         justify-content: center;
         display: flex;
         align-items: center;
@@ -99,10 +104,15 @@
         top: 40px;
       }
 
-      .zoom-in:hover,
-      .zoom-out:hover {
-        background-color: rgba(128, 128, 128, 0.7);
-      }
+      .print {
+        top: 75px;
+
+        &::after {
+          .icon-print();
+
+          font-size: 20px;
+        }
+      }      
     }
 
     .resize {
@@ -143,20 +153,108 @@
       top: 0;
       left: 0;
       bottom: 0;
-
-      img {
-        height: 100%;
-      }
+      height: 100%;
     }
 
     .document-title {
+      position: absolute;
       box-sizing: border-box;
-      width: 100%;
-      padding: 0 250px;
-      text-align: center;
-      line-height: @top-bar-height;
+      left: 160px;
+      top: 0;
+      padding-right: 1.6rem;
+      padding-top: 1.3rem;
+      border-right: solid 0.1rem #ccc;
       height: @top-bar-height;
       overflow: hidden;
+    }
+
+    .top-bar-controls {
+      position: absolute;
+      right: 1.8rem;
+      top: 0;
+      line-height: @top-bar-height;
+
+      * {
+        vertical-align: middle;
+      }
+
+      .content {
+        input {
+          position: relative;
+          top: -0.1rem;
+          margin-right: 0.6rem;
+        }
+      }
+
+      .highlight-key {
+        margin-left: 0.6rem;
+        margin-right: 1.5rem;
+        position: relative;
+
+        &::before {
+          .icon-question();
+
+          font-size: 1.6rem;
+        }
+
+        .popup-content {
+          position: absolute;
+          top: 3.2rem;
+          left: -2rem;
+          background: #fff;
+          border: solid 1px @text;
+          border-radius: 0.3rem;
+          line-height: 1.6rem;
+
+          .arrow {
+            position: absolute;
+            top: 0;
+            left: 1.1rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-top: solid 0.1rem @text;
+            border-left: solid 0.1rem @text;
+            transform: translate(50%, -50%) rotate(45deg);
+            background: #fff;
+          }
+
+          .item {
+            white-space: nowrap;
+            margin: 1rem;
+            position: relative;
+
+            .sample {
+              display: inline-block;
+              width: 3.2rem;
+              height: 1.6rem;
+              margin-right: 1rem;
+            }
+
+            .sample-0 {
+              background: @highlight-default;
+            }
+
+            .sample-1 {
+              background: @highlight-1;
+            }
+
+            .sample-2 {
+              background: @highlight-2;
+            }
+          }
+        }
+      }
+
+      .validation-warning {
+        margin-left: 0.5rem;
+        font-size: 1.6rem;
+        display: none;
+        cursor: pointer;
+
+        &::before {
+          .icon-warning();
+        }
+      }
     }
   }
 
@@ -218,6 +316,18 @@
             .icon-chevron-left();
           }
         }
+
+        .menu {
+          top: 0;
+          right: 0;
+          position: absolute;
+
+          .menu-title::before {
+            .icon-cog();
+
+            font-size: 2rem;
+          }
+        }
       }
 
       .controls {
@@ -230,10 +340,38 @@
 
           position: absolute;
           top: 0;
-          left: 0;
+          left: 3.6rem;
 
           &::before {
             .icon-search();
+
+            position: relative;
+          }
+        }
+
+        .outline-button {
+          .square-button();
+
+          position: absolute;
+          top: 0;
+          left: 3.6rem;
+
+          &::before {
+            .icon-outline();
+
+            position: relative;
+          }
+        }
+
+        .outline-button {
+          .square-button();
+
+          position: absolute;
+          top: 0;
+          left: 0;
+
+          &::before {
+            .icon-outline();
 
             position: relative;
           }
@@ -340,7 +478,8 @@
       position: relative;
       overflow: hidden;
 
-      .no-fact-overlay {
+      .no-fact-overlay,
+      .no-outline-overlay {
         display: block;
         position: absolute;
         left: 50%;
@@ -356,6 +495,12 @@
           font-size: 10rem;
         }
 
+        .no-outline-overlay-icon::before {
+          .icon-outline();
+
+          font-size: 10rem;
+        }
+
         .title {
           font-size: x-large;
         }
@@ -364,11 +509,13 @@
       .inspector-body-fact {
         overflow-y: auto;
         height: 100%;
+        position: relative;
       }
 
       .search-results {
         overflow-y: auto;
         height: 100%;
+        .panel-indent();
 
         .search-overlay {
           transform: translate(-50%, -50%);
@@ -418,6 +565,15 @@
           text-align: center;
         }
       } /* search results */
+
+      .outline {
+        overflow-y: auto;
+        height: 100%;
+      }
+
+      .body {
+        .panel-indent();
+      }
     } /* inspector body */
 
     .std-label {
@@ -490,12 +646,17 @@
       top: 1px;
     }
 
-    .hidden-fact-tag {
+    .hidden-fact-tag,
+    .html-hidden-fact-tag {
       .tag();
 
       position: absolute;
-      top: 1.33rem;
+      top: 1.5rem;
       right: 0.9rem;
+
+      &.html-hidden-fact-tag {
+        background-color: #c63018;
+      }
     }
 
     table.fact-properties {
@@ -568,6 +729,28 @@
       }
     }
     
+    .concept td > div {
+      display: flex;
+
+      span.text {
+        white-space: nowrap;
+        position: relative;
+        flex-shrink: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      span.filler {
+        width: 0.7rem;
+        display: inline-block;
+        flex-shrink: 1000;
+      }
+
+      span.copy-icon {
+        flex-shrink: 0;
+      }
+    }
+
     .documentation {
       margin-top: 10px;
       margin-left: 30px;
@@ -617,8 +800,7 @@
 
     .collapsible-section {
       .collapsible-body {
-        padding-left: 0.9rem;
-        padding-right: 0.9rem;
+        .panel-indent();
       }
 
       .collapsible-header {
@@ -759,10 +941,26 @@
       }
     }
 
+    &:not(.html-hidden-fact) {
+      .html-hidden-fact-tag {
+        display: none;
+      }
+    }
+
     &.search-mode {
       #inspector-head {
         .controls {
           .search-button {
+            .square-button.primary();
+          }
+        }
+      }
+    }
+
+    &.outline-mode {
+      #inspector-head {
+        .controls {
+          .outline-button {
             .square-button.primary();
           }
         }
@@ -791,7 +989,12 @@
       display: none;
     }
 
-    &.search-mode .fact-mode-only {
+    &:not(.outline-mode) .outline-mode-only {
+      display: none;
+    }
+
+    &.search-mode .fact-mode-only,
+    &.outline-mode .fact-mode-only {
       display: none;
     }
 
@@ -815,9 +1018,6 @@
   }
 
   .fact-list {
-    margin-left: 0.9rem;
-    margin-right: 0.9rem;
-
     .fact-list-item {
       .block-list-item();
 
@@ -848,7 +1048,7 @@
   }
 
   .dialog-mask {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 60%);
     position: fixed;
     top: 0;
     bottom: 0;
@@ -856,6 +1056,26 @@
     left: 0;
     z-index: 10;
     display: none;
+  }
+
+  .popup-content {
+    display: none;
+  }
+
+  .copy-icon {
+    color: @primary;
+    border-radius: 0.3rem;
+
+    &:active {
+      background-color: @primary;
+      color: #fff;
+    }
+
+    &::before {
+      .icon-clipboard();
+
+      cursor: pointer;
+    }
   }
 }
 
@@ -902,5 +1122,7 @@
   display: block;
   padding: 2px 0;
   line-height: 1px;
-  border-top: 0.25px solid rgba(255, 255, 255, 0.8); 
+  border-top: 0.25px solid rgba(255, 255, 255, 0.8);
 }
+ 
+.tooltip { font-size: 10px !important; }

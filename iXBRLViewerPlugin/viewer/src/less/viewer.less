@@ -18,73 +18,66 @@
 @import "bootstrap.less";
 @import (reference) "icons.less";
 
-.iv-ixbrl-fact {
-  background-color: yellow;
-  cursor: pointer;
-}
+.ixbrl-highlight:not(.ixbrl-no-highlight) {
+  background-color: @highlight-default !important;
 
-.ixbrl-highlight {
-  &, & span {
-    background-color: @highlight-default !important;
-  }
-
-  &.ixbrl-highlight-1, &.ixbrl-highlight-1 span {
+  &.ixbrl-highlight-1 {
     background-color: @highlight-1 !important;
   }
 
-  &.ixbrl-highlight-2, &.ixbrl-highlight-2 span {
+  &.ixbrl-highlight-2 {
     background-color: @highlight-2 !important;
   }
-  &.ixbrl-highlight-missing, &.ixbrl-highlight-missing span {
+
+  &.ixbrl-highlight-missing {
     background-color: rebeccapurple !important;
+  }
+  &.amanablock {
+    background-color: @highlight-block !important;
   }
 }
 
 div,
 span {
-  &.ixbrl-selected {
-    outline: solid 2px @primary-focus;
-    outline-offset: 1px;
+  &:not(.ixbrl-no-highlight) {
+    &.ixbrl-selected {
+      outline: solid 2px @primary-focus;
+      outline-offset: 1px;
+    }
+
+    &.ixbrl-element,
+    &.ixbrl-sub-element {
+      &:hover:not(.ixbrl-selected) {
+        outline: dashed 2px @primary-focus;
+        outline-offset: 1px;
+      }
+    }
+  }
+}
+
+.ixbrl-element:not(.ixbrl-no-highlight),
+.ixbrl-sub-element:not(.ixbrl-no-highlight) {
+  cursor: pointer;
+
+  &.inline-fact-with-message {
+    color: red !important;
   }
 
-  &.ixbrl-element:hover:not(.ixbrl-selected) {
-    outline: dashed 2px @primary-focus;
+  &.ixbrl-related {
+    outline: dashed 2px @related-fact;
     outline-offset: 1px;
   }
-}
-
-span.ixbrl-selected.ixbrl-element-nonnumeric {
-  outline: solid 2px @primary;
-  outline-offset: 1px;
-}
-
-span.ixbrl-element.ixbrl-element-nonnumeric:not(.ixbrl-selected):hover {
-  outline: dashed 2px @primary;
-  outline-offset: 1px;
-}
-
-.ixbrl-element {
-  cursor: pointer; 
-  z-index: 1;  
-}
-
-.inline-fact-with-message.ixbrl-highlight {
-  color: red !important;
-}
-
-.ixbrl-related {
-  outline: dashed 2px @related-fact;
-  outline-offset: 1px;
 }
 
 td,
 th {
-  &.ixbrl-selected {
+  &.ixbrl-selected:not(.ixbrl-no-highlight) {
     outline: solid 2px @primary-focus !important;
     outline-offset: -1px !important;
   }
 
-  &.ixbrl-element:hover:not(.ixbrl-selected) {
+  &.ixbrl-element:hover:not(.ixbrl-selected),
+  &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
     outline: dashed 2px @primary-focus !important;
     outline-offset: -1px !important;
   }
@@ -117,7 +110,7 @@ div.ixbrl-table-handle {
   top: -2 * @export-handle-size;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     left: -@export-handle-size;
     top: @export-handle-size;
@@ -143,7 +136,8 @@ div.ixbrl-table-handle {
     width: 9rem;
     height: initial;
     left: -0.1rem;
-    padding: 2 * @export-handle-size - 0.1rem 0 0 0;
+    padding: 0;
+    z-index: 1;
 
     & > span {
       &::before {
@@ -162,4 +156,3 @@ div.ixbrl-table-handle {
     }
   }
 }
-

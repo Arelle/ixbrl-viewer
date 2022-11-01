@@ -17,6 +17,8 @@ import { TableExport } from './tableExport.js'
 import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
 import { IXNode } from './ixnode.js';
 import { Fact } from './fact.js';
+import { setDefault } from './util.js';
+import { DocOrderIndex } from './docOrderIndex.js';
 
 import 'bootstrap/js/dist/tooltip';
 
@@ -38,15 +40,18 @@ export function Viewer(iv, iframes, report, useFrames, isPDF) {
     this.onMouseLeave = $.Callbacks();
 
     this._ixNodeMap = {};
-    this._continuedAtMap = {};        
-    this._currentShowElement = null;
-    this._mzInit = false;    
+    this._docOrderItemIndex = new DocOrderIndex();
+    this._currentDocumentIndex = 0;
+    this._mzInit = false;   
+    this._tooltipShown = null;
 }
 
 Viewer.prototype.initialize = function() {
     return new Promise((resolve, reject) => {
         var viewer = this;
+        viewer._buildContinuationMaps();
         viewer._iframes.each(function (docIndex) { 
+            $(this).data("selected", docIndex == viewer._currentDocumentIndex);
             viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
         });
 
@@ -58,7 +63,6 @@ Viewer.prototype.initialize = function() {
         })()
             .then(() => viewer._iv.setProgress("Preparing document") )
             .then(() => {
-                this._buildContinuationMap();
                 this._report.setIXNodeMap(this._ixNodeMap);
                 this._applyStyles();
                 this._bindHandlers();
@@ -69,7 +73,7 @@ Viewer.prototype.initialize = function() {
             })
             .then(() => {
                 viewer._iframes.each(function (docIndex) { 
-                    viewer._postProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+                    viewer._postProcessXBRL($(this).contents().find("body").get(0), docIndex);
                 });    
             });
     });
@@ -80,31 +84,7 @@ function localName(e) {
         return e.toUpperCase();
     }
     else {
-        return e.substring(e.indexOf(':') + 1).toUpperCase();
-    }
-}
-
-Viewer.prototype._buildContinuationMap = function() {
-    var continuations = Object.keys(this._continuedAtMap)
-    for (var i = 0; i < continuations.length; i++) {
-        var id = continuations[i];
-        if (this._continuedAtMap[id].isFact) {
-            var parts = [];
-            var nextId = id;
-            while (this._continuedAtMap[nextId].continuedAt !== undefined) {
-                nextId = this._continuedAtMap[nextId].continuedAt;
-                if (this._ixNodeMap[nextId] !== undefined) {
-                    this._continuedAtMap[nextId] = this._continuedAtMap[nextId] || {};
-                    this._continuedAtMap[nextId].continuationOf = id;
-                    parts.push(this._ixNodeMap[nextId]);
-                }
-                else {
-                    console.log("Unresolvable continuedAt reference: " + nextId);
-                    break;
-                }
-            }
-            this._ixNodeMap[id].continuations = parts;
-        }
+        return e.substring(e.indexOf(':') + 1)
     }
 }
 
@@ -127,147 +107,334 @@ Viewer.prototype._addDocumentSetTabs = function() {
     }
 }
 
+// Wrap a DOM node in a div or span.  If the node or any descendent has
+// display: block, a div is used, otherwise a span.  Returns the wrapper node
+// as a jQuery node
+Viewer.prototype._wrapNode = function(n) {
+    var wrapper = "<span>";
+    const nn = n.getElementsByTagName("*");
+    for (var i = 0; i < nn.length; i++) {
+        if($(nn[i]).css("display") === "block") {
+            wrapper = '<div>';
+            break;
+        }
+    }
+    $(n).wrap(wrapper);
+    return $(n).parent();
+}
+
+/*
+ * Select the document within the current document set identified docIndex, and
+ * if specified, the element identified by fragment (via id or a.name
+ * attribute)
+ */
+Viewer.prototype._showDocumentAndElement = function (docIndex, fragment) {
+    this.selectDocument(docIndex); 
+    if (fragment !== undefined && fragment != "") {
+        // As per HTML spec, try fragment, then try %-decoded fragment
+        // https://html.spec.whatwg.org/multipage/browsing-the-web.html#the-indicated-part-of-the-document
+        for (const fragment_option of [fragment, decodeURIComponent(fragment)]) {
+            const f = $.escapeSelector(fragment_option);
+            const ee = this._iframes.eq(docIndex).contents().find('#' + f + ', a[name="' + f + '"]');
+            if (ee.length > 0) {
+                this.showElement(ee.eq(0));
+                return
+            }
+        }
+    }
+}
+
+/*
+ * Rewrite hyperlinks in the iXBRL.
+ *
+ * Relative links to other files in the same document set are handled by
+ * JavaScript to switch tabs within the viewer
+ *
+ * All other links are forced to open in a new tab
+ *
+ */
+Viewer.prototype._updateLink = function(n) {
+    const url = $(n).attr("href");
+    if (url !== undefined) {
+        const [file, fragment] = url.split('#', 2);
+        const docIndex = this._report.documentSetFiles().indexOf(file);
+        if (!url.includes('/') && docIndex != -1) {
+            $(n).click((e) => { 
+                this._showDocumentAndElement(docIndex, fragment);
+                e.preventDefault(); 
+            });
+        }
+        else if (file) {
+            // Open target in a new browser tab.  Without this, links will
+            // replace the contents of the current iframe in the viewer, which
+            // leaves the viewer in a confusing state.
+            $(n).attr("target", "_blank");
+        }
+    }
+}
+
+Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
+    const v = this;
+    /* Is the element the only significant content within a <td> or <th> ? If
+     * so, use that as the wrapper element. */
+    var nodes = $(domNode).closest("td,th").eq(0);
+    const innerText = $(domNode).text();
+    if (nodes.length == 1 && innerText.length > 0) {
+        if (nodes.css('display') == 'none') {
+            nodes = nodes.parent();
+            nodes.addClass('ixbrl-cellblock');
+        } else {
+            // Use indexOf rather than a single regex because innerText may
+            // be too long for the regex engine 
+            const outerText = $(nodes).text();
+            const start = outerText.indexOf(innerText);
+            const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
+            if (/[0-9A-Za-z]/.test(wrapper)) {
+                nodes = $();
+            } 
+        }
+    }
+    /* AMANA extension: */
+    if (nodes.length == 0) {
+        var parent = $(domNode).parent('div.amanablock');
+        if (parent.length > 0) {                    
+            nodes = parent;
+        }
+    }
+    /* Otherwise, insert a <span> as wrapper */
+    if (nodes.length == 0) {
+        nodes = this._wrapNode(domNode);
+        // Create a node set of current node and all absolutely positioned
+        // descendants.
+        nodes = nodes.find("*").addBack().filter(function () {
+            return (this == nodes[0] || $(this).css("position") == "absolute");
+        });
+    }
+    nodes.each(function (i) {
+        if (this.getBoundingClientRect().height == 0) {
+            $(this).addClass("ixbrl-no-highlight"); 
+        }
+        if (i == 0) {
+            $(this).addClass("ixbrl-element")
+        }
+        else {
+            $(this).addClass("ixbrl-sub-element"); 
+        }
+    });
+    return nodes;
+}
+
+
+// Adds the specified ID to the "ivid" data list on the given node
+Viewer.prototype._addIdToNode = function(node, id) {
+    const ivids = node.data('ivid') || [];
+    ivids.push(id);
+    node.data('ivid', ivids);
+}
+
+Viewer.prototype._buildContinuationMaps = function() {
+    // map of element id to next element id in continuation chain
+    const nextContinuationMap = {};
+    // map of items in default target document to all their continuations
+    const itemContinuationMap = {};
+    this._iframes.contents().find("body *").each(function () {
+        const name = localName(this.nodeName).toUpperCase();
+        if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
+            const nodeId = this.getAttribute('id');
+            const continuedAtId = this.getAttribute("continuedAt");
+            if (continuedAtId !== null) {
+                nextContinuationMap[nodeId] = continuedAtId;
+            }
+            if (name != 'CONTINUATION' && !this.hasAttribute('target')) {
+                itemContinuationMap[nodeId] = [];
+            }
+        }
+    });
+
+    // Map of continuation IDs to list of (default target doc) items that
+    // they're continuations of
+    this.continuationOfMap = {};
+    for (const [itemId, itemContinuations] of Object.entries(itemContinuationMap)) {
+        var id = itemId;
+        while (nextContinuationMap[id] !== undefined) {
+            id = nextContinuationMap[id];
+            itemContinuations.push(id);
+            if (this.continuationOfMap[id] !== undefined) {
+                console.log("Continuation '" + id + "' is a continuation of multiple items.");
+            }
+            this.continuationOfMap[id] = itemId;
+        }
+    }
+    this.itemContinuationMap = itemContinuationMap;
+}
+
+//
+// Traverse the DOM hierarchy to find IX elements, and build maps and add
+// wrapper nodes and classes.
+//
+// Primary classes, one of:
+//   .ixbrl-element        a wrapper for any ix: fact, footnote, or continuation
+//   .ixbrl-sub-element    an absolutely positioned element within an
+//                         ixbrl-element.  These require separate highlighting.
+//   .ixbrl-element-hidden an ix: element inside ix:hidden
+//
+// Additional classes:
+//   .ixbrl-no-highlight   a zero-height .ixbrl-element - no highlighting or 
+//                         borders applied
+//   .ixbrl-element-nonfraction,
+//   .ixbrl-element-nonnumeric,
+//   .ixbrl-continuation, 
+//   .ixbrl-element-footnote       
+//                         Indicates type of element being wrapped
+//
+// All ixbrl-elements have "ivid" data added, which is a list of the ID
+// attribute(s) of corresponding IX item(s).  Continuations have the IDs of
+// their head items (fact or footnotes).
+// "ivid" can be a mix of different types.
+//
+// Viewer._ixNodeMap is a map of these IDs to IXNode objects.
+//
+// Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
+// fact and footnotes in document order.
+//
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
-    var elt;
-    var name = localName(n.nodeName).toUpperCase();
-    var isFootnote = (name == 'FOOTNOTE');
-    if(n.nodeType == 1 && (name == 'NONNUMERIC' || name == 'NONFRACTION' || name == 'CONTINUATION' || isFootnote)) {
-        var node = $();
-        var id = n.getAttribute("id");
-        if (!inHidden) {
-            /* Is the element the only significant content within a <td> or <th> ? If
-             * so, use that as the wrapper element. */
-            node = $(n).closest("td,th").eq(0);
-            if (node.length == 0 && name == 'NONFRACTION') {
-                node = $(n).closest("span,div").eq(0);                
+    const name = localName(n.nodeName).toUpperCase();
+    const isFootnote = (name == 'FOOTNOTE');
+    const isContinuation = (name == 'CONTINUATION');
+    const isFact = (name == 'NONNUMERIC' || name == 'NONFRACTION');
+    if (n.nodeType == 1) {
+        // Ignore iXBRL elements that are not in the default target document, as
+        // the viewer builder does not handle these, and the builder does not
+        // ensure that they have ID attributes.
+        const id = n.getAttribute("id");
+        if (((isFact || isFootnote) && !n.hasAttribute("target"))
+            || (isContinuation && this.continuationOfMap[id] !== undefined)) {
+            var nodes;
+            if (inHidden) {
+                nodes = $(n);
+            } else {
+                nodes = this._findOrCreateWrapperNode(n);
             }
-            const innerText = $(n).text();
-            if (node.length == 1 && innerText.length > 0) {
-                if (node.css('display') == 'none') {
-                    node = node.parent();
-                    node.addClass('ixbrl-cellblock');
-                } else {                
-                    // Use indexOf rather than a single regex because innerText may
-                    // be too long for the regex engine 
-                    const outerText = $(node).text();
-                    const start = outerText.indexOf(innerText);
-                    const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
-                    if (/[0-9A-Za-z]/.test(wrapper)) {
-                        node = $();
-                    } 
+
+            // For a continuation, store the IX ID(s) of the item(s), not the continuation
+            const headId = isContinuation ? this.continuationOfMap[id] : id;
+            this._addIdToNode(nodes.first(), headId);
+
+            // We may have already created an IXNode for this ID from a -sec-ix-hidden
+            // element 
+            var ixn = this._ixNodeMap[id];
+            if (!ixn) {
+                ixn = new IXNode(id, nodes, docIndex);
+                this._ixNodeMap[id] = ixn;
+            }
+            if (nodes.is(':hidden')) {
+                ixn.htmlHidden = true;
+            }
+            if (inHidden) {
+                ixn.isHidden = true;
+                nodes.addClass("ixbrl-element-hidden");
+            }
+            if (isContinuation) {
+                $(nodes).addClass("ixbrl-continuation");
+            }
+            else {
+                this._docOrderItemIndex.addItem(id, docIndex);
+            }
+            if (name == 'NONFRACTION') {
+                $(nodes).addClass("ixbrl-element-nonfraction");
+            }
+            if (name == 'NONNUMERIC') {
+                $(nodes).addClass("ixbrl-element-nonnumeric");
+                if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
+                    ixn.escaped = true;
                 }
             }
-            if (node.length == 0) {
-                var parent = $(n).parent('div.amanablock');
-                if (parent.length > 0) {                    
-                    node = parent;
-                }
-            }
-            /* Otherwise, insert a <span> as wrapper */
-            if (node.length == 0) {
-                var wrapper = "<span>";
-                var nn = n.getElementsByTagName("*");
-                for (var i = 0; i < nn.length; i++) {
-                    if($(nn[i]).css("display") === "block") {
-                        wrapper = '<div>';
-                        break;
-                    }
-                }
-                $(n).wrap(wrapper);
-                node = $(n).parent();
-            }
-            /* If we use an enclosing table cell as the wrapper, we may have
-             * multiple tags in a single element. */
-            var ivids = node.data('ivid') || [];
-            ivids.push(id);
-            node.addClass("ixbrl-element").data('ivid', ivids)
-        }
-        /* We may have already created an IXNode for this ID from a -sec-ix-hidden
-         * element */
-        var ixn = this._ixNodeMap[id];
-        if (!ixn) {
-            ixn = new IXNode(id, node, docIndex);
-            this._ixNodeMap[id] = ixn;
-        }
-        if (node.is(':hidden')) {
-            ixn.htmlHidden = true;
-        }
-        if (n.getAttribute("continuedAt")) {
-            this._continuedAtMap[id] = { 
-                "isFact": name != 'CONTINUATION',
-                "continuedAt": n.getAttribute("continuedAt")
+            if (isFootnote) {
+                $(nodes).addClass("ixbrl-element-footnote");
+                ixn.footnote = true;
             }
         }
-        if (name == 'CONTINUATION') {
-            $(node).addClass("ixbrl-continuation");
+        else if(name == 'HIDDEN') {
+            inHidden = true;
         }
-        if (name == 'NONFRACTION') {
-            $(node).addClass("ixbrl-element-nonfraction");
-        }
-        if (name == 'NONNUMERIC') {
-            $(node).addClass("ixbrl-element-nonnumeric");
-            if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-                ixn.escaped = true;
-            }
-        }
-        if (isFootnote) {
-            $(node).addClass("ixbrl-element-footnote");
-            ixn.footnote = true;
-        }
-        if (elt) {
-            var concept = n.getAttribute("name");
-            if (elt.children().first().text() == "") {
-                elt.children().first().html("<i>no content</i>");
-            }
-            var tr = $("<tr></tr>").append("<td><div title=\"" + concept + "\">" + concept + "</div></td>").append($(elt).wrap("<td></td>").parent());
-            $("#ixbrl-inspector-hidden-facts-table-body").append(tr);
-        }
-    }
-    else if(n.nodeType == 1 && name == 'HIDDEN') {
-        inHidden = true;
-    }
-    else if(n.nodeType == 1) {
-        if (n.hasAttribute('style')) {
-            const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
-            var m = n.getAttribute('style').match(re);
-            if (m) {
-                var id = m[1];
-                node = $(n);
-                node.addClass("ixbrl-element").data('ivid', [id]);
+        else {
+            // Handle SEC/ESEF links-to-hidden
+            const id = this._getIXHiddenLinkStyle(n);
+            if (id !== null) {
+                nodes = $(n);
+                nodes.addClass("ixbrl-element").data('ivid', [id]);
+                this._docOrderItemIndex.addItem(id, docIndex);
                 /* We may have already seen the corresponding ix element in the hidden
                  * section */
                 var ixn = this._ixNodeMap[id];
                 if (ixn) {
                     /* ... if so, update the node and docIndex so we can navigate to it */
-                    ixn.wrapperNode = node;
+                    ixn.wrapperNodes = nodes;
                     ixn.docIndex = docIndex;
                 }
                 else {
-                    this._ixNodeMap[id] = new IXNode(id, node, docIndex);
+                    this._ixNodeMap[id] = new IXNode(id, nodes, docIndex);
                 }
             }
+            if (name == 'A') {
+                this._updateLink(n);
+            }
+        }    
+    }
+    this._preProcessChildNodes(n, docIndex, inHidden);
+}
+
+Viewer.prototype._getIXHiddenLinkStyle = function(domNode) {
+    if (domNode.hasAttribute('style')) {
+        const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const m = domNode.getAttribute('style').match(re);
+        if (m) {
+            return m[1];
         }
     }
-    for (var i=0; i < n.childNodes.length; i++) {
-        this._preProcessiXBRL(n.childNodes[i], docIndex, inHidden);
+    return null;
+}
+
+Viewer.prototype._preProcessChildNodes = function (domNode, docIndex, inHidden) {
+    for (const childNode of domNode.childNodes) {
+        this._preProcessiXBRL(childNode, docIndex, inHidden);
+    }
+    this._preProcessChildNodes(n, docIndex, inHidden);
+}
+
+Viewer.prototype._getIXHiddenLinkStyle = function(domNode) {
+    if (domNode.hasAttribute('style')) {
+        const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const m = domNode.getAttribute('style').match(re);
+        if (m) {
+            return m[1];
+        }
+    }
+    return null;
+}
+
+Viewer.prototype._preProcessChildNodes = function (domNode, docIndex, inHidden) {
+    for (const childNode of domNode.childNodes) {
+        this._preProcessiXBRL(childNode, docIndex, inHidden);
     }
 }
 
-Viewer.prototype._postProcessiXBRL = function(container) {
+Viewer.prototype._postProcessXBRL = function(container) {
     var viewer = this;
     $(container).find('.ixbrl-element').each(function (_, node) { 
         var id = $(node).data('ivid')[0];
         var fact = viewer._report.getItemById(id);
-        if (fact && fact instanceof Fact) {
-            viewer._postProcessiXBRLNode(container, node, fact);
-            var ixNode = fact._ixNode;
-            ixNode.continuations.forEach(c => 
-                viewer._postProcessiXBRLNode(container, c.wrapperNode[0], fact));
+        if (fact && fact instanceof Fact) { 
+            viewer._postProcessXBRLNode(container, node, fact);
+            const elements = viewer.elementsForItemIds(viewer.itemContinuationMap[id]);
+            elements.each(function () {
+                viewer._postProcessXBRLNode(container, this, fact);
+            });
         }
     });
 }
 
-Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
+Viewer.prototype._postProcessXBRLNode = function (container, node, fact) {
     const self = this;
     if (fact && fact.hasValidationResults())
         $(node).addClass("inline-fact-with-message");
@@ -287,9 +454,24 @@ Viewer.prototype._postProcessiXBRLNode = function (container, node, fact) {
     $(node).tooltip({     
         html: htmlTooltip,
         container: container,
+        delay: { "show": 350 },
         title: function() {
             return $(this).attr('ix-title') || $(this).parents('.ixbrl-element').attr('ix-title');
         }
+    }).on('show.bs.tooltip', function(evt) {        
+        if (self._tooltipShown !== null && self._tooltipShown !== evt.target) {
+            if ($(self._tooltipShown).parents().length > $(evt.target).parents().length) {
+                evt.preventDefault();
+            } else {
+                $(self._tooltipShown).tooltip('hide');
+                self._tooltipShown = evt.target;
+            }
+        } else {
+            self._tooltipShown = evt.target;
+        }
+    }).on('hide.bs.tooltip', function(evt) {        
+        if (self._tooltipShown === evt.target)
+            self._tooltipShown = null;
     }); 
 }
 
@@ -305,23 +487,32 @@ Viewer.prototype.contents = function() {
     return this._contents;
 }
 
-Viewer.prototype._selectAdjacentTag = function (offset) {
-    var elements = $(".ixbrl-element:not(.ixbrl-continuation)", this._contents);
-    var current = $(".ixbrl-selected:not(.ixbrl-continuation)", this._contents);
-    var next;
-    if (current.length == 1) {
-        next = elements.eq((elements.index(current.first()) + offset) % elements.length);
+// Move by offset (+1 or -1) through the tags in the document in document
+// order.
+//
+// Each element may have one or more tags associated with it, so we need to
+// move through the list of tags associated with the current element before
+// moving to the next/prev element
+//
+Viewer.prototype._selectAdjacentTag = function (offset, currentItem) {
+    var nextId;
+    if (currentItem !== null) {
+        nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.id, offset);
+        this.showDocumentForItemId(nextId);
     }
+    // If no fact selected go to the first or last in the current document
     else if (offset > 0) {
-        next = elements.first();
+        nextId = this._docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
     } 
     else {
-        next = elements.last();
+        nextId = this._docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
     }
     
-    this.showDocumentForItemId(next.data('ivid')[0]);
-    this.showElement(next);
-    this.selectElement(next);
+    const nextElement = this.elementsForItemId(nextId); 
+    this.showElement(nextElement);
+    // If this is a table cell with multiple nested tags pass all tags so that
+    // all are shown in the inspector. 
+    this.selectElement(nextId, this._ixIdsForElement(nextElement));
 }
 
 Viewer.prototype._bindHandlers = function () {
@@ -342,83 +533,88 @@ Viewer.prototype._bindHandlers = function () {
     
     $('#iframe-container .zoom-in').click(function () { viewer.zoomIn() });
     $('#iframe-container .zoom-out').click(function () { viewer.zoomOut() });
-
+    $('#iframe-container .print').click(function () { viewer.currentDocument().get(0).contentWindow.print() });
 
     TableExport.addHandles(this._contents, this._report);
 }
 
-Viewer.prototype.selectNextTag = function () {
-    this._selectAdjacentTag(1);
+Viewer.prototype.selectNextTag = function (currentFact) {
+    this._selectAdjacentTag(1, currentFact);
 }
 
-Viewer.prototype.selectPrevTag = function () {
-    this._selectAdjacentTag(-1);
-}
-
-Viewer.prototype.showElement = function(e, force) {
-    if (e[0] != this._currentShowElement || force) {
-        this._currentShowElement = e[0];
-        var span = e.find('span').first();
-        if (span.length)
-        {
-            if (span.css('display') == 'none') {
-                span = span.parent();
-            }
-            this.scrollIntoViewIfNeeded(span);
-        }
-        else
-            this.scrollIntoViewIfNeeded(e);
-    }
-}
-
-Viewer.prototype.scrollIntoViewIfNeeded = function(e) {
-    if (Element.prototype.scrollIntoViewIfNeeded)
-       e[0].scrollIntoViewIfNeeded(true);
-    else {
-        var viewTop = this._contents.scrollTop();
-        var viewBottom = viewTop + this._iframes.height();
-        var eTop = e.offset().top;
-        var eBottom = eTop + e.height();
-        if (eTop < viewTop || eBottom > viewBottom) {
-            e[0].scrollIntoView({block: "center"});
-        }
-    }        
-}
-
-
-Viewer.prototype.showAndSelectElement = function(e) {
-    this.scrollIfNotVisible(e);
-}
-
-Viewer.prototype.clearHighlighting = function () {
-    $("body", this._contents).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+Viewer.prototype.selectPrevTag = function (currentFact) {
+    this._selectAdjacentTag(-1, currentFact);
 }
 
 /*
- * Update the currently highlighted fact, but do not trigger a change in the
- * inspector.
- * 
- * Used to switch facts when the selection corresponds to multiple facts.
+ * Calculate the intersection of two rectangles
  */
-Viewer.prototype.highlightElements = function (ee) {
-    this.clearHighlighting();
-    ee.addClass("ixbrl-selected");
+Viewer.prototype.intersect = function(r1, r2) {
+    const r3 = {
+        left: Math.max(r1.left, r2.left),
+        top: Math.max(r1.top, r2.top),
+        right: Math.min(r1.right, r2.right),
+        bottom: Math.min(r1.bottom, r2.bottom)
+    };
+    r3.width = r3.right - r3.left;
+    r3.height = r3.bottom - r3.top;
+    return r3;
+}
+
+Viewer.prototype.isScrollableElement = function (domNode) {
+    const overflowy = $(domNode).css('overflow-y');
+    if (domNode.clientHeight > 0 && domNode.clientHeight < domNode.scrollHeight
+        && (overflowy == "auto" || overflowy == 'scroll')) {
+        return true;
+    }
+    const overflowx = $(domNode).css('overflow-x');
+    if (domNode.clientWidth > 0 && domNode.clientWidth < domNode.scrollWidth
+        && (overflowx == "auto" || overflowx == 'scroll')) {
+        return true;
+    }
+    return false;
+}
+
+/*
+ * Determine if the element is fully visible within all scrollable ancestors
+ */
+Viewer.prototype.isFullyVisible = function (node) {
+    var r1 = node.getBoundingClientRect();
+    const r2 = node.getBoundingClientRect();
+    var ancestor = $(node.parentElement);
+    while (!ancestor.is('body')) {
+        if (this.isScrollableElement(ancestor[0])) {
+            r1 = this.intersect(r1, ancestor[0].getBoundingClientRect());
+        }
+        // If the width or height of the intersection is less than the original
+        // element, then it's not fully visible.
+        if (r1.width < r2.width || r1.height < r2.height) {
+            return false;
+        }
+        ancestor = ancestor.parent();
+    } 
+    // In quirks mode, clientHeight of body is viewport height.  In standards
+    // mode, clientHeight of html is viewport height.
+    const quirksMode = node.ownerDocument.compatMode != 'CSS1Compat';
+    const de = quirksMode ? ancestor : ancestor.closest("html").get(0);
+    return r1.left > 0 && r1.top > 0 && r1.right < de.clientWidth && r1.bottom < de.clientHeight;
+}
+
+/* If the specified element is not fully visible, scroll it into the center of
+ * the viewport */
+Viewer.prototype.showElement = function(e) {
+    var ee = e.get(0);
+    if (!this.isFullyVisible(ee)) {
+        ee.scrollIntoView({ block: "center", inline: "center" });
+    }
+}
+
+Viewer.prototype.clearHighlighting = function () {
+    $("body", this._iframes.contents()).find(".ixbrl-element, .ixbrl-sub-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
 }
 
 Viewer.prototype._ixIdsForElement = function (e) {
-    var ids = e.data('ivid');
-    if (e.hasClass("ixbrl-continuation")) {
-        ids = [...ids];
-        /* If any of the ids are continuations, replace them with the IDs of
-         * their underlying facts */
-        for (var i = 0; i < ids.length; i++) {
-            const cof = this._continuedAtMap[ids[i]];
-            if (cof !== undefined) {
-                ids[i] = cof.continuationOf;
-            }
-        }
-    }
-    return ids;
+    return e.data('ivid');
 }
 
 /*
@@ -427,79 +623,116 @@ Viewer.prototype._ixIdsForElement = function (e) {
  * Takes an optional list of factIds corresponding to all facts that a click
  * falls within.  If omitted, it's treated as a click on a non-nested fact.
  */
-Viewer.prototype.selectElement = function (e, factIdList) {
-    if (e !== null) {
-        var factId = this._ixIdsForElement(e)[0];
-        this.onSelect.fire(factId, factIdList);
+Viewer.prototype.selectElement = function (itemId, itemIdList) {
+    if (itemId !== null) {
+        this.onSelect.fire(itemId, itemIdList);
     }
     else {
         this.onSelect.fire(null);
     }
 }
 
+// Handle a mouse click to select.  This finds all tagged elements that the
+// mouse click is within, and returns a list of item IDs for the items that
+// they're tagging.  This is so the inspector can show all items that were
+// under the click.
+// The initially selected element is the highest ancestor which is tagging
+// exactly the same content as the clicked element.  This is so that when we
+// have double tagged elements, we select the first of the set, but where we
+// have nested elements, we select the innermost, as this gives the most
+// intuitive behaviour when clicking "next".
 Viewer.prototype.selectElementByClick = function (e) {
-    var eltSet = [];
+    var itemIDList = [];
     var viewer = this;
+    var sameContentAncestorId;
+    // If the user clicked on a sub-element (and which is not also a proper
+    // ixbrl-element) treat as if we clicked the first non-sub-element
+    // ancestor in the DOM hierarchy - which would typically be
+    // the corresponding ixbrl-element (or one of the corresponding
+    // ixbrl-elements, in the case of nested tags)
+    // This is important in order to guarantee that sameContentAncestorId gets
+    // assigned below.
+    // We can't just ignore clicks on sub elements altogether because they are
+    // likely to be rendered outside the "enclosing" ixbrl-element.
+    if (!e.hasClass(".ixbrl-element")) {
+        e = e.closest(".ixbrl-element");
+    }
+    // Now find all iXBRL IDs on all ancestors in document order, making a note
+    // of the first one (sameContentAncestorId) that has exactly the same
+    // content as "e"
     e.parents(".ixbrl-element").addBack().each(function () { 
-        eltSet = eltSet.concat(viewer._ixIdsForElement($(this))); 
+        const ids = viewer._ixIdsForElement($(this));
+        itemIDList = itemIDList.concat(ids); 
+        if ($(this).text() == e.text() && sameContentAncestorId === undefined) {
+            sameContentAncestorId = ids[0];
+        }
     });
-    this.selectElement(e, eltSet);
+    this.selectElement(sameContentAncestorId, itemIDList);
 }
 
 Viewer.prototype._mouseEnter = function (e) {
-    var id = e.data('ivid');
+    var id = e.data('ivid')[0];
     this.onMouseEnter.fire(id);
 }
 
 Viewer.prototype._mouseLeave = function (e) {
-    var id = e.data('ivid');
+    var id = e.data('ivid')[0];
     this.onMouseLeave.fire(id);
 }
 
 Viewer.prototype.highlightRelatedFact = function (f) {
-    var e = this.elementForFact(f);
-    e.addClass("ixbrl-related");
+    this.changeItemClass(f.id, "ixbrl-related");
 }
 
 Viewer.prototype.highlightRelatedFacts = function (facts) {
-    this.elementsForFacts(facts).addClass("ixbrl-related");
+    for (const f of facts) {
+        this.changeItemClass(f.id, "ixbrl-related");
+    }
 }
 
 Viewer.prototype.clearRelatedHighlighting = function (f) {
     $(".ixbrl-related", this._contents).removeClass("ixbrl-related");
 }
 
-Viewer.prototype.elementForFact = function (fact) {
-    return this.elementForItemId(fact.id);
-}
-
-Viewer.prototype.elementForItemId = function (factId) {
-    return this._ixNodeMap[factId].wrapperNode;
+// Return a jQuery node list for wrapper elements corresponding to 
+// the factId.  May contain more than one node if the IX node contains
+// absolutely positioned elements.
+Viewer.prototype.elementsForItemId = function (factId) {
+    return this._ixNodeMap[factId].wrapperNodes; 
 }
 
 Viewer.prototype.elementsForItemIds = function (ids) {
-    var viewer = this;
-    return $($.map(ids, function (id, n) {
-        return viewer._ixNodeMap[id].wrapperNode.get();
-    }));
+    return $(ids.map(id => this._ixNodeMap[id].wrapperNodes.get()).flat());
 }
 
-Viewer.prototype.elementsForFacts = function (facts) {
-    return this.elementsForItemIds($.map(facts, function (f) { return f.id }));
+/*
+ * Add or remove a class to an item (fact or footnote) and any continuation elements
+ */
+Viewer.prototype.changeItemClass = function(itemId, highlightClass, removeClass) {
+    const elements = this.elementsForItemIds([itemId].concat(this.itemContinuationMap[itemId]))
+    if (removeClass) {
+        elements.removeClass(highlightClass);
+    }
+    else {
+        elements.addClass(highlightClass);
+    }
 }
 
+/*
+ * Change the currently highlighted item
+ */
 Viewer.prototype.highlightItem = function(factId) {
-    var continuations = this._ixNodeMap[factId].continuationIds();
-    this.highlightElements(this.elementsForItemIds([factId].concat(continuations)));
+    this.clearHighlighting();
+    this.changeItemClass(factId, "ixbrl-selected");
 }
 
 Viewer.prototype.showItemById = function (id, force) {
     if (id !== null) {
-        let elt = this.elementForItemId(id);
+        let elts = this.elementsForItemId(id);
         this.showDocumentForItemId(id);
         /* Hidden elements will return an empty node list */
-        if (elt.length > 0) {
-            this.showElement(elt, force);
+        if (elts.length > 0) {
+            this.showElement(elts);
         }
     }
 }
@@ -512,27 +745,28 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     var report = this._report;
     var viewer = this;
     if (on) {
-        $(".ixbrl-element:not(.ixbrl-continuation)", this._contents).each(function () {
-            var factId = $(this).data('ivid')[0];
-            var ixn = viewer._ixNodeMap[factId];
-            var elements = viewer.elementsForItemIds([factId].concat(ixn.continuationIds()));
-            elements.addClass("ixbrl-highlight");
-
-            if (!ixn.footnote) {
-                var fact = report.getItemById(factId);
-                if (fact) {
-                    var i = groups[fact.conceptQName().prefix];
+        $(".ixbrl-element", this._contents)
+            .addClass("ixbrl-highlight")
+            .each(function () {
+                // Find the first ixn for this element that isn't a footnote.
+                // Choosing the first means that we're arbitrarily choosing a
+                // highlight color for an element that is double tagged in a
+                // table cell.
+                const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
+                if (ixn != undefined) {
+                    const elements = viewer.elementsForItemIds(ixn.chainIXIds());
+                    const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
                     if (i !== undefined) {
                         elements.addClass("ixbrl-highlight-" + i);
                     }
                 } else {
                     $(this).addClass("ixbrl-highlight-missing");
                 }
-            }
         });
+        $(".ixbrl-sub-element", this._contents).addClass("ixbrl-highlight");
     }
     else {
-        $(".ixbrl-element", this._contents).removeClass (function (i, className) {
+        $(".ixbrl-element, .ixbrl-sub-element", this._contents).removeClass (function (i, className) {
             return (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ');
         });
     }
@@ -590,37 +824,35 @@ Viewer.prototype.zoomOut = function () {
 
 Viewer.prototype.factsInSameTable = function (fact) {
     var facts = [];
-    var tableHashCode = fact.tableHashCode();
-    if (tableHashCode)
-    {
-        for (const f of this._report.facts()) {
-            if (f.tableHashCode() == tableHashCode) {
-                facts.push(f.id);
-            }
-        }
-    } 
+    const e = this.elementsForItemId(fact.id);
+    e.closest("table").find(".ixbrl-element").each(function () {
+        facts = facts.concat($(this).data('ivid'));
+    });
     return facts;
 }
 
 Viewer.prototype.linkedHighlightFact = function (f) {
-    var e = this.elementForFact(f);
-    e.addClass("ixbrl-linked-highlight");
+    this.changeItemClass(f.id, "ixbrl-linked-highlight");
 }
 
 Viewer.prototype.clearLinkedHighlightFact = function (f) {
-    var e = this.elementForFact(f);
-    e.removeClass("ixbrl-linked-highlight");
+    this.changeItemClass(f.id, "ixbrl-linked-highlight", true);
 }
 
 Viewer.prototype._setTitle = function (docIndex) {
     $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
 }
 
-Viewer.prototype.showDocumentForItemId = function(factId) {
-    this.selectDocument(this._ixNodeMap[factId].docIndex);
+Viewer.prototype.showDocumentForItemId = function(itemId) {
+    this.selectDocument(this._ixNodeMap[itemId].docIndex);
+}
+
+Viewer.prototype.currentDocument = function () {
+    return this._iframes.eq(this._currentDocumentIndex);
 }
 
 Viewer.prototype.selectDocument = function (docIndex) {
+    this._currentDocumentIndex = docIndex;
     $('#ixv #viewer-pane .ixds-tabs .tab')
         .removeClass("active")
         .eq(docIndex)
@@ -629,8 +861,10 @@ Viewer.prototype.selectDocument = function (docIndex) {
      * delay when switching tabs on large, slow-to-render documents. */
     this._iframes
         .height(0)
+        .data("selected", false)
         .eq(docIndex)
-        .height("100%");
+        .height("100%")
+        .data("selected", true);
     this._setTitle(docIndex);
 }
 

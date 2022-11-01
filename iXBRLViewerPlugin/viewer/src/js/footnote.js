@@ -14,15 +14,20 @@
 
 export function Footnote(report, footnoteId, title) {
     this.id = footnoteId;
-    this.facts = [];
+    this.linkedFacts = [];
     this.title = title;
-    this._ixNode = report.getIXNodeForItemId(footnoteId);
+    this.ixNode = report.getIXNodeForItemId(footnoteId);
 }
 
-Footnote.prototype.addFact = function (f) {
-    this.facts.push(f); 
+// Facts that are the source of relationships to this fact.
+Footnote.prototype.addLinkedFact = function (f) {
+    this.linkedFacts.push(f); 
 }
 
 Footnote.prototype.textContent = function () {
-    return this._ixNode.textContent();
+    return this.ixNode.textContent();
+}
+
+Footnote.prototype.readableValue = function () {
+    return this.textContent();
 }

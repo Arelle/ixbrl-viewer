@@ -23,7 +23,7 @@ function bindEvents() { // AMANA extension
 
 $(function () {
     bindEvents();
-    var iv = new iXBRLViewer();
+    var iv = new iXBRLViewer({ showValidationWarningOnStart: false });
     iv.load();
 });
 

@@ -14,6 +14,7 @@
 
 import { Aspect, AspectSet } from "./aspect.js";
 import { iXBRLReport } from "./report.js";
+import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
     "prefixes": {
@@ -34,9 +35,30 @@ var testReportData = {
                     "en": "English label for concept two"
                 }
             }
+        },
+        "eg:ExplicitDimension": {
+            "labels": {
+                "std": {
+                    "en": "Explicit dimension"
+                }
+            },
+            "d": "e"
+        },
+        "eg:TypedDimension": {
+            "labels": {
+                "std": {
+                    "en": "Typed dimension"
+                }
+            },
+            "d": "t"
         }
     }
 };
+
+var insp = new TestInspector();
+beforeAll(() => {
+    return insp.i18nInit();
+});
 
 var testReport = new iXBRLReport(testReportData);
 
@@ -66,8 +88,8 @@ test("Unit aspects label - known currency (EUR)", () => {
 
 test("Unit aspects label - unknown currency", () => {
     var unitAspect = new Aspect("u", "iso4217:ZAR", testReport);
-    expect(unitAspect.label()).toBe("Unit");  
-    expect(unitAspect.valueLabel()).toBe("iso4217:ZAR");  
+    expect(unitAspect.label()).toBe("Unit");
+    expect(unitAspect.valueLabel()).toBe("ZAR ");
 });
 
 test("Entity aspect labels - unknown scheme", () => {
@@ -77,9 +99,22 @@ test("Entity aspect labels - unknown scheme", () => {
 });
 
 test("Taxonomy defined dimension labels", () => {
-    var tda = new Aspect("eg:Concept1", "eg:Concept2", testReport);
-    expect(tda.label()).toBe("English label");  
-    expect(tda.valueLabel()).toBe("English label for concept two");  
+    var tda = new Aspect("eg:ExplicitDimension", "eg:Concept2", testReport);
+    expect(tda.label()).toBe("Explicit dimension");
+    expect(tda.valueLabel()).toBe("English label for concept two");
+
+    tda = new Aspect("eg:TypedDimension", "eg:Concept2", testReport);
+    expect(tda.label()).toBe("Typed dimension");
+    // "eg:Concept2" should be treated as a string, not a member name
+    expect(tda.valueLabel()).toBe("eg:Concept2");
+
+    tda = new Aspect("eg:TypedDimension", "1 2 3 4", testReport);
+    expect(tda.label()).toBe("Typed dimension");
+    expect(tda.valueLabel()).toBe("1 2 3 4");
+
+    tda = new Aspect("eg:TypedDimension", null, testReport);
+    expect(tda.label()).toBe("Typed dimension");
+    expect(tda.valueLabel()).toBe("nil");
 });
 
 describe("AspectSet", () => {
@@ -92,7 +127,6 @@ describe("AspectSet", () => {
         expect(uv).toHaveLength(2);
         expect(uv.map(x => x.value())).toEqual(expect.arrayContaining(["eg:Concept1", "eg:Concept2"]));
     });
-    
 });
 
 

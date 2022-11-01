@@ -25,6 +25,10 @@
   <body xmlns="http://www.w3.org/1999/xhtml">
     <div style="display: none">
       <ix:header>
+        <ix:hidden>
+          <ix:nonFraction format="ixt:numdotdecimal" unitRef="u1" id="f-hidden" name="ifrs:DeferredTaxAssets" contextRef="c3" decimals="0">123456</ix:nonFraction>
+          <ix:footnote xml:lang="en" id="fn-f-hidden">This is a footnote</ix:footnote>
+        </ix:hidden>
         <ix:references>
           <link:schemaRef xlink:type="simple" xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd" />
           <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd" xlink:type="simple" />
@@ -187,6 +191,7 @@
           <xbrli:unit id="EUR">
             <xbrli:measure>iso4217:EUR</xbrli:measure>
           </xbrli:unit>
+          <ix:relationship arcrole="http://www.xbrl.org/2003/arcrole/fact-footnote" linkRole="http://www.xbrl.org/2003/role/link" fromRefs="f-hidden" toRefs="fn-f-hidden"/>
         </ix:resources>
       </ix:header>
     </div>
@@ -505,5 +510,29 @@ Profit Loss double tagged:
         <i />
       </p>
     </div>
+    <h3>Cross-document links</h3>
+    <p>
+    <a href="faurecia.html#link-target">With fragment to id</a>
+    <br />
+    <a href="valeo.html#name-link-target">With fragment to name</a>
+    <br />
+    <a href="valeo.html#%D1%86%D0%B5%D0%BB%D1%8C%20%D1%81%D1%81%D1%8B%D0%BB%D0%BA%D0%B8">%-encoded non-ASCII fragment</a>
+    <br />
+    <a href="faurecia.html">Without fragment</a>
+    <br />
+    <a href="faurecia.html#">With empty fragment</a>
+    <br />
+    <a href="faurecia.html#does not exist">With non-existent fragment</a>
+    </p>
+    <p>
+    <a href="https://www.workiva.com">Absolute link</a>
+    </p>
+    <p>
+    <a href="doesnotexist.html">File not in document set</a>
+    </p>
+    <p style="height: 45px">
+    </p>
+    <p>
+    </p>
   </body>
 </html>

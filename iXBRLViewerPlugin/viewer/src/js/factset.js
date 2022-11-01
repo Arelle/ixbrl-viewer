@@ -50,7 +50,7 @@ FactSet.prototype.minimallyUniqueLabel = function(fact) {
             var f = facts[i];
             allLabels[f.id] = [];
             for (var j = 0; j < allAspects.length; j++) {
-                var dd = f.aspects()[allAspects[j]];
+                var dd = f.aspect(allAspects[j]);
                 allLabels[f.id].push(dd ? dd.valueLabel() : null);
             }
         }

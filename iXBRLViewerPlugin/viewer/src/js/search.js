@@ -35,15 +35,22 @@ ReportSearch.prototype.buildSearchIndex = function () {
         doc.startDate = f.periodFrom();
         var dims = f.dimensions();
         for (var d in dims) {
-            l += " " + this._report.getLabel(dims[d],"std");
+            if (this._report.getConcept(d).isTypedDimension()) {
+                if (dims[d] !== null) {
+                    l += " " + dims[d];
+                }
+            }
+            else {
+                l += " " + this._report.getLabel(dims[d], "std");
+            }
         }
         doc.label = l;
         doc.ref = f.concept().referenceValuesAsString();
         const wider = f.widerConcepts();
         if (wider.length > 0) {
             doc.widerConcept = this._report.qname(wider[0]).localname;
-            doc.widerLabel = this._report.getLabel(wider[0],"std");
-            doc.widerDoc = this._report.getLabel(wider[0],"doc");
+            doc.widerLabel = this._report.getLabel(wider[0], "std");
+            doc.widerDoc = this._report.getLabel(wider[0], "doc");
         }
         docs.push(doc);
 

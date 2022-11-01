@@ -26,7 +26,6 @@
     <div style="display: none">
       <ix:header>
         <ix:references>
-          <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_entry_point_2017-03-09-es.xsd" xlink:type="simple" />
           <link:schemaRef xlink:href="http://xbrl.ifrs.org/taxonomy/2017-03-09/full_ifrs_doc_entry_point_2017-03-09.xsd" xlink:type="simple" />
         </ix:references>
         <ix:resources>
@@ -88,6 +87,24 @@
         </td>
         <td style="padding: 15px">(
           <ix:nonFraction decimals="0" name="ifrs:DeferredTaxAssets" format="ixt:numdotdecimal" unitRef="u1" sign="-" id="f4" contextRef="i2">461,123</ix:nonFraction>)
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 15px">Calc error</td>
+        <td style="padding: 15px">
+          <ix:nonFraction decimals="0" name="ifrs:NoncurrentProvisions" unitRef="u1" format="ixt:numdotdecimal" contextRef="i1" id="f5">1234</ix:nonFraction>
+        </td>
+        <td style="padding: 15px">(
+          <ix:nonFraction decimals="0" name="ifrs:NoncurrentLiabilities" unitRef="u1" format="ixt:numdotdecimal" contextRef="i1" id="f6">4321</ix:nonFraction>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 15px">Invalid format</td>
+        <td style="padding: 15px">
+          <ix:nonFraction decimals="0" name="ifrs:Assets" format="ixt:numdotdecimal" unitRef="u1" contextRef="i1" id="f7">abcd</ix:nonFraction>
+        </td>
+        <td style="padding: 15px">
+          <ix:nonFraction decimals="0" name="ifrs:Assets" unitRef="u1" contextRef="i1" id="f8">12,000.00</ix:nonFraction>
         </td>
       </tr>
     </table>

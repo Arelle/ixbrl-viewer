@@ -18,11 +18,13 @@ import { iXBRLReport } from "./report.js";
 import { Viewer } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
-export function iXBRLViewer() {
+export function iXBRLViewer(options) {
+    this.options = options || {};
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
     this._width = undefined;
+    this.options = options || {};
 }
 
 /*
@@ -46,6 +48,11 @@ export function iXBRLViewer() {
  *
  * Called when the display options menu is created or recreated.  menu is a
  * Menu object, and can be modified to add additional menu items.
+ *
+ * extendHighlightKey(key)
+ *
+ * Called when the highlight color key is created.  key is an array of labels,
+ * which can be modified or extended.
  *
  */
 iXBRLViewer.prototype.registerPlugin = function (plugin) {
@@ -127,26 +134,50 @@ iXBRLViewer.prototype._fixChromeBug = function(iframe) {
 
 iXBRLViewer.prototype._reparentDocument = function (source, useFrames) {    
     var iframeContainer = $('#ixv #iframe-container');        
-    
+
     if (useFrames) {
         
-        var iframe = $('<iframe />')[0];        
-        $('#iframe-div').replaceWith(iframe);
+        var iframe = $('<iframe title="iXBRL document view"/>').appendTo(iframeContainer)[0];
 
         var doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
         doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
         doc.close();
 
+        var docTitle = $('title', source).text();
+        if (docTitle != "") {
+            docTitle = "Inline Viewer - " + docTitle;
+        }
+        else {
+            docTitle = "Inline Viewer";
+        }
+        if ($('html', source).attr("lang") === undefined) {
+            $('html', source).attr("lang", "en-US");
+        }
+
         $('head', source).children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
-        
+
+        $('<title>', source).text(docTitle).appendTo($('head', source));
+    
         /* Due to self-closing tags, our script tags may not be a direct child of
         * the body tag in an HTML DOM, so move them so that they are */
-        $('body script', source).appendTo($('body', source));
-        $('body', source).children().not("script").not('#ixv').not(iframeContainer).appendTo($(iframe).contents().find('body'));
+        $('body script', source).appendTo($('body'));
+        const iframeBody = $(iframe).contents().find('body');
+        $('body', source).children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
+
+            /* Move all attributes on the body tag to the new body */
+        for (const bodyAttr of [...$('body', source).prop("attributes")]) {
+            iframeBody.attr(bodyAttr.name, bodyAttr.value); 
+            $('body', source).removeAttr(bodyAttr.name);
+        }
 
         /* Avoid any inline styles on the old body interfering with the inspector */
         $('body', source).removeAttr('style');
+
+        $('<style></style>')
+            .prop('type','text/css')
+            .html('.tooltip { font-size: 10px !important; }')
+            .appendTo($(iframe).contents().find('head'));
         
         return iframe;
 
@@ -180,13 +211,13 @@ iXBRLViewer.prototype._getTaxonomyData = function() {
     return null;
 }
 
-iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function() {
+iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function () {
     if (document.location.protocol == 'file:') {
         alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
     }
 }
 
-iXBRLViewer.prototype.load = function() {
+iXBRLViewer.prototype.load = function () {
     var iv = this;
     var iframeDiv = $('#ixv #iframe-container #iframe-div');
     var src = iframeDiv[0].dataset.src;
@@ -204,12 +235,11 @@ iXBRLViewer.prototype.load = function() {
 iXBRLViewer.prototype._load = function(ownerDocument) {
     var iv = this;
     var inspector = this.inspector;
-
     setTimeout(function(){
-        
+
         /* AMANA: In the chromium, pdf files do not use frames in case of content-visibility CSS style  */  
-        var isPDF = iv._detectPDF(ownerDocument);     
-        var useFrames = iv._inIframe() || !isPDF;
+        var isPDF = iv._detectPDF(ownerDocument);    
+        var useFrames = iv._inIframe() || !isPDF; 
         var iframes = $(iv._reparentDocument(ownerDocument, useFrames));
 
         /* AMANA extension: In a case of multifile iXBRL attach JSON into every HTML page is too expensive --> */
@@ -261,11 +291,10 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
                 var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames, isPDF);
 
                 viewer.initialize()
-                    .then(() => inspector.initialize(report))
+                    .then(() => inspector.initialize(report, viewer))
                     .then(() => {
-                        inspector.setViewer(viewer);
                         interact('#viewer-pane').resizable({
-                            edges: { left: false, right: ".resize", bottom: false, top: false},
+                            edges: { left: false, right: ".resize", bottom: false, top: false },
                             restrictEdges: {
                                 outer: 'parent',
                                 endOnly: true,
@@ -295,10 +324,13 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
 
                         /* Focus on fact specified in URL fragment, if any */
                         inspector.handleFactDeepLink();
+                        if (iv.options.showValidationWarningOnStart) {
+                            inspector.showValidationWarning();
+                        }
                     })
                     .then(() => viewer.notifyReady());
             }
-        });
+        }, 250);
     }, 0);
 }
 

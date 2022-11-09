@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export function Footnote(report, footnoteId, title) {
-    this.id = footnoteId;
-    this.linkedFacts = [];
-    this.title = title;
-    this.ixNode = report.getIXNodeForItemId(footnoteId);
-}
+export class Footnote {
+    constructor(report, footnoteId, title) {
+        this.id = footnoteId;
+        this.linkedFacts = [];
+        this.title = title;
+        this.ixNode = report.getIXNodeForItemId(footnoteId);
+    }
 
-// Facts that are the source of relationships to this fact.
-Footnote.prototype.addLinkedFact = function (f) {
-    this.linkedFacts.push(f); 
-}
+    // Facts that are the source of relationships to this fact.
+    addLinkedFact(f) {
+        this.linkedFacts.push(f); 
+    }
 
-Footnote.prototype.textContent = function () {
-    return this.ixNode.textContent();
-}
+    textContent() {
+        return this.ixNode.textContent();
+    }
 
-Footnote.prototype.readableValue = function () {
-    return this.textContent();
+    readableValue() {
+        return this.textContent();
+    }
 }

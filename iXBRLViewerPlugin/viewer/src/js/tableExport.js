@@ -41,7 +41,7 @@ export class TableExport {
         const report = this._report;
         let maxRowLength = 0;
         const rows = [];
-        table.find("tr:visible").each(function () {
+        table.find("tr").each(function () {
             const row = [];
             $(this).find("td:visible, th:visible").each(function () {
                 const colspan = $(this).attr("colspan");

@@ -172,12 +172,7 @@ iXBRLViewer.prototype._reparentDocument = function (source, useFrames) {
         }
 
         /* Avoid any inline styles on the old body interfering with the inspector */
-        $('body', source).removeAttr('style');
-
-        $('<style></style>')
-            .prop('type','text/css')
-            .html('.tooltip { font-size: 10px !important; }')
-            .appendTo($(iframe).contents().find('head'));
+        $('body', source).removeAttr('style');       
         
         return iframe;
 

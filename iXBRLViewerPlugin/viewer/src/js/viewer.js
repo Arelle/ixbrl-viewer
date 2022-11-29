@@ -19,6 +19,7 @@ import { IXNode } from './ixnode.js';
 import { Fact } from './fact.js';
 import { setDefault } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
+import { ContextMenu } from './contextMenu.js';
 
 import 'bootstrap/js/dist/tooltip';
 
@@ -44,6 +45,10 @@ export function Viewer(iv, iframes, report, useFrames, isPDF) {
     this._currentDocumentIndex = 0;
     this._mzInit = false;   
     this._tooltipShown = null;
+    this._highlighting = false;
+
+    $(".amanablock", this.contents())
+      .addClass("-ixh-highlight-region").removeClass("amanablock");
 }
 
 Viewer.prototype.initialize = function() {
@@ -75,7 +80,15 @@ Viewer.prototype.initialize = function() {
                 viewer._iframes.each(function (docIndex) { 
                     viewer._postProcessXBRL($(this).contents().find("body").get(0), docIndex);
                 });    
-            });
+            })
+            .then(() => {                
+                viewer.contextMenu = new ContextMenu({
+                    target: $('.ixbrl-element-nonnumeric,.ixbrl-continuation', viewer.contents()),
+                    menuItems: (target) => viewer._createContextMenuItems(target),
+                    mode: "light" 
+                  });
+                viewer.contextMenu.init();                  
+            })
     });
 }
 
@@ -196,7 +209,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
     }
     /* AMANA extension: */
     if (nodes.length == 0) {
-        var parent = $(domNode).parent('div.amanablock');
+        var parent = $(domNode).parent('div.-ixh-highlight-region');
         if (parent.length > 0) {                    
             nodes = parent;
         }
@@ -237,7 +250,7 @@ Viewer.prototype._buildContinuationMaps = function() {
     const nextContinuationMap = {};
     // map of items in default target document to all their continuations
     const itemContinuationMap = {};
-    this._iframes.contents().find("body *").each(function () {
+    this.contents().find("body *").each(function () {
         const name = localName(this.nodeName).toUpperCase();
         if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
             const nodeId = this.getAttribute('id');
@@ -298,6 +311,7 @@ Viewer.prototype._buildContinuationMaps = function() {
 // fact and footnotes in document order.
 //
 Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
+    const self = this;
     const name = localName(n.nodeName).toUpperCase();
     const isFootnote = (name == 'FOOTNOTE');
     const isContinuation = (name == 'CONTINUATION');
@@ -319,12 +333,13 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             // For a continuation, store the IX ID(s) of the item(s), not the continuation
             const headId = isContinuation ? this.continuationOfMap[id] : id;
             this._addIdToNode(nodes.first(), headId);
+            
 
             // We may have already created an IXNode for this ID from a -sec-ix-hidden
             // element 
             var ixn = this._ixNodeMap[id];
             if (!ixn) {
-                ixn = new IXNode(id, nodes, docIndex);
+                ixn = new IXNode(id, nodes, docIndex, name);
                 this._ixNodeMap[id] = ixn;
             }
             if (nodes.is(':hidden')) {
@@ -487,6 +502,101 @@ Viewer.prototype.contents = function() {
     return this._contents;
 }
 
+Viewer.prototype._createContextMenuItems = function (e) {
+    const self = this;
+    const menuItems = [];
+    e = $(e);
+    if (!e.hasClass(".ixbrl-element")) {
+        e = e.closest(".ixbrl-element");
+    }    
+    const ids = this._ixIdsForElement(e);      
+    if (self._iv.inspector._currentItem !== null && ids.includes(self._iv.inspector._currentItem.id)) {
+        const id = self._iv.inspector._currentItem.id;
+        const all = $.makeArray($(".ixbrl-element", this._contents).filter(function () {
+            let ids2 = self._ixIdsForElement($(this));
+            return ids2[0] === id;
+        }));
+        if (all.length > 1) {
+            let firstElm = $(all[0]);
+            let firstSubelement = firstElm.find("ixbrl-sub-element").first();
+            if (firstSubelement.length > 0) {
+                prevElm = firstSubelement;
+            }
+            if (!this.isFullyVisible(firstElm[0])) {
+                menuItems.push({ 
+                    content: "Show head",
+                    divider: "bottom", 
+                    events: {
+                        click: () => {
+                            firstElm[0].scrollIntoView({ block: "center"});
+                            setTimeout(() => self.selectElement(ids[0]), 50);                        
+                        } 
+                    } 
+                });
+            }            
+        }
+        const index = all.indexOf(e[0]);
+        for (let j = index - 1; j >= 0; j--) {
+            let prevElm = $(all[j]);
+            let firstSubelement = prevElm.find("ixbrl-sub-element").first();
+            if (firstSubelement.length > 0) {
+                prevElm = firstSubelement;
+            }
+            if (!this.isFullyVisible(prevElm[0])) {
+                menuItems.push({
+                    content: "Show previous",
+                    events: {
+                        click: () => {
+                            prevElm[0].scrollIntoView({ block: "center"});
+                            setTimeout(() => self.selectElement(ids[0]), 50);
+                        }
+                    } 
+                });
+                break;
+            }
+        }
+        for (let j = index + 1; j < all.length; j++) {
+            let nextElm = $(all[j]);
+            let lastSubelement = nextElm.find("ixbrl-sub-element").last();
+            if (lastSubelement.length > 0) {
+                nextElm = lastSubelement;
+            }
+            if (!this.isFullyVisible(nextElm[0])) {
+                menuItems.push({ 
+                    content: "Show next",
+                    events: {
+                        click: () => {
+                            nextElm[0].scrollIntoView({ block: "center"});
+                            setTimeout(() => self.selectElement(ids[0]), 50);                        
+                        } 
+                    } 
+                });
+                break;
+            }
+        }        
+        if (all.length > 1) {
+            let lastElm = $(all[all.length - 1]);
+            let lastSubelement = lastElm.find("ixbrl-sub-element").last();
+            if (lastSubelement.length > 0) {
+                lastElm = lastSubelement;
+            }
+            if (!this.isFullyVisible(lastElm[0])) {
+                menuItems.push({ 
+                    content: "Show tail",
+                    divider: "top", 
+                    events: {
+                        click: () => {
+                            lastElm[0].scrollIntoView({ block: "center"});
+                            setTimeout(() => self.selectElement(ids[0]), 50);                        
+                        } 
+                    } 
+                });
+            }
+        }
+    }
+    return menuItems;
+}
+
 // Move by offset (+1 or -1) through the tags in the document in document
 // order.
 //
@@ -605,12 +715,12 @@ Viewer.prototype.isFullyVisible = function (node) {
 Viewer.prototype.showElement = function(e) {
     var ee = e.get(0);
     if (!this.isFullyVisible(ee)) {
-        ee.scrollIntoView({ block: "center", inline: "center" });
+        ee.scrollIntoView({ block: "center" });
     }
 }
 
 Viewer.prototype.clearHighlighting = function () {
-    $("body", this._iframes.contents()).find(".ixbrl-element, .ixbrl-sub-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+    $("body", this.contents()).find(".ixbrl-element, .ixbrl-sub-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
 }
 
 Viewer.prototype._ixIdsForElement = function (e) {
@@ -625,7 +735,7 @@ Viewer.prototype._ixIdsForElement = function (e) {
  */
 Viewer.prototype.selectElement = function (itemId, itemIdList) {
     if (itemId !== null) {
-        this.onSelect.fire(itemId, itemIdList);
+        this.onSelect.fire(itemId, itemIdList);        
     }
     else {
         this.onSelect.fire(null);
@@ -667,7 +777,7 @@ Viewer.prototype.selectElementByClick = function (e) {
             sameContentAncestorId = ids[0];
         }
     });
-    this.selectElement(sameContentAncestorId, itemIDList);
+    this.selectElement(sameContentAncestorId, itemIDList);    
 }
 
 Viewer.prototype._mouseEnter = function (e) {
@@ -721,9 +831,12 @@ Viewer.prototype.changeItemClass = function(itemId, highlightClass, removeClass)
 /*
  * Change the currently highlighted item
  */
-Viewer.prototype.highlightItem = function(factId) {
+Viewer.prototype.highlightItem = function(factId, itemIdList) {
     this.clearHighlighting();
     this.changeItemClass(factId, "ixbrl-selected");
+    if (this._highlighting) {
+        this.focusOnSelected(factId, itemIdList.map(f => f.id));
+    }
 }
 
 Viewer.prototype.showItemById = function (id, force) {
@@ -738,12 +851,14 @@ Viewer.prototype.showItemById = function (id, force) {
 }
 
 Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
+    this._highlighting = on;
     var groups = {};
     $.each(namespaceGroups, function (i, ns) {
         groups[ns] = i;
     });
     var report = this._report;
-    var viewer = this;
+    var viewer = this;    
+    this._removeFocusOnSelected();
     if (on) {
         $(".ixbrl-element", this._contents)
             .addClass("ixbrl-highlight")
@@ -768,8 +883,25 @@ Viewer.prototype.highlightAllTags = function (on, namespaceGroups) {
     else {
         $(".ixbrl-element, .ixbrl-sub-element", this._contents).removeClass (function (i, className) {
             return (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ');
-        });
+        });        
     }
+}
+
+Viewer.prototype._removeFocusOnSelected = function () {
+    $(".ixbrl-blur-highlight", this._contents).removeClass("ixbrl-blur-highlight");
+}
+
+Viewer.prototype.focusOnSelected = function(itemId, itemIdList) {
+    const self = this;
+    if (itemId === null || itemIdList === null) return;
+    $(".ixbrl-blur-highlight", this._contents).addClass("ixbrl-highlight").removeClass("ixbrl-blur-highlight");
+    const items = $(".ixbrl-element", this._contents)
+        .filter(function() {
+            const ids = self._ixIdsForElement($(this));
+            return ids[0] != itemId && itemIdList.includes(ids[0]);
+        });
+    items.addClass("ixbrl-blur-highlight").removeClass("ixbrl-highlight");
+    items.find(".ixbrl-sub-element").addClass("ixbrl-blur-highlight").removeClass("ixbrl-highlight");
 }
 
 // The firefox browser does not support CSS zoom style,

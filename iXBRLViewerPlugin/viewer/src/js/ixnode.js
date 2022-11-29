@@ -25,7 +25,7 @@
 
 var docOrderindex = 0;
 
-export function IXNode(id, wrapperNodes, docIndex) {
+export function IXNode(id, wrapperNodes, docIndex, name) {
     this.wrapperNodes = wrapperNodes;
     this.escaped = false;
     this.continuations = [];
@@ -35,6 +35,7 @@ export function IXNode(id, wrapperNodes, docIndex) {
     this.isHidden = false;
     this.htmlHidden = false;
     this.docOrderindex = docOrderindex++;
+    this.name = name;
 }
 
 IXNode.prototype.continuationIds = function () {

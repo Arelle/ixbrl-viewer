@@ -143,7 +143,7 @@ Inspector.prototype.initialize = function (report, viewer) {
 
 Inspector.prototype.initializeViewer = function () {
     var viewer = this._viewer;
-    viewer.onSelect.add((id, eltSet) => this.selectItem(id, eltSet));
+    viewer.onSelect.add((id, eltSet) => this.selectItem(id, eltSet, false));
     viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
     viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
     $('.ixbrl-next-tag').click(() => viewer.selectNextTag(this._currentItem));
@@ -668,7 +668,7 @@ Inspector.prototype._selectionSummaryAccordian = function() {
 
     // dissolveSingle => title not shown if only one item in accordian
     var a = new Accordian({
-        onSelect: (id) => this.switchItem(id),
+        onSelect: (id) => this.switchItem(id, false),
         alwaysOpen: true,
         dissolveSingle: true,
     });
@@ -821,7 +821,7 @@ Inspector.prototype.update = function () {
  * If itemIdList is omitted, the currently selected item list is reset to just
  * the primary item.
  */
-Inspector.prototype.selectItem = function (id, itemIdList, force) {
+Inspector.prototype.selectItem = function (id, itemIdList, force = true) {
     if (itemIdList === undefined) {
         this._currentItemList = [ this._report.getItemById(id) ];
     }
@@ -852,11 +852,13 @@ Inspector.prototype.notifySelectItem = function (id) {
  *
  * For footnotes, we currently only support a single footnote being selected.
  */
-Inspector.prototype.switchItem = function (id, force) {
+Inspector.prototype.switchItem = function (id, force = true) {
     if (id !== null) {
         this._currentItem = this._report.getItemById(id);
-        this._viewer.showItemById(id, force);
-        this._viewer.highlightItem(id);
+        if (force || this._currentItem.ixNode.name == 'NONFRACTION') {            
+            this._viewer.showItemById(id);
+        }
+        this._viewer.highlightItem(id, this._currentItemList);
     }
     else {
         this._currentItem = null;

@@ -17,10 +17,11 @@
 @import "common.less";
 @import "bootstrap.less";
 @import (reference) "icons.less";
+@import "contextmenu.less";
 
 .tooltip { font-size: 10px !important; }
 
-.ixbrl-highlight:not(.ixbrl-no-highlight) {
+.ixbrl-highlight:not(.ixbrl-no-highlight,.-ixh-highlight-region) {
   background-color: @highlight-default !important;
 
   &.ixbrl-highlight-1 {
@@ -35,13 +36,29 @@
     background-color: rebeccapurple !important;
   }
 
-  &.amanablock {
-    background-color: @highlight-block !important;
+  &.-ixh-highlight-region {
+    background-color: @highlight-block-1 !important;
   }
 
   &.inline-fact-with-message:not(:hover) {
     outline: dashed 1px @inline-fact-with-message;    
   }
+}
+
+.ixbrl-highlight.-ixh-highlight-region:not(.ixbrl-no-highlight) {
+  background-color: @highlight-block-default !important;
+
+  &.ixbrl-highlight-1 {
+    background-color: @highlight-block-1 !important;
+  }
+
+  &.ixbrl-highlight-2 {
+    background-color: @highlight-block-2 !important;
+  }
+}
+
+.ixbrl-blur-highlight:not(.ixbrl-no-highlight) {
+  background-color: @highlight-blur !important;
 }
 
 div,

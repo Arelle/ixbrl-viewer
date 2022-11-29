@@ -118,7 +118,7 @@ iXBRLViewer.prototype._detectPDF = function(document) {
 
 iXBRLViewer.prototype._fixChromeBug = function(iframe) {
     var chromeVersion = this._getChromeVersion();
-    if (chromeVersion && chromeVersion >= 88) { // Giving a chance for Google to fix this        
+    if (chromeVersion && chromeVersion >= 88 && chromeVersion < 107) { // Giving a chance for Google to fix this        
         var doc = iframe.contentDocument || iframe.contentWindow.document;
         var pageContainer = $(doc).find("div#page-container"); // PDF
         if (pageContainer.length > 0) {

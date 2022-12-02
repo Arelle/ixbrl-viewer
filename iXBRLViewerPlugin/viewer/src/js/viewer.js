@@ -414,7 +414,6 @@ Viewer.prototype._preProcessChildNodes = function (domNode, docIndex, inHidden) 
     for (const childNode of domNode.childNodes) {
         this._preProcessiXBRL(childNode, docIndex, inHidden);
     }
-    this._preProcessChildNodes(n, docIndex, inHidden);
 }
 
 Viewer.prototype._getIXHiddenLinkStyle = function(domNode) {
@@ -441,10 +440,6 @@ Viewer.prototype._postProcessXBRL = function(container) {
         var fact = viewer._report.getItemById(id);
         if (fact && fact instanceof Fact) { 
             viewer._postProcessXBRLNode(container, node, fact);
-            const elements = viewer.elementsForItemIds(viewer.itemContinuationMap[id]);
-            elements.each(function () {
-                viewer._postProcessXBRLNode(container, this, fact);
-            });
         }
     });
 }
@@ -453,7 +448,7 @@ Viewer.prototype._postProcessXBRLNode = function (container, node, fact) {
     const self = this;
     if (fact && fact.hasValidationResults())
         $(node).addClass("inline-fact-with-message");
-    var htmlTooltip;
+    var htmlTooltip;    
     if (fact) {
         var title = fact.getLabel("std") || fact.conceptName();
         if (fact.concept().isTaxonomyExtension()) {

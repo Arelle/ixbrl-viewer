@@ -37,7 +37,7 @@ class TestXHTMLSerializer(unittest.TestCase):
         self._checkTagExpansion('<br></br>', '<br/>')
 
         # Only expand tags in the XHTML namespace
-        self._checkTagExpansion('<div xmlns="other" />', '<div xmlns="other"/>')
+        self._checkTagExpansion('<div xmlns="other" />', '<div xmlns="other"></div>')
 
     def test_serialize(self):
         htmlsrc = self._html("<p>hello</p>")

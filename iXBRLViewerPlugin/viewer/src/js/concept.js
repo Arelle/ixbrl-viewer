@@ -62,7 +62,7 @@ export class Concept {
     }
 
     isEnumeration() {
-        return Boolean(this._c.e);
+        return Boolean(this._c.en);
     }
 }
 

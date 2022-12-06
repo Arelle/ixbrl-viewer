@@ -97,7 +97,8 @@ export function wrapLabel(str, maxwidth) {
  * adding an ellipsis if the label is actually shortened.
  */
 export function truncateLabel(label, length) {
-    let t = wrapLabel(label, length)[0];
+    let vv = wrapLabel(label, length)[0];
+    let t = vv[0];
     if (vv.length > 1) {
         t += ' \u2026';
     }

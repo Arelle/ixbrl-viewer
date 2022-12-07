@@ -11,7 +11,7 @@ COPY package.json /build/
 RUN npm update --location=global && \
     npm install --include=dev
 
-COPY . /build/
+COPY . /build/ 
 
 # The following command replaces the version string in package.json
 ARG VERSION=${GIT_TAG:-0.0.0}

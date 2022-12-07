@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex } from "./util.js"
+import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel } from "./util.js"
 import moment from 'moment';
 import "./moment-jest.js";
 
@@ -136,6 +136,17 @@ describe("wrapLabel", () => {
             "trailing",
             "space "
         ])
+    });
+});
+
+describe("truncateLabel", () => {
+    test("Truncate at width 10", () => {
+        expect(truncateLabel("The cat sat on the mat.  My hovercraft is full of eels.", 10)).toEqual(
+            "The cat \u2026"
+        );
+        expect(truncateLabel("The cat", 10)).toEqual(
+            "The cat"
+        )
     });
 });
 

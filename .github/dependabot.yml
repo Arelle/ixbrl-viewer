@@ -50,7 +50,3 @@ updates:
   open-pull-requests-limit: 99
   reviewers:
   - Workiva/xt
-  ignore:
-  - dependency-name: numpy
-    versions:
-    - ">=1.20"

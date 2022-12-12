@@ -4,14 +4,22 @@ ARG NPM_CONFIG__AUTH
 ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
 ARG NPM_CONFIG_ALWAYS_AUTH=true
 ARG GIT_TAG
+ARG NPM_CONFIG_USERCONFIG
 
 WORKDIR /build/
+COPY . /build/ 
+RUN echo `cat /build/$NPM_CONFIG_USERCONFIG`
+
+RUN echo $NPM_CONFIG_REGISTRY
+RUN echo $NPM_CONFIG__AUTH
+
 
 COPY package.json /build/
-RUN npm update --location=global && \
-    npm install --include=dev
+RUN npm version
+RUN npm update --location=global 
+RUN npm version
+RUN npm install --include=dev
 
-COPY . /build/ 
 
 # The following command replaces the version string in package.json
 ARG VERSION=${GIT_TAG:-0.0.0}
@@ -25,7 +33,7 @@ RUN npm run test
 
 # build ixbrlviewer.js
 RUN npm run prod
-
+#MOVE AFTER WORKIDIR /build/
 # Upload ixbrlviewer.js to github artifacts
 ARG BUILD_ARTIFACTS_GITHUB_RELEASE_ASSETS=/build/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 

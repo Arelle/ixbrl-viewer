@@ -2,7 +2,7 @@ FROM node:16-slim as node-build
 
 # ARG NPM_CONFIG__AUTH
 # ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
-ARG NPM_CONFIG_ALWAYS_AUTH=true
+# ARG NPM_CONFIG_ALWAYS_AUTH=true
 ARG GIT_TAG
 ARG NPM_CONFIG_USERCONFIG
 

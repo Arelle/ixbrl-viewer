@@ -8,7 +8,7 @@ COPY package.json /build/
 RUN echo `cat $NPM_CONFIG_USERCONFIG`
 
 RUN npm version
-RUN npm update --location=global 
+# RUN npm update --location=global 
 RUN npm version
 RUN npm install --include=dev
 

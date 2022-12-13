@@ -5,7 +5,7 @@ ARG NPM_CONFIG_USERCONFIG
 
 WORKDIR /build/
 COPY package.json /build/
-RUN echo `cat $NPM_CONFIG_USERCONFIG`
+RUN echo `cat ~/.npmrc`
 
 RUN npm version
 # RUN npm update --location=global 

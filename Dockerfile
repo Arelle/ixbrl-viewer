@@ -1,7 +1,6 @@
 FROM node:16-slim as node-build
 
 ARG GIT_TAG
-# ARG NPM_CONFIG_USERCONFIG
 
 WORKDIR /build/
 COPY package.json /build/

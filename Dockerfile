@@ -1,11 +1,11 @@
 FROM node:16-slim as node-build
 
 ARG GIT_TAG
-ARG NPM_CONFIG_USERCONFIG
+# ARG NPM_CONFIG_USERCONFIG
 
 WORKDIR /build/
 COPY package.json /build/
-RUN echo `cat ~/.npmrc`
+# RUN echo `cat ~/.npmrc`
 
 RUN npm version
 RUN npm update --location=global 

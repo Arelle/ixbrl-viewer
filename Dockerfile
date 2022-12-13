@@ -4,13 +4,14 @@ ARG GIT_TAG
 ARG NPM_CONFIG_USERCONFIG
 
 WORKDIR /build/
-COPY . /build/ 
+COPY package.json /build/
 
 RUN npm version
-# RUN npm update --location=global 
-# RUN npm version
+RUN npm update --location=global 
+RUN npm version
 RUN npm install --include=dev
 
+COPY . /build/
 
 # The following command replaces the version string in package.json
 ARG VERSION=${GIT_TAG:-0.0.0}
@@ -24,7 +25,6 @@ RUN npm run test
 
 # build ixbrlviewer.js
 RUN npm run prod
-#MOVE AFTER WORKIDIR /build/
 # Upload ixbrlviewer.js to github artifacts
 ARG BUILD_ARTIFACTS_GITHUB_RELEASE_ASSETS=/build/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 

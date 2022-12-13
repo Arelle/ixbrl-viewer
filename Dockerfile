@@ -8,7 +8,7 @@ COPY package.json /build/
 RUN echo `cat ~/.npmrc`
 
 RUN npm version
-# RUN npm update --location=global 
+RUN npm update --location=global 
 RUN npm version
 RUN npm install --include=dev
 

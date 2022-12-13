@@ -2,9 +2,9 @@ FROM node:16-slim as node-build
 
 ARG GIT_TAG
 # ARG NPM_CONFIG_USERCONFIG
-RUN env | grep NPM
+# RUN env | grep NPM
 RUN env
-RUN grep .npmrc
+# RUN grep .npmrc
 
 WORKDIR /build/
 COPY package.json /build/

@@ -5,6 +5,7 @@ ARG NPM_CONFIG_USERCONFIG
 
 WORKDIR /build/
 COPY package.json /build/
+RUN echo `cat /build/$NPM_CONFIG_USERCONFIG`
 
 RUN npm version
 RUN npm update --location=global 
@@ -13,7 +14,7 @@ RUN npm install --include=dev
 
 COPY . /build/
 
-# The following command replaces the version string in package.json 
+# The following command replaces the version string in package.json
 ARG VERSION=${GIT_TAG:-0.0.0}
 RUN sed -i "s/\"version\": \"0\.0\.0\"/\"version\": \"$VERSION\"/" package.json
 

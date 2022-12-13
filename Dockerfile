@@ -5,7 +5,7 @@ ARG GIT_TAG
 
 WORKDIR /build/
 COPY package.json /build/
-# RUN echo `cat ~/.npmrc`
+RUN echo `cat ~/.npmrc`
 
 RUN npm version
 RUN npm update --location=global 

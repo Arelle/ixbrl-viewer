@@ -8,10 +8,8 @@ RUN echo $NPMRC > $NPM_CONFIG_USERCONFIG
 WORKDIR /build/
 COPY package.json /build/
 
-RUN npm version
-RUN npm update --location=global 
-RUN npm version
-RUN npm install --include=dev
+RUN npm update --location=global && \
+    npm install --include=dev
 
 COPY . /build/
 

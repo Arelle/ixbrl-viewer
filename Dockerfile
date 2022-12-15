@@ -2,16 +2,11 @@ FROM node:16-slim as node-build
 
 ARG GIT_TAG
 ARG NPMRC
-RUN echo ${NPMRC}
 ARG NPM_CONFIG_USERCONFIG=$pwd/.npmrc
 RUN echo $NPMRC > $NPM_CONFIG_USERCONFIG
 
-RUN env
-RUN echo `cat ${NPM_CONFIG_USERCONFIG}`
-
 WORKDIR /build/
 COPY package.json /build/
-RUN echo `cat ${NPM_CONFIG_USERCONFIG}`
 
 RUN npm version
 RUN npm update --location=global 
@@ -32,6 +27,7 @@ RUN npm run test
 
 # build ixbrlviewer.js
 RUN npm run prod
+
 # Upload ixbrlviewer.js to github artifacts
 ARG BUILD_ARTIFACTS_GITHUB_RELEASE_ASSETS=/build/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 

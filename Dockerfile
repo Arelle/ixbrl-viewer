@@ -3,6 +3,7 @@ FROM node:16-slim as node-build
 ARG GIT_TAG
 ARG NPMRC
 ARG NPM_CONFIG_USERCONFIG=$pwd/.npmrc
+RUN echo $NPMRC
 RUN echo $NPMRC > $NPM_CONFIG_USERCONFIG
 
 WORKDIR /build/

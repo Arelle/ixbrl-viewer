@@ -1,14 +1,17 @@
 FROM node:16-slim as node-build
 
 ARG GIT_TAG
-# ARG NPM_CONFIG_USERCONFIG
-# RUN env | grep NPM
+ARG NPMRC
+RUN echo ${NPMRC}
+ARG NPM_CONFIG_USERCONFIG=$pwd/.npmrc
+RUN echo $NPMRC > $NPM_CONFIG_USERCONFIG
+
 RUN env
-# RUN grep .npmrc
+RUN echo `cat ${NPM_CONFIG_USERCONFIG}`
 
 WORKDIR /build/
 COPY package.json /build/
-RUN echo `cat ~/.npmrc`
+RUN echo `cat ${NPM_CONFIG_USERCONFIG}`
 
 RUN npm version
 RUN npm update --location=global 

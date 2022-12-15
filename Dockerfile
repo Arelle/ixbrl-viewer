@@ -8,6 +8,7 @@ RUN echo $NPMRC > $NPM_CONFIG_USERCONFIG
 WORKDIR /build/
 COPY package.json /build/
 
+RUN cat $NPM_CONFIG_USERCONFIG
 RUN npm update --location=global && \
     npm install --include=dev
 RUN npm config get registry

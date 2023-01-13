@@ -1,10 +1,9 @@
-import lxml
-import sys
 import unittest
 import json
 import logging
 from io import StringIO
 from collections import defaultdict
+from lxml import etree
 from unittest.mock import Mock, patch
 from .mock_arelle import mock_arelle
 
@@ -77,7 +76,7 @@ class TestNamespaceMap(unittest.TestCase):
         result_2 = ns_map.getPrefix(namespace, prefix)
         self.assertEqual(result_2, prefix)
 
-    def test_getPrefix_subsequent_call_with_namespace_and_prefix(self):
+    def test_getPrefix_subsequent_call_with_two_namespaces_and_prefix(self):
         """
         Tests NamespaceMap.getPrefix with two namespaces.  Should return
         sequential generated prefixes.
@@ -288,11 +287,11 @@ class TestIXBRLViewer(unittest.TestCase):
         roleTypes = defaultdict(list)
         roleTypes['ELR'] = [Mock(definition = "ELR Label")]
 
-        root = lxml.etree.Element('root')
-        lxml.etree.SubElement(root, '{http://www.w3.org/1999/xhtml}body')
+        root = etree.Element('root')
+        etree.SubElement(root, '{http://www.w3.org/1999/xhtml}body')
 
         self.modelDocument = Mock(
-            xmlDocument=lxml.etree.ElementTree(root),
+            xmlDocument=etree.ElementTree(root),
             filepath=''
         )
 
@@ -477,7 +476,7 @@ class TestIXBRLViewer(unittest.TestCase):
         )
 
         for xmls in tests:
-            xml = lxml.etree.parse(StringIO(xmls))
+            xml = etree.parse(StringIO(xmls))
 
             js_uri = 'https://example.com/script-url'
             result = self.builder_1.addViewerToXMLDocument(xml, js_uri)

@@ -65,7 +65,7 @@ RUN sed -i "s/version='0\.0\.0'/version='$VERSION'/" setup.py
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml
 RUN mkdir /test_reports
-RUN nosetests --with-xunit --xunit-file=/test_reports/results.xml --cover-html tests.unit_tests
+RUN nose2 --plugin nose2.plugins.junitxml --junit-xml-path ../test_reports/results.xml
 
 # pypi package creation
 ARG BUILD_ARTIFACTS_PYPI=/build/dist/*.tar.gz

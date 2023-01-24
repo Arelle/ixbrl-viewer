@@ -181,7 +181,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         });
     }
     nodes.each(function (i) {
-        if (this.getBoundingClientRect().height == 0) {
+        if (this.getBoundingClientRect().height == 0 && $(this).css('display') !== 'inline') {
             $(this).addClass("ixbrl-no-highlight"); 
         }
         if (i == 0) {

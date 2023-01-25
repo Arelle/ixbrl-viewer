@@ -19,11 +19,15 @@ import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer(options) {
-    this.options = options || {};
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
-    this.options = options || {};
+    options = options || {};
+    const defaults = {
+        showValidationWarningOnStart: false,
+        continuationElementLimit: 10000
+    }
+    this.options = {...defaults, ...options};
 }
 
 /*

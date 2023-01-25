@@ -20,8 +20,6 @@ import { setDefault } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 
-const CONTINUATION_LIMIT = 10000;
-
 export class DocumentTooLargeError extends Error {}
 
 export function Viewer(iv, iframes, report) {
@@ -39,8 +37,8 @@ export function Viewer(iv, iframes, report) {
 }
 
 Viewer.prototype._checkContinuationCount = function() {
-        const continuationCount = Object.keys(this.continuationOfMap).length
-    if (continuationCount > CONTINUATION_LIMIT) {
+    const continuationCount = Object.keys(this.continuationOfMap).length
+    if (continuationCount > this._iv.options.continuationElementLimit) {
         const contents = $('<div></div>')
             .append($('<p></p>').text(`This document contains a very large number of iXBRL elements (found ${continuationCount} ix:continuation elements).`))
             .append($('<p></p>').text('You may experience performance problems viewing this document, or the viewer may not load at all.'))

@@ -15,7 +15,7 @@
 import interact from 'interactjs'
 import $ from 'jquery'
 import { iXBRLReport } from "./report.js";
-import { Viewer } from "./viewer.js";
+import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer(options) {
@@ -226,7 +226,17 @@ iXBRLViewer.prototype.load = function () {
                         if (iv.options.showValidationWarningOnStart) {
                             inspector.showValidationWarning();
                         }
-                    });
+                    })
+                    .catch(err => {
+                        if (err instanceof DocumentTooLargeError) {
+                            $('#ixv .loader').remove();
+                            $('#inspector').addClass('failed-to-load');
+                        }
+                        else {
+                            throw err;
+                        }
+
+                    })
             }
         }, 250);
     }, 0);

@@ -51,7 +51,7 @@ Viewer.prototype._checkContinuationCount = function() {
             }
         });
     }
-    return new Promise(r => r());
+    return Promise.resolve();
 }
 
 Viewer.prototype.initialize = function() {

@@ -19,8 +19,7 @@ import { Dialog } from './dialog.js';
 
 export class CalculationInspector extends Dialog {
     constructor() {
-        super();
-        Dialog.call(this, ".dialog.calculation-inspector");
+        super(".dialog.calculation-inspector");
         this.addButton("Dismiss", true);
     }
 

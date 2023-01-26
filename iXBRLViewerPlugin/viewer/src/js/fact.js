@@ -14,6 +14,7 @@
 
 import $ from 'jquery'
 import i18next from "i18next";
+import Decimal from 'decimal.js';
 import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
@@ -21,9 +22,6 @@ import { Period } from './period.js';
 import { formatNumber } from "./util.js";
 import { Footnote } from "./footnote.js";
 import { Interval } from './interval.js';
-import $ from 'jquery'
-import i18next from "i18next";
-import Decimal from 'decimal.js';
 
 export class Fact {
     
@@ -80,7 +78,7 @@ export class Fact {
         return this.f.v;
     }
 
-    readableValue() {
+    readableValue(val) {
         let v = val === undefined ? this.f.v : val;
         if (this.isInvalidIXValue()) {
             v = "Invalid value";
@@ -288,27 +286,27 @@ export class Fact {
     addLinkedFact(f) {
         this.linkedFacts.push(f);
     }
-}
 
-Fact.prototype.roundedValue = function() {
-    Decimal.rounding = Decimal.ROUND_HALF_UP;
-    const v = new Decimal(this.value());
-    const d = this.decimals();
-    if (d === undefined) {
-        return v;
+    roundedValue() {
+        Decimal.rounding = Decimal.ROUND_HALF_UP;
+        const v = new Decimal(this.value());
+        const d = this.decimals();
+        if (d === undefined) {
+            return v;
+        }
+        return v.mul(10 ** d).round().mul(10 ** (0-d));
     }
-    return v.mul(10 ** d).round().mul(10 ** (0-d));
-}
 
-Fact.prototype.isCompleteDuplicate = function(other) {
-    return this.value() === other.value() && this.decimals() === other.decimals();
-}
+    isCompleteDuplicate(other) {
+        return this.value() === other.value() && this.decimals() === other.decimals();
+    }
 
-// Facts that are the source of relationships to this fact.
-Fact.prototype.addLinkedFact = function (f) {
-    this.linkedFacts.push(f);
-}
+    // Facts that are the source of relationships to this fact.
+    addLinkedFact(f) {
+        this.linkedFacts.push(f);
+    }
 
-Fact.prototype.valueInterval = function() {
-    return Interval.fromFact(this);
+    valueInterval() {
+        return Interval.fromFact(this);
+    }
 }

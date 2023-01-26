@@ -64,8 +64,8 @@ export class Concept {
     isEnumeration() {
         return Boolean(this._c && this._c.e);
     }
-}
 
-Concept.prototype.label = function () {
-    return this.report.getLabelOrName(this.name);
+    label() {
+        return this.report.getLabelOrName(this.name);
+    }
 }

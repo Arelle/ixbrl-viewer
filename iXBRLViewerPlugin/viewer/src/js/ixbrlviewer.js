@@ -15,15 +15,19 @@
 import interact from 'interactjs'
 import $ from 'jquery'
 import { iXBRLReport } from "./report.js";
-import { Viewer } from "./viewer.js";
+import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer(options) {
-    this.options = options || {};
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
-    this.options = options || {};
+    options = options || {};
+    const defaults = {
+        showValidationWarningOnStart: false,
+        continuationElementLimit: 10000
+    }
+    this.options = {...defaults, ...options};
 }
 
 /*
@@ -226,7 +230,17 @@ iXBRLViewer.prototype.load = function () {
                         if (iv.options.showValidationWarningOnStart) {
                             inspector.showValidationWarning();
                         }
-                    });
+                    })
+                    .catch(err => {
+                        if (err instanceof DocumentTooLargeError) {
+                            $('#ixv .loader').remove();
+                            $('#inspector').addClass('failed-to-load');
+                        }
+                        else {
+                            throw err;
+                        }
+
+                    })
             }
         }, 250);
     }, 0);

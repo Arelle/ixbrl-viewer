@@ -20,8 +20,9 @@ import { FactSet } from './factset.js';
 
 export class Calculation {
     
-    constructor(fact) {
+    constructor(fact, calc11) {
         this.fact = fact;
+        this.calc11 = calc11;
     }
 
     /* Resolve calculation relationships to a map of maps of maps 
@@ -94,7 +95,7 @@ export class Calculation {
         var calcFacts = this.calculationFacts()[elr];
         const report = this.fact.report();
         var rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
-        const resolvedCalculation = new ResolvedCalculation(elr, this.fact);
+        const resolvedCalculation = new ResolvedCalculation(elr, this.fact, this.calc11);
         for (const r of rels) {
             const factset = new FactSet(Object.values(calcFacts[r.t] || {}));
             resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
@@ -131,10 +132,11 @@ class CalculationContribution {
 }
 
 class ResolvedCalculation {
-    constructor(elr, fact) {
+    constructor(elr, fact, calc11) {
         this.totalFact = fact; // XXX  this needs to be factset
         this.elr = elr;
         this.rows = [];
+        this.calc11 = calc11;
     }
 
     addRow(contribution) {

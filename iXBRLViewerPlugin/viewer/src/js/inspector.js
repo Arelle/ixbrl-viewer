@@ -38,6 +38,7 @@ export function Inspector(iv) {
     this._iv = iv;
     this._viewerOptions = new ViewerOptions()
     this._currentItem = null;
+    this._useCalc11 = true;
 }
 
 Inspector.prototype.i18nInit = function () {
@@ -178,7 +179,7 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
         this.setLanguage(dl);
-        this._optionsMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (mode) => { this.calculationMode = mode }, "calculation-mode", "select-language", true);
+        this._optionsMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => { this._useCalc11 = useCalc11 }, "calculation-mode", "select-language", true);
 
     }
     this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
@@ -444,7 +445,7 @@ Inspector.prototype._referencesHTML = function (fact) {
 }
 
 Inspector.prototype._calculationHTML = function (fact) {
-    const calc = new Calculation(fact);
+    const calc = new Calculation(fact, this._useCalc11);
     if (!calc.hasCalculations()) {
         return "";
     }
@@ -504,7 +505,7 @@ Inspector.prototype._calculationHTML = function (fact) {
                 .addClass("calculation-details-link")
                 .attr("title", i18next.t('factDetails.viewCalculationDetails'))
                 .click((e) => {
-                    let dialog = new CalculationInspector();
+                    const dialog = new CalculationInspector();
                     dialog.displayCalculation(rCalc);
                     dialog.show();
                     e.stopPropagation();

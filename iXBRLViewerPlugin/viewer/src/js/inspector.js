@@ -178,6 +178,8 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
         this.setLanguage(dl);
+        this._optionsMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (mode) => { this.calculationMode = mode }, "calculation-mode", "select-language", true);
+
     }
     this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
 }
@@ -446,7 +448,6 @@ Inspector.prototype._calculationHTML = function (fact) {
     if (!calc.hasCalculations()) {
         return "";
     }
-
     
     // Find facts in the same HTML table, and then find the calculation ELR
     // with the best match for that set of facts.  This is used to pre-select
@@ -462,7 +463,7 @@ Inspector.prototype._calculationHTML = function (fact) {
     const a = new Accordian();
 
     for (const rCalc of calc.resolvedCalculations()) {
-        const label = report.getRoleLabel(rCalc.elr, inspector._viewerOptions);
+        const label = report.getRoleLabel(rCalc.elr, this._viewerOptions);
         const calcBody = $('<table></table>').addClass("calculation-table");
 
         for (const r of rCalc.rows) {

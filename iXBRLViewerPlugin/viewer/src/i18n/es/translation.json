@@ -1,11 +1,12 @@
 {
   "calculation": {
     "calculated-total": "",
+    "calculations11": "",
     "concept": "",
     "consistent-duplicate-facts-present": "",
     "inconsistent-duplicate-facts-present": "",
-    "maximum-contribution": "",
-    "mininum-contribution": "",
+    "maximum": "",
+    "mininum": "",
     "reported-total": "",
     "reported-value": ""
   },

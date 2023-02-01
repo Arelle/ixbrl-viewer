@@ -97,7 +97,7 @@ def iXBRLViewerMenuCommand(cntlr):
     dialog = SaveViewerDialog(cntlr)
     if dialog.accepted and dialog.filename():
         viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl())
+        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl(), showValidations=False)
         if iv is not None:
             iv.save(dialog.filename())
 
@@ -133,10 +133,12 @@ def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
     cntlr.launchIXBRLViewer.trace("w", setLaunchIXBRLViewer)
     erViewMenu.add_checkbutton(label=_("Launch viewer on load"), underline=0, variable=cntlr.launchIXBRLViewer, onvalue=True, offvalue=False)
 
+
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
     if cntlr.hasGui and cntlr.launchIXBRLViewer.get() and modelXbrl.modelDocument.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
         launchLocalViewer(cntlr, modelXbrl)
+
 
 __pluginInfo__ = {
     'name': 'ixbrl-viewer',

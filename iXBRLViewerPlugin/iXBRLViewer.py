@@ -16,6 +16,7 @@ from arelle import XbrlConst
 from arelle.ModelDocument import Type
 from arelle.ModelValue import QName, INVALIDixVALUE
 from lxml import etree
+from copy import deepcopy
 import json
 import math
 import re
@@ -301,6 +302,7 @@ class IXBRLViewerBuilder:
                     if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type','') == 'application/x.ixbrl-viewer+json':
                         self.dts.error("viewer:error", "File already contains iXBRL viewer")
                         return False
+
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
                 # Insert <script> tags, and make sure that they are in the
@@ -326,7 +328,6 @@ class IXBRLViewerBuilder:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added
         """
-
         dts = self.dts
         iv = iXBRLViewer(dts)
         self.idGen = 0
@@ -351,17 +352,19 @@ class IXBRLViewerBuilder:
 
         if dts.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
             # Sort by object index to preserve order in which files were specified.
-            docSet = sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
-            docSetFiles = list(map(lambda x: os.path.basename(x.filepath), docSet))
-            self.taxonomyData["docSetFiles"] = docSetFiles
+            xmlDocsByFilename = {
+                os.path.basename(doc.filepath): deepcopy(doc.xmlDocument)
+                for doc in sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+            }
+            self.taxonomyData["docSetFiles"] = list(xmlDocsByFilename.values())
 
-            for n in range(0, len(docSet)):
-                iv.addFile(iXBRLViewerFile(docSetFiles[n], docSet[n].xmlDocument))
+            for filename, xmlDocument in xmlDocsByFilename.items():
+                iv.addFile(iXBRLViewerFile(filename, xmlDocument))
 
-            xmlDocument = docSet[0].xmlDocument 
+            xmlDocument = next(iter(xmlDocsByFilename.values()))
 
         else:
-            xmlDocument = dts.modelDocument.xmlDocument
+            xmlDocument = deepcopy(dts.modelDocument.xmlDocument)
             filename = os.path.basename(dts.modelDocument.filepath)
             iv.addFile(iXBRLViewerFile(filename, xmlDocument))
 

@@ -1,4 +1,5 @@
 # Workiva iXBRL Viewer
+![ixbrl-viewer](examples/ixbrl-viewer-demo.gif)
 
 The [Workiva](https://www.workiva.com) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL report.  Key features include:
 
@@ -7,6 +8,8 @@ The [Workiva](https://www.workiva.com) iXBRL Viewer allows [Inline XBRL](https:/
 * Export tables to Excel
 * Visualize and navigate calculation relationships
 * Produce on-the-fly graphs using XBRL data
+
+A sample viewer is provided in the [examples](examples/README.md) for those interested.
 
 The viewer project consists of two components:
 

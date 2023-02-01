@@ -18,7 +18,9 @@
   },
   "factDetails": {
     "accuracy": "Precisión",
+    "calculationIsConsistent": "",
     "calculationIsInconsistent": "",
+    "calculationUnchecked": "",
     "change": "Cambio",
     "changeFromIn": "Anteriormente {{from}} en ",
     "changePercentageDecrease": "{{decrease}}% menos que en ",

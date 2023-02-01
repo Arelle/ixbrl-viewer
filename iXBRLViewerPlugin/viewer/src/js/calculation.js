@@ -95,7 +95,8 @@ export class Calculation {
         var calcFacts = this.calculationFacts()[elr];
         const report = this.fact.report();
         var rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
-        const resolvedCalculation = new ResolvedCalculation(elr, this.fact, this.calc11);
+        const resolvedCalcClass = this.calc11 ? ResolvedCalc11Calculation : ResolvedLegacyCalculation;
+        const resolvedCalculation = new resolvedCalcClass(elr, this.fact);
         for (const r of rels) {
             const factset = new FactSet(Object.values(calcFacts[r.t] || {}));
             resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
@@ -131,17 +132,29 @@ class CalculationContribution {
     }
 }
 
-class ResolvedCalculation {
-    constructor(elr, fact, calc11) {
+class AbstractResolvedCalculation {
+    constructor(elr, fact) {
         this.totalFact = fact; // XXX  this needs to be factset
         this.elr = elr;
         this.rows = [];
-        this.calc11 = calc11;
     }
 
     addRow(contribution) {
         this.rows.push(contribution);
     }
+
+    binds() {
+        return this.rows.some((r) => !r.facts.isEmpty());
+    }
+
+    unchecked() {
+        return false;
+    }
+
+}
+
+class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
+
 
     calculatedTotalInterval() {
         let total = new Interval(0, 0);
@@ -159,9 +172,6 @@ class ResolvedCalculation {
         return total;
     }
 
-    binds() {
-        return this.rows.some((r) => !r.facts.isEmpty());
-    }
 
     /*
      * Is the calculation consistent under Calculations v1.1 rules?
@@ -169,13 +179,25 @@ class ResolvedCalculation {
     isConsistent() {
         return this.calculatedTotalInterval().intersection(Interval.fromFact(this.totalFact)) !== undefined;
     }
+}
 
-    calculatedTotalLegacy() {
+class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
+
+    binds() {
+        return super.binds() && this.rows.every((r) => r.facts.completeDuplicates());
+    }
+
+    unchecked() {
+        return super.binds() && !this.binds();
+    }
+
+    calculatedTotal() {
         let total = new Decimal(0);
 
         for (const row of this.rows) {
             // XXX need to check for exact duplicates
             if (!row.facts.isConsistent()) {
+                console.log(row.facts);
                 return undefined;
             }
             if (!row.facts.isEmpty()) {
@@ -185,9 +207,8 @@ class ResolvedCalculation {
         return total;
     }
 
-    isConsistentLegacy() {
-        // XXX needs rounding
-        console.log(this.calculatedTotalLegacy().toString());
-        return this.calculatedTotalLegacy().equals(this.totalFact.roundedValue());
+    isConsistent() {
+        console.log(this.calculatedTotal().toString());
+        return this.calculatedTotal().equals(this.totalFact.roundedValue());
     }
 }

@@ -18,7 +18,9 @@
   },
   "factDetails": {
     "accuracy": "Accuracy",
+    "calculationIsConsistent": "Calculation is consistent",
     "calculationIsInconsistent": "Calculation is inconsistent",
+    "calculationUnchecked": "Calculation not checked due to presence of duplicate facts",
     "change": "Change",
     "changeFromIn": "From {{from}} in ",
     "changePercentageDecrease": "{{decrease}}% decrease on ",

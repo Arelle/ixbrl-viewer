@@ -179,7 +179,7 @@ Inspector.prototype.buildDisplayOptionsMenu = function () {
         var dl = this.selectDefaultLanguage();
         this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
         this.setLanguage(dl);
-        this._optionsMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => { this._useCalc11 = useCalc11 }, "calculation-mode", "select-language", true);
+        this._optionsMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => { this._useCalc11 = useCalc11 }, "calculation-mode", "select-language", this._useCalc11);
 
     }
     this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
@@ -493,11 +493,24 @@ Inspector.prototype._calculationHTML = function (fact) {
 
         const cardTitle = $("<span></span>")
             .append($("<span></span>").text(label));
-        if (rCalc.binds() && !rCalc.isConsistent()) {
-            $("<span></span>")
-                .addClass("inconsistent-flag")
-                .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
-                .appendTo(cardTitle);
+        const calcStatus = $("<span></span>").appendTo(cardTitle);
+        if (rCalc.binds()) {
+            if (rCalc.isConsistent()) {
+                calcStatus
+                    .addClass("consistent-flag")
+                    .attr("title", i18next.t('factDetails.calculationIsConsistent'))
+            }
+            else {
+                calcStatus
+                    .addClass("inconsistent-flag")
+                    .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
+            }
+        }
+        else if (rCalc.unchecked()) {
+            calcStatus
+                .addClass("unchecked-flag")
+                .attr("title", i18next.t('factDetails.calculationUnchecked'))
+
         }
 
         cardTitle

@@ -124,6 +124,9 @@ export class FactSet {
     }
 
     isConsistent() {
+        if (this.items.length == 0) {
+            return true;
+        }
         const duplicates = Object.values(this.items).map(fact => Interval.fromFact(fact));
         return Interval.intersection(...duplicates) !== undefined;
     }

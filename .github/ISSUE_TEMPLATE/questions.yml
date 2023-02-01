@@ -1,0 +1,11 @@
+name: Question
+description: Ask a question.
+title: "[QUESTION] "
+labels: ["question"]
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: What question do you have? Be sure to check the wiki to see if it has been answered before
+    validations:
+      required: true

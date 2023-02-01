@@ -1,0 +1,56 @@
+name: Bug Report
+description: File a bug report.
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+        ixbrl-viewer is browser based product which means it can vary between browsers.
+        Providing details on how you're using ixbrl-viewer will significantly decrease the amount of time to figure out what's wrong.
+
+        Please try to provide a document that reproduces the issue as well as a screenshot.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: And what did you expect to happen?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: |
+        What version of ixbrl-viewer are you using?
+        - In the browser, right click + inspect
+        - Scroll to the bottom of the `<body>` tag and find the script tag containing the version eg: `<script type="text/javascript" src="https://cdn-prod.wdesk.com/ixbrl-viewer/<version>/ixbrlviewer.js"></script>`
+      placeholder: e.g. 1.1.43
+    validations:
+      required: true
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: With which browsers are you experiencing the bug?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+    validations:
+      required: true
+  - type: textarea
+    id: documents
+    attributes:
+      label: Documents
+      description: If possible, please attach any documents that cause the bug.
+      placeholder: Drag and drop documents here.
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If possible, please attach screenshots of the bug.
+      placeholder: Drag and drop screenshots here.

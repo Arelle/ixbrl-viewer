@@ -1,3 +1,6 @@
 .idea
 .vscode
-node_modules/*
+node_modules/
+iXBRLViewerPlugin/viewer/dist
+iXBRLViewerPlugin/
+*/__pycache__

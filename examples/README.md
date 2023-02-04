@@ -12,3 +12,7 @@ The ixbrl-viewer is taking the Workiva's January 2023 8-K filing:
 
 And wraps it with javascript to create a viewer output: 
 - [workiva-8k-filing-ixbrl-viewer](examples/workiva-january-2023-8-k-ixbrl-viewer/ixbrl-viewer.htm)
+
+## Example Plugin
+There is an [example plugin](example_plugin/README.md) that makes use of the [plugin architecture](../PLUGINS.md) for those looking to extend the viewer.
+![example-plugin](example_plugin/example-plugin.gif)

@@ -1,10 +1,10 @@
 import $ from 'jquery'
 import {iXBRLViewer} from "ixbrl-viewer"
-import {ExtendedVeiwer} from "./extended-veiwer.js";
+import {ExtendedViewer} from "./extended-viewer.js";
 
 $(function () {
     var iv = new iXBRLViewer();
-    var ivp = new ExtendedVeiwer(iv);
+    var ivp = new ExtendedViewer(iv);
     iv.registerPlugin(ivp);
     iv.load();
 });

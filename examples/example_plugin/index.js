@@ -1,10 +1,9 @@
-import $ from 'jquery'
 import {iXBRLViewer} from "ixbrl-viewer"
 import {ExtendedViewer} from "./extended-viewer.js";
 
-$(function () {
-    var iv = new iXBRLViewer();
-    var ivp = new ExtendedViewer(iv);
+document.addEventListener("DOMContentLoaded", () =>  {
+    const iv = new iXBRLViewer(); // prefer const then let
+    const ivp = new ExtendedViewer(iv);
     iv.registerPlugin(ivp);
     iv.load();
 });

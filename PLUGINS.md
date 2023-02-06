@@ -15,12 +15,12 @@ To instantiate a viewer with a plugin, call `registerPlugin`:
 import { iXBRLViewer } from 'ixbrl-viewer';
 import { MyPlugin } from "./my-plugin.js";
 
-$(function () {
-    var iv = new iXBRLViewer();
-    var ivp = new MyPlugin(iv);
+document.addEventListener("DOMContentLoaded", () =>  {
+    const iv = new iXBRLViewer(); // prefer const then let
+    const ivp = new ExtendedViewer(iv);
     iv.registerPlugin(ivp);
     iv.load();
-}
+});
 ```
 
 The `ixbrl-viewer` project can be added as a dev dependency in `package.json`:

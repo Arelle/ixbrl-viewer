@@ -8,9 +8,8 @@ const highlightToggle = "red-highlight-toggle-on";
 const highlight = "example-containing-t-red-highlight";
 
 ExtendedViewer.prototype.extendDisplayOptionsMenu = function(menu) {
-    let iv = this._iv;
-    menu.addCheckboxItem("Example Menu Item (Highlight Words containing the letter 'T' Red)", function(checked) {
-        let body = iv.viewer.contents().find("body");
+    menu.addCheckboxItem("Example Menu Item (Highlight Words containing the letter 'T' Red)",(checked) => {
+        let body = this._iv.viewer.contents().find("body");
         if (checked) {
             body.addClass(highlightToggle)
         } else {

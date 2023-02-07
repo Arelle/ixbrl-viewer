@@ -153,6 +153,12 @@ export class Fact {
         return q.namespace == "http://www.xbrl.org/2003/iso4217";
     }
 
+    isTextBlock() {
+        // This should be based on datatype, but we don't currently have access
+        // to that.
+        return this.escaped();
+    }
+
     aspects() {
         return Object.keys(this.f.a).map(k => this.aspect(k));
     }

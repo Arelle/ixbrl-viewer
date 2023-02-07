@@ -18,6 +18,9 @@ import { escapeRegex } from './util.js'
 import { IXNode } from './ixnode.js';
 import { setDefault } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
+import { MessageBox } from './messagebox.js';
+
+export class DocumentTooLargeError extends Error {}
 
 export function Viewer(iv, iframes, report) {
     this._iv = iv;
@@ -33,31 +36,55 @@ export function Viewer(iv, iframes, report) {
     this._currentDocumentIndex = 0;
 }
 
+Viewer.prototype._checkContinuationCount = function() {
+    const continuationCount = Object.keys(this.continuationOfMap).length
+    if (continuationCount > this._iv.options.continuationElementLimit) {
+        const contents = $('<div></div>')
+            .append($('<p></p>').text(`This document contains a very large number of iXBRL elements (found ${continuationCount} ix:continuation elements).`))
+            .append($('<p></p>').text('You may experience performance problems viewing this document, or the viewer may not load at all.'))
+            .append($('<p></p>').text('Do you want to continue trying to load this document?'));
+
+        const mb = new MessageBox("Large document warning", contents, "Continue", "Cancel");
+        return mb.showAsync().then((result) => {
+            if (!result) {
+                throw new DocumentTooLargeError("Too many continuations");
+            }
+        });
+    }
+    return Promise.resolve();
+}
+
 Viewer.prototype.initialize = function() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         var viewer = this;
         viewer._buildContinuationMaps();
-        viewer._iframes.each(function (docIndex) { 
-            $(this).data("selected", docIndex == viewer._currentDocumentIndex);
-            viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
-        });
-
-        /* Call plugin promise for each document in turn */
-        (async function () {
-            for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
-                await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
-            }
-        })()
-            .then(() => viewer._iv.setProgress("Preparing document") )
+        viewer._checkContinuationCount()
+            .catch(err => { throw err })
             .then(() => {
-                this._report.setIXNodeMap(this._ixNodeMap);
-                this._applyStyles();
-                this._bindHandlers();
-                this.scale = 1;
-                this._setTitle(0);
-                this._addDocumentSetTabs();
-                resolve();
-            });
+
+                viewer._iframes.each(function (docIndex) { 
+                    $(this).data("selected", docIndex == viewer._currentDocumentIndex);
+                    viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+                });
+
+                /* Call plugin promise for each document in turn */
+                (async function () {
+                    for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
+                        await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
+                    }
+                })()
+                    .then(() => viewer._iv.setProgress("Preparing document") )
+                    .then(() => {
+                        this._report.setIXNodeMap(this._ixNodeMap);
+                        this._applyStyles();
+                        this._bindHandlers();
+                        this.scale = 1;
+                        this._setTitle(0);
+                        this._addDocumentSetTabs();
+                        resolve();
+                    });
+            })
+            .catch(err => reject(err));
     });
 }
 
@@ -181,7 +208,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         });
     }
     nodes.each(function (i) {
-        if (this.getBoundingClientRect().height == 0) {
+        if (this.getBoundingClientRect().height == 0 && $(this).css('display') !== 'inline') {
             $(this).addClass("ixbrl-no-highlight"); 
         }
         if (i == 0) {

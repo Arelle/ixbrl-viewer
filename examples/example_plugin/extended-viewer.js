@@ -27,7 +27,6 @@ export class ExtendedViewer {
                 const children = body.children();
                 children.hide();
                 children.each(function () {
-                    // element.classList.add()
                     if (this.textContent != null) {
                         const containsTheLetterT = this.textContent.toUpperCase().includes("T");
                         if (containsTheLetterT) {

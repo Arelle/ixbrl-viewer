@@ -27,7 +27,7 @@ export class ExtendedViewer {
                 const children = body.children();
                 children.hide();
                 children.each(function () {
-                    if (this.textContent != null) {
+                    if (this.textContent !== null) {
                         const containsTheLetterT = this.textContent.toUpperCase().includes("T");
                         if (containsTheLetterT) {
                             $(this).addClass(highlight);

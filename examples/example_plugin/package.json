@@ -1,7 +1,7 @@
 {
   "name": "extended_ixbrl_viewer",
   "version": "1.0.0",
-  "main": "viewer/src/js/extended-veiwer.js",
+  "main": "extended-veiwer.js",
   "scripts": {
     "build": "webpack --config webpack.config.js"
   },

@@ -40,7 +40,7 @@ export class ExtendedViewer {
 
     updateViewerStyleElements = (styleElts) => {
         styleElts.append(document.createTextNode(
-                "." + highlightToggle + " ." + highlight + " {\n    background-color: red;\n}"
+                `.${highlightToggle} .${highlight} {\n    background-color: red;\n}`
         ));
     }
 }

@@ -38,4 +38,4 @@ class XHTMLSerializer:
 
     def serialize(self, xmlDocument, fout):
         self._expandEmptyTags(xmlDocument)
-        fout.write(etree.tostring(xmlDocument, method="xml", encoding="utf-8", xml_declaration=True))
+        fout.write(etree.tostring(xmlDocument, method="html", encoding="utf-8"))

@@ -14,6 +14,16 @@ class TestXHTMLSerializer(unittest.TestCase):
     def _html(self, s):
         return '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>%s</body></html>' % s
 
+    def _htmlHead(self, s):
+        return '<html xmlns="http://www.w3.org/1999/xhtml"><head>%s</head><body></body></html>' % s   
+
+    def _serialize(self, html):
+        doc = lxml.etree.fromstring(html)
+        f = io.BytesIO()
+        writer = XHTMLSerializer()
+        writer.serialize(doc, f)
+        return f.getvalue().decode('utf-8')     
+
     def _checkTagExpansion(self, html_in, html_out):
         writer = XHTMLSerializer()
         doc = lxml.etree.fromstring(self._html(html_in))
@@ -41,11 +51,11 @@ class TestXHTMLSerializer(unittest.TestCase):
 
     def test_serialize(self):
         htmlsrc = self._html("<p>hello</p>")
-        doc = lxml.etree.fromstring(htmlsrc)
-        f = io.BytesIO()
+        serialized = self._serialize(htmlsrc)
+        self.assertEqual(serialized, htmlsrc)
 
-        writer = XHTMLSerializer()
-        writer.serialize(doc, f)
-
-        # XML declaration should be added.
-        self.assertEqual(f.getvalue().decode('utf-8'), "<?xml version='1.0' encoding='utf-8'?>\n" + htmlsrc)
+    def test_serializeCss(self):
+        # Do not escape > character in CSS style tag
+        htmlsrc = self._html('<style type="text/css">li > p { color: red; }</style>')
+        serialized = self._serialize(htmlsrc)
+        self.assertEqual(serialized, htmlsrc)

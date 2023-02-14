@@ -34,7 +34,6 @@ export class ExtendedViewer {
                 }
             });
             children.show();
-            resolve();
         });
     }
 

@@ -140,6 +140,10 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         launchLocalViewer(cntlr, modelXbrl)
 
 
+def load_plugin_url():
+    return __file__
+
+
 __pluginInfo__ = {
     'name': 'ixbrl-viewer',
     'version': '0.1',

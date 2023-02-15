@@ -30,4 +30,9 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
     install_requires=get_requirements(),
+    entry_points={
+        'arelle.plugin': [
+            'ixbrl-viewer = iXBRLViewerPlugin:load_plugin_url'
+        ]
+    }
 )

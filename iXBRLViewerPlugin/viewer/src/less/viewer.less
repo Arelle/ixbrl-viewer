@@ -117,6 +117,10 @@ td.ixbrl-linked-highlight {
   .linked-highlight-cell();
 }
 
+.ixbrl-sub-element:not(.ixbrl-no-highlight) {
+   mix-blend-mode: multiply;
+}
+
 div.ixbrl-table-handle {
   @export-handle-size: 0.4rem;
 
@@ -174,5 +178,10 @@ div.ixbrl-table-handle {
       padding: 0.7rem 1.5rem 0.7rem 2.5rem;
       background-color: @workiva-green;
     }
-  }
+  }  
+}
+
+table.table-highlight {
+  outline: double 2px blue; 
+  outline-offset: 1px;
 }

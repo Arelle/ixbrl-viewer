@@ -168,6 +168,12 @@ Inspector.prototype.handleMessage = function (event) {
 
     if (data.task == 'SHOW_FACT') {
         this.selectItem(data.factId, undefined, true);
+    } else if (data.task == 'TABLE_HIGHLIGHT') {
+        this._viewer.highlightTables(data.on);
+    } else if (data.task == "CUSTOMIZE") {
+        for (const selector in data.styles) {
+            this._viewer.customize(selector, data.styles[selector]);
+        }
     }
     else {
         console.log("Not handling unsupported task message: " + jsonString);

@@ -224,7 +224,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         });
     }
     nodes.each(function (i) {
-        if (this.getBoundingClientRect().height == 0) {
+        if (this.getBoundingClientRect().height == 0 && $(this).css('display') !== 'inline') {
             $(this).addClass("ixbrl-no-highlight"); 
         }
         if (i == 0) {
@@ -890,13 +890,11 @@ Viewer.prototype.focusOnSelected = function(itemId, itemIdList) {
     const self = this;
     if (itemId === null || itemIdList === null) return;
     $(".ixbrl-blur-highlight", this._contents).addClass("ixbrl-highlight").removeClass("ixbrl-blur-highlight");
-    const items = $(".ixbrl-element", this._contents)
+    const items = $(".ixbrl-highlight", this._contents)
         .filter(function() {
-            const ids = self._ixIdsForElement($(this));
-            return ids[0] != itemId && itemIdList.includes(ids[0]);
+            return !$(this).hasClass("ixbrl-selected");
         });
     items.addClass("ixbrl-blur-highlight").removeClass("ixbrl-highlight");
-    items.find(".ixbrl-sub-element").addClass("ixbrl-blur-highlight").removeClass("ixbrl-highlight");
 }
 
 // The firefox browser does not support CSS zoom style,
@@ -1003,3 +1001,37 @@ Viewer.prototype.notifyReady = function () {
         boundEvent.ready();
     }
 }
+
+/*
+ * AMANA extension: add borders to tables
+ *
+ */
+Viewer.prototype.highlightTables = function(on) {
+    if (on) 
+        $(".ixbrl-element", this._contents)
+            .find("table")
+            .addClass('table-highlight');            
+    else 
+        $(".table-highlight", this._contents)
+            .removeClass("table-highlight");            
+}
+
+/*
+ * AMANA extension: CSS customization
+ */
+Viewer.prototype.customize = function(selector, styles) {
+    this._contents.each(function () {   
+        for (const sheet of this.styleSheets) {
+            for (const rule of sheet.cssRules) {
+                if (!(rule instanceof CSSStyleRule))
+                    continue;
+                if (rule.selectorText == selector) {
+                    for (const property in styles) {
+                        rule.styleMap.set(property, styles[property]);
+                    }
+                }                
+            }
+        }
+    });
+}
+

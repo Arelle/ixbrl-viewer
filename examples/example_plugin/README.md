@@ -4,8 +4,8 @@
 Example plugin provides an example usage of the ixbrl-viewer plugin infrastructure.
 
 ## Highlighting
-The example plugin is able to highlight any element containing the letter 'T' with the color red.
-Click the settings and settings and select the toggle on and off to see it in action.
+The example plugin is able to highlight any section containing the letter 'T' with the color red.
+Click the settings and select the toggle on and off to see it in action.
 
 ## Running
 From the `example_plugin` directory

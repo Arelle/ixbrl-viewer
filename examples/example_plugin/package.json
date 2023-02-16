@@ -1,0 +1,11 @@
+{
+  "name": "extended_ixbrl_viewer",
+  "version": "1.0.0",
+  "main": "extended-viewer.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+    "ixbrl-viewer": "Workiva/ixbrl-viewer"
+  }
+}

@@ -14,10 +14,15 @@ class TestXHTMLSerializer(unittest.TestCase):
     def _html(self, s):
         return '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>%s</body></html>' % s
 
+    def _serialiseToString(self, xml):
+        buf = io.BytesIO()
+        serializer = XHTMLSerializer(buf, xml_declaration=False)
+        serializer.serialize(xml)
+        return buf.getvalue().decode('utf-8')
+
     def _checkTagExpansion(self, html_in, html_out):
-        writer = XHTMLSerializer()
         doc = lxml.etree.fromstring(self._html(html_in))
-        self.assertEqual(writer.write_element(doc), self._html(html_out))
+        self.assertEqual(self._serialiseToString(doc), self._html(html_out))
 
     def test_expandEmptyTags(self):
         self._checkTagExpansion('<div/>', '<div></div>')
@@ -43,8 +48,8 @@ class TestXHTMLSerializer(unittest.TestCase):
         doc = lxml.etree.fromstring(htmlsrc)
         f = io.BytesIO()
 
-        writer = XHTMLSerializer()
-        writer.serialize(doc, f)
+        writer = XHTMLSerializer(f)
+        writer.serialize(doc)
 
         # XML declaration should be added.
         self.assertEqual(f.getvalue().decode('utf-8'), '<?xml version="1.0" encoding="utf-8"?>\n' + htmlsrc)
@@ -96,10 +101,22 @@ class TestXHTMLSerializer(unittest.TestCase):
                 r'''<xhtml:div xmlns:xhtml="http://www.w3.org/1999/xhtml"><svg xmlns="http://www.w3.org/2000/svg"></svg></xhtml:div>''',
             ),
 
-            # Default and prefixed namespace for same URI.  Serialiser prefers unprefixed
+            # Default and prefixed namespace for same URI.  Choioce of prefix should be preserved
             (
                 r'''<xhtml:div xmlns="http://www.w3.org/1999/xhtml" xmlns:xhtml="http://www.w3.org/1999/xhtml"><svg xmlns="http://www.w3.org/2000/svg"></svg></xhtml:div>''',
+                r'''<xhtml:div xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"><svg xmlns="http://www.w3.org/2000/svg"></svg></xhtml:div>''',
+            ),
+
+            # Default and prefixed namespace for same URI.  Choioce of prefix should be preserved
+            (
+                r'''<div xmlns="http://www.w3.org/1999/xhtml" xmlns:xhtml="http://www.w3.org/1999/xhtml"><svg xmlns="http://www.w3.org/2000/svg"></svg></div>''',
                 r'''<div xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"><svg xmlns="http://www.w3.org/2000/svg"></svg></div>''',
+            ),
+
+            # Unprefixed attributes have no namespace, not default namespace
+            (
+                r'''<div xmlns="http://www.w3.org/1999/xhtml" xmlns:xhtml="http://www.w3.org/1999/xhtml"><span bar="baz" xhtml:foo="bar"></span></div>''',
+                r'''<div xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"><span bar="baz" xhtml:foo="bar"></span></div>''',
             ),
 
             # Text and tail and comment handling
@@ -127,13 +144,12 @@ class TestXHTMLSerializer(unittest.TestCase):
         )
 
 
-        serializer = XHTMLSerializer(xml_declaration=False)
         for (test_in, test_out) in tests:
             x = lxml.etree.fromstring(test_in)
-            s = serializer.write_element(x)
+            s = self._serialiseToString(x)
             assert s == test_out
 
             # Round trip
             x2 = lxml.etree.fromstring(s)
-            assert serializer.write_element(x2) == s
+            assert self._serialiseToString(x2) == s
 

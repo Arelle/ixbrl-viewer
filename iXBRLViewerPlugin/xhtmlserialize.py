@@ -37,24 +37,36 @@ class XHTMLSerializer:
         '&': '&amp;'
         }
 
-    def __init__(self, xml_declaration = True, assume_xhtml = True):
+    def __init__(self, fout, xml_declaration = True, assume_xhtml = True):
+        self.fout = fout
+        self.encoding = "utf-8"
         self.xml_declaration = xml_declaration
         self.assume_xhtml = assume_xhtml
+
+    def write(self, s):
+        self.fout.write(s.encode(self.encoding))
 
     def prefix_sort(self, p):
         return p if p is not None else '0'
 
-    def tag_as_qname(self, tag, nsmap):
+    def qname_for_node(self, node):
+        qname = etree.QName(node.tag)
+        if qname.namespace is None:
+            prefix = None
+        elif node.nsmap.get(node.prefix, None) == qname.namespace:
+            prefix = node.prefix
+        else:
+            prefix = next(iter(sorted((p for p, ns in nsmap.items() if ns == qname.namespace), key = self.prefix_sort)))
+        if prefix is None:
+            return qname.localname
+        return "%s:%s" % (prefix, qname.localname)
+
+    def qname_for_attr(self, tag, nsmap):
         qname = etree.QName(tag)
         if qname.namespace is None:
             return qname.localname
-
-        prefix = next(iter(sorted((p for p, ns in nsmap.items() if ns == qname.namespace), key = self.prefix_sort)))
-
-        if prefix is None:
-            return qname.localname
-        else:
-            return "%s:%s" % (prefix, qname.localname)
+        prefix = next(iter(sorted((p for p, ns in nsmap.items() if ns == qname.namespace and p is not None), key = self.prefix_sort)))
+        return "%s:%s" % (prefix, qname.localname)
 
     def is_selfclosable(self, n):
         qname = etree.QName(n)
@@ -88,22 +100,22 @@ class XHTMLSerializer:
 
     def attributes(self, node):
         return sorted(
-            '%s="%s"' % (self.tag_as_qname(k, node.nsmap), self.escape_attr(v))
+            '%s="%s"' % (self.qname_for_attr(k, node.nsmap), self.escape_attr(v))
                 for k, v in node.items()
             )
 
     def write_comment(self, n, escape_mode):
-        return '<!--' + n.text + '-->' + self.escape_text(n.tail, escape_mode)
+        self.write('<!--' + n.text + '-->' + self.escape_text(n.tail, escape_mode))
 
     def write_processing_instruction(self, n, escape_mode):
-        return '<?' + n.target + ' ' + n.text + '?>' + self.escape_text(n.tail, escape_mode)
+        self.write( '<?' + n.target + ' ' + n.text + '?>' + self.escape_text(n.tail, escape_mode))
 
     def write_element(self, n, parent_nsmap = {}, escape_mode = EscapeMode.DEFAULT):
-        name = self.tag_as_qname(n.tag, n.nsmap)
+        name = self.qname_for_node(n)
         qname = etree.QName(n.tag)
         selfclose = len(n) == 0 and n.text is None and self.is_selfclosable(n)
         parts = [ name ] + self.namespace_declarations(n.nsmap, parent_nsmap) + self.attributes(n)
-        s = '<' + ' '.join(parts)
+        self.write('<' + ' '.join(parts))
 
         if qname.localname.lower() == 'style':
             inner_escape_mode = EscapeMode.STYLE
@@ -111,27 +123,24 @@ class XHTMLSerializer:
             inner_escape_mode = escape_mode
 
         if selfclose:
-            s += '/>'
+            self.write('/>')
         else:
-            s += '>'
-            s += self.escape_text(n.text, inner_escape_mode)
+            self.write('>' + self.escape_text(n.text, inner_escape_mode))
 
             for child in n.iterchildren():
                 if isinstance(child, etree._Comment):
-                    s += self.write_comment(child, inner_escape_mode)
+                    self.write_comment(child, inner_escape_mode)
                 elif isinstance(child, etree._ProcessingInstruction):
-                    s += self.write_processing_instruction(child, inner_escape_mode)
+                    self.write_processing_instruction(child, inner_escape_mode)
                 else:
-                    s += self.write_element(child, n.nsmap, inner_escape_mode)
-            s += '</%s>' % name
+                    self.write_element(child, n.nsmap, inner_escape_mode)
+            self.write('</%s>' % name)
 
-        s += self.escape_text(n.tail, escape_mode)
+        self.write(self.escape_text(n.tail, escape_mode))
 
-        return s
-
-    def serialize(self, element, fout):
+    def serialize(self, element):
         if hasattr(element, 'getroot'):
             element = element.getroot()
         if self.xml_declaration:
-            fout.write('<?xml version="1.0" encoding="utf-8"?>\n'.encode('utf-8'))
-        fout.write(self.write_element(element).encode('utf-8'))
+            self.write('<?xml version="1.0" encoding="utf-8"?>\n')
+        self.write_element(element)

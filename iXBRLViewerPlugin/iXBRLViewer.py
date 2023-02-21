@@ -356,7 +356,7 @@ class IXBRLViewerBuilder:
                 os.path.basename(doc.filepath): deepcopy(doc.xmlDocument)
                 for doc in sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
             }
-            self.taxonomyData["docSetFiles"] = list(xmlDocsByFilename.values())
+            self.taxonomyData["docSetFiles"] = list(xmlDocsByFilename.keys())
 
             for filename, xmlDocument in xmlDocsByFilename.items():
                 iv.addFile(iXBRLViewerFile(filename, xmlDocument))

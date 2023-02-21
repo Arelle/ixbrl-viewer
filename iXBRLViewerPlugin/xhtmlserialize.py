@@ -92,8 +92,10 @@ class XHTMLSerializer:
         if s is None:
             return ''
         if escape_mode == EscapeMode.STYLE:
-            # Don't escape >
-            # & and < may only appear in a string or comment in CSS, so escape
+            # HTML does not understand XML escapes inside a style element.
+            # Don't escape ">".  Escaping isn't required by XML, but is common
+            # practice, so we do it elsewhere.
+            # "&" and "<" may only appear in a string or comment in CSS, so escape
             # as if they're in a string.
             return re.sub(r'([<&])', lambda m: "\\%06X" % ord(m.group(1)), s)
         return re.sub(r'([<>&])', lambda m: self.ENTITIES[m.group(0)], s)

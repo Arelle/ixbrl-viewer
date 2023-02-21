@@ -117,7 +117,7 @@ class XHTMLSerializer:
         parts = [ name ] + self.namespace_declarations(n.nsmap, parent_nsmap) + self.attributes(n)
         self.write('<' + ' '.join(parts))
 
-        if qname.localname.lower() == 'style':
+        if qname.localname == 'style':
             inner_escape_mode = EscapeMode.STYLE
         else:
             inner_escape_mode = escape_mode

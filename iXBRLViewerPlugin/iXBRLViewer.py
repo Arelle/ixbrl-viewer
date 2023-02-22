@@ -395,9 +395,9 @@ class iXBRLViewer:
             with zipfile.ZipFile(outPath, "a", zipfile.ZIP_DEFLATED, True) as zout:
                 for f in self.files:
                     self.dts.info("viewer:info", "Saving in output zip %s" % f.filename)
-                    fout = attrdict(write=lambda s: zout.writestr(_outPrefix + f.filename, s))
-                    writer = XHTMLSerializer(fout)
-                    writer.serialize(f.xmlDocument)
+                    with zout.open(_outPrefix + f.filename, "w") as fout:
+                        writer = XHTMLSerializer(fout)
+                        writer.serialize(f.xmlDocument)
                 zout.write(os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"), _outPrefix + "ixbrlviewer.js")
         elif os.path.isdir(outPath):
             # If output is a directory, write each file in the doc set to that

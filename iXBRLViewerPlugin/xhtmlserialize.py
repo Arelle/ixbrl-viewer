@@ -92,36 +92,40 @@ class XHTMLSerializer:
         changed = set(p[0] for p in (set(new_nsmap.items()) ^ set(cur_nsmap.items())))
         return sorted(self.xmlns_declaration(p, new_nsmap[p]) for p in changed)
 
-    def escape_text(self, s, escape_mode):
+    def write_escape_text(self, s, escape_mode):
         if s is None:
-            return ''
+            return
         if escape_mode == EscapeMode.STYLE:
             # HTML does not understand XML escapes inside a style element.
             # Don't escape ">".  Escaping isn't required by XML, but is common
             # practice, so we do it elsewhere.
             # "&" and "<" may only appear in a string or comment in CSS, so escape
             # as if they're in a string.
-            return re.sub(r'([<&])', lambda m: "\\%06X" % ord(m.group(1)), s)
-        return re.sub(r'([<>&])', lambda m: self.ENTITIES[m.group(0)], s)
+            self.write(re.sub(r'([<&])', lambda m: "\\%06X" % ord(m.group(1)), s))
+        else:
+            self.write(re.sub(r'([<>&])', lambda m: self.ENTITIES[m.group(0)], s))
 
-    def attributes(self, node):
-        return sorted(
-            '%s="%s"' % (self.qname_for_attr(k, node.nsmap), self.escape_attr(v))
-                for k, v in node.items()
-            )
+    def write_attributes(self, node):
+        for qname, value in sorted((self.qname_for_attr(k, node.nsmap), v) for k, v in node.items()):
+            self.write(' %s="' % qname)
+            self.write(self.escape_attr(value))
+            self.write("\"")
 
     def write_comment(self, n, escape_mode):
-        self.write('<!--' + n.text + '-->' + self.escape_text(n.tail, escape_mode))
+        self.write('<!--' + n.text + '-->')
+        self.write_escape_text(n.tail, escape_mode)
 
     def write_processing_instruction(self, n, escape_mode):
-        self.write( '<?' + n.target + ' ' + n.text + '?>' + self.escape_text(n.tail, escape_mode))
+        self.write( '<?' + n.target + ' ' + n.text + '?>')
+        self.write_escape_text(n.tail, escape_mode)
 
     def write_element(self, n, parent_nsmap = {}, escape_mode = EscapeMode.DEFAULT):
         name = self.qname_for_node(n)
         qname = etree.QName(n.tag)
         selfclose = len(n) == 0 and n.text is None and self.is_selfclosable(n)
-        parts = [ name ] + self.namespace_declarations(n.nsmap, parent_nsmap) + self.attributes(n)
+        parts = [ name ] + self.namespace_declarations(n.nsmap, parent_nsmap) 
         self.write('<' + ' '.join(parts))
+        self.write_attributes(n)
 
         if qname.localname == 'style':
             inner_escape_mode = EscapeMode.STYLE
@@ -131,7 +135,8 @@ class XHTMLSerializer:
         if selfclose:
             self.write('/>')
         else:
-            self.write('>' + self.escape_text(n.text, inner_escape_mode))
+            self.write('>')
+            self.write_escape_text(n.text, inner_escape_mode)
 
             for child in n.iterchildren():
                 if isinstance(child, etree._Comment):
@@ -142,7 +147,7 @@ class XHTMLSerializer:
                     self.write_element(child, n.nsmap, inner_escape_mode)
             self.write('</%s>' % name)
 
-        self.write(self.escape_text(n.tail, escape_mode))
+        self.write_escape_text(n.tail, escape_mode)
 
     def serialize(self, element):
         if hasattr(element, 'getroot'):

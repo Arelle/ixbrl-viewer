@@ -608,12 +608,18 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
 }
 
 Inspector.prototype._updateEntityIdentifier = function (fact, context) {
-    var url = Identifiers.identifierURLForFact(fact);
-    var cell = $('tr.entity-identifier td', context);
+    const cell = $('tr.entity-identifier td', context);
     cell.empty();
-    if (url) {
+    const url = Identifiers.identifierURLForFact(fact);
+    const name = Identifiers.identifierNameForFact(fact);
+    if (fact !== undefined) {
         $('<span></span>').text('['+Identifiers.identifierNameForFact(fact) + "] ").appendTo(cell)
-        $('<a target="_blank"></a>').attr('href',url).text(fact.identifier().localname).appendTo(cell)
+        if (url !== undefined) {
+            $('<a target="_blank"></a>').attr('href',url).text(fact.identifier().localname).appendTo(cell)
+        }
+        else {
+            $('<span></span>').text(fact.identifier().localname).appendTo(cell);
+        }
     }
     else {
         cell.text(fact.f.a.e);

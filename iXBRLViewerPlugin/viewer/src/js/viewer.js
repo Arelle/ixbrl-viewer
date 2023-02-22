@@ -1023,9 +1023,8 @@ Viewer.prototype.customize = function(selector, styles) {
     this._contents.each(function () {   
         for (const sheet of this.styleSheets) {
             for (const rule of sheet.cssRules) {
-                if (!(rule instanceof CSSStyleRule))
-                    continue;
-                if (rule.selectorText == selector) {
+                if ('selectorText' in rule && 'styleMap' in rule &&
+                    rule.selectorText == selector) {
                     for (const property in styles) {
                         rule.styleMap.set(property, styles[property]);
                     }

@@ -140,6 +140,11 @@ class TestXHTMLSerializer(unittest.TestCase):
                 r'''<div attr1='"foo"'>abc</div>''',
                 r'''<div attr1="&quot;foo&quot;">abc</div>''',
             ),
+            # xml prefix doesn't need declaring
+            (
+                r'''<div xml:lang="en" attr='abc'>abc</div>''',
+                r'''<div attr="abc" xml:lang="en">abc</div>''',
+            ),
 
         )
 

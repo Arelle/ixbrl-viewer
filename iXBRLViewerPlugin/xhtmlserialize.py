@@ -17,6 +17,7 @@ from enum import Enum
 import re
 
 XHTML_NS = 'http://www.w3.org/1999/xhtml'
+XML_NS = 'http://www.w3.org/XML/1998/namespace'
 
 class EscapeMode(Enum):
     DEFAULT = 0
@@ -65,7 +66,10 @@ class XHTMLSerializer:
         qname = etree.QName(tag)
         if qname.namespace is None:
             return qname.localname
-        prefix = next(iter(sorted((p for p, ns in nsmap.items() if ns == qname.namespace and p is not None), key = self.prefix_sort)))
+        if qname.namespace == XML_NS:
+            prefix = 'xml'
+        else:
+            prefix = next(iter(sorted((p for p, ns in nsmap.items() if ns == qname.namespace and p is not None), key = self.prefix_sort)))
         return "%s:%s" % (prefix, qname.localname)
 
     def is_selfclosable(self, n):

@@ -119,6 +119,14 @@ class XHTMLSerializer:
         self.write( '<?' + n.target + ' ' + n.text + '?>')
         self.write_escape_text(n.tail, escape_mode)
 
+    def write_node(self, n, nsmap = {}, escape_mode = EscapeMode.DEFAULT):
+        if isinstance(n, etree._Comment):
+            self.write_comment(n, escape_mode)
+        elif isinstance(n, etree._ProcessingInstruction):
+            self.write_processing_instruction(n, escape_mode)
+        else:
+            self.write_element(n, nsmap, escape_mode)
+
     def write_element(self, n, parent_nsmap = {}, escape_mode = EscapeMode.DEFAULT):
         name = self.qname_for_node(n)
         qname = etree.QName(n.tag)
@@ -137,21 +145,26 @@ class XHTMLSerializer:
         else:
             self.write('>')
             self.write_escape_text(n.text, inner_escape_mode)
-
             for child in n.iterchildren():
-                if isinstance(child, etree._Comment):
-                    self.write_comment(child, inner_escape_mode)
-                elif isinstance(child, etree._ProcessingInstruction):
-                    self.write_processing_instruction(child, inner_escape_mode)
-                else:
-                    self.write_element(child, n.nsmap, inner_escape_mode)
+                self.write_node(child, n.nsmap, inner_escape_mode)
             self.write('</%s>' % name)
 
         self.write_escape_text(n.tail, escape_mode)
 
     def serialize(self, element):
-        if hasattr(element, 'getroot'):
-            element = element.getroot()
         if self.xml_declaration:
             self.write('<?xml version="1.0" encoding="utf-8"?>\n')
-        self.write_element(element)
+        if hasattr(element, 'getroot'):
+            element = element.getroot()
+            while element.getprevious() is not None:
+                element = element.getprevious()
+
+            while element is not None:
+                self.write_node(element)
+                if isinstance(element, (etree._Comment, etree._ProcessingInstruction)):
+                    self.write("\n")
+                element = element.getnext()
+
+        else:
+            self.write_element(element)
+

@@ -145,6 +145,11 @@ class TestXHTMLSerializer(unittest.TestCase):
                 r'''<div xml:lang="en" attr='abc'>abc</div>''',
                 r'''<div attr="abc" xml:lang="en">abc</div>''',
             ),
+            # control characters escaped
+            (
+                r'''<div foo="&#128;">abc&#x81;&#127;</div>''',
+                r'''<div foo="&#x80;">abc&#x81;&#x7F;</div>''',
+            ),
 
         )
 

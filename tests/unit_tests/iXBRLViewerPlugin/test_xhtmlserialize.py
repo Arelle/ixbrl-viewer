@@ -235,3 +235,36 @@ class TestXHTMLSerializer(unittest.TestCase):
             x = lxml.etree.parse(f)
             s = self._serialiseToString(x, xml_declaration = True)
             assert s == test_out
+
+    def test_document_modification(self):
+        tests = (
+            (
+                # lxml allocates new prefixes for new element, and for namespace attribute (which can't use the default NS)
+                r'''<div xmlns="http://www.example.com"><span>foo</span></div>''',
+                r'''<div xmlns="http://www.example.com"><span>foo</span><ns0:abc xmlns:ns0="http://www.example.com/ns2" xmlns:ns1="http://www.example.com" ns1:attr="def"></ns0:abc></div>'''
+            ),
+            (
+                # lxml allocates new ns0 prefix to new element, overriding previous binding, and allocates ns1 for the attribute
+                r'''<ns0:div xmlns:ns0="http://www.example.com"><span>foo</span></ns0:div>''',
+                r'''<ns0:div xmlns:ns0="http://www.example.com"><span>foo</span><ns0:abc xmlns:ns0="http://www.example.com/ns2" xmlns:ns1="http://www.example.com" ns1:attr="def"></ns0:abc></ns0:div>'''
+            ),
+            (
+                # newly allocated ns0 doesn't override abc binding, so it can be re-used for the attribute
+                r'''<abc:div xmlns:abc="http://www.example.com"><span>foo</span></abc:div>''',
+                r'''<abc:div xmlns:abc="http://www.example.com"><span>foo</span><ns0:abc xmlns:ns0="http://www.example.com/ns2" abc:attr="def"></ns0:abc></abc:div>'''
+            ),
+            (
+                # newly allocated ns0 doesn't override abc binding, so it can be re-used for the attribute
+                r'''<abc:div xmlns:abc="http://www.example.com/ns2"><span>foo</span></abc:div>''',
+                r'''<abc:div xmlns:abc="http://www.example.com/ns2"><span>foo</span><abc:abc xmlns:ns0="http://www.example.com" ns0:attr="def"></abc:abc></abc:div>'''
+            ),
+        )
+
+        for (test_in, test_out) in tests:
+            f = io.StringIO(test_in)
+            x = lxml.etree.parse(f)
+            e = lxml.etree.Element("{http://www.example.com/ns2}abc")
+            x.getroot().append(e)
+            e.set("{http://www.example.com}attr", "def")
+            s = self._serialiseToString(x)
+            assert s == test_out

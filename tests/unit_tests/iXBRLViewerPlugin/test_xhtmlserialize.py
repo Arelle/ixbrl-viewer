@@ -14,9 +14,9 @@ class TestXHTMLSerializer(unittest.TestCase):
     def _html(self, s):
         return '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>%s</body></html>' % s
 
-    def _serialiseToString(self, xml):
+    def _serialiseToString(self, xml, xml_declaration = False):
         buf = io.BytesIO()
-        serializer = XHTMLSerializer(buf, xml_declaration=False)
+        serializer = XHTMLSerializer(buf, xml_declaration)
         serializer.serialize(xml)
         return buf.getvalue().decode('utf-8')
 
@@ -158,3 +158,75 @@ class TestXHTMLSerializer(unittest.TestCase):
             x2 = lxml.etree.fromstring(s)
             assert self._serialiseToString(x2) == s
 
+    def test_full_document_serialisation(self):
+        tests = (
+            # Self-closable elements should be collapsed
+            (
+                # Comment before body is preserved, but trailing whitespace normalised to single newline
+                r'''<?xml version="1.0" ?>
+                <!-- comment -->
+                <div><br></br><span></span></div>''',
+                r'''<!-- comment -->
+<div><br/><span></span></div>'''
+            ),
+            (
+                # Comment before body is preserved, but trailing whitespace normalised to single newline
+                r'''
+
+                <!-- comment -->
+                <div><br></br><span></span></div>''',
+                r'''<!-- comment -->
+<div><br/><span></span></div>'''
+            ),
+
+
+        )
+
+        for (test_in, test_out) in tests:
+            f = io.StringIO(test_in)
+            x = lxml.etree.parse(f)
+            s = self._serialiseToString(x)
+            assert s == test_out
+
+
+    def test_full_document_serialisation_with_xml_declaration(self):
+        tests = (
+            # Self-closable elements should be collapsed
+            (
+                r'''<?xml version="1.0" ?>
+                <!-- comment -->
+                <div><br></br><span></span></div>''',
+
+                r'''<?xml version="1.0" encoding="utf-8"?>
+<!-- comment -->
+<div><br/><span></span></div>'''
+            ),
+            (
+                r'''
+
+                <!-- comment -->
+                <div><br></br><span></span></div>''',
+
+                r'''<?xml version="1.0" encoding="utf-8"?>
+<!-- comment -->
+<div><br/><span></span></div>'''
+            ),
+            (
+                r'''<?xml version="1.0" standalone="yes" ?> 
+<div></div>''',
+                r'''<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<div></div>''',
+            ),
+            (
+                r'''<?xml version="1.1" standalone="no" ?> 
+<div></div>''',
+                r'''<?xml version="1.1" encoding="utf-8"?>
+<div></div>''',
+            ),
+        )
+
+        for (test_in, test_out) in tests:
+            f = io.StringIO(test_in)
+            x = lxml.etree.parse(f)
+            s = self._serialiseToString(x, xml_declaration = True)
+            assert s == test_out

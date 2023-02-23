@@ -151,10 +151,20 @@ class XHTMLSerializer:
 
         self.write_escape_text(n.tail, escape_mode)
 
-    def serialize(self, element):
+    def write_xml_declaration(self, docinfo = None):
         if self.xml_declaration:
-            self.write('<?xml version="1.0" encoding="utf-8"?>\n')
+            version = "1.0"
+            standalone = ""
+            if docinfo is not None:
+                version = docinfo.xml_version
+                if docinfo.standalone:
+                    standalone = ' standalone="yes"'
+            self.write('<?xml version="%s" encoding="%s"%s?>\n' % (version, self.encoding, standalone))
+
+    def serialize(self, element):
         if hasattr(element, 'getroot'):
+            self.write_xml_declaration(element.docinfo)
+
             element = element.getroot()
             while element.getprevious() is not None:
                 element = element.getprevious()
@@ -166,5 +176,6 @@ class XHTMLSerializer:
                 element = element.getnext()
 
         else:
+            self.write_xml_declaration()
             self.write_element(element)
 

@@ -210,7 +210,6 @@ iXBRLViewer.prototype.load = function () {
                     viewer.initialize()
                         .then(() => inspector.initialize(report, viewer))
                         .then(() => {
-                            inspector.setViewer(viewer);
                             interact('#viewer-pane').resizable({
                                 edges: { left: false, right: ".resize", bottom: false, top: false},
                                 restrictEdges: {
@@ -252,7 +251,8 @@ iXBRLViewer.prototype.load = function () {
 
                         });
                 }
-            });
+            }, 250);
+        });
     }, 0);
 }
 

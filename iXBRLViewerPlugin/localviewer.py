@@ -49,7 +49,7 @@ localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
 def launchLocalViewer(cntlr, modelXbrl):
     from arelle import LocalViewer
     try:
-        ixds = cntlr.modelManager.modelXbrl.type == Type.INLINEXBRLDOCUMENTSET:
+        ixds = cntlr.modelManager.modelXbrl.type == Type.INLINEXBRLDOCUMENTSET
         basenameSuffix = '' if xds else VIEWER_BASENAME_SUFFIX
         viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl, basenameSuffix = basenameSuffix, showValidations = False)
         iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js")

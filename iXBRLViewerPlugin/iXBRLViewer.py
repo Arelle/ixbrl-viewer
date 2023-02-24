@@ -208,7 +208,6 @@ class IXBRLViewerBuilder:
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
 
-<<<<<<< HEAD
     def validationErrors(self):
         dts = self.dts
 

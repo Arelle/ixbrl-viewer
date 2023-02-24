@@ -15,6 +15,7 @@
 from arelle.LocalViewer import LocalViewer
 from arelle.webserver.bottle import static_file
 from arelle.FileSource import archiveFilenameParts
+from arelle import ModelDocument
 import os, shutil
 import logging
 import zipfile, sys, traceback
@@ -49,10 +50,10 @@ localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
 def launchLocalViewer(cntlr, modelXbrl):
     from arelle import LocalViewer
     try:
-        ixds = cntlr.modelManager.modelXbrl.type == Type.INLINEXBRLDOCUMENTSET
-        basenameSuffix = '' if xds else VIEWER_BASENAME_SUFFIX
-        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl, basenameSuffix = basenameSuffix, showValidations = False)
-        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js")
+        ixds = cntlr.modelManager.modelXbrl.modelDocument.type == ModelDocument.Type.INLINEXBRLDOCUMENTSET
+        basenameSuffix = '' if ixds else VIEWER_BASENAME_SUFFIX
+        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.modelXbrl, basenameSuffix = basenameSuffix)
+        iv = viewerBuilder.createViewer(scriptUrl="/ixbrlviewer.js", showValidations = False)
         # first check if source file was in an archive (e.g., taxonomy package)
         _archiveFilenameParts = archiveFilenameParts(modelXbrl.modelDocument.filepath)
         if _archiveFilenameParts is not None:

@@ -124,7 +124,7 @@ Viewer.prototype._wrapNode = function(n) {
     var wrapper = "<span>";
     const nn = n.getElementsByTagName("*");
     for (var i = 0; i < nn.length; i++) {
-        if(nn[i].style.display === "block") {
+        if ('style' in nn[i] && nn[i].style.display === "block") {
             wrapper = '<div>';
             break;
         }

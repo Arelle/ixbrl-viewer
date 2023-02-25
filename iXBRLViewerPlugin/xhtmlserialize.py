@@ -93,7 +93,7 @@ class XHTMLSerializer:
         return sorted(self.xmlns_declaration(p, new_nsmap[p]) for p in changed)
 
     def escape_char(self, c):
-        return self.ENTITIES.get(c, '&#x%2X;' % ord(c))
+        return self.ENTITIES.get(c, '&#x%02X;' % ord(c))
 
     def write_escape_text(self, s, escape_mode):
         if s is None:
@@ -106,7 +106,7 @@ class XHTMLSerializer:
             # as if they're in a string.
             self.write(re.sub(r'([<&])', lambda m: "\\%06X" % ord(m.group(1)), s))
         else:
-            self.write(re.sub(r'([<>&\u0001-\u001F\u007F-\u009F])', lambda m: self.escape_char(m.group(0)),s))
+            self.write(re.sub(r'([<>&\u0001-\u0008\u000B\u000C\u000E\u001F\u007F-\u009F])', lambda m: self.escape_char(m.group(0)),s))
 
     def write_attributes(self, node):
         for qname, value in sorted((self.qname_for_attr(k, node.nsmap), v) for k, v in node.items()):

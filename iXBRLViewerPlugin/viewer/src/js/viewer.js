@@ -124,7 +124,7 @@ Viewer.prototype._wrapNode = function(n) {
     var wrapper = "<span>";
     const nn = n.getElementsByTagName("*");
     for (var i = 0; i < nn.length; i++) {
-        if($(nn[i]).css("display") === "block") {
+        if(nn[i].style.display === "block") {
             wrapper = '<div>';
             break;
         }
@@ -204,19 +204,22 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         nodes = this._wrapNode(domNode);
         // Create a node set of current node and all absolutely positioned
         // descendants.
-        nodes = nodes.find("*").addBack().filter(function () {
-            return (this == nodes[0] || $(this).css("position") == "absolute");
+        nodes = nodes.find("*").addBack().filter(function (n, e) {
+            // node list will include ix:* elements, with no style property.
+            // Can't trivially use instanceof HTMLElement in an iframe.
+            return (this == nodes[0] || ('style' in this && this.style.position === "absolute"));
         });
     }
     nodes.each(function (i) {
-        if (this.getBoundingClientRect().height == 0 && $(this).css('display') !== 'inline') {
-            $(this).addClass("ixbrl-no-highlight"); 
+        // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
+        if (nodes.length > 1 && this.style.display !== 'inline' && this.getBoundingClientRect().height == 0) {
+            this.classList.add("ixbrl-no-highlight");
         }
         if (i == 0) {
-            $(this).addClass("ixbrl-element")
+            this.classList.add("ixbrl-element");
         }
         else {
-            $(this).addClass("ixbrl-sub-element"); 
+            this.classList.add("ixbrl-sub-element");
         }
     });
     return nodes;

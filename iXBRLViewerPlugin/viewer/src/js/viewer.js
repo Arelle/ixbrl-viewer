@@ -60,6 +60,7 @@ Viewer.prototype.initialize = function() {
         viewer._buildContinuationMaps();
         viewer._checkContinuationCount()
             .catch(err => { throw err })
+            .then(() => viewer._iv.setProgress("Pre-processing document"))
             .then(() => {
 
                 viewer._iframes.each(function (docIndex) { 

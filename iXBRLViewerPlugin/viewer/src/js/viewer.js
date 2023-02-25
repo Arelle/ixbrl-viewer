@@ -324,9 +324,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
                 ixn = new IXNode(id, nodes, docIndex);
                 this._ixNodeMap[id] = ixn;
             }
-            if (nodes.is(':hidden')) {
-                ixn.htmlHidden = true;
-            }
             if (inHidden) {
                 ixn.isHidden = true;
                 nodes.addClass("ixbrl-element-hidden");

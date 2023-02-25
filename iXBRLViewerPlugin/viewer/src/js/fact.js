@@ -259,7 +259,7 @@ export class Fact {
     }
 
     isHTMLHidden() {
-        return this.ixNode.htmlHidden;
+        return this.ixNode.htmlHidden();
     }
 
     widerConcepts() {

@@ -31,12 +31,20 @@ class XHTMLSerializer:
         'input', 'isindex', 'link', 'meta', 'param'
     )
 
-    ENTITIES = {
+    ESCAPES = {
+        ']]>': ']]&gt;',
         '>': '&gt;',
         '<': '&lt;',
         '"': '&quot;',
         '&': '&amp;'
         }
+
+    MUST_ESCAPE_CHARS = r'<&\u0001-\u0008\u000B\u000C\u000E\u001F\u007F-\u009F'
+    CDATA_END = r']]>'
+
+    ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>]|' + CDATA_END + ')')
+    ATTR_ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>"]|' + CDATA_END + ')')
+    STYLE_ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + ']|' + CDATA_END + ')')
 
     def __init__(self, fout, xml_declaration = True, assume_xhtml = True):
         self.fout = fout
@@ -81,7 +89,7 @@ class XHTMLSerializer:
                     or (self.assume_xhtml and qname.namespace is None)))
 
     def escape_attr(self, s):
-        return re.sub(r'([<>"&\u0001-\u001F\u007F-\u009F])', lambda m: self.escape_char(m.group(0)), s)
+        return self.ATTR_ESCAPE_RE.sub(lambda m: self.escape_str(m[0]), s)
 
     def xmlns_declaration(self, prefix, uri):
         if prefix is None:
@@ -92,8 +100,8 @@ class XHTMLSerializer:
         changed = set(p[0] for p in (set(new_nsmap.items()) ^ set(cur_nsmap.items())))
         return sorted(self.xmlns_declaration(p, new_nsmap[p]) for p in changed)
 
-    def escape_char(self, c):
-        return self.ENTITIES.get(c, '&#x%02X;' % ord(c))
+    def escape_str(self, c):
+        return self.ESCAPES.get(c, '&#x%02X;' % ord(c[0]))
 
     def write_escape_text(self, s, escape_mode):
         if s is None:
@@ -104,9 +112,9 @@ class XHTMLSerializer:
             # practice, so we do it elsewhere.
             # "&" and "<" may only appear in a string or comment in CSS, so escape
             # as if they're in a string.
-            self.write(re.sub(r'([<&])', lambda m: "\\%06X" % ord(m.group(1)), s))
+            self.write(self.STYLE_ESCAPE_RE.sub(lambda m: self.escape_str(m[0]),s))
         else:
-            self.write(re.sub(r'([<>&\u0001-\u0008\u000B\u000C\u000E\u001F\u007F-\u009F])', lambda m: self.escape_char(m.group(0)),s))
+            self.write(self.ESCAPE_RE.sub(lambda m: self.escape_str(m[0]),s))
 
     def write_attributes(self, node):
         for qname, value in sorted((self.qname_for_attr(k, node.nsmap), v) for k, v in node.items()):
@@ -119,7 +127,7 @@ class XHTMLSerializer:
         self.write_escape_text(n.tail, escape_mode)
 
     def write_processing_instruction(self, n, escape_mode):
-        self.write( '<?' + n.target + ' ' + n.text + '?>')
+        self.write( '<?' + (n.target + ' ' + n.text).rstrip() + '?>')
         self.write_escape_text(n.tail, escape_mode)
 
     def write_node(self, n, nsmap = {}, escape_mode = EscapeMode.DEFAULT):

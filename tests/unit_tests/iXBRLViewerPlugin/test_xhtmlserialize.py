@@ -80,16 +80,17 @@ class TestXHTMLSerializer(unittest.TestCase):
                 r'''<style>div > p { color: #777 }</style>''',
             ),
 
-            # < and & can appear in CSS string
+            # < and & can appear in CSS string.  We leave them as is, even
+            # thought this won't work in HTML mode
             (
                 r'''<style>span::before { content: "&lt;&amp;" }</style>''',
-                r'''<style>span::before { content: "\00003C\000026" }</style>''',
+                r'''<style>span::before { content: "&lt;&amp;" }</style>''',
             ),
 
-            # also escaped this way in comments, which is harmless
+            # also escaped this way in comments
             (
                 r'''<style>span { color: #777 } /* &lt;span> elements are styled this way */ </style>''',
-                r'''<style>span { color: #777 } /* \00003Cspan> elements are styled this way */ </style>''',
+                r'''<style>span { color: #777 } /* &lt;span> elements are styled this way */ </style>''',
             ),
 
             (
@@ -126,8 +127,8 @@ class TestXHTMLSerializer(unittest.TestCase):
             ),
 
             (
-                r'''<div><?my-pi attr1="val1" attr2="val2" ?></div>''',
-                r'''<div><?my-pi attr1="val1" attr2="val2" ?></div>'''
+                r'''<div><?my-pi attr1="val1" attr2="val2"?></div>''',
+                r'''<div><?my-pi attr1="val1" attr2="val2"?></div>'''
             ),
 
             # attribute escaping
@@ -150,6 +151,29 @@ class TestXHTMLSerializer(unittest.TestCase):
                 r'''<div foo="&#128;">abc&#x81;&#127;</div>''',
                 r'''<div foo="&#x80;">abc&#x81;&#x7F;</div>''',
             ),
+            (
+                # whitespace preservation
+                r'''<div>
+                        <br></br>
+                        <span></span>
+                    </div>''',
+                r'''<div>
+                        <br/>
+                        <span></span>
+                    </div>'''
+            ),
+            (
+                # whitespace preservation
+                # we can't test \r here, because lxml appears to convert
+                # literal \r => \n (on unix) so the round trip fails
+                '<div>&#x0A;/&#09;</div>',
+                '<div>\n/\t</div>',
+            ),
+            (
+                # ]]> is the one case where we do escape '>' in a style tag.
+                '<div>]]&gt;<style>]]&gt;</style></div>',
+                '<div>]]&gt;<style>]]&gt;</style></div>',
+            ),
 
         )
 
@@ -162,6 +186,7 @@ class TestXHTMLSerializer(unittest.TestCase):
             # Round trip
             x2 = lxml.etree.fromstring(s)
             assert self._serialiseToString(x2) == s
+
 
     def test_full_document_serialisation(self):
         tests = (
@@ -183,8 +208,11 @@ class TestXHTMLSerializer(unittest.TestCase):
                 r'''<!-- comment -->
 <div><br/><span></span></div>'''
             ),
-
-
+            (
+                # whitespace preservation
+                '<div>&#x0D;/&#x0A;/&#09;</div>',
+                '<div>\r/\n/\t</div>',
+            ),
         )
 
         for (test_in, test_out) in tests:
@@ -200,15 +228,16 @@ class TestXHTMLSerializer(unittest.TestCase):
             (
                 r'''<?xml version="1.0" ?>
                 <!-- comment -->
+                <?pi?>
                 <div><br></br><span></span></div>''',
 
                 r'''<?xml version="1.0" encoding="utf-8"?>
 <!-- comment -->
+<?pi?>
 <div><br/><span></span></div>'''
             ),
             (
                 r'''
-
                 <!-- comment -->
                 <div><br></br><span></span></div>''',
 

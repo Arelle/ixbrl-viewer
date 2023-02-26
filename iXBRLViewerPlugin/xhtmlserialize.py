@@ -127,7 +127,10 @@ class XHTMLSerializer:
         self.write_escape_text(n.tail, escape_mode)
 
     def write_processing_instruction(self, n, escape_mode):
-        self.write( '<?' + (n.target + ' ' + n.text).rstrip() + '?>')
+        self.write( '<?' + n.target )
+        if n.text != '':
+            self.write(' ' + n.text)
+        self.write('?>')
         self.write_escape_text(n.tail, escape_mode)
 
     def write_node(self, n, nsmap = {}, escape_mode = EscapeMode.DEFAULT):

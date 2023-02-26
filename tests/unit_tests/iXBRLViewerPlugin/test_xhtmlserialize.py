@@ -126,9 +126,20 @@ class TestXHTMLSerializer(unittest.TestCase):
                 r'''<div>Text<span>text</span>tail<!-- comment -->after comment<span>text</span>tail</div>'''
             ),
 
+            # PI trailing space handling
+            (
+                r'''<div><?my-pi attr1="val1" attr2="val2" ?></div>''',
+                r'''<div><?my-pi attr1="val1" attr2="val2" ?></div>'''
+            ),
+
             (
                 r'''<div><?my-pi attr1="val1" attr2="val2"?></div>''',
                 r'''<div><?my-pi attr1="val1" attr2="val2"?></div>'''
+            ),
+
+            (
+                r'''<div><?my-pi ?></div>''',
+                r'''<div><?my-pi?></div>'''
             ),
 
             # attribute escaping

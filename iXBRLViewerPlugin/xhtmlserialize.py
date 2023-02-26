@@ -42,8 +42,8 @@ class XHTMLSerializer:
     MUST_ESCAPE_CHARS = r'<&\u0001-\u0008\u000B\u000C\u000E\u001F\u007F-\u009F'
     CDATA_END = r']]>'
 
-    ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>]|' + CDATA_END + ')')
-    ATTR_ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>"]|' + CDATA_END + ')')
+    ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>])')
+    ATTR_ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>"])')
     STYLE_ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + ']|' + CDATA_END + ')')
 
     def __init__(self, fout, xml_declaration = True, assume_xhtml = True):

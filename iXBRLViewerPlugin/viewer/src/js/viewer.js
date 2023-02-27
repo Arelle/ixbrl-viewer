@@ -124,7 +124,7 @@ Viewer.prototype._wrapNode = function(n) {
     var wrapper = "<span>";
     const nn = n.getElementsByTagName("*");
     for (var i = 0; i < nn.length; i++) {
-        if ('style' in nn[i] && nn[i].style.display === "block") {
+        if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
             wrapper = '<div>';
             break;
         }
@@ -205,9 +205,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         // Create a node set of current node and all absolutely positioned
         // descendants.
         nodes = nodes.find("*").addBack().filter(function (n, e) {
-            // node list will include ix:* elements, with no style property.
-            // Can't trivially use instanceof HTMLElement in an iframe.
-            return (this == nodes[0] || ('style' in this && this.style.position === "absolute"));
+            return (this == nodes[0] || (getComputedStyle(this).getPropertyValue('position') === "absolute"));
         });
     }
     nodes.each(function (i) {

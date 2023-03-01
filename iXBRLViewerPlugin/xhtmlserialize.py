@@ -110,8 +110,9 @@ class XHTMLSerializer:
             # HTML does not understand XML escapes inside a style element.
             # Don't escape ">".  Escaping isn't required by XML, but is common
             # practice, so we do it elsewhere.
-            # "&" and "<" may only appear in a string or comment in CSS, so escape
-            # as if they're in a string.
+            # "&" and "<" are escaped using XML escapes.  This will break
+            # HTML/XHTML compatibility, but any source document using them
+            # wouldn't have been HTML compatible anyway.
             self.write(self.STYLE_ESCAPE_RE.sub(lambda m: self.escape_str(m[0]),s))
         else:
             self.write(self.ESCAPE_RE.sub(lambda m: self.escape_str(m[0]),s))

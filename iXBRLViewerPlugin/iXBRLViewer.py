@@ -398,9 +398,9 @@ class iXBRLViewer:
             with zipfile.ZipFile(outPath, "a", zipfile.ZIP_DEFLATED, True) as zout:
                 for f in self.files:
                     self.dts.info("viewer:info", "Saving in output zip %s" % f.filename)
-                    fout = attrdict(write=lambda s: zout.writestr(_outPrefix + f.filename, s))
-                    writer = XHTMLSerializer()
-                    writer.serialize(f.xmlDocument, fout)
+                    with zout.open(_outPrefix + f.filename, "w") as fout:
+                        writer = XHTMLSerializer(fout)
+                        writer.serialize(f.xmlDocument)
                 zout.write(os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"), _outPrefix + "ixbrlviewer.js")
         elif os.path.isdir(outPath):
             # If output is a directory, write each file in the doc set to that
@@ -409,8 +409,8 @@ class iXBRLViewer:
                 filename = os.path.join(outPath, "{0[0]}{1}{0[1]}".format(os.path.splitext(f.filename), outBasenameSuffix))
                 self.dts.info("viewer:info", "Writing %s" % filename)
                 with open(filename, "wb") as fout:
-                    writer = XHTMLSerializer()
-                    writer.serialize(f.xmlDocument, fout)
+                    writer = XHTMLSerializer(fout)
+                    writer.serialize(f.xmlDocument)
 
         else:
             if len(self.files) > 1:
@@ -424,5 +424,5 @@ class iXBRLViewer:
             else:
                 self.dts.info("viewer:info", "Writing %s" % outPath)
                 with open("{0[0]}{1}{0[1]}".format(os.path.splitext(outPath), outBasenameSuffix), "wb") as fout:
-                    writer = XHTMLSerializer()
-                    writer.serialize(self.files[0].xmlDocument, fout)
+                    writer = XHTMLSerializer(fout)
+                    writer.serialize(self.files[0].xmlDocument)

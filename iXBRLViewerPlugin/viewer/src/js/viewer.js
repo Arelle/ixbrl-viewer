@@ -210,7 +210,7 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
     }
     nodes.each(function (i) {
         // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
-        if (nodes.length > 1 && this.style.display !== 'inline' && this.getBoundingClientRect().height == 0) {
+        if (nodes.length > 1 && getComputedStyle(this).getPropertyValue("display") !== 'inline' && this.getBoundingClientRect().height == 0) {
             this.classList.add("ixbrl-no-highlight");
         }
         if (i == 0) {

@@ -34,7 +34,6 @@ export class IXNode {
         this.footnote = false;
         this.id = id;
         this.isHidden = false;
-        this.htmlHidden = false;
         this.docOrderindex = docOrderindex++;
     }
 
@@ -54,5 +53,9 @@ export class IXNode {
             // so will give the full text content.
             .map(n => n.wrapperNodes.first().text())
             .join(" ");
+    }
+
+    htmlHidden() {
+        return this.wrapperNodes.is(':hidden');
     }
 }

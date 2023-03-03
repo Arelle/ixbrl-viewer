@@ -60,6 +60,7 @@ Viewer.prototype.initialize = function() {
         viewer._buildContinuationMaps();
         viewer._checkContinuationCount()
             .catch(err => { throw err })
+            .then(() => viewer._iv.setProgress("Pre-processing document"))
             .then(() => {
 
                 viewer._iframes.each(function (docIndex) { 
@@ -123,7 +124,7 @@ Viewer.prototype._wrapNode = function(n) {
     var wrapper = "<span>";
     const nn = n.getElementsByTagName("*");
     for (var i = 0; i < nn.length; i++) {
-        if($(nn[i]).css("display") === "block") {
+        if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
             wrapper = '<div>';
             break;
         }
@@ -203,19 +204,20 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         nodes = this._wrapNode(domNode);
         // Create a node set of current node and all absolutely positioned
         // descendants.
-        nodes = nodes.find("*").addBack().filter(function () {
-            return (this == nodes[0] || $(this).css("position") == "absolute");
+        nodes = nodes.find("*").addBack().filter(function (n, e) {
+            return (this == nodes[0] || (getComputedStyle(this).getPropertyValue('position') === "absolute"));
         });
     }
     nodes.each(function (i) {
-        if (this.getBoundingClientRect().height == 0 && $(this).css('display') !== 'inline') {
-            $(this).addClass("ixbrl-no-highlight"); 
+        // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
+        if (nodes.length > 1 && getComputedStyle(this).getPropertyValue("display") !== 'inline' && this.getBoundingClientRect().height == 0) {
+            this.classList.add("ixbrl-no-highlight");
         }
         if (i == 0) {
-            $(this).addClass("ixbrl-element")
+            this.classList.add("ixbrl-element");
         }
         else {
-            $(this).addClass("ixbrl-sub-element"); 
+            this.classList.add("ixbrl-sub-element");
         }
     });
     return nodes;
@@ -323,9 +325,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             if (!ixn) {
                 ixn = new IXNode(id, nodes, docIndex);
                 this._ixNodeMap[id] = ixn;
-            }
-            if (nodes.is(':hidden')) {
-                ixn.htmlHidden = true;
             }
             if (inHidden) {
                 ixn.isHidden = true;

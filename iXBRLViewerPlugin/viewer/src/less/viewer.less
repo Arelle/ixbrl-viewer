@@ -48,33 +48,33 @@ span {
 }
 
 :not(.ixbrl-no-highlight) {
-    &.ixbrl-element,
-    &.ixbrl-sub-element {
-      cursor: pointer;
+  &.ixbrl-element,
+  &.ixbrl-sub-element {
+    cursor: pointer;
 
-      &.ixbrl-related {
-        outline: dashed 2px @related-fact;
+    &.ixbrl-related {
+      outline: dashed 2px @related-fact;
 
-        &:not(td):not(th) {
-            outline-offset: 1px;
-        }
+      &:not(td, th) {
+        outline-offset: 1px;
       }
     }
+  }
 }
 
 td,
 th {
   &:not(.ixbrl-no-highlight) {
-      &.ixbrl-selected {
-        outline: solid 2px @primary-focus !important;
-        outline-offset: -1px !important;
-      }
+    &.ixbrl-selected {
+      outline: solid 2px @primary-focus !important;
+      outline-offset: -1px !important;
+    }
 
-      &.ixbrl-element:hover:not(.ixbrl-selected),
-      &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
-        outline: dashed 2px @primary-focus !important;
-        outline-offset: -1px !important;
-      }
+    &.ixbrl-element:hover:not(.ixbrl-selected),
+    &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
+      outline: dashed 2px @primary-focus !important;
+      outline-offset: -1px !important;
+    }
   }
 
   &.ixbrl-related {

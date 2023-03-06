@@ -62,4 +62,8 @@ export class Concept {
     isEnumeration() {
         return Boolean(this._c.e);
     }
+
+    isTextBlock() {
+        return Boolean(this._c.t);
+    }
 }

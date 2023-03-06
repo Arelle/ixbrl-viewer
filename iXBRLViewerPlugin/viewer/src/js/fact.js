@@ -154,9 +154,7 @@ export class Fact {
     }
 
     isTextBlock() {
-        // This should be based on datatype, but we don't currently have access
-        // to that.
-        return this.escaped();
+        return this.concept().isTextBlock();
     }
 
     aspects() {

@@ -99,6 +99,7 @@ iXBRLViewer.prototype._loadInspectorHTML = function () {
     $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
         .attr('href', require('../img/favicon.ico'))
         .appendTo('head');
+    $('.inspector-foot .version').text(__VERSION__);
 }
 
 iXBRLViewer.prototype._reparentDocument = function () {

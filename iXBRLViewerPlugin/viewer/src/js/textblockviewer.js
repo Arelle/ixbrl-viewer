@@ -20,15 +20,28 @@ export class TextBlockViewerDialog extends Dialog {
         this.addButton("Dismiss", true);
     }
 
+    htmlWrapString(content) {
+        const str =
+            "<!DOCTYPE html><html><head><title></title></head><body>" 
+            + content 
+            + "</body></html>";
+        return str;
+    }
+
     displayTextBlock(textBlockValue) {
         const iframe = this.node.find("iframe").get(0);
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
-        const html = 
-            "<!DOCTYPE html><html><head><title></title></head><body>" 
-            + textBlockValue 
-            + "</body></html>";
-        doc.write(html);
+        const html = this.htmlWrapString(textBlockValue);
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(html, 'text/xml');
+        const errorNode = xml.querySelector("parsererror");
+        if (errorNode) {
+            doc.write(this.htmlWrapString('<div style="color: red">Text block contains invalid XML.</div>'));
+        }
+        else {
+            doc.write(html);
+        }
         doc.close();
     }
 }

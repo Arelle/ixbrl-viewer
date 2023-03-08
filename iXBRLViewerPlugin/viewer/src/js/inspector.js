@@ -602,6 +602,9 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
         tr.removeClass('truncated');
     }
 
+    // Only enable text block viewer for escaped, text block facts.  This
+    // ensure that we're only rendering fragments of the main documents, rather
+    // than potentially arbitrary strings.
     if (TextBlockViewerDialog.canRender(item)) {
         tr
             .addClass('text-block')

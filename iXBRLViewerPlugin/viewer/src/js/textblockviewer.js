@@ -32,16 +32,16 @@ export class TextBlockViewerDialog extends Dialog {
         const iframe = this.node.find("iframe").get(0);
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
+        // This feature is only used on facts with 'escape="true"'.  This means
+        // that they are effectively a subset of the document that we're
+        // already displaying
+        //
+        // The iframe will render in HTML mode, not XHTML mode, regardless of
+        // the display mode of the parent document.  Arelle will ensure that
+        // only empty, no-content tags (e.g. <br>) are self-closed, to ensure
+        // the correct rendering.
         const html = this.htmlWrapString(textBlockValue);
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(html, 'text/xml');
-        const errorNode = xml.querySelector("parsererror");
-        if (errorNode) {
-            doc.write(this.htmlWrapString('<div style="color: red">Text block contains invalid XML.</div>'));
-        }
-        else {
-            doc.write(html);
-        }
+        doc.write(html);
         doc.close();
     }
 }

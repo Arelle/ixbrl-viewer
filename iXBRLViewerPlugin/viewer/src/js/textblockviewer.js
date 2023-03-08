@@ -28,6 +28,10 @@ export class TextBlockViewerDialog extends Dialog {
         return str;
     }
 
+    static canRender(item) {
+        return item.isTextBlock() && item.escaped();
+    }
+
     displayTextBlock(textBlockValue) {
         const iframe = this.node.find("iframe").get(0);
         const doc = iframe.contentDocument || iframe.contentWindow.document;

@@ -602,7 +602,7 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
         tr.removeClass('truncated');
     }
 
-    if (item.isTextBlock() && item.escaped()) {
+    if (TextBlockViewerDialog.canRender(item)) {
         tr
             .addClass('text-block')
             .find('.expand-text-block')

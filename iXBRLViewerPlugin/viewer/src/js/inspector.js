@@ -623,8 +623,8 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
 }
 
 Inspector.prototype.showTextBlock = function(item) {
-    const tbd = new TextBlockViewerDialog();
-    tbd.displayTextBlock(item.value());
+    const tbd = new TextBlockViewerDialog(item);
+    tbd.displayTextBlock();
     tbd.show();
 }
 

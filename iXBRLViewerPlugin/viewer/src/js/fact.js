@@ -153,6 +153,10 @@ export class Fact {
         return q.namespace == "http://www.xbrl.org/2003/iso4217";
     }
 
+    isTextBlock() {
+        return this.concept().isTextBlock();
+    }
+
     aspects() {
         return Object.keys(this.f.a).map(k => this.aspect(k));
     }

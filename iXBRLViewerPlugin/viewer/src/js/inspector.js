@@ -27,6 +27,7 @@ import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
+import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
 
@@ -581,30 +582,50 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 
 Inspector.prototype._updateValue = function (item, showAll, context) {
     const text = item.readableValue();
+    const tr = $('tr.value', context);
     var v = text;
     if (!showAll) {
         var fullLabel = text;
         var vv = wrapLabel(text, 120);
         if (vv.length > 1) {
-            $('tr.value', context).addClass("truncated");
-            $('tr.value .show-all', context).off('click').on('click', () => { 
-                this._updateValue(item, true, context) 
-            });
+            tr.addClass("truncated");
+            tr.find('.show-all')
+                .off('click')
+                .on('click', () => this._updateValue(item, true, context));
         }
         else {
-            $('tr.value', context).removeClass('truncated');
+            tr.removeClass('truncated');
         }
         v = vv[0];
     }
     else {
-        $('tr.value', context).removeClass('truncated');
+        tr.removeClass('truncated');
     }
 
-    var valueSpan = $('tr.value td .value', context).empty().text(v);
+    // Only enable text block viewer for escaped, text block facts.  This
+    // ensure that we're only rendering fragments of the main documents, rather
+    // than potentially arbitrary strings.
+    if (TextBlockViewerDialog.canRender(item)) {
+        tr
+            .addClass('text-block')
+            .find('.expand-text-block')
+                .off().click(() => this.showTextBlock(item));
+    }
+    else {
+        tr.removeClass('text-block');
+    }
+
+    var valueSpan = tr.find('td .value').empty().text(v);
     if (item instanceof Fact && (item.isNil() || item.isInvalidIXValue())) {
         valueSpan.wrapInner("<i></i>");
     }
 
+}
+
+Inspector.prototype.showTextBlock = function(item) {
+    const tbd = new TextBlockViewerDialog(item);
+    tbd.displayTextBlock();
+    tbd.show();
 }
 
 Inspector.prototype._updateEntityIdentifier = function (fact, context) {

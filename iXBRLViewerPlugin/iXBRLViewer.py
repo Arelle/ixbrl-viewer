@@ -167,6 +167,9 @@ class IXBRLViewerBuilder:
             if concept.isEnumeration:
                 conceptData["e"] = True
 
+            if concept.type.isTextBlock:
+                conceptData['t'] = True
+
             self.taxonomyData["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):

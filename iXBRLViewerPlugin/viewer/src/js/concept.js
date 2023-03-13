@@ -16,7 +16,7 @@ import $ from 'jquery'
 
 export class Concept {
     constructor(report, name) {
-        this._c = report.data.concepts[name];
+        this._c = report.data.concepts[name] || {};
     }
 
     /*
@@ -24,7 +24,7 @@ export class Concept {
      * the concept has none.
      */
     referenceValuesAsString() {
-        if (!this._c || !this._c.r) {
+        if (!this._c.r) {
             return "";
         }
         else {
@@ -35,7 +35,7 @@ export class Concept {
     }
 
     references() {
-        if (!this._c || !this._c.r) {
+        if (!this._c.r) {
             return [];
         }
         else {
@@ -48,18 +48,22 @@ export class Concept {
     }
 
     isTypedDimension() {
-        return this._c && this._c.d == "t";
+        return this._c.d == "t";
     }
 
     isExplicitDimension() {
-        return this._c && this._c.d == "e";
+        return this._c.d == "e";
     }
 
     isDimension() {
-        return this._c && "d" in this._c;
+        return "d" in this._c;
     }
 
     isEnumeration() {
         return Boolean(this._c.e);
+    }
+
+    isTextBlock() {
+        return Boolean(this._c.t);
     }
 }

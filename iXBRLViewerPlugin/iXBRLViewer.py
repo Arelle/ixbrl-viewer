@@ -365,6 +365,7 @@ class IXBRLViewerBuilder:
         dts.info("viewer:info", "Creating iXBRL viewer")
 
         if dts.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
+
             # Sort by object index to preserve order in which files were specified.
             xmlDocsByFilename = {
                 os.path.basename(self.outputFilename(doc.filepath)): deepcopy(doc.xmlDocument)
@@ -372,10 +373,14 @@ class IXBRLViewerBuilder:
             }
             self.taxonomyData["docSetFiles"] = list(xmlDocsByFilename.keys())
 
-            for filename, xmlDocument in xmlDocsByFilename.items():
-                iv.addFile(iXBRLViewerFile(filename, xmlDocument))
+            if useStubViewer:
+                xmlDocument = self.getStubDocument()
+                iv.addFile(iXBRLViewerFile("ixbrlviewer.html", xmlDocument))
+            else:
+                xmlDocument = next(iter(xmlDocsByFilename.values()))
 
-            xmlDocument = next(iter(xmlDocsByFilename.values()))
+            for filename, docSetXMLDoc in xmlDocsByFilename.items():
+                iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
 
         elif useStubViewer:
             xmlDocument = self.getStubDocument()

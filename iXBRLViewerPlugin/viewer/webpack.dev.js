@@ -27,6 +27,6 @@ module.exports = merge(common, {
     path: path.resolve(__dirname, 'dist')
   },
   plugins: [
-    new webpack.DefinePlugin({ __VERSION__: JSON.stringify(version.dev_version()) })
+    new webpack.DefinePlugin({ __VERSION__: JSON.stringify(version.dev_version())})
   ],
 });

@@ -53,5 +53,6 @@ module.exports = {
   plugins: [
     // Ignore all locale files of moment.js
     new webpack.IgnorePlugin({ resourceRegExp: /^\.\/locale$/, contextRegExp: /moment$/ }),
+    new webpack.DefinePlugin({ __VERSION__: JSON.stringify(process.env.VIEWER_VERSION) })
   ]
 };

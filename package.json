@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "jest",
-    "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
-    "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
+    "dev": "VIEWER_VERSION=`git describe --tags --dirty`-dev webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
+    "prod": "VIEWER_VERSION=`git describe --tags --dirty` webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
     "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js"
   },

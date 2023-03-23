@@ -18,10 +18,10 @@ import $ from 'jquery'
 export class ReportSearch {
     constructor(report) {
         this._report = report;
-        this.buildSearchIndex();
+        this.ready = false;
     }
 
-    buildSearchIndex() {
+    * buildSearchIndex(doneCallback) {
         var docs = [];
         var dims = {};
         var facts = this._report.facts();
@@ -60,26 +60,38 @@ export class ReportSearch {
                 this.periods[p.key()] = p.toString();
             }
 
+            if (i % 100 == 0) {
+                yield;
+            }
         }
-        this._searchIndex = lunr(function () {
-          this.ref('id');
-          this.field('label');
-          this.field('concept');
-          this.field('startDate');
-          this.field('date');
-          this.field('doc');
-          this.field('ref');
-          this.field('widerLabel');
-          this.field('widerDoc');
-          this.field('widerConcept');
+        const builder = new lunr.Builder();
+        builder.ref('id');
+        builder.field('label');
+        builder.field('concept');
+        builder.field('startDate');
+        builder.field('date');
+        builder.field('doc');
+        builder.field('ref');
+        builder.field('widerLabel');
+        builder.field('widerDoc');
+        builder.field('widerConcept');
 
-          docs.forEach(function (doc) {
-            this.add(doc);
-          }, this)
-        })
+
+        for (const [i, doc] of docs.entries()) {
+            builder.add(doc);
+            if (i % 100 == 0) {
+                yield;
+            }
+        }
+        this._searchIndex = builder.build();
+        this.ready = true;
+        doneCallback();
     }
 
     search(s) {
+        if (!this.ready) {
+            return;
+        }
         var rr = this._searchIndex.search(s.searchString);
         var results = []
         var searchIndex = this;

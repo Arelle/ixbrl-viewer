@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -136,7 +136,10 @@ Inspector.prototype.initializeViewer = function () {
     viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
     $('.ixbrl-next-tag').click(() => viewer.selectNextTag(this._currentItem));
     $('.ixbrl-prev-tag').click(() => viewer.selectPrevTag(this._currentItem));
-    this.search();
+}
+
+Inspector.prototype.postLoadAsync = function () {
+    runGenerator(this._search.buildSearchIndex(this.searchReady));
 }
 
 
@@ -280,7 +283,6 @@ Inspector.prototype.searchSpec = function () {
 }
 
 Inspector.prototype.setupSearchControls = function (viewer) {
-    var inspector = this;
     $('.search-controls input, .search-controls select').change(() => this.search());
     $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
     $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
@@ -303,9 +305,17 @@ Inspector.prototype.resetSearchFilters = function () {
     this.search();
 }
 
+Inspector.prototype.searchReady = function() {
+    $('#inspector').addClass('search-ready');
+    $('#ixbrl-search').prop('disabled', false);
+}
+
 Inspector.prototype.search = function() {
     var spec = this.searchSpec();
     var results = this._search.search(spec);
+    if (results === undefined) {
+        return;
+    }
     var viewer = this._viewer;
     var container = $('#inspector .search-results .results');
     $('div', container).remove();

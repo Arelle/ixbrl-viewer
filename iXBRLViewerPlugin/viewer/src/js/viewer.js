@@ -16,7 +16,7 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex } from './util.js'
 import { IXNode } from './ixnode.js';
-import { setDefault } from './util.js';
+import { setDefault, runGenerator } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 
@@ -210,8 +210,8 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
     }
     nodes.each(function (i) {
         // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
-        if (nodes.length > 1 && getComputedStyle(this).getPropertyValue("display") !== 'inline' && this.getBoundingClientRect().height == 0) {
-            this.classList.add("ixbrl-no-highlight");
+        if (nodes.length > 1) {
+            this.classList.add("ixbrl-contains-absolute");
         }
         if (i == 0) {
             this.classList.add("ixbrl-element");
@@ -753,4 +753,32 @@ Viewer.prototype.selectDocument = function (docIndex) {
         .height("100%")
         .data("selected", true);
     this._setTitle(docIndex);
+}
+
+Viewer.prototype.postProcess = function*(iframe) {
+    for (const iframe of this._iframes.get()) {
+        const elts = $(iframe).contents().get(0).querySelectorAll(".ixbrl-contains-absolute");
+        // In some cases, getBoundingClientRect().height returns 0, and
+        // immediately repeating the call returns > 0, so do this in two passes.
+        for (const [i, e] of elts.entries()) {
+            if (getComputedStyle(e).getPropertyValue("display") !== 'inline') {
+                e.getBoundingClientRect().height
+            }
+            if (i % 100 == 0) {
+                yield;
+            }
+        }
+        for (const [i, e] of elts.entries()) {
+            if (getComputedStyle(e).getPropertyValue("display") !== 'inline' && e.getBoundingClientRect().height == 0) {
+                e.classList.add("ixbrl-no-highlight");
+            }
+            if (i % 100 == 0) {
+                yield;
+            }
+        }
+    }
+}
+
+Viewer.prototype.postLoadAsync = function () {
+    runGenerator(this.postProcess());
 }

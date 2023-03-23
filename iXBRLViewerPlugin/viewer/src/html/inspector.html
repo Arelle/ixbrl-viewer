@@ -57,7 +57,7 @@ limitations under the License.
 
       <div class="search-controls search-mode-only">
         <div class="search-input">
-          <input id="ixbrl-search" type="text" aria-label="Search iXBRL report"/>
+          <input id="ixbrl-search" type="text" aria-label="Search iXBRL report" disabled="disabled" />
           <div class="filter-toggle"></div>
         </div>
         <div class="search-filters">
@@ -162,7 +162,8 @@ limitations under the License.
         </div>
         <div class="search-overlay">
           <div class="search-overlay-icon"></div>
-          <div class="search-overlay-text"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
+          <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
+          <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
         </div>
       </div>
 

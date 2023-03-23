@@ -115,7 +115,7 @@ Inspector.prototype.initialize = function (report, viewer) {
             report.setViewerOptions(inspector._viewerOptions);
             inspector.outline = new DocumentOutline(report);
             inspector.createOutline();
-            inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
+            inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                 inspector._search = new ReportSearch(report);
                 inspector.setupSearchControls();
                 inspector.buildDisplayOptionsMenu();

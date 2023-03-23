@@ -63,7 +63,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--use-stub-viewer",
                       action="store_true",
                       dest="useStubViewer",
-                      help="Use stub viewer for faster loading of inspector")
+                      help="Use stub viewer for faster loading of inspector (requires web server)")
     parser.add_option("--viewer-suffix",
                       action="store",
                       default="",

@@ -180,13 +180,15 @@ iXBRLViewer.prototype.load = function () {
             $('#ixv .loader').removeClass("loading");
             return;
         }
-        var report = new iXBRLReport(JSON.parse(taxonomyData));
-        if (report.isDocumentSet()) {
-            var ds = report.documentSetFiles();
-            for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {
-                var iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
-                iframes = iframes.add(iframe);
-            }
+        const report = new iXBRLReport(JSON.parse(taxonomyData));
+        const ds = report.documentSetFiles();
+        var hasExternalIframe = false;
+        for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {
+            const iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
+            iframes = iframes.add(iframe);
+            hasExternalIframe = true;
+        }
+        if (hasExternalIframe) {
             iv._checkDocumentSetBrowserSupport();
         }
 

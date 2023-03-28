@@ -21,6 +21,7 @@ import json
 import math
 import re
 import pycountry
+import urllib.parse
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from .xhtmlserialize import XHTMLSerializer
@@ -352,6 +353,8 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
 
+        docSetFiles = None
+
         for f in dts.facts:
             self.addFact(f)
 
@@ -371,7 +374,7 @@ class IXBRLViewerBuilder:
                 os.path.basename(self.outputFilename(doc.filepath)): deepcopy(doc.xmlDocument)
                 for doc in sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
             }
-            self.taxonomyData["docSetFiles"] = list(xmlDocsByFilename.keys())
+            docSetFiles = list(xmlDocsByFilename.keys())
 
             if useStubViewer:
                 xmlDocument = self.getStubDocument()
@@ -385,7 +388,7 @@ class IXBRLViewerBuilder:
         elif useStubViewer:
             xmlDocument = self.getStubDocument()
             filename = self.outputFilename(os.path.basename(dts.modelDocument.filepath))
-            self.taxonomyData["docSetFiles"] = [ filename ]
+            docSetFiles = [ filename ]
             iv.addFile(iXBRLViewerFile("ixbrlviewer.html", xmlDocument))
             iv.addFile(iXBRLViewerFile(filename, dts.modelDocument.xmlDocument))
 
@@ -393,6 +396,9 @@ class IXBRLViewerBuilder:
             xmlDocument = deepcopy(dts.modelDocument.xmlDocument)
             filename = os.path.basename(dts.modelDocument.filepath)
             iv.addFile(iXBRLViewerFile(filename, xmlDocument))
+
+        if docSetFiles is not None:
+            self.taxonomyData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         if not self.addViewerToXMLDocument(xmlDocument, scriptUrl):
             return None
@@ -413,7 +419,6 @@ class iXBRLViewer:
 
     def addFile(self, ivf):
         self.files.append(ivf)
-
 
     def save(self, outPath, outzipFilePrefix=""):
         """

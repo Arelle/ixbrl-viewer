@@ -1,4 +1,4 @@
-// Copyright 2019 Workiva Inc.
+// Copyright 2023 Workiva Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const webpack = require('webpack');
-const { merge } = require('webpack-merge');
-const common = require('./webpack.common.js');
-const path = require('path');
-const version = require("./version.js");
+const exec = require('child_process');
 
-module.exports = merge(common, {
-  mode: 'development',
-  devtool: 'inline-source-map',
-  watch: false,
-  output: {
-    filename: 'ixbrlviewer.dev.js',
-    path: path.resolve(__dirname, 'dist')
-  },
-  plugins: [
-    new webpack.DefinePlugin({ __VERSION__: JSON.stringify(version.dev_version())})
-  ],
-});
+function git_describe() {
+    if (process.env.GIT_TAG !== undefined) {
+        return process.env.GIT_TAG;
+    }
+    return exec.execSync("git describe --tags --dirty", {encoding: "utf-8"}).trim();
+}
+
+module.exports = {
+    dev_version: function() {
+        return git_describe() + "-dev";
+    },
+    prod_version: function() {
+        return git_describe();
+    }
+};

@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 const path = require('path');
+const version = require("./version.js");
 
 module.exports = merge(common, {
   mode: 'production',
@@ -22,4 +24,7 @@ module.exports = merge(common, {
     filename: 'ixbrlviewer.js',
     path: path.resolve(__dirname, 'dist')
   },
+  plugins: [
+    new webpack.DefinePlugin({ __VERSION__: JSON.stringify(version.prod_version())})
+  ],
 });

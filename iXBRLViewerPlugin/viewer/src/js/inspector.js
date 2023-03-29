@@ -139,7 +139,7 @@ Inspector.prototype.initializeViewer = function () {
 }
 
 Inspector.prototype.postLoadAsync = function () {
-    runGenerator(this._search.buildSearchIndex(this.searchReady));
+    runGenerator(this._search.buildSearchIndex(() => this.searchReady()));
 }
 
 
@@ -308,6 +308,7 @@ Inspector.prototype.resetSearchFilters = function () {
 Inspector.prototype.searchReady = function() {
     $('#inspector').addClass('search-ready');
     $('#ixbrl-search').prop('disabled', false);
+    this.search();
 }
 
 Inspector.prototype.search = function() {

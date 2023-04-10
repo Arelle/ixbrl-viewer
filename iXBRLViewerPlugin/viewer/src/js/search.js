@@ -65,6 +65,16 @@ export class ReportSearch {
             }
         }
         const builder = new lunr.Builder();
+        builder.pipeline.add(
+          lunr.trimmer,
+          lunr.stopWordFilter,
+          lunr.stemmer
+        )
+
+        builder.searchPipeline.add(
+          lunr.stemmer
+        )
+
         builder.ref('id');
         builder.field('label');
         builder.field('concept');

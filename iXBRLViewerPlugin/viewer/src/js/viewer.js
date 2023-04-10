@@ -755,7 +755,7 @@ Viewer.prototype.selectDocument = function (docIndex) {
     this._setTitle(docIndex);
 }
 
-Viewer.prototype.postProcess = function*(iframe) {
+Viewer.prototype.postProcess = function*() {
     for (const iframe of this._iframes.get()) {
         const elts = $(iframe).contents().get(0).querySelectorAll(".ixbrl-contains-absolute");
         // In some cases, getBoundingClientRect().height returns 0, and

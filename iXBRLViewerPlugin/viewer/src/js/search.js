@@ -60,7 +60,7 @@ export class ReportSearch {
                 this.periods[p.key()] = p.toString();
             }
 
-            if (i % 100 == 0) {
+            if (i % 100 === 0) {
                 yield;
             }
         }
@@ -89,7 +89,7 @@ export class ReportSearch {
 
         for (const [i, doc] of docs.entries()) {
             builder.add(doc);
-            if (i % 100 == 0) {
+            if (i % 100 === 0) {
                 yield;
             }
         }

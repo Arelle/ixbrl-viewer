@@ -764,7 +764,7 @@ Viewer.prototype.postProcess = function*(iframe) {
             if (getComputedStyle(e).getPropertyValue("display") !== 'inline') {
                 e.getBoundingClientRect().height
             }
-            if (i % 100 == 0) {
+            if (i % 100 === 0) {
                 yield;
             }
         }
@@ -772,7 +772,7 @@ Viewer.prototype.postProcess = function*(iframe) {
             if (getComputedStyle(e).getPropertyValue("display") !== 'inline' && e.getBoundingClientRect().height == 0) {
                 e.classList.add("ixbrl-no-highlight");
             }
-            if (i % 100 == 0) {
+            if (i % 100 === 0) {
                 yield;
             }
         }

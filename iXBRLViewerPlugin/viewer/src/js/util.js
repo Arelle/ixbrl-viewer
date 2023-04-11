@@ -137,3 +137,14 @@ export function setDefault(obj, key, def) {
     }
     return obj[key];
 }
+
+export function runGenerator(generator) {
+    function resume() {
+        const res = generator.next();
+        if (!res.done) {
+            setTimeout(resume, 0);
+        }
+        return;
+    }
+    setTimeout(resume, 0);
+}

@@ -117,7 +117,6 @@ Inspector.prototype.initialize = function (report, viewer) {
             inspector.createOutline();
             inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                 inspector._search = new ReportSearch(report);
-                inspector.setupSearchControls();
                 inspector.buildDisplayOptionsMenu();
                 inspector.buildToolbarHighlightMenu();
                 inspector.buildHighlightKey();
@@ -306,6 +305,7 @@ Inspector.prototype.resetSearchFilters = function () {
 }
 
 Inspector.prototype.searchReady = function() {
+    this.setupSearchControls();
     $('#inspector').addClass('search-ready');
     $('#ixbrl-search').prop('disabled', false);
     this.search();

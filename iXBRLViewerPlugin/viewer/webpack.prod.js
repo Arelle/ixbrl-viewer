@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 const path = require('path');
 
-module.exports = merge(common, {
+module.exports = env => merge(common, {
   mode: 'production',
   output: {
     filename: 'ixbrlviewer.js',
-    path: path.resolve(__dirname, 'dist')
+    path: env.output || path.resolve(__dirname, 'dist')
   },
 });

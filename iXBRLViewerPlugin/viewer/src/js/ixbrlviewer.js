@@ -18,6 +18,12 @@ import { iXBRLReport } from "./report.js";
 import { Viewer } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
+function bindEvents() { // AMANA extension
+    if (typeof CefSharp !== "undefined") { 
+        CefSharp.BindObjectAsync("boundEvent");
+    }
+}
+
 export function iXBRLViewer(options) {
     this.options = options || {};
     this._plugins = [];
@@ -25,6 +31,7 @@ export function iXBRLViewer(options) {
     this.viewer = null;
     this._width = undefined;
     this.options = options || {};
+    bindEvents();
 }
 
 /*
@@ -57,6 +64,17 @@ export function iXBRLViewer(options) {
  */
 iXBRLViewer.prototype.registerPlugin = function (plugin) {
     this._plugins.push(plugin);
+}
+
+iXBRLViewer.prototype.hasPluginMethod = function (methodName) {
+    var iv = this;
+    var hasMethod = false;
+    $.each(iv._plugins, function (n, p) {
+        if (typeof p[methodName] === 'function') {
+            hasMethod = true;
+        }
+    });
+    return hasMethod;
 }
 
 iXBRLViewer.prototype.callPluginMethod = function (methodName, ...args) {

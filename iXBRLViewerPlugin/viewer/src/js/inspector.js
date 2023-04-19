@@ -30,6 +30,7 @@ import { ValidationReportDialog } from './validationreport.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
 import { escapeHtml } from './util.js'
+import { PreviewBox } from './previewbox.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -594,6 +595,7 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 }
 
 Inspector.prototype._updateValue = function (item, showAll, context) {
+    const self = this;
     const text = item.readableValue();
     var v = text;
     if (!showAll) {
@@ -602,7 +604,8 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
         if (vv.length > 1) {
             $('tr.value', context).addClass("truncated");
             $('tr.value .show-all', context).off('click').on('click', () => { 
-                this._updateValue(item, true, context) 
+                if (!self.showValuePreview(item, context))
+                    this._updateValue(item, true, context) 
             });
         }
         else {
@@ -923,3 +926,18 @@ Inspector.prototype.showValidationWarning = function () {
         mb.show(() => this.showValidationReport());
     }    
 }
+
+Inspector.prototype.showValuePreview = function (fact, context) {
+    const iv = this._iv;
+    if (iv.hasPluginMethod('showValuePreview')) {
+        const mb = new PreviewBox("Value Preview", "Dismiss");        
+        (async function () {            
+            await iv.pluginPromise('showValuePreview', fact, mb.iframe);
+        })().then(() => {
+            mb.show();
+        });
+        return true;
+    }
+    return false;
+}
+

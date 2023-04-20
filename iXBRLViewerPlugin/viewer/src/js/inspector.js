@@ -50,6 +50,7 @@ export function Inspector(iv) {
     this._iv = iv;
     this._viewerOptions = new ViewerOptions()
     this._currentItem = null;
+    this.enablePreviewBox = false;
 }
 
 Inspector.prototype.i18nInit = function () {
@@ -604,7 +605,7 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
         if (vv.length > 1) {
             $('tr.value', context).addClass("truncated");
             $('tr.value .show-all', context).off('click').on('click', () => { 
-                if (!self.showValuePreview(item, context))
+                if (!(this.enablePreviewBox && self.showValuePreview(item, context)))
                     this._updateValue(item, true, context) 
             });
         }

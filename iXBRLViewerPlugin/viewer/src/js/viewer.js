@@ -17,24 +17,22 @@ import { TableExport } from './tableExport.js'
 import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
 import { IXNode } from './ixnode.js';
 import { Fact } from './fact.js';
-import { setDefault } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { ContextMenu } from './contextMenu.js';
 
 import 'bootstrap/js/dist/tooltip';
 
-export function Viewer(iv, iframes, report, useFrames, isPDF) {
+export function Viewer(iv, iframes, report, useFrames) {
     this._iv = iv;
     this._report = report;
     this._iframes = iframes;
     this._useFrames = useFrames;
-    this._isPDF = isPDF;
 
     if (useFrames) {
         this._contents = iframes.contents();
     } else {
         this._contents = iframes;
-    }    
+    }        
 
     this.onSelect = $.Callbacks();
     this.onMouseEnter = $.Callbacks();
@@ -900,14 +898,14 @@ Viewer.prototype.focusOnSelected = function(itemId, itemIdList) {
 // The firefox browser does not support CSS zoom style,
 //      instead of is we should use -moz-transform and -moz-transform-origin styles
 Viewer.prototype._zoom = function () {
-    var iv = this;    
+    var self = this;    
     $('html', this._contents).each(function () {
         var container, scrollParent;
-        if (iv._isPDF) {
-            if (!iv._mzInit) {
+        if (self._iv.isPDF) {
+            if (!self._mzInit) {
                 let pagecontainer = $('#page-container', $(this));
                 pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');
-                iv._mzInit = true;
+                self._mzInit = true;
             }
             container = $('#zoom-container', $(this));
             scrollParent = $(getScrollParent(container[0]));
@@ -920,9 +918,9 @@ Viewer.prototype._zoom = function () {
         var rc = container[0].getBoundingClientRect();
         container.css({
             '-moz-transform-origin': 'center 0',
-            '-moz-transform': 'scale(' + iv.scale + ')',
+            '-moz-transform': 'scale(' + self.scale + ')',
             'transform-origin': 'center 0',
-            'transform': 'scale(' + iv.scale + ')',
+            'transform': 'scale(' + self.scale + ')',
         }).promise().done(function() {
             var rcNew = container[0].getBoundingClientRect();
             container.css({

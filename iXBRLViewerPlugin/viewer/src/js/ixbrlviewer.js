@@ -31,6 +31,7 @@ export function iXBRLViewer(options) {
     this.viewer = null;
     this._width = undefined;
     this.options = options || {};
+    this.isPDF = false;
     bindEvents();
 }
 
@@ -251,8 +252,8 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
     setTimeout(function(){
 
         /* AMANA: In the chromium, pdf files do not use frames in case of content-visibility CSS style  */  
-        var isPDF = iv._detectPDF(ownerDocument);    
-        var useFrames = iv._inIframe() || !isPDF; 
+        iv.isPDF = iv._detectPDF(ownerDocument);    
+        var useFrames = iv._inIframe() || !iv.isPDF; 
         var iframes = $(iv._reparentDocument(ownerDocument, useFrames));
 
         /* AMANA extension: In a case of multifile iXBRL attach JSON into every HTML page is too expensive --> */
@@ -301,7 +302,7 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
                     });
                 }
 
-                var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames, isPDF);
+                var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames);
 
                 viewer.initialize()
                     .then(() => inspector.initialize(report, viewer))
@@ -339,7 +340,7 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
                         inspector.handleFactDeepLink();
                         if (iv.options.showValidationWarningOnStart) {
                             inspector.showValidationWarning();
-                        }
+                        }                        
                     })
                     .then(() => viewer.notifyReady());
             }

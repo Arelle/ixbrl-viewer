@@ -65,6 +65,10 @@ export function iXBRLViewer(options) {
  *
  * Called when the highlight color key is created.  key is an array of labels,
  * which can be modified or extended.
+ * 
+ * extendDisplayTextblock(doc, fact)
+ * 
+ * Called when the textblock for a fact is rendered. doc is the iframe document
  *
  */
 iXBRLViewer.prototype.registerPlugin = function (plugin) {

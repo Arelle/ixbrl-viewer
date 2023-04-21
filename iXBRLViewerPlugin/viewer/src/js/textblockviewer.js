@@ -15,8 +15,9 @@
 import { Dialog } from './dialog.js';
 
 export class TextBlockViewerDialog extends Dialog {
-    constructor(fact) {
+    constructor(iv, fact) {
         super(".dialog.text-block-viewer");
+        this.iv = iv;
         this.addButton("Dismiss", true);
         this.fact = fact;
         this.node.find('#text-block-viewer-plain-text')
@@ -53,8 +54,12 @@ export class TextBlockViewerDialog extends Dialog {
             // The iframe will render in HTML mode, not XHTML mode, regardless of
             // the display mode of the parent document.  Arelle will ensure that
             // only empty, no-content tags (e.g. <br>) are self-closed, to ensure
-            // the correct rendering.
-            doc.write(this.htmlWrapString(this.fact.value()));
+            // the correct rendering.            
+            if (this.iv.hasPluginMethod('extendDisplayTextblock'))
+                this.iv.callPluginMethod('extendDisplayTextblock', doc, this.fact);
+            else {
+                doc.write(this.htmlWrapString(this.fact.value()));
+            }
         }
         else {
             const div = document.createElement('div');

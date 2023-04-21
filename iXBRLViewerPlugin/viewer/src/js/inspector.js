@@ -637,7 +637,7 @@ Inspector.prototype._updateValue = function (item, showAll, context) {
 }
 
 Inspector.prototype.showTextBlock = function(item) {
-    const tbd = new TextBlockViewerDialog(item);
+    const tbd = new TextBlockViewerDialog(this._iv, item);
     tbd.displayTextBlock();
     tbd.show();
 }
@@ -951,17 +951,4 @@ Inspector.prototype.showValidationWarning = function () {
     }    
 }
 
-Inspector.prototype.showValuePreview = function (fact, context) {
-    const iv = this._iv;
-    if (iv.hasPluginMethod('showValuePreview')) {
-        const mb = new PreviewBox("Value Preview", "Dismiss");        
-        (async function () {            
-            await iv.pluginPromise('showValuePreview', fact, mb.iframe);
-        })().then(() => {
-            mb.show();
-        });
-        return true;
-    }
-    return false;
-}
 

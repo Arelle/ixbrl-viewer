@@ -157,17 +157,12 @@ iXBRLViewer.prototype._fixChromeBug = function(iframe) {
 
 iXBRLViewer.prototype._loadInspectorHTML = function () {
     /* Insert HTML and CSS styles into body */
-    if ($('#ixv #iframe-container').length == 0) { /* AMANA: Portal extensions. Checking if inspector.html already loaded as part of portal template */
-        $(require('../html/inspector.html')).prependTo('body');
-        var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
-        $('<style id="ixv-style"></style>')
-            .prop("type", "text/css")
-            .text(inspector_css)
-            .appendTo('head');
-    }    
-    /*$('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-        .attr('href', require('../img/favicon.ico'))
-        .appendTo('head');*/
+    $(require('../html/inspector.html')).prependTo('body');
+    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
+    $('<style id="ixv-style"></style>')
+        .prop("type", "text/css")
+        .text(inspector_css)
+        .appendTo('head');
 
     try {
         $('.inspector-foot .version').text(__VERSION__);
@@ -258,16 +253,18 @@ iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function () {
 }
 
 iXBRLViewer.prototype.load = function () {
-    var iv = this;
-    var iframeDiv = $('#ixv #iframe-container #iframe-div');
-    var src = iframeDiv[0].dataset.src;
-    if (src) {
+    /* AMANA: Portal extensions. Checking if inspector.html already loaded as part of portal template */
+    var iv = this;    
+    var iframeDiv = $('#ixv #iframe-container #iframe-div');    
+    if (iframeDiv.length > 0) {
+        var src = iframeDiv[0].dataset.src;
         $.get(src, function(data) {
             var doc = $(data);
             iv._load(doc);
         });
     }
     else {
+        iv._loadInspectorHTML();
         iv._load($(document));
     }
 }
@@ -275,9 +272,7 @@ iXBRLViewer.prototype.load = function () {
 iXBRLViewer.prototype._load = function(ownerDocument) {
     var iv = this;
     var inspector = this.inspector;
-    setTimeout(function(){
-
-        iv._loadInspectorHTML();
+    setTimeout(function(){                        
         /* AMANA: In the chromium, pdf files do not use frames in case of content-visibility CSS style  */  
         iv.isPDF = iv._detectPDF(ownerDocument);    
         var useFrames = iv._inIframe() || !iv.isPDF; 

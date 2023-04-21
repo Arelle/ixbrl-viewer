@@ -17,6 +17,7 @@ import { TableExport } from './tableExport.js'
 import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
 import { IXNode } from './ixnode.js';
 import { setDefault, runGenerator } from './util.js';
+import { Fact } from './fact.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 import { ContextMenu } from './contextMenu.js';

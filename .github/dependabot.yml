@@ -48,9 +48,21 @@ updates:
     time: "02:00"
     timezone: America/Chicago
   open-pull-requests-limit: 99
+  allow:
+    - dependency-type: indirect
   reviewers:
   - Workiva/xt
+- package-ecosystem: docker
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "02:00"
+    timezone: America/Chicago
+  open-pull-requests-limit: 5
+  reviewers:
+    - Workiva/xt
+  allow:
+    - dependency-name: "python"
   ignore:
-  - dependency-name: numpy
-    versions:
-    - ">=1.20"
+    - dependency-name: "python"
+      update-types: ["version-update:semver-major", "version-update:semver-minor"]

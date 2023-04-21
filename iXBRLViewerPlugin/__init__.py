@@ -42,8 +42,6 @@ import argparse
 import traceback
 import sys
 
-import traceback
-import sys
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer",
@@ -62,6 +60,15 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     # Force logging to use a buffer so that messages are retained and can be
     # retrieved for inclusion with the viewer.
     parser.add_option("--logToBuffer", action="store_true", dest="logToBuffer", default=True, help=argparse.SUPPRESS)
+    parser.add_option("--use-stub-viewer",
+                      action="store_true",
+                      dest="useStubViewer",
+                      help="Use stub viewer for faster loading of inspector (requires web server)")
+    parser.add_option("--viewer-suffix",
+                      action="store",
+                      default="",
+                      dest="viewerBasenameSuffix",
+                      help="Suffix for basename of viewer files")
 
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     # extend XBRL-loaded run processing for this option
@@ -76,9 +83,9 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
         out = getattr(options, 'saveViewerFile') or kwargs.get("responseZipStream")
         if out:
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL, showValidations = options.validationMessages)
+            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL, showValidations = options.validationMessages, useStubViewer=options.useStubViewer)
             if iv is not None:
-                iv.save(out, outBasenameSuffix=VIEWER_BASENAME_SUFFIX, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
+                iv.save(out, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
     except IXBRLViewerBuilderError as ex:
         print(ex.message)
     except Exception as ex:
@@ -97,7 +104,7 @@ def iXBRLViewerMenuCommand(cntlr):
     dialog = SaveViewerDialog(cntlr)
     if dialog.accepted and dialog.filename():
         viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl())
+        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl(), showValidations=False)
         if iv is not None:
             iv.save(dialog.filename())
 
@@ -133,10 +140,16 @@ def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
     cntlr.launchIXBRLViewer.trace("w", setLaunchIXBRLViewer)
     erViewMenu.add_checkbutton(label=_("Launch viewer on load"), underline=0, variable=cntlr.launchIXBRLViewer, onvalue=True, offvalue=False)
 
+
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
     if cntlr.hasGui and cntlr.launchIXBRLViewer.get() and modelXbrl.modelDocument.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
         launchLocalViewer(cntlr, modelXbrl)
+
+
+def load_plugin_url():
+    return __file__
+
 
 __pluginInfo__ = {
     'name': 'ixbrl-viewer',

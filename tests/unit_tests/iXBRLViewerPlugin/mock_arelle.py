@@ -34,4 +34,3 @@ def mock_arelle():
             inferredDecimals=inferredDecimals_effect
         )
         sys.modules['arelle.webserver.bottle'] = Mock()
-        sys.modules['arelle.XbrlConst'] = Mock()

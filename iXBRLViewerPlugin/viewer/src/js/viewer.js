@@ -16,9 +16,12 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
 import { IXNode } from './ixnode.js';
-import { Fact } from './fact.js';
+import { setDefault, runGenerator } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
+import { MessageBox } from './messagebox.js';
 import { ContextMenu } from './contextMenu.js';
+
+export class DocumentTooLargeError extends Error {}
 
 import 'bootstrap/js/dist/tooltip';
 
@@ -49,44 +52,87 @@ export function Viewer(iv, iframes, report, useFrames) {
       .addClass("-ixh-highlight-region").removeClass("amanablock");
 }
 
+Viewer.prototype._checkContinuationCount = function() {
+    const continuationCount = Object.keys(this.continuationOfMap).length
+    if (continuationCount > this._iv.options.continuationElementLimit) {
+        const contents = $('<div></div>')
+            .append($('<p></p>').text(`This document contains a very large number of iXBRL elements (found ${continuationCount} ix:continuation elements).`))
+            .append($('<p></p>').text('You may experience performance problems viewing this document, or the viewer may not load at all.'))
+            .append($('<p></p>').text('Do you want to continue trying to load this document?'));
+
+        const mb = new MessageBox("Large document warning", contents, "Continue", "Cancel");
+        return mb.showAsync().then((result) => {
+            if (!result) {
+                throw new DocumentTooLargeError("Too many continuations");
+            }
+        });
+    }
+    return Promise.resolve();
+}
+
+Viewer.prototype._checkContinuationCount = function() {
+    const continuationCount = Object.keys(this.continuationOfMap).length
+    if (continuationCount > this._iv.options.continuationElementLimit) {
+        const contents = $('<div></div>')
+            .append($('<p></p>').text(`This document contains a very large number of iXBRL elements (found ${continuationCount} ix:continuation elements).`))
+            .append($('<p></p>').text('You may experience performance problems viewing this document, or the viewer may not load at all.'))
+            .append($('<p></p>').text('Do you want to continue trying to load this document?'));
+
+        const mb = new MessageBox("Large document warning", contents, "Continue", "Cancel");
+        return mb.showAsync().then((result) => {
+            if (!result) {
+                throw new DocumentTooLargeError("Too many continuations");
+            }
+        });
+    }
+    return Promise.resolve();
+}
+
 Viewer.prototype.initialize = function() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         var viewer = this;
         viewer._buildContinuationMaps();
-        viewer._iframes.each(function (docIndex) { 
-            $(this).data("selected", docIndex == viewer._currentDocumentIndex);
-            viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
-        });
+        viewer._checkContinuationCount()
+            .catch(err => { throw err })
+            .then(() => viewer._iv.setProgress("Pre-processing document"))
+            .then(() => {
 
-        /* Call plugin promise for each document in turn */
-        (async function () {
-            for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
-                await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
-            }
-        })()
-            .then(() => viewer._iv.setProgress("Preparing document") )
-            .then(() => {
-                this._report.setIXNodeMap(this._ixNodeMap);
-                this._applyStyles();
-                this._bindHandlers();
-                this.scale = 1;
-                this._setTitle(0);
-                this._addDocumentSetTabs();
-                resolve();
-            })
-            .then(() => {
                 viewer._iframes.each(function (docIndex) { 
-                    viewer._postProcessXBRL($(this).contents().find("body").get(0), docIndex);
-                });    
+                    $(this).data("selected", docIndex == viewer._currentDocumentIndex);
+                    viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+                });
+
+            /* Call plugin promise for each document in turn */
+            (async function () {
+                for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
+                    await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
+                }
+            })()
+                .then(() => viewer._iv.setProgress("Preparing document") )
+                .then(() => {
+                    this._report.setIXNodeMap(this._ixNodeMap);
+                    this._applyStyles();
+                    this._bindHandlers();
+                    this.scale = 1;
+                    this._setTitle(0);
+                    this._addDocumentSetTabs();
+                    resolve();
+                })
+                .then(() => {
+                    viewer._iframes.each(function (docIndex) { 
+                        viewer._postProcessXBRL($(this).contents().find("body").get(0), docIndex);
+                    });    
+                })
+                .then(() => {                
+                    viewer.contextMenu = new ContextMenu({
+                        target: $('.ixbrl-element-nonnumeric,.ixbrl-continuation', viewer.contents()),
+                        menuItems: (target) => viewer._createContextMenuItems(target),
+                        mode: "light" 
+                    });
+                    viewer.contextMenu.init();                  
+                })
             })
-            .then(() => {                
-                viewer.contextMenu = new ContextMenu({
-                    target: $('.ixbrl-element-nonnumeric,.ixbrl-continuation', viewer.contents()),
-                    menuItems: (target) => viewer._createContextMenuItems(target),
-                    mode: "light" 
-                  });
-                viewer.contextMenu.init();                  
-            })
+            .catch(err => reject(err));
     });
 }
 
@@ -125,7 +171,7 @@ Viewer.prototype._wrapNode = function(n) {
     var wrapper = "<span>";
     const nn = n.getElementsByTagName("*");
     for (var i = 0; i < nn.length; i++) {
-        if($(nn[i]).css("display") === "block") {
+        if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
             wrapper = '<div>';
             break;
         }
@@ -217,19 +263,20 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         nodes = this._wrapNode(domNode);
         // Create a node set of current node and all absolutely positioned
         // descendants.
-        nodes = nodes.find("*").addBack().filter(function () {
-            return (this == nodes[0] || $(this).css("position") == "absolute");
+        nodes = nodes.find("*").addBack().filter(function (n, e) {
+            return (this == nodes[0] || (getComputedStyle(this).getPropertyValue('position') === "absolute"));
         });
     }
     nodes.each(function (i) {
-        if (this.getBoundingClientRect().height == 0 && $(this).css('display') !== 'inline') {
-            $(this).addClass("ixbrl-no-highlight"); 
+        // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
+        if (nodes.length > 1) {
+            this.classList.add("ixbrl-contains-absolute");
         }
         if (i == 0) {
-            $(this).addClass("ixbrl-element")
+            this.classList.add("ixbrl-element");
         }
         else {
-            $(this).addClass("ixbrl-sub-element"); 
+            this.classList.add("ixbrl-sub-element");
         }
     });
     return nodes;
@@ -339,9 +386,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             if (!ixn) {
                 ixn = new IXNode(id, nodes, docIndex, name);
                 this._ixNodeMap[id] = ixn;
-            }
-            if (nodes.is(':hidden')) {
-                ixn.htmlHidden = true;
             }
             if (inHidden) {
                 ixn.isHidden = true;
@@ -1032,3 +1076,31 @@ Viewer.prototype.customize = function(selector, styles) {
     });
 }
 
+
+Viewer.prototype.postProcess = function*() {
+    for (const iframe of this._iframes.get()) {
+        const elts = $(iframe).contents().get(0).querySelectorAll(".ixbrl-contains-absolute");
+        // In some cases, getBoundingClientRect().height returns 0, and
+        // immediately repeating the call returns > 0, so do this in two passes.
+        for (const [i, e] of elts.entries()) {
+            if (getComputedStyle(e).getPropertyValue("display") !== 'inline') {
+                e.getBoundingClientRect().height
+            }
+            if (i % 100 === 0) {
+                yield;
+            }
+        }
+        for (const [i, e] of elts.entries()) {
+            if (getComputedStyle(e).getPropertyValue("display") !== 'inline' && e.getBoundingClientRect().height == 0) {
+                e.classList.add("ixbrl-no-highlight");
+            }
+            if (i % 100 === 0) {
+                yield;
+            }
+        }
+    }
+}
+
+Viewer.prototype.postLoadAsync = function () {
+    runGenerator(this.postProcess());
+}

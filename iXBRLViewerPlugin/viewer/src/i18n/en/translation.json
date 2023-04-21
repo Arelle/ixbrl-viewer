@@ -40,6 +40,7 @@
     "hiddenFact": "Hidden Fact",
     "hiddenFacts": "Hidden Facts",
     "highlight": "Highlight",
+    "initializing": "Initializing",
     "loadingViewer": "Loading iXBRL Viewer",
     "narrowerAnchor": "Narrower anchors",
     "nextTag": "Next tag",
@@ -53,6 +54,7 @@
     "references": "References",
     "reset": "Reset",
     "searchTitle": "Search",
+    "showTextOnly": "",
     "textOption": "Text",
     "visibleFacts": "Visible Facts",
     "widerAnchor": "Wider anchor"

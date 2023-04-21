@@ -30,7 +30,7 @@ iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js:	iXBRLViewerPlugin/viewer/src/*/*
 test: testplugin testviewer
 
 testplugin:
-	nosetests3 tests.unit_tests
+	nose2
 
 Arelle:
 	git clone https://github.com/Arelle/Arelle.git Arelle

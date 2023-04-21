@@ -1,0 +1,11 @@
+name: Change Request
+description: Suggest an idea.
+title: "[REQUEST] "
+labels: ["request"]
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: What should we change and why?
+    validations:
+      required: true

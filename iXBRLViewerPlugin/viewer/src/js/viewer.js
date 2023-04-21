@@ -55,25 +55,7 @@ export function Viewer(iv, iframes, report, useFrames) {
 
 Viewer.prototype._checkContinuationCount = function() {
     const continuationCount = Object.keys(this.continuationOfMap).length
-    if (continuationCount > this._iv.options.continuationElementLimit) {
-        const contents = $('<div></div>')
-            .append($('<p></p>').text(`This document contains a very large number of iXBRL elements (found ${continuationCount} ix:continuation elements).`))
-            .append($('<p></p>').text('You may experience performance problems viewing this document, or the viewer may not load at all.'))
-            .append($('<p></p>').text('Do you want to continue trying to load this document?'));
-
-        const mb = new MessageBox("Large document warning", contents, "Continue", "Cancel");
-        return mb.showAsync().then((result) => {
-            if (!result) {
-                throw new DocumentTooLargeError("Too many continuations");
-            }
-        });
-    }
-    return Promise.resolve();
-}
-
-Viewer.prototype._checkContinuationCount = function() {
-    const continuationCount = Object.keys(this.continuationOfMap).length
-    if (continuationCount > this._iv.options.continuationElementLimit) {
+    if (this._iv.options.continuationElementLimit > 0 && continuationCount > this._iv.options.continuationElementLimit) {
         const contents = $('<div></div>')
             .append($('<p></p>').text(`This document contains a very large number of iXBRL elements (found ${continuationCount} ix:continuation elements).`))
             .append($('<p></p>').text('You may experience performance problems viewing this document, or the viewer may not load at all.'))

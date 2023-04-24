@@ -14,6 +14,7 @@
 
 import lunr from 'lunr'
 import $ from 'jquery'
+import Decimal from "decimal.js";
 
 export class ReportSearch {
     constructor(report) {
@@ -108,10 +109,11 @@ export class ReportSearch {
 
         rr.forEach((r,i) => {
                 var item = searchIndex._report.getItemById(r.ref);
-                if (
-                    (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
-                    (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
-                    (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
+                if ((item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
+                    (s.periodFilter === '*' || item.period().key() === s.periodFilter) &&
+                    (s.conceptTypeFilter === '*' || s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')) &&
+                    (s.factValueFilter === '*' || (s.factValueFilter === 'positive' && item.isPositive()) || (s.factValueFilter === 'negative' && item.isNegative())))
+                {
                     results.push({
                         "fact": item,
                         "score": r.score

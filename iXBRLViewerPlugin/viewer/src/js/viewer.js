@@ -16,7 +16,7 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
 import { IXNode } from './ixnode.js';
-import { setDefault, runGenerator } from './util.js';
+import { setDefault, runGenerator, zoom } from './util.js';
 import { Fact } from './fact.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
@@ -940,25 +940,7 @@ Viewer.prototype._zoom = function () {
             container = $(this.ownerDocument.body);
             scrollParent = $(this);
         }
-        var viewTop = scrollParent.scrollTop();
-        var viewLeft = scrollParent.scrollLeft();
-        var rc = container[0].getBoundingClientRect();
-        container.css({
-            '-moz-transform-origin': 'center 0',
-            '-moz-transform': 'scale(' + self.scale + ')',
-            'transform-origin': 'center 0',
-            'transform': 'scale(' + self.scale + ')',
-        }).promise().done(function() {
-            var rcNew = container[0].getBoundingClientRect();
-            container.css({
-                'margin-top': 0,
-                'margin-left': (rcNew.width - container[0].clientWidth)/2,
-                'margin-bottom': rcNew.height - container[0].clientHeight, 
-                'margin-right': (rcNew.width - container[0].clientWidth)/2,
-            });        
-            scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
-            scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);       
-        });
+        zoom(container, scrollParent, self.scale);
     });    
 }
 

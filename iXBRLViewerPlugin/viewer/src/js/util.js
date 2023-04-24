@@ -199,3 +199,25 @@ export function runGenerator(generator) {
     }
     setTimeout(resume, 0);
 }
+
+export function zoom(container, scrollParent, scale) {
+    var viewTop = scrollParent.scrollTop();
+    var viewLeft = scrollParent.scrollLeft();
+    var rc = container[0].getBoundingClientRect();
+    container.css({
+        '-moz-transform-origin': 'center 0',
+        '-moz-transform': 'scale(' + scale + ')',
+        'transform-origin': 'center 0',
+        'transform': 'scale(' + scale + ')',
+    }).promise().done(function() {
+        var rcNew = container[0].getBoundingClientRect();
+        container.css({
+            'margin-top': 0,
+            'margin-left': (rcNew.width - container[0].clientWidth)/2,
+            'margin-bottom': rcNew.height - container[0].clientHeight, 
+            'margin-right': (rcNew.width - container[0].clientWidth)/2,
+        });        
+        scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
+        scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);       
+    });
+}

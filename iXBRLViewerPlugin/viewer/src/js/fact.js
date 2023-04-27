@@ -20,6 +20,7 @@ import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
 import { Footnote } from "./footnote.js";
+import Decimal from "decimal.js";
 
 export class Fact {
     
@@ -210,7 +211,16 @@ export class Fact {
     isNil() {
         return this.f.v === null;
     }
+    isNegative() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isNegative() && !this.isZero();
+    }
+    isPositive() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isPositive() && !this.isZero();
+    }
 
+    isZero() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isZero();
+    }
     isInvalidIXValue() {
         return this.f.err == 'INVALID_IX_VALUE';
     }

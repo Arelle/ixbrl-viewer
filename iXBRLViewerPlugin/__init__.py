@@ -55,7 +55,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--viewer-url",
                       action="store",
                       dest="viewerURL",
-                      default="js/dist/ixbrlviewer.js",
+                      default=os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"),
                       help="Specify the URL to ixbrlviewer.js")
     parser.add_option("--viewer-validation-messages",
                       dest="validationMessages",
@@ -127,7 +127,7 @@ def iXBRLViewerMenuCommand(cntlr):
         viewerBuilder = IXBRLViewerBuilder(modelXbrl)
         iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl(), showValidations=False)
         if iv is not None:
-            iv.save(dialog.filename())
+            iv.save(dialog.filename(), zipOutput=dialog.zipViewerOutput())
 
 
 def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):

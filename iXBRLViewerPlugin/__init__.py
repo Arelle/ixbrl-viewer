@@ -11,6 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
+import logging
+import os
+import sys
+import tempfile
+import traceback
+
+from arelle.LocalViewer import LocalViewer
+from arelle.ModelDocument import Type
+from arelle.webserver.bottle import static_file
 
 #
 # GUI operation:
@@ -27,20 +37,14 @@
 #
 #     example uploading an ESEF report package and receiving a zip of viewable .xhtml and viewer javascript file:
 #
-#         curl -X POST "-HContent-type: application/zip" 
-#              -T /Users/mystuff/ESMA/samples/bzwbk_2016.zip 
-#              -o ~/temp/out.zip 
+#         curl -X POST "-HContent-type: application/zip"
+#              -T /Users/mystuff/ESMA/samples/bzwbk_2016.zip
+#              -o ~/temp/out.zip
 #              "http://localhost:8080/rest/xbrl/validation?&media=zip&plugins=iXBRLViewerPlugin&packages=somewhere/esef_taxonomy_2017.zip"
 #
 #     In the zip, the iXBRLViewer files are in a subdirectory VIEWER_BASENAME_SUFFIX to separate them from possible EdgarRenderer and other output files
 #
 from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
-
-from .localviewer import launchLocalViewer, VIEWER_BASENAME_SUFFIX
-from arelle.ModelDocument import Type
-import argparse
-import traceback
-import sys
 
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
@@ -160,8 +164,42 @@ def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
 
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
-    if cntlr.hasGui and cntlr.launchIXBRLViewer.get() and modelXbrl.modelDocument.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-        launchLocalViewer(cntlr, modelXbrl)
+    class iXBRLViewerLocalViewer(LocalViewer):
+        # plugin-specific local file handler
+        def getLocalFile(self, file, relpath, request):
+            _report, _sep, _file = file.partition("/")
+            if file == 'ixbrlviewer.js':
+                return static_file('ixbrlviewer.js', os.path.abspath(os.path.join(os.path.dirname(__file__), "viewer", "dist")))
+            elif _report.isnumeric():  # in reportsFolder folder
+                # check if file is in the current or parent directory (may bve
+                _fileDir = self.reportsFolders[int(_report)]
+                _fileExists = False
+                if os.path.exists(os.path.join(_fileDir, _file)):
+                    _fileExists = True
+                elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.filepart(_file))):
+                    # xhtml in a subdirectory for output files may refer to an image file in parent directory
+                    _fileExists = True
+                    _file = os.path.filepart(_file)
+                if not _fileExists:
+                    self.cntlr.addToLog("http://localhost:{}/{}".format(self.port, file), messageCode="localViewer:fileNotFound", level=logging.DEBUG)
+                return static_file(_file, root=_fileDir, headers=self.noCacheHeaders)  # extra_headers modification to py-bottle
+            return static_file(file, root="/")  # probably can't get here unless path is wrong
+    try:
+        import webbrowser
+        global tempViewer
+        tempViewer = tempfile.TemporaryDirectory()
+        viewer_file_name = 'ixbrlviewer.htm'
+        temp_file_path = os.path.join(tempViewer.name, viewer_file_name)
+        generateViewer(cntlr, temp_file_path)
+        localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
+        localhost = localViewer.init(cntlr, tempViewer.name)
+        webbrowser.open(f'{localhost}/{viewer_file_name}')
+    except Exception as ex:
+        modelXbrl.error(
+            "viewer:exception",
+            "Exception %(exception)s \sTraceback %(traceback)s",
+            modelObject=modelXbrl, exception=ex, traceback=traceback.format_tb(sys.exc_info()[2])
+        )
 
 
 def load_plugin_url():

@@ -69,8 +69,14 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       default="",
                       dest="viewerBasenameSuffix",
                       help="Suffix for basename of viewer files")
+    parser.add_option("--zip-viewer-output",
+                      action="store_true",
+                      default=False,
+                      dest="zipViewerOutput",
+                      help="Converts the viewer output into a self contained zip")
 
-def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
+
+def generateViewer(cntlr, saveViewerFile, viewerURL=os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"), showValidationMessages=False, useStubViewer=False, zipViewerOutput=False):
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
         cntlr.addToLog("No taxonomy loaded.")
@@ -80,16 +86,27 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
         cntlr.addToLog("No inline XBRL document loaded.")
         return
     try:
-        out = getattr(options, 'saveViewerFile') or kwargs.get("responseZipStream")
+        out = saveViewerFile
         if out:
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL, showValidations = options.validationMessages, useStubViewer=options.useStubViewer)
+            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer)
             if iv is not None:
-                iv.save(out, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
+                iv.save(out, zipOutput=zipViewerOutput)
     except IXBRLViewerBuilderError as ex:
         print(ex.message)
     except Exception as ex:
         cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
+
+
+def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
+    generateViewer(
+        cntlr,
+        options.saveViewerFile or kwargs.get("responseZipStream"),
+        options.viewerURL,
+        options.validationMessages,
+        options.useStubViewer,
+        options.zipViewerOutput
+    )
 
 
 def iXBRLViewerMenuCommand(cntlr):

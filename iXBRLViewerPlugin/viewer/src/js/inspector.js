@@ -90,13 +90,16 @@ Inspector.prototype.initialize = function (report, viewer) {
                 }
             });
             $("#inspector .controls .search-button").on("click", function () {
-                $(this).closest("#inspector").removeClass("outline-mode").toggleClass("search-mode");
+                $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode"]).toggleClass("search-mode");
+            });
+            $("#inspector .controls .summary-button").on("click", function () {
+                $(this).closest("#inspector").removeClass(["outline-mode", "search-mode"]).toggleClass("summary-mode");
             });
             $("#inspector .controls .outline-button").on("click", function () {
-                $(this).closest("#inspector").removeClass("search-mode").toggleClass("outline-mode");
+                $(this).closest("#inspector").removeClass(["summary-mode", "search-mode"]).toggleClass("outline-mode");
             });
             $("#inspector-head .back").on("click", function () {
-                $(this).closest("#inspector").removeClass(["outline-mode", "search-mode"]);
+                $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode", "search-mode"]);
             });
             $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
             $("#inspector").on("click", ".clipboard-copy", function () {

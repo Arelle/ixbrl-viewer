@@ -96,7 +96,7 @@ Inspector.prototype.initialize = function (report, viewer) {
                 $(this).closest("#inspector").removeClass("search-mode").toggleClass("outline-mode");
             });
             $("#inspector-head .back").on("click", function () {
-                $(this).closest("#inspector").removeClass("search-mode").removeClass("outline-mode");
+                $(this).closest("#inspector").removeClass(["outline-mode", "search-mode"]);
             });
             $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
             $("#inspector").on("click", ".clipboard-copy", function () {

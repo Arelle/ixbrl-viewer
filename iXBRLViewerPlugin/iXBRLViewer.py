@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
 from arelle import XbrlConst
 from arelle.ModelDocument import Type
 from arelle.ModelValue import QName, INVALIDixVALUE
@@ -337,7 +338,7 @@ class IXBRLViewerBuilder:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
             return etree.parse(fin)
 
-    def createViewer(self, scriptUrl=os.path.join(os.path.dirname(__file__), "js", "dist", "ixbrlviewer.js"), useStubViewer=False, showValidations=True):
+    def createViewer(self, scriptUrl=DEFAULT_VIEWER_PATH, useStubViewer=False, showValidations=True):
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added
         """
@@ -464,7 +465,7 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.dts.info("viewer:info", "Writing %s" % filename)
                     zout.write(self.filingDocuments, filename)
-                zout.write(os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"), "ixbrlviewer.js")
+                zout.write(DEFAULT_VIEWER_PATH, "ixbrlviewer.js")
         elif os.path.isdir(outPath):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename

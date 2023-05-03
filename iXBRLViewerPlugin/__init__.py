@@ -45,6 +45,7 @@ from arelle.webserver.bottle import static_file
 #     In the zip, the iXBRLViewer files are in a subdirectory VIEWER_BASENAME_SUFFIX to separate them from possible EdgarRenderer and other output files
 #
 from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
+from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
 
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
@@ -55,7 +56,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--viewer-url",
                       action="store",
                       dest="viewerURL",
-                      default=os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"),
+                      default=DEFAULT_VIEWER_PATH,
                       help="Specify the URL to ixbrlviewer.js")
     parser.add_option("--viewer-validation-messages",
                       dest="validationMessages",
@@ -80,7 +81,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       help="Converts the viewer output into a self contained zip")
 
 
-def generateViewer(cntlr, saveViewerFile, viewerURL=os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"), showValidationMessages=False, useStubViewer=False, zipViewerOutput=False):
+def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showValidationMessages=False, useStubViewer=False, zipViewerOutput=False):
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
         cntlr.addToLog("No taxonomy loaded.")
@@ -151,7 +152,7 @@ def commandLineRun(*args, **kwargs):
 
 def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
     # persist menu selections for showing filing data and tables menu
-    from tkinter import Menu, BooleanVar # must only import if GUI present (no tkinter on GUI-less servers)
+    from tkinter import Menu, BooleanVar  # must only import if GUI present (no tkinter on GUI-less servers)
     def setLaunchIXBRLViewer(self, *args):
         cntlr.config["LaunchIXBRLViewer"] = cntlr.launchIXBRLViewer.get()
         cntlr.saveConfig()
@@ -169,7 +170,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         def getLocalFile(self, file, relpath, request):
             _report, _sep, _file = file.partition("/")
             if file == 'ixbrlviewer.js':
-                return static_file('ixbrlviewer.js', os.path.abspath(os.path.join(os.path.dirname(__file__), "viewer", "dist")))
+                return static_file('ixbrlviewer.js', os.path.dirname(DEFAULT_VIEWER_PATH))
             elif _report.isnumeric():  # in reportsFolder folder
                 # check if file is in the current or parent directory (may bve
                 _fileDir = self.reportsFolders[int(_report)]

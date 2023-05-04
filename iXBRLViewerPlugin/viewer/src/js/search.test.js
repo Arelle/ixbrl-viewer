@@ -28,6 +28,13 @@ const testReportData = {
     "languages": {
         "en-us": "En (US)"
     },
+function getReportSearch(report) {
+    const reportSearch = new ReportSearch(report);
+    const searchIndex = reportSearch.buildSearchIndex(() => {});
+    for (const _ of searchIndex) {}
+    return reportSearch;
+}
+
     "facts": {},
     "prefixes": {
         "us-gaap": "http://fasb.org/us-gaap/2023",
@@ -102,9 +109,7 @@ describe("search negative filter", () => {
             {'positive': positive, 'negative': negative, 'zero': zero, 'text': text, 'undefined': undef},
             {'positive': {}, 'negative': {}, 'zero': {}, 'text': {}, 'undefined': {}}
     )
-    const reportSearch = new ReportSearch(report);
-    const searchIndex = reportSearch.buildSearchIndex(() => {});
-    for (const _ of searchIndex) {}
+    const reportSearch = getReportSearch(report);
 
     test("Fact Value Negative filter works", () => {
         const spec = testSearchSpec('Cash');

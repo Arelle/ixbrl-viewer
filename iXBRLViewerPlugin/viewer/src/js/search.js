@@ -99,6 +99,43 @@ export class ReportSearch {
         doneCallback();
     }
 
+    visibilityFilter(s, item) {
+        return item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts;
+    }
+
+    periodFilter(s, item) {
+        return (
+            s.periodFilter === '*' ||
+            s.periodFilter === item.period().key()
+        );
+    }
+
+    conceptTypeFilter(s, item) {
+        return (
+            s.conceptTypeFilter === '*' ||
+            s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')
+        );
+    }
+
+    factValueFilter(s, item) {
+        return (
+            s.factValueFilter === '*' ||
+            (s.factValueFilter === 'positive' && item.isPositive()) ||
+            (s.factValueFilter === 'negative' && item.isNegative())
+        );
+    }
+
+    calculationsFilter(s, item) {
+        return (
+            s.calculationsFilter === '*' ||
+            (s.calculationsFilter === 'contributing' && item.isCalcItem) ||
+            (s.calculationsFilter === 'summation' && item.isCalcSum) ||
+            (s.calculationsFilter === 'either' && (item.isCalcItem || item.isCalcSum))
+        );
+    }
+
+
+
     search(s) {
         if (!this.ready) {
             return;
@@ -107,12 +144,17 @@ export class ReportSearch {
         var results = []
         var searchIndex = this;
 
+        const filters = [
+            this.visibilityFilter,
+            this.periodFilter,
+            this.conceptTypeFilter,
+            this.factValueFilter,
+            this.calculationsFilter
+        ];
+
         rr.forEach((r,i) => {
                 var item = searchIndex._report.getItemById(r.ref);
-                if ((item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
-                    (s.periodFilter === '*' || item.period().key() === s.periodFilter) &&
-                    (s.conceptTypeFilter === '*' || s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')) &&
-                    (s.factValueFilter === '*' || (s.factValueFilter === 'positive' && item.isPositive()) || (s.factValueFilter === 'negative' && item.isNegative())))
+                if (filters.every(f => f(s, item)))
                 {
                     results.push({
                         "fact": item,

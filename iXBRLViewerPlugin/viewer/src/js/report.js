@@ -69,6 +69,22 @@ iXBRLReport.prototype._initialize = function () {
     }
 }
 
+iXBRLReport.prototype.isCalculationContributingConcept = function(c) {
+    if (this.data.rels.calc === undefined) return false;
+    return Boolean(Object.values(this.data.rels.calc).some(calculations => {
+        return Object.values(calculations).some(contributingItems => {
+            return contributingItems.some(i => i.t === c);
+        })
+    }));
+}
+
+iXBRLReport.prototype.isCalculationSummationConcept = function(c) {
+    if (this.data.rels.calc === undefined) return false;
+    return Boolean(Object.values(this.data.rels.calc).some(calculations => {
+        return Object.keys(calculations).includes(c);
+    }));
+}
+
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     rolePrefix = rolePrefix || 'std';
     var lang = this._viewerOptions.language;

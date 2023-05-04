@@ -30,6 +30,8 @@ export class Fact {
         this._report = report;
         this.id = factId;
         this.linkedFacts = [];
+        this.isCalcItem = this._report.isCalculationContributingConcept(this.f.a.c);
+        this.isCalcSum = this._report.isCalculationSummationConcept(this.f.a.c);
     }
 
     report() {

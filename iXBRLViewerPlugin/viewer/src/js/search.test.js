@@ -78,7 +78,7 @@ function testReport(ixData, testData) {
     return report;
 }
 
-function testSearchSpec(searchString) {
+function testSearchSpec(searchString='') {
     const spec = {};
     spec.searchString = searchString;
     spec.showVisibleFacts = true;
@@ -86,6 +86,7 @@ function testSearchSpec(searchString) {
     spec.periodFilter = '*';
     spec.conceptTypeFilter = '*';
     spec.factValueFilter = '*';
+    spec.calculationsFilter = "*";
     return spec;
 }
 
@@ -141,5 +142,64 @@ describe("Search fact value filter", () => {
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"]["id"]).toEqual("positive")
+    });
+});
+
+describe("Search calculation filter", () => {
+    const report = testReport(
+            {'summation': {}, 'item1': {}, 'item2': {}, 'other': {}},
+            {
+                "concepts": {
+                    ...createSimpleConcept("test:Summation", "Summation"),
+                    ...createSimpleConcept("test:Item1", "Item1"),
+                    ...createSimpleConcept("test:Item2", "Item2"),
+                    ...createSimpleConcept("test:Other", "Other"),
+                },
+                "facts": {
+                    ...createSimpleFact("summation", "test:Summation"),
+                    ...createSimpleFact("item1", "test:Item1"),
+                    ...createSimpleFact("item2", "test:Item2"),
+                    ...createSimpleFact("other", "test:Other"),
+                },
+                "rels": {
+                    "calc": {
+                        "ns": {
+                            "test:Summation": [
+                                {"t": "test:Item1", "w": 1},
+                                {"t": "test:Item2", "w": 1}
+                            ]
+                        }
+                    }
+                }
+            }
+    )
+    const reportSearch = getReportSearch(report);
+
+    test("Calculations 'all' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = '*';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item1', 'item2', 'other', 'summation']);
+    });
+
+    test("Calculations 'contributing' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'contributing';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item1', 'item2']);
+    });
+
+    test("Calculations 'summation' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'summation';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['summation']);
+    });
+
+    test("Calculations 'either' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'either';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item1', 'item2', 'summation']);
     });
 });

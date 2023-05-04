@@ -59,8 +59,7 @@ export class Menu {
         const menu = this;
         const item = $('<a></a>')
                 .attr({
-                    href: filename,
-                    download: filename})
+                    href: filename})
                 .prepend($('<input type="button">')
                         .prop("value", name)
                         .click(() => menu.close()));

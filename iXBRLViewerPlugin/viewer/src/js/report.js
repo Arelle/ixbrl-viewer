@@ -69,20 +69,32 @@ iXBRLReport.prototype._initialize = function () {
     }
 }
 
-iXBRLReport.prototype.isCalculationContributingConcept = function(c) {
-    if (!this.data.rels?.calc) return false;
-    return Boolean(Object.values(this.data.rels.calc).some(calculations => {
-        return Object.values(calculations).some(contributingItems => {
-            return contributingItems.some(i => i.t === c);
-        })
-    }));
+iXBRLReport.prototype.isCalculationContributor = function(c) {
+    if (this._calculationContributors === undefined) {
+        if (this.data.rels?.calc) {
+            this._calculationContributors = Object.values(this.data.rels.calc).flatMap(calculations => {
+                return Object.values(calculations).flatMap(contributors => {
+                    return contributors.map(c => c.t);
+                });
+            });
+        } else {
+            this._calculationContributors = [];
+        }
+    }
+    return this._calculationContributors.includes(c);
 }
 
-iXBRLReport.prototype.isCalculationSummationConcept = function(c) {
-    if (!this.data.rels?.calc) return false;
-    return Boolean(Object.values(this.data.rels.calc).some(calculations => {
-        return Object.keys(calculations).includes(c);
-    }));
+iXBRLReport.prototype.isCalculationSummation = function(c) {
+    if (this._calculationSummations === undefined) {
+        if (this.data.rels?.calc) {
+            this._calculationSummations = Object.values(this.data.rels.calc).flatMap(calculations => {
+                return Object.keys(calculations);
+            });
+        } else {
+            this._calculationSummations = [];
+        }
+    }
+    return this._calculationSummations.includes(c);
 }
 
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {

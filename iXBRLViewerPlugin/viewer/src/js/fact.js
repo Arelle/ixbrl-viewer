@@ -30,8 +30,6 @@ export class Fact {
         this._report = report;
         this.id = factId;
         this.linkedFacts = [];
-        this.isCalcItem = this._report.isCalculationContributingConcept(this.f.a.c);
-        this.isCalcSum = this._report.isCalculationSummationConcept(this.f.a.c);
     }
 
     report() {
@@ -131,6 +129,20 @@ export class Fact {
         else {
             return undefined;
         }
+    }
+
+    isCalculationContributor() {
+        if (this._isCalculationContributor === undefined) {
+            this._isCalculationContributor = this._report.isCalculationContributor(this.f.a.c);
+        }
+        return this._isCalculationContributor;
+    }
+
+    isCalculationSummation() {
+        if (this._isCalculationSummation === undefined) {
+            this._isCalculationSummation = this._report.isCalculationSummation(this.f.a.c);
+        }
+        return this._isCalculationSummation;
     }
 
     isNumeric() {

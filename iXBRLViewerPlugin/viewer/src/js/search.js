@@ -128,9 +128,9 @@ export class ReportSearch {
     calculationsFilter(s, item) {
         return (
             s.calculationsFilter === '*' ||
-            (s.calculationsFilter === 'contributing' && item.isCalcItem) ||
-            (s.calculationsFilter === 'summation' && item.isCalcSum) ||
-            (s.calculationsFilter === 'either' && (item.isCalcItem || item.isCalcSum))
+            (s.calculationsFilter === 'summation' && item.isCalculationSummation()) ||
+            (s.calculationsFilter === 'contributor' && item.isCalculationContributor()) ||
+            (s.calculationsFilter === 'summationOrContributor' && (item.isCalculationSummation() || item.isCalculationContributor()))
         );
     }
 

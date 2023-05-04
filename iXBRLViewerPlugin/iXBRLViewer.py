@@ -11,27 +11,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
+from __future__ import annotations
+import io
+import json
+import logging
+import math
+import os
+import re
+import shutil
+import sys
+import urllib.parse
+import zipfile
+from copy import deepcopy
+
+import pycountry
 from arelle import XbrlConst
 from arelle.ModelDocument import Type
-from arelle.ModelValue import QName, INVALIDixVALUE
-from copy import deepcopy
-import json
-import math
-import re
-import pycountry
-import urllib.parse
-from arelle.ValidateXbrlCalcs import inferredDecimals
 from arelle.ModelRelationshipSet import ModelRelationshipSet
-from .xhtmlserialize import XHTMLSerializer
+from arelle.ModelValue import QName, INVALIDixVALUE
+from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
-import os
-import logging
-import io
-import shutil
-import zipfile
-from arelle.PythonUtil import attrdict
+from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
+from .xhtmlserialize import XHTMLSerializer
+
+
+
 
 WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
 

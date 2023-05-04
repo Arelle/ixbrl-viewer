@@ -16,18 +16,15 @@ import { ReportSearch } from "./search.js"
 import {iXBRLReport} from "./report";
 
 const testReportData = {
-    "concepts": {
-        "us-gaap:Cash": {
-            "labels": {
-                "ns0": {
-                    "en-us": "Cash"
-                }
-            }
-        }
-    },
-    "languages": {
-        "en-us": "En (US)"
-    },
+    "concepts": {},
+    "languages": {},
+    "facts": {},
+    "prefixes": {},
+    "roles": {},
+    "roleDefs": {},
+    "rels": {}
+};
+
 function getReportSearch(report) {
     const reportSearch = new ReportSearch(report);
     const searchIndex = reportSearch.buildSearchIndex(() => {});
@@ -69,15 +66,6 @@ function createNumericFact(id, concept, unit, period, value) {
         "value": value
     });
 }
-
-    "facts": {},
-    "prefixes": {
-        "us-gaap": "http://fasb.org/us-gaap/2023",
-    },
-    "roles": {},
-    "roleDefs": {},
-    "rels": {}
-};
 
 function testReport(ixData, testData) {
     // Deep copy of standing data

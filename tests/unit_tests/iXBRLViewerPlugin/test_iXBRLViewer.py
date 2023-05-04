@@ -294,7 +294,7 @@ class TestIXBRLViewer(unittest.TestCase):
 
         self.modelDocument = Mock(
             xmlDocument=etree.ElementTree(root),
-            filepath=''
+            filepath='c.xml'
         )
 
         self.modelDocumentInlineSet = Mock(
@@ -310,6 +310,7 @@ class TestIXBRLViewer(unittest.TestCase):
                     objectIndex=1
                 ): []
             },
+            filepath=self.modelDocument.filepath,
             type=Type.INLINEXBRLDOCUMENTSET
         )
 

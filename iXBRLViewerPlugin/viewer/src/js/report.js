@@ -72,29 +72,29 @@ iXBRLReport.prototype._initialize = function () {
 iXBRLReport.prototype.isCalculationContributor = function(c) {
     if (this._calculationContributors === undefined) {
         if (this.data.rels?.calc) {
-            this._calculationContributors = Object.values(this.data.rels.calc).flatMap(calculations => {
+            this._calculationContributors = new Set(Object.values(this.data.rels.calc).flatMap(calculations => {
                 return Object.values(calculations).flatMap(contributors => {
                     return contributors.map(c => c.t);
                 });
-            });
+            }));
         } else {
             this._calculationContributors = [];
         }
     }
-    return this._calculationContributors.includes(c);
+    return this._calculationContributors.has(c);
 }
 
 iXBRLReport.prototype.isCalculationSummation = function(c) {
     if (this._calculationSummations === undefined) {
         if (this.data.rels?.calc) {
-            this._calculationSummations = Object.values(this.data.rels.calc).flatMap(calculations => {
+            this._calculationSummations = new Set(Object.values(this.data.rels.calc).flatMap(calculations => {
                 return Object.keys(calculations);
-            });
+            }));
         } else {
             this._calculationSummations = [];
         }
     }
-    return this._calculationSummations.includes(c);
+    return this._calculationSummations.has(c);
 }
 
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {

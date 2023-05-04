@@ -182,9 +182,9 @@ describe("Search calculation filter", () => {
         expect(results).toEqual(['item1', 'item2', 'other', 'summation']);
     });
 
-    test("Calculations 'contributing' filter works", () => {
+    test("Calculations 'contributor' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'contributing';
+        spec.calculationsFilter = 'contributor';
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2']);
     });
@@ -196,9 +196,9 @@ describe("Search calculation filter", () => {
         expect(results).toEqual(['summation']);
     });
 
-    test("Calculations 'either' filter works", () => {
+    test("Calculations 'summationOrContributor' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'either';
+        spec.calculationsFilter = 'summationOrContributor';
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2', 'summation']);
     });

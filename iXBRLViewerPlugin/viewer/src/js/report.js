@@ -70,7 +70,7 @@ iXBRLReport.prototype._initialize = function () {
 }
 
 iXBRLReport.prototype.isCalculationContributingConcept = function(c) {
-    if (this.data.rels.calc === undefined) return false;
+    if (!this.data.rels?.calc) return false;
     return Boolean(Object.values(this.data.rels.calc).some(calculations => {
         return Object.values(calculations).some(contributingItems => {
             return contributingItems.some(i => i.t === c);
@@ -79,7 +79,7 @@ iXBRLReport.prototype.isCalculationContributingConcept = function(c) {
 }
 
 iXBRLReport.prototype.isCalculationSummationConcept = function(c) {
-    if (this.data.rels.calc === undefined) return false;
+    if (!this.data.rels?.calc) return false;
     return Boolean(Object.values(this.data.rels.calc).some(calculations => {
         return Object.keys(calculations).includes(c);
     }));

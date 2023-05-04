@@ -35,6 +35,41 @@ function getReportSearch(report) {
     return reportSearch;
 }
 
+function createSimpleConcept(name, label) {
+    return {
+        [name]: {
+            "labels": {
+                "ns0": {
+                    "en-us": label
+                }
+            }
+        }
+    };
+}
+
+function createSimpleFact(id, concept, options=null) {
+    options = options || {};
+    return {
+        [id]: {
+            "a": {
+                "c": concept,
+                "u": options["unit"],
+                "p": options["period"],
+            },
+            "d": options["decimals"],
+            "v": options["value"]
+        }
+    };
+}
+
+function createNumericFact(id, concept, unit, period, value) {
+    return createSimpleFact(id, concept, {
+        "unit": unit,
+        "period": period,
+        "value": value
+    });
+}
+
     "facts": {},
     "prefixes": {
         "us-gaap": "http://fasb.org/us-gaap/2023",
@@ -44,10 +79,12 @@ function getReportSearch(report) {
     "rels": {}
 };
 
-function testReport(facts, ixData) {
+function testReport(ixData, testData) {
     // Deep copy of standing data
-    const data = JSON.parse(JSON.stringify(testReportData));
-    data.facts = facts;
+    const data = {
+        ...JSON.parse(JSON.stringify(testReportData)),
+        ...testData
+    }
     const report = new iXBRLReport(data);
     report.setIXNodeMap(ixData);
     return report;
@@ -64,50 +101,23 @@ function testSearchSpec(searchString) {
     return spec;
 }
 
-describe("search negative filter", () => {
-    const positive = {
-        "d": -3,
-        "v": 1000,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-01",
-        }};
-    const negative = {
-        "d": -3,
-        "v": -1000,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-01",
-        }};
-    const zero = {
-        "d": 0,
-        "v": 0,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-03",
-        }};
-    const text = {
-        "d": -3,
-        "v": "someText",
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": undefined,
-            "p": "2018-01-01/2019-01-03",
-        }};
-    const undef = {
-        "d": -3,
-        "v": undefined,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-03",
-        }};
+describe("Search fact value filter", () => {
+    const cashConcept = 'us-gaap:Cash';
+    const cashUnit = 'iso4217:USD';
     const report = testReport(
-            {'positive': positive, 'negative': negative, 'zero': zero, 'text': text, 'undefined': undef},
-            {'positive': {}, 'negative': {}, 'zero': {}, 'text': {}, 'undefined': {}}
+            {'positive': {}, 'negative': {}, 'zero': {}, 'text': {}, 'undefined': {}},
+            {
+                'concepts': {
+                    ...createSimpleConcept(cashConcept, 'Cash')
+                },
+                'facts': {
+                    ...createNumericFact('positive', cashConcept, cashUnit, '2018-01-01/2019-01-01', 1000 ),
+                    ...createNumericFact('negative', cashConcept, cashUnit, '2018-01-01/2019-01-01', -1000 ),
+                    ...createNumericFact('zero', cashConcept, cashUnit, '2018-01-01/2019-01-03', 0 ),
+                    ...createNumericFact('text', cashConcept, undefined, '2018-01-01/2019-01-03', 'someText' ),
+                    ...createNumericFact('undefined', cashConcept, cashUnit, '2018-01-01/2019-01-03', undefined ),
+                }
+            },
     )
     const reportSearch = getReportSearch(report);
 

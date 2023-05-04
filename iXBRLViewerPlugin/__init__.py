@@ -22,6 +22,10 @@ from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
 from arelle.webserver.bottle import static_file
 
+from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
+from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
+
+
 #
 # GUI operation:
 #
@@ -44,8 +48,6 @@ from arelle.webserver.bottle import static_file
 #
 #     In the zip, the iXBRLViewer files are in a subdirectory VIEWER_BASENAME_SUFFIX to separate them from possible EdgarRenderer and other output files
 #
-from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
-from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
 
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):

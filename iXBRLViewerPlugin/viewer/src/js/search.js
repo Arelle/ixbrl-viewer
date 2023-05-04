@@ -140,9 +140,9 @@ export class ReportSearch {
         if (!this.ready) {
             return;
         }
-        var rr = this._searchIndex.search(s.searchString);
-        var results = []
-        var searchIndex = this;
+        const rr = this._searchIndex.search(s.searchString);
+        const results = []
+        const searchIndex = this;
 
         const filters = [
             this.visibilityFilter,
@@ -153,9 +153,8 @@ export class ReportSearch {
         ];
 
         rr.forEach((r,i) => {
-                var item = searchIndex._report.getItemById(r.ref);
-                if (filters.every(f => f(s, item)))
-                {
+                const item = searchIndex._report.getItemById(r.ref);
+                if (filters.every(f => f(s, item))) {
                     results.push({
                         "fact": item,
                         "score": r.score

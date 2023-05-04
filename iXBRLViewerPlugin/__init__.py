@@ -172,7 +172,7 @@ class iXBRLViewerLocalViewer(LocalViewer):
         if file == 'ixbrlviewer.js':
             return static_file('ixbrlviewer.js', os.path.dirname(DEFAULT_VIEWER_PATH))
         elif _report.isnumeric():  # in reportsFolder folder
-            # check if file is in the current or parent directory (may bve
+            # check if file is in the current or parent directory
             _fileDir = self.reportsFolders[int(_report)]
             _fileExists = False
             if os.path.exists(os.path.join(_fileDir, _file)):

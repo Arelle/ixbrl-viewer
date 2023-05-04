@@ -279,6 +279,7 @@ Inspector.prototype.searchSpec = function () {
     spec.periodFilter = $('#search-filter-period').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
+    spec.calculationsFilter = $('#search-filter-calculations').val();
     return spec;
 }
 
@@ -301,6 +302,7 @@ Inspector.prototype.resetSearchFilters = function () {
     $("#search-filter-period").val("*");
     $("#search-filter-concept-type").val("*");
     $("#search-filter-fact-value").val("*");
+    $("#search-filter-calculations").val("*");
     $("#search-hidden-fact-filter").prop("checked", true);
     $("#search-visible-fact-filter").prop("checked", true);
     this.search();

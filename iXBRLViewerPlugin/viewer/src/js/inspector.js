@@ -289,7 +289,7 @@ Inspector.prototype.setupSearchControls = function (viewer) {
     $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
     $("#search-filter-period")
         .empty()
-        .append($('<option value="*">ALL</option>'));
+        .append($('<option value="*">-</option>'));
     for (const key in this._search.periods) {
         $("<option>")
             .attr("value", key)

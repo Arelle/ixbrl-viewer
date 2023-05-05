@@ -78,7 +78,7 @@ iXBRLReport.prototype.isCalculationContributor = function(c) {
                 });
             }));
         } else {
-            this._calculationContributors = [];
+            this._calculationContributors = new Set();
         }
     }
     return this._calculationContributors.has(c);
@@ -91,7 +91,7 @@ iXBRLReport.prototype.isCalculationSummation = function(c) {
                 return Object.keys(calculations);
             }));
         } else {
-            this._calculationSummations = [];
+            this._calculationSummations = new Set();
         }
     }
     return this._calculationSummations.has(c);

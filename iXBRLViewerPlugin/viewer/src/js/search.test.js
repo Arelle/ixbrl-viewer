@@ -202,4 +202,23 @@ describe("Search calculation filter", () => {
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2', 'summation']);
     });
+    const emptyReport = testReport(
+            {'fact': {}},
+            {
+                "concepts": {
+                    ...createSimpleConcept("test:Concept", "Concept"),
+                },
+                "facts": {
+                    ...createSimpleFact("fact", "test:Fact"),
+                },
+            },
+    )
+    const emptyReportSearch = getReportSearch(emptyReport);
+
+    test("Calculations filter works on empty report", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'summationOrContributor';
+        const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual([]);
+    });
 });

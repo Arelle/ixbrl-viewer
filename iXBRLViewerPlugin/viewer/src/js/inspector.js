@@ -338,6 +338,7 @@ Inspector.prototype.search = function() {
         $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
         overlay.show();
     }
+    $("#matching-concepts-count").text(results.length);
     /* Don't highlight search results if there's no search string */
     if (spec.searchString != "") {
         viewer.highlightRelatedFacts($.map(results, r =>  r.fact ));

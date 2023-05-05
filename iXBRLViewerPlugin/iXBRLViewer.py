@@ -397,7 +397,6 @@ class IXBRLViewerBuilder:
         else:
             xmlDocument = deepcopy(dts.modelDocument.xmlDocument)
             iv.addFile(iXBRLViewerFile('xbrlviewer.html', xmlDocument))
-        print(self.dts.modelDocument)
         if os.path.dirname(self.dts.modelDocument.filepath).endswith('.zip'):
             filingDocZipPath = os.path.dirname(self.dts.modelDocument.filepath)
             filingDocZipName = os.path.basename(filingDocZipPath)

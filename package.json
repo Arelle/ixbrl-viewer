@@ -8,10 +8,12 @@
   },
   "scripts": {
     "test": "jest --roots=iXBRLViewerPlugin --env=jsdom",
+    "test:puppeteer": "jest --roots=tests/puppeteer",
     "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
     "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
-    "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js"
+    "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js",
+    "puppeteerServe": "npm run prod && ./tests/puppeteer/tools/generate.sh && npx http-server ."
   },
   "repository": {
     "type": "git",
@@ -57,8 +59,11 @@
   },
   "devDependencies": {
     "decimal.js": "^10.4.1",
+    "http-server": "^14.1.1",
     "i18next-parser": "^8.0.0",
-    "jest-environment-jsdom": "^29.5.0"
+    "jest-environment-jsdom": "^29.5.0",
+    "puppeteer": "20.2.0",
+    "puppeteer-screen-recorder": "2.1.2"
   },
   "license": "Apache-2.0"
 }

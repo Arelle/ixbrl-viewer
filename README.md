@@ -194,3 +194,26 @@ Run the following command to run javascript unit tests: `npm run test`
 In order to run the python unit tests make sure that you have pip installed requirements-dev.txt.
 
 Run the following command to run python unit tests: `nose2`
+
+## Running Puppeteer Tests
+All commands should be run from repository root
+1. Install the npm requirements(instructions under [Building the javascript locally](#user-content-building-the-javascript-locally)).
+2. Install Arelle
+    ```bash
+    pip install arelle-release .
+    ```
+3. [Terminal 1] Start the puppeteer serve
+    ```bash
+    npm run puppeteerServe 
+    ```
+    * This command generates the `ixbrlviewer.js`, uses Arelle to generate several test files, then serves the files via a nodejs http-server.
+    * Currently changes to application code require restarting this step to take effect. 
+4. Start the puppeteer tests
+    * Terminal:
+       ```bash
+       npm run test:puppeteer
+       ```
+   * IDE:
+     * Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
+     ![ixbrl-viewer](tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
+     * Debug runs with breakpoints are also typically supported. 

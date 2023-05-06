@@ -55,6 +55,17 @@ export class Menu {
         item.appendTo(this._elt.find(".content"));
     }
 
+    addDownloadButton(name, filename) {
+        const menu = this;
+        const item = $('<a></a>')
+                .attr({
+                    href: filename})
+                .prepend($('<input type="button">')
+                        .prop("value", name)
+                        .click(() => menu.close()));
+        this._add(item);
+    }
+
     addCheckboxItem(name, callback, itemName, after, onByDefault) {
         const menu = this;
         const item = $("<label></label>")

@@ -44,7 +44,7 @@ iXBRLReport.prototype._initialize = function () {
     var fnorder = Object.keys(this._ixNodeMap).filter((id) => this._ixNodeMap[id].footnote);
     fnorder.sort((a,b) => this._ixNodeMap[a].docOrderindex - this._ixNodeMap[b].docOrderindex);
 
-    // Create Fact objects for all facts.  
+    // Create Fact objects for all facts.
     for (const id in this.data.facts) {
         this._items[id] = new Fact(this, id);
     }
@@ -172,6 +172,11 @@ iXBRLReport.prototype.facts = function() {
     $.each(this.data.facts, (id, f) => allItems.push(this.getItemById(id)));
     return allItems;
 }
+
+iXBRLReport.prototype.filingDocuments = function() {
+    return this.data.filingDocuments;
+}
+
 
 iXBRLReport.prototype.prefixMap = function() {
     return this.data.prefixes;

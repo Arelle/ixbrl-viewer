@@ -131,6 +131,20 @@ export class Fact {
         }
     }
 
+    isCalculationContributor() {
+        if (this._isCalculationContributor === undefined) {
+            this._isCalculationContributor = this._report.isCalculationContributor(this.f.a.c);
+        }
+        return this._isCalculationContributor;
+    }
+
+    isCalculationSummation() {
+        if (this._isCalculationSummation === undefined) {
+            this._isCalculationSummation = this._report.isCalculationSummation(this.f.a.c);
+        }
+        return this._isCalculationSummation;
+    }
+
     isNumeric() {
         return this.f.a.u !== undefined;
     }

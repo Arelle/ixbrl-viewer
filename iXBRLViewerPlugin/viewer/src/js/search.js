@@ -99,21 +99,62 @@ export class ReportSearch {
         doneCallback();
     }
 
+    visibilityFilter(s, item) {
+        return item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts;
+    }
+
+    periodFilter(s, item) {
+        return (
+            s.periodFilter === '*' ||
+            s.periodFilter === item.period().key()
+        );
+    }
+
+    conceptTypeFilter(s, item) {
+        return (
+            s.conceptTypeFilter === '*' ||
+            s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')
+        );
+    }
+
+    factValueFilter(s, item) {
+        return (
+            s.factValueFilter === '*' ||
+            (s.factValueFilter === 'positive' && item.isPositive()) ||
+            (s.factValueFilter === 'negative' && item.isNegative())
+        );
+    }
+
+    calculationsFilter(s, item) {
+        return (
+            s.calculationsFilter === '*' ||
+            (s.calculationsFilter === 'summation' && item.isCalculationSummation()) ||
+            (s.calculationsFilter === 'contributor' && item.isCalculationContributor()) ||
+            (s.calculationsFilter === 'summationOrContributor' && (item.isCalculationSummation() || item.isCalculationContributor()))
+        );
+    }
+
+
+
     search(s) {
         if (!this.ready) {
             return;
         }
-        var rr = this._searchIndex.search(s.searchString);
-        var results = []
-        var searchIndex = this;
+        const rr = this._searchIndex.search(s.searchString);
+        const results = []
+        const searchIndex = this;
+
+        const filters = [
+            this.visibilityFilter,
+            this.periodFilter,
+            this.conceptTypeFilter,
+            this.factValueFilter,
+            this.calculationsFilter
+        ];
 
         rr.forEach((r,i) => {
-                var item = searchIndex._report.getItemById(r.ref);
-                if ((item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
-                    (s.periodFilter === '*' || item.period().key() === s.periodFilter) &&
-                    (s.conceptTypeFilter === '*' || s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')) &&
-                    (s.factValueFilter === '*' || (s.factValueFilter === 'positive' && item.isPositive()) || (s.factValueFilter === 'negative' && item.isNegative())))
-                {
+                const item = searchIndex._report.getItemById(r.ref);
+                if (filters.every(f => f(s, item))) {
                     results.push({
                         "fact": item,
                         "score": r.score

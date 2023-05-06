@@ -16,37 +16,69 @@ import { ReportSearch } from "./search.js"
 import {iXBRLReport} from "./report";
 
 const testReportData = {
-    "concepts": {
-        "us-gaap:Cash": {
-            "labels": {
-                "ns0": {
-                    "en-us": "Cash"
-                }
-            }
-        }
-    },
-    "languages": {
-        "en-us": "En (US)"
-    },
+    "concepts": {},
+    "languages": {},
     "facts": {},
-    "prefixes": {
-        "us-gaap": "http://fasb.org/us-gaap/2023",
-    },
+    "prefixes": {},
     "roles": {},
     "roleDefs": {},
     "rels": {}
 };
 
-function testReport(facts, ixData) {
+function getReportSearch(report) {
+    const reportSearch = new ReportSearch(report);
+    const searchIndex = reportSearch.buildSearchIndex(() => {});
+    for (const _ of searchIndex) {}
+    return reportSearch;
+}
+
+function createSimpleConcept(name, label) {
+    return {
+        [name]: {
+            "labels": {
+                "ns0": {
+                    "en-us": label
+                }
+            }
+        }
+    };
+}
+
+function createSimpleFact(id, concept, options=null) {
+    options = options || {};
+    return {
+        [id]: {
+            "a": {
+                "c": concept,
+                "u": options["unit"],
+                "p": options["period"],
+            },
+            "d": options["decimals"],
+            "v": options["value"]
+        }
+    };
+}
+
+function createNumericFact(id, concept, unit, period, value) {
+    return createSimpleFact(id, concept, {
+        "unit": unit,
+        "period": period,
+        "value": value
+    });
+}
+
+function testReport(ixData, testData) {
     // Deep copy of standing data
-    const data = JSON.parse(JSON.stringify(testReportData));
-    data.facts = facts;
+    const data = {
+        ...JSON.parse(JSON.stringify(testReportData)),
+        ...testData
+    }
     const report = new iXBRLReport(data);
     report.setIXNodeMap(ixData);
     return report;
 }
 
-function testSearchSpec(searchString) {
+function testSearchSpec(searchString='') {
     const spec = {};
     spec.searchString = searchString;
     spec.showVisibleFacts = true;
@@ -54,57 +86,29 @@ function testSearchSpec(searchString) {
     spec.periodFilter = '*';
     spec.conceptTypeFilter = '*';
     spec.factValueFilter = '*';
+    spec.calculationsFilter = "*";
     return spec;
 }
 
-describe("search negative filter", () => {
-    const positive = {
-        "d": -3,
-        "v": 1000,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-01",
-        }};
-    const negative = {
-        "d": -3,
-        "v": -1000,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-01",
-        }};
-    const zero = {
-        "d": 0,
-        "v": 0,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-03",
-        }};
-    const text = {
-        "d": -3,
-        "v": "someText",
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": undefined,
-            "p": "2018-01-01/2019-01-03",
-        }};
-    const undef = {
-        "d": -3,
-        "v": undefined,
-        "a": {
-            "c": "us-gaap:Cash",
-            "u": "iso4217:USD",
-            "p": "2018-01-01/2019-01-03",
-        }};
+describe("Search fact value filter", () => {
+    const cashConcept = 'us-gaap:Cash';
+    const cashUnit = 'iso4217:USD';
     const report = testReport(
-            {'positive': positive, 'negative': negative, 'zero': zero, 'text': text, 'undefined': undef},
-            {'positive': {}, 'negative': {}, 'zero': {}, 'text': {}, 'undefined': {}}
+            {'positive': {}, 'negative': {}, 'zero': {}, 'text': {}, 'undefined': {}},
+            {
+                'concepts': {
+                    ...createSimpleConcept(cashConcept, 'Cash')
+                },
+                'facts': {
+                    ...createNumericFact('positive', cashConcept, cashUnit, '2018-01-01/2019-01-01', 1000 ),
+                    ...createNumericFact('negative', cashConcept, cashUnit, '2018-01-01/2019-01-01', -1000 ),
+                    ...createNumericFact('zero', cashConcept, cashUnit, '2018-01-01/2019-01-03', 0 ),
+                    ...createNumericFact('text', cashConcept, undefined, '2018-01-01/2019-01-03', 'someText' ),
+                    ...createNumericFact('undefined', cashConcept, cashUnit, '2018-01-01/2019-01-03', undefined ),
+                }
+            },
     )
-    const reportSearch = new ReportSearch(report);
-    const searchIndex = reportSearch.buildSearchIndex(() => {});
-    for (const _ of searchIndex) {}
+    const reportSearch = getReportSearch(report);
 
     test("Fact Value Negative filter works", () => {
         const spec = testSearchSpec('Cash');
@@ -138,5 +142,83 @@ describe("search negative filter", () => {
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"]["id"]).toEqual("positive")
+    });
+});
+
+describe("Search calculation filter", () => {
+    const report = testReport(
+            {'summation': {}, 'item1': {}, 'item2': {}, 'other': {}},
+            {
+                "concepts": {
+                    ...createSimpleConcept("test:Summation", "Summation"),
+                    ...createSimpleConcept("test:Item1", "Item1"),
+                    ...createSimpleConcept("test:Item2", "Item2"),
+                    ...createSimpleConcept("test:Other", "Other"),
+                },
+                "facts": {
+                    ...createSimpleFact("summation", "test:Summation"),
+                    ...createSimpleFact("item1", "test:Item1"),
+                    ...createSimpleFact("item2", "test:Item2"),
+                    ...createSimpleFact("other", "test:Other"),
+                },
+                "rels": {
+                    "calc": {
+                        "ns": {
+                            "test:Summation": [
+                                {"t": "test:Item1", "w": 1},
+                                {"t": "test:Item2", "w": 1}
+                            ]
+                        }
+                    }
+                }
+            }
+    )
+    const reportSearch = getReportSearch(report);
+
+    test("Calculations 'all' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = '*';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item1', 'item2', 'other', 'summation']);
+    });
+
+    test("Calculations 'contributor' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'contributor';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item1', 'item2']);
+    });
+
+    test("Calculations 'summation' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'summation';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['summation']);
+    });
+
+    test("Calculations 'summationOrContributor' filter works", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'summationOrContributor';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item1', 'item2', 'summation']);
+    });
+    const emptyReport = testReport(
+            {'fact': {}},
+            {
+                "concepts": {
+                    ...createSimpleConcept("test:Concept", "Concept"),
+                },
+                "facts": {
+                    ...createSimpleFact("fact", "test:Fact"),
+                },
+            },
+    )
+    const emptyReportSearch = getReportSearch(emptyReport);
+
+    test("Calculations filter works on empty report", () => {
+        const spec = testSearchSpec();
+        spec.calculationsFilter = 'summationOrContributor';
+        const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual([]);
     });
 });

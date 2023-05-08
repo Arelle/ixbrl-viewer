@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "decimal.js": "^10.4.1",
-    "i18next-parser": "^7.0.0"
+    "i18next-parser": "^8.0.0"
   },
   "license": "Apache-2.0"
 }

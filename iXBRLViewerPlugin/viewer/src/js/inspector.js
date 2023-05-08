@@ -279,6 +279,7 @@ Inspector.prototype.searchSpec = function () {
     spec.searchString = $('#ixbrl-search').val();
     spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
     spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
+    spec.namespacesFilter = $('#search-filter-namespaces').val();
     spec.periodFilter = $('#search-filter-period').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
@@ -299,6 +300,12 @@ Inspector.prototype.setupSearchControls = function (viewer) {
             .text(this._search.periods[key])
             .appendTo('#search-filter-period');
     }
+    this._report.getUsedPrefixes().forEach(prefix => {
+        $("<option>")
+            .attr("value", prefix)
+            .text(`${prefix} (${this._report.prefixMap()[prefix]})`)
+            .appendTo('#search-filter-namespaces');
+    });
 }
 
 Inspector.prototype.resetSearchFilters = function () {
@@ -308,6 +315,7 @@ Inspector.prototype.resetSearchFilters = function () {
     $("#search-filter-calculations").val("*");
     $("#search-hidden-fact-filter").prop("checked", true);
     $("#search-visible-fact-filter").prop("checked", true);
+    $("#search-filter-namespaces option:selected").prop("selected", false);
     this.search();
 }
 

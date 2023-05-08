@@ -131,6 +131,10 @@ export class Fact {
         }
     }
 
+    getConceptPrefix() {
+        return this.conceptName().split(':')[0];
+    }
+
     isCalculationContributor() {
         if (this._isCalculationContributor === undefined) {
             this._isCalculationContributor = this._report.isCalculationContributor(this.f.a.c);

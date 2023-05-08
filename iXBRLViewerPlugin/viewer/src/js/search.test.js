@@ -83,6 +83,7 @@ function testSearchSpec(searchString='') {
     spec.searchString = searchString;
     spec.showVisibleFacts = true;
     spec.showHiddenFacts = true;
+    spec.namespacesFilter = [];
     spec.periodFilter = '*';
     spec.conceptTypeFilter = '*';
     spec.factValueFilter = '*';
@@ -220,5 +221,69 @@ describe("Search calculation filter", () => {
         spec.calculationsFilter = 'summationOrContributor';
         const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual([]);
+    });
+});
+
+describe("Search namespaces filter", () => {
+    const report = testReport(
+            {'itemA1': {}, 'itemA2': {}, 'itemB1': {}, 'itemC1': {}},
+            {
+                "concepts": {
+                    ...createSimpleConcept("a:ItemA1", "ItemA1"),
+                    ...createSimpleConcept("a:ItemA2", "ItemA2"),
+                    ...createSimpleConcept("b:ItemB1", "ItemB1"),
+                    ...createSimpleConcept("c:ItemC1", "ItemC1"),
+                },
+                "facts": {
+                    ...createSimpleFact("itemA1", "a:ItemA1"),
+                    ...createSimpleFact("itemA2", "a:ItemA2"),
+                    ...createSimpleFact("itemB1", "b:ItemB1"),
+                    ...createSimpleFact("itemC1", "c:ItemC1"),
+                },
+                "prefixes": {
+                    "a": "http://test.com/a",
+                    "b": "http://test.com/b",
+                    "c": "http://test.com/c",
+                    "d": "http://test.com/d",
+                }
+            }
+    )
+    const reportSearch = getReportSearch(report)
+
+    test("Namespaces filter only shows used prefixes", () => {
+        const prefixes = Array.from(report.getUsedPrefixes()).sort();
+        expect(prefixes).toEqual(['a', 'b', 'c']);
+    });
+
+    test("Namespaces filter works without selection", () => {
+        const spec = testSearchSpec();
+        spec.namespacesFilter = [];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['itemA1', 'itemA2', 'itemB1', 'itemC1']);
+    });
+
+    test("Namespaces filter works with single selection", () => {
+        const spec = testSearchSpec();
+        spec.namespacesFilter = ['a'];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['itemA1', 'itemA2']);
+    });
+
+    test("Namespaces filter works with multiple selections", () => {
+        const spec = testSearchSpec();
+        spec.namespacesFilter = ['a', 'b'];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['itemA1', 'itemA2', 'itemB1']);
+    });
+
+    test("Namespaces filter works with all selections", () => {
+        const spec1 = testSearchSpec();
+        spec1.namespacesFilter = Array.from(report.getUsedPrefixes());
+        const results1 = reportSearch.search(spec1).map(r => r.fact.id).sort();
+        const spec2 = testSearchSpec();
+        spec2.namespacesFilter = [];
+        const results2 = reportSearch.search(spec2).map(r => r.fact.id).sort();
+        expect(results1).toEqual(results2);
+        expect(results1).toEqual(['itemA1', 'itemA2', 'itemB1', 'itemC1'])
     });
 });

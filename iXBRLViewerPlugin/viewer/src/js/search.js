@@ -134,7 +134,12 @@ export class ReportSearch {
         );
     }
 
-
+    namespacesFilter(s, item) {
+        return (
+            s.namespacesFilter.length === 0 ||
+            s.namespacesFilter.some(p => item.getConceptPrefix() === p)
+        );
+    }
 
     search(s) {
         if (!this.ready) {
@@ -149,7 +154,8 @@ export class ReportSearch {
             this.periodFilter,
             this.conceptTypeFilter,
             this.factValueFilter,
-            this.calculationsFilter
+            this.calculationsFilter,
+            this.namespacesFilter,
         ];
 
         rr.forEach((r,i) => {

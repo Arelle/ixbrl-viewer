@@ -182,6 +182,14 @@ iXBRLReport.prototype.prefixMap = function() {
     return this.data.prefixes;
 }
 
+iXBRLReport.prototype.getUsedPrefixes = function() {
+    if (this._usedPrefixes === undefined) {
+        this._usedPrefixes = new Set(Object.values(this._items)
+                .map(f => f.getConceptPrefix()));
+    }
+    return this._usedPrefixes;
+}
+
 iXBRLReport.prototype.roleMap = function() {
     return this.data.roles;
 }

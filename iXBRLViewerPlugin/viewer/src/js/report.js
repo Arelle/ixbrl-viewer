@@ -185,7 +185,7 @@ iXBRLReport.prototype.prefixMap = function() {
 iXBRLReport.prototype.getUsedPrefixes = function() {
     if (this._usedPrefixes === undefined) {
         this._usedPrefixes = new Set(Object.values(this._items)
-                .map(f => f.getPrefix()));
+                .map(f => f.getConceptPrefix()));
     }
     return this._usedPrefixes;
 }

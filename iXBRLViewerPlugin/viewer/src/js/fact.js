@@ -131,7 +131,7 @@ export class Fact {
         }
     }
 
-    getPrefix() {
+    getConceptPrefix() {
         return this.conceptName().split(':')[0];
     }
 

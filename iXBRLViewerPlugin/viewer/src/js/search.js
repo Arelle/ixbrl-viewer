@@ -137,7 +137,7 @@ export class ReportSearch {
     namespacesFilter(s, item) {
         return (
             s.namespacesFilter.length === 0 ||
-            s.namespacesFilter.some(p => item.getPrefix() === p)
+            s.namespacesFilter.some(p => item.getConceptPrefix() === p)
         );
     }
 

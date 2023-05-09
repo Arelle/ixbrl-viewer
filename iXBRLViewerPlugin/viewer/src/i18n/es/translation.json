@@ -64,6 +64,15 @@
       "fact": {
         "header": "",
         "title": ""
+      },
+      "tag": {
+        "colDimensions": "",
+        "colMembers": "",
+        "colNamespace": "",
+        "colPrimaryItems": "",
+        "colTotal": "",
+        "header": "",
+        "rowTotal": ""
       }
     },
     "summation": "",

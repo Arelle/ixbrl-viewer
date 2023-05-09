@@ -64,6 +64,15 @@
       "fact": {
         "header": "Fact Summary",
         "title": "Total Facts:"
+      },
+      "tag": {
+        "colDimensions": "Dimensions",
+        "colMembers": "Members",
+        "colNamespace": "Namespace",
+        "colPrimaryItems": "Primary Items",
+        "colTotal": "Total",
+        "header": "Tag Summary",
+        "rowTotal": "Total"
       }
     },
     "summation": "Summation",

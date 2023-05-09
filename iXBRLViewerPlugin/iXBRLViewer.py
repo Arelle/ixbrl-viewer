@@ -179,7 +179,7 @@ class IXBRLViewerBuilder:
             if concept.isEnumeration:
                 conceptData["e"] = True
 
-            if concept.type.isTextBlock:
+            if concept.type is not None and concept.type.isTextBlock:
                 conceptData['t'] = True
 
             self.taxonomyData["concepts"][conceptName] = conceptData

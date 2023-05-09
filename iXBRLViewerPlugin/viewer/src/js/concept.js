@@ -66,4 +66,8 @@ export class Concept {
     isTextBlock() {
         return Boolean(this._c.t);
     }
+
+    typedDomainElement() {
+        return this._c.td
+    }
 }

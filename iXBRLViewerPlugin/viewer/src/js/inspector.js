@@ -30,7 +30,7 @@ import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
-import { DocumentSummary } from './summary.js';
+import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -366,6 +366,7 @@ Inspector.prototype.updateCalculation = function (fact, elr) {
 Inspector.prototype.createSummary = function () {
     const summaryDom = $("#inspector .summary .body");
     this._populateFactSummary(summaryDom);
+    this._populateTagSummary(summaryDom);
 }
 
 Inspector.prototype._populateFactSummary = function(summaryDom) {
@@ -373,6 +374,56 @@ Inspector.prototype._populateFactSummary = function(summaryDom) {
     $("<span></span>")
             .text(totalFacts)
             .appendTo(summaryDom.find(".total-facts-value"));
+}
+
+Inspector.prototype._populateTagSummary = function (summaryDom) {
+    const summaryTagsTableBody = summaryDom.find(".tag-summary-table-body");
+
+    const tagCounts = this.summary.tagCounts();
+
+    let totalPrimaryItemTags = 0;
+    let totalDimensionTags = 0;
+    let totalMemberTags = 0;
+    let totalTags = 0;
+    for (const counts of tagCounts.values()) {
+        totalPrimaryItemTags += counts[PRIMARY_ITEMS_KEY];
+        totalDimensionTags += counts[DIMENSIONS_KEY];
+        totalMemberTags += counts[MEMBERS_KEY];
+        totalTags += counts[TOTAL_KEY];
+    }
+
+    function insertTagCount(row, count, total) {
+        let percent = 0;
+        if (total > 0) {
+            percent = count / total;
+        }
+        let formattedPercent = percent.toLocaleString(undefined, {
+            style: "percent",
+        });
+        formattedPercent = ` (${formattedPercent})`;
+
+        $("<td></td>")
+                .text(count)
+                .append($("<sup></sup>").text(formattedPercent))
+                .appendTo(row);
+    }
+
+    const sortedPrefixCounts = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    for (const [prefix, counts] of sortedPrefixCounts) {
+        const countRow = $("<tr></tr>").appendTo(summaryTagsTableBody);
+        countRow.append($("<th></th>").attr("scope", "row").text(prefix));
+        insertTagCount(countRow, counts[PRIMARY_ITEMS_KEY], totalPrimaryItemTags);
+        insertTagCount(countRow, counts[DIMENSIONS_KEY], totalDimensionTags);
+        insertTagCount(countRow, counts[MEMBERS_KEY], totalMemberTags);
+        insertTagCount(countRow, counts[TOTAL_KEY], totalTags);
+    }
+
+    const summaryTagsTableFooterRow = summaryDom.find(".tag-summary-table-footer-row");
+
+    insertTagCount(summaryTagsTableFooterRow, totalPrimaryItemTags, totalPrimaryItemTags);
+    insertTagCount(summaryTagsTableFooterRow, totalDimensionTags, totalDimensionTags);
+    insertTagCount(summaryTagsTableFooterRow, totalMemberTags, totalMemberTags);
+    insertTagCount(summaryTagsTableFooterRow, totalTags, totalTags);
 }
 
 Inspector.prototype.createOutline = function () {

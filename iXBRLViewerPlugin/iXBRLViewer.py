@@ -182,6 +182,13 @@ class IXBRLViewerBuilder:
             if concept.type is not None and concept.type.isTextBlock:
                 conceptData['t'] = True
 
+            if concept.isTypedDimension:
+                typedDomainElement = concept.typedDomainElement
+                if typedDomainElement is not None:
+                    typedDomainName = self.nsmap.qname(typedDomainElement.qname)
+                    conceptData['td'] = typedDomainName
+                    self.addConcept(typedDomainElement)
+
             self.taxonomyData["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):

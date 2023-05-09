@@ -114,7 +114,8 @@ class TestIXBRLViewer(unittest.TestCase):
                 localName='Cash',
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
-            )
+            ),
+            isTypedDimension=False,
         )
 
         to_concept = Mock(
@@ -122,14 +123,16 @@ class TestIXBRLViewer(unittest.TestCase):
                 localName='to_concept',
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
-            )
+            ),
+            isTypedDimension=False,
         )
         from_concept = Mock(
             qname=Mock(
                 localName='from_concept',
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
-            )
+            ),
+            isTypedDimension=False,
         )
 
         dimension_concept = Mock(
@@ -137,7 +140,27 @@ class TestIXBRLViewer(unittest.TestCase):
                 localName='dimension',
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
-            )
+            ),
+            isTypedDimension=False,
+        )
+
+        typed_dimension_domain_concept = Mock(
+            qname=Mock(
+                localName='typed_dimension_domain',
+                prefix='us-gaap',
+                namespaceURI='http://viewer.com'
+            ),
+            isTypedDimension=False,
+        )
+
+        typed_dimension_concept = Mock(
+            qname=Mock(
+                localName='typed_dimension',
+                prefix='us-gaap',
+                namespaceURI='http://viewer.com'
+            ),
+            isTypedDimension=True,
+            typedDomainElement=typed_dimension_domain_concept,
         )
 
         member_concept = Mock(
@@ -145,7 +168,8 @@ class TestIXBRLViewer(unittest.TestCase):
                 localName='member',
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
-            )
+            ),
+            isTypedDimension=False,
         )
 
         rel = Mock(
@@ -162,9 +186,9 @@ class TestIXBRLViewer(unittest.TestCase):
         )
 
         typed_dimension = Mock(
-            dimensionQname=dimension_concept.qname,
+            dimensionQname=typed_dimension_concept.qname,
             memberQname=None,
-            dimension=dimension_concept,
+            dimension=typed_dimension_concept,
             typedMember=Mock(text='typedDimension')
         )
 
@@ -361,6 +385,8 @@ class TestIXBRLViewer(unittest.TestCase):
         to_concept.modelXbrl = self.modelXbrl_1
         from_concept.modelXbrl = self.modelXbrl_1
         dimension_concept.modelXbrl = self.modelXbrl_1
+        typed_dimension_concept.modelXbrl = self.modelXbrl_1
+        typed_dimension_domain_concept.modelXbrl = self.modelXbrl_1
         member_concept.modelXbrl = self.modelXbrl_1
         self.builder_1 = IXBRLViewerBuilder(self.modelXbrl_1)
         self.builder_2 = IXBRLViewerBuilder(self.modelXbrl_1)
@@ -451,6 +477,15 @@ class TestIXBRLViewer(unittest.TestCase):
         jsdata = json.loads(body[2].text)
         self.assertNotIn("validation", jsdata)
         self.assertEqual(set(jsdata["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+        self.assertEqual(jsdata["concepts"], {
+            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}},
+            'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}},
+            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}},
+            'us-gaap:dimension': {'d': 'e', 'e': True, 't': True, 'labels': {}},
+            'us-gaap:member': {'e': True, 't': True, 'labels': {}},
+            'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}},
+            'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain'},
+        })
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')

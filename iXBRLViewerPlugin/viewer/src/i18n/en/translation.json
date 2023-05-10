@@ -60,6 +60,12 @@
     "reset": "Reset",
     "searchTitle": "Search",
     "showTextOnly": "Show text only",
+    "summary": {
+      "fact": {
+        "header": "Fact Summary",
+        "title": "Total Facts:"
+      }
+    },
     "summation": "Summation",
     "summationOrContributor": "Summation or Contributor",
     "textOption": "Text",

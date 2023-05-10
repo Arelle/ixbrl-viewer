@@ -60,6 +60,12 @@
     "reset": "Limpiar",
     "searchTitle": "Búsqueda de hechos",
     "showTextOnly": "",
+    "summary": {
+      "fact": {
+        "header": "",
+        "title": ""
+      }
+    },
     "summation": "",
     "summationOrContributor": "",
     "textOption": "Texto",

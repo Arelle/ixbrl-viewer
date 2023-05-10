@@ -65,6 +65,17 @@
         "header": "Fact Summary",
         "title": "Total Facts:"
       },
+      "file": {
+        "calculations": "Calculation Linkbases",
+        "definitions": "Definition Linkbases",
+        "header": "File Summary",
+        "inline": "Inline Documents",
+        "labels": "Label Linkbases",
+        "other": "Other Linkbases",
+        "presentation": "Presentation Linkbases",
+        "references": "Reference Linkbases",
+        "schemas": "Schemas"
+      },
       "tag": {
         "colDimensions": "Dimensions",
         "colMembers": "Members",

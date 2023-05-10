@@ -18,8 +18,18 @@
       font-size: 0.9rem;
     }
 
-    .total-facts-title {
+    .total-facts-title,
+    .files-summary-title {
       font-weight: bold;
+    }
+
+    .file-summary-container {
+      display: flex;
+      flex-flow: row wrap;
+
+      .files {
+        flex: 1 1 auto;
+      }
     }
 
     table {

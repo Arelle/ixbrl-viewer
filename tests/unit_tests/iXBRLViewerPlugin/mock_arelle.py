@@ -30,6 +30,9 @@ def mock_arelle():
             QName=qname_effect
         )
         sys.modules['arelle.PythonUtil'] = Mock()
+        sys.modules['arelle.UrlUtil'] = Mock(
+            isHttpUrl=lambda path: path.startswith('http')
+        )
         sys.modules['arelle.ValidateXbrlCalcs'] = Mock(
             inferredDecimals=inferredDecimals_effect
         )

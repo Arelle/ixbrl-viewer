@@ -30,6 +30,7 @@ import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
+import { DocumentSummary } from './summary.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -116,6 +117,8 @@ Inspector.prototype.initialize = function (report, viewer) {
             // Listen to messages posted to this window
             $(window).on("message", (e) => inspector.handleMessage(e));
             report.setViewerOptions(inspector._viewerOptions);
+            inspector.summary = new DocumentSummary(report);
+            inspector.createSummary()
             inspector.outline = new DocumentOutline(report);
             inspector.createOutline();
             inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
@@ -358,6 +361,18 @@ Inspector.prototype.search = function() {
 
 Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
+}
+
+Inspector.prototype.createSummary = function () {
+    const summaryDom = $("#inspector .summary .body");
+    this._populateFactSummary(summaryDom);
+}
+
+Inspector.prototype._populateFactSummary = function(summaryDom) {
+    const totalFacts = this.summary.totalFacts();
+    $("<span></span>")
+            .text(totalFacts)
+            .appendTo(summaryDom.find(".total-facts-value"));
 }
 
 Inspector.prototype.createOutline = function () {

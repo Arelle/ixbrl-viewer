@@ -367,6 +367,7 @@ Inspector.prototype.createSummary = function () {
     const summaryDom = $("#inspector .summary .body");
     this._populateFactSummary(summaryDom);
     this._populateTagSummary(summaryDom);
+    this._populateFileSummary(summaryDom);
 }
 
 Inspector.prototype._populateFactSummary = function(summaryDom) {
@@ -425,6 +426,41 @@ Inspector.prototype._populateTagSummary = function (summaryDom) {
     insertTagCount(summaryTagsTableFooterRow, totalMemberTags, totalMemberTags);
     insertTagCount(summaryTagsTableFooterRow, totalTags, totalTags);
 }
+
+Inspector.prototype._populateFileSummary = function (summaryDom) {
+    const {
+        inline,
+        schema,
+        calcLinkbase,
+        defLinkbase,
+        labelLinkbase,
+        presLinkbase,
+        refLinkbase,
+        unrecognizedLinkbase
+    } = this.summary.getLocalDocuments();
+
+    const summaryFilesContent = summaryDom.find(".files-summary");
+
+    function insertFileSummary(docs, classSelector) {
+        if (docs.length === 0) {
+            summaryFilesContent.find(classSelector).hide();
+        } else {
+            const ul = summaryFilesContent.find(classSelector + ' ul')
+            for (const doc of docs) {
+                ul.append($("<li></li>").text(doc));
+            }
+        }
+    }
+
+    insertFileSummary(inline, ".inline-docs");
+    insertFileSummary(schema, ".schemas");
+    insertFileSummary(presLinkbase, ".pres-links");
+    insertFileSummary(calcLinkbase, ".calc-links");
+    insertFileSummary(defLinkbase, ".def-links");
+    insertFileSummary(labelLinkbase, ".label-links");
+    insertFileSummary(refLinkbase, ".ref-links");
+    insertFileSummary(unrecognizedLinkbase, ".other-links");
+};
 
 Inspector.prototype.createOutline = function () {
     if (this.outline.hasOutline()) {

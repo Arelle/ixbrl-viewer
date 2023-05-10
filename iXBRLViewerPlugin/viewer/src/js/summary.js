@@ -47,6 +47,38 @@ class TagCounter {
     }
 }
 
+class LocalDocuments {
+    constructor() {
+        this._documentsByType = {
+            'inline': new Set(),
+            'schema': new Set(),
+            'calcLinkbase': new Set(),
+            'defLinkbase': new Set(),
+            'labelLinkbase': new Set(),
+            'presLinkbase': new Set(),
+            'refLinkbase': new Set(),
+            'unrecognizedLinkbase': new Set(),
+        };
+    }
+
+    addDocument(document, documentTypes) {
+        for (const documentType of documentTypes) {
+            if (!(documentType in this._documentsByType)) {
+                throw new Error(`Document ${document} with unrecognized type ${documentType}.`);
+            }
+            this._documentsByType[documentType].add(document);
+        }
+    }
+
+    getDocuments() {
+        const sortedDocuments = {};
+        for (const [documentType, documents] of Object.entries(this._documentsByType)) {
+            sortedDocuments[documentType] = [...documents].sort();
+        }
+        return sortedDocuments;
+    }
+}
+
 export class DocumentSummary {
     constructor(report) {
         this._report = report;
@@ -91,6 +123,13 @@ export class DocumentSummary {
         );
     }
 
+    _buildLocalFileSummary() {
+        this._localFileSummary = new LocalDocuments();
+        for (const [document, documentTypes] of Object.entries(this._report.localDocuments())) {
+            this._localFileSummary.addDocument(document, documentTypes);
+        }
+    }
+
     totalFacts() {
         if (this._totalFacts === undefined) {
             this._totalFacts = this._report.facts().length;
@@ -103,5 +142,12 @@ export class DocumentSummary {
             this._buildTagCounts();
         }
         return this._tagCounts;
+    }
+
+    getLocalDocuments() {
+        if (this._localFileSummary === undefined) {
+            this._buildLocalFileSummary();
+        }
+        return this._localFileSummary.getDocuments()
     }
 }

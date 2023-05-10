@@ -29,17 +29,18 @@ function testFact(conceptName, dimensions) {
     }
 }
 
-function testReport(concepts, facts) {
+function testReport(concepts, facts, documents) {
     return {
         getConcept: conceptName => concepts[conceptName],
-        facts: () => facts
+        facts: () => facts,
+        localDocuments: () => documents
     }
 }
 
 describe("Facts summary", () => {
 
     test("no facts", () => {
-        const report = testReport({}, []);
+        const report = testReport({}, [], {});
         const summary = new DocumentSummary(report);
 
         expect(summary.totalFacts()).toBe(0);
@@ -50,7 +51,7 @@ describe("Facts summary", () => {
         for (let i = 0; i < 10; i++) {
             facts.push(testFact("eg:Concept1", {}));
         }
-        const report = testReport({}, facts);
+        const report = testReport({}, facts, {});
         const summary = new DocumentSummary(report);
 
         expect(summary.totalFacts()).toBe(10);
@@ -60,7 +61,7 @@ describe("Facts summary", () => {
         const conceptName = "eg:Concept1";
         const fact1 = testFact(conceptName, {});
         const fact2 = testFact(conceptName, {});
-        const report = testReport({}, [fact1, fact2]);
+        const report = testReport({}, [fact1, fact2], {});
         const summary = new DocumentSummary(report);
 
         expect(summary.totalFacts()).toBe(2);
@@ -71,7 +72,7 @@ describe("Facts summary", () => {
 describe("Tags summary", () => {
 
     test("no tags", () => {
-        const report = testReport({}, [])
+        const report = testReport({}, [], {})
         const summary = new DocumentSummary(report);
 
         expect(summary.tagCounts()).toEqual(new Map());
@@ -81,7 +82,7 @@ describe("Tags summary", () => {
         const fact1 = testFact("eg:Concept1", {});
         const fact2 = testFact("eg:Concept2", {});
         const fact3 = testFact("xz:Concept1", {});
-        const report = testReport({}, [fact1, fact2, fact3])
+        const report = testReport({}, [fact1, fact2, fact3], {})
         const summary = new DocumentSummary(report);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
@@ -110,7 +111,7 @@ describe("Tags summary", () => {
         const concepts = {
             [dimension]: testConcept(),
         }
-        const report = testReport(concepts, [fact])
+        const report = testReport(concepts, [fact], {})
         const summary = new DocumentSummary(report);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
@@ -140,7 +141,7 @@ describe("Tags summary", () => {
             [dimension2]: testConcept(),
             [dimension3]: testConcept(),
         }
-        const report = testReport(concepts, [fact])
+        const report = testReport(concepts, [fact], {})
         const summary = new DocumentSummary(report);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
@@ -181,7 +182,7 @@ describe("Tags summary", () => {
         const concepts = {
             [dimension]: testConcept(typedDomain),
         }
-        const report = testReport(concepts, [fact])
+        const report = testReport(concepts, [fact], {})
         const summary = new DocumentSummary(report);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
@@ -197,6 +198,54 @@ describe("Tags summary", () => {
                 "primaryItems": 0,
                 "total": 1
             }
+        });
+    });
+});
+
+describe("Files summary", () => {
+
+    test("no files", () => {
+        const documentData = {}
+        const report = testReport({}, [], documentData);
+        const summary = new DocumentSummary(report);
+
+        expect(summary.getLocalDocuments()).toEqual({
+            inline: [],
+            schema: [],
+            calcLinkbase: [],
+            defLinkbase: [],
+            labelLinkbase: [],
+            presLinkbase: [],
+            refLinkbase: [],
+            unrecognizedLinkbase: [],
+        });
+    });
+
+    test("with files", () => {
+        const documentData = {
+            'inline.htm': ['inline'],
+            'docset': ['inline'],
+            'schema.xsd': ['schema'],
+            'calcLinkbase.xml': ['calcLinkbase'],
+            'defLinkbase.xml': ['defLinkbase'],
+            'presLinkbase.xml': ['presLinkbase'],
+            'refLinkbase2.xml': ['refLinkbase', 'labelLinkbase'],
+            'refLinkbase1.xml': ['refLinkbase'],
+            'labelLinkbase.xml': ['labelLinkbase'],
+            'unrecognizedLinkbase.xml': ['unrecognizedLinkbase'],
+        }
+        const report = testReport({}, [], documentData);
+        const summary = new DocumentSummary(report);
+
+        expect(summary.getLocalDocuments()).toEqual({
+            inline: ['docset', 'inline.htm'],
+            schema: ['schema.xsd'],
+            calcLinkbase: ['calcLinkbase.xml'],
+            defLinkbase: ['defLinkbase.xml'],
+            labelLinkbase: ['labelLinkbase.xml', 'refLinkbase2.xml'],
+            presLinkbase: ['presLinkbase.xml'],
+            refLinkbase: ['refLinkbase1.xml', 'refLinkbase2.xml'],
+            unrecognizedLinkbase: ['unrecognizedLinkbase.xml'],
         });
     });
 });

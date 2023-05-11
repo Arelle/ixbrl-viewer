@@ -14,10 +14,6 @@
 
 #inspector .summary {
   .body {
-    sup {
-      font-size: 0.9rem;
-    }
-
     .total-facts-title,
     .files-summary-title {
       font-weight: bold;
@@ -32,33 +28,41 @@
       }
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .tag-summary-body {
+      overflow-x: auto;
 
-      td,
-      th {
-        padding: 0.2rem;
-        text-align: left;
+      sup {
+        font-size: 0.9rem;
       }
 
-      thead {
+      table {
+        width: 100%;
+        border-collapse: collapse;
+
+        td,
         th {
-          word-break: break-word;
+          padding: 0.2rem;
+          text-align: left;
         }
-      }
 
-      tbody,
-      tfoot {
-        tr {
-          transition: background-color 0.25s ease;
-
-          &:nth-child(odd) {
-            background-color: rgb(248 248 248);
+        thead {
+          th {
+            white-space: break-spaces;
           }
+        }
 
-          &:hover {
-            background-color: rgb(230 230 230);
+        tbody,
+        tfoot {
+          tr {
+            transition: background-color 0.25s ease;
+
+            &:nth-child(odd) {
+              background-color: rgb(248 248 248);
+            }
+
+            &:hover {
+              background-color: rgb(230 230 230);
+            }
           }
         }
       }

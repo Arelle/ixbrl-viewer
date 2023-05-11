@@ -181,10 +181,15 @@ export class Fact {
     }
 
     aspect(a) {
-        if (this.f.a[a] !== undefined) {
-            return new Aspect(a, this.f.a[a], this._report);
+        if (this._aspects === undefined) {
+            this._aspects = {}
         }
-        return undefined;
+        if (this._aspects[a] === undefined) {
+            if (this.f.a[a] !== undefined) {
+                this._aspects[a] = new Aspect(a, this.f.a[a], this._report);
+            }
+        }
+        return this._aspects[a];
     }
 
     isAligned(of, coveredAspects) {

@@ -19,9 +19,9 @@ import math
 import os
 import re
 import shutil
-import sys
 import urllib.parse
 import zipfile
+from collections import defaultdict
 from copy import deepcopy
 
 import pycountry
@@ -29,6 +29,7 @@ from arelle import XbrlConst
 from arelle.ModelDocument import Type
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import QName, INVALIDixVALUE
+from arelle.UrlUtil import isHttpUrl
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
@@ -36,7 +37,14 @@ from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
 from .xhtmlserialize import XHTMLSerializer
 
 
-
+UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = 'unrecognizedLinkbase'
+LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
+    XbrlConst.qnLinkCalculationLink: 'calcLinkbase',
+    XbrlConst.qnLinkDefinitionLink: 'defLinkbase',
+    XbrlConst.qnLinkLabelLink: 'labelLinkbase',
+    XbrlConst.qnLinkPresentationLink: 'presLinkbase',
+    XbrlConst.qnLinkReferenceLink: 'refLinkbase',
+}
 
 WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
 
@@ -179,8 +187,15 @@ class IXBRLViewerBuilder:
             if concept.isEnumeration:
                 conceptData["e"] = True
 
-            if concept.type.isTextBlock:
+            if concept.type is not None and concept.type.isTextBlock:
                 conceptData['t'] = True
+
+            if concept.isTypedDimension:
+                typedDomainElement = concept.typedDomainElement
+                if typedDomainElement is not None:
+                    typedDomainName = self.nsmap.qname(typedDomainElement.qname)
+                    conceptData['td'] = typedDomainName
+                    self.addConcept(typedDomainElement)
 
             self.taxonomyData["concepts"][conceptName] = conceptData
 
@@ -402,6 +417,28 @@ class IXBRLViewerBuilder:
             filingDocZipName = os.path.basename(filingDocZipPath)
             iv.addFilingDoc(filingDocZipPath)
             self.taxonomyData["filingDocuments"] = filingDocZipName
+
+        localDocs = defaultdict(set)
+        for path, doc in dts.urlDocs.items():
+            if isHttpUrl(path):
+                continue
+            if doc.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
+                localDocs[doc.basename].add('inline')
+            elif doc.type == Type.SCHEMA:
+                localDocs[doc.basename].add('schema')
+            elif doc.type == Type.LINKBASE:
+                linkbaseIdentifed = False
+                for child in doc.xmlRootElement.iterchildren():
+                    linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
+                    if linkbaseLocalDocumentsKey is not None:
+                        localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
+                        linkbaseIdentifed = True
+                if not linkbaseIdentifed:
+                    localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
+        self.taxonomyData["localDocs"] = {
+            localDoc: sorted(docTypes)
+            for localDoc, docTypes in localDocs.items()
+        }
 
         if docSetFiles is not None:
             self.taxonomyData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)

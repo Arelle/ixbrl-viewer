@@ -48,11 +48,11 @@ export class Concept {
     }
 
     isTypedDimension() {
-        return this._c.d == "t";
+        return this._c.d === "t";
     }
 
     isExplicitDimension() {
-        return this._c.d == "e";
+        return this._c.d === "e";
     }
 
     isDimension() {
@@ -65,5 +65,9 @@ export class Concept {
 
     isTextBlock() {
         return Boolean(this._c.t);
+    }
+
+    typedDomainElement() {
+        return this._c.td
     }
 }

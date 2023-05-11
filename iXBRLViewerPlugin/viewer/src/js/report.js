@@ -343,6 +343,13 @@ iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
     return this.roleMap()[rolePrefix];
 }
 
+iXBRLReport.prototype.localDocuments = function() {
+    if (this.data.localDocs === undefined) {
+        return {}
+    }
+    return this.data.localDocs;
+}
+
 iXBRLReport.prototype.documentSetFiles = function() {
     if (this.data.docSetFiles === undefined) {
         return []

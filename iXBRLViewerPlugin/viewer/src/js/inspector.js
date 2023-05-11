@@ -30,6 +30,7 @@ import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
+import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -90,13 +91,16 @@ Inspector.prototype.initialize = function (report, viewer) {
                 }
             });
             $("#inspector .controls .search-button").on("click", function () {
-                $(this).closest("#inspector").removeClass("outline-mode").toggleClass("search-mode");
+                $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode"]).toggleClass("search-mode");
+            });
+            $("#inspector .controls .summary-button").on("click", function () {
+                $(this).closest("#inspector").removeClass(["outline-mode", "search-mode"]).toggleClass("summary-mode");
             });
             $("#inspector .controls .outline-button").on("click", function () {
-                $(this).closest("#inspector").removeClass("search-mode").toggleClass("outline-mode");
+                $(this).closest("#inspector").removeClass(["summary-mode", "search-mode"]).toggleClass("outline-mode");
             });
             $("#inspector-head .back").on("click", function () {
-                $(this).closest("#inspector").removeClass("search-mode").removeClass("outline-mode");
+                $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode", "search-mode"]);
             });
             $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
             $("#inspector").on("click", ".clipboard-copy", function () {
@@ -113,6 +117,8 @@ Inspector.prototype.initialize = function (report, viewer) {
             // Listen to messages posted to this window
             $(window).on("message", (e) => inspector.handleMessage(e));
             report.setViewerOptions(inspector._viewerOptions);
+            inspector.summary = new DocumentSummary(report);
+            inspector.createSummary()
             inspector.outline = new DocumentOutline(report);
             inspector.createOutline();
             inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
@@ -356,6 +362,105 @@ Inspector.prototype.search = function() {
 Inspector.prototype.updateCalculation = function (fact, elr) {
     $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
 }
+
+Inspector.prototype.createSummary = function () {
+    const summaryDom = $("#inspector .summary .body");
+    this._populateFactSummary(summaryDom);
+    this._populateTagSummary(summaryDom);
+    this._populateFileSummary(summaryDom);
+}
+
+Inspector.prototype._populateFactSummary = function(summaryDom) {
+    const totalFacts = this.summary.totalFacts();
+    $("<span></span>")
+            .text(totalFacts)
+            .appendTo(summaryDom.find(".total-facts-value"));
+}
+
+Inspector.prototype._populateTagSummary = function (summaryDom) {
+    const summaryTagsTableBody = summaryDom.find(".tag-summary-table-body");
+
+    const tagCounts = this.summary.tagCounts();
+
+    let totalPrimaryItemTags = 0;
+    let totalDimensionTags = 0;
+    let totalMemberTags = 0;
+    let totalTags = 0;
+    for (const counts of tagCounts.values()) {
+        totalPrimaryItemTags += counts[PRIMARY_ITEMS_KEY];
+        totalDimensionTags += counts[DIMENSIONS_KEY];
+        totalMemberTags += counts[MEMBERS_KEY];
+        totalTags += counts[TOTAL_KEY];
+    }
+
+    function insertTagCount(row, count, total) {
+        let percent = 0;
+        if (total > 0) {
+            percent = count / total;
+        }
+        let formattedPercent = percent.toLocaleString(undefined, {
+            style: "percent",
+        });
+        formattedPercent = ` (${formattedPercent})`;
+
+        $("<td></td>")
+                .text(count)
+                .append($("<sup></sup>").text(formattedPercent))
+                .appendTo(row);
+    }
+
+    const sortedPrefixCounts = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    for (const [prefix, counts] of sortedPrefixCounts) {
+        const countRow = $("<tr></tr>").appendTo(summaryTagsTableBody);
+        countRow.append($("<th></th>").attr("scope", "row").text(prefix));
+        insertTagCount(countRow, counts[PRIMARY_ITEMS_KEY], totalPrimaryItemTags);
+        insertTagCount(countRow, counts[DIMENSIONS_KEY], totalDimensionTags);
+        insertTagCount(countRow, counts[MEMBERS_KEY], totalMemberTags);
+        insertTagCount(countRow, counts[TOTAL_KEY], totalTags);
+    }
+
+    const summaryTagsTableFooterRow = summaryDom.find(".tag-summary-table-footer-row");
+
+    insertTagCount(summaryTagsTableFooterRow, totalPrimaryItemTags, totalPrimaryItemTags);
+    insertTagCount(summaryTagsTableFooterRow, totalDimensionTags, totalDimensionTags);
+    insertTagCount(summaryTagsTableFooterRow, totalMemberTags, totalMemberTags);
+    insertTagCount(summaryTagsTableFooterRow, totalTags, totalTags);
+}
+
+Inspector.prototype._populateFileSummary = function (summaryDom) {
+    const {
+        inline,
+        schema,
+        calcLinkbase,
+        defLinkbase,
+        labelLinkbase,
+        presLinkbase,
+        refLinkbase,
+        unrecognizedLinkbase
+    } = this.summary.getLocalDocuments();
+
+    const summaryFilesContent = summaryDom.find(".files-summary");
+
+    function insertFileSummary(docs, classSelector) {
+        if (docs.length === 0) {
+            summaryFilesContent.find(classSelector).hide();
+        } else {
+            const ul = summaryFilesContent.find(classSelector + ' ul')
+            for (const doc of docs) {
+                ul.append($("<li></li>").text(doc));
+            }
+        }
+    }
+
+    insertFileSummary(inline, ".inline-docs");
+    insertFileSummary(schema, ".schemas");
+    insertFileSummary(presLinkbase, ".pres-links");
+    insertFileSummary(calcLinkbase, ".calc-links");
+    insertFileSummary(defLinkbase, ".def-links");
+    insertFileSummary(labelLinkbase, ".label-links");
+    insertFileSummary(refLinkbase, ".ref-links");
+    insertFileSummary(unrecognizedLinkbase, ".other-links");
+};
 
 Inspector.prototype.createOutline = function () {
     if (this.outline.hasOutline()) {

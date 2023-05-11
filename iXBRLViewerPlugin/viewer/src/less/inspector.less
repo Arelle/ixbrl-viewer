@@ -29,6 +29,7 @@
 @import "block-list.less";
 @import "validation-report.less";
 @import "text-block-viewer.less";
+@import "summary.less";
 
 @top-bar-height: 3.5rem;
 
@@ -346,7 +347,7 @@
 
           position: absolute;
           top: 0;
-          left: 3.6rem;
+          left: 7.7rem;
 
           &::before {
             .icon-search();
@@ -360,10 +361,24 @@
 
           position: absolute;
           top: 0;
-          left: 0;
+          left: 3.6rem;
 
           &::before {
             .icon-outline();
+
+            position: relative;
+          }
+        }
+
+        .summary-button {
+          .square-button();
+
+          position: absolute;
+          top: 0;
+          left: 0;
+
+          &::before {
+            .icon-summary();
 
             position: relative;
           }
@@ -566,6 +581,11 @@
       } /* search results */
 
       .outline {
+        overflow-y: auto;
+        height: 100%;
+      }
+
+      .summary {
         overflow-y: auto;
         height: 100%;
       }
@@ -910,6 +930,16 @@
       }
     }
 
+    &.summary-mode {
+      #inspector-head {
+        .controls {
+          .summary-button {
+            .square-button.primary();
+          }
+        }
+      }
+    }
+
     .powered-by {
       .text-sm();
 
@@ -947,7 +977,12 @@
       display: none;
     }
 
+    &:not(.summary-mode) .summary-mode-only {
+      display: none;
+    }
+
     &.search-mode .fact-mode-only,
+    &.summary-mode .fact-mode-only,
     &.outline-mode .fact-mode-only {
       display: none;
     }

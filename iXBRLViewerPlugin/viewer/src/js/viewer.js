@@ -48,6 +48,7 @@ export function Viewer(iv, iframes, report, useFrames) {
     this._mzInit = false;   
     this._tooltipShown = null;
     this._highlighting = false;
+    this.showTablesBorder = false;
 
     $(".amanablock", this.contents())
       .addClass("-ixh-highlight-region").removeClass("amanablock");
@@ -1014,13 +1015,16 @@ Viewer.prototype.notifyReady = function () {
  *
  */
 Viewer.prototype.highlightTables = function(on) {
-    if (on) 
+    if (on) {
         $(".ixbrl-element", this._contents)
             .find("table")
             .addClass('table-highlight');            
-    else 
+        this.showTablesBorder = true;
+    } else {
         $(".table-highlight", this._contents)
             .removeClass("table-highlight");            
+        this.showTablesBorder = false;
+    }
 }
 
 /*
@@ -1044,7 +1048,8 @@ Viewer.prototype.customize = function(selector, styles) {
 
 Viewer.prototype.postProcess = function*() {
     for (const iframe of this._iframes.get()) {
-        const elts = $(iframe).contents().get(0).querySelectorAll(".ixbrl-contains-absolute");
+        const doc = this._useFrames ? $(iframe).contents() : $(iframe);
+        const elts = doc.get(0).querySelectorAll(".ixbrl-contains-absolute");
         // In some cases, getBoundingClientRect().height returns 0, and
         // immediately repeating the call returns > 0, so do this in two passes.
         for (const [i, e] of elts.entries()) {
@@ -1063,7 +1068,7 @@ Viewer.prototype.postProcess = function*() {
                 yield;
             }
         }
-    }
+    }    
 }
 
 Viewer.prototype.postLoadAsync = function () {

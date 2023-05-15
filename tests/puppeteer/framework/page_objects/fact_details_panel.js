@@ -1,4 +1,5 @@
 import {Button, Text} from "../core_elements";
+import {getTextContent} from "../utils";
 
 export class FactDetailsPanel {
     #viewerPage;
@@ -43,27 +44,27 @@ export class FactDetailsPanel {
     // Asserts the calculation contributors listed in the fact details panel
     // under the [sectionTitle]. [expectedCalculation] is a map of concept to
     // weight ex: {'cash':'+ '}
-     async assertCalculation(sectionTitle, expectedCalculations) {
+    async assertCalculation(sectionTitle, expectedCalculations) {
         this.#viewerPage.log(`Asserting Calculations for section ${sectionTitle}`);
 
         // Pull the title elements and assert the section exists
-        let titleElems = await this.#viewerPage.page.$x('//*[contains(@class,"calculations")]//*[contains(@class,"title")]');
+        const titleElems = await this.#viewerPage.page.$x('//*[contains(@class,"calculations")]//*[contains(@class,"title")]');
 
-        let titles = await Promise.all(titleElems.map(async (e) => await (await e.getProperty('textContent')).jsonValue()));
+        const titles = await Promise.all(titleElems.map(async (e) => await getTextContent(e)));
         expect(titles).toContain(sectionTitle)
 
         // Pull the concepts from the expected section
-        let conceptElems = await this.#viewerPage.page.$x(`
+        const conceptElems = await this.#viewerPage.page.$x(`
             //*[contains(@class,"calculations")]//*[text()="${sectionTitle}"]
             //ancestor::*[contains(@class,"card")]//*[contains(@class,"item")]
         `);
 
         let calc = {};
-        for(const elem in conceptElems){
-            let nameElem = await conceptElems[elem].waitForSelector('xpath/' + '*[contains(@class,"concept-name")]');
-            let name = await (await nameElem.getProperty('textContent')).jsonValue();
-            let weightElem = await conceptElems[elem].waitForSelector('xpath/' + '*[contains(@class,"weight")]');
-            let weight = await (await weightElem.getProperty('textContent')).jsonValue();
+        for(const elem of conceptElems){
+            const nameElem = await elem.waitForSelector('xpath/' + '*[contains(@class,"concept-name")]');
+            const name = await getTextContent(nameElem)
+            const weightElem = await elem.waitForSelector('xpath/' + '*[contains(@class,"weight")]');
+            const weight = await getTextContent(weightElem);
             calc[name] = weight;
         }
         expect(calc).toEqual(expectedCalculations);
@@ -71,9 +72,9 @@ export class FactDetailsPanel {
 
     async assertFootnotes(expectedFootnotes) {
         this.#viewerPage.log('Asserting footnotes');
-        let conceptElems = await this.#viewerPage.page.$x(
+        const conceptElems = await this.#viewerPage.page.$x(
                 '//*[contains(@class,"footnotes")]//*[contains(@class,"block-list-item")]');
-        let footnotes = await Promise.all(conceptElems.map(async (e) => await (await e.getProperty('textContent')).jsonValue()));
+        const footnotes = await Promise.all(conceptElems.map(async (e) => await getTextContent(e)));
         expect(footnotes).toEqual(expectedFootnotes);
     }
 }

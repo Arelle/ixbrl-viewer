@@ -1,4 +1,5 @@
 import {ViewerPage} from '../framework/viewer_page'
+import {getTextContent} from "../framework/utils";
 
 jest.setTimeout(60000);
 
@@ -15,7 +16,7 @@ describe('ixbrl-viewer',() => {
         });
 
         test('Fact Properties', async () => {
-                let detailsPanel = viewerPage.factDetailsPanel;
+                const detailsPanel = viewerPage.factDetailsPanel;
                 const documentType = '10-K';
 
                 await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
@@ -60,17 +61,17 @@ describe('ixbrl-viewer',() => {
 
                 // Duplicate Facts - Verify we're looking at fact 1 of 2
                 await detailsPanel.duplicateText.assertText('1 of 2');
-                let oldFact = await viewerPage.docFrame.getSelectedFact();
-                let oldFactBox = await oldFact.boundingBox();
-                let oldFactText = await (await oldFact.getProperty('textContent')).jsonValue()
+                const oldFact = await viewerPage.docFrame.getSelectedFact();
+                const oldFactBox = await oldFact.boundingBox();
+                const oldFactText = await getTextContent(oldFact);
                 expect(oldFactText).toEqual(documentType);
 
                 // Duplicate Facts - Test navigation to fact 2
                 await detailsPanel.duplicateNext.select();
                 await detailsPanel.duplicateText.assertText('2 of 2');
-                let newFact = await viewerPage.docFrame.getSelectedFact();
-                let newFactBox = await newFact.boundingBox();
-                let newFactText = await (await newFact.getProperty('textContent')).jsonValue()
+                const newFact = await viewerPage.docFrame.getSelectedFact();
+                const newFactBox = await newFact.boundingBox();
+                const newFactText = await getTextContent(newFact);
                 expect(newFactText).toEqual(documentType);
                 expect(newFactBox).not.toEqual(oldFactBox);
         });

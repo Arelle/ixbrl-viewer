@@ -1,3 +1,5 @@
+import {getTextContent} from "./utils";
+
 export class Text {
     #viewerPage;
     #xpathSelector;
@@ -10,8 +12,8 @@ export class Text {
 
     async assertText(expectedText) {
         this.#viewerPage.log(`Asserting text content of ${this.#name} equals "${expectedText}"`);
-        let elem = await this.#viewerPage.page.waitForSelector('xpath/' + this.#xpathSelector);
-        let text = await (await elem.getProperty('textContent')).jsonValue();
+        const elem = await this.#viewerPage.page.waitForSelector('xpath/' + this.#xpathSelector);
+        const text = await getTextContent(elem);
         expect(text).toEqual(expectedText);
     }
 }
@@ -29,9 +31,8 @@ export class Button {
 
     async select() {
         this.#viewerPage.log(`Select ${this.#name}`);
-        let button = await this.getButtonElement();
+        const button = await this.getButtonElement();
         await button.click();
-
     }
 
     async getButtonElement() {

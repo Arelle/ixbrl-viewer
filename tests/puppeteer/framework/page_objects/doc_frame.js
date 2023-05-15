@@ -9,12 +9,12 @@ export class DocFrame {
     }
 
     async getDocumentIframe() {
-        let iframe = await this.#viewerPage.page.waitForSelector('xpath/' + '//iframe[@title="iXBRL document view"]');
+        const iframe = await this.#viewerPage.page.waitForSelector('xpath/' + '//iframe[@title="iXBRL document view"]');
         return iframe.contentFrame();
     }
 
     async getSelectedFact() {
-        let iframe = await this.getDocumentIframe();
+        const iframe = await this.getDocumentIframe();
         return iframe.waitForSelector('xpath/' + '//*[contains(@class,"ixbrl-selected")]');
     }
 
@@ -22,8 +22,8 @@ export class DocFrame {
     // Ex: "dei:DocumentType"
     async selectFact(name) {
         this.#viewerPage.log(`Selecting fact ${name}`);
-        let iframe = await this.getDocumentIframe();
-        let fact = await iframe.waitForSelector('xpath/' + `//*[@name="${name}"]`);
+        const iframe = await this.getDocumentIframe();
+        const fact = await iframe.waitForSelector('xpath/' + `//*[@name="${name}"]`);
         return fact.click();
     }
 }

@@ -12,12 +12,12 @@ export class ViewerPage {
 
     #artifactDirectory = './tests/puppeteer/artifacts';
     #cleanedTestName = expect.getState().currentTestName.replaceAll(/[^a-zA-Z0-9-]/g, '_');
-    #isCi = process.env.CI || false;
+    #isCi = process.env.CI === 'true';
     #logMsgs = [];
     #recorder;
 
     async buildPage() {
-        // Lunch the browser
+        // Launch the browser
         this.browser = await puppeteer.launch({
             headless: this.#isCi,
             args: [`--window-size=1440,900`],

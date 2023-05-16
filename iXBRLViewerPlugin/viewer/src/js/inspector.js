@@ -875,10 +875,11 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             }
 
             $('#dimensions', factHTML).empty();
-            for (const aspect of fact.aspects()) {
-                if (!aspect.isTaxonomyDefined()) {
-                    continue;
-                }
+            const taxonomyDefinedAspects = fact.aspects().filter(a => a.isTaxonomyDefined());
+            if (taxonomyDefinedAspects.length === 0) {
+                $('#dimensions-label', factHTML).hide();
+            }
+            for (const aspect of taxonomyDefinedAspects) {
                 var h = $('<div class="dimension"></div>')
                     .text(aspect.label() || aspect.name())
                     .appendTo($('#dimensions', factHTML));

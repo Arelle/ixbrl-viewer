@@ -141,6 +141,13 @@ export class ReportSearch {
         );
     }
 
+    unitsFilter(s, item) {
+        return (
+                s.unitsFilter.length === 0 ||
+                s.unitsFilter.some(u => item.unit()?.value() === u)
+        );
+    }
+
     search(s) {
         if (!this.ready) {
             return;
@@ -156,6 +163,7 @@ export class ReportSearch {
             this.factValueFilter,
             this.calculationsFilter,
             this.namespacesFilter,
+            this.unitsFilter,
         ];
 
         rr.forEach((r,i) => {

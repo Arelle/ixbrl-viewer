@@ -120,6 +120,7 @@ describe("Simple fact properties", () => {
         expect(f.isMonetaryValue()).toBeTruthy();
         expect(f.readableValue()).toEqual("US $ 1,000");
         expect(f.unit().value()).toEqual("iso4217:USD");
+        expect(f.measure()).toEqual("iso4217:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -141,6 +142,7 @@ describe("Simple fact properties", () => {
         expect(f.isMonetaryValue()).toBeFalsy();
         expect(f.readableValue()).toEqual("1,000 eg:USD");
         expect(f.unit().value()).toEqual("eg:USD");
+        expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -161,6 +163,7 @@ describe("Simple fact properties", () => {
         expect(f.isMonetaryValue()).toBeFalsy();
         expect(f.readableValue()).toEqual("1,000,000.0125 eg:USD");
         expect(f.unit().value()).toEqual("eg:USD");
+        expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -545,10 +548,10 @@ describe("Unit aspect handling", () => {
             }
         });
         expect(f.isNumeric()).toBeTruthy();
-        expect(f.unit()).not.toBeUndefined();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.unit().value()).toBeNull();
-        expect(f.unit().valueLabel()).toBe("<NOUNIT>");
+        expect(f.unit()).toBeUndefined();
+        expect(f.measure()).toBeUndefined();
+        expect(f.measureLabel()).toBe("<NOUNIT>");
     });
 
     test("Non-numeric, no unit", () => {    
@@ -559,6 +562,7 @@ describe("Unit aspect handling", () => {
         });
         expect(f.isNumeric()).toBeFalsy();
         expect(f.unit()).toBeUndefined();
+        expect(f.measure()).toBeUndefined();
     });
 });
 
@@ -618,6 +622,7 @@ describe("Fact errors", () => {
         expect(f.isMonetaryValue()).toBeTruthy();
         expect(f.readableValue()).toEqual("Invalid value");
         expect(f.unit().value()).toEqual("iso4217:USD");
+        expect(f.measure()).toEqual("iso4217:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");

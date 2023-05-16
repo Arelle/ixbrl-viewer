@@ -22,7 +22,7 @@ const testReportData = {
     "prefixes": {},
     "roles": {},
     "roleDefs": {},
-    "rels": {}
+    "rels": {},
 };
 
 function getReportSearch(report) {
@@ -84,6 +84,7 @@ function testSearchSpec(searchString='') {
     spec.showVisibleFacts = true;
     spec.showHiddenFacts = true;
     spec.namespacesFilter = [];
+    spec.unitsFilter = [];
     spec.periodFilter = '*';
     spec.conceptTypeFilter = '*';
     spec.factValueFilter = '*';
@@ -285,5 +286,77 @@ describe("Search namespaces filter", () => {
         const results2 = reportSearch.search(spec2).map(r => r.fact.id).sort();
         expect(results1).toEqual(results2);
         expect(results1).toEqual(['itemA1', 'itemA2', 'itemB1', 'itemC1'])
+    });
+});
+
+describe("Search units filter", () => {
+
+    const cashUnit = 'test:USD';
+    const shareUnit = 'test:share';
+    const cashShareUnit = `${cashUnit} / ${shareUnit}`
+    const shareCashUnit = `${shareUnit} / ${cashUnit}`
+    const period = '2018-01-01/2019-01-01';
+    const numericValue = 1000;
+    let report = null;
+    let reportSearch = null;
+
+    beforeAll(() => {
+        report = testReport(
+                {'itemA': {}, 'itemAB': {}, 'itemB': {}, 'itemBA': {}},
+                {
+                    "concepts": {
+                        ...createSimpleConcept("a:ItemA", "ItemA"),
+                        ...createSimpleConcept("a:ItemAB", "ItemAB"),
+                        ...createSimpleConcept("a:ItemB", "ItemB"),
+                        ...createSimpleConcept("a:ItemBA", "ItemBA"),
+                        ...createSimpleConcept("a:Other", "Other"),
+                    },
+                    "facts": {
+                        ...createNumericFact("itemA", "a:ItemA", cashUnit, period, numericValue),
+                        ...createNumericFact("itemAB", "a:ItemAB", cashShareUnit, period, numericValue),
+                        ...createNumericFact("itemB", "a:ItemB", shareUnit, period, numericValue),
+                        ...createNumericFact("itemBA", "a:ItemBA", shareCashUnit, period, numericValue),
+                        ...createSimpleFact("other", "a:Other")
+                    },
+                }
+        )
+        reportSearch = getReportSearch(report)
+    });
+
+    test("Units filter only shows used units", () => {
+        const units = Array.from(report.getUsedUnits()).sort();
+        expect(units).toEqual([cashUnit, cashShareUnit, shareUnit, shareCashUnit]);
+    });
+
+    test("Units filter works without selection", () => {
+        const spec = testSearchSpec();
+        spec.unitsFilter = [];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['itemA', 'itemAB', 'itemB', 'itemBA', 'other']);
+    });
+
+    test("Units filter works with single selection", () => {
+        const spec = testSearchSpec();
+        spec.unitsFilter = [cashShareUnit];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['itemAB']);
+    });
+
+    test("Units filter works with multiple selections", () => {
+        const spec = testSearchSpec();
+        spec.unitsFilter = [cashUnit, cashShareUnit];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['itemA', 'itemAB']);
+    });
+
+    test("Units filter with all selections matches numeric filter", () => {
+        const spec1 = testSearchSpec();
+        spec1.unitsFilter = Array.from(report.getUsedUnits());
+        const results1 = reportSearch.search(spec1).map(r => r.fact.id).sort();
+        const spec2 = testSearchSpec()
+        spec2.conceptTypeFilter = 'numeric';
+        const results2 = reportSearch.search(spec2).map(r => r.fact.id).sort();
+        expect(results1).toEqual(results2);
+        expect(results1).toEqual(['itemA', 'itemAB', 'itemB', 'itemBA'])
     });
 });

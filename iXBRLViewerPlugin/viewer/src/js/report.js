@@ -16,6 +16,7 @@ import { Fact } from "./fact.js"
 import { Footnote } from "./footnote.js"
 import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
+import { Unit } from "./unit";
 import { ViewerOptions } from "./viewerOptions.js";
 import { setDefault } from "./util.js";
 import $ from 'jquery'
@@ -162,7 +163,6 @@ iXBRLReport.prototype.getItemById = function(id) {
     return this._items[id];
 }
 
-
 iXBRLReport.prototype.getIXNodeForItemId = function(id) {
     return this._ixNodeMap[id] || {};
 }
@@ -177,7 +177,6 @@ iXBRLReport.prototype.filingDocuments = function() {
     return this.data.filingDocuments;
 }
 
-
 iXBRLReport.prototype.prefixMap = function() {
     return this.data.prefixes;
 }
@@ -188,6 +187,35 @@ iXBRLReport.prototype.getUsedPrefixes = function() {
                 .map(f => f.getConceptPrefix()));
     }
     return this._usedPrefixes;
+}
+
+/**
+ * Returns a set of OIM format unit strings used by facts on this report. Lazy-loaded.
+ * @return {Set[String]} Set of OIM format unit strings
+ */
+iXBRLReport.prototype.getUsedUnits = function() {
+    if (this._usedUnits === undefined) {
+        this._usedUnits = new Set(Object.values(this._items)
+                .map(f => f.unit()?.value())
+                .filter(f => f)
+                .sort());
+    }
+    return this._usedUnits;
+}
+
+/**
+ * Returns details about the provided unit. Lazy-loaded once per unit.
+ * @param  {String} unitKey  Unit in OIM format
+ * @return {Unit}  Unit instance corresponding with provided key
+ */
+iXBRLReport.prototype.getUnit = function(unitKey) {
+    if (this._unitsMap === undefined) {
+        this._unitsMap = {};
+    }
+    if (this._unitsMap[unitKey] === undefined) {
+        this._unitsMap[unitKey] = new Unit(this, unitKey)
+    }
+    return this._unitsMap[unitKey];
 }
 
 iXBRLReport.prototype.roleMap = function() {

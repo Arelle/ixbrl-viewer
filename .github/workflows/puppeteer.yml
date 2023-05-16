@@ -1,0 +1,55 @@
+name: Run Puppeteer Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-12
+          - ubuntu-22.04
+          - windows-2022
+        node-version:
+          - '16'
+          - '18'
+          - '19'
+        python-version:
+          - '3.11'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Python 3
+        uses: actions/setup-python@v4.4.0
+        with:
+          cache: 'pip'
+          check-latest: true
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: npm install --include dev
+      - name: Install Arelle
+        run: pip install arelle-release .
+      - name: Build viewer js
+        run: npm run prod
+      - name: Generate test viewers
+        shell: bash
+        run: ./tests/puppeteer/tools/generate.sh
+      - name: Serve the generated files
+        shell: bash
+        run: npx http-server . &> tests/puppeteer/artifacts/http_server.log &
+      - name: Run puppeteer tests
+        run: npm run test:puppeteer
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: ${{ github.run_id }}.${{ github.run_attempt }}_${{ matrix.os }}_${{ matrix.node-version }}_${{ matrix.python-version }}_artifacts
+          path: tests/puppeteer/artifacts/

@@ -21,7 +21,7 @@ export class Unit {
         this._report = report;
         this._value = unitKey;
         const split = unitKey
-                .replaceAll(/[()]/ig,'')
+                .split(/[()]/ig).join('') // TODO: replace with .replaceAll(/[()]/ig,'') when no longer supporting node 14
                 .split('/');
         this._numerators = split[0].split('*');
         this._denominators = split.length > 1 ? split[1].split('*') : [];

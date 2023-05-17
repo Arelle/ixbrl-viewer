@@ -286,6 +286,7 @@ Inspector.prototype.searchSpec = function () {
     spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
     spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
     spec.namespacesFilter = $('#search-filter-namespaces').val();
+    spec.unitsFilter = $('#search-filter-units').val();
     spec.periodFilter = $('#search-filter-period').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
@@ -312,6 +313,12 @@ Inspector.prototype.setupSearchControls = function (viewer) {
             .text(`${prefix} (${this._report.prefixMap()[prefix]})`)
             .appendTo('#search-filter-namespaces');
     });
+    this._report.getUsedUnits().forEach(unit => {
+        $("<option>")
+                .attr("value", unit)
+                .text(`${this._report.getUnit(unit)?.label()} (${unit})`)
+                .appendTo('#search-filter-units');
+    });
 }
 
 Inspector.prototype.resetSearchFilters = function () {
@@ -322,6 +329,7 @@ Inspector.prototype.resetSearchFilters = function () {
     $("#search-hidden-fact-filter").prop("checked", true);
     $("#search-visible-fact-filter").prop("checked", true);
     $("#search-filter-namespaces option:selected").prop("selected", false);
+    $("#search-filter-units option:selected").prop("selected", false);
     this.search();
 }
 

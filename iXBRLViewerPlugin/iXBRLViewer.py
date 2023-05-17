@@ -282,9 +282,7 @@ class IXBRLViewerBuilder:
 
         if f.isNumeric:
             if f.unit is not None and len(f.unit.measures[0]):
-                # XXX does not support complex units
-                unit = self.nsmap.qname(f.unit.measures[0][0])
-                aspects["u"] = unit
+                aspects['u'] = self.oimUnitString(f.unit)
             else:
                 # The presence of the unit aspect is used by the viewer to
                 # identify numeric facts.  If the fact has no unit (invalid
@@ -322,6 +320,27 @@ class IXBRLViewerBuilder:
 
         self.taxonomyData["facts"][f.id] = factData
         self.addConcept(f.concept)
+
+    def oimUnitString(self, unit):
+        """
+        Returns an OIM-format string representation of the given ModelUnit.
+        See https://www.xbrl.org/Specification/oim-common/REC-2021-10-13/oim-common-REC-2021-10-13.html#term-unit-string-representation
+        :param unit: ModelUnit
+        :return: String representation of unit (OIM format)
+        """
+        numerators, denominators = unit.measures
+        numeratorsString = '*'.join(self.nsmap.qname(x) for x in sorted(numerators))
+        if denominators:
+            denominatorsString = '*'.join(self.nsmap.qname(x) for x in sorted(denominators))
+            if len(denominators) > 1:
+                if len(numerators) > 1:
+                    return "({})/({})".format(numeratorsString, denominatorsString)
+                return "{}/({})".format(numeratorsString, denominatorsString)
+            else:
+                if len(numerators) > 1:
+                    return "({})/{}".format(numeratorsString, denominatorsString)
+                return "{}/{}".format(numeratorsString, denominatorsString)
+        return numeratorsString
 
     def addViewerToXMLDocument(self, xmlDocument, scriptUrl):
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))

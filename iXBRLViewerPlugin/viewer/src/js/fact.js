@@ -14,12 +14,9 @@
 
 import $ from 'jquery'
 import i18next from "i18next";
-import { isodateToHuman } from "./util.js"
-import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber } from "./util.js";
-import { Footnote } from "./footnote.js";
 import Decimal from "decimal.js";
 
 export class Fact {
@@ -92,10 +89,10 @@ export class Fact {
                 formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
-                v = this.unit().valueLabel() + " " + formattedNumber;
+                v = this.measureLabel() + " " + formattedNumber;
             }
             else {
-                v = formattedNumber + " " + this.unit().valueLabel();
+                v = formattedNumber + " " + this.measureLabel();
             }
         }
         else if (this.isNil()) {
@@ -122,13 +119,35 @@ export class Fact {
         return v;
     }
 
+    /**
+     * Returns the qname of the first numerator in the fact's unit
+     * @return {String} QName string of a measure
+     */
+    measure() {
+        return this.unit()?.measure();
+    }
+
+    /**
+     * Returns a readable label representing the first numerator in the fact's unit
+     * @return {String} Label representing measure
+     */
+    measureLabel() {
+        return this.unit()?.measureLabel() ?? i18next.t("factDetails.noUnit");
+    }
+
+    /**
+     * Returns details about this fact's unit
+     * @return {Unit} Unit instance
+     */
     unit() {
-        if (this.isNumeric()) {
-            return this.aspect("u");
+        if (this._unit === undefined) {
+            const unitKey = this.aspect('u')?.value();
+            if (!unitKey) {
+                return undefined;
+            }
+            this._unit = this.report().getUnit(unitKey);
         }
-        else {
-            return undefined;
-        }
+        return this._unit;
     }
 
     getConceptPrefix() {
@@ -164,12 +183,7 @@ export class Fact {
     }
 
     isMonetaryValue() {
-        const unit = this.unit();
-        if (!unit || unit.value() === null) {
-            return false;
-        }
-        const q = this.report().qname(unit.value());
-        return q.namespace == "http://www.xbrl.org/2003/iso4217";
+        return this.unit()?.isMonetary() ?? false;
     }
 
     isTextBlock() {
@@ -181,10 +195,15 @@ export class Fact {
     }
 
     aspect(a) {
-        if (this.f.a[a] !== undefined) {
-            return new Aspect(a, this.f.a[a], this._report);
+        if (this._aspects === undefined) {
+            this._aspects = {}
         }
-        return undefined;
+        if (this._aspects[a] === undefined) {
+            if (this.f.a[a] !== undefined) {
+                this._aspects[a] = new Aspect(a, this.f.a[a], this._report);
+            }
+        }
+        return this._aspects[a];
     }
 
     isAligned(of, coveredAspects) {
@@ -256,7 +275,7 @@ export class Fact {
         }
         var name = i18next.t(`currencies:accuracy${d}`, {defaultValue:"noName"});
         if (this.isMonetaryValue()) {
-            var currency = this.report().qname(this.unit().value()).localname;
+            var currency = this.report().qname(this.measure()).localname;
             if (d == 2) {
                 var name = i18next.t(`currencies:cents${currency}`, {defaultValue: name});
             }

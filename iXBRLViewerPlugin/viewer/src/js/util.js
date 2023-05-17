@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import dateFormat from "dateformat"
 import moment from "moment";
 import Decimal from "decimal.js";
 
@@ -147,4 +146,17 @@ export function runGenerator(generator) {
         return;
     }
     setTimeout(resume, 0);
+}
+
+/**
+ * Word-by-word title-casing that preserves existing uppercase characters
+ * @param  {String} text  Text to title-case
+ * @return {String} Title-cased string
+ */
+export function titleCase(text) {
+    return text.split(' ').map(word => {
+        return Array.from(word)
+                .map((c, i) => (i === 0) ? c.toUpperCase() : c)
+                .join('');
+    }).join(' ');
 }

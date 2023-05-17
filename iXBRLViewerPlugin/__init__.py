@@ -193,9 +193,8 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         import webbrowser
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
-        viewer_file_name = 'ixbrlviewer.htm'
-        temp_file_path = os.path.join(tempViewer.name, viewer_file_name)
-        generateViewer(cntlr, temp_file_path)
+        viewer_file_name = 'ixbrlviewer.html'
+        generateViewer(cntlr, tempViewer.name, useStubViewer = True)
         localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
         localhost = localViewer.init(cntlr, tempViewer.name)
         webbrowser.open(f'{localhost}/{viewer_file_name}')

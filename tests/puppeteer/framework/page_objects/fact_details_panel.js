@@ -1,5 +1,5 @@
-import {Button, Text} from "../core_elements";
-import {getTextContent} from "../utils";
+import { Button, Text } from '../core_elements.js';
+import { getTextContent } from '../utils.js';
 
 export class FactDetailsPanel {
     #viewerPage;

@@ -296,10 +296,12 @@ export class Viewer {
     //
     _preProcessiXBRL = function(n, docIndex, inHidden) {
         const name = localName(n.nodeName).toUpperCase();
-        const isFootnote = (name == 'FOOTNOTE');
-        const isContinuation = (name == 'CONTINUATION');
-        const isFact = (name == 'NONNUMERIC' || name == 'NONFRACTION');
-        if (n.nodeType == 1) {
+        const isFootnote = name === 'FOOTNOTE';
+        const isContinuation = name === 'CONTINUATION';
+        const isNonNumeric = name === 'NONNUMERIC';
+        const isNonFraction = name === 'NONFRACTION';
+        const isFact = isNonNumeric || isNonFraction;
+        if (n.nodeType === 1) {
             // Ignore iXBRL elements that are not in the default target document, as
             // the viewer builder does not handle these, and the builder does not
             // ensure that they have ID attributes.
@@ -334,10 +336,17 @@ export class Viewer {
                 else {
                     this._docOrderItemIndex.addItem(id, docIndex);
                 }
-                if (name == 'NONFRACTION') {
+                if (isNonFraction) {
                     $(nodes).addClass("ixbrl-element-nonfraction");
+                    if (n.hasAttribute('scale')) {
+                        const scale = Number(n.getAttribute('scale'));
+                        // Set scale if the value is a valid number and is not a redundant 0/"ones" scale.
+                        if (!Number.isNaN(scale) && scale !== 0) {
+                            ixn.scale = scale;
+                        }
+                    }
                 }
-                if (name == 'NONNUMERIC') {
+                if (isNonNumeric) {
                     $(nodes).addClass("ixbrl-element-nonnumeric");
                     if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
                         ixn.escaped = true;

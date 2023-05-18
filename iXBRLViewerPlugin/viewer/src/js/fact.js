@@ -268,7 +268,10 @@ export class Fact {
 
     getScaleLabel(value, isAccuracy=false) {
         return this._report.getScaleLabel(
-                isAccuracy ? -value : value, // Invert value if this is an accuracy value
+                // We use the same table of labels for scale and accuracy,
+                // but decimals means "accurate to 10^-N" whereas scale means 10^N,
+                // so invert N for accuracy.
+                isAccuracy ? -value : value,
                 this.isMonetaryValue(),
                 this.report().qname(this.measure()).localname
         );

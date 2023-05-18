@@ -182,6 +182,24 @@ export class Fact {
         return dims;
     }
 
+    hasExplicitDimension() {
+        for (const d in this.dimensions()) {
+            if (!this._report.getConcept(d).isTypedDimension()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    hasTypedDimension() {
+        for (const d in this.dimensions()) {
+            if (this._report.getConcept(d).isTypedDimension()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     isMonetaryValue() {
         return this.unit()?.isMonetary() ?? false;
     }

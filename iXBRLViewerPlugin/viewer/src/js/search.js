@@ -117,6 +117,14 @@ export class ReportSearch {
         );
     }
 
+    dimensionTypeFilter(s, item) {
+        return (
+            s.dimensionTypeFilter === '*' ||
+            (s.dimensionTypeFilter === 'typed' && item.hasTypedDimension()) ||
+            (s.dimensionTypeFilter === 'explicit' && item.hasExplicitDimension())
+        )
+    }
+
     factValueFilter(s, item) {
         return (
             s.factValueFilter === '*' ||
@@ -167,6 +175,7 @@ export class ReportSearch {
             this.visibilityFilter,
             this.periodFilter,
             this.conceptTypeFilter,
+            this.dimensionTypeFilter,
             this.factValueFilter,
             this.calculationsFilter,
             this.namespacesFilter,

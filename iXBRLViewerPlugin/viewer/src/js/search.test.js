@@ -32,16 +32,33 @@ function getReportSearch(report) {
     return reportSearch;
 }
 
+function createDimensionConcept(name, label, isExplicit= true) {
+    const c = createSimpleConcept(name, label);
+    c[name]["d"] = isExplicit ? "e": "t";
+    return c;
+}
 function createSimpleConcept(name, label=null) {
     return {
         [name]: {
             "labels": {
-                "ns0": {
+                "std": {
                     "en-us": label ?? name.split(':')[1]
+                },
+                "doc": {
+                    "en-us": label + " documentation"
                 }
             }
         }
     };
+}
+
+function createDimensionalizedFact(id, concept, options=null, dimensions= {}) {
+    const fact = createSimpleFact(id, concept, options);
+    for (const d in dimensions) {
+        const m = dimensions[d];
+        fact[id]["a"][d] = m;
+    }
+    return fact;
 }
 
 function createSimpleFact(id, concept, options=null) {
@@ -93,6 +110,7 @@ function testSearchSpec(searchString='') {
     spec.scalesFilter = [];
     spec.periodFilter = '*';
     spec.conceptTypeFilter = '*';
+    spec.dimensionTypeFilter = '*';
     spec.factValueFilter = '*';
     spec.calculationsFilter = "*";
     return spec;
@@ -364,6 +382,75 @@ describe("Search units filter", () => {
         const results2 = reportSearch.search(spec2).map(r => r.fact.id).sort();
         expect(results1).toEqual(results2);
         expect(results1).toEqual(['itemA', 'itemAB', 'itemB', 'itemBA'])
+    });
+});
+
+describe("Search dimension type filter", () => {
+    const report = testReport(
+            {},
+            {
+                "concepts": {
+                    ...createSimpleConcept("test:Concept", "Concept"),
+                    ...createSimpleConcept("test:Concept2", "Concept2"),
+                    ...createSimpleConcept("test:Member", "Member"),
+                    ...createDimensionConcept("test:ExplicitDimension", "ExplicitDimension"),
+                    ...createDimensionConcept("test:ExplicitDimension2", "ExplicitDimension2"),
+                    ...createDimensionConcept("test:TypedDimension", "TypedDimension", false),
+                    ...createDimensionConcept("test:TypedDimension2", "TypedDimension2", false),
+                },
+                "facts": {
+                    ...createSimpleFact("simple", "test:Concept"),
+                    ...createSimpleFact("simple2", "test:Concept2"),
+                    ...createDimensionalizedFact("explicit", "test:Concept", null, {"test:ExplicitDimension": "test:Member"}),
+                    ...createDimensionalizedFact("explicit2", "test:Concept2", null,{"test:ExplicitDimension2": "test:Member"}),
+                    ...createDimensionalizedFact("typed", "test:Concept", null,{"test:TypedDimension": 1}),
+                    ...createDimensionalizedFact("typed2", "test:Concept2", null,{"test:TypedDimension2": 2}),
+                    ...createDimensionalizedFact("explicitAndTyped", "test:Concept", null,{"test:ExplicitDimension": "test:Member", "test:TypedDimension": 1}),
+                    ...createDimensionalizedFact("explicitAndTyped2", "test:Concept2", null,{"test:ExplicitDimension2": "test:Member", "test:TypedDimension2": 2}),
+                }
+            }
+    )
+    const reportSearch = getReportSearch(report);
+
+    test("Dimension 'all' filter works", () => {
+        const spec = testSearchSpec();
+        spec.dimensionTypeFilter = '*';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'simple', 'simple2', 'typed', 'typed2']);
+    });
+
+    test("Dimension 'explicit' filter works", () => {
+        const spec = testSearchSpec();
+        spec.dimensionTypeFilter = 'explicit';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2']);
+    });
+
+    test("Dimension 'typed' filter works", () => {
+        const spec = testSearchSpec();
+        spec.dimensionTypeFilter = 'typed';
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
+    });
+
+    const emptyReport = testReport(
+            {'fact': {}},
+            {
+                "concepts": {
+                    ...createSimpleConcept("test:Concept", "Concept"),
+                },
+                "facts": {
+                    ...createSimpleFact("fact", "test:Fact"),
+                },
+            },
+    )
+    const emptyReportSearch = getReportSearch(emptyReport);
+
+    test("Dimension filter works on empty report", () => {
+        const spec = testSearchSpec();
+        spec.dimensionTypeFilter = 'explicit';
+        const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual([]);
     });
 });
 

@@ -32,12 +32,12 @@ function getReportSearch(report) {
     return reportSearch;
 }
 
-function createSimpleConcept(name, label) {
+function createSimpleConcept(name, label=null) {
     return {
         [name]: {
             "labels": {
                 "ns0": {
-                    "en-us": label
+                    "en-us": label ?? name.split(':')[1]
                 }
             }
         }
@@ -73,6 +73,11 @@ function testReport(ixData, testData) {
         ...JSON.parse(JSON.stringify(testReportData)),
         ...testData
     }
+    Object.keys(data['facts']).forEach(id => {
+        if (!(id in ixData)) {
+            ixData[id] = {};
+        }
+    })
     const report = new iXBRLReport(data);
     report.setIXNodeMap(ixData);
     return report;
@@ -85,6 +90,7 @@ function testSearchSpec(searchString='') {
     spec.showHiddenFacts = true;
     spec.namespacesFilter = [];
     spec.unitsFilter = [];
+    spec.scalesFilter = [];
     spec.periodFilter = '*';
     spec.conceptTypeFilter = '*';
     spec.factValueFilter = '*';
@@ -358,5 +364,74 @@ describe("Search units filter", () => {
         const results2 = reportSearch.search(spec2).map(r => r.fact.id).sort();
         expect(results1).toEqual(results2);
         expect(results1).toEqual(['itemA', 'itemAB', 'itemB', 'itemBA'])
+    });
+});
+
+describe("Search scales filter", () => {
+    const cashUnit = 'test:USD';
+    const period = '2018-01-01/2019-01-01';
+    const report = testReport(
+            {
+                "item-3": { "scale": -3 },
+                "item-2": { "scale": -2 },
+                "item-1": { "scale": -1 },
+                "item0": { },
+                "item1": { "scale": 1 },
+                "item2": { "scale": 2 },
+                "item3": { "scale": 3 },
+                "item6": { "scale": 6 },
+                "item9": { "scale": 9 },
+                "item12": { "scale": 12 },
+            },
+            {
+                "concepts": {
+                    ...createSimpleConcept("a:Item-3"),
+                    ...createSimpleConcept("a:Item-2"),
+                    ...createSimpleConcept("a:Item-1"),
+                    ...createSimpleConcept("a:Item0"),
+                    ...createSimpleConcept("a:Item1"),
+                    ...createSimpleConcept("a:Item2"),
+                    ...createSimpleConcept("a:Item3"),
+                    ...createSimpleConcept("a:Item6"),
+                    ...createSimpleConcept("a:Item9"),
+                    ...createSimpleConcept("a:Item12"),
+                    ...createSimpleConcept("a:Other"),
+                },
+                "facts": {
+                    ...createNumericFact("item-3", "a:Item-3", cashUnit, period, 0.001),
+                    ...createNumericFact("item-2", "a:Item-2", cashUnit, period, 0.01),
+                    ...createNumericFact("item-1", "a:Item-1", cashUnit, period, 0.1),
+                    ...createNumericFact("item0", "a:Item0", cashUnit, period, 1),
+                    ...createNumericFact("item1", "a:Item1", cashUnit, period, 10),
+                    ...createNumericFact("item2", "a:Item2", cashUnit, period, 100),
+                    ...createNumericFact("item3", "a:Item3", cashUnit, period, 1000),
+                    ...createNumericFact("item6", "a:Item6", cashUnit, period, 1000000),
+                    ...createNumericFact("item9", "a:Item9", cashUnit, period, 1000000000),
+                    ...createNumericFact("item12", "a:Item12", cashUnit, period, 1000000000000),
+                    ...createSimpleFact("itemOther", "a:Other"),
+                },
+            }
+    )
+    const reportSearch = getReportSearch(report);
+
+    test("Scales filter works without selection", () => {
+        const spec = testSearchSpec();
+        spec.scalesFilter = [];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item-1', 'item-2', 'item-3', 'item0', 'item1', 'item12', 'item2', 'item3', 'item6', 'item9', 'itemOther']);
+    });
+
+    test("Scales filter works with single selection", () => {
+        const spec = testSearchSpec();
+        spec.scalesFilter = [-2];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item-2']);
+    });
+
+    test("Scales filter works with multiple selections", () => {
+        const spec = testSearchSpec();
+        spec.scalesFilter = [-2, 2];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['item-2', 'item2']);
     });
 });

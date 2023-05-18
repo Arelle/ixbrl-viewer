@@ -168,9 +168,9 @@ iXBRLReport.prototype.getIXNodeForItemId = function(id) {
 }
 
 iXBRLReport.prototype.facts = function() {
-    var allItems = [];
-    $.each(this.data.facts, (id, f) => allItems.push(this.getItemById(id)));
-    return allItems;
+    var allFacts = [];
+    $.each(this.data.facts, (id, f) => allFacts.push(this.getItemById(id)));
+    return allFacts;
 }
 
 iXBRLReport.prototype.filingDocuments = function() {

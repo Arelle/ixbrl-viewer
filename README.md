@@ -209,7 +209,7 @@ All commands should be run from repository root
     * This command generates the `ixbrlviewer.js`, uses Arelle to generate several test files, then serves the files via a nodejs http-server.
     * Currently changes to application code require restarting this step to take effect. 
 4. Start the puppeteer tests
-    * Terminal:
+    * [Terminal 2]:
        ```bash
        npm run test:puppeteer
        ```

@@ -40,7 +40,7 @@ describe('ixbrl-viewer',() => {
                 await detailsPanel.concept.assertText('(us-gaap) Revenues');
                 await detailsPanel.date.assertText('1 Jan 2011 to 31 Mar 2011');
                 await detailsPanel.factValue.assertText('US $ 5,117,000,000');
-                await detailsPanel.accuracy.assertText('-6 (millions)');
+                await detailsPanel.accuracy.assertText('millions');
                 await detailsPanel.entity.assertText('[CIK] 0000990763');
 
                 // Assert Calculations

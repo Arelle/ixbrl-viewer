@@ -3,6 +3,7 @@
     "accuracyInfinite": "Infinite precision",
     "none": "None",
     "notApplicable": "n/a",
+    "unscaled": "Unscaled",
     "unspecified": "Unspecified"
   },
   "factDetails": {
@@ -18,7 +19,8 @@
     "entity": "Entity",
     "factValue": "Fact Value",
     "noPriorFactInThisReport": "No prior fact in this report",
-    "noUnit": "<NOUNIT>"
+    "noUnit": "<NOUNIT>",
+    "scale": "Scale"
   },
   "footnotes": {
     "footnote": "Footnote"
@@ -58,6 +60,7 @@
     "printDocument": "Print Document",
     "references": "References",
     "reset": "Reset",
+    "scales": "Scales",
     "searchTitle": "Search",
     "showTextOnly": "Show text only",
     "summary": {
@@ -89,12 +92,28 @@
     "summation": "Summation",
     "summationOrContributor": "Summation or Contributor",
     "textOption": "Text",
+    "units": "Units",
     "validationCode": "Code",
     "validationMessage": "Message",
     "validationResults": "Validation results",
     "validationSeverity": "Severity",
     "visibleFacts": "Visible Facts",
     "widerAnchor": "Wider anchor"
+  },
+  "scale": {
+    "-3": "thousandths",
+    "-2": "hundredths",
+    "-1": "tenths",
+    "0": "ones",
+    "1": "tens",
+    "2": "hundreds",
+    "3": "thousands",
+    "4": "ten thousands",
+    "5": "hundred thousands",
+    "6": "millions",
+    "7": "ten millions",
+    "8": "hundred millions",
+    "9": "billions"
   },
   "search": {
     "concealedFact": "Concealed fact",

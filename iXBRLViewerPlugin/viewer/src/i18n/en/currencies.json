@@ -9,13 +9,5 @@
     "centsAUD": "cents",
     "centsZAR": "cents",
     "centsMXN": "cents",
-    "centsGBP": "pence",
-    "accuracy3": "thousandths",
-    "accuracy2": "hundredths",
-    "accuracy0":  "ones",
-    "accuracy-1":  "tens",
-    "accuracy-2":  "hundreds",
-    "accuracy-3":  "thousands",
-    "accuracy-6":  "millions",
-    "accuracy-9":  "billions"
+    "centsGBP": "pence"
 }

@@ -3,6 +3,7 @@
     "accuracyInfinite": "Precisió infinita",
     "none": "Ninguno",
     "notApplicable": "n/d",
+    "unscaled": "Sin escala",
     "unspecified": "Sin especificar"
   },
   "factDetails": {
@@ -18,7 +19,8 @@
     "entity": "Entidad",
     "factValue": "Valor del hecho",
     "noPriorFactInThisReport": "No hay un hecho previo",
-    "noUnit": "Sin unidad"
+    "noUnit": "Sin unidad",
+    "scale": "Escala"
   },
   "footnotes": {
     "footnote": "Nota al pie de página"
@@ -58,6 +60,7 @@
     "printDocument": "",
     "references": "Referencias",
     "reset": "Limpiar",
+    "scales": "Escalas",
     "searchTitle": "Búsqueda de hechos",
     "showTextOnly": "",
     "summary": {
@@ -89,12 +92,28 @@
     "summation": "",
     "summationOrContributor": "",
     "textOption": "Texto",
+    "units": "Unidads",
     "validationCode": "",
     "validationMessage": "",
     "validationResults": "",
     "validationSeverity": "",
     "visibleFacts": "Hechos visibles",
     "widerAnchor": "Anclaje amplio"
+  },
+  "scale": {
+    "-3": "mil\u00E9simos",
+    "-2": "cent\u00E9simos",
+    "-1": "d\u00E9cimas",
+    "0": "unidades",
+    "1": "d\u00E9cimos",
+    "2": "cientos",
+    "3": "miles",
+    "4": "diez miles",
+    "5": "cien miles",
+    "6": "millones",
+    "7": "diez millones",
+    "8": "cien millones",
+    "9": "billones"
   },
   "search": {
     "concealedFact": "",

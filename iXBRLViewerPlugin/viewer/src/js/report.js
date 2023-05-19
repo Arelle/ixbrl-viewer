@@ -168,9 +168,9 @@ iXBRLReport.prototype.getIXNodeForItemId = function(id) {
 }
 
 iXBRLReport.prototype.facts = function() {
-    var allItems = [];
-    $.each(this.data.facts, (id, f) => allItems.push(this.getItemById(id)));
-    return allItems;
+    var allFacts = [];
+    $.each(this.data.facts, (id, f) => allFacts.push(this.getItemById(id)));
+    return allFacts;
 }
 
 iXBRLReport.prototype.filingDocuments = function() {
@@ -184,6 +184,7 @@ iXBRLReport.prototype.prefixMap = function() {
 iXBRLReport.prototype.getUsedPrefixes = function() {
     if (this._usedPrefixes === undefined) {
         this._usedPrefixes = new Set(Object.values(this._items)
+                .filter(f => f instanceof Fact)
                 .map(f => f.getConceptPrefix()));
     }
     return this._usedPrefixes;
@@ -196,6 +197,7 @@ iXBRLReport.prototype.getUsedPrefixes = function() {
 iXBRLReport.prototype.getUsedUnits = function() {
     if (this._usedUnits === undefined) {
         this._usedUnits = new Set(Object.values(this._items)
+                .filter(f => f instanceof Fact)
                 .map(f => f.unit()?.value())
                 .filter(f => f)
                 .sort());

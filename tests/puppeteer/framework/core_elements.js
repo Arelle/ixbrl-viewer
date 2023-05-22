@@ -15,7 +15,7 @@ export class Text {
         this.#viewerPage.log(
             `Asserting text content of ${this.#name} equals "${expectedText}"`);
         const elem = await this.#viewerPage.page.waitForSelector(
-            'xpath/' + this.#xpathSelector);
+            'xpath/' + this.#xpathSelector, { visible: true });
         const text = await getTextContent(elem);
         expect(text).toEqual(expectedText);
     }
@@ -46,7 +46,7 @@ export class Button {
 
     async getButtonElement() {
         return await this.#viewerPage.page.waitForSelector(
-            'xpath/' + this.#xpathSelector);
+            'xpath/' + this.#xpathSelector, { visible: true });
     }
 }
 
@@ -63,7 +63,7 @@ export class Checkbox {
 
     async getInput() {
         return await this.#viewerPage.page.waitForSelector(
-            'xpath/' + this.#xpathSelector);
+            'xpath/' + this.#xpathSelector, { visible: true });
     }
 
     async isChecked() {
@@ -112,6 +112,6 @@ export class TextInput {
 
     async getInput() {
         return await this.#viewerPage.page.waitForSelector(
-            'xpath/' + this.#xpathSelector);
+            'xpath/' + this.#xpathSelector, { visible: true });
     }
 }

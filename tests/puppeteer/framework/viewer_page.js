@@ -55,6 +55,9 @@ export class ViewerPage {
         const url = `http://localhost:8080/tests/puppeteer/artifacts/generated_output/${filingName}.htm`;
         this.log(`Navigating to ${url}`);
         await this.page.goto(url, { waitUntil: 'networkidle0' });
+        await this.page.waitForSelector(
+            'xpath/' + '//*[contains(@class, "loading")]',
+            { visible: false, hidden: true });
     }
 
     async tearDown() {

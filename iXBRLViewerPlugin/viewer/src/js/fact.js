@@ -183,21 +183,11 @@ export class Fact {
     }
 
     hasExplicitDimension() {
-        for (const d in this.dimensions()) {
-            if (!this._report.getConcept(d).isTypedDimension()) {
-                return true;
-            }
-        }
-        return false;
+        return Object.keys(this.dimensions()).some(d => !this._report.getConcept(d).isTypedDimension());
     }
 
     hasTypedDimension() {
-        for (const d in this.dimensions()) {
-            if (this._report.getConcept(d).isTypedDimension()) {
-                return true;
-            }
-        }
-        return false;
+        return Object.keys(this.dimensions()).some(d => this._report.getConcept(d).isTypedDimension());
     }
 
     isMonetaryValue() {

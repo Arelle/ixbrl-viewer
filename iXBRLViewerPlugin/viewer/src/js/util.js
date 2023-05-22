@@ -154,6 +154,7 @@ export function runGenerator(generator) {
  * @return {String} Title-cased string
  */
 export function titleCase(text) {
+    if (!text) return text;
     return text.split(' ').map(word => {
         return Array.from(word)
                 .map((c, i) => (i === 0) ? c.toUpperCase() : c)

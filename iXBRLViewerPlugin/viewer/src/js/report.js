@@ -18,8 +18,9 @@ import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
 import { Unit } from "./unit";
 import { ViewerOptions } from "./viewerOptions.js";
-import { setDefault } from "./util.js";
+import { setDefault, titleCase } from "./util.js";
 import $ from 'jquery'
+import i18next from "i18next";
 
 export function iXBRLReport (data) {
     this.data = data;
@@ -220,6 +221,25 @@ iXBRLReport.prototype.getUnit = function(unitKey) {
     return this._unitsMap[unitKey];
 }
 
+iXBRLReport.prototype.getUsedScalesMap = function() {
+    // Do not lazy load. This is language-dependent so needs to re-evaluate after language changes.
+    const usedScalesMap = {};
+    Object.values(this._items).forEach(fact => {
+        const scale = fact.scale();
+        if (scale !== null && scale !== undefined) {
+            if (!(scale in usedScalesMap)) {
+                usedScalesMap[scale] = new Set();
+            }
+            const labels = usedScalesMap[scale];
+            const label = titleCase(fact.getScaleLabel(scale));
+            if (label && !labels.has(label)) {
+                labels.add(label);
+            }
+        }
+    });
+    return usedScalesMap;
+}
+
 iXBRLReport.prototype.roleMap = function() {
     return this.data.roles;
 }
@@ -397,4 +417,15 @@ iXBRLReport.prototype.usesAnchoring = function() {
 
 iXBRLReport.prototype.hasValidationErrors = function() {
     return this.data.validation !== undefined && this.data.validation.length > 0;
+}
+
+iXBRLReport.prototype.getScaleLabel = function(scale, isMonetaryValue, currency=null) {
+    var label = i18next.t(`scale.${scale}`, {defaultValue:"noName"});
+    if (isMonetaryValue && scale === -2) {
+        label = i18next.t(`currencies:cents${currency}`, {defaultValue: label});
+    }
+    if (label === "noName") {
+        return null;
+    }
+    return label;
 }

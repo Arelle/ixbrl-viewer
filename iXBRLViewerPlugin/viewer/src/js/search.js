@@ -148,6 +148,13 @@ export class ReportSearch {
         );
     }
 
+    scalesFilter(s, item) {
+        return (
+                s.scalesFilter.length === 0 ||
+                s.scalesFilter.some(x => item.scale() === Number(x))
+        );
+    }
+
     search(s) {
         if (!this.ready) {
             return;
@@ -164,9 +171,10 @@ export class ReportSearch {
             this.calculationsFilter,
             this.namespacesFilter,
             this.unitsFilter,
+            this.scalesFilter,
         ];
 
-        rr.forEach((r,i) => {
+        rr.forEach((r,_) => {
                 const item = searchIndex._report.getItemById(r.ref);
                 if (filters.every(f => f(s, item))) {
                     results.push({

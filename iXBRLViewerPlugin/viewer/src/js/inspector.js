@@ -287,6 +287,7 @@ Inspector.prototype.searchSpec = function () {
     spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
     spec.namespacesFilter = $('#search-filter-namespaces').val();
     spec.unitsFilter = $('#search-filter-units').val();
+    spec.scalesFilter = $('#search-filter-scales').val();
     spec.periodFilter = $('#search-filter-period').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
@@ -319,6 +320,28 @@ Inspector.prototype.setupSearchControls = function (viewer) {
                 .text(`${this._report.getUnit(unit)?.label()} (${unit})`)
                 .appendTo('#search-filter-units');
     });
+    const scalesOptions = this._getScalesOptions();
+    Object.keys(scalesOptions).sort().forEach(scale => {
+            $("<option>")
+                    .attr("value", scale)
+                    .text(scalesOptions[scale])
+                    .appendTo('#search-filter-scales');
+    });
+}
+
+Inspector.prototype._getScalesOptions = function() {
+    const scalesOptions = {}
+    const usedScalesMap = this._report.getUsedScalesMap();
+    Object.keys(usedScalesMap).sort().forEach(scale => {
+        const labels = Array.from(usedScalesMap[scale]).sort();
+        if (labels.length > 0) {
+            scalesOptions[scale] = labels.join(', ');
+        }
+        else {
+            scalesOptions[scale] = scale.toString();
+        }
+    });
+    return scalesOptions;
 }
 
 Inspector.prototype.resetSearchFilters = function () {
@@ -330,6 +353,7 @@ Inspector.prototype.resetSearchFilters = function () {
     $("#search-visible-fact-filter").prop("checked", true);
     $("#search-filter-namespaces option:selected").prop("selected", false);
     $("#search-filter-units option:selected").prop("selected", false);
+    $("#search-filter-scales option:selected").prop("selected", false);
     this.search();
 }
 
@@ -841,6 +865,11 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             var accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
             if (!fact.isNumeric() || fact.isNil()) {
                 accuracyTD.wrapInner("<i></i>");
+            }
+
+            var scaleTD = $('tr.scale td', factHTML).empty().append(fact.readableScale());
+            if (!fact.isNumeric() || fact.isNil()) {
+                scaleTD.wrapInner("<i></i>");
             }
 
             $('#dimensions', factHTML).empty();

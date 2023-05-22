@@ -46,8 +46,12 @@ var testReportData = {
             }
         }
     },
-    "facts": {
-    }
+    "facts": {},
+    "languages": {},
+    "roles": {},
+    "roleDefs": {},
+    "rels": {},
+    "units": {},
 };
 
 function testReport(facts, ixData) {
@@ -103,4 +107,117 @@ describe("Describe changes", () => {
         expect(insp.describeChange(fromFact(0), toFact(0))).toBe("From US $ 0 in ");
         expect(insp.describeChange(fromFact(1000), toFact(0))).toBe("From US $ 1,000 in ");
     });
+});
+
+describe("Scales filter options", () => {
+    const createTestFact = function(isMonetary) {
+        return {
+            "v": 1,
+            "a": {
+                "c": "eg:Concept1",
+                "u": isMonetary ? "iso4217:USD" : "test:shares",
+                "p": "2018-01-01/2019-01-01",
+            },
+        };
+    }
+    const ixData = {};
+    const monetaryFactData = {};
+    for (let scale = -4; scale < 11; scale++) {
+        const id = `itemM${scale}`;
+        monetaryFactData[id] = createTestFact(true);
+        const ixNode = {}
+        if (scale !== 0) {
+            ixNode["scale"] = scale;
+        }
+        ixData[id] = ixNode;
+    }
+    const nonMonetaryFactData = {};
+    for (let scale = -4; scale < 11; scale++) {
+        const id = `item${scale}`;
+        nonMonetaryFactData[id] = createTestFact(false);
+        const ixNode = {}
+        if (scale !== 0) {
+            ixNode["scale"] = scale;
+        }
+        ixData[id] = ixNode;
+    }
+
+    test("Scales filter options with monetary and non-monetary facts", () => {
+        var insp = new TestInspector();
+        const report = testReport({
+            ...monetaryFactData,
+            ...nonMonetaryFactData,
+        }, ixData);
+        insp.initialize(report)
+        insp.i18nInit();
+        const scalesOptions = insp._getScalesOptions();
+        expect(scalesOptions).toEqual({
+            "1": "Tens",
+            "2": "Hundreds",
+            "3": "Thousands",
+            "4": "Ten Thousands",
+            "5": "Hundred Thousands",
+            "6": "Millions",
+            "7": "Ten Millions",
+            "8": "Hundred Millions",
+            "9": "Billions",
+            "10": "10",
+            "-1": "Tenths",
+            "-2": "Cents, Hundredths",
+            "-3": "Thousandths",
+            "-4": "-4",
+        });
+    })
+
+    test("Scales filter options with only monetary facts", () => {
+        var insp = new TestInspector();
+        const report = testReport({
+            ...monetaryFactData,
+        }, ixData);
+        insp.initialize(report)
+        insp.i18nInit();
+        const scalesOptions = insp._getScalesOptions();
+        expect(scalesOptions).toEqual({
+            "1": "Tens",
+            "2": "Hundreds",
+            "3": "Thousands",
+            "4": "Ten Thousands",
+            "5": "Hundred Thousands",
+            "6": "Millions",
+            "7": "Ten Millions",
+            "8": "Hundred Millions",
+            "9": "Billions",
+            "10": "10",
+            "-1": "Tenths",
+            "-2": "Cents",
+            "-3": "Thousandths",
+            "-4": "-4",
+        });
+    })
+
+    test("Scales filter options with only non-monetary facts", () => {
+        var insp = new TestInspector();
+        const report = testReport({
+            ...nonMonetaryFactData,
+        }, ixData);
+        insp.initialize(report)
+        insp.i18nInit();
+        const scalesOptions = insp._getScalesOptions();
+        expect(scalesOptions).toEqual({
+            "1": "Tens",
+            "2": "Hundreds",
+            "3": "Thousands",
+            "4": "Ten Thousands",
+            "5": "Hundred Thousands",
+            "6": "Millions",
+            "7": "Ten Millions",
+            "8": "Hundred Millions",
+            "9": "Billions",
+            "10": "10",
+            "-1": "Tenths",
+            "-2": "Hundredths",
+            "-3": "Thousandths",
+            "-4": "-4",
+        });
+    })
 });

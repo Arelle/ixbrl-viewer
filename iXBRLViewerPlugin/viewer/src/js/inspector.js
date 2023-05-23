@@ -409,12 +409,16 @@ Inspector.prototype.search = function() {
 }
 
 Inspector.prototype.updateMultiSelectSubheader = function (id) {
-    const selectedOptions = $(`#${id} select option:selected`).length;
-    if (selectedOptions > 0) {
+    const subheader = $(`#${id} .collapsible-subheader`);
+    const selectedOptions = $(`#${id} select option:selected`);
+    if (selectedOptions.length === 1) {
+        subheader.text(` ${selectedOptions.text()}`);
+    }
+    else if (selectedOptions.length > 0) {
         const totalOptions = $(`#${id} select option`).length;
-        $(`#${id} .collapsible-subheader`).text(` (${selectedOptions}/${totalOptions} ${i18next.t("search.selected")})`)
+        subheader.text(` (${selectedOptions.length}/${totalOptions} ${i18next.t("search.selected")})`)
     } else {
-        $(`#${id} .collapsible-subheader`).empty();
+        subheader.empty();
     }
 }
 

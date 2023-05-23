@@ -438,6 +438,9 @@
 
         .search-filters {
           position: relative;
+          // Ensure the filter pane never grows too large to hide the results pane
+          max-height: 60vh;
+          overflow-y: auto;
 
           .reset {
             .clickable();

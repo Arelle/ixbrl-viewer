@@ -295,7 +295,7 @@ Inspector.prototype.searchSpec = function () {
     spec.namespacesFilter = $('#search-filter-namespaces select').val();
     spec.unitsFilter = $('#search-filter-units select').val();
     spec.scalesFilter = $('#search-filter-scales select').val();
-    spec.periodFilter = $('#search-filter-period').val();
+    spec.periodFilter = $('#search-filter-period select').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
     spec.calculationsFilter = $('#search-filter-calculations select').val();
@@ -312,15 +312,12 @@ Inspector.prototype.setupSearchControls = function (viewer) {
         $(this).siblings().children('select option:selected').prop('selected', false);
         inspector.search();
     });
-    $("#search-filter-period")
-        .empty()
-        .append($('<option value="*">-</option>'));
-    for (const key in this._search.periods) {
+    Object.keys(this._search.periods).forEach(key => {
         $("<option>")
             .attr("value", key)
             .text(this._search.periods[key])
-            .appendTo('#search-filter-period');
-    }
+            .appendTo('#search-filter-period select');
+    });
     this._report.getUsedPrefixes().forEach(prefix => {
         $("<option>")
             .attr("value", prefix)
@@ -358,7 +355,7 @@ Inspector.prototype._getScalesOptions = function() {
 }
 
 Inspector.prototype.resetSearchFilters = function () {
-    $("#search-filter-period").val("*");
+    $("#search-filter-period select option:selected").prop("selected", false);
     $("#search-filter-concept-type").val("*");
     $("#search-filter-fact-value").val("*");
     $("#search-filter-calculations select option:selected").prop("selected", false);
@@ -408,6 +405,7 @@ Inspector.prototype.search = function() {
     this.updateMultiSelectSubheader('search-filter-namespaces');
     this.updateMultiSelectSubheader('search-filter-dimension-type');
     this.updateMultiSelectSubheader('search-filter-calculations');
+    this.updateMultiSelectSubheader('search-filter-period');
 }
 
 Inspector.prototype.updateMultiSelectSubheader = function (id) {

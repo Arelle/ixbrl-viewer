@@ -105,8 +105,8 @@ export class ReportSearch {
 
     periodFilter(s, item) {
         return (
-            s.periodFilter === '*' ||
-            s.periodFilter === item.period().key()
+            s.periodFilter.length === 0 ||
+            s.periodFilter.some(p => item.period().key() === p)
         );
     }
 

@@ -108,7 +108,7 @@ function testSearchSpec(searchString='') {
     spec.namespacesFilter = [];
     spec.unitsFilter = [];
     spec.scalesFilter = [];
-    spec.periodFilter = '*';
+    spec.periodFilter = [];
     spec.conceptTypeFilter = '*';
     spec.dimensionTypeFilter = [];
     spec.factValueFilter = '*';
@@ -147,7 +147,7 @@ describe("Search fact value filter", () => {
     test("Fact Value Negative filter works with other filter", () => {
         const spec = testSearchSpec('Cash');
         spec.factValueFilter = 'negative'
-        spec.periodFilter = '2018-01-01/2019-01-01'
+        spec.periodFilter = ['2018-01-01/2019-01-01']
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"]["id"]).toEqual("negative")
@@ -164,7 +164,7 @@ describe("Search fact value filter", () => {
     test("Fact Value Positive filter works with other filter", () => {
         const spec = testSearchSpec('Cash');
         spec.factValueFilter = 'positive'
-        spec.periodFilter = '2018-01-01/2019-01-01'
+        spec.periodFilter = ['2018-01-01/2019-01-01']
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"]["id"]).toEqual("positive")

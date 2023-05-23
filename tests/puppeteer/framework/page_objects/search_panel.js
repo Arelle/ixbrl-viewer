@@ -51,7 +51,7 @@ export class Search {
 
     async filterPeriod(option) {
         const dropdown = await this.#viewerPage.page
-            .waitForSelector('#search-filter-period');
+            .waitForSelector('#search-filter-period select');
         await dropdown.select(option);
     }
 

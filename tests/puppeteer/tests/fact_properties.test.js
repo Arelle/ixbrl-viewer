@@ -1,5 +1,5 @@
-import {ViewerPage} from '../framework/viewer_page'
-import {getTextContent} from "../framework/utils";
+import { ViewerPage } from '../framework/viewer_page.js';
+import { getTextContent } from '../framework/utils.js';
 
 jest.setTimeout(60000);
 

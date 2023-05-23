@@ -224,19 +224,21 @@ iXBRLReport.prototype.getUnit = function(unitKey) {
 iXBRLReport.prototype.getUsedScalesMap = function() {
     // Do not lazy load. This is language-dependent so needs to re-evaluate after language changes.
     const usedScalesMap = {};
-    Object.values(this._items).forEach(fact => {
-        const scale = fact.scale();
-        if (scale !== null && scale !== undefined) {
-            if (!(scale in usedScalesMap)) {
-                usedScalesMap[scale] = new Set();
+    Object.values(this._items)
+        .filter(f => f instanceof Fact)
+        .forEach(fact => {
+            const scale = fact.scale();
+            if (scale !== null && scale !== undefined) {
+                if (!(scale in usedScalesMap)) {
+                    usedScalesMap[scale] = new Set();
+                }
+                const labels = usedScalesMap[scale];
+                const label = titleCase(fact.getScaleLabel(scale));
+                if (label && !labels.has(label)) {
+                    labels.add(label);
+                }
             }
-            const labels = usedScalesMap[scale];
-            const label = titleCase(fact.getScaleLabel(scale));
-            if (label && !labels.has(label)) {
-                labels.add(label);
-            }
-        }
-    });
+        });
     return usedScalesMap;
 }
 

@@ -453,6 +453,26 @@
             padding-bottom: 0;
           }
 
+          .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 0.4em;
+
+            .control-label {
+              white-space: nowrap;
+              margin-right: 2em;
+              width: 6em;
+            }
+
+            input,
+            select,
+            textarea {
+              flex-basis: 12em;
+              flex-grow: 2;
+            }
+          }
+
           .control-label {
             font-weight: bold;
             margin-bottom: 0.6em;

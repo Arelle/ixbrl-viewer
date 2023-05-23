@@ -285,9 +285,9 @@ Inspector.prototype.searchSpec = function () {
     spec.searchString = $('#ixbrl-search').val();
     spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
     spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
-    spec.namespacesFilter = $('#search-filter-namespaces').val();
-    spec.unitsFilter = $('#search-filter-units').val();
-    spec.scalesFilter = $('#search-filter-scales').val();
+    spec.namespacesFilter = $('#search-filter-namespaces select').val();
+    spec.unitsFilter = $('#search-filter-units select').val();
+    spec.scalesFilter = $('#search-filter-scales select').val();
     spec.periodFilter = $('#search-filter-period').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
@@ -313,20 +313,20 @@ Inspector.prototype.setupSearchControls = function (viewer) {
         $("<option>")
             .attr("value", prefix)
             .text(`${prefix} (${this._report.prefixMap()[prefix]})`)
-            .appendTo('#search-filter-namespaces');
+            .appendTo('#search-filter-namespaces select');
     });
     this._report.getUsedUnits().forEach(unit => {
         $("<option>")
                 .attr("value", unit)
                 .text(`${this._report.getUnit(unit)?.label()} (${unit})`)
-                .appendTo('#search-filter-units');
+                .appendTo('#search-filter-units select');
     });
     const scalesOptions = this._getScalesOptions();
     Object.keys(scalesOptions).sort().forEach(scale => {
             $("<option>")
                     .attr("value", scale)
                     .text(scalesOptions[scale])
-                    .appendTo('#search-filter-scales');
+                    .appendTo('#search-filter-scales select');
     });
 }
 
@@ -353,9 +353,9 @@ Inspector.prototype.resetSearchFilters = function () {
     $("#search-filter-dimension-type").val("*")
     $("#search-hidden-fact-filter").prop("checked", true);
     $("#search-visible-fact-filter").prop("checked", true);
-    $("#search-filter-namespaces option:selected").prop("selected", false);
-    $("#search-filter-units option:selected").prop("selected", false);
-    $("#search-filter-scales option:selected").prop("selected", false);
+    $("#search-filter-namespaces select option:selected").prop("selected", false);
+    $("#search-filter-units select option:selected").prop("selected", false);
+    $("#search-filter-scales select option:selected").prop("selected", false);
     this.search();
 }
 
@@ -390,6 +390,19 @@ Inspector.prototype.search = function() {
     /* Don't highlight search results if there's no search string */
     if (spec.searchString != "") {
         viewer.highlightRelatedFacts($.map(results, r =>  r.fact ));
+    }
+    this.updateMultiSelectSubheader('search-filter-scales');
+    this.updateMultiSelectSubheader('search-filter-units');
+    this.updateMultiSelectSubheader('search-filter-namespaces');
+}
+
+Inspector.prototype.updateMultiSelectSubheader = function (id) {
+    const selectedOptions = $(`#${id} select option:selected`).length;
+    if (selectedOptions > 0) {
+        const totalOptions = $(`#${id} select option`).length;
+        $(`#${id} .collapsible-subheader`).text(` (${selectedOptions}/${totalOptions} ${i18next.t("search.selected")})`)
+    } else {
+        $(`#${id} .collapsible-subheader`).empty();
     }
 }
 

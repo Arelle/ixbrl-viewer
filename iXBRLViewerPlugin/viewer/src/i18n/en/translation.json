@@ -120,6 +120,7 @@
     "concealedFact": "Concealed fact",
     "hiddenFact": "Hidden fact",
     "noMatchFound": "No match found",
+    "selected": "selected",
     "showMoreResults": "Show more results",
     "tryAgainDifferentKeywords": "Try again with different keywords"
   },

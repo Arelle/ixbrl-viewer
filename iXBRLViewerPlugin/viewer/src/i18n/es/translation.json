@@ -120,6 +120,7 @@
     "concealedFact": "",
     "hiddenFact": "Hecho oculto",
     "noMatchFound": "No se encontró ninguna coincidencia",
+    "selected": "seleccionados",
     "showMoreResults": "Mostrar más resultados",
     "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },

@@ -831,6 +831,15 @@
           transition: all 0.25s ease;
           display: inline-block;
         }
+
+        .collapsible-subheader {
+          pointer-events: none;
+          user-select: none;
+          font-weight: normal;
+          font-style: italic;
+          font-size: 1.3rem;
+          color: @text-form-value;
+        }
       }
 
       &.collapsed {
@@ -838,6 +847,10 @@
           transform: rotate(0);
           top: 0.3rem;
           left: -0.2rem;
+        }
+
+        .collapsible-subheader {
+          color: @primary;
         }
       }
 

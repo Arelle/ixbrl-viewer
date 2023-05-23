@@ -110,7 +110,7 @@ function testSearchSpec(searchString='') {
     spec.scalesFilter = [];
     spec.periodFilter = '*';
     spec.conceptTypeFilter = '*';
-    spec.dimensionTypeFilter = '*';
+    spec.dimensionTypeFilter = [];
     spec.factValueFilter = '*';
     spec.calculationsFilter = "*";
     return spec;
@@ -414,23 +414,30 @@ describe("Search dimension type filter", () => {
 
     test("Dimension 'all' filter works", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = '*';
+        spec.dimensionTypeFilter = [];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'simple', 'simple2', 'typed', 'typed2']);
     });
 
     test("Dimension 'explicit' filter works", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = 'explicit';
+        spec.dimensionTypeFilter = ['explicit'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2']);
     });
 
     test("Dimension 'typed' filter works", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = 'typed';
+        spec.dimensionTypeFilter = ['typed'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
+    });
+
+    test("Dimension 'explicit' and 'typed' filter works", () => {
+        const spec = testSearchSpec();
+        spec.dimensionTypeFilter = ['explicit', 'typed'];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
     });
 
     const emptyReport = testReport(
@@ -448,7 +455,7 @@ describe("Search dimension type filter", () => {
 
     test("Dimension filter works on empty report", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = 'explicit';
+        spec.dimensionTypeFilter = ['explicit'];
         const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual([]);
     });

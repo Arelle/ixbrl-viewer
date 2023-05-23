@@ -292,7 +292,7 @@ Inspector.prototype.searchSpec = function () {
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
     spec.calculationsFilter = $('#search-filter-calculations').val();
-    spec.dimensionTypeFilter = $('#search-filter-dimension-type').val();
+    spec.dimensionTypeFilter = $('#search-filter-dimension-type select').val();
     return spec;
 }
 
@@ -350,7 +350,7 @@ Inspector.prototype.resetSearchFilters = function () {
     $("#search-filter-concept-type").val("*");
     $("#search-filter-fact-value").val("*");
     $("#search-filter-calculations").val("*");
-    $("#search-filter-dimension-type").val("*")
+    $("#search-filter-dimension-type select option:selected").prop("selected", false);
     $("#search-hidden-fact-filter").prop("checked", true);
     $("#search-visible-fact-filter").prop("checked", true);
     $("#search-filter-namespaces select option:selected").prop("selected", false);

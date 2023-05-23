@@ -118,10 +118,12 @@ export class ReportSearch {
     }
 
     dimensionTypeFilter(s, item) {
+        const typed = s.dimensionTypeFilter.includes('typed');
+        const explicit = s.dimensionTypeFilter.includes('explicit');
         return (
-            s.dimensionTypeFilter === '*' ||
-            (s.dimensionTypeFilter === 'typed' && item.hasTypedDimension()) ||
-            (s.dimensionTypeFilter === 'explicit' && item.hasExplicitDimension())
+            s.dimensionTypeFilter.length === 0 ||
+            (typed && item.hasTypedDimension()) ||
+            (explicit && item.hasExplicitDimension())
         )
     }
 

@@ -169,9 +169,7 @@ iXBRLReport.prototype.getIXNodeForItemId = function(id) {
 }
 
 iXBRLReport.prototype.facts = function() {
-    var allFacts = [];
-    $.each(this.data.facts, (id, f) => allFacts.push(this.getItemById(id)));
-    return allFacts;
+    return Object.keys(this.data.facts).map(id => this.getItemById(id));
 }
 
 iXBRLReport.prototype.filingDocuments = function() {

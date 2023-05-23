@@ -182,6 +182,14 @@ export class Fact {
         return dims;
     }
 
+    hasExplicitDimension() {
+        return Object.keys(this.dimensions()).some(d => !this._report.getConcept(d).isTypedDimension());
+    }
+
+    hasTypedDimension() {
+        return Object.keys(this.dimensions()).some(d => this._report.getConcept(d).isTypedDimension());
+    }
+
     isMonetaryValue() {
         return this.unit()?.isMonetary() ?? false;
     }

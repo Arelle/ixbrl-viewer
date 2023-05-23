@@ -297,9 +297,14 @@ Inspector.prototype.searchSpec = function () {
 }
 
 Inspector.prototype.setupSearchControls = function (viewer) {
+    const inspector = this;
     $('.search-controls input, .search-controls select').change(() => this.search());
     $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
     $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
+    $(".search-controls .search-filters .reset-multiselect").on("click", function () {
+        $(this).siblings().children('select option:selected').prop('selected', false);
+        inspector.search();
+    });
     $("#search-filter-period")
         .empty()
         .append($('<option value="*">-</option>'));

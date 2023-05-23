@@ -833,7 +833,6 @@
         }
 
         .collapsible-subheader {
-          pointer-events: none;
           user-select: none;
           font-weight: normal;
           font-style: italic;
@@ -896,6 +895,18 @@
             padding-bottom: 1.2rem;
           }
         }
+      }
+    }
+
+    .reset-multiselect {
+      float: right;
+      line-height: 0;
+      position: relative;
+      bottom: 1rem;
+      cursor: pointer;
+
+      &::after {
+        .icon-close();
       }
     }
 

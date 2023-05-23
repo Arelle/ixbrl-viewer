@@ -89,52 +89,27 @@ limitations under the License.
             </select>
           </div>
 
-          <div id="search-filter-calculations" class="collapsible-section collapsible-only collapsed">
-            <h3 class="collapsible-header">
-              <span data-i18n="inspector.calculations">Calculations</span>
-              <span class="collapsible-subheader"></span>
-            </h3>
-            <div class="collapsible-body calculations" style="display: none;">
-              <span class="reset-multiselect"></span>
-              <select multiple size="2">
-                <option value="summation" data-i18n="inspector.summation">Summation</option>
-                <option value="contributor" data-i18n="inspector.contributor">Contributor</option>
-              </select>
+          <div class="checkboxes">
+            <div>
+              <label class="checkbox">
+                <input id="search-hidden-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.hiddenFacts">Hidden Facts</span>
+                <span class="checkmark"></span>
+              </label>
+            </div>
+            <div>
+              <label class="checkbox">
+                <input id="search-visible-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.visibleFacts">Visible Facts</span>
+                <span class="checkmark"></span>
+              </label>
             </div>
           </div>
 
-          <div id="search-filter-dimension-type" class="collapsible-section collapsible-only collapsed">
+          <div id="search-filter-period" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.dimensions">Dimension Type</span>
+              <span data-i18n="inspector.period">Period</span>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body dimensions" style="display: none;">
-              <span class="reset-multiselect"></span>
-              <select multiple size="2">
-                <option value="explicit" data-i18n="inspector.explicitDimension">Explicit Dimensions</option>
-                <option value="typed" data-i18n="inspector.typedDimensions">Typed Dimensions</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="search-filter-scales" class="collapsible-section collapsible-only collapsed">
-            <h3 class="collapsible-header">
-              <span data-i18n="inspector.scales">Scales</span>
-              <span class="collapsible-subheader"></span>
-            </h3>
-            <div class="collapsible-body scales" style="display: none;">
-              <span class="reset-multiselect"></span>
-              <select multiple>
-              </select>
-            </div>
-          </div>
-
-          <div id="search-filter-units" class="collapsible-section collapsible-only collapsed">
-            <h3 class="collapsible-header">
-              <span data-i18n="inspector.units">Units</span>
-              <span class="collapsible-subheader"></span>
-            </h3>
-            <div class="collapsible-body units" style="display: none;">
+            <div class="collapsible-body" style="display: none;">
               <span class="reset-multiselect"></span>
               <select multiple>
               </select>
@@ -153,32 +128,58 @@ limitations under the License.
             </div>
           </div>
 
-          <div id="search-filter-period" class="collapsible-section collapsible-only collapsed">
+          <div id="search-filter-units" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.period">Period</span>
+              <span data-i18n="inspector.units">Units</span>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body" style="display: none;">
+            <div class="collapsible-body units" style="display: none;">
               <span class="reset-multiselect"></span>
               <select multiple>
               </select>
             </div>
           </div>
-          
-          <div class="checkboxes">
-            <div>
-              <label class="checkbox">
-                <input id="search-hidden-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.hiddenFacts">Hidden Facts</span>
-                <span class="checkmark"></span>
-              </label>
-            </div>
-            <div>
-              <label class="checkbox">
-                <input id="search-visible-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.visibleFacts">Visible Facts</span>
-                <span class="checkmark"></span>
-              </label>
+
+          <div id="search-filter-scales" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.scales">Scales</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body scales" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple>
+              </select>
             </div>
           </div>
+
+          <div id="search-filter-dimension-type" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.dimensions">Dimension Type</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body dimensions" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple size="2">
+                <option value="explicit" data-i18n="inspector.explicitDimension">Explicit Dimensions</option>
+                <option value="typed" data-i18n="inspector.typedDimensions">Typed Dimensions</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="search-filter-calculations" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.calculations">Calculations</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body calculations" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple size="2">
+                <option value="summation" data-i18n="inspector.summation">Summation</option>
+                <option value="contributor" data-i18n="inspector.contributor">Contributor</option>
+              </select>
+            </div>
+          </div>
+
           <div class="filter-info">
             <span id="matching-concepts-count">?</span>
             <span data-i18n="inspector.matchingConcepts"> matching concept(s)</span>

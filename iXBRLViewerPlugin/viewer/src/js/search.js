@@ -136,11 +136,12 @@ export class ReportSearch {
     }
 
     calculationsFilter(s, item) {
+        const summation = s.calculationsFilter.includes('summation');
+        const contributor = s.calculationsFilter.includes('contributor');
         return (
-            s.calculationsFilter === '*' ||
-            (s.calculationsFilter === 'summation' && item.isCalculationSummation()) ||
-            (s.calculationsFilter === 'contributor' && item.isCalculationContributor()) ||
-            (s.calculationsFilter === 'summationOrContributor' && (item.isCalculationSummation() || item.isCalculationContributor()))
+            s.calculationsFilter.length === 0 ||
+            (summation && item.isCalculationSummation()) ||
+            (contributor && item.isCalculationContributor())
         );
     }
 

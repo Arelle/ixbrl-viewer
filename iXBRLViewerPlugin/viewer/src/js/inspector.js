@@ -291,7 +291,7 @@ Inspector.prototype.searchSpec = function () {
     spec.periodFilter = $('#search-filter-period').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
-    spec.calculationsFilter = $('#search-filter-calculations').val();
+    spec.calculationsFilter = $('#search-filter-calculations select').val();
     spec.dimensionTypeFilter = $('#search-filter-dimension-type select').val();
     return spec;
 }
@@ -349,7 +349,7 @@ Inspector.prototype.resetSearchFilters = function () {
     $("#search-filter-period").val("*");
     $("#search-filter-concept-type").val("*");
     $("#search-filter-fact-value").val("*");
-    $("#search-filter-calculations").val("*");
+    $("#search-filter-calculations select option:selected").prop("selected", false);
     $("#search-filter-dimension-type select option:selected").prop("selected", false);
     $("#search-hidden-fact-filter").prop("checked", true);
     $("#search-visible-fact-filter").prop("checked", true);
@@ -395,6 +395,7 @@ Inspector.prototype.search = function() {
     this.updateMultiSelectSubheader('search-filter-units');
     this.updateMultiSelectSubheader('search-filter-namespaces');
     this.updateMultiSelectSubheader('search-filter-dimension-type');
+    this.updateMultiSelectSubheader('search-filter-calculations');
 }
 
 Inspector.prototype.updateMultiSelectSubheader = function (id) {

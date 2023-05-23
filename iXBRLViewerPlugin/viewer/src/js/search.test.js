@@ -112,7 +112,7 @@ function testSearchSpec(searchString='') {
     spec.conceptTypeFilter = '*';
     spec.dimensionTypeFilter = [];
     spec.factValueFilter = '*';
-    spec.calculationsFilter = "*";
+    spec.calculationsFilter = [];
     return spec;
 }
 
@@ -203,28 +203,28 @@ describe("Search calculation filter", () => {
 
     test("Calculations 'all' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = '*';
+        spec.calculationsFilter = [];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2', 'other', 'summation']);
     });
 
     test("Calculations 'contributor' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'contributor';
+        spec.calculationsFilter = ['contributor'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2']);
     });
 
     test("Calculations 'summation' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'summation';
+        spec.calculationsFilter = ['summation'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['summation']);
     });
 
-    test("Calculations 'summationOrContributor' filter works", () => {
+    test("Calculations 'summation' and 'contributor' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'summationOrContributor';
+        spec.calculationsFilter = ['summation', 'contributor'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2', 'summation']);
     });
@@ -243,7 +243,7 @@ describe("Search calculation filter", () => {
 
     test("Calculations filter works on empty report", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'summationOrContributor';
+        spec.calculationsFilter = ['summation', 'contributor'];
         const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual([]);
     });

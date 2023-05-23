@@ -88,6 +88,13 @@ Inspector.prototype.initialize = function (report, viewer) {
                 }
                 else {
                     d.find(".collapsible-body").slideDown(250);
+                    if (d.hasClass("collapsible-only")) {
+                        d.siblings('.collapsible-section:not(.collapsed)').each(function() {
+                            const section = $(this);
+                            section.addClass("collapsed");
+                            section.find(".collapsible-body").slideUp(250);
+                        });
+                    }
                 }
             });
             $("#inspector .controls .search-button").on("click", function () {

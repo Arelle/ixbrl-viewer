@@ -394,6 +394,7 @@ Inspector.prototype.search = function() {
     this.updateMultiSelectSubheader('search-filter-scales');
     this.updateMultiSelectSubheader('search-filter-units');
     this.updateMultiSelectSubheader('search-filter-namespaces');
+    this.updateMultiSelectSubheader('search-filter-dimension-type');
 }
 
 Inspector.prototype.updateMultiSelectSubheader = function (id) {

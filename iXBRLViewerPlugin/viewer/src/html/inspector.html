@@ -86,15 +86,6 @@ limitations under the License.
             <option value="summationOrContributor" data-i18n="inspector.summationOrContributor">Summation or Contributor</option>
           </select>
 
-          <div class="control-label" data-i18n="inspector.dimensions">
-              Dimension Type
-          </div>
-          <select id="search-filter-dimension-type">
-              <option value="*" data-i18n="inspector.noFilter">-</option>
-              <option value="explicit" data-i18n="inspector.explicitDimension">Explicit Dimensions</option>
-              <option value="typed" data-i18n="inspector.typedDimensions">Typed Dimensions</option>
-          </select>
-
           <div class="control-label" data-i18n="inspector.factValue">
               Fact Value
           </div>
@@ -103,6 +94,20 @@ limitations under the License.
               <option value="negative" data-i18n="inspector.negative">Negative</option>
               <option value="positive" data-i18n="inspector.positive">Positive</option>
           </select>
+
+          <div id="search-filter-dimension-type" class="collapsible-section collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.dimensions">Dimension Type</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body dimensions" style="display: none;">
+              <select>
+                <option value="*" data-i18n="inspector.noFilter">-</option>
+                <option value="explicit" data-i18n="inspector.explicitDimension">Explicit Dimensions</option>
+                <option value="typed" data-i18n="inspector.typedDimensions">Typed Dimensions</option>
+              </select>
+            </div>
+          </div>
 
           <div id="search-filter-scales" class="collapsible-section collapsed">
             <h3 class="collapsible-header">

@@ -33,6 +33,7 @@
 
       sup {
         font-size: 0.9rem;
+        display: block;
       }
 
       table {
@@ -47,8 +48,32 @@
 
         thead {
           th {
-            white-space: break-spaces;
+            white-space: nowrap;
+            position: relative;
+            height: 10rem;
+
+            &.namespace {
+              text-align: left;
+              vertical-align: bottom;
+            }
+
+            &.figure {
+              width: 5rem;
+
+              & > div {
+                position: absolute;
+                transform: translate(100px, -50%) rotate(45deg) translate(-50%, 50%);
+                text-align: right;
+                width: 200px;
+                right: 0;
+                bottom: 0;
+              }
+            }
           }
+        }
+
+        tbody th {
+          font-weight: normal;
         }
 
         tbody,
@@ -62,6 +87,10 @@
 
             &:hover {
               background-color: rgb(230 230 230);
+            }
+
+            td.figure {
+              text-align: right;
             }
           }
         }

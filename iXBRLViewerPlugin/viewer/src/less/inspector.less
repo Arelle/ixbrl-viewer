@@ -438,6 +438,9 @@
 
         .search-filters {
           position: relative;
+          // Ensure the filter pane never grows too large to hide the results pane
+          max-height: 60vh;
+          overflow-y: auto;
 
           .reset {
             .clickable();
@@ -451,6 +454,26 @@
             border: none;
             font-weight: bold;
             padding-bottom: 0;
+          }
+
+          .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 0.4em;
+
+            .control-label {
+              white-space: nowrap;
+              margin-right: 2em;
+              width: 6em;
+            }
+
+            input,
+            select,
+            textarea {
+              flex-basis: 12em;
+              flex-grow: 2;
+            }
           }
 
           .control-label {
@@ -683,7 +706,7 @@
       width: 100%;
 
       th {
-        width: 100px;
+        width: 75px;
         text-align: right;
         padding-right: 20px;
         color: @text-title;
@@ -691,8 +714,8 @@
 
       th,
       td {
-        padding-top: 7px;
-        padding-bottom: 7px;
+        padding-top: 2px;
+        padding-bottom: 2px;
       }
 
       tr.value {
@@ -819,6 +842,7 @@
         padding-left: 12px;
         cursor: pointer;
         user-select: none;
+        white-space: nowrap;
 
         &::before {
           .icon-chevron-right();
@@ -831,6 +855,14 @@
           transition: all 0.25s ease;
           display: inline-block;
         }
+
+        .collapsible-subheader {
+          user-select: none;
+          font-weight: normal;
+          font-style: italic;
+          font-size: 1.3rem;
+          color: @text-form-value;
+        }
       }
 
       &.collapsed {
@@ -838,6 +870,10 @@
           transform: rotate(0);
           top: 0.3rem;
           left: -0.2rem;
+        }
+
+        .collapsible-subheader {
+          color: @primary;
         }
       }
 
@@ -883,6 +919,18 @@
             padding-bottom: 1.2rem;
           }
         }
+      }
+    }
+
+    .reset-multiselect {
+      float: right;
+      line-height: 0;
+      position: relative;
+      bottom: 1rem;
+      cursor: pointer;
+
+      &::after {
+        .icon-close();
       }
     }
 

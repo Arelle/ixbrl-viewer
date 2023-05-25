@@ -105,8 +105,8 @@ export class ReportSearch {
 
     periodFilter(s, item) {
         return (
-            s.periodFilter === '*' ||
-            s.periodFilter === item.period().key()
+            s.periodFilter.length === 0 ||
+            s.periodFilter.some(p => item.period().key() === p)
         );
     }
 
@@ -118,10 +118,12 @@ export class ReportSearch {
     }
 
     dimensionTypeFilter(s, item) {
+        const typed = s.dimensionTypeFilter.includes('typed');
+        const explicit = s.dimensionTypeFilter.includes('explicit');
         return (
-            s.dimensionTypeFilter === '*' ||
-            (s.dimensionTypeFilter === 'typed' && item.hasTypedDimension()) ||
-            (s.dimensionTypeFilter === 'explicit' && item.hasExplicitDimension())
+            s.dimensionTypeFilter.length === 0 ||
+            (typed && item.hasTypedDimension()) ||
+            (explicit && item.hasExplicitDimension())
         )
     }
 
@@ -134,11 +136,12 @@ export class ReportSearch {
     }
 
     calculationsFilter(s, item) {
+        const summation = s.calculationsFilter.includes('summation');
+        const contributor = s.calculationsFilter.includes('contributor');
         return (
-            s.calculationsFilter === '*' ||
-            (s.calculationsFilter === 'summation' && item.isCalculationSummation()) ||
-            (s.calculationsFilter === 'contributor' && item.isCalculationContributor()) ||
-            (s.calculationsFilter === 'summationOrContributor' && (item.isCalculationSummation() || item.isCalculationContributor()))
+            s.calculationsFilter.length === 0 ||
+            (summation && item.isCalculationSummation()) ||
+            (contributor && item.isCalculationContributor())
         );
     }
 

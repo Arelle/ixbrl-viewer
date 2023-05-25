@@ -20,6 +20,7 @@
     "factValue": "Valor del hecho",
     "noPriorFactInThisReport": "No hay un hecho previo",
     "noUnit": "Sin unidad",
+    "properties": "Características",
     "scale": "Escala"
   },
   "footnotes": {
@@ -90,7 +91,6 @@
       }
     },
     "summation": "",
-    "summationOrContributor": "",
     "textOption": "Texto",
     "units": "Unidads",
     "validationCode": "",
@@ -119,6 +119,7 @@
     "concealedFact": "",
     "hiddenFact": "Hecho oculto",
     "noMatchFound": "No se encontró ninguna coincidencia",
+    "selected": "seleccionados",
     "showMoreResults": "Mostrar más resultados",
     "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },

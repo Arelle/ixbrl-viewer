@@ -88,6 +88,13 @@ Inspector.prototype.initialize = function (report, viewer) {
                 }
                 else {
                     d.find(".collapsible-body").slideDown(250);
+                    if (d.hasClass("collapsible-only")) {
+                        d.siblings('.collapsible-section:not(.collapsed)').each(function() {
+                            const section = $(this);
+                            section.addClass("collapsed");
+                            section.find(".collapsible-body").slideUp(250);
+                        });
+                    }
                 }
             });
             $("#inspector .controls .search-button").on("click", function () {
@@ -285,48 +292,50 @@ Inspector.prototype.searchSpec = function () {
     spec.searchString = $('#ixbrl-search').val();
     spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
     spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
-    spec.namespacesFilter = $('#search-filter-namespaces').val();
-    spec.unitsFilter = $('#search-filter-units').val();
-    spec.scalesFilter = $('#search-filter-scales').val();
-    spec.periodFilter = $('#search-filter-period').val();
+    spec.namespacesFilter = $('#search-filter-namespaces select').val();
+    spec.unitsFilter = $('#search-filter-units select').val();
+    spec.scalesFilter = $('#search-filter-scales select').val();
+    spec.periodFilter = $('#search-filter-period select').val();
     spec.conceptTypeFilter = $('#search-filter-concept-type').val();
     spec.factValueFilter = $('#search-filter-fact-value').val();
-    spec.calculationsFilter = $('#search-filter-calculations').val();
-    spec.dimensionTypeFilter = $('#search-filter-dimension-type').val();
+    spec.calculationsFilter = $('#search-filter-calculations select').val();
+    spec.dimensionTypeFilter = $('#search-filter-dimension-type select').val();
     return spec;
 }
 
 Inspector.prototype.setupSearchControls = function (viewer) {
+    const inspector = this;
     $('.search-controls input, .search-controls select').change(() => this.search());
     $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
     $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
-    $("#search-filter-period")
-        .empty()
-        .append($('<option value="*">-</option>'));
-    for (const key in this._search.periods) {
+    $(".search-controls .search-filters .reset-multiselect").on("click", function () {
+        $(this).siblings().children('select option:selected').prop('selected', false);
+        inspector.search();
+    });
+    Object.keys(this._search.periods).forEach(key => {
         $("<option>")
             .attr("value", key)
             .text(this._search.periods[key])
-            .appendTo('#search-filter-period');
-    }
+            .appendTo('#search-filter-period select');
+    });
     this._report.getUsedPrefixes().forEach(prefix => {
         $("<option>")
             .attr("value", prefix)
             .text(`${prefix} (${this._report.prefixMap()[prefix]})`)
-            .appendTo('#search-filter-namespaces');
+            .appendTo('#search-filter-namespaces select');
     });
     this._report.getUsedUnits().forEach(unit => {
         $("<option>")
                 .attr("value", unit)
                 .text(`${this._report.getUnit(unit)?.label()} (${unit})`)
-                .appendTo('#search-filter-units');
+                .appendTo('#search-filter-units select');
     });
     const scalesOptions = this._getScalesOptions();
     Object.keys(scalesOptions).sort().forEach(scale => {
             $("<option>")
                     .attr("value", scale)
                     .text(scalesOptions[scale])
-                    .appendTo('#search-filter-scales');
+                    .appendTo('#search-filter-scales select');
     });
 }
 
@@ -346,16 +355,16 @@ Inspector.prototype._getScalesOptions = function() {
 }
 
 Inspector.prototype.resetSearchFilters = function () {
-    $("#search-filter-period").val("*");
+    $("#search-filter-period select option:selected").prop("selected", false);
     $("#search-filter-concept-type").val("*");
     $("#search-filter-fact-value").val("*");
-    $("#search-filter-calculations").val("*");
-    $("#search-filter-dimension-type").val("*")
+    $("#search-filter-calculations select option:selected").prop("selected", false);
+    $("#search-filter-dimension-type select option:selected").prop("selected", false);
     $("#search-hidden-fact-filter").prop("checked", true);
     $("#search-visible-fact-filter").prop("checked", true);
-    $("#search-filter-namespaces option:selected").prop("selected", false);
-    $("#search-filter-units option:selected").prop("selected", false);
-    $("#search-filter-scales option:selected").prop("selected", false);
+    $("#search-filter-namespaces select option:selected").prop("selected", false);
+    $("#search-filter-units select option:selected").prop("selected", false);
+    $("#search-filter-scales select option:selected").prop("selected", false);
     this.search();
 }
 
@@ -390,6 +399,26 @@ Inspector.prototype.search = function() {
     /* Don't highlight search results if there's no search string */
     if (spec.searchString != "") {
         viewer.highlightRelatedFacts($.map(results, r =>  r.fact ));
+    }
+    this.updateMultiSelectSubheader('search-filter-scales');
+    this.updateMultiSelectSubheader('search-filter-units');
+    this.updateMultiSelectSubheader('search-filter-namespaces');
+    this.updateMultiSelectSubheader('search-filter-dimension-type');
+    this.updateMultiSelectSubheader('search-filter-calculations');
+    this.updateMultiSelectSubheader('search-filter-period');
+}
+
+Inspector.prototype.updateMultiSelectSubheader = function (id) {
+    const subheader = $(`#${id} .collapsible-subheader`);
+    const selectedOptions = $(`#${id} select option:selected`);
+    if (selectedOptions.length === 1) {
+        subheader.text(` ${selectedOptions.text()}`);
+    }
+    else if (selectedOptions.length > 0) {
+        const totalOptions = $(`#${id} select option`).length;
+        subheader.text(` (${selectedOptions.length}/${totalOptions} ${i18next.t("search.selected")})`)
+    } else {
+        subheader.empty();
     }
 }
 
@@ -875,10 +904,11 @@ Inspector.prototype._selectionSummaryAccordian = function() {
             }
 
             $('#dimensions', factHTML).empty();
-            for (const aspect of fact.aspects()) {
-                if (!aspect.isTaxonomyDefined()) {
-                    continue;
-                }
+            const taxonomyDefinedAspects = fact.aspects().filter(a => a.isTaxonomyDefined());
+            if (taxonomyDefinedAspects.length === 0) {
+                $('#dimensions-label', factHTML).hide();
+            }
+            for (const aspect of taxonomyDefinedAspects) {
                 var h = $('<div class="dimension"></div>')
                     .text(aspect.label() || aspect.name())
                     .appendTo($('#dimensions', factHTML));

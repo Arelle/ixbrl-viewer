@@ -108,11 +108,11 @@ function testSearchSpec(searchString='') {
     spec.namespacesFilter = [];
     spec.unitsFilter = [];
     spec.scalesFilter = [];
-    spec.periodFilter = '*';
+    spec.periodFilter = [];
     spec.conceptTypeFilter = '*';
-    spec.dimensionTypeFilter = '*';
+    spec.dimensionTypeFilter = [];
     spec.factValueFilter = '*';
-    spec.calculationsFilter = "*";
+    spec.calculationsFilter = [];
     return spec;
 }
 
@@ -147,7 +147,7 @@ describe("Search fact value filter", () => {
     test("Fact Value Negative filter works with other filter", () => {
         const spec = testSearchSpec('Cash');
         spec.factValueFilter = 'negative'
-        spec.periodFilter = '2018-01-01/2019-01-01'
+        spec.periodFilter = ['2018-01-01/2019-01-01']
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"]["id"]).toEqual("negative")
@@ -164,7 +164,7 @@ describe("Search fact value filter", () => {
     test("Fact Value Positive filter works with other filter", () => {
         const spec = testSearchSpec('Cash');
         spec.factValueFilter = 'positive'
-        spec.periodFilter = '2018-01-01/2019-01-01'
+        spec.periodFilter = ['2018-01-01/2019-01-01']
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"]["id"]).toEqual("positive")
@@ -203,28 +203,28 @@ describe("Search calculation filter", () => {
 
     test("Calculations 'all' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = '*';
+        spec.calculationsFilter = [];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2', 'other', 'summation']);
     });
 
     test("Calculations 'contributor' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'contributor';
+        spec.calculationsFilter = ['contributor'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2']);
     });
 
     test("Calculations 'summation' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'summation';
+        spec.calculationsFilter = ['summation'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['summation']);
     });
 
-    test("Calculations 'summationOrContributor' filter works", () => {
+    test("Calculations 'summation' and 'contributor' filter works", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'summationOrContributor';
+        spec.calculationsFilter = ['summation', 'contributor'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['item1', 'item2', 'summation']);
     });
@@ -243,7 +243,7 @@ describe("Search calculation filter", () => {
 
     test("Calculations filter works on empty report", () => {
         const spec = testSearchSpec();
-        spec.calculationsFilter = 'summationOrContributor';
+        spec.calculationsFilter = ['summation', 'contributor'];
         const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual([]);
     });
@@ -414,23 +414,30 @@ describe("Search dimension type filter", () => {
 
     test("Dimension 'all' filter works", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = '*';
+        spec.dimensionTypeFilter = [];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'simple', 'simple2', 'typed', 'typed2']);
     });
 
     test("Dimension 'explicit' filter works", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = 'explicit';
+        spec.dimensionTypeFilter = ['explicit'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2']);
     });
 
     test("Dimension 'typed' filter works", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = 'typed';
+        spec.dimensionTypeFilter = ['typed'];
         const results = reportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual(['explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
+    });
+
+    test("Dimension 'explicit' and 'typed' filter works", () => {
+        const spec = testSearchSpec();
+        spec.dimensionTypeFilter = ['explicit', 'typed'];
+        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
     });
 
     const emptyReport = testReport(
@@ -448,7 +455,7 @@ describe("Search dimension type filter", () => {
 
     test("Dimension filter works on empty report", () => {
         const spec = testSearchSpec();
-        spec.dimensionTypeFilter = 'explicit';
+        spec.dimensionTypeFilter = ['explicit'];
         const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
         expect(results).toEqual([]);
     });

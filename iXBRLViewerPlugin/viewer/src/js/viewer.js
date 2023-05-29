@@ -916,7 +916,8 @@ Viewer.prototype.focusOnSelected = function(itemId, itemIdList) {
     const self = this;
     if (itemId === null || itemIdList === null) return;
     $(".ixbrl-blur-highlight", this._contents).addClass("ixbrl-highlight").removeClass("ixbrl-blur-highlight");
-    const items = $(".ixbrl-highlight", this._contents)
+    const items = $(".ixbrl-selected", this._contents)
+        .parents(".ixbrl-highlight")
         .filter(function() {
             return !$(this).hasClass("ixbrl-selected");
         });

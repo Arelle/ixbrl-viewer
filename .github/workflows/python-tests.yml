@@ -1,0 +1,35 @@
+name: Run Python Unit Tests
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-12
+          - ubuntu-22.04
+          - windows-2022
+        python-version:
+          - '3.7'
+          - '3.8'
+          - '3.9'
+          - '3.10'
+          - '3.11'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3.3.0
+      - name: Install Python 3
+        uses: actions/setup-python@v4.4.0
+        with:
+          cache: 'pip'
+          check-latest: true
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dev.txt
+      - name: Test with nose2
+        run: nose2

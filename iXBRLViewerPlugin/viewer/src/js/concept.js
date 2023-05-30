@@ -16,9 +16,7 @@ import $ from 'jquery'
 
 export class Concept {
     constructor(report, name) {
-        this._report = report;
-        this.name = name;  
-        this._c = report.data.concepts[name];
+        this._c = report.data.concepts[name] || {};
     }
 
     /*
@@ -26,7 +24,7 @@ export class Concept {
      * the concept has none.
      */
     referenceValuesAsString() {
-        if (!this._c || !this._c.r) {
+        if (!this._c.r) {
             return "";
         }
         else {
@@ -37,7 +35,7 @@ export class Concept {
     }
 
     references() {
-        if (!this._c || !this._c.r) {
+        if (!this._c.r) {
             return [];
         }
         else {
@@ -50,26 +48,30 @@ export class Concept {
     }
 
     isTypedDimension() {
-        return this._c && this._c.d == "t";
+        return this._c.d == "t";
     }
 
     isExplicitDimension() {
-        return this._c && this._c.d == "e";
+        return this._c.d == "e";
     }
 
     isDimension() {
-        return this._c && "d" in this._c;
+        return "d" in this._c;
     }
 
     isEnumeration() {
         return Boolean(this._c.en);
     }
-}
 
-Concept.prototype.isTaxonomyExtension = function() {
-    return this._c && this._c.hasOwnProperty('e') && this._c.e === 1;
-}
+    isTextBlock() {
+        return Boolean(this._c.t);
+    }
 
-Concept.prototype.getLabel = function(rolePrefix, withPrefix) {
-    return this._report.getLabel(this.name, rolePrefix, withPrefix);
+    isTaxonomyExtension() {
+        return this._c && this._c.hasOwnProperty('e') && this._c.e === 1;
+    }
+    
+    getLabel(rolePrefix, withPrefix) {
+        return this._report.getLabel(this.name, rolePrefix, withPrefix);
+    }
 }

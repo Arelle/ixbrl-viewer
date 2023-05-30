@@ -51,4 +51,10 @@ export class MessageBox extends Dialog {
 
         super.show(this);
     }
+
+    showAsync() {
+        return new Promise((resolve, reject) => {
+            this.show(() => resolve(true), () => resolve(false));
+        });
+    }
 }

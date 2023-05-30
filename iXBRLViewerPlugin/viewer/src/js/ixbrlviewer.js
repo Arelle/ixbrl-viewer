@@ -15,16 +15,28 @@
 import interact from 'interactjs'
 import $ from 'jquery'
 import { iXBRLReport } from "./report.js";
-import { Viewer } from "./viewer.js";
+import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
+function bindEvents() { // AMANA extension
+    if (typeof CefSharp !== "undefined") { 
+        CefSharp.BindObjectAsync("boundEvent");
+    }
+}
+
 export function iXBRLViewer(options) {
-    this.options = options || {};
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
     this._width = undefined;
-    this.options = options || {};
+    options = options || {};
+    const defaults = {
+        showValidationWarningOnStart: false,
+        continuationElementLimit: 10000
+    }
+    this.options = {...defaults, ...options};
+    this.isPDF = false;
+    bindEvents();
 }
 
 /*
@@ -53,10 +65,25 @@ export function iXBRLViewer(options) {
  *
  * Called when the highlight color key is created.  key is an array of labels,
  * which can be modified or extended.
+ * 
+ * extendDisplayTextblock(doc, fact)
+ * 
+ * Called when the textblock for a fact is rendered. doc is the iframe document
  *
  */
 iXBRLViewer.prototype.registerPlugin = function (plugin) {
     this._plugins.push(plugin);
+}
+
+iXBRLViewer.prototype.hasPluginMethod = function (methodName) {
+    var iv = this;
+    var hasMethod = false;
+    $.each(iv._plugins, function (n, p) {
+        if (typeof p[methodName] === 'function') {
+            hasMethod = true;
+        }
+    });
+    return hasMethod;
 }
 
 iXBRLViewer.prototype.callPluginMethod = function (methodName, ...args) {
@@ -129,6 +156,23 @@ iXBRLViewer.prototype._fixChromeBug = function(iframe) {
                 pageContainer.find("div.page_A4").css("content-visibility", "");
             }
         }
+    }
+}
+
+iXBRLViewer.prototype._loadInspectorHTML = function () {
+    /* Insert HTML and CSS styles into body */
+    $(require('../html/inspector.html')).prependTo('body');
+    var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
+    $('<style id="ixv-style"></style>')
+        .prop("type", "text/css")
+        .text(inspector_css)
+        .appendTo('head');
+
+    try {
+        $('.inspector-foot .version').text(__VERSION__);
+    }
+    catch (e) {
+        // ReferenceError if __VERSION__ not defined
     }
 }
 
@@ -213,16 +257,18 @@ iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function () {
 }
 
 iXBRLViewer.prototype.load = function () {
-    var iv = this;
-    var iframeDiv = $('#ixv #iframe-container #iframe-div');
-    var src = iframeDiv[0].dataset.src;
-    if (src) {
+    /* AMANA: Portal extensions. Checking if inspector.html already loaded as part of portal template */
+    var iv = this;    
+    var iframeDiv = $('#ixv #iframe-container #iframe-div');    
+    if (iframeDiv.length > 0) {
+        var src = iframeDiv[0].dataset.src;
         $.get(src, function(data) {
             var doc = $(data);
             iv._load(doc);
         });
     }
     else {
+        iv._loadInspectorHTML();
         iv._load($(document));
     }
 }
@@ -230,11 +276,10 @@ iXBRLViewer.prototype.load = function () {
 iXBRLViewer.prototype._load = function(ownerDocument) {
     var iv = this;
     var inspector = this.inspector;
-    setTimeout(function(){
-
+    setTimeout(function(){                        
         /* AMANA: In the chromium, pdf files do not use frames in case of content-visibility CSS style  */  
-        var isPDF = iv._detectPDF(ownerDocument);    
-        var useFrames = iv._inIframe() || !isPDF; 
+        iv.isPDF = iv._detectPDF(ownerDocument);    
+        var useFrames = iv._inIframe() || !iv.isPDF; 
         var iframes = $(iv._reparentDocument(ownerDocument, useFrames));
 
         /* AMANA extension: In a case of multifile iXBRL attach JSON into every HTML page is too expensive --> */
@@ -255,76 +300,94 @@ iXBRLViewer.prototype._load = function(ownerDocument) {
 
         if (useFrames && report.isDocumentSet()) {
             var ds = report.documentSetFiles();
-            for (var i = 1; i < ds.length; i++) {
-                var iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
+            var hasExternalIframe = false;
+            for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {
+                const iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
                 iframes = iframes.add(iframe);
+                hasExternalIframe = true;
             }
-            iv._checkDocumentSetBrowserSupport();
+            if (hasExternalIframe) {
+                iv._checkDocumentSetBrowserSupport();
+            }
         }
 
-        /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
-        var timer = setInterval(function () {
-            var complete = true;
-            if (useFrames) {
-                iframes.each(function (n) {
-                    var iframe = this;
-                    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
-                        complete = false;
-                    }
-                });
-            }
-            if (complete) {
-                clearInterval(timer);
+        iv.setProgress('Loading iXBRL Viewer').then(() => {
+            /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
+            var timer = setInterval(function () {
+                var complete = true;
                 if (useFrames) {
                     iframes.each(function (n) {
-                        /* fix chrome 88 content-visibility issue */ 
-                        iv._fixChromeBug(this);
+                        var iframe = this;
+                        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
+                            complete = false;
+                        }
                     });
                 }
-
-                var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames, isPDF);
-
-                viewer.initialize()
-                    .then(() => inspector.initialize(report, viewer))
-                    .then(() => {
-                        interact('#viewer-pane').resizable({
-                            edges: { left: false, right: ".resize", bottom: false, top: false },
-                            restrictEdges: {
-                                outer: 'parent',
-                                endOnly: true,
-                            },
-                            restrictSize: {
-                                min: { width: 100 }
-                            },
-                        })
-                        .on('resizestart', function (event) {
-                            $('#ixv').css({"pointer-events": "none", "-moz-user-select": "none"});
-                        })
-                        .on('resizemove', function (event) {                                                    
-                            event.target.style.width = `${event.rect.width}px`;
-                            iv._width = window.innerWidth-event.rect.width;
-                            $('#inspector').css('width', `${iv._width}px`);
-                        })
-                        .on('resizeend', function (event) {
-                            $('#ixv').css({"pointer-events": "auto", "-moz-user-select": "all"});
+                if (complete) {
+                    clearInterval(timer);
+                    if (useFrames) {
+                        iframes.each(function (n) {
+                            /* fix chrome 88 content-visibility issue */ 
+                            iv._fixChromeBug(this);
                         });
-                        $('#ixv .loader').remove();
+                    }
 
-                        $(window).on('resize', function(){
-                            if (iv._width) {                 
-                                $('#viewer-pane').css('width', `${window.innerWidth-iv._width}px`); 
+                    var viewer = iv.viewer = new Viewer(iv, iframes, report, useFrames);
+
+                    viewer.initialize()
+                        .then(() => inspector.initialize(report, viewer))
+                        .then(() => {
+                            interact('#viewer-pane').resizable({
+                                edges: { left: false, right: ".resize", bottom: false, top: false },
+                                restrictEdges: {
+                                    outer: 'parent',
+                                    endOnly: true,
+                                },
+                                restrictSize: {
+                                    min: { width: 100 }
+                                },
+                            })
+                            .on('resizestart', function (event) {
+                                $('#ixv').css({"pointer-events": "none", "-moz-user-select": "none"});
+                            })
+                            .on('resizemove', function (event) {                                                    
+                                event.target.style.width = `${event.rect.width}px`;
+                                iv._width = window.innerWidth-event.rect.width;
+                                $('#inspector').css('width', `${iv._width}px`);
+                            })
+                            .on('resizeend', function (event) {
+                                $('#ixv').css({"pointer-events": "auto", "-moz-user-select": "all"});
+                            });
+                            $('#ixv .loader').remove();
+
+                            $(window).on('resize', function(){
+                                if (iv._width) {                 
+                                    $('#viewer-pane').css('width', `${window.innerWidth-iv._width}px`); 
+                                }
+                            });
+
+                            /* Focus on fact specified in URL fragment, if any */
+                            inspector.handleFactDeepLink();
+                            if (iv.options.showValidationWarningOnStart) {
+                                inspector.showValidationWarning();
+                            }   
+                            viewer.postLoadAsync();
+                            inspector.postLoadAsync();                     
+                        })
+                        .catch(err => {
+                            if (err instanceof DocumentTooLargeError) {
+                                $('#ixv .loader').remove();
+                                $('#inspector').addClass('failed-to-load');
                             }
-                        });
+                            else {
+                                throw err;
+                            }
 
-                        /* Focus on fact specified in URL fragment, if any */
-                        inspector.handleFactDeepLink();
-                        if (iv.options.showValidationWarningOnStart) {
-                            inspector.showValidationWarning();
-                        }
-                    })
-                    .then(() => viewer.notifyReady());
-            }
+                        })
+                        .then(() => viewer.notifyReady());
+                }
+            });
         }, 250);
     }, 0);
 }

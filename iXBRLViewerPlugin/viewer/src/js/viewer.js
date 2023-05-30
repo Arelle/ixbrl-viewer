@@ -16,25 +16,27 @@ import $ from 'jquery'
 import { TableExport } from './tableExport.js'
 import { escapeRegex, escapeHtml, getScrollParent } from './util.js'
 import { IXNode } from './ixnode.js';
+import { setDefault, runGenerator, zoom } from './util.js';
 import { Fact } from './fact.js';
-import { setDefault } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
+import { MessageBox } from './messagebox.js';
 import { ContextMenu } from './contextMenu.js';
+
+export class DocumentTooLargeError extends Error {}
 
 import 'bootstrap/js/dist/tooltip';
 
-export function Viewer(iv, iframes, report, useFrames, isPDF) {
+export function Viewer(iv, iframes, report, useFrames) {
     this._iv = iv;
     this._report = report;
     this._iframes = iframes;
     this._useFrames = useFrames;
-    this._isPDF = isPDF;
 
     if (useFrames) {
         this._contents = iframes.contents();
     } else {
         this._contents = iframes;
-    }    
+    }        
 
     this.onSelect = $.Callbacks();
     this.onMouseEnter = $.Callbacks();
@@ -46,49 +48,75 @@ export function Viewer(iv, iframes, report, useFrames, isPDF) {
     this._mzInit = false;   
     this._tooltipShown = null;
     this._highlighting = false;
+    this.showTablesBorder = false;
 
     $(".amanablock", this.contents())
       .addClass("-ixh-highlight-region").removeClass("amanablock");
 }
 
+Viewer.prototype._checkContinuationCount = function() {
+    const continuationCount = Object.keys(this.continuationOfMap).length
+    if (this._iv.options.continuationElementLimit > 0 && continuationCount > this._iv.options.continuationElementLimit) {
+        const contents = $('<div></div>')
+            .append($('<p></p>').text(`This document contains a very large number of iXBRL elements (found ${continuationCount} ix:continuation elements).`))
+            .append($('<p></p>').text('You may experience performance problems viewing this document, or the viewer may not load at all.'))
+            .append($('<p></p>').text('Do you want to continue trying to load this document?'));
+
+        const mb = new MessageBox("Large document warning", contents, "Continue", "Cancel");
+        return mb.showAsync().then((result) => {
+            if (!result) {
+                throw new DocumentTooLargeError("Too many continuations");
+            }
+        });
+    }
+    return Promise.resolve();
+}
+
 Viewer.prototype.initialize = function() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         var viewer = this;
         viewer._buildContinuationMaps();
-        viewer._iframes.each(function (docIndex) { 
-            $(this).data("selected", docIndex == viewer._currentDocumentIndex);
-            viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
-        });
+        viewer._checkContinuationCount()
+            .catch(err => { throw err })
+            .then(() => viewer._iv.setProgress("Pre-processing document"))
+            .then(() => {
 
-        /* Call plugin promise for each document in turn */
-        (async function () {
-            for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
-                await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
-            }
-        })()
-            .then(() => viewer._iv.setProgress("Preparing document") )
-            .then(() => {
-                this._report.setIXNodeMap(this._ixNodeMap);
-                this._applyStyles();
-                this._bindHandlers();
-                this.scale = 1;
-                this._setTitle(0);
-                this._addDocumentSetTabs();
-                resolve();
-            })
-            .then(() => {
                 viewer._iframes.each(function (docIndex) { 
-                    viewer._postProcessXBRL($(this).contents().find("body").get(0), docIndex);
-                });    
+                    $(this).data("selected", docIndex == viewer._currentDocumentIndex);
+                    viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+                });
+
+            /* Call plugin promise for each document in turn */
+            (async function () {
+                for (var docIndex = 0; docIndex < viewer._iframes.length; docIndex++) {
+                    await viewer._iv.pluginPromise('preProcessiXBRL', viewer._iframes.eq(docIndex).contents().find("body").get(0), docIndex);
+                }
+            })()
+                .then(() => viewer._iv.setProgress("Preparing document") )
+                .then(() => {
+                    this._report.setIXNodeMap(this._ixNodeMap);
+                    this._applyStyles();
+                    this._bindHandlers();
+                    this.scale = 1;
+                    this._setTitle(0);
+                    this._addDocumentSetTabs();
+                    resolve();
+                })
+                .then(() => {
+                    viewer._iframes.each(function (docIndex) { 
+                        viewer._postProcessXBRL($(this).contents().find("body").get(0), docIndex);
+                    });    
+                })
+                .then(() => {                
+                    viewer.contextMenu = new ContextMenu({
+                        target: $('.ixbrl-element-nonnumeric,.ixbrl-continuation', viewer.contents()),
+                        menuItems: (target) => viewer._createContextMenuItems(target),
+                        mode: "light" 
+                    });
+                    viewer.contextMenu.init();                  
+                })
             })
-            .then(() => {                
-                viewer.contextMenu = new ContextMenu({
-                    target: $('.ixbrl-element-nonnumeric,.ixbrl-continuation', viewer.contents()),
-                    menuItems: (target) => viewer._createContextMenuItems(target),
-                    mode: "light" 
-                  });
-                viewer.contextMenu.init();                  
-            })
+            .catch(err => reject(err));
     });
 }
 
@@ -127,7 +155,7 @@ Viewer.prototype._wrapNode = function(n) {
     var wrapper = "<span>";
     const nn = n.getElementsByTagName("*");
     for (var i = 0; i < nn.length; i++) {
-        if($(nn[i]).css("display") === "block") {
+        if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
             wrapper = '<div>';
             break;
         }
@@ -219,19 +247,20 @@ Viewer.prototype._findOrCreateWrapperNode = function(domNode) {
         nodes = this._wrapNode(domNode);
         // Create a node set of current node and all absolutely positioned
         // descendants.
-        nodes = nodes.find("*").addBack().filter(function () {
-            return (this == nodes[0] || $(this).css("position") == "absolute");
+        nodes = nodes.find("*").addBack().filter(function (n, e) {
+            return (this == nodes[0] || (getComputedStyle(this).getPropertyValue('position') === "absolute"));
         });
     }
     nodes.each(function (i) {
-        if (this.getBoundingClientRect().height == 0) {
-            $(this).addClass("ixbrl-no-highlight"); 
+        // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
+        if (nodes.length > 1) {
+            this.classList.add("ixbrl-contains-absolute");
         }
         if (i == 0) {
-            $(this).addClass("ixbrl-element")
+            this.classList.add("ixbrl-element");
         }
         else {
-            $(this).addClass("ixbrl-sub-element"); 
+            this.classList.add("ixbrl-sub-element");
         }
     });
     return nodes;
@@ -341,9 +370,6 @@ Viewer.prototype._preProcessiXBRL = function(n, docIndex, inHidden) {
             if (!ixn) {
                 ixn = new IXNode(id, nodes, docIndex, name);
                 this._ixNodeMap[id] = ixn;
-            }
-            if (nodes.is(':hidden')) {
-                ixn.htmlHidden = true;
             }
             if (inHidden) {
                 ixn.isHidden = true;
@@ -890,26 +916,25 @@ Viewer.prototype.focusOnSelected = function(itemId, itemIdList) {
     const self = this;
     if (itemId === null || itemIdList === null) return;
     $(".ixbrl-blur-highlight", this._contents).addClass("ixbrl-highlight").removeClass("ixbrl-blur-highlight");
-    const items = $(".ixbrl-element", this._contents)
+    const items = $(".ixbrl-selected", this._contents)
+        .parents(".ixbrl-highlight")
         .filter(function() {
-            const ids = self._ixIdsForElement($(this));
-            return ids[0] != itemId && itemIdList.includes(ids[0]);
+            return !$(this).hasClass("ixbrl-selected");
         });
     items.addClass("ixbrl-blur-highlight").removeClass("ixbrl-highlight");
-    items.find(".ixbrl-sub-element").addClass("ixbrl-blur-highlight").removeClass("ixbrl-highlight");
 }
 
 // The firefox browser does not support CSS zoom style,
 //      instead of is we should use -moz-transform and -moz-transform-origin styles
 Viewer.prototype._zoom = function () {
-    var iv = this;    
+    var self = this;    
     $('html', this._contents).each(function () {
         var container, scrollParent;
-        if (iv._isPDF) {
-            if (!iv._mzInit) {
+        if (self._iv.isPDF) {
+            if (!self._mzInit) {
                 let pagecontainer = $('#page-container', $(this));
                 pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');
-                iv._mzInit = true;
+                self._mzInit = true;
             }
             container = $('#zoom-container', $(this));
             scrollParent = $(getScrollParent(container[0]));
@@ -917,25 +942,7 @@ Viewer.prototype._zoom = function () {
             container = $(this.ownerDocument.body);
             scrollParent = $(this);
         }
-        var viewTop = scrollParent.scrollTop();
-        var viewLeft = scrollParent.scrollLeft();
-        var rc = container[0].getBoundingClientRect();
-        container.css({
-            '-moz-transform-origin': 'center 0',
-            '-moz-transform': 'scale(' + iv.scale + ')',
-            'transform-origin': 'center 0',
-            'transform': 'scale(' + iv.scale + ')',
-        }).promise().done(function() {
-            var rcNew = container[0].getBoundingClientRect();
-            container.css({
-                'margin-top': 0,
-                'margin-left': (rcNew.width - container[0].clientWidth)/2,
-                'margin-bottom': rcNew.height - container[0].clientHeight, 
-                'margin-right': (rcNew.width - container[0].clientWidth)/2,
-            });        
-            scrollParent.scrollLeft(rcNew.width * (viewLeft)/rc.width);
-            scrollParent.scrollTop(rcNew.height * (viewTop)/rc.height);       
-        });
+        zoom(container, scrollParent, self.scale);
     });    
 }
 
@@ -1002,4 +1009,69 @@ Viewer.prototype.notifyReady = function () {
     if (typeof boundEvent !== "undefined") { 
         boundEvent.ready();
     }
+}
+
+/*
+ * AMANA extension: add borders to tables
+ *
+ */
+Viewer.prototype.highlightTables = function(on) {
+    if (on) {
+        $(".ixbrl-element", this._contents)
+            .find("table")
+            .addClass('table-highlight');            
+        this.showTablesBorder = true;
+    } else {
+        $(".table-highlight", this._contents)
+            .removeClass("table-highlight");            
+        this.showTablesBorder = false;
+    }
+}
+
+/*
+ * AMANA extension: CSS customization
+ */
+Viewer.prototype.customize = function(selector, styles) {
+    this._contents.each(function () {   
+        for (const sheet of this.styleSheets) {
+            for (const rule of sheet.cssRules) {
+                if ('selectorText' in rule && 'styleMap' in rule &&
+                    rule.selectorText == selector) {
+                    for (const property in styles) {
+                        rule.styleMap.set(property, styles[property]);
+                    }
+                }                
+            }
+        }
+    });
+}
+
+
+Viewer.prototype.postProcess = function*() {
+    for (const iframe of this._iframes.get()) {
+        const doc = this._useFrames ? $(iframe).contents() : $(iframe);
+        const elts = doc.get(0).querySelectorAll(".ixbrl-contains-absolute");
+        // In some cases, getBoundingClientRect().height returns 0, and
+        // immediately repeating the call returns > 0, so do this in two passes.
+        for (const [i, e] of elts.entries()) {
+            if (getComputedStyle(e).getPropertyValue("display") !== 'inline') {
+                e.getBoundingClientRect().height
+            }
+            if (i % 100 === 0) {
+                yield;
+            }
+        }
+        for (const [i, e] of elts.entries()) {
+            if (getComputedStyle(e).getPropertyValue("display") !== 'inline' && e.getBoundingClientRect().height == 0) {
+                e.classList.add("ixbrl-no-highlight");
+            }
+            if (i % 100 === 0) {
+                yield;
+            }
+        }
+    }    
+}
+
+Viewer.prototype.postLoadAsync = function () {
+    runGenerator(this.postProcess());
 }

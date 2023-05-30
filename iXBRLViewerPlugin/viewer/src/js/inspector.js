@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -27,25 +27,14 @@ import { FactSet } from './factset.js';
 import { Fact } from './fact.js';
 import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
+import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
 import { DocumentOutline } from './outline.js';
 import { escapeHtml } from './util.js'
 
 const SEARCH_PAGE_SIZE = 100
 
-export function Inspector(iv) {
-    /* Insert HTML and CSS styles into body */
-    if ($('#ixv #iframe-container').length == 0) { /* AMANA: Portal extensions. Checking if inspector.html already loaded as part of portal template */
-        $(require('../html/inspector.html')).prependTo('body');
-        var inspector_css = require('css-loader!less-loader!../less/inspector.less').toString(); 
-        $('<style id="ixv-style"></style>')
-            .prop("type", "text/css")
-            .text(inspector_css)
-            .appendTo('head');
-    }    
-    /*$('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-        .attr('href', require('../img/favicon.ico'))
-        .appendTo('head');*/
+export function Inspector(iv) {    
     this._iv = iv;
     this._viewerOptions = new ViewerOptions()
     this._currentItem = null;
@@ -127,9 +116,8 @@ Inspector.prototype.initialize = function (report, viewer) {
             report.setViewerOptions(inspector._viewerOptions);
             inspector.outline = new DocumentOutline(report);
             inspector.createOutline();
-            inspector._iv.setProgress(i18next.t("search.buildingSearchIndex")).then(() => {
+            inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                 inspector._search = new ReportSearch(report);
-                inspector.setupSearchControls();
                 inspector.buildDisplayOptionsMenu();
                 inspector.buildToolbarHighlightMenu();
                 inspector.buildHighlightKey();
@@ -148,7 +136,10 @@ Inspector.prototype.initializeViewer = function () {
     viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
     $('.ixbrl-next-tag').click(() => viewer.selectNextTag(this._currentItem));
     $('.ixbrl-prev-tag').click(() => viewer.selectPrevTag(this._currentItem));
-    this.search();
+}
+
+Inspector.prototype.postLoadAsync = function () {
+    runGenerator(this._search.buildSearchIndex(() => this.searchReady()));
 }
 
 
@@ -168,6 +159,12 @@ Inspector.prototype.handleMessage = function (event) {
 
     if (data.task == 'SHOW_FACT') {
         this.selectItem(data.factId, undefined, true);
+    } else if (data.task == 'TABLE_HIGHLIGHT') {
+        this._viewer.highlightTables(data.on);
+    } else if (data.task == "CUSTOMIZE") {
+        for (const selector in data.styles) {
+            this._viewer.customize(selector, data.styles[selector]);
+        }
     }
     else {
         console.log("Not handling unsupported task message: " + jsonString);
@@ -292,7 +289,6 @@ Inspector.prototype.searchSpec = function () {
 }
 
 Inspector.prototype.setupSearchControls = function (viewer) {
-    var inspector = this;
     $('.search-controls input, .search-controls select').change(() => this.search());
     $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
     $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
@@ -315,9 +311,19 @@ Inspector.prototype.resetSearchFilters = function () {
     this.search();
 }
 
+Inspector.prototype.searchReady = function() {
+    this.setupSearchControls();
+    $('#inspector').addClass('search-ready');
+    $('#ixbrl-search').prop('disabled', false);
+    this.search();
+}
+
 Inspector.prototype.search = function() {
     var spec = this.searchSpec();
     var results = this._search.search(spec);
+    if (results === undefined) {
+        return;
+    }
     var viewer = this._viewer;
     var container = $('#inspector .search-results .results');
     $('div', container).remove();
@@ -588,40 +594,67 @@ Inspector.prototype.getPeriodIncrease = function (fact) {
 }
 
 Inspector.prototype._updateValue = function (item, showAll, context) {
+    const self = this;
     const text = item.readableValue();
+    const tr = $('tr.value', context);
     var v = text;
     if (!showAll) {
         var fullLabel = text;
         var vv = wrapLabel(text, 120);
         if (vv.length > 1) {
-            $('tr.value', context).addClass("truncated");
-            $('tr.value .show-all', context).off('click').on('click', () => { 
-                this._updateValue(item, true, context) 
-            });
+            tr.addClass("truncated");
+            tr.find('.show-all')
+                .off('click')
+                .on('click', () => this._updateValue(item, true, context));
         }
         else {
-            $('tr.value', context).removeClass('truncated');
+            tr.removeClass('truncated');
         }
         v = vv[0];
     }
     else {
-        $('tr.value', context).removeClass('truncated');
+        tr.removeClass('truncated');
     }
 
-    var valueSpan = $('tr.value td .value', context).empty().text(v);
+    // Only enable text block viewer for escaped, text block facts.  This
+    // ensure that we're only rendering fragments of the main documents, rather
+    // than potentially arbitrary strings.
+    if (TextBlockViewerDialog.canRender(item)) {
+        tr
+            .addClass('text-block')
+            .find('.expand-text-block')
+                .off().click(() => this.showTextBlock(item));
+    }
+    else {
+        tr.removeClass('text-block');
+    }
+
+    var valueSpan = tr.find('td .value').empty().text(v);
     if (item instanceof Fact && (item.isNil() || item.isInvalidIXValue())) {
         valueSpan.wrapInner("<i></i>");
     }
 
 }
 
+Inspector.prototype.showTextBlock = function(item) {
+    const tbd = new TextBlockViewerDialog(this._iv, item);
+    tbd.displayTextBlock();
+    tbd.show();
+}
+
 Inspector.prototype._updateEntityIdentifier = function (fact, context) {
-    var url = Identifiers.identifierURLForFact(fact);
-    var cell = $('tr.entity-identifier td', context);
+    const cell = $('tr.entity-identifier td', context);
     cell.empty();
-    if (url) {
+    const url = Identifiers.identifierURLForFact(fact);
+    const name = Identifiers.identifierNameForFact(fact);
+    if (fact !== undefined) {
         $('<span></span>').text('['+Identifiers.identifierNameForFact(fact) + "] ").appendTo(cell)
-        $('<a target="_blank"></a>').attr('href',url).text(fact.identifier().localname).appendTo(cell)
+        if (url !== undefined) {
+            $('<a target="_blank"></a>').attr('href',url).text(fact.identifier().localname).appendTo(cell)
+        }
+        else {
+            $('<span></span>').text(fact.identifier().localname).appendTo(cell);
+        }
     }
     else {
         cell.text(fact.f.a.e);
@@ -917,3 +950,5 @@ Inspector.prototype.showValidationWarning = function () {
         mb.show(() => this.showValidationReport());
     }    
 }
+
+

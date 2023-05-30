@@ -79,27 +79,34 @@ span {
   }
 }
 
-.ixbrl-element:not(.ixbrl-no-highlight),
-.ixbrl-sub-element:not(.ixbrl-no-highlight) {
-  cursor: pointer;
+:not(.ixbrl-no-highlight) {
+  &.ixbrl-element,
+  &.ixbrl-sub-element {
+    cursor: pointer;
 
-  &.ixbrl-related {
-    outline: dashed 2px @related-fact;
-    outline-offset: 1px;
+    &.ixbrl-related {
+      outline: dashed 2px @related-fact;
+
+      &:not(td, th) {
+        outline-offset: 1px;
+      }
+    }
   }
 }
 
 td,
 th {
-  &.ixbrl-selected:not(.ixbrl-no-highlight) {
-    outline: solid 2px @primary-focus !important;
-    outline-offset: -1px !important;
-  }
+  &:not(.ixbrl-no-highlight) {
+    &.ixbrl-selected {
+      outline: solid 2px @primary-focus !important;
+      outline-offset: -1px !important;
+    }
 
-  &.ixbrl-element:hover:not(.ixbrl-selected),
-  &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
-    outline: dashed 2px @primary-focus !important;
-    outline-offset: -1px !important;
+    &.ixbrl-element:hover:not(.ixbrl-selected),
+    &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
+      outline: dashed 2px @primary-focus !important;
+      outline-offset: -1px !important;
+    }
   }
 
   &.ixbrl-related {
@@ -107,14 +114,20 @@ th {
   }
 }
 
-.ixbrl-related.ixbrl-linked-highlight,
-.ixbrl-linked-highlight {
+.ixbrl-related.ixbrl-linked-highlight:not(.ixbrl-no-highlight),
+.ixbrl-linked-highlight:not(.ixbrl-no-highlight) {
   .linked-highlight-text();
 }
 
-td.ixbrl-related.ixbrl-linked-highlight,
-td.ixbrl-linked-highlight {
+td.ixbrl-related.ixbrl-linked-highlight:not(.ixbrl-no-highlight),
+td.ixbrl-linked-highlight:not(.ixbrl-no-highlight) {
   .linked-highlight-cell();
+
+  outline-offset: -1px;
+}
+
+.ixbrl-sub-element:not(.ixbrl-no-highlight) {
+   mix-blend-mode: multiply;
 }
 
 div.ixbrl-table-handle {
@@ -153,7 +166,7 @@ div.ixbrl-table-handle {
     border: none;
     color: #fff;
     transition: width 0.3s;
-    width: 9rem;
+    width: 11rem;
     height: initial;
     left: -0.1rem;
     padding: 0;
@@ -174,5 +187,10 @@ div.ixbrl-table-handle {
       padding: 0.7rem 1.5rem 0.7rem 2.5rem;
       background-color: @workiva-green;
     }
-  }
+  }  
+}
+
+table.table-highlight {
+  outline: double 2px blue; 
+  outline-offset: 1px;
 }

@@ -547,14 +547,15 @@ export class Viewer {
      *
      * Takes an optional list of factIds corresponding to all facts that a click
      * falls within.  If omitted, it's treated as a click on a non-nested fact.
+     *
+     * byClick indicates that the element was clicked directly, and in this
+     * case we never scroll to make it more visible.
      */
-    selectElement(itemId, itemIdList) {
+    selectElement(itemId, itemIdList, byClick) {
         if (itemId !== null) {
-            this.onSelect.fire(itemId, itemIdList);
+            this.onSelect.fire(itemId, itemIdList, byClick);
         }
-        else {
-            this.onSelect.fire(null);
-        }
+        this.onSelect.fire(null);
     }
 
     // Handle a mouse click to select.  This finds all tagged elements that the
@@ -592,7 +593,7 @@ export class Viewer {
                 sameContentAncestorId = ids[0];
             }
         });
-        this.selectElement(sameContentAncestorId, itemIDList);
+        this.selectElement(sameContentAncestorId, itemIDList, true);
     }
 
     _mouseEnter(e) {

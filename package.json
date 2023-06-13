@@ -62,7 +62,7 @@
     "http-server": "^14.1.1",
     "i18next-parser": "^8.0.0",
     "jest-environment-jsdom": "^29.5.0",
-    "puppeteer": "20.5.0",
+    "puppeteer": "20.6.0",
     "puppeteer-screen-recorder": "2.1.2"
   },
   "license": "Apache-2.0"

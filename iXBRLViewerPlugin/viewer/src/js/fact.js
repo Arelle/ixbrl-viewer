@@ -275,13 +275,17 @@ export class Fact {
     }
 
     getScaleLabel(value, isAccuracy=false) {
+        let measure = this.measure() ?? '';
+        if (measure) {
+            measure = this.report().qname(measure).localname;
+        }
         return this._report.getScaleLabel(
                 // We use the same table of labels for scale and accuracy,
                 // but decimals means "accurate to 10^-N" whereas scale means 10^N,
                 // so invert N for accuracy.
                 isAccuracy ? -value : value,
                 this.isMonetaryValue(),
-                this.report().qname(this.measure()).localname
+                measure
         );
     }
 

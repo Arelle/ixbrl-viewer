@@ -389,6 +389,12 @@ describe("Readable accuracy", () => {
             "a": { "u": "eg:unit" }
         }).readableAccuracy()).toBe("4");
 
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": null }
+        }).readableAccuracy()).toBe("4");
+
     });
     test("Numeric, monetary", () => {    
         expect(testFact({

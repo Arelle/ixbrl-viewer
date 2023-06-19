@@ -51,7 +51,7 @@
     "lunr": "^2.3.8",
     "moment": "^2.24.0",
     "postcss-less": "^6.0.0",
-    "stylelint": "^14.9.1",
+    "stylelint": "^15.8.0",
     "stylelint-config-standard": "^28.0.0",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",

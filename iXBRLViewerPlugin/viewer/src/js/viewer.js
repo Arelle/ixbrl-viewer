@@ -555,7 +555,9 @@ export class Viewer {
         if (itemId !== null) {
             this.onSelect.fire(itemId, itemIdList, byClick);
         }
-        this.onSelect.fire(null);
+        else {
+            this.onSelect.fire(null);
+        }
     }
 
     // Handle a mouse click to select.  This finds all tagged elements that the

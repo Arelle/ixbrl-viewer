@@ -17,11 +17,11 @@ def get_requirements():
 setup(
     name='ixbrl_viewer',
     version='0.0.0',
-    description='The Workiva iXBRL Viewer allows iXBRL reports to be viewed interactively in a web browser',
+    description='The Arelle iXBRL Viewer allows iXBRL reports to be viewed interactively in a web browser',
     long_description=open('README.md').read(),
     url='https://github.com/workiva/ixbrl-viewer',
-    author='Workiva',
-    author_email='team-xt@workiva.com',
+    author='arelle.org',
+    author_email='support@arelle.org',
     include_package_data=True,
     packages=find_packages(),
     classifiers=[

@@ -1,7 +1,7 @@
-# Workiva iXBRL Viewer
+# Arelle iXBRL Viewer
 ![ixbrl-viewer](examples/ixbrl-viewer-demo.gif)
 
-The [Workiva](https://www.workiva.com) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL report.  Key features include:
+The [Arelle](https://arelle.org/) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL report.  Key features include:
 
 * Full text search on taxonomy labels and references
 * View full details of tagged facts
@@ -41,8 +41,7 @@ The python portion of this repo is developed using Python 3.9.
 # Accessing the javascript viewer application
 
 ## Accessing via the CDN
-In order to make things as easy as possible Workiva is now hosting the javascript 
-via a CDN. It can be accessed via the followng CDN url: 
+The JavaScript file is available via a CDN. It can be accessed via the following url:
 ```
 https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
 ```

@@ -143,7 +143,7 @@ Inspector.prototype.initialize = function (report, viewer) {
 
 Inspector.prototype.initializeViewer = function () {
     var viewer = this._viewer;
-    viewer.onSelect.add((id, eltSet) => this.selectItem(id, eltSet));
+    viewer.onSelect.add((id, eltSet, byClick) => this.selectItem(id, eltSet, byClick));
     viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
     viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
     $('.ixbrl-next-tag').click(() => viewer.selectNextTag(this._currentItem));
@@ -1014,7 +1014,7 @@ Inspector.prototype.update = function () {
  * If itemIdList is omitted, the currently selected item list is reset to just
  * the primary item.
  */
-Inspector.prototype.selectItem = function (id, itemIdList) {
+Inspector.prototype.selectItem = function (id, itemIdList, noScroll) {
     if (itemIdList === undefined) {
         this._currentItemList = [ this._report.getItemById(id) ];
     }
@@ -1024,7 +1024,7 @@ Inspector.prototype.selectItem = function (id, itemIdList) {
             this._currentItemList.push(this._report.getItemById(itemIdList[i]));
         }
     }
-    this.switchItem(id);
+    this.switchItem(id, noScroll);
 }
 
 /*
@@ -1035,10 +1035,12 @@ Inspector.prototype.selectItem = function (id, itemIdList) {
  *
  * For footnotes, we currently only support a single footnote being selected.
  */
-Inspector.prototype.switchItem = function (id) {
+Inspector.prototype.switchItem = function (id, noScroll) {
     if (id !== null) {
         this._currentItem = this._report.getItemById(id);
-        this._viewer.showItemById(id);
+        if (!noScroll) {
+            this._viewer.showItemById(id);
+        }
         this._viewer.highlightItem(id);
     }
     else {

@@ -468,6 +468,7 @@ Inspector.prototype._populateTagSummary = function (summaryDom) {
 
         $("<td></td>")
                 .text(count)
+                .addClass("figure")
                 .append($("<sup></sup>").text(formattedPercent))
                 .appendTo(row);
     }

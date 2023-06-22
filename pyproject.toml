@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools~=65.3", "wheel~=0.37", "setuptools_scm[toml]~=7.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ixbrl-viewer"
+dynamic = ['version']
+readme = "README.md"
+license = {text = "Apache-2.0"}
+description = "The Arelle iXBRL Viewer allows iXBRL reports to be viewed interactively in a web browser."
+authors = [
+    {name = "arelle.org", email = "support@arelle.org"}
+]
+keywords = ["xbrl"]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: End Users/Desktop',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Operating System :: OS Independent',
+    'Topic :: Text Processing :: Markup :: XML'
+]
+requires-python = ">=3.7"
+dependencies = [
+    'isodate>=0.6.0,<0.7.0',
+    'numpy>=1.19.5,<2.0.0',
+    'pycountry>=20.7.3,<21.0.0'
+]
+
+[project.optional-dependencies]
+dev = [
+    'arelle_release==2.4.2',
+    'lxml>=4.6.3,<5.0.0',
+    'mock>=4.0.3,<6.0.0',
+    'nose2>=0.12.0,<1.0.0',
+    'typing-extensions==4.5.0'
+]
+
+# https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins
+[project.entry-points."arelle.plugin"]
+ixbrl-viewer = "iXBRLViewerPlugin:load_plugin_url"
+
+[project.urls]
+"Homepage" = "https://arelle.org/"
+"Downloads" = "https://arelle.org/arelle/pub/"
+"Documentation" = "https://arelle.org/arelle/documentation/"
+"Blog" = "https://arelle.org/arelle/blog/"
+"Source Code" = "https://github.com/workiva/ixbrl-viewer"
+"Bug Reports" = "https://github.com/workiva/ixbrl-viewer/issues/"
+"Support" = "https://groups.google.com/g/arelle-users/"
+
+[tool.setuptools]
+platforms = ["any"]
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.setuptools_scm]
+tag_regex = "^(?:[\\w-]+-?)?(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
+write_to = "iXBRLViewerPlugin/_version.py"

@@ -47,20 +47,17 @@ ARG BUILD_ARTIFACTS_NPM=/build/*.tgz
 FROM python:3.9-slim-bullseye as python-build
 
 ARG PIP_INDEX_URL
-ARG GIT_TAG
 
 WORKDIR /build/
 
-COPY requirements*.txt /build/
-RUN pip install -U pip setuptools && \
-    pip install -r requirements-dev.txt
+RUN apt update -y
+RUN apt-get install git -y
 
 COPY . /build/
-COPY --from=node-build /build/iXBRLViewerPlugin/viewer/dist /build/iXBRLViewerPlugin/viewer/dist
+RUN pip install -U pip setuptools && \
+    pip install .[dev]
 
-# The following command replaces the version string in setup.py
-ARG VERSION=${GIT_TAG:-0.0.0}
-RUN sed -i "s/version='0\.0\.0'/version='$VERSION'/" setup.py
+COPY --from=node-build /build/iXBRLViewerPlugin/viewer/dist /build/iXBRLViewerPlugin/viewer/dist
 
 # python tests
 ARG BUILD_ARTIFACTS_TEST=/test_reports/*.xml
@@ -69,7 +66,7 @@ RUN nose2 --plugin nose2.plugins.junitxml --junit-xml-path ../test_reports/resul
 
 # pypi package creation
 ARG BUILD_ARTIFACTS_PYPI=/build/dist/*.tar.gz
-RUN python setup.py sdist
+RUN pip install build && python -m build
 
 ARG BUILD_ARTIFACTS_AUDIT=/audit/*
 RUN mkdir /audit/

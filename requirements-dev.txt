@@ -1,4 +1,4 @@
-arelle_release==2.4.2
+arelle_release==2.11.3
 lxml>=4.6.3,<5.0.0
 mock>=4.0.3,<6.0.0
 nose2>=0.12.0,<1.0.0

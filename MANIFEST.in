@@ -1,2 +1,1 @@
-include README.md
 graft iXBRLViewerPlugin/viewer/dist

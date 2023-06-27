@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools~=65.3", "wheel~=0.37", "setuptools_scm[toml]~=7.0"]
+requires = ["setuptools~=68.0", "wheel~=0.40", "setuptools_scm[toml]~=7.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,7 +11,7 @@ description = "The Arelle iXBRL Viewer allows iXBRL reports to be viewed interac
 authors = [
     {name = "arelle.org", email = "support@arelle.org"}
 ]
-keywords = ["xbrl"]
+keywords = ["arelle", "plugin", "xbrl"]
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: End Users/Desktop',
@@ -29,18 +29,14 @@ classifiers = [
 ]
 requires-python = ">=3.7"
 dependencies = [
-    'isodate>=0.6.0,<0.7.0',
-    'numpy>=1.19.5,<2.0.0',
-    'pycountry>=20.7.3,<21.0.0'
+    'arelle_release==2.*',
+    'lxml==4.*',
+    'pycountry==22.*'
 ]
-
 [project.optional-dependencies]
 dev = [
-    'arelle_release==2.4.2',
-    'lxml>=4.6.3,<5.0.0',
-    'mock>=4.0.3,<6.0.0',
-    'nose2>=0.12.0,<1.0.0',
-    'typing-extensions==4.5.0'
+    'nose2==0.13.0',
+    'typing-extensions==4.6.3'
 ]
 
 # https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins

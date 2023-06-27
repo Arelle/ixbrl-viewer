@@ -573,7 +573,6 @@ export class Inspector {
         }
     }
 
-
     _anchorList(fact, anchors) {
         const html = $("<ul></ul>");
         if (anchors.length > 0) {
@@ -827,7 +826,7 @@ export class Inspector {
 
     _footnoteFactsHTML(fact) {
         const html = $('<div></div>');
-        fact.linkedFacts.forEach((linkedFact) =>  {
+        fact.linkedFacts.forEach((linkedFact) => {
             html.append(this.factListRow(linkedFact));
         });
         return html;
@@ -931,8 +930,7 @@ export class Inspector {
     }
 
     update() {
-        const inspector = this;
-        const cf = inspector._currentItem;
+        const cf = this._currentItem;
         if (!cf) {
             $('#inspector').removeClass('footnote-mode');
             $('#inspector').addClass('no-fact-selected');
@@ -964,8 +962,8 @@ export class Inspector {
                     }
                 }
                 $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().click(() => inspector.selectItem(duplicates[(n+ndup-1) % ndup].id));
-                $('.duplicates .next').off().click(() => inspector.selectItem(duplicates[(n+1) % ndup].id));
+                $('.duplicates .prev').off().click(() => this.selectItem(duplicates[(n+ndup-1) % ndup].id));
+                $('.duplicates .next').off().click(() => this.selectItem(duplicates[(n+1) % ndup].id));
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {

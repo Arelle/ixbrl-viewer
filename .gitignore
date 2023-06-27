@@ -4,3 +4,4 @@ node_modules/
 dist/
 __pycache__
 /tests/puppeteer/artifacts/
+iXBRLViewerPlugin/_version.py

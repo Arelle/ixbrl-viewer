@@ -222,11 +222,11 @@ export class Viewer {
     }
 
 
-    // Adds the specified ID to the "ivid" data list on the given node
+    // Adds the specified ID to the "ivids" data list on the given node
     _addIdToNode(node, id) {
-        const ivids = node.data('ivid') || [];
+        const ivids = node.data('ivids') || [];
         ivids.push(id);
-        node.data('ivid', ivids);
+        node.data('ivids', ivids);
     }
 
     _buildContinuationMaps() {
@@ -284,10 +284,10 @@ export class Viewer {
     //   .ixbrl-element-footnote       
     //                         Indicates type of element being wrapped
     //
-    // All ixbrl-elements have "ivid" data added, which is a list of the ID
+    // All ixbrl-elements have "ivids" data added, which is a list of the ID
     // attribute(s) of corresponding IX item(s).  Continuations have the IDs of
     // their head items (fact or footnotes).
-    // "ivid" can be a mix of different types.
+    // "ivids" can be a mix of different types.
     //
     // Viewer._ixNodeMap is a map of these IDs to IXNode objects.
     //
@@ -365,7 +365,7 @@ export class Viewer {
                 const id = this._getIXHiddenLinkStyle(n);
                 if (id !== null) {
                     nodes = $(n);
-                    nodes.addClass("ixbrl-element").data('ivid', [id]);
+                    nodes.addClass("ixbrl-element").data('ivids', [id]);
                     this._docOrderItemIndex.addItem(id, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */
@@ -539,7 +539,7 @@ export class Viewer {
     }
 
     _ixIdsForElement(e) {
-        return e.data('ivid');
+        return e.data('ivids');
     }
 
     /*
@@ -599,12 +599,12 @@ export class Viewer {
     }
 
     _mouseEnter(e) {
-        const id = e.data('ivid')[0];
+        const id = e.data('ivids')[0];
         this.onMouseEnter.fire(id);
     }
 
     _mouseLeave(e) {
-        const id = e.data('ivid')[0];
+        const id = e.data('ivids')[0];
         this.onMouseLeave.fire(id);
     }
 
@@ -680,7 +680,7 @@ export class Viewer {
                     // Choosing the first means that we're arbitrarily choosing a
                     // highlight color for an element that is double tagged in a
                     // table cell.
-                    const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
+                    const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
                     if (ixn != undefined) {
                         const elements = viewer.elementsForItemIds(ixn.chainIXIds());
                         const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
@@ -721,7 +721,7 @@ export class Viewer {
         var facts = [];
         const e = this.elementsForItemId(fact.id);
         e.closest("table").find(".ixbrl-element").each(function () {
-            facts = facts.concat($(this).data('ivid'));
+            facts = facts.concat($(this).data('ivids'));
         });
         return facts;
     }

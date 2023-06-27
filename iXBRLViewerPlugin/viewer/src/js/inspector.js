@@ -659,9 +659,10 @@ export class Inspector {
                     .append($("<span></span>").addClass("concept-name").text(report.getLabelOrName(r.concept, "std")))
                     .appendTo(calcBody);
 
+                // r.facts is a map of fact IDs to Fact objects
                 if (r.facts) {
                     itemHTML.addClass("calc-fact-link");
-                    itemHTML.data('ivid', r.facts);
+                    itemHTML.data('ivids', Object.keys(r.facts));
                     itemHTML.click(() => inspector.selectItem(Object.values(r.facts)[0].id));
                     itemHTML.mouseenter(() => Object.values(r.facts).forEach(f => this._viewer.linkedHighlightFact(f)));
                     itemHTML.mouseleave(() => Object.values(r.facts).forEach(f => this._viewer.clearLinkedHighlightFact(f)));
@@ -700,7 +701,7 @@ export class Inspector {
 
     viewerMouseEnter(id) {
         $('.calculations .item')
-            .filter((i, e) => Object.keys($(e).data('ivid') ?? {}).includes(id))
+            .filter((i, e) => ($(e).data('ivids') ?? []).includes(id))
             .addClass('linked-highlight');
         $('#inspector .search .results tr')
             .filter((i, e) => $(e).data('ivid') == id)

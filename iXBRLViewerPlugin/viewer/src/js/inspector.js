@@ -820,22 +820,9 @@ export class Inspector {
     }
 
     _updateEntityIdentifier(fact, context) {
-        const cell = $('tr.entity-identifier td', context);
-        cell.empty();
-        const url = Identifiers.identifierURLForFact(fact);
-        const name = Identifiers.identifierNameForFact(fact);
-        if (name !== undefined) {
-            $('<span></span>').text('[' + name + "] ").appendTo(cell)
-            if (url !== undefined) {
-                $('<a target="_blank"></a>').attr('href',url).text(fact.identifier().localname).appendTo(cell)
-            }
-            else {
-                $('<span></span>').text(fact.identifier().localname).appendTo(cell);
-            }
-        }
-        else {
-            cell.text(fact.f.a.e);
-        }
+        $('tr.entity-identifier td', context)
+            .empty()
+            .append(Identifiers.readableNameHTML(fact.identifier()));
     }
 
     _footnoteFactsHTML(fact) {

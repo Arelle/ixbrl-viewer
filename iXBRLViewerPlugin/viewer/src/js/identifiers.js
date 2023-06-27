@@ -20,13 +20,11 @@ const schemes = {
 };
 
 export class Identifiers {
-    static identifierURLForFact(fact) {
-        const data = schemes[fact.identifier().namespace];
+    static identifierURL(identifier) {
+        const data = schemes[identifier.namespace];
         if (data !== undefined && data.url !== undefined) {
-            let url = data.url.replace('%s', fact.identifier().localname);
-            url = url.replace(/%0(\d+)d/, function (match, width) { 
-                return fact.identifier().localname.padStart(width, "0");
-            });
+            let url = data.url.replace('%s', identifier.localname);
+            url = url.replace(/%0(\d+)d/, (match, width) => identifier.localname.padStart(width, "0"));
             return url;
         }
         return undefined;
@@ -46,5 +44,29 @@ export class Identifiers {
             return "[" + data.name + "] " + identifier.localname;
         }
         return identifier.qname
+    }
+
+    static readableNameHTML(identifier) {
+        const data = schemes[identifier.namespace];
+        const span = document.createElement("span");
+        if (data !== undefined) {
+            const schemeSpan = span.appendChild(document.createElement("span"));
+            schemeSpan.textContent = "[" + data.name + "] ";
+            const url = Identifiers.identifierURL(identifier);
+            if (url !== undefined) {
+                const a = span.appendChild(document.createElement("a"));
+                a.textContent = identifier.localname;
+                a.setAttribute("target", "_blank");
+                a.setAttribute("href", url);
+            }
+            else {
+                const el = span.appendChild(document.createElement("span"));
+                el.textContent = identifier.localname;
+            }
+        }
+        else {
+            span.textContent = identifier.qname;
+        }
+        return span;
     }
 }

@@ -47,7 +47,7 @@ export class Viewer {
         this._currentDocumentIndex = 0;
     }
 
-    _checkContinuationCount = function() {
+    _checkContinuationCount() {
         const continuationCount = Object.keys(this.continuationOfMap).length
         if (continuationCount > this._iv.options.continuationElementLimit) {
             const contents = $('<div></div>')
@@ -65,7 +65,7 @@ export class Viewer {
         return Promise.resolve();
     }
 
-    initialize = function() {
+    initialize() {
         return new Promise(async (resolve, reject) => {
             const viewer = this;
             viewer._buildContinuationMaps();
@@ -100,7 +100,7 @@ export class Viewer {
         });
     }
 
-    _addDocumentSetTabs = function() {
+    _addDocumentSetTabs() {
         if (this._report.isDocumentSet()) {
             $('#ixv .ixds-tabs').show();
             for (const [i, doc] of this._report.documentSetFiles().entries()) {
@@ -118,7 +118,7 @@ export class Viewer {
     // Wrap a DOM node in a div or span.  If the node or any descendent has
     // display: block, a div is used, otherwise a span.  Returns the wrapper node
     // as a jQuery node
-    _wrapNode = function(n) {
+    _wrapNode(n) {
         var wrapper = "<span>";
         const nn = n.getElementsByTagName("*");
         for (var i = 0; i < nn.length; i++) {
@@ -161,7 +161,7 @@ export class Viewer {
      * All other links are forced to open in a new tab
      *
      */
-    _updateLink = function(n) {
+    _updateLink(n) {
         const url = $(n).attr("href");
         if (url !== undefined) {
             const [file, fragment] = url.split('#', 2);
@@ -181,7 +181,7 @@ export class Viewer {
         }
     }
 
-    _findOrCreateWrapperNode = function(domNode) {
+    _findOrCreateWrapperNode(domNode) {
         const v = this;
         /* Is the element the only significant content within a <td> or <th> ? If
          * so, use that as the wrapper element. */
@@ -222,14 +222,14 @@ export class Viewer {
     }
 
 
-    // Adds the specified ID to the "ivid" data list on the given node
-    _addIdToNode = function(node, id) {
-        const ivids = node.data('ivid') || [];
+    // Adds the specified ID to the "ivids" data list on the given node
+    _addIdToNode(node, id) {
+        const ivids = node.data('ivids') || [];
         ivids.push(id);
-        node.data('ivid', ivids);
+        node.data('ivids', ivids);
     }
 
-    _buildContinuationMaps = function() {
+    _buildContinuationMaps() {
         // map of element id to next element id in continuation chain
         const nextContinuationMap = {};
         // map of items in default target document to all their continuations
@@ -284,17 +284,17 @@ export class Viewer {
     //   .ixbrl-element-footnote       
     //                         Indicates type of element being wrapped
     //
-    // All ixbrl-elements have "ivid" data added, which is a list of the ID
+    // All ixbrl-elements have "ivids" data added, which is a list of the ID
     // attribute(s) of corresponding IX item(s).  Continuations have the IDs of
     // their head items (fact or footnotes).
-    // "ivid" can be a mix of different types.
+    // "ivids" can be a mix of different types.
     //
     // Viewer._ixNodeMap is a map of these IDs to IXNode objects.
     //
     // Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
     // fact and footnotes in document order.
     //
-    _preProcessiXBRL = function(n, docIndex, inHidden) {
+    _preProcessiXBRL(n, docIndex, inHidden) {
         const name = localName(n.nodeName).toUpperCase();
         const isFootnote = name === 'FOOTNOTE';
         const isContinuation = name === 'CONTINUATION';
@@ -365,7 +365,7 @@ export class Viewer {
                 const id = this._getIXHiddenLinkStyle(n);
                 if (id !== null) {
                     nodes = $(n);
-                    nodes.addClass("ixbrl-element").data('ivid', [id]);
+                    nodes.addClass("ixbrl-element").data('ivids', [id]);
                     this._docOrderItemIndex.addItem(id, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */
@@ -387,7 +387,7 @@ export class Viewer {
         this._preProcessChildNodes(n, docIndex, inHidden);
     }
 
-    _getIXHiddenLinkStyle = function(domNode) {
+    _getIXHiddenLinkStyle(domNode) {
         if (domNode.hasAttribute('style')) {
             const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
             const m = domNode.getAttribute('style').match(re);
@@ -412,7 +412,7 @@ export class Viewer {
         this._iv.callPluginMethod("updateViewerStyleElements", stlyeElts);
     }
 
-    contents = function() {
+    contents() {
         return this._iframes.contents();
     }
 
@@ -474,7 +474,7 @@ export class Viewer {
     /*
      * Calculate the intersection of two rectangles
      */
-    intersect = function(r1, r2) {
+    intersect(r1, r2) {
         const r3 = {
             left: Math.max(r1.left, r2.left),
             top: Math.max(r1.top, r2.top),
@@ -527,7 +527,7 @@ export class Viewer {
 
     /* If the specified element is not fully visible, scroll it into the center of
      * the viewport */
-    showElement = function(e) {
+    showElement(e) {
         const ee = e.get(0);
         if (!this.isFullyVisible(ee)) {
             ee.scrollIntoView({ block: "center", inline: "center" });
@@ -539,7 +539,7 @@ export class Viewer {
     }
 
     _ixIdsForElement(e) {
-        return e.data('ivid');
+        return e.data('ivids');
     }
 
     /*
@@ -599,12 +599,12 @@ export class Viewer {
     }
 
     _mouseEnter(e) {
-        const id = e.data('ivid')[0];
+        const id = e.data('ivids')[0];
         this.onMouseEnter.fire(id);
     }
 
     _mouseLeave(e) {
-        const id = e.data('ivid')[0];
+        const id = e.data('ivids')[0];
         this.onMouseLeave.fire(id);
     }
 
@@ -636,7 +636,7 @@ export class Viewer {
     /*
      * Add or remove a class to an item (fact or footnote) and any continuation elements
      */
-    changeItemClass = function(itemId, highlightClass, removeClass) {
+    changeItemClass(itemId, highlightClass, removeClass) {
         const elements = this.elementsForItemIds([itemId].concat(this.itemContinuationMap[itemId]))
         if (removeClass) {
             elements.removeClass(highlightClass);
@@ -649,7 +649,7 @@ export class Viewer {
     /*
      * Change the currently highlighted item
      */
-    highlightItem = function(factId) {
+    highlightItem(factId) {
         this.clearHighlighting();
         this.changeItemClass(factId, "ixbrl-selected");
     }
@@ -680,7 +680,7 @@ export class Viewer {
                     // Choosing the first means that we're arbitrarily choosing a
                     // highlight color for an element that is double tagged in a
                     // table cell.
-                    const ixn = $(this).data('ivid').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
+                    const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
                     if (ixn != undefined) {
                         const elements = viewer.elementsForItemIds(ixn.chainIXIds());
                         const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
@@ -721,7 +721,7 @@ export class Viewer {
         var facts = [];
         const e = this.elementsForItemId(fact.id);
         e.closest("table").find(".ixbrl-element").each(function () {
-            facts = facts.concat($(this).data('ivid'));
+            facts = facts.concat($(this).data('ivids'));
         });
         return facts;
     }
@@ -738,7 +738,7 @@ export class Viewer {
         $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
     }
 
-    showDocumentForItemId = function(itemId) {
+    showDocumentForItemId(itemId) {
         this.selectDocument(this._ixNodeMap[itemId].docIndex);
     }
 

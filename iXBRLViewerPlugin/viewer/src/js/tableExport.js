@@ -54,7 +54,7 @@ export class TableExport {
                 const facts = $(this).find(".ixbrl-element").addBack(".ixbrl-element");
                 let fact = null;
                 if (facts.length > 0) {
-                    const id = facts.first().data('ivid');
+                    const id = facts.first().data('ivids');
                     fact = report.getItemById(id);
                 }
                 if (fact instanceof Fact) {

@@ -441,6 +441,34 @@ describe("Readable accuracy", () => {
     });
 });
 
+describe("Readable accuracy", () => {
+    test("With units", () => {
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": "iso4217:GBP" }
+        }).getScaleLabel(-2)).toBe("pence");
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": "iso4217:GBP" }
+        }).getScaleLabel(-4)).toBe(null);
+    });
+    test("Without units", () => {
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": {}
+        }).getScaleLabel(-2)).toBe("hundredths");
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": {}
+        }).getScaleLabel(-4)).toBe(null);
+    });
+});
+
+
 describe("Readable scale", () => {
     test("Non-numeric", () => {
         expect(testFact({

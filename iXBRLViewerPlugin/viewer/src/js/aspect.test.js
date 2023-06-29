@@ -89,7 +89,7 @@ test("Unit aspects label - known currency (EUR)", () => {
 test("Unit aspects label - unknown currency", () => {
     var unitAspect = new Aspect("u", "iso4217:ZAR", testReport);
     expect(unitAspect.label()).toBe("Unit");
-    expect(unitAspect.valueLabel()).toBe("ZAR ");
+    expect(unitAspect.valueLabel()).toBe("ZAR");
 });
 
 test("Entity aspect labels - unknown scheme", () => {

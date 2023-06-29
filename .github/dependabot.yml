@@ -8,6 +8,8 @@ updates:
     time: "02:00"
     timezone: America/Chicago
   open-pull-requests-limit: 99
+  allow:
+    - dependency-type: all
   reviewers:
   - Workiva/xt
   ignore:
@@ -26,21 +28,12 @@ updates:
   - dependency-name: i18next
     versions:
     - ">=21"
-  - dependency-name: jest
-    versions:
-    - ">=27"
   - dependency-name: less
     versions:
     - ">=4"
   - dependency-name: less-loader
     versions:
     - ">=7"
-  - dependency-name: webpack-cli
-    versions:
-    - ">=4"
-  - dependency-name: webpack-merge
-    versions:
-    - ">=5"
 - package-ecosystem: pip
   directory: "/"
   schedule:
@@ -49,7 +42,7 @@ updates:
     timezone: America/Chicago
   open-pull-requests-limit: 99
   allow:
-    - dependency-type: indirect
+    - dependency-type: all
   reviewers:
   - Workiva/xt
 - package-ecosystem: docker

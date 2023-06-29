@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools~=68.0", "wheel~=0.40", "setuptools_scm[toml]~=7.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ixbrl-viewer"
+dynamic = ['version']
+readme = "README.md"
+license = {text = "Apache-2.0"}
+description = "The Arelle iXBRL Viewer allows iXBRL reports to be viewed interactively in a web browser."
+authors = [
+    {name = "arelle.org", email = "support@arelle.org"}
+]
+keywords = ["arelle", "plugin", "xbrl"]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: End Users/Desktop',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Operating System :: OS Independent',
+    'Topic :: Text Processing :: Markup :: XML'
+]
+requires-python = ">=3.8"
+dependencies = [
+    'arelle_release==2.*',
+    'lxml==4.*',
+    'pycountry==22.*'
+]
+[project.optional-dependencies]
+dev = [
+    'nose2==0.13.0',
+    'typing-extensions==4.7.0'
+]
+
+# https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins
+[project.entry-points."arelle.plugin"]
+ixbrl-viewer = "iXBRLViewerPlugin:load_plugin_url"
+
+[project.urls]
+"Homepage" = "https://arelle.org/"
+"Downloads" = "https://arelle.org/arelle/pub/"
+"Documentation" = "https://arelle.org/arelle/documentation/"
+"Blog" = "https://arelle.org/arelle/blog/"
+"Source Code" = "https://github.com/workiva/ixbrl-viewer"
+"Bug Reports" = "https://github.com/workiva/ixbrl-viewer/issues/"
+"Support" = "https://groups.google.com/g/arelle-users/"
+
+[tool.setuptools]
+platforms = ["any"]
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.setuptools_scm]
+tag_regex = "^(?:[\\w-]+-?)?(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
+write_to = "iXBRLViewerPlugin/_version.py"

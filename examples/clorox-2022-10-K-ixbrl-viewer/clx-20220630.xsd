@@ -1,0 +1,833 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with Wdesk from Workiva-->
+<!--Copyright 2022 Workiva-->
+<!--r:82dc8430-b80f-485d-b3d8-f56a96be4c77,g:713f2607-ed5d-4225-ab37-67f4dda3a609-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:clx="http://www.clorox.com/20220630" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2020-01-21" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.clorox.com/20220630">
+  <xs:import namespace="http://fasb.org/srt/2022" schemaLocation="https://xbrl.fasb.org/srt/2022/elts/srt-2022.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2022" schemaLocation="https://xbrl.fasb.org/us-gaap/2022/elts/us-gaap-2022.xsd"/>
+  <xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="http://www.xbrl.org/2003/xlink-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2020-01-21" schemaLocation="https://www.xbrl.org/dtr/type/2020-01-21/types.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/country/2022" schemaLocation="https://xbrl.sec.gov/country/2022/country-2022.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2022" schemaLocation="https://xbrl.sec.gov/dei/2022/dei-2022.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="clx-20220630_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="clx-20220630_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="clx-20220630_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="clx-20220630_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="CoverPage" roleURI="http://www.clorox.com/role/CoverPage">
+        <link:definition>000010001 - Document - Cover Page</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AuditInformation" roleURI="http://www.clorox.com/role/AuditInformation">
+        <link:definition>000020002 - Document - Audit Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTOFEARNINGS" roleURI="http://www.clorox.com/role/CONSOLIDATEDSTATEMENTOFEARNINGS">
+        <link:definition>100010003 - Statement - CONSOLIDATED STATEMENT OF EARNINGS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME" roleURI="http://www.clorox.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME">
+        <link:definition>100020004 - Statement - CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDBALANCESHEETS" roleURI="http://www.clorox.com/role/CONSOLIDATEDBALANCESHEETS">
+        <link:definition>100030005 - Statement - CONSOLIDATED BALANCE SHEETS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDBALANCESHEETSParenthetical" roleURI="http://www.clorox.com/role/CONSOLIDATEDBALANCESHEETSParenthetical">
+        <link:definition>100040006 - Statement - CONSOLIDATED BALANCE SHEETS (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITY" roleURI="http://www.clorox.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITY">
+        <link:definition>100050007 - Statement - CONSOLIDATED STATEMENTS OF STOCKHOLDERS' EQUITY</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITYParenthetical" roleURI="http://www.clorox.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSEQUITYParenthetical">
+        <link:definition>100060008 - Statement - CONSOLIDATED STATEMENTS OF STOCKHOLDERS' EQUITY (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFCASHFLOWS" roleURI="http://www.clorox.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS">
+        <link:definition>100070009 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIES" roleURI="http://www.clorox.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIES">
+        <link:definition>210011001 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESPolicies" roleURI="http://www.clorox.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESPolicies">
+        <link:definition>220022001 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESTables" roleURI="http://www.clorox.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESTables">
+        <link:definition>230033001 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESAdditionalInformationDetails" roleURI="http://www.clorox.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESAdditionalInformationDetails">
+        <link:definition>240044001 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES (Additional Information) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESScheduleofEstimatedUsefulLivesofPropertyPlantandEquipmentDetails" roleURI="http://www.clorox.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESScheduleofEstimatedUsefulLivesofPropertyPlantandEquipmentDetails">
+        <link:definition>240054002 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES (Schedule of Estimated Useful Lives of Property, Plant and Equipment) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BUSINESSACQUIRED" roleURI="http://www.clorox.com/role/BUSINESSACQUIRED">
+        <link:definition>210061002 - Disclosure - BUSINESS ACQUIRED</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BUSINESSACQUIREDTables" roleURI="http://www.clorox.com/role/BUSINESSACQUIREDTables">
+        <link:definition>230073002 - Disclosure - BUSINESS ACQUIRED (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BUSINESSACQUIREDNarrativeDetails" roleURI="http://www.clorox.com/role/BUSINESSACQUIREDNarrativeDetails">
+        <link:definition>240084003 - Disclosure - BUSINESS ACQUIRED (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BUSINESSACQUIREDFairValueOfAssetsAcquiredandLiabilitiesAssumedDetails" roleURI="http://www.clorox.com/role/BUSINESSACQUIREDFairValueOfAssetsAcquiredandLiabilitiesAssumedDetails">
+        <link:definition>240094004 - Disclosure - BUSINESS ACQUIRED (Fair Value Of Assets Acquired and Liabilities Assumed) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INVENTORIESNET" roleURI="http://www.clorox.com/role/INVENTORIESNET">
+        <link:definition>210101003 - Disclosure - INVENTORIES, NET</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INVENTORIESNETTables" roleURI="http://www.clorox.com/role/INVENTORIESNETTables">
+        <link:definition>230113003 - Disclosure - INVENTORIES, NET (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INVENTORIESNETInventoryDetails" roleURI="http://www.clorox.com/role/INVENTORIESNETInventoryDetails">
+        <link:definition>240124005 - Disclosure - INVENTORIES, NET (Inventory) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INVENTORIESNETNarrativeDetails" roleURI="http://www.clorox.com/role/INVENTORIESNETNarrativeDetails">
+        <link:definition>240134006 - Disclosure - INVENTORIES, NET (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PROPERTYPLANTANDEQUIPMENTNET" roleURI="http://www.clorox.com/role/PROPERTYPLANTANDEQUIPMENTNET">
+        <link:definition>210141004 - Disclosure - PROPERTY, PLANT AND EQUIPMENT, NET</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PROPERTYPLANTANDEQUIPMENTNETTables" roleURI="http://www.clorox.com/role/PROPERTYPLANTANDEQUIPMENTNETTables">
+        <link:definition>230153004 - Disclosure - PROPERTY, PLANT AND EQUIPMENT, NET (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PROPERTYPLANTANDEQUIPMENTNETComponentsofPropertyPlantandEquipmentNetDetails" roleURI="http://www.clorox.com/role/PROPERTYPLANTANDEQUIPMENTNETComponentsofPropertyPlantandEquipmentNetDetails">
+        <link:definition>240164007 - Disclosure - PROPERTY, PLANT AND EQUIPMENT, NET (Components of Property, Plant and Equipment, Net) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PROPERTYPLANTANDEQUIPMENTNETNarrativeDetails" roleURI="http://www.clorox.com/role/PROPERTYPLANTANDEQUIPMENTNETNarrativeDetails">
+        <link:definition>240174008 - Disclosure - PROPERTY, PLANT AND EQUIPMENT, NET (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETS" roleURI="http://www.clorox.com/role/GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETS">
+        <link:definition>210181005 - Disclosure - GOODWILL, TRADEMARKS AND OTHER INTANGIBLE ASSETS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSTables" roleURI="http://www.clorox.com/role/GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSTables">
+        <link:definition>230193005 - Disclosure - GOODWILL, TRADEMARKS AND OTHER INTANGIBLE ASSETS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSScheduleofGoodwillDetails" roleURI="http://www.clorox.com/role/GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSScheduleofGoodwillDetails">
+        <link:definition>240204009 - Disclosure - GOODWILL, TRADEMARKS AND OTHER INTANGIBLE ASSETS (Schedule of Goodwill) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSScheduleofIntangibleAssetsExcludingGoodwillDetails" roleURI="http://www.clorox.com/role/GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSScheduleofIntangibleAssetsExcludingGoodwillDetails">
+        <link:definition>240214010 - Disclosure - GOODWILL, TRADEMARKS AND OTHER INTANGIBLE ASSETS (Schedule of Intangible Assets, Excluding Goodwill) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSNarrativeDetails" roleURI="http://www.clorox.com/role/GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSNarrativeDetails">
+        <link:definition>240224011 - Disclosure - GOODWILL, TRADEMARKS AND OTHER INTANGIBLE ASSETS (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSImpairmentChargesDetails" roleURI="http://www.clorox.com/role/GOODWILLTRADEMARKSANDOTHERINTANGIBLEASSETSImpairmentChargesDetails">
+        <link:definition>240234012 - Disclosure - GOODWILL, TRADEMARKS AND OTHER INTANGIBLE ASSETS (Impairment Charges) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCOUNTSPAYABLEANDACCRUEDLIABILITIES" roleURI="http://www.clorox.com/role/ACCOUNTSPAYABLEANDACCRUEDLIABILITIES">
+        <link:definition>210241006 - Disclosure - ACCOUNTS PAYABLE AND ACCRUED LIABILITIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCOUNTSPAYABLEANDACCRUEDLIABILITIESTables" roleURI="http://www.clorox.com/role/ACCOUNTSPAYABLEANDACCRUEDLIABILITIESTables">
+        <link:definition>230253006 - Disclosure - ACCOUNTS PAYABLE AND ACCRUED LIABILITIES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCOUNTSPAYABLEANDACCRUEDLIABILITIESDetails" roleURI="http://www.clorox.com/role/ACCOUNTSPAYABLEANDACCRUEDLIABILITIESDetails">
+        <link:definition>240264013 - Disclosure - ACCOUNTS PAYABLE AND ACCRUED LIABILITIES (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DEBT" roleURI="http://www.clorox.com/role/DEBT">
+        <link:definition>210271007 - Disclosure - DEBT</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DEBTTables" roleURI="http://www.clorox.com/role/DEBTTables">
+        <link:definition>230283007 - Disclosure - DEBT (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DEBTNarrativeDetails" roleURI="http://www.clorox.com/role/DEBTNarrativeDetails">
+        <link:definition>240294014 - Disclosure - DEBT (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DEBTLongtermDebtNetofUnamortizedDiscountsorPremiumsDetails" roleURI="http://www.clorox.com/role/DEBTLongtermDebtNetofUnamortizedDiscountsorPremiumsDetails">
+        <link:definition>240304015 - Disclosure - DEBT (Long-term Debt, Net of Unamortized Discounts or Premiums) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DEBTBorrowingCapacityUnderOtherFinancingArrangementsDetails" roleURI="http://www.clorox.com/role/DEBTBorrowingCapacityUnderOtherFinancingArrangementsDetails">
+        <link:definition>240314016 - Disclosure - DEBT (Borrowing Capacity Under Other Financing Arrangements) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERLIABILITIES" roleURI="http://www.clorox.com/role/OTHERLIABILITIES">
+        <link:definition>210321008 - Disclosure - OTHER LIABILITIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERLIABILITIESTables" roleURI="http://www.clorox.com/role/OTHERLIABILITIESTables">
+        <link:definition>230333008 - Disclosure - OTHER LIABILITIES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERLIABILITIESScheduleofOtherLiabilitiesDetails" roleURI="http://www.clorox.com/role/OTHERLIABILITIESScheduleofOtherLiabilitiesDetails">
+        <link:definition>240344017 - Disclosure - OTHER LIABILITIES (Schedule of Other Liabilities) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERLIABILITIESNarrativeDetails" roleURI="http://www.clorox.com/role/OTHERLIABILITIESNarrativeDetails">
+        <link:definition>240354018 - Disclosure - OTHER LIABILITIES (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTS" roleURI="http://www.clorox.com/role/FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTS">
+        <link:definition>210361009 - Disclosure - FINANCIAL INSTRUMENTS AND FAIR VALUE MEASUREMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSTables" roleURI="http://www.clorox.com/role/FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSTables">
+        <link:definition>230373009 - Disclosure - FINANCIAL INSTRUMENTS AND FAIR VALUE MEASUREMENTS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSNarrativeDetails" roleURI="http://www.clorox.com/role/FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSNarrativeDetails">
+        <link:definition>240384019 - Disclosure - FINANCIAL INSTRUMENTS AND FAIR VALUE MEASUREMENTS (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSScheduleoftheEffectsofDerivativeInstrumentsDesignatedasHedgingInstrumentsDetails" roleURI="http://www.clorox.com/role/FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSScheduleoftheEffectsofDerivativeInstrumentsDesignatedasHedgingInstrumentsDetails">
+        <link:definition>240394020 - Disclosure - FINANCIAL INSTRUMENTS AND FAIR VALUE MEASUREMENTS (Schedule of the Effects of Derivative Instruments Designated as Hedging Instruments) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSScheduleofFinancialInstrumentsMeasuredatFairValueDetails" roleURI="http://www.clorox.com/role/FINANCIALINSTRUMENTSANDFAIRVALUEMEASUREMENTSScheduleofFinancialInstrumentsMeasuredatFairValueDetails">
+        <link:definition>240404021 - Disclosure - FINANCIAL INSTRUMENTS AND FAIR VALUE MEASUREMENTS (Schedule of Financial Instruments Measured at Fair Value) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTS" roleURI="http://www.clorox.com/role/OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTS">
+        <link:definition>210411010 - Disclosure - OTHER CONTINGENCIES, GUARANTEES AND COMMITMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTSTables" roleURI="http://www.clorox.com/role/OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTSTables">
+        <link:definition>230423010 - Disclosure - OTHER CONTINGENCIES, GUARANTEES AND COMMITMENTS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTSNarrativeDetails" roleURI="http://www.clorox.com/role/OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTSNarrativeDetails">
+        <link:definition>240434022 - Disclosure - OTHER CONTINGENCIES, GUARANTEES AND COMMITMENTS (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTSUnrecordedUnconditionalPurchaseObligationsDisclosureDetails" roleURI="http://www.clorox.com/role/OTHERCONTINGENCIESGUARANTEESANDCOMMITMENTSUnrecordedUnconditionalPurchaseObligationsDisclosureDetails">
+        <link:definition>240444023 - Disclosure - OTHER CONTINGENCIES, GUARANTEES AND COMMITMENTS (Unrecorded Unconditional Purchase Obligations Disclosure) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASES" roleURI="http://www.clorox.com/role/LEASES">
+        <link:definition>210451011 - Disclosure - LEASES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESTables" roleURI="http://www.clorox.com/role/LEASESTables">
+        <link:definition>230463011 - Disclosure - LEASES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESNarrativeDetails" roleURI="http://www.clorox.com/role/LEASESNarrativeDetails">
+        <link:definition>240474024 - Disclosure - LEASES (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESSupplementalBalanceSheetInformationScheduleDetails" roleURI="http://www.clorox.com/role/LEASESSupplementalBalanceSheetInformationScheduleDetails">
+        <link:definition>240484025 - Disclosure - LEASES (Supplemental Balance Sheet Information Schedule) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESComponentsofLeaseCostScheduleDetails" roleURI="http://www.clorox.com/role/LEASESComponentsofLeaseCostScheduleDetails">
+        <link:definition>240494026 - Disclosure - LEASES (Components of Lease Cost Schedule) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESSupplementalCashFlowInformationandNonCashActivityScheduleDetails" roleURI="http://www.clorox.com/role/LEASESSupplementalCashFlowInformationandNonCashActivityScheduleDetails">
+        <link:definition>240504027 - Disclosure - LEASES (Supplemental Cash Flow Information and Non-Cash Activity Schedule) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESWeightedAverageRemainingLeaseTermandDiscountRateScheduleDetails" roleURI="http://www.clorox.com/role/LEASESWeightedAverageRemainingLeaseTermandDiscountRateScheduleDetails">
+        <link:definition>240514028 - Disclosure - LEASES (Weighted-Average Remaining Lease Term and Discount Rate Schedule) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails" roleURI="http://www.clorox.com/role/LEASESMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails">
+        <link:definition>240524029 - Disclosure - LEASES (Maturities of Lease Liabilities by Fiscal Year Schedule) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails_1" roleURI="http://www.clorox.com/role/LEASESMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails_1">
+        <link:definition>240524029 - Disclosure - LEASES (Maturities of Lease Liabilities by Fiscal Year Schedule) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKHOLDERSEQUITY" roleURI="http://www.clorox.com/role/STOCKHOLDERSEQUITY">
+        <link:definition>210531012 - Disclosure - STOCKHOLDERS' EQUITY</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKHOLDERSEQUITYTables" roleURI="http://www.clorox.com/role/STOCKHOLDERSEQUITYTables">
+        <link:definition>230543012 - Disclosure - STOCKHOLDERS' EQUITY (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKHOLDERSEQUITYNarrativeDetails" roleURI="http://www.clorox.com/role/STOCKHOLDERSEQUITYNarrativeDetails">
+        <link:definition>240554030 - Disclosure - STOCKHOLDERS' EQUITY (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKHOLDERSEQUITYCommonStockDividendsDetails" roleURI="http://www.clorox.com/role/STOCKHOLDERSEQUITYCommonStockDividendsDetails">
+        <link:definition>240564031 - Disclosure - STOCKHOLDERS' EQUITY (Common Stock Dividends) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKHOLDERSEQUITYScheduleofChangesinAccumulatedOtherComprehensiveNetLossesDetails" roleURI="http://www.clorox.com/role/STOCKHOLDERSEQUITYScheduleofChangesinAccumulatedOtherComprehensiveNetLossesDetails">
+        <link:definition>240574032 - Disclosure - STOCKHOLDERS' EQUITY (Schedule of Changes in Accumulated Other Comprehensive Net (Losses) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NETEARNINGSPERSHAREEPS" roleURI="http://www.clorox.com/role/NETEARNINGSPERSHAREEPS">
+        <link:definition>210581013 - Disclosure - NET EARNINGS PER SHARE (EPS)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NETEARNINGSPERSHAREEPSTables" roleURI="http://www.clorox.com/role/NETEARNINGSPERSHAREEPSTables">
+        <link:definition>230593013 - Disclosure - NET EARNINGS PER SHARE (EPS) (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NETEARNINGSPERSHAREEPSDetails" roleURI="http://www.clorox.com/role/NETEARNINGSPERSHAREEPSDetails">
+        <link:definition>240604033 - Disclosure - NET EARNINGS PER SHARE (EPS) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANS" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANS">
+        <link:definition>210611014 - Disclosure - STOCK-BASED COMPENSATION PLANS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANSTables" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANSTables">
+        <link:definition>230623014 - Disclosure - STOCK-BASED COMPENSATION PLANS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANSNarrativeDetails" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANSNarrativeDetails">
+        <link:definition>240634034 - Disclosure - STOCK-BASED COMPENSATION PLANS (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANSCompensationCostandRelatedIncomeTaxBenefitDetails" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANSCompensationCostandRelatedIncomeTaxBenefitDetails">
+        <link:definition>240644035 - Disclosure - STOCK-BASED COMPENSATION PLANS (Compensation Cost and Related Income Tax Benefit) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANSAssumptionsUtilizedintheValuationinCalculatingtheCompensationExpenseforStockOptionsGrantedDetails" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANSAssumptionsUtilizedintheValuationinCalculatingtheCompensationExpenseforStockOptionsGrantedDetails">
+        <link:definition>240654036 - Disclosure - STOCK-BASED COMPENSATION PLANS (Assumptions Utilized in the Valuation in Calculating the Compensation Expense for Stock Options Granted) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANSSummaryofStockOptionActivityDetails" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANSSummaryofStockOptionActivityDetails">
+        <link:definition>240664037 - Disclosure - STOCK-BASED COMPENSATION PLANS (Summary of Stock Option Activity) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANSSummaryofRestrictedStockAwardActivityDetails" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANSSummaryofRestrictedStockAwardActivityDetails">
+        <link:definition>240674038 - Disclosure - STOCK-BASED COMPENSATION PLANS (Summary of Restricted Stock Award Activity) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="STOCKBASEDCOMPENSATIONPLANSSummaryofPerformanceStockAwardActivityDetails" roleURI="http://www.clorox.com/role/STOCKBASEDCOMPENSATIONPLANSSummaryofPerformanceStockAwardActivityDetails">
+        <link:definition>240684039 - Disclosure - STOCK-BASED COMPENSATION PLANS (Summary of Performance Stock Award Activity) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERINCOMEEXPENSENET" roleURI="http://www.clorox.com/role/OTHERINCOMEEXPENSENET">
+        <link:definition>210691015 - Disclosure - OTHER (INCOME) EXPENSE, NET</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERINCOMEEXPENSENETTables" roleURI="http://www.clorox.com/role/OTHERINCOMEEXPENSENETTables">
+        <link:definition>230703015 - Disclosure - OTHER (INCOME) EXPENSE, NET (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OTHERINCOMEEXPENSENETDetails" roleURI="http://www.clorox.com/role/OTHERINCOMEEXPENSENETDetails">
+        <link:definition>240714040 - Disclosure - OTHER (INCOME) EXPENSE, NET (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXES" roleURI="http://www.clorox.com/role/INCOMETAXES">
+        <link:definition>210721016 - Disclosure - INCOME TAXES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESTables" roleURI="http://www.clorox.com/role/INCOMETAXESTables">
+        <link:definition>230733016 - Disclosure - INCOME TAXES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESProvisionforIncomeTaxesbyTaxJurisdictionandDomesticandForeignEarningsbeforeTaxesDetails" roleURI="http://www.clorox.com/role/INCOMETAXESProvisionforIncomeTaxesbyTaxJurisdictionandDomesticandForeignEarningsbeforeTaxesDetails">
+        <link:definition>240744041 - Disclosure - INCOME TAXES (Provision for Income Taxes by Tax Jurisdiction and Domestic and Foreign Earnings before Taxes) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESEffectiveIncomeTaxRateReconciliationDetails" roleURI="http://www.clorox.com/role/INCOMETAXESEffectiveIncomeTaxRateReconciliationDetails">
+        <link:definition>240754042 - Disclosure - INCOME TAXES (Effective Income Tax Rate Reconciliation) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESNarrativeDetails" roleURI="http://www.clorox.com/role/INCOMETAXESNarrativeDetails">
+        <link:definition>240764043 - Disclosure - INCOME TAXES (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESComponentsofNetDeferredTaxAssetsDetails" roleURI="http://www.clorox.com/role/INCOMETAXESComponentsofNetDeferredTaxAssetsDetails">
+        <link:definition>240774044 - Disclosure - INCOME TAXES (Components of Net Deferred Tax Assets) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESValuationAllowanceDetails" roleURI="http://www.clorox.com/role/INCOMETAXESValuationAllowanceDetails">
+        <link:definition>240784045 - Disclosure - INCOME TAXES (Valuation Allowance) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESUnrecognizedTaxBenefitsDetails" roleURI="http://www.clorox.com/role/INCOMETAXESUnrecognizedTaxBenefitsDetails">
+        <link:definition>240794046 - Disclosure - INCOME TAXES (Unrecognized Tax Benefits) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANS" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANS">
+        <link:definition>210801017 - Disclosure - EMPLOYEE BENEFIT PLANS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSTables" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSTables">
+        <link:definition>230813017 - Disclosure - EMPLOYEE BENEFIT PLANS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSNarrativeDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSNarrativeDetails">
+        <link:definition>240824047 - Disclosure - EMPLOYEE BENEFIT PLANS (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSSummarizedInformationforDefinedBenefitRetirementIncomeandHealthcarePlansDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSSummarizedInformationforDefinedBenefitRetirementIncomeandHealthcarePlansDetails">
+        <link:definition>240834048 - Disclosure - EMPLOYEE BENEFIT PLANS (Summarized Information for Defined Benefit Retirement Income and Healthcare Plans) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSInformationforRetirementIncomePlanswithAccumulatedBenefitObligationinExcessofPlanAssetsDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSInformationforRetirementIncomePlanswithAccumulatedBenefitObligationinExcessofPlanAssetsDetails">
+        <link:definition>240844049 - Disclosure - EMPLOYEE BENEFIT PLANS (Information for Retirement Income Plans with Accumulated Benefit Obligation in Excess of Plan Assets) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSComponentsoftheNetCostofRetirementIncomeandHealthCarePlansDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSComponentsoftheNetCostofRetirementIncomeandHealthCarePlansDetails">
+        <link:definition>240854050 - Disclosure - EMPLOYEE BENEFIT PLANS (Components of the Net Cost of Retirement Income and Health Care Plans) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSItemsNotYetRecognizedasaComponentofPostretirementExpenseDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSItemsNotYetRecognizedasaComponentofPostretirementExpenseDetails">
+        <link:definition>240864051 - Disclosure - EMPLOYEE BENEFIT PLANS (Items Not Yet Recognized as a Component of Postretirement Expense) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSNetActuarialLossGainandPriorServiceCostBenefitActivityRecordedinAccumulatedOtherComprehensiveLossIncomeDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSNetActuarialLossGainandPriorServiceCostBenefitActivityRecordedinAccumulatedOtherComprehensiveLossIncomeDetails">
+        <link:definition>240874052 - Disclosure - EMPLOYEE BENEFIT PLANS (Net Actuarial Loss (Gain) and Prior Service Cost (Benefit) Activity Recorded in Accumulated Other Comprehensive Loss (Income)) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSWeightedAverageAssumptionsUsedtoEstimatetheNetPeriodicPensionandOtherPostretirementBenefitCostsDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSWeightedAverageAssumptionsUsedtoEstimatetheNetPeriodicPensionandOtherPostretirementBenefitCostsDetails">
+        <link:definition>240884053 - Disclosure - EMPLOYEE BENEFIT PLANS (Weighted-Average Assumptions Used to Estimate the Net Periodic Pension and Other Postretirement Benefit Costs) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSExpectedBenefitPaymentsDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSExpectedBenefitPaymentsDetails">
+        <link:definition>240894054 - Disclosure - EMPLOYEE BENEFIT PLANS (Expected Benefit Payments) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSTargetAllocationsandWeightedAverageAssetAllocationsDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSTargetAllocationsandWeightedAverageAssetAllocationsDetails">
+        <link:definition>240904055 - Disclosure - EMPLOYEE BENEFIT PLANS (Target Allocations and Weighted Average Asset Allocations) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EMPLOYEEBENEFITPLANSRetirementIncomePlansAssetsCarriedatFairValueDetails" roleURI="http://www.clorox.com/role/EMPLOYEEBENEFITPLANSRetirementIncomePlansAssetsCarriedatFairValueDetails">
+        <link:definition>240914056 - Disclosure - EMPLOYEE BENEFIT PLANS (Retirement Income Plan's Assets Carried at Fair Value) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTREPORTING" roleURI="http://www.clorox.com/role/SEGMENTREPORTING">
+        <link:definition>210921018 - Disclosure - SEGMENT REPORTING</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTREPORTINGTables" roleURI="http://www.clorox.com/role/SEGMENTREPORTINGTables">
+        <link:definition>230933018 - Disclosure - SEGMENT REPORTING (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTREPORTINGNarrativeDetails" roleURI="http://www.clorox.com/role/SEGMENTREPORTINGNarrativeDetails">
+        <link:definition>240944057 - Disclosure - SEGMENT REPORTING (Narrative) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTREPORTINGSelectedFinancialInformationRelatingToCompanysSegmentsDetails" roleURI="http://www.clorox.com/role/SEGMENTREPORTINGSelectedFinancialInformationRelatingToCompanysSegmentsDetails">
+        <link:definition>240954058 - Disclosure - SEGMENT REPORTING (Selected Financial Information Relating To Company's Segments) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTREPORTINGConcentrationPercentagesDetails" roleURI="http://www.clorox.com/role/SEGMENTREPORTINGConcentrationPercentagesDetails">
+        <link:definition>240964059 - Disclosure - SEGMENT REPORTING (Concentration Percentages) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTREPORTINGNetSalesandLongLivedAssetsbyGeographicAreaDetails" roleURI="http://www.clorox.com/role/SEGMENTREPORTINGNetSalesandLongLivedAssetsbyGeographicAreaDetails">
+        <link:definition>240974060 - Disclosure - SEGMENT REPORTING (Net Sales and Long-Lived Assets by Geographic Area) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RELATEDPARTYTRANSACTIONS" roleURI="http://www.clorox.com/role/RELATEDPARTYTRANSACTIONS">
+        <link:definition>210981019 - Disclosure - RELATED PARTY TRANSACTIONS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RELATEDPARTYTRANSACTIONSDetails" roleURI="http://www.clorox.com/role/RELATEDPARTYTRANSACTIONSDetails">
+        <link:definition>240994061 - Disclosure - RELATED PARTY TRANSACTIONS (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUBSEQUENTEVENT" roleURI="http://www.clorox.com/role/SUBSEQUENTEVENT">
+        <link:definition>211001020 - Disclosure - SUBSEQUENT EVENT</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUBSEQUENTEVENTDetails" roleURI="http://www.clorox.com/role/SUBSEQUENTEVENTDetails">
+        <link:definition>241014062 - Disclosure - SUBSEQUENT EVENT (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures440500DueMay2029Member" abstract="true" name="SeniorLongTermNotesAndDebentures440500DueMay2029Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_PropertyPlantAndEquipmentAndFiniteLivedIntangibleAssetsPolicyPolicyTextBlock" abstract="false" name="PropertyPlantAndEquipmentAndFiniteLivedIntangibleAssetsPolicyPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_NotesAndLoansPayableMember" abstract="false" name="NotesAndLoansPayableMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsOutstanding" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsOutstanding" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="clx_WalmartStoresIncMember" abstract="false" name="WalmartStoresIncMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_RemediationPeriod" abstract="false" name="RemediationPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures3.90500DueMay2028Member" abstract="true" name="SeniorLongTermNotesAndDebentures3.90500DueMay2028Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_OTHERINCOMEEXPENSENETTextBlock" abstract="false" name="OTHERINCOMEEXPENSENETTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_OtherEmployeeStockPlanActivitiesAmount" abstract="false" name="OtherEmployeeStockPlanActivitiesAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_ProfessionalProductsMember" abstract="true" name="ProfessionalProductsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_TaxCreditAndOperatingLossCarryforwardsLineItems" abstract="true" name="TaxCreditAndOperatingLossCarryforwardsLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_DickinsonCountyMichiganMatterMember" abstract="true" name="DickinsonCountyMichiganMatterMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_BagsAndWrapsMember" abstract="true" name="BagsAndWrapsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_OtherObligations" abstract="false" name="OtherObligations" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_TrustAssetsForNonqualifiedDeferredCompensationPlansMember" abstract="false" name="TrustAssetsForNonqualifiedDeferredCompensationPlansMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_VentureAgreement.TerminalObligation" abstract="false" name="VentureAgreement.TerminalObligation" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_AuditInformationAbstract" abstract="true" name="AuditInformationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_WeightedAverageRemainingLeaseTermAbstract" abstract="true" name="WeightedAverageRemainingLeaseTermAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_InternationalMember" abstract="false" name="InternationalMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_IndemnitySettlementFromPastAcquisition" abstract="false" name="IndemnitySettlementFromPastAcquisition" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsReinvestedDividends" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsReinvestedDividends" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="clx_OtherComprehensiveIncomeDefinedBenefitPlansNetUnamortizedGainLossArisingDuringPeriod" abstract="false" name="OtherComprehensiveIncomeDefinedBenefitPlansNetUnamortizedGainLossArisingDuringPeriod" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_LongTermInterCompanyLoansMember" abstract="false" name="LongTermInterCompanyLoansMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_IncreaseDecreaseDeferredCompensationPlanAssets" abstract="false" name="IncreaseDecreaseDeferredCompensationPlanAssets" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_DefinedBenefitPlanPlanTerminationPeriod" abstract="false" name="DefinedBenefitPlanPlanTerminationPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_OtherExpenseIncomeNet" abstract="false" name="OtherExpenseIncomeNet" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_FoodProductsMember" abstract="true" name="FoodProductsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_TrademarksNet" abstract="false" name="TrademarksNet" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_BusinessCombinationSettlementOfPreExistingNetLiabilities" abstract="false" name="BusinessCombinationSettlementOfPreExistingNetLiabilities" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_LeasesWeightedAverageDiscountRateAbstract" abstract="true" name="LeasesWeightedAverageDiscountRateAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_AdvertisingAndResearchAndDevelopmentCostsPolicyTextBlock" abstract="false" name="AdvertisingAndResearchAndDevelopmentCostsPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_NaturalPersonalCareMember" abstract="true" name="NaturalPersonalCareMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_DomesticDefinedContributionPlanMember" abstract="true" name="DomesticDefinedContributionPlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_OtherComprehensiveIncomeReclassificationOfDefinedBenefitPlansNetGainLossRecognizedInNetPeriodicBenefitCost" abstract="false" name="OtherComprehensiveIncomeReclassificationOfDefinedBenefitPlansNetGainLossRecognizedInNetPeriodicBenefitCost" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_JetFuelSwapsMember" abstract="true" name="JetFuelSwapsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_MaximumExposureUndiscountedCost" abstract="false" name="MaximumExposureUndiscountedCost" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_RevolvingCreditAgreementMaturesNovember2024Member" abstract="true" name="RevolvingCreditAgreementMaturesNovember2024Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_GrillingMember" abstract="true" name="GrillingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_CatLitterMember" abstract="true" name="CatLitterMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_TotalCommodityPurchaseDerivativeContractsMember" abstract="true" name="TotalCommodityPurchaseDerivativeContractsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsForfeitedInPeriodVestedAndDeferred" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsForfeitedInPeriodVestedAndDeferred" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="clx_DefinedBenefitPlanBondsFundsMember" abstract="false" name="DefinedBenefitPlanBondsFundsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_LifestyleMember" abstract="false" name="LifestyleMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_ExpirationPeriodDomain" abstract="true" name="ExpirationPeriodDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_LetterOfCreditBorrowingCapacity" abstract="false" name="LetterOfCreditBorrowingCapacity" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndDeferredInPeriodWeightedAverageGrantDateFairValue" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndDeferredInPeriodWeightedAverageGrantDateFairValue" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="clx_FiniteLivedIntangibleAssetsAccumulatedAmortizationAndImpairment" abstract="false" name="FiniteLivedIntangibleAssetsAccumulatedAmortizationAndImpairment" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_LesseeFinanceLeaseLeaseNotYetCommencedMinimumLeasePayment" abstract="false" name="LesseeFinanceLeaseLeaseNotYetCommencedMinimumLeasePayment" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_DerivativeInstrumentsSubjectToContractuallyDefinedCounterpartyLiabilityPositionLimits" abstract="false" name="DerivativeInstrumentsSubjectToContractuallyDefinedCounterpartyLiabilityPositionLimits" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_RightOfUseAssetObtainedInExchangeForLeaseLiabilityAbstract" abstract="true" name="RightOfUseAssetObtainedInExchangeForLeaseLiabilityAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_EmployeeBenefitsPolicyTextBlock" abstract="false" name="EmployeeBenefitsPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_LesseeOperatingLeaseOptionToTerminatePeriod" abstract="false" name="LesseeOperatingLeaseOptionToTerminatePeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsOutstandingWeightedAverageFairValueOnGrantDate" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsOutstandingWeightedAverageFairValueOnGrantDate" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="clx_ShortTermDebtWeightedAverageInterestRateDuringPeriod" abstract="false" name="ShortTermDebtWeightedAverageInterestRateDuringPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonemployeeDirectorsMember" abstract="false" name="DeferredStockUnitsForNonemployeeDirectorsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_MajorComponentsOfOtherIncomeExpenseNetTableTextBlock" abstract="false" name="MajorComponentsOfOtherIncomeExpenseNetTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_WaterFiltrationMember" abstract="true" name="WaterFiltrationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_VitaminsMineralsAndSupplementsMember" abstract="true" name="VitaminsMineralsAndSupplementsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_HealthAndWellnessMember" abstract="false" name="HealthAndWellnessMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures3.50500DueDecember2024Member" abstract="false" name="SeniorLongTermNotesAndDebentures3.50500DueDecember2024Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_EmployeeBenefitObligationsNoncurrent" abstract="false" name="EmployeeBenefitObligationsNoncurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_HostingArrangementServiceContractTerm" abstract="false" name="HostingArrangementServiceContractTerm" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsWeightedAverageRiskFreeInterestRate" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsWeightedAverageRiskFreeInterestRate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="clx_NonCashCapitalExpenditures" abstract="false" name="NonCashCapitalExpenditures" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_FinanceLeaseCost" abstract="false" name="FinanceLeaseCost" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsReinvestedWeightedAverageFairValueOnGrantDate" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsReinvestedWeightedAverageFairValueOnGrantDate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="clx_MinimumPercentageForCalculatingAmortizationOfActuarialGainsAndLossesUnderCorridorApproach" abstract="false" name="MinimumPercentageForCalculatingAmortizationOfActuarialGainsAndLossesUnderCorridorApproach" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsDistributed" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsDistributed" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="clx_GladBusinessMember" abstract="true" name="GladBusinessMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_SiteContingencyAgreedPercentageOfCostSharing" abstract="false" name="SiteContingencyAgreedPercentageOfCostSharing" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="clx_DeferredTaxAssetsOperatingAndFinanceLeaseLiabilities" abstract="false" name="DeferredTaxAssetsOperatingAndFinanceLeaseLiabilities" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_MiscellaneousOtherExpenseIncome" abstract="false" name="MiscellaneousOtherExpenseIncome" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_NumberOfHedgingInstrumentsDesignatedAsFairValueHedges" abstract="false" name="NumberOfHedgingInstrumentsDesignatedAsFairValueHedges" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="clx_ValuationAllowanceDeferredTaxAssetNetIncreaseDecreaseForForeignAndUSNetOperatingLossCarryforwardsAndTaxCredits" abstract="false" name="ValuationAllowanceDeferredTaxAssetNetIncreaseDecreaseForForeignAndUSNetOperatingLossCarryforwardsAndTaxCredits" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_IncomeTaxesTable" abstract="true" name="IncomeTaxesTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="clx_InternationalDefinedContributionPlanMember" abstract="false" name="InternationalDefinedContributionPlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures460600DueMay2032Member" abstract="true" name="SeniorLongTermNotesAndDebentures460600DueMay2032Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsWeightedAverageExpectedDividendRate" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsWeightedAverageExpectedDividendRate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsGranted" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsGranted" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="clx_DeferredGainLossOnSettlementOfInterestRateCashFlowHedgeAmortizationPeriod" abstract="false" name="DeferredGainLossOnSettlementOfInterestRateCashFlowHedgeAmortizationPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_RevolvingCreditAgreementMaturesMarch2027Member" abstract="true" name="RevolvingCreditAgreementMaturesMarch2027Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_PercentageofOwnershipbyVenturePartner" abstract="false" name="PercentageofOwnershipbyVenturePartner" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="clx_LesseeRemainingLeaseTerm" abstract="false" name="LesseeRemainingLeaseTerm" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_AlamedaCountyCaliforniaMatterMember" abstract="true" name="AlamedaCountyCaliforniaMatterMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_TradeandSalesPromotion" abstract="false" name="TradeandSalesPromotion" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures3.10400DueOctober2027Member" abstract="true" name="SeniorLongTermNotesAndDebentures3.10400DueOctober2027Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_NumberOfEntitiesInJointVenture" abstract="false" name="NumberOfEntitiesInJointVenture" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="clx_PurchasesofInventoryMember" abstract="true" name="PurchasesofInventoryMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_RetirementIncomeMember" abstract="false" name="RetirementIncomeMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_UsefulLivesOfPropertyPlantandEquipmentAndFiniteLivedIntangibleAssetsTableTextBlock" abstract="false" name="UsefulLivesOfPropertyPlantandEquipmentAndFiniteLivedIntangibleAssetsTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndNonvestedWeightedAverageGrantDateFairValuePerShare" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndNonvestedWeightedAverageGrantDateFairValuePerShare" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="clx_ForeignTaxCreditCarryforwardMember" abstract="false" name="ForeignTaxCreditCarryforwardMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_LeaseCostFinanceAbstract" abstract="true" name="LeaseCostFinanceAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_OtherEmployeeStockPlanActivitiesShares" abstract="false" name="OtherEmployeeStockPlanActivitiesShares" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="clx_HouseholdMember" abstract="false" name="HouseholdMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_FinanceLeaseAssetsAndLiabilitiesLesseeAbstract" abstract="true" name="FinanceLeaseAssetsAndLiabilitiesLesseeAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_ExpirationPeriodAxis" abstract="true" name="ExpirationPeriodAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="clx_DeferredTaxAssetsBasisDifferenceRelatedToVentureAgreement" abstract="false" name="DeferredTaxAssetsBasisDifferenceRelatedToVentureAgreement" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_SettlementOfInterestRateDerivativeContracts" abstract="false" name="SettlementOfInterestRateDerivativeContracts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_FairValueMeasurementsRecurringTable" abstract="true" name="FairValueMeasurementsRecurringTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="clx_CommodityPurchaseDerivativeContractsAxis" abstract="true" name="CommodityPurchaseDerivativeContractsAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="clx_FinancialInstrumentsAndFairValueMeasurementsAbstract" abstract="true" name="FinancialInstrumentsAndFairValueMeasurementsAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_OperatingLeaseAssetsAndLiabilitiesLesseeAbstract" abstract="true" name="OperatingLeaseAssetsAndLiabilitiesLesseeAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_DerivativeNotionalAmountAdditionalContracts" abstract="false" name="DerivativeNotionalAmountAdditionalContracts" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsGrantedWeightedAverageFairValueOnGrantDate" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsGrantedWeightedAverageFairValueOnGrantDate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures3.80300DueNovember2021Member" abstract="false" name="SeniorLongTermNotesAndDebentures3.80300DueNovember2021Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_SubjectToExpirationMember" abstract="false" name="SubjectToExpirationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_ProvisionForIncomeTaxesOnContinuingOperationsByTaxJurisdictionTableTextBlock" abstract="false" name="ProvisionForIncomeTaxesOnContinuingOperationsByTaxJurisdictionTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedWorkingCapitalNet" abstract="false" name="BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedWorkingCapitalNet" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_MaximumOwnershipPercentageOfEquityInvestments" abstract="false" name="MaximumOwnershipPercentageOfEquityInvestments" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="clx_ImpairmentOfIntangibleAssetsExcludingGoodwillIncomeTaxExpenseBenefit" abstract="false" name="ImpairmentOfIntangibleAssetsExcludingGoodwillIncomeTaxExpenseBenefit" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_DefinedBenefitPlanShortTermInvestmentMember" abstract="true" name="DefinedBenefitPlanShortTermInvestmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_DeferredTaxAssetsOperatingLossAndTaxCreditCarryforwardsForeign" abstract="false" name="DeferredTaxAssetsOperatingLossAndTaxCreditCarryforwardsForeign" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_USJurisdictionTaxCreditCarryforwardMember" abstract="true" name="USJurisdictionTaxCreditCarryforwardMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_DeferredStockUnitsForNonEmployeeDirectorsDistributedWeightedAverageFairValueOnGrantDate" abstract="false" name="DeferredStockUnitsForNonEmployeeDirectorsDistributedWeightedAverageFairValueOnGrantDate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="clx_JointVentureInKingdomOfSaudiArabiaMember" abstract="true" name="JointVentureInKingdomOfSaudiArabiaMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_NotSubjectToExpirationMember" abstract="false" name="NotSubjectToExpirationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_SoybeanOilFuturesMember" abstract="true" name="SoybeanOilFuturesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_InventoryCurrentAndNoncurrentNet" abstract="false" name="InventoryCurrentAndNoncurrentNet" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_ValuationAllowanceDeferredTaxAssetNetIncreaseDecreaseForOtherForeignDeferredTaxAssets" abstract="false" name="ValuationAllowanceDeferredTaxAssetNetIncreaseDecreaseForOtherForeignDeferredTaxAssets" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_BusinessAcquisitionRevenueReportedByAcquiredEntityForCurrentPeriod" abstract="false" name="BusinessAcquisitionRevenueReportedByAcquiredEntityForCurrentPeriod" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_CommodityPurchaseDerivativeContractsDomain" abstract="true" name="CommodityPurchaseDerivativeContractsDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_LongTermAndShortTermDebtLineItems" abstract="true" name="LongTermAndShortTermDebtLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_OperatingLeaseRightOfUseAssetAndLiabilityNet" abstract="false" name="OperatingLeaseRightOfUseAssetAndLiabilityNet" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsWeightedAverageExpectedTerm" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsWeightedAverageExpectedTerm" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_CashFlowLesseeAbstract" abstract="true" name="CashFlowLesseeAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="clx_PerformancePeriodForPerformanceAwards" abstract="false" name="PerformancePeriodForPerformanceAwards" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_RetirementHealthCareMember" abstract="false" name="RetirementHealthCareMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_RelatedPartyTransactionPaymentstoRelatedParty" abstract="false" name="RelatedPartyTransactionPaymentstoRelatedParty" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsDistributedWeightedAverageGrantDateFairValue" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsDistributedWeightedAverageGrantDateFairValue" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="clx_LesseeOperatingLeaseLeaseNotYetCommencedMinimumLeasePayment" abstract="false" name="LesseeOperatingLeaseLeaseNotYetCommencedMinimumLeasePayment" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures3.05600DueSeptember2022Member" abstract="false" name="SeniorLongTermNotesAndDebentures3.05600DueSeptember2022Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_CleaningMember" abstract="true" name="CleaningMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_ForeignAndOtherCreditLinesMember" abstract="false" name="ForeignAndOtherCreditLinesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_IssuanceOfCommonStockForEmployeeStockPlansAndOther" abstract="false" name="IssuanceOfCommonStockForEmployeeStockPlansAndOther" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_VentureAgreementTerminalObligationNet" abstract="false" name="VentureAgreementTerminalObligationNet" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_ForeignMember" abstract="false" name="ForeignMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_SeniorLongTermNotesAndDebentures180500DueMay2030Member" abstract="true" name="SeniorLongTermNotesAndDebentures180500DueMay2030Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="clx_AssetsAndLiabilitiesLesseeTableTextBlock" abstract="false" name="AssetsAndLiabilitiesLesseeTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="clx_DeferredTaxLiabilitiesPlantAndEquipmentAndIntangibleAssets" abstract="false" name="DeferredTaxLiabilitiesPlantAndEquipmentAndIntangibleAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_AmortizationOfTrademarksAndOtherIntangibleAssets" abstract="false" name="AmortizationOfTrademarksAndOtherIntangibleAssets" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="clx_VentureAgreementOptiontoExtendAgreementTermPeriod" abstract="false" name="VentureAgreementOptiontoExtendAgreementTermPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="clx_FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisLineItems" abstract="true" name="FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+</xs:schema>

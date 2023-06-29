@@ -11,24 +11,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
+import io
+import json
+import logging
+import math
+import os
+import re
+import shutil
+import urllib.parse
+import zipfile
+from collections import defaultdict
+from copy import deepcopy
 
+import pycountry
 from arelle import XbrlConst
 from arelle.ModelDocument import Type
-from arelle.ModelValue import QName, INVALIDixVALUE
-from lxml import etree
-import json
-import math
-import re
-import pycountry
-from arelle.ValidateXbrlCalcs import inferredDecimals
 from arelle.ModelRelationshipSet import ModelRelationshipSet
+from arelle.ModelValue import QName, INVALIDixVALUE
+from arelle.UrlUtil import isHttpUrl
+from arelle.ValidateXbrlCalcs import inferredDecimals
+from lxml import etree
+
+from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
 from .xhtmlserialize import XHTMLSerializer
 
-import os
-import logging
-import io
-import zipfile
-from arelle.PythonUtil import attrdict
+
+UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = 'unrecognizedLinkbase'
+LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
+    XbrlConst.qnLinkCalculationLink: 'calcLinkbase',
+    XbrlConst.qnLinkDefinitionLink: 'defLinkbase',
+    XbrlConst.qnLinkLabelLink: 'labelLinkbase',
+    XbrlConst.qnLinkPresentationLink: 'presLinkbase',
+    XbrlConst.qnLinkReferenceLink: 'refLinkbase',
+}
 
 WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
 
@@ -76,7 +92,7 @@ class IXBRLViewerBuilderError(Exception):
 
 class IXBRLViewerBuilder:
 
-    def __init__(self, dts):
+    def __init__(self, dts, basenameSuffix = ''):
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.dts = dts
@@ -86,6 +102,11 @@ class IXBRLViewerBuilder:
             "facts": {},
         }
         self.footnoteRelationshipSet = ModelRelationshipSet(dts, "XBRL-footnotes")
+        self.basenameSuffix = basenameSuffix
+
+    def outputFilename(self, filename):
+        (base, ext) = os.path.splitext(filename)
+        return base + self.basenameSuffix + ext
 
     def lineWrap(self, s, n = 80):
         return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
@@ -165,6 +186,16 @@ class IXBRLViewerBuilder:
 
             if concept.isEnumeration:
                 conceptData["e"] = True
+
+            if concept.type is not None and concept.type.isTextBlock:
+                conceptData['t'] = True
+
+            if concept.isTypedDimension:
+                typedDomainElement = concept.typedDomainElement
+                if typedDomainElement is not None:
+                    typedDomainName = self.nsmap.qname(typedDomainElement.qname)
+                    conceptData['td'] = typedDomainName
+                    self.addConcept(typedDomainElement)
 
             self.taxonomyData["concepts"][conceptName] = conceptData
 
@@ -251,9 +282,7 @@ class IXBRLViewerBuilder:
 
         if f.isNumeric:
             if f.unit is not None and len(f.unit.measures[0]):
-                # XXX does not support complex units
-                unit = self.nsmap.qname(f.unit.measures[0][0])
-                aspects["u"] = unit
+                aspects['u'] = self.oimUnitString(f.unit)
             else:
                 # The presence of the unit aspect is used by the viewer to
                 # identify numeric facts.  If the fact has no unit (invalid
@@ -292,6 +321,27 @@ class IXBRLViewerBuilder:
         self.taxonomyData["facts"][f.id] = factData
         self.addConcept(f.concept)
 
+    def oimUnitString(self, unit):
+        """
+        Returns an OIM-format string representation of the given ModelUnit.
+        See https://www.xbrl.org/Specification/oim-common/REC-2021-10-13/oim-common-REC-2021-10-13.html#term-unit-string-representation
+        :param unit: ModelUnit
+        :return: String representation of unit (OIM format)
+        """
+        numerators, denominators = unit.measures
+        numeratorsString = '*'.join(self.nsmap.qname(x) for x in sorted(numerators))
+        if denominators:
+            denominatorsString = '*'.join(self.nsmap.qname(x) for x in sorted(denominators))
+            if len(denominators) > 1:
+                if len(numerators) > 1:
+                    return "({})/({})".format(numeratorsString, denominatorsString)
+                return "{}/({})".format(numeratorsString, denominatorsString)
+            else:
+                if len(numerators) > 1:
+                    return "({})/{}".format(numeratorsString, denominatorsString)
+                return "{}/{}".format(numeratorsString, denominatorsString)
+        return numeratorsString
+
     def addViewerToXMLDocument(self, xmlDocument, scriptUrl):
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 
@@ -301,6 +351,7 @@ class IXBRLViewerBuilder:
                     if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type','') == 'application/x.ixbrl-viewer+json':
                         self.dts.error("viewer:error", "File already contains iXBRL viewer")
                         return False
+
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
                 # Insert <script> tags, and make sure that they are in the
@@ -322,11 +373,14 @@ class IXBRLViewerBuilder:
                 return True
         return False
 
-    def createViewer(self, scriptUrl="js/dist/ixbrlviewer.js", showValidations = True):
+    def getStubDocument(self):
+        with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
+            return etree.parse(fin)
+
+    def createViewer(self, scriptUrl=DEFAULT_VIEWER_PATH, useStubViewer=False, showValidations=True):
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added
         """
-
         dts = self.dts
         iv = iXBRLViewer(dts)
         self.idGen = 0
@@ -336,6 +390,8 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
+
+        docSetFiles = None
 
         for f in dts.facts:
             self.addFact(f)
@@ -348,27 +404,69 @@ class IXBRLViewerBuilder:
             self.taxonomyData["validation"] = self.validationErrors()
 
         dts.info("viewer:info", "Creating iXBRL viewer")
-
         if dts.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
             # Sort by object index to preserve order in which files were specified.
-            docSet = sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
-            docSetFiles = list(map(lambda x: os.path.basename(x.filepath), docSet))
-            self.taxonomyData["docSetFiles"] = docSetFiles
+            xmlDocsByFilename = {
+                os.path.basename(self.outputFilename(doc.filepath)): deepcopy(doc.xmlDocument)
+                for doc in sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+            }
+            docSetFiles = list(xmlDocsByFilename.keys())
 
-            for n in range(0, len(docSet)):
-                iv.addFile(iXBRLViewerFile(docSetFiles[n], docSet[n].xmlDocument))
+            if useStubViewer:
+                xmlDocument = self.getStubDocument()
+                iv.addFile(iXBRLViewerFile("ixbrlviewer.html", xmlDocument))
+            else:
+                xmlDocument = next(iter(xmlDocsByFilename.values()))
 
-            xmlDocument = docSet[0].xmlDocument 
+            for filename, docSetXMLDoc in xmlDocsByFilename.items():
+                iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
+
+        elif useStubViewer:
+            xmlDocument = self.getStubDocument()
+            filename = self.outputFilename(os.path.basename(dts.modelDocument.filepath))
+            docSetFiles = [ filename ]
+            iv.addFile(iXBRLViewerFile("ixbrlviewer.html", xmlDocument))
+            iv.addFile(iXBRLViewerFile(filename, dts.modelDocument.xmlDocument))
 
         else:
-            xmlDocument = dts.modelDocument.xmlDocument
-            filename = os.path.basename(dts.modelDocument.filepath)
-            iv.addFile(iXBRLViewerFile(filename, xmlDocument))
+            xmlDocument = deepcopy(dts.modelDocument.xmlDocument)
+            iv.addFile(iXBRLViewerFile('xbrlviewer.html', xmlDocument))
+        if os.path.dirname(self.dts.modelDocument.filepath).endswith('.zip'):
+            filingDocZipPath = os.path.dirname(self.dts.modelDocument.filepath)
+            filingDocZipName = os.path.basename(filingDocZipPath)
+            iv.addFilingDoc(filingDocZipPath)
+            self.taxonomyData["filingDocuments"] = filingDocZipName
+
+        localDocs = defaultdict(set)
+        for path, doc in dts.urlDocs.items():
+            if isHttpUrl(path):
+                continue
+            if doc.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
+                localDocs[doc.basename].add('inline')
+            elif doc.type == Type.SCHEMA:
+                localDocs[doc.basename].add('schema')
+            elif doc.type == Type.LINKBASE:
+                linkbaseIdentifed = False
+                for child in doc.xmlRootElement.iterchildren():
+                    linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
+                    if linkbaseLocalDocumentsKey is not None:
+                        localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
+                        linkbaseIdentifed = True
+                if not linkbaseIdentifed:
+                    localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
+        self.taxonomyData["localDocs"] = {
+            localDoc: sorted(docTypes)
+            for localDoc, docTypes in localDocs.items()
+        }
+
+        if docSetFiles is not None:
+            self.taxonomyData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         if not self.addViewerToXMLDocument(xmlDocument, scriptUrl):
             return None
 
         return iv
+
 
 class iXBRLViewerFile:
 
@@ -376,39 +474,71 @@ class iXBRLViewerFile:
         self.filename = filename
         self.xmlDocument = xmlDocument
 
+
 class iXBRLViewer:
 
     def __init__(self, dts):
         self.files = []
+        self.filingDocuments = None
         self.dts = dts
-
     def addFile(self, ivf):
         self.files.append(ivf)
 
-    def save(self, outPath, outBasenameSuffix="", outzipFilePrefix=""):
+    def addFilingDoc(self, filingDocuments):
+        self.filingDocuments = filingDocuments
+
+    def save(self, outPath: io.BytesIO | str, zipOutput: bool=False):
         """
         Save the iXBRL viewer
         """
-        if isinstance(outPath, io.BytesIO): # zip output stream
+        if isinstance(outPath, io.BytesIO) or zipOutput: # zip output stream
             # zipfile may be cumulatively added to by inline extraction, EdgarRenderer etc
-            _outPrefix = outzipFilePrefix + ("/" if outzipFilePrefix and outzipFilePrefix[-1] not in ("/", "\\") else "")
-            with zipfile.ZipFile(outPath, "a", zipfile.ZIP_DEFLATED, True) as zout:
+            if isinstance(outPath, io.BytesIO):
+                file = outPath
+                fileMode = 'a'
+            elif os.path.isdir(outPath):
+                file = os.path.join(outPath, f'{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip')
+                fileMode = 'w'
+            elif outPath.endswith(os.sep):
+                # Looks like a directory, but isn't one
+                self.dts.error("viewer:error", "Directory %s does not exist" % outPath)
+                return
+            elif not os.path.isdir(os.path.dirname(os.path.abspath(outPath))):
+                # Directory part of filename doesn't exist
+                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(outPath)))
+                return
+            elif not outPath.endswith('.zip'):
+                # File extension isn't a zip
+                self.dts.error("viewer:error", "File extension %s is not a zip" % os.path.splitext(outPath)[0])
+                return
+            else:
+                file = outPath
+                fileMode = 'w'
+
+            with zipfile.ZipFile(file, fileMode, zipfile.ZIP_DEFLATED, True) as zout:
                 for f in self.files:
                     self.dts.info("viewer:info", "Saving in output zip %s" % f.filename)
-                    fout = attrdict(write=lambda s: zout.writestr(_outPrefix + f.filename, s))
-                    writer = XHTMLSerializer()
-                    writer.serialize(f.xmlDocument, fout)
-                zout.write(os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js"), _outPrefix + "ixbrlviewer.js")
+                    with zout.open(f.filename, "w") as fout:
+                        writer = XHTMLSerializer(fout)
+                        writer.serialize(f.xmlDocument)
+                if self.filingDocuments:
+                    filename = os.path.basename(self.filingDocuments)
+                    self.dts.info("viewer:info", "Writing %s" % filename)
+                    zout.write(self.filingDocuments, filename)
+                zout.write(DEFAULT_VIEWER_PATH, "ixbrlviewer.js")
         elif os.path.isdir(outPath):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
             for f in self.files:
-                filename = os.path.join(outPath, "{0[0]}{1}{0[1]}".format(os.path.splitext(f.filename), outBasenameSuffix))
+                filename = os.path.join(outPath, f.filename)
                 self.dts.info("viewer:info", "Writing %s" % filename)
                 with open(filename, "wb") as fout:
-                    writer = XHTMLSerializer()
-                    writer.serialize(f.xmlDocument, fout)
-
+                    writer = XHTMLSerializer(fout)
+                    writer.serialize(f.xmlDocument)
+            if self.filingDocuments:
+                filename = os.path.basename(self.filingDocuments)
+                self.dts.info("viewer:info", "Writing %s" % filename)
+                shutil.copy2(self.filingDocuments, os.path.join(outPath, filename))
         else:
             if len(self.files) > 1:
                 self.dts.error("viewer:error", "More than one file in input, but output is not a directory")
@@ -420,6 +550,10 @@ class iXBRLViewer:
                 self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(outPath)))
             else:
                 self.dts.info("viewer:info", "Writing %s" % outPath)
-                with open("{0[0]}{1}{0[1]}".format(os.path.splitext(outPath), outBasenameSuffix), "wb") as fout:
-                    writer = XHTMLSerializer()
-                    writer.serialize(self.files[0].xmlDocument, fout)
+                with open(outPath, "wb") as fout:
+                    writer = XHTMLSerializer(fout)
+                    writer.serialize(self.files[0].xmlDocument)
+                if self.filingDocuments:
+                    filename = os.path.basename(self.filingDocuments)
+                    self.dts.info("viewer:info", "Writing %s" % filename)
+                    shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(outPath), filename))

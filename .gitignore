@@ -1,3 +1,8 @@
 .idea
 .vscode
-node_modules/*
+node_modules/
+dist/
+__pycache__
+/tests/puppeteer/artifacts/
+iXBRLViewerPlugin/_version.py
+/ixbrl-viewer*.tgz

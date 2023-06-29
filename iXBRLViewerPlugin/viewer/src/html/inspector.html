@@ -36,6 +36,8 @@ limitations under the License.
         <h1 class="footnote-mode-only" data-i18n="inspector.footnoteProperties">Footnote Properties</h1>
         <div class="back search-mode-only">
         </div>
+        <div class="back summary-mode-only">
+        </div>
         <div class="back outline-mode-only">
         </div>
         <div class="menu" id='display-options-menu'>
@@ -46,6 +48,8 @@ limitations under the License.
         </div>
       </div>
       <div class="controls">
+        <div class="summary-button" data-i18n="[title]inspector.documentSummary" title="Document summary">
+        </div>
         <div class="outline-button" data-i18n="[title]inspector.documentOutline" title="Document outline">
         </div>
         <div class="search-button" data-i18n="[title]inspector.searchTitle" title="Search">
@@ -57,26 +61,34 @@ limitations under the License.
 
       <div class="search-controls search-mode-only">
         <div class="search-input">
-          <input id="ixbrl-search" type="text" aria-label="Search iXBRL report"/>
+          <input id="ixbrl-search" type="text" aria-label="Search iXBRL report" disabled="disabled" />
           <div class="filter-toggle"></div>
         </div>
         <div class="search-filters">
           <div class="reset" data-i18n="inspector.reset">Reset</div>
           <h3 data-i18n="inspector.filter">Filter</h3>
-          <div class="control-label" data-i18n="inspector.conceptType">
+          <div class="filter-group">
+            <div class="control-label" data-i18n="inspector.conceptType">
               Concept Type
-          </div>
-          <select id="search-filter-concept-type">
-              <option value="*" data-i18n="inspector.allOption">ALL</option>
+            </div>
+            <select id="search-filter-concept-type">
+              <option value="*">-</option>
               <option value="numeric" data-i18n="inspector.numericOption">Numeric</option>
               <option value="text" data-i18n="inspector.textOption">Text</option>
-          </select>
-          <div class="control-label" data-i18n="inspector.period">
-              Period
+            </select>
           </div>
-          <select id="search-filter-period">
-          </select>
-          
+
+          <div class="filter-group">
+            <div class="control-label" data-i18n="inspector.factValue">
+                Fact Value
+            </div>
+            <select id="search-filter-fact-value">
+                <option value="*">-</option>
+                <option value="negative" data-i18n="inspector.negative">Negative</option>
+                <option value="positive" data-i18n="inspector.positive">Positive</option>
+            </select>
+          </div>
+
           <div class="checkboxes">
             <div>
               <label class="checkbox">
@@ -90,6 +102,87 @@ limitations under the License.
                 <span class="checkmark"></span>
               </label>
             </div>
+          </div>
+
+          <div id="search-filter-period" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.period">Period</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple>
+              </select>
+            </div>
+          </div>
+
+          <div id="search-filter-namespaces" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.namespaces">Namespaces</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body namespaces" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple>
+              </select>
+            </div>
+          </div>
+
+          <div id="search-filter-units" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.units">Units</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body units" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple>
+              </select>
+            </div>
+          </div>
+
+          <div id="search-filter-scales" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.scales">Scales</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body scales" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple>
+              </select>
+            </div>
+          </div>
+
+          <div id="search-filter-dimension-type" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.dimensions">Dimension Type</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body dimensions" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple size="2">
+                <option value="explicit" data-i18n="inspector.explicitDimension">Explicit Dimensions</option>
+                <option value="typed" data-i18n="inspector.typedDimensions">Typed Dimensions</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="search-filter-calculations" class="collapsible-section collapsible-only collapsed">
+            <h3 class="collapsible-header">
+              <span data-i18n="inspector.calculations">Calculations</span>
+              <span class="collapsible-subheader"></span>
+            </h3>
+            <div class="collapsible-body calculations" style="display: none;">
+              <span class="reset-multiselect"></span>
+              <select multiple size="2">
+                <option value="summation" data-i18n="inspector.summation">Summation</option>
+                <option value="contributor" data-i18n="inspector.contributor">Contributor</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-info">
+            <span id="matching-concepts-count">?</span>
+            <span data-i18n="inspector.matchingConcepts"> matching concept(s)</span>
           </div>
         </div>
       </div>
@@ -162,7 +255,8 @@ limitations under the License.
         </div>
         <div class="search-overlay">
           <div class="search-overlay-icon"></div>
-          <div class="search-overlay-text"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
+          <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
+          <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
         </div>
       </div>
 
@@ -175,10 +269,87 @@ limitations under the License.
         </div>
       </div>
 
+      <div class="summary summary-mode-only">
+        <div class="body">
+          <div class="collapsible-section fact-summary">
+            <h3 class="collapsible-header" data-i18n="inspector.summary.fact.header">Fact Summary</h3>
+            <div class="collapsible-body">
+              <div class="total-facts-value">
+                <span class="total-facts-title" data-i18n="inspector.summary.fact.title">Total Facts:</span>
+              </div>
+            </div>
+          </div>
+          <div class="collapsible-section tag-summary">
+            <h3 class="collapsible-header" data-i18n="inspector.summary.tag.header">Tag Summary</h3>
+            <div class="collapsible-body">
+              <div class="tag-summary-body">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col" class="namespace"><div data-i18n="inspector.summary.tag.colNamespace">Namespace</div></th>
+                      <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colPrimaryItems">Primary Items</div></th>
+                      <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colDimensions">Dimensions</div></th>
+                      <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colMembers">Members</div></th>
+                      <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colTotal">Total</div></th>
+                    </tr>
+                  </thead>
+                  <tbody class="tag-summary-table-body">
+                  </tbody>
+                  <tfoot>
+                    <tr class="tag-summary-table-footer-row">
+                      <th scope="row" data-i18n="inspector.summary.tag.rowTotal">Total</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="collapsible-section files-summary">
+            <h3 class="collapsible-header" data-i18n="inspector.summary.file.header">File Summary</h3>
+            <div class="collapsible-body">
+              <div class="file-summary-container">
+                <div class="files inline-docs">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.inline">Inline Documents</span>
+                  <ul></ul>
+                </div>
+                <div class="files schemas">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.schemas">Schemas</span>
+                  <ul></ul>
+                </div>
+                <div class="files pres-links">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.presentation">Presentation Linkbases</span>
+                  <ul></ul>
+                </div>
+                <div class="files calc-links">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.calculations">Calculation Linkbases</span>
+                  <ul></ul>
+                </div>
+                <div class="files def-links">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.definitions">Definition Linkbases</span>
+                  <ul></ul>
+                </div>
+                <div class="files label-links">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.labels">Label Linkbases</span>
+                  <ul></ul>
+                </div>
+                <div class="files ref-links">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.references">Reference Linkbases</span>
+                  <ul></ul>
+                </div>
+                <div class="files other-links">
+                  <span class="files-summary-title" data-i18n="inspector.summary.file.other">Other Linkbases</span>
+                  <ul></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div class="inspector-foot powered-by">
-        <span data-i18n="inspector.poweredBy">Powered by</span>
-        <a href="https://www.workiva.co.uk/solutions/xbrl-and-ixbrl" target="_blank"><img alt="Workiva logo (opens in new window)" src="../img/workiva.svg" /></a>
+        <a href="https://arelle.org" target="_blank"><img alt="Arelle logo (opens in new window)" src="../img/arelle.svg" /></a>
+        <div class="version"></div>
     </div>
     <div class="failed-to-load-mask"></div>
   </div>
@@ -234,6 +405,21 @@ limitations under the License.
             </tr>
           </tfoot>
         </table>
+        <div class="buttons">
+        </div>
+      </div>
+    </div>
+    <div class="dialog text-block-viewer">
+      <div class="close"></div>
+      <div class="contents">
+        <h2 class="title"></h2>
+        <iframe id="text-block-viewer-iframe"></iframe>
+        <div class="controls">
+          <label class="checkbox">
+            <input id="text-block-viewer-plain-text" type="checkbox" /> <span data-i18n="inspector.showTextOnly">Show text only</span>
+            <span class="checkmark"></span>
+          </label>
+        </div>
         <div class="buttons">
         </div>
       </div>

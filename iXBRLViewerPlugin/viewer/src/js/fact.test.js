@@ -120,6 +120,7 @@ describe("Simple fact properties", () => {
         expect(f.isMonetaryValue()).toBeTruthy();
         expect(f.readableValue()).toEqual("US $ 1,000");
         expect(f.unit().value()).toEqual("iso4217:USD");
+        expect(f.measure()).toEqual("iso4217:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -141,6 +142,7 @@ describe("Simple fact properties", () => {
         expect(f.isMonetaryValue()).toBeFalsy();
         expect(f.readableValue()).toEqual("1,000 eg:USD");
         expect(f.unit().value()).toEqual("eg:USD");
+        expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -161,6 +163,7 @@ describe("Simple fact properties", () => {
         expect(f.isMonetaryValue()).toBeFalsy();
         expect(f.readableValue()).toEqual("1,000,000.0125 eg:USD");
         expect(f.unit().value()).toEqual("eg:USD");
+        expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -366,24 +369,30 @@ describe("Readable accuracy", () => {
             "v": "1234",
             "d": -6,
             "a": { "u": "eg:unit" }
-        }).readableAccuracy()).toBe("-6 (millions)");
+        }).readableAccuracy()).toBe("millions");
 
         expect(testFact({
             "v": "1234",
             "d": 0,
             "a": { "u": "eg:unit" }
-        }).readableAccuracy()).toBe("0 (ones)");
+        }).readableAccuracy()).toBe("ones");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "eg:unit" }
-        }).readableAccuracy()).toBe("2 (hundredths)");
+        }).readableAccuracy()).toBe("hundredths");
 
         expect(testFact({
             "v": "1234",
             "d": 4,
             "a": { "u": "eg:unit" }
+        }).readableAccuracy()).toBe("4");
+
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": null }
         }).readableAccuracy()).toBe("4");
 
     });
@@ -397,37 +406,100 @@ describe("Readable accuracy", () => {
             "v": "1234",
             "d": -6,
             "a": { "u": "iso4217:USD" }
-        }).readableAccuracy()).toBe("-6 (millions)");
+        }).readableAccuracy()).toBe("millions");
 
         expect(testFact({
             "v": "1234",
             "d": 0,
             "a": { "u": "iso4217:USD" }
-        }).readableAccuracy()).toBe("0 (ones)");
+        }).readableAccuracy()).toBe("ones");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:USD" }
-        }).readableAccuracy()).toBe("2 (cents)");
+        }).readableAccuracy()).toBe("cents");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:EUR" }
-        }).readableAccuracy()).toBe("2 (cents)");
+        }).readableAccuracy()).toBe("cents");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:YEN" }
-        }).readableAccuracy()).toBe("2 (hundredths)");
+        }).readableAccuracy()).toBe("hundredths");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:GBP" }
-        }).readableAccuracy()).toBe("2 (pence)");
+        }).readableAccuracy()).toBe("pence");
+
+    });
+});
+
+describe("Readable scale", () => {
+    test("Non-numeric", () => {
+        expect(testFact({
+            "v": "1234",
+            "a": {  }
+        }, { "scale": 6 }).readableScale()).toBe("n/a");
+    });
+    test("Numeric, non-monetary", () => {
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }).readableScale()).toBe("Unscaled");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }, { "scale": 6 }).readableScale()).toBe("millions");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }, { "scale": -2 }).readableScale()).toBe("hundredths");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }, { "scale": -4 }).readableScale()).toBe("-4");
+
+    });
+    test("Numeric, monetary", () => {
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:USD" }
+        }).readableScale()).toBe("Unscaled");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:USD" }
+        }, { "scale": 6 }).readableScale()).toBe("millions");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:EUR" }
+        }, { "scale": -2 }).readableScale()).toBe("cents");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:USD" }
+        }, { "scale": -2 }).readableScale()).toBe("cents");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:YEN" }
+        }, { "scale": -2 }).readableScale()).toBe("hundredths");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:GBP" }
+        }, { "scale": -2 }).readableScale()).toBe("pence");
 
     });
 });
@@ -545,10 +617,10 @@ describe("Unit aspect handling", () => {
             }
         });
         expect(f.isNumeric()).toBeTruthy();
-        expect(f.unit()).not.toBeUndefined();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.unit().value()).toBeNull();
-        expect(f.unit().valueLabel()).toBe("<NOUNIT>");
+        expect(f.unit()).toBeUndefined();
+        expect(f.measure()).toBeUndefined();
+        expect(f.measureLabel()).toBe("<NOUNIT>");
     });
 
     test("Non-numeric, no unit", () => {    
@@ -559,6 +631,7 @@ describe("Unit aspect handling", () => {
         });
         expect(f.isNumeric()).toBeFalsy();
         expect(f.unit()).toBeUndefined();
+        expect(f.measure()).toBeUndefined();
     });
 });
 
@@ -618,6 +691,7 @@ describe("Fact errors", () => {
         expect(f.isMonetaryValue()).toBeTruthy();
         expect(f.readableValue()).toEqual("Invalid value");
         expect(f.unit().value()).toEqual("iso4217:USD");
+        expect(f.measure()).toEqual("iso4217:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");

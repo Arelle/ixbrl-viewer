@@ -11,6 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
+import logging
+import os
+import sys
+import tempfile
+import traceback
+
+from arelle.LocalViewer import LocalViewer
+from arelle.ModelDocument import Type
+from arelle.webserver.bottle import static_file
+
+from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
+from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
+
 
 #
 # GUI operation:
@@ -27,23 +41,14 @@
 #
 #     example uploading an ESEF report package and receiving a zip of viewable .xhtml and viewer javascript file:
 #
-#         curl -X POST "-HContent-type: application/zip" 
-#              -T /Users/mystuff/ESMA/samples/bzwbk_2016.zip 
-#              -o ~/temp/out.zip 
+#         curl -X POST "-HContent-type: application/zip"
+#              -T /Users/mystuff/ESMA/samples/bzwbk_2016.zip
+#              -o ~/temp/out.zip
 #              "http://localhost:8080/rest/xbrl/validation?&media=zip&plugins=iXBRLViewerPlugin&packages=somewhere/esef_taxonomy_2017.zip"
 #
 #     In the zip, the iXBRLViewer files are in a subdirectory VIEWER_BASENAME_SUFFIX to separate them from possible EdgarRenderer and other output files
 #
-from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 
-from .localviewer import launchLocalViewer, VIEWER_BASENAME_SUFFIX
-from arelle.ModelDocument import Type
-import argparse
-import traceback
-import sys
-
-import traceback
-import sys
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer",
@@ -53,7 +58,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--viewer-url",
                       action="store",
                       dest="viewerURL",
-                      default="js/dist/ixbrlviewer.js",
+                      default=DEFAULT_VIEWER_PATH,
                       help="Specify the URL to ixbrlviewer.js")
     parser.add_option("--viewer-validation-messages",
                       dest="validationMessages",
@@ -62,8 +67,23 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     # Force logging to use a buffer so that messages are retained and can be
     # retrieved for inclusion with the viewer.
     parser.add_option("--logToBuffer", action="store_true", dest="logToBuffer", default=True, help=argparse.SUPPRESS)
+    parser.add_option("--use-stub-viewer",
+                      action="store_true",
+                      dest="useStubViewer",
+                      help="Use stub viewer for faster loading of inspector (requires web server)")
+    parser.add_option("--viewer-suffix",
+                      action="store",
+                      default="",
+                      dest="viewerBasenameSuffix",
+                      help="Suffix for basename of viewer files")
+    parser.add_option("--zip-viewer-output",
+                      action="store_true",
+                      default=False,
+                      dest="zipViewerOutput",
+                      help="Converts the viewer output into a self contained zip")
 
-def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
+
+def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showValidationMessages=False, useStubViewer=False, zipViewerOutput=False):
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
         cntlr.addToLog("No taxonomy loaded.")
@@ -73,16 +93,27 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
         cntlr.addToLog("No inline XBRL document loaded.")
         return
     try:
-        out = getattr(options, 'saveViewerFile') or kwargs.get("responseZipStream")
+        out = saveViewerFile
         if out:
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-            iv = viewerBuilder.createViewer(scriptUrl=options.viewerURL, showValidations = options.validationMessages)
+            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer)
             if iv is not None:
-                iv.save(out, outBasenameSuffix=VIEWER_BASENAME_SUFFIX, outzipFilePrefix=VIEWER_BASENAME_SUFFIX)
+                iv.save(out, zipOutput=zipViewerOutput)
     except IXBRLViewerBuilderError as ex:
         print(ex.message)
     except Exception as ex:
         cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
+
+
+def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
+    generateViewer(
+        cntlr,
+        options.saveViewerFile or kwargs.get("responseZipStream"),
+        options.viewerURL,
+        options.validationMessages,
+        options.useStubViewer,
+        options.zipViewerOutput
+    )
 
 
 def iXBRLViewerMenuCommand(cntlr):
@@ -97,9 +128,9 @@ def iXBRLViewerMenuCommand(cntlr):
     dialog = SaveViewerDialog(cntlr)
     if dialog.accepted and dialog.filename():
         viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl())
+        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl(), showValidations=False)
         if iv is not None:
-            iv.save(dialog.filename())
+            iv.save(dialog.filename(), zipOutput=dialog.zipViewerOutput())
 
 
 def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):
@@ -123,7 +154,7 @@ def commandLineRun(*args, **kwargs):
 
 def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
     # persist menu selections for showing filing data and tables menu
-    from tkinter import Menu, BooleanVar # must only import if GUI present (no tkinter on GUI-less servers)
+    from tkinter import Menu, BooleanVar  # must only import if GUI present (no tkinter on GUI-less servers)
     def setLaunchIXBRLViewer(self, *args):
         cntlr.config["LaunchIXBRLViewer"] = cntlr.launchIXBRLViewer.get()
         cntlr.saveConfig()
@@ -133,10 +164,51 @@ def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
     cntlr.launchIXBRLViewer.trace("w", setLaunchIXBRLViewer)
     erViewMenu.add_checkbutton(label=_("Launch viewer on load"), underline=0, variable=cntlr.launchIXBRLViewer, onvalue=True, offvalue=False)
 
+
+class iXBRLViewerLocalViewer(LocalViewer):
+    # plugin-specific local file handler
+    def getLocalFile(self, file, relpath, request):
+        _report, _sep, _file = file.partition("/")
+        if file == 'ixbrlviewer.js':
+            return static_file('ixbrlviewer.js', os.path.dirname(DEFAULT_VIEWER_PATH))
+        elif _report.isnumeric():  # in reportsFolder folder
+            # check if file is in the current or parent directory
+            _fileDir = self.reportsFolders[int(_report)]
+            _fileExists = False
+            if os.path.exists(os.path.join(_fileDir, _file)):
+                _fileExists = True
+            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.filepart(_file))):
+                # xhtml in a subdirectory for output files may refer to an image file in parent directory
+                _fileExists = True
+                _file = os.path.filepart(_file)
+            if not _fileExists:
+                self.cntlr.addToLog("http://localhost:{}/{}".format(self.port, file), messageCode="localViewer:fileNotFound", level=logging.DEBUG)
+            return static_file(_file, root=_fileDir, headers=self.noCacheHeaders)  # extra_headers modification to py-bottle
+        return static_file(file, root="/")  # probably can't get here unless path is wrong
+
+
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
-    if cntlr.hasGui and cntlr.launchIXBRLViewer.get() and modelXbrl.modelDocument.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-        launchLocalViewer(cntlr, modelXbrl)
+    try:
+        import webbrowser
+        global tempViewer
+        tempViewer = tempfile.TemporaryDirectory()
+        viewer_file_name = 'ixbrlviewer.html'
+        generateViewer(cntlr, tempViewer.name, useStubViewer = True)
+        localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
+        localhost = localViewer.init(cntlr, tempViewer.name)
+        webbrowser.open(f'{localhost}/{viewer_file_name}')
+    except Exception as ex:
+        modelXbrl.error(
+            "viewer:exception",
+            "Exception %(exception)s \sTraceback %(traceback)s",
+            modelObject=modelXbrl, exception=ex, traceback=traceback.format_tb(sys.exc_info()[2])
+        )
+
+
+def load_plugin_url():
+    return __file__
+
 
 __pluginInfo__ = {
     'name': 'ixbrl-viewer',

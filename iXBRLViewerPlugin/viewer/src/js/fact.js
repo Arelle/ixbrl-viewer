@@ -14,7 +14,7 @@
 
 import $ from 'jquery'
 import i18next from "i18next";
-import Decimal from 'decimal.js';
+import Decimal from "decimal.js";
 import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
@@ -93,10 +93,10 @@ export class Fact {
                 formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
-                v = this.unit().valueLabel() + " " + formattedNumber;
+                v = this.measureLabel() + " " + formattedNumber;
             }
             else {
-                v = formattedNumber + " " + this.unit().valueLabel();
+                v = formattedNumber + " " + this.measureLabel();
             }
         }
         else if (this.isNil()) {
@@ -123,13 +123,53 @@ export class Fact {
         return v;
     }
 
+    /**
+     * Returns the qname of the first numerator in the fact's unit
+     * @return {String} QName string of a measure
+     */
+    measure() {
+        return this.unit()?.measure();
+    }
+
+    /**
+     * Returns a readable label representing the first numerator in the fact's unit
+     * @return {String} Label representing measure
+     */
+    measureLabel() {
+        return this.unit()?.measureLabel() ?? i18next.t("factDetails.noUnit");
+    }
+
+    /**
+     * Returns details about this fact's unit
+     * @return {Unit} Unit instance
+     */
     unit() {
-        if (this.isNumeric()) {
-            return this.aspect("u");
+        if (this._unit === undefined) {
+            const unitKey = this.aspect('u')?.value();
+            if (!unitKey) {
+                return undefined;
+            }
+            this._unit = this.report().getUnit(unitKey);
         }
-        else {
-            return undefined;
+        return this._unit;
+    }
+
+    getConceptPrefix() {
+        return this.conceptName().split(':')[0];
+    }
+
+    isCalculationContributor() {
+        if (this._isCalculationContributor === undefined) {
+            this._isCalculationContributor = this._report.isCalculationContributor(this.f.a.c);
         }
+        return this._isCalculationContributor;
+    }
+
+    isCalculationSummation() {
+        if (this._isCalculationSummation === undefined) {
+            this._isCalculationSummation = this._report.isCalculationSummation(this.f.a.c);
+        }
+        return this._isCalculationSummation;
     }
 
     isNumeric() {
@@ -146,13 +186,20 @@ export class Fact {
         return dims;
     }
 
+    hasExplicitDimension() {
+        return Object.keys(this.dimensions()).some(d => !this._report.getConcept(d).isTypedDimension());
+    }
+
+    hasTypedDimension() {
+        return Object.keys(this.dimensions()).some(d => this._report.getConcept(d).isTypedDimension());
+    }
+
     isMonetaryValue() {
-        const unit = this.unit();
-        if (!unit || unit.value() === null) {
-            return false;
-        }
-        const q = this.report().qname(unit.value());
-        return q.namespace == "http://www.xbrl.org/2003/iso4217";
+        return this.unit()?.isMonetary() ?? false;
+    }
+
+    isTextBlock() {
+        return this.concept().isTextBlock();
     }
 
     aspects() {
@@ -160,10 +207,15 @@ export class Fact {
     }
 
     aspect(a) {
-        if (this.f.a[a] !== undefined) {
-            return new Aspect(a, this.f.a[a], this._report);
+        if (this._aspects === undefined) {
+            this._aspects = {}
         }
-        return undefined;
+        if (this._aspects[a] === undefined) {
+            if (this.f.a[a] !== undefined) {
+                this._aspects[a] = new Aspect(a, this.f.a[a], this._report);
+            }
+        }
+        return this._aspects[a];
     }
 
     isAligned(of, coveredAspects) {
@@ -201,6 +253,10 @@ export class Fact {
         return this.f.d;
     }
 
+    scale() {
+        return this.ixNode.scale;
+    }
+
     duplicates() {
         return this._report.getAlignedFacts(this);
     }
@@ -208,36 +264,66 @@ export class Fact {
     isNil() {
         return this.f.v === null;
     }
+    isNegative() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isNegative() && !this.isZero();
+    }
+    isPositive() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isPositive() && !this.isZero();
+    }
 
+    isZero() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isZero();
+    }
     isInvalidIXValue() {
         return this.f.err == 'INVALID_IX_VALUE';
+    }
+
+    getScaleLabel(value, isAccuracy=false) {
+        let measure = this.measure() ?? '';
+        if (measure) {
+            measure = this.report().qname(measure).localname;
+        }
+        return this._report.getScaleLabel(
+                // We use the same table of labels for scale and accuracy,
+                // but decimals means "accurate to 10^-N" whereas scale means 10^N,
+                // so invert N for accuracy.
+                isAccuracy ? -value : value,
+                this.isMonetaryValue(),
+                measure
+        );
     }
 
     readableAccuracy() {
         if (!this.isNumeric() || this.isNil()) {
             return i18next.t("common.notApplicable");
         }
-        let d = this.decimals();
+        const d = this.decimals();
         if (d === undefined) {
             return i18next.t("common.accuracyInfinite")
         }
         else if (d === null) {
             return i18next.t("common.unspecified");
         }
-        var name = i18next.t(`currencies:accuracy${d}`, {defaultValue:"noName"});
-        if (this.isMonetaryValue()) {
-            var currency = this.report().qname(this.unit().value()).localname;
-            if (d == 2) {
-                var name = i18next.t(`currencies:cents${currency}`, {defaultValue: name});
-            }
+        const label = this.getScaleLabel(d, true);
+        if (label != null) {
+            return label;
         }
-        if (name !== "noName") {
-            d += " ("+name+")";
+        return d.toString();
+    }
+
+    readableScale() {
+        if (!this.isNumeric() || this.isNil()) {
+            return i18next.t("common.notApplicable");
         }
-        else {
-            d += "";
+        const scale = this.scale();
+        if (scale === undefined || scale === null) {
+            return i18next.t("common.unscaled");
         }
-        return d;
+        const label = this.getScaleLabel(scale);
+        if (label != null) {
+            return label;
+        }
+        return scale.toString();
     }
 
     identifier() {
@@ -261,7 +347,7 @@ export class Fact {
     }
 
     isHTMLHidden() {
-        return this.ixNode.htmlHidden;
+        return this.ixNode.htmlHidden();
     }
 
     widerConcepts() {

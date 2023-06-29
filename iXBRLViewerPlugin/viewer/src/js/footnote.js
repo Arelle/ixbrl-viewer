@@ -32,4 +32,8 @@ export class Footnote {
     readableValue() {
         return this.textContent();
     }
+
+    isTextBlock() {
+        return false;
+    }
 }

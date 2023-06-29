@@ -14,14 +14,15 @@
 
 import lunr from 'lunr'
 import $ from 'jquery'
+import Decimal from "decimal.js";
 
 export class ReportSearch {
     constructor(report) {
         this._report = report;
-        this.buildSearchIndex();
+        this.ready = false;
     }
 
-    buildSearchIndex() {
+    * buildSearchIndex(doneCallback) {
         var docs = [];
         var dims = {};
         var facts = this._report.facts();
@@ -60,36 +61,134 @@ export class ReportSearch {
                 this.periods[p.key()] = p.toString();
             }
 
+            if (i % 100 === 0) {
+                yield;
+            }
         }
-        this._searchIndex = lunr(function () {
-          this.ref('id');
-          this.field('label');
-          this.field('concept');
-          this.field('startDate');
-          this.field('date');
-          this.field('doc');
-          this.field('ref');
-          this.field('widerLabel');
-          this.field('widerDoc');
-          this.field('widerConcept');
+        const builder = new lunr.Builder();
+        builder.pipeline.add(
+          lunr.trimmer,
+          lunr.stopWordFilter,
+          lunr.stemmer
+        )
 
-          docs.forEach(function (doc) {
-            this.add(doc);
-          }, this)
-        })
+        builder.searchPipeline.add(
+          lunr.stemmer
+        )
+
+        builder.ref('id');
+        builder.field('label');
+        builder.field('concept');
+        builder.field('startDate');
+        builder.field('date');
+        builder.field('doc');
+        builder.field('ref');
+        builder.field('widerLabel');
+        builder.field('widerDoc');
+        builder.field('widerConcept');
+
+
+        for (const [i, doc] of docs.entries()) {
+            builder.add(doc);
+            if (i % 100 === 0) {
+                yield;
+            }
+        }
+        this._searchIndex = builder.build();
+        this.ready = true;
+        doneCallback();
+    }
+
+    visibilityFilter(s, item) {
+        return item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts;
+    }
+
+    periodFilter(s, item) {
+        return (
+            s.periodFilter.length === 0 ||
+            s.periodFilter.some(p => item.period().key() === p)
+        );
+    }
+
+    conceptTypeFilter(s, item) {
+        return (
+            s.conceptTypeFilter === '*' ||
+            s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')
+        );
+    }
+
+    dimensionTypeFilter(s, item) {
+        const typed = s.dimensionTypeFilter.includes('typed');
+        const explicit = s.dimensionTypeFilter.includes('explicit');
+        return (
+            s.dimensionTypeFilter.length === 0 ||
+            (typed && item.hasTypedDimension()) ||
+            (explicit && item.hasExplicitDimension())
+        )
+    }
+
+    factValueFilter(s, item) {
+        return (
+            s.factValueFilter === '*' ||
+            (s.factValueFilter === 'positive' && item.isPositive()) ||
+            (s.factValueFilter === 'negative' && item.isNegative())
+        );
+    }
+
+    calculationsFilter(s, item) {
+        const summation = s.calculationsFilter.includes('summation');
+        const contributor = s.calculationsFilter.includes('contributor');
+        return (
+            s.calculationsFilter.length === 0 ||
+            (summation && item.isCalculationSummation()) ||
+            (contributor && item.isCalculationContributor())
+        );
+    }
+
+    namespacesFilter(s, item) {
+        return (
+            s.namespacesFilter.length === 0 ||
+            s.namespacesFilter.some(p => item.getConceptPrefix() === p)
+        );
+    }
+
+    unitsFilter(s, item) {
+        return (
+                s.unitsFilter.length === 0 ||
+                s.unitsFilter.some(u => item.unit()?.value() === u)
+        );
+    }
+
+    scalesFilter(s, item) {
+        return (
+                s.scalesFilter.length === 0 ||
+                s.scalesFilter.some(x => item.scale() === Number(x))
+        );
     }
 
     search(s) {
-        var rr = this._searchIndex.search(s.searchString);
-        var results = []
-        var searchIndex = this;
+        if (!this.ready) {
+            return;
+        }
+        const rr = this._searchIndex.search(s.searchString);
+        const results = []
+        const searchIndex = this;
 
-        rr.forEach((r,i) => {
-                var item = searchIndex._report.getItemById(r.ref);
-                if (
-                    (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
-                    (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
-                    (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
+        const filters = [
+            this.visibilityFilter,
+            this.periodFilter,
+            this.conceptTypeFilter,
+            this.dimensionTypeFilter,
+            this.factValueFilter,
+            this.calculationsFilter,
+            this.namespacesFilter,
+            this.unitsFilter,
+            this.scalesFilter,
+        ];
+
+        rr.forEach((r,_) => {
+                const item = searchIndex._report.getItemById(r.ref);
+                if (filters.every(f => f(s, item))) {
                     results.push({
                         "fact": item,
                         "score": r.score

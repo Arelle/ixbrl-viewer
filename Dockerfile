@@ -44,7 +44,7 @@ ARG BUILD_ARTIFACTS_CDN=/static_release/assets.tar.gz
 RUN npm pack
 ARG BUILD_ARTIFACTS_NPM=/build/*.tgz
 
-FROM python:3.9-slim-bullseye as python-build
+FROM python:3.11.4-slim-bullseye as python-build
 
 ARG PIP_INDEX_URL
 

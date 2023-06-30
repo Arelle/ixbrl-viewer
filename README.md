@@ -35,7 +35,7 @@ contains all of the javascript that runs the viewer functionality.
 
 ## Installation
 
-The python portion of this repo is developed using Python 3.9.
+The python portion of this repo is developed using Python 3.11.
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
 2. Download and install [Arelle][arelle-download]

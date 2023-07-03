@@ -1,9 +1,14 @@
-FROM node:19-slim as node-build
+FROM node:20.2.0-slim as node-build
 
 ARG NPM_CONFIG__AUTH
 ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
 ARG NPM_CONFIG_ALWAYS_AUTH=true
 ARG GIT_TAG
+
+RUN apt update -y && \
+    apt install -y \
+        git && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN reg=$(echo "$NPM_CONFIG_REGISTRY" | cut -d ":" -f 2) && \
     echo "$reg:_auth = $NPM_CONFIG__AUTH" > /.npmrc && \

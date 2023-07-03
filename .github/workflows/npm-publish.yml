@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       node_version:
-        default: '19'
+        default: '20'
         description: 'Node version to use'
         required: true
         type: string

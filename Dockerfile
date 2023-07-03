@@ -15,7 +15,8 @@ ARG NPM_CONFIG_USERCONFIG=/.npmrc
 WORKDIR /build/
 
 COPY package.json package-lock.json /build/
-RUN npm install --include=dev
+RUN npm update -g npm && \
+    npm ci
 
 COPY . /build/
 

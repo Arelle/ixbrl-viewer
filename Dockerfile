@@ -50,8 +50,10 @@ ARG PIP_INDEX_URL
 
 WORKDIR /build/
 
-RUN apt update -y
-RUN apt-get install git -y
+RUN apt update -y && \
+    apt install -y \
+        git && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY . /build/
 RUN pip install -U pip setuptools && \

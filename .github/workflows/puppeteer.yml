@@ -17,7 +17,7 @@ jobs:
         node-version:
           - '16'
           - '18'
-          - '19'
+          - '20'
         python-version:
           - '3.11'
     runs-on: ${{ matrix.os }}
@@ -36,7 +36,7 @@ jobs:
           check-latest: true
           python-version: ${{ matrix.python-version }}
       - name: Install Dependencies
-        run: npm install --include dev
+        run: npm ci
       - name: Install Arelle
         run: pip install arelle-release .
       - name: Build viewer js

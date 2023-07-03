@@ -1,4 +1,4 @@
-FROM node:20.2.0-slim as node-build
+FROM node:20.3.1-slim as node-build
 
 ARG NPM_CONFIG__AUTH
 ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/

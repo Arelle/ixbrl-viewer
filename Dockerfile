@@ -1,9 +1,14 @@
-FROM node:19-slim as node-build
+FROM node:20.2.0-slim as node-build
 
 ARG NPM_CONFIG__AUTH
 ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/
 ARG NPM_CONFIG_ALWAYS_AUTH=true
 ARG GIT_TAG
+
+RUN apt update -y && \
+    apt install -y \
+        git && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN reg=$(echo "$NPM_CONFIG_REGISTRY" | cut -d ":" -f 2) && \
     echo "$reg:_auth = $NPM_CONFIG__AUTH" > /.npmrc && \
@@ -15,7 +20,8 @@ ARG NPM_CONFIG_USERCONFIG=/.npmrc
 WORKDIR /build/
 
 COPY package.json package-lock.json /build/
-RUN npm install --include=dev
+RUN npm update -g npm && \
+    npm ci
 
 COPY . /build/
 
@@ -50,8 +56,10 @@ ARG PIP_INDEX_URL
 
 WORKDIR /build/
 
-RUN apt update -y
-RUN apt-get install git -y
+RUN apt update -y && \
+    apt install -y \
+        git && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY . /build/
 RUN pip install -U pip setuptools && \

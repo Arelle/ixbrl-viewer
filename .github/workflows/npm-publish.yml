@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       node_version:
-        default: '19'
+        default: '20'
         description: 'Node version to use'
         required: true
         type: string
@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ inputs.node_version }}
           registry-url: 'https://registry.npmjs.org' # Must explicitly set this for NODE_AUTH_TOKEN to work below
       - name: Install dependencies
-        run: npm install --include=dev
+        run: npm ci
       - name: Test with npm
         run: npm run test
       - name: Build with npm

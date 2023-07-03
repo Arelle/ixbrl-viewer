@@ -14,10 +14,9 @@ jobs:
           - ubuntu-22.04
           - windows-2022
         node-version:
-          - '14'
           - '16'
           - '18'
-          - '19'
+          - '20'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3.3.0
@@ -26,6 +25,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: |
-          npm install
+          npm ci
       - name: Test with npm
         run: npm run test

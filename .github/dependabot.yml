@@ -32,9 +32,6 @@ updates:
     reviewers:
       - Workiva/xt
     ignore:
-      - dependency-name: babel-jest
-        versions:
-          - ">=27"
       - dependency-name: chart.js
         versions:
           - ">=3"

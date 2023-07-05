@@ -16,10 +16,10 @@ jobs:
     environment: release
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v3.5.3
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3.7.0
         with:
           node-version: ${{ inputs.node_version }}
           registry-url: 'https://registry.npmjs.org' # Must explicitly set this for NODE_AUTH_TOKEN to work below

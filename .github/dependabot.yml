@@ -25,7 +25,11 @@ updates:
         patterns:
           - "*"
         exclude-patterns:
+          - "*jest*"
           - "stylelint*"
+      jest:
+        patterns:
+          - "*jest*"
       stylelint:
         patterns:
           - "stylelint*"

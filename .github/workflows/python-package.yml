@@ -1,0 +1,103 @@
+name: Build and publish Python package
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        default: '20'
+        description: 'Node version to use'
+        required: false
+        type: string
+      python_version:
+        default: '3.11'
+        description: 'Python version to use'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      node_version:
+        default: '20'
+        description: 'Node version to use'
+        required: true
+        type: string
+      python_version:
+        default: '3.11'
+        description: 'Python version to use'
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  build-package:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout ixbrl-viewer
+        uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0
+      - name: Install Node.js
+        uses: actions/setup-node@v3.7.0
+        with:
+          cache: 'npm'
+          check-latest: true
+          node-version: ${{ inputs.node_version }}
+      - name: Install npm dependencies
+        run: npm ci
+      - name: Build ixbrlviewer.js
+        run: npm run prod
+      - name: Install Python
+        uses: actions/setup-python@v4.6.1
+        with:
+          cache: 'pip'
+          cache-dependency-path: '**/pyproject.toml'
+          check-latest: true
+          python-version: ${{ inputs.python_version }}
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install build
+      - name: Build Python package
+        run: python -m build
+      - name: Upload source distribution artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: source distribution
+          if-no-files-found: error
+          path: dist/*.tar.gz
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: wheel
+          if-no-files-found: error
+          path: dist/*.whl
+
+  publish-package:
+    needs: build-package
+    environment: release
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags')
+    steps:
+      - name: Install twine
+        run: pip install -U twine
+      - name: Download source distribution artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: source distribution
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: wheel
+      - name: Publish package on release
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+          TWINE_REPOSITORY: ${{ github.repository == 'Workiva/ixbrl-viewer' && 'pypi' || 'testpypi' }}
+        run: twine upload ./*
+      - name: Upload release artifacts
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          fail_on_unmatched_files: true
+          files: './*'

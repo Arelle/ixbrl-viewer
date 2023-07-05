@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@import "core.less";
-@import "fonts.less";
-@import "colours.less";
-@import "common.less";
+@import url("core.less");
+@import url("fonts.less");
+@import url("colours.less");
+@import url("common.less");
 @import (reference) "components.less";
-@import "form-controls.less";
+@import url("form-controls.less");
 @import (reference) "icons.less";
-@import "chart.less";
-@import "dialog.less";
-@import "menu.less";
-@import "accordian.less";
-@import "loader.less";
-@import "tabs.less";
+@import url("chart.less");
+@import url("dialog.less");
+@import url("menu.less");
+@import url("accordian.less");
+@import url("loader.less");
+@import url("tabs.less");
 @import (reference) "text-mixins.less";
-@import "block-list.less";
-@import "validation-report.less";
-@import "text-block-viewer.less";
-@import "summary.less";
+@import url("block-list.less");
+@import url("validation-report.less");
+@import url("text-block-viewer.less");
+@import url("summary.less");
 
 @top-bar-height: 3.5rem;
 
@@ -1115,10 +1115,7 @@
   .dialog-mask {
     background-color: rgb(0 0 0 / 60%);
     position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    inset: 0;
     z-index: 10;
     display: none;
   }

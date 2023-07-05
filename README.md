@@ -1,6 +1,6 @@
 # Arelle iXBRL Viewer
 
-![ixbrl-viewer](examples/ixbrl-viewer-demo.gif)
+![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
 
 The [Arelle](https://arelle.org/) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be
 viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL
@@ -12,7 +12,7 @@ report.  Key features include:
 * Visualize and navigate calculation relationships
 * Produce on-the-fly graphs using XBRL data
 
-A sample viewer is provided in the [examples](examples/README.md) for those interested.
+A sample viewer is provided in the [examples](https://github.com/Workiva/ixbrl-viewer/blob/master/examples/README.md) for those interested.
 
 The viewer project consists of two components:
 
@@ -231,5 +231,5 @@ All commands should be run from repository root
 
     * IDE:
       * Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
-      ![ixbrl-viewer](tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
+      ![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
       * Debug runs with breakpoints are also typically supported.

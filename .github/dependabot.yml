@@ -12,6 +12,11 @@ updates:
       dependencies:
         patterns:
           - "*"
+        exclude-patterns:
+          - "stylelint*"
+      stylelint:
+        patterns:
+          - "stylelint*"
     reviewers:
       - Workiva/xt
     ignore:

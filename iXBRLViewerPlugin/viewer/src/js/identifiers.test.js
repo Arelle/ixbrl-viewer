@@ -1,3 +1,5 @@
+// See COPYRIGHT.md for copyright information
+
 import { Identifiers } from './identifiers.js';
 import { QName } from './qname.js';
 

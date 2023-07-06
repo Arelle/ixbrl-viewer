@@ -5,6 +5,8 @@ on:
     branches:
       - master
 
+permissions: {}
+
 jobs:
   tests:
     strategy:
@@ -22,14 +24,16 @@ jobs:
           - '3.11'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.5.3
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3.7.0
         with:
+          cache: 'npm'
+          check-latest: true
           node-version: ${{ matrix.node-version }}
       - name: Install Python 3
-        uses: actions/setup-python@v4.4.0
+        uses: actions/setup-python@v4.6.1
         with:
           cache: 'pip'
           cache-dependency-path: '**/pyproject.toml'
@@ -49,7 +53,7 @@ jobs:
         run: npx http-server . &> tests/puppeteer/artifacts/http_server.log &
       - name: Run puppeteer tests
         run: npm run test:puppeteer
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v3.1.2
         if: failure()
         with:
           name: ${{ github.run_id }}.${{ github.run_attempt }}_${{ matrix.os }}_${{ matrix.node-version }}_${{ matrix.python-version }}_artifacts

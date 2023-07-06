@@ -1,8 +1,11 @@
 name: Run Python Unit Tests
+
 on:
   pull_request:
     branches:
       - master
+
+permissions: {}
 
 jobs:
   tests:
@@ -20,9 +23,9 @@ jobs:
           - '3.11'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v3.5.3
       - name: Install Python 3
-        uses: actions/setup-python@v4.4.0
+        uses: actions/setup-python@v4.6.1
         with:
           cache: 'pip'
           cache-dependency-path: '**/pyproject.toml'

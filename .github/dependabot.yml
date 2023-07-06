@@ -1,5 +1,17 @@
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "02:00"
+      timezone: America/Chicago
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+    reviewers:
+      - Workiva/xt
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -13,16 +25,17 @@ updates:
         patterns:
           - "*"
         exclude-patterns:
+          - "*jest*"
           - "stylelint*"
+      jest:
+        patterns:
+          - "*jest*"
       stylelint:
         patterns:
           - "stylelint*"
     reviewers:
       - Workiva/xt
     ignore:
-      - dependency-name: babel-jest
-        versions:
-          - ">=27"
       - dependency-name: chart.js
         versions:
           - ">=3"
@@ -62,7 +75,6 @@ updates:
       interval: daily
       time: "02:00"
       timezone: America/Chicago
-    open-pull-requests-limit: 5
     reviewers:
       - Workiva/xt
     allow:

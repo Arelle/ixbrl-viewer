@@ -1,0 +1,89 @@
+name: Build and publish NPM package
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        default: '20'
+        description: 'Node version to use'
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      node_version:
+        default: '20'
+        description: 'Node version to use'
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  build-package:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout ixbrl-viewer
+        uses: actions/checkout@v3.5.3
+        with:
+          fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
+      - name: Install Node.js
+        uses: actions/setup-node@v3.7.0
+        with:
+          cache: 'npm'
+          check-latest: true
+          node-version: ${{ inputs.node_version }}
+      - name: Install npm dependencies
+        run: npm ci
+      - name: Build ixbrlviewer.js
+        run: npm run prod
+      - name: Create npm package
+        run: |
+          npm config set git-tag-version=false
+          npm version $(git describe --tags)
+          npm pack
+      - name: Upload ixbrlviewer.js artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: ixbrlviewer.js
+          if-no-files-found: error
+          path: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
+      - name: Upload npm artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: npm package
+          if-no-files-found: error
+          path: ixbrl-viewer-*.tgz
+
+  publish-package:
+    needs: build-package
+    environment: release
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags')
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v3.7.0
+        with:
+          check-latest: true
+          node-version: ${{ inputs.node_version }}
+          registry-url: 'https://registry.npmjs.org' # Must explicitly set this for NODE_AUTH_TOKEN to work below
+      - name: Download ixbrlviewer.js artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: ixbrlviewer.js
+      - name: Download npm artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: npm package
+      - name: Publish with npm
+        if: startsWith(github.ref, 'refs/tags')
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_DRY_RUN: ${{ github.repository != 'Workiva/ixbrl-viewer' }}
+        run: npm publish ixbrl-viewer-*.tgz --access public
+      - name: Upload release artifacts
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          fail_on_unmatched_files: true
+          files: './*'

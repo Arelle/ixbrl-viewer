@@ -59,7 +59,7 @@
     "jest-environment-jsdom": "^29.6.1",
     "puppeteer": "20.7.4",
     "puppeteer-screen-recorder": "2.1.2",
-    "stylelint": "^15.10.0",
+    "stylelint": "^15.10.1",
     "stylelint-config-standard": "^34.0.0",
     "webpack": "^5.88.1",
     "webpack-cli": "^5.0.1",

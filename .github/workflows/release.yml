@@ -1,8 +1,10 @@
 name: Release
 
 on:
-  release:
-    types: [released]
+  # XT-3084: Enable released events once NPM and PyPI projects have been transferred to Arelle user.
+  # release:
+  #   types: [released]
+  workflow_dispatch:
 
 permissions: {}
 

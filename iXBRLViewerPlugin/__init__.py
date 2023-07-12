@@ -72,7 +72,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       help="Converts the viewer output into a self contained zip")
 
 
-def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showValidationMessages=False, useStubViewer=False, zipViewerOutput=False):
+def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showValidationMessages=False, useStubViewer=False, zipViewerOutput=False, copyScript=False):
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
         cntlr.addToLog("No taxonomy loaded.")
@@ -81,13 +81,19 @@ def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showVal
     if modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
         cntlr.addToLog("No inline XBRL document loaded.")
         return
+    copyScriptPath = None
+    if copyScript:
+        # The script at viewerURL will be copied into the destination directory,
+        # so the local path (just the basename) of viewerURL should be passed to the script tag
+        copyScriptPath = viewerURL
+        viewerURL = os.path.basename(viewerURL)
     try:
         out = saveViewerFile
         if out:
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
             iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer)
             if iv is not None:
-                iv.save(out, zipOutput=zipViewerOutput)
+                iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
     except IXBRLViewerBuilderError as ex:
         print(ex.message)
     except Exception as ex:
@@ -183,7 +189,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
         viewer_file_name = 'ixbrlviewer.html'
-        generateViewer(cntlr, tempViewer.name, useStubViewer = True)
+        generateViewer(cntlr, tempViewer.name, useStubViewer=True, copyScript=True)
         localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
         localhost = localViewer.init(cntlr, tempViewer.name)
         webbrowser.open(f'{localhost}/{viewer_file_name}')

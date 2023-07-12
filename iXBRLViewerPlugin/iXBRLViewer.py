@@ -476,7 +476,7 @@ class iXBRLViewer:
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments
 
-    def save(self, outPath: io.BytesIO | str, zipOutput: bool=False):
+    def save(self, outPath: io.BytesIO | str, zipOutput: bool=False, copyScriptPath: str | None = None):
         """
         Save the iXBRL viewer
         """
@@ -485,6 +485,7 @@ class iXBRLViewer:
             if isinstance(outPath, io.BytesIO):
                 file = outPath
                 fileMode = 'a'
+                outPath = os.sep
             elif os.path.isdir(outPath):
                 file = os.path.join(outPath, f'{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip')
                 fileMode = 'w'
@@ -514,7 +515,10 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.dts.info("viewer:info", "Writing %s" % filename)
                     zout.write(self.filingDocuments, filename)
-                zout.write(DEFAULT_VIEWER_PATH, "ixbrlviewer.js")
+                if copyScriptPath is not None:
+                    scriptSrc = os.path.join(outPath, copyScriptPath)
+                    self.dts.info("viewer:info", "Writing script from %s" % scriptSrc)
+                    zout.write(scriptSrc, os.path.basename(copyScriptPath))
         elif os.path.isdir(outPath):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
@@ -528,6 +532,8 @@ class iXBRLViewer:
                 filename = os.path.basename(self.filingDocuments)
                 self.dts.info("viewer:info", "Writing %s" % filename)
                 shutil.copy2(self.filingDocuments, os.path.join(outPath, filename))
+            if copyScriptPath is not None:
+                self._copyScript(outPath, copyScriptPath)
         else:
             if len(self.files) > 1:
                 self.dts.error("viewer:error", "More than one file in input, but output is not a directory")
@@ -546,3 +552,12 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.dts.info("viewer:info", "Writing %s" % filename)
                     shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(outPath), filename))
+                if copyScriptPath is not None:
+                    outDirectory = os.path.dirname(os.path.join(os.getcwd(), outPath))
+                    self._copyScript(outDirectory, copyScriptPath)
+
+    def _copyScript(self, directory: str, scriptPath: str):
+        scriptSrc = os.path.join(directory, scriptPath)
+        scriptDest = os.path.join(directory, os.path.basename(scriptPath))
+        self.dts.info("viewer:info", "Copying script from %s to %s" % (scriptSrc, scriptDest))
+        shutil.copy2(scriptSrc, scriptDest)

@@ -191,6 +191,17 @@ e.g.
 PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --out out-dir --package-dir /my/packages/ ixds-dir
 ```
 
+## Review mode
+![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/examples/review-mode.png)
+
+A review mode is available that is intended to assist in reviewing partially tagged or incomplete documents.
+This mode replaces the namespace-based highlighting with optional highlighting based on untagged numbers and/or dates.
+
+To enable review mode while viewing a document, include a "review" entry in the URL query string.
+
+Example: `file://path-to-your-document/ixbrl-report-viewer.html?review`
+
+
 ## Running tests
 
 ### Running unit tests

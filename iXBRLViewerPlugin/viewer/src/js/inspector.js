@@ -190,6 +190,27 @@ export class Inspector {
     buildToolbarHighlightMenu() {
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
+        if (this._iv.options.reviewMode) {
+            this._toolbarMenu.addCheckboxItem("Untagged numbers", function (checked) {
+                const body = this._iv.viewer.contents().find("body");
+                if (checked) {
+                    body.addClass("wkiv-highlight-untagged-numbers");
+                }
+                else {
+                    body.removeClass("wkiv-highlight-untagged-numbers");
+                }
+            }, "highlight-untagged-numbers", "highlight-tags");
+
+            this._toolbarMenu.addCheckboxItem("Untagged dates", function (checked) {
+                const body = this._iv.viewer.contents().find("body");
+                if (checked) {
+                    body.addClass("wkiv-highlight-untagged-dates");
+                }
+                else {
+                    body.removeClass("wkiv-highlight-untagged-dates");
+                }
+            }, "highlight-untagged-dates", "highlight-untagged-numbers");
+        }
         this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
     }
 

@@ -141,3 +141,23 @@ div.ixbrl-table-handle {
     }
   }
 }
+
+.review.review-highlight-untagged-numbers .review-untagged-number {
+  background-color: @highlight-1;
+}
+
+.review.review-highlight-untagged-dates .review-untagged-date {
+  background-color: @highlight-2;
+}
+
+.review .ixbrl-highlight:not(.ixbrl-no-highlight) {
+  background-color: @highlight-default !important;
+
+  &.ixbrl-highlight-1 {
+    background-color: @highlight-default !important;
+  }
+
+  &.ixbrl-highlight-2 {
+    background-color: @highlight-default !important;
+  }
+}

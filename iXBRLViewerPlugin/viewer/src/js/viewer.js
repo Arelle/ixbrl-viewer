@@ -179,7 +179,7 @@ export class Viewer {
                         output.append(document.createTextNode(m[0]));
                     }
                     else {
-                        const c = is_date ? 'wkiv-untagged-date' : 'wkiv-untagged-number';
+                        const c = is_date ? 'review-untagged-date' : 'review-untagged-number';
                         $('<span></span>')
                                 .text(m[0])
                                 .addClass(c)

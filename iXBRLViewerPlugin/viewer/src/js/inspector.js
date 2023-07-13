@@ -194,20 +194,20 @@ export class Inspector {
             this._toolbarMenu.addCheckboxItem("Untagged numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");
                 if (checked) {
-                    body.addClass("wkiv-highlight-untagged-numbers");
+                    body.addClass("review-highlight-untagged-numbers");
                 }
                 else {
-                    body.removeClass("wkiv-highlight-untagged-numbers");
+                    body.removeClass("review-highlight-untagged-numbers");
                 }
             }, "highlight-untagged-numbers", "highlight-tags");
 
             this._toolbarMenu.addCheckboxItem("Untagged dates", function (checked) {
                 const body = iv.viewer.contents().find("body");
                 if (checked) {
-                    body.addClass("wkiv-highlight-untagged-dates");
+                    body.addClass("review-highlight-untagged-dates");
                 }
                 else {
-                    body.removeClass("wkiv-highlight-untagged-dates");
+                    body.removeClass("review-highlight-untagged-dates");
                 }
             }, "highlight-untagged-dates", "highlight-untagged-numbers");
         }

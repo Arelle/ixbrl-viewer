@@ -142,6 +142,10 @@ export class Inspector {
         runGenerator(this._search.buildSearchIndex(() => this.searchReady()));
     }
 
+    isReviewMode() {
+        return this._iv.options.reviewMode;
+    }
+
 
     /*
      * Check for fragment identifier pointing to a specific fact and select it if
@@ -190,7 +194,7 @@ export class Inspector {
     buildToolbarHighlightMenu() {
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
-        if (this._iv.options.reviewMode) {
+        if (this.isReviewMode()) {
             this._toolbarMenu.addCheckboxItem("Untagged numbers", function (checked) {
                 const body = this._iv.viewer.contents().find("body");
                 if (checked) {
@@ -216,7 +220,16 @@ export class Inspector {
 
     buildHighlightKey() {
         $(".highlight-key .items").empty();
-        const key = this._report.namespaceGroups();
+        let key;
+        if (this.isReviewMode()) {
+            key = [
+                "XBRL Elements",
+                "Untagged Numbers",
+                "Untagged Dates",
+            ]
+        } else {
+            key = this._report.namespaceGroups();
+        }
         this._iv.callPluginMethod("extendHighlightKey", key);
 
         for (const [i, name] of key.entries()) {

@@ -72,7 +72,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       help="Converts the viewer output into a self contained zip")
 
 
-def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showValidationMessages=False, useStubViewer=False, zipViewerOutput=False, copyScript=False):
+def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showValidationMessages=False, useStubViewer=False, zipViewerOutput=False):
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
         cntlr.addToLog("No taxonomy loaded.")
@@ -82,11 +82,22 @@ def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showVal
         cntlr.addToLog("No inline XBRL document loaded.")
         return
     copyScriptPath = None
-    if copyScript:
-        # The script at viewerURL will be copied into the destination directory,
-        # so the local path (just the basename) of viewerURL should be passed to the script tag
-        copyScriptPath = viewerURL
-        viewerURL = os.path.basename(viewerURL)
+    if isinstance(saveViewerFile, str):
+        # Note on URLs: Rather than rely on logic to determine if the input is a file
+        # path or web address, we can allow web addresses to be considered relative paths.
+        # Unless the URL happens to resolve to an existing file on the local filesystem,
+        # it will skip this step and pass through into the viewer as expected.
+        if os.path.isabs(viewerURL):
+            viewerAbsolutePath = viewerURL
+        else:
+            viewerAbsolutePath = getAbsoluteViewerPath(saveViewerFile, viewerURL)
+
+        if os.path.isfile(viewerAbsolutePath):
+            # The script was found on the local file system and will be copied into the
+            # destination directory, so the local path (just the basename) of viewerURL should
+            # be passed to the script tag
+            copyScriptPath = viewerURL
+            viewerURL = os.path.basename(viewerURL)
     try:
         out = saveViewerFile
         if out:
@@ -98,6 +109,13 @@ def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showVal
         print(ex.message)
     except Exception as ex:
         cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
+
+
+def getAbsoluteViewerPath(saveViewerPath, relativeViewerPath):
+    saveViewerDir = saveViewerPath
+    if os.path.isfile(saveViewerDir):
+        saveViewerDir = os.path.dirname(os.path.join(os.getcwd(), saveViewerDir))
+    return os.path.join(saveViewerDir, relativeViewerPath)
 
 
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
@@ -189,7 +207,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
         viewer_file_name = 'ixbrlviewer.html'
-        generateViewer(cntlr, tempViewer.name, useStubViewer=True, copyScript=True)
+        generateViewer(cntlr, tempViewer.name, useStubViewer=True)
         localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
         localhost = localViewer.init(cntlr, tempViewer.name)
         webbrowser.open(f'{localhost}/{viewer_file_name}')

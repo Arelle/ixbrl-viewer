@@ -265,6 +265,7 @@ iXBRLViewer.prototype.setProgress = function (msg) {
          * https://bugs.chromium.org/p/chromium/issues/detail?id=675795 
          */
         window.requestAnimationFrame(function () {
+            console.log(`%c [Progress] ${msg} `, 'background: #77d1c8; color: black;');
             $('#ixv .loader .text').text(msg);
             window.requestAnimationFrame(function () {
                 resolve();

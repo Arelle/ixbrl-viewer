@@ -142,11 +142,6 @@ export class Inspector {
         runGenerator(this._search.buildSearchIndex(() => this.searchReady()));
     }
 
-    isReviewMode() {
-        return this._iv.options.reviewMode;
-    }
-
-
     /*
      * Check for fragment identifier pointing to a specific fact and select it if
      * present.
@@ -192,11 +187,12 @@ export class Inspector {
     }
 
     buildToolbarHighlightMenu() {
+        const iv = this._iv;
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
-        if (this.isReviewMode()) {
+        if (iv.options.reviewMode) {
             this._toolbarMenu.addCheckboxItem("Untagged numbers", function (checked) {
-                const body = this._iv.viewer.contents().find("body");
+                const body = iv.viewer.contents().find("body");
                 if (checked) {
                     body.addClass("wkiv-highlight-untagged-numbers");
                 }
@@ -206,7 +202,7 @@ export class Inspector {
             }, "highlight-untagged-numbers", "highlight-tags");
 
             this._toolbarMenu.addCheckboxItem("Untagged dates", function (checked) {
-                const body = this._iv.viewer.contents().find("body");
+                const body = iv.viewer.contents().find("body");
                 if (checked) {
                     body.addClass("wkiv-highlight-untagged-dates");
                 }
@@ -221,7 +217,7 @@ export class Inspector {
     buildHighlightKey() {
         $(".highlight-key .items").empty();
         let key;
-        if (this.isReviewMode()) {
+        if (this._iv.options.reviewMode) {
             key = [
                 "XBRL Elements",
                 "Untagged Numbers",

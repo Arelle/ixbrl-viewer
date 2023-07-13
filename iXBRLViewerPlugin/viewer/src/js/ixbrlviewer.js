@@ -12,8 +12,9 @@ export function iXBRLViewer(options) {
     this.viewer = null;
     options = options || {};
     const defaults = {
+        continuationElementLimit: 10000,
+        reviewMode: false,
         showValidationWarningOnStart: false,
-        continuationElementLimit: 10000
     }
     this.options = {...defaults, ...options};
 }

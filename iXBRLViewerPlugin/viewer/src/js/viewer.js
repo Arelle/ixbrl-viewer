@@ -723,7 +723,8 @@ export class Viewer {
     }
 
     _setTitle(docIndex) {
-        $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
+        const mode = this._iv.options.reviewMode ? " - Review Mode" : "";
+        $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text() + mode);
     }
 
     showDocumentForItemId(itemId) {

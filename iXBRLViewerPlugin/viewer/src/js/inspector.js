@@ -155,7 +155,13 @@ export class Inspector {
 
     handleMessage(event) {
         const jsonString = event.originalEvent.data;
-        const data = JSON.parse(jsonString);
+        let data;
+        try {
+            data = JSON.parse(jsonString);
+        }
+        catch (e) {
+            return;
+        }
 
         if (data.task == 'SHOW_FACT') {
             this.selectItem(data.factId);

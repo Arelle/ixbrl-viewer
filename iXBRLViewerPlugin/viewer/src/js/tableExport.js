@@ -257,9 +257,5 @@ export class TableExport {
             columns: excelData.columns,
             fileName: 'table.xlsx'
         });
-        //wb.xlsx.writeBuffer().then( data => {
-        //  const blob = new Blob( [data], {type: "application/octet-stream"} );
-        //  FileSaver.saveAs( blob, 'table.xlsx');
-        //});
     }
 }

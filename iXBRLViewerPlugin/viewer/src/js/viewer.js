@@ -799,8 +799,7 @@ export class Viewer {
     }
 
     _setTitle(docIndex) {
-        const mode = this._iv.options.reviewMode ? " - Review Mode" : "";
-        $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text() + mode);
+        $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
     }
 
     showDocumentForItemId(itemId) {

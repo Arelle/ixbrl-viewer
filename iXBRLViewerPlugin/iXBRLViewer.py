@@ -12,6 +12,7 @@ import urllib.parse
 import zipfile
 from collections import defaultdict
 from copy import deepcopy
+from typing import Optional, Union
 
 import pycountry
 from arelle import XbrlConst
@@ -366,9 +367,13 @@ class IXBRLViewerBuilder:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
             return etree.parse(fin)
 
-    def createViewer(self, scriptUrl=DEFAULT_VIEWER_PATH, useStubViewer=False, showValidations=True):
+    def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True) -> Optional[iXBRLViewer]:
         """
-        Create an iXBRL file with XBRL data as a JSON blob, and script tags added
+        Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
+        :param scriptUrl: The `src` value of the script tag that loads the viewer script.
+        :param useStubViewer: True if stub document should be included in output.
+        :param showValidations: True if validation errors should be included in output taxonomy data.
+        :return: An iXBRLViewer instance that is ready to be saved.
         """
         dts = self.dts
         iv = iXBRLViewer(dts)
@@ -476,32 +481,36 @@ class iXBRLViewer:
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments
 
-    def save(self, outPath: io.BytesIO | str, zipOutput: bool=False):
+    def save(self, destination: Union[io.BytesIO, str], zipOutput: bool = False, copyScriptPath: Optional[str] = None):
         """
-        Save the iXBRL viewer
+        Save the iXBRL viewer.
+        :param destination: The target that viewer data/files will be written to (path to file/directory, or a file object itself).
+        :param zipOutput: True if the destination is a zip archive.
+        :param copyScriptPath: If provided, the path from where the viewer JS will be copied into the output from.
         """
-        if isinstance(outPath, io.BytesIO) or zipOutput: # zip output stream
+        if isinstance(destination, io.BytesIO) or zipOutput: # zip output stream
             # zipfile may be cumulatively added to by inline extraction, EdgarRenderer etc
-            if isinstance(outPath, io.BytesIO):
-                file = outPath
+            if isinstance(destination, io.BytesIO):
+                file = destination
                 fileMode = 'a'
-            elif os.path.isdir(outPath):
-                file = os.path.join(outPath, f'{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip')
+                destination = os.sep
+            elif os.path.isdir(destination):
+                file = os.path.join(destination, f'{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip')
                 fileMode = 'w'
-            elif outPath.endswith(os.sep):
+            elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.dts.error("viewer:error", "Directory %s does not exist" % outPath)
+                self.dts.error("viewer:error", "Directory %s does not exist" % destination)
                 return
-            elif not os.path.isdir(os.path.dirname(os.path.abspath(outPath))):
+            elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(outPath)))
+                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
                 return
-            elif not outPath.endswith('.zip'):
+            elif not destination.endswith('.zip'):
                 # File extension isn't a zip
-                self.dts.error("viewer:error", "File extension %s is not a zip" % os.path.splitext(outPath)[0])
+                self.dts.error("viewer:error", "File extension %s is not a zip" % os.path.splitext(destination)[0])
                 return
             else:
-                file = outPath
+                file = destination
                 fileMode = 'w'
 
             with zipfile.ZipFile(file, fileMode, zipfile.ZIP_DEFLATED, True) as zout:
@@ -514,12 +523,15 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.dts.info("viewer:info", "Writing %s" % filename)
                     zout.write(self.filingDocuments, filename)
-                zout.write(DEFAULT_VIEWER_PATH, "ixbrlviewer.js")
-        elif os.path.isdir(outPath):
+                if copyScriptPath is not None:
+                    scriptSrc = os.path.join(destination, copyScriptPath)
+                    self.dts.info("viewer:info", "Writing script from %s" % scriptSrc)
+                    zout.write(scriptSrc, os.path.basename(copyScriptPath))
+        elif os.path.isdir(destination):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
             for f in self.files:
-                filename = os.path.join(outPath, f.filename)
+                filename = os.path.join(destination, f.filename)
                 self.dts.info("viewer:info", "Writing %s" % filename)
                 with open(filename, "wb") as fout:
                     writer = XHTMLSerializer(fout)
@@ -527,22 +539,33 @@ class iXBRLViewer:
             if self.filingDocuments:
                 filename = os.path.basename(self.filingDocuments)
                 self.dts.info("viewer:info", "Writing %s" % filename)
-                shutil.copy2(self.filingDocuments, os.path.join(outPath, filename))
+                shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
+            if copyScriptPath is not None:
+                self._copyScript(destination, copyScriptPath)
         else:
             if len(self.files) > 1:
                 self.dts.error("viewer:error", "More than one file in input, but output is not a directory")
-            elif outPath.endswith(os.sep):
+            elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.dts.error("viewer:error", "Directory %s does not exist" % outPath)
-            elif not os.path.isdir(os.path.dirname(os.path.abspath(outPath))):
+                self.dts.error("viewer:error", "Directory %s does not exist" % destination)
+            elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(outPath)))
+                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
             else:
-                self.dts.info("viewer:info", "Writing %s" % outPath)
-                with open(outPath, "wb") as fout:
+                self.dts.info("viewer:info", "Writing %s" % destination)
+                with open(destination, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(self.files[0].xmlDocument)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
                     self.dts.info("viewer:info", "Writing %s" % filename)
-                    shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(outPath), filename))
+                    shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(destination), filename))
+                if copyScriptPath is not None:
+                    outDirectory = os.path.dirname(os.path.join(os.getcwd(), destination))
+                    self._copyScript(outDirectory, copyScriptPath)
+
+    def _copyScript(self, directory: str, scriptPath: str):
+        scriptSrc = os.path.join(directory, scriptPath)
+        scriptDest = os.path.join(directory, os.path.basename(scriptPath))
+        self.dts.info("viewer:info", "Copying script from %s to %s" % (scriptSrc, scriptDest))
+        shutil.copy2(scriptSrc, scriptDest)

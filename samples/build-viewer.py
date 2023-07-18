@@ -23,6 +23,7 @@ import glob
 import argparse
 import iXBRLViewerPlugin.iXBRLViewer
 from arelle.plugin import inlineXbrlDocumentSet
+from iXBRLViewerPlugin import generateViewer
 
 class CntlrCreateViewer(Cntlr.Cntlr):
 
@@ -51,13 +52,11 @@ class CntlrCreateViewer(Cntlr.Cntlr):
                 self.addToLog("No xhtml, html or htm files found in directory", messageCode="error", file=f)
                 return None
         fs = arelle.FileSource.openFileSource(f, self)
-        xbrl = self.modelManager.load(fs)
+        self.modelManager.load(fs)
         self.modelManager.validate()
 
         try:
-            viewerBuilder = iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilder(xbrl)
-            viewer = viewerBuilder.createViewer(scriptUrl = scriptUrl, useStubViewer = useStubViewer)
-            viewer.save(outPath)
+            generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer)
         except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
             print(e.message)
             sys.exit(1)

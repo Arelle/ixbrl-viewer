@@ -140,10 +140,12 @@ def iXBRLViewerMenuCommand(cntlr):
         return
     dialog = SaveViewerDialog(cntlr)
     if dialog.accepted and dialog.filename():
-        viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl(), showValidations=False)
-        if iv is not None:
-            iv.save(dialog.filename(), zipOutput=dialog.zipViewerOutput())
+        generateViewer(
+            cntlr,
+            dialog.filename(),
+            dialog.scriptUrl(),
+            zipViewerOutput=dialog.zipViewerOutput(),
+        )
 
 
 def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):

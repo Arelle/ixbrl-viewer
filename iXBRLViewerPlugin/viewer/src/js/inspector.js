@@ -191,7 +191,7 @@ export class Inspector {
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
         if (iv.options.reviewMode) {
-            this._toolbarMenu.addCheckboxItem("Untagged numbers", function (checked) {
+            this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");
                 if (checked) {
                     body.addClass("review-highlight-untagged-numbers");
@@ -201,7 +201,7 @@ export class Inspector {
                 }
             }, "highlight-untagged-numbers", "highlight-tags");
 
-            this._toolbarMenu.addCheckboxItem("Untagged dates", function (checked) {
+            this._toolbarMenu.addCheckboxItem("Untagged Dates", function (checked) {
                 const body = iv.viewer.contents().find("body");
                 if (checked) {
                     body.addClass("review-highlight-untagged-dates");

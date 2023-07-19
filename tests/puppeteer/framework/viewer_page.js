@@ -50,9 +50,10 @@ export class ViewerPage {
         this.#logMsgs.push(message);
     }
 
-    async navigateToViewer(filingZipName) {
+    async navigateToViewer(filingZipName, args = '') {
+
         const filingName = filingZipName.replace('.zip', '');
-        const url = `http://localhost:8080/tests/puppeteer/artifacts/generated_output/${filingName}.htm`;
+        const url = `http://localhost:8080/tests/puppeteer/artifacts/generated_output/${filingName}.htm${args}`;
         this.log(`Navigating to ${url}`);
         await this.page.goto(url, { waitUntil: 'networkidle0' });
         await this.page.waitForSelector(

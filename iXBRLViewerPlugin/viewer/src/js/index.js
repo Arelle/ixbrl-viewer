@@ -4,6 +4,10 @@ import $ from 'jquery'
 import { iXBRLViewer } from "./ixbrlviewer.js";
 
 $(() => {
-    const iv = new iXBRLViewer({ showValidationWarningOnStart: true });
+    const urlParams = new URLSearchParams(window.location.search);
+    const iv = new iXBRLViewer({
+        reviewMode: urlParams.has('review'),
+        showValidationWarningOnStart: true
+    });
     iv.load();
 });

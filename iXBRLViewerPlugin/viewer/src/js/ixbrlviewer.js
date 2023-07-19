@@ -12,8 +12,9 @@ export function iXBRLViewer(options) {
     this.viewer = null;
     options = options || {};
     const defaults = {
+        continuationElementLimit: 10000,
+        reviewMode: false,
         showValidationWarningOnStart: false,
-        continuationElementLimit: 10000
     }
     this.options = {...defaults, ...options};
 }
@@ -125,6 +126,9 @@ iXBRLViewer.prototype._reparentDocument = function () {
      * the body tag in an HTML DOM, so move them so that they are */
     $('body script').appendTo($('body'));
     const iframeBody = $(iframe).contents().find('body');
+    if (this.options.reviewMode) {
+        iframeBody.addClass('review');
+    }
     $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
 
     /* Move all attributes on the body tag to the new body */
@@ -264,6 +268,7 @@ iXBRLViewer.prototype.setProgress = function (msg) {
          * https://bugs.chromium.org/p/chromium/issues/detail?id=675795 
          */
         window.requestAnimationFrame(function () {
+            console.log(`%c [Progress] ${msg} `, 'background: #77d1c8; color: black;');
             $('#ixv .loader .text').text(msg);
             window.requestAnimationFrame(function () {
                 resolve();

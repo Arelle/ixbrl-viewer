@@ -142,7 +142,6 @@ export class Inspector {
         runGenerator(this._search.buildSearchIndex(() => this.searchReady()));
     }
 
-
     /*
      * Check for fragment identifier pointing to a specific fact and select it if
      * present.
@@ -188,14 +187,45 @@ export class Inspector {
     }
 
     buildToolbarHighlightMenu() {
+        const iv = this._iv;
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
+        if (iv.options.reviewMode) {
+            this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
+                const body = iv.viewer.contents().find("body");
+                if (checked) {
+                    body.addClass("review-highlight-untagged-numbers");
+                }
+                else {
+                    body.removeClass("review-highlight-untagged-numbers");
+                }
+            }, "highlight-untagged-numbers", "highlight-tags");
+
+            this._toolbarMenu.addCheckboxItem("Untagged Dates", function (checked) {
+                const body = iv.viewer.contents().find("body");
+                if (checked) {
+                    body.addClass("review-highlight-untagged-dates");
+                }
+                else {
+                    body.removeClass("review-highlight-untagged-dates");
+                }
+            }, "highlight-untagged-dates", "highlight-untagged-numbers");
+        }
         this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
     }
 
     buildHighlightKey() {
         $(".highlight-key .items").empty();
-        const key = this._report.namespaceGroups();
+        let key;
+        if (this._iv.options.reviewMode) {
+            key = [
+                "XBRL Elements",
+                "Untagged Numbers",
+                "Untagged Dates",
+            ]
+        } else {
+            key = this._report.namespaceGroups();
+        }
         this._iv.callPluginMethod("extendHighlightKey", key);
 
         for (const [i, name] of key.entries()) {

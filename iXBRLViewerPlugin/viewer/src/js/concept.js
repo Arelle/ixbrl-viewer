@@ -16,6 +16,8 @@ import $ from 'jquery'
 
 export class Concept {
     constructor(report, name) {
+        this.name = name;  
+        this._report = report;
         this._c = report.data.concepts[name] || {};
     }
 

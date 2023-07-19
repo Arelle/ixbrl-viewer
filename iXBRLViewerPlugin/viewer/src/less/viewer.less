@@ -6,14 +6,39 @@
 @import (reference) "icons.less";
 
 .ixbrl-highlight:not(.ixbrl-no-highlight) {
-  background-color: @highlight-default;
+  // To ensure highlighting takes place, !important is used to override inline styles.
+  // For example: overrides highlighting applied inline to alternate table rows.
+  background-color: @highlight-default !important; // Override inline styles
 
   &.ixbrl-highlight-1 {
-    background-color: @highlight-1;
+    background-color: @highlight-1 !important; // Override inline styles
   }
 
   &.ixbrl-highlight-2 {
-    background-color: @highlight-2;
+    background-color: @highlight-2 !important; // Override inline styles
+  }
+}
+
+.review.review-highlight-untagged-numbers .review-untagged-number {
+  background-color: @highlight-1;
+}
+
+.review.review-highlight-untagged-dates .review-untagged-date {
+  background-color: @highlight-2;
+}
+
+.review .ixbrl-highlight:not(.ixbrl-no-highlight) {
+  // Review mode disables namespace-specific highlighting in favor of all tagged
+  // elements sharing the same default highlight color, other colors are used for
+  // untagged highlighting defined above.
+  background-color: @highlight-default !important; // Override inline styles
+
+  &.ixbrl-highlight-1 {
+    background-color: @highlight-default !important; // Override inline styles
+  }
+
+  &.ixbrl-highlight-2 {
+    background-color: @highlight-default !important; // Override inline styles
   }
 }
 
@@ -139,25 +164,5 @@ div.ixbrl-table-handle {
       padding: 0.7rem 1.5rem 0.7rem 2.5rem;
       background-color: @workiva-green;
     }
-  }
-}
-
-.review.review-highlight-untagged-numbers .review-untagged-number {
-  background-color: @highlight-1;
-}
-
-.review.review-highlight-untagged-dates .review-untagged-date {
-  background-color: @highlight-2;
-}
-
-.review .ixbrl-highlight:not(.ixbrl-no-highlight) {
-  background-color: @highlight-default;
-
-  &.ixbrl-highlight-1 {
-    background-color: @highlight-default;
-  }
-
-  &.ixbrl-highlight-2 {
-    background-color: @highlight-default;
   }
 }

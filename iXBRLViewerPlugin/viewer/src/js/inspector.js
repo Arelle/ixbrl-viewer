@@ -160,6 +160,8 @@ export class Inspector {
             data = JSON.parse(jsonString);
         }
         catch (e) {
+            // Silently ignore any non-JSON messages as write-excel-file sends
+            // messages to itself when exporting files.
             return;
         }
 

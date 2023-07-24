@@ -3,9 +3,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: daily
-      time: "02:00"
-      timezone: America/Chicago
+      interval: weekly
     groups:
       dependencies:
         patterns:
@@ -15,9 +13,7 @@ updates:
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: daily
-      time: "02:00"
-      timezone: America/Chicago
+      interval: weekly
     allow:
       - dependency-type: all
     groups:
@@ -58,9 +54,7 @@ updates:
     directory: "/"
     insecure-external-code-execution: allow
     schedule:
-      interval: daily
-      time: "02:00"
-      timezone: America/Chicago
+      interval: weekly
     allow:
       - dependency-type: all
     groups:
@@ -72,9 +66,7 @@ updates:
   - package-ecosystem: docker
     directory: "/"
     schedule:
-      interval: daily
-      time: "02:00"
-      timezone: America/Chicago
+      interval: weekly
     reviewers:
       - Workiva/xt
     allow:

@@ -1,4 +1,4 @@
-FROM node:20.4.0-bullseye-slim as node-build
+FROM node:20.5.0-bullseye-slim as node-build
 
 ARG NPM_CONFIG__AUTH
 ARG NPM_CONFIG_REGISTRY=https://workivaeast.jfrog.io/workivaeast/api/npm/npm-prod/

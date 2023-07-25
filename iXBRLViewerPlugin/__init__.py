@@ -1,4 +1,5 @@
 # See COPYRIGHT.md for copyright information
+from __future__ import annotations
 
 import argparse
 import io
@@ -7,7 +8,8 @@ import os
 import sys
 import tempfile
 import traceback
-from typing import Union
+from optparse import OptionGroup, OptionParser
+from typing import Optional, Union
 
 from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
@@ -15,7 +17,7 @@ from arelle.ModelDocument import Type
 from arelle.webserver.bottle import static_file
 
 from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
-from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
+from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError, VIEWER_FEATURES_AND_DESCRIPTIONS
 
 
 #
@@ -73,6 +75,12 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       default=False,
                       dest="zipViewerOutput",
                       help="Converts the viewer output into a self contained zip")
+    featureGroup = OptionGroup(parser, "Viewer Features",
+                            "See viewer README for information on enabling/disabling features.")
+    for featureName, featureDescription in VIEWER_FEATURES_AND_DESCRIPTIONS.items():
+        arg = f'--viewer-feature-{featureName}'
+        featureGroup.add_option(arg, arg.lower(), action="store_true", default=False, help=featureDescription)
+    parser.add_option_group(featureGroup)
 
 
 def generateViewer(
@@ -81,7 +89,8 @@ def generateViewer(
         viewerURL: str = DEFAULT_VIEWER_PATH,
         showValidationMessages: bool = False,
         useStubViewer: bool = False,
-        zipViewerOutput: bool = False):
+        zipViewerOutput: bool = False,
+        features: Optional[list[str]] = None):
     """
     Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
     If the viewer URL is a location on the local file system, a copy will be placed included in the output destination.
@@ -91,6 +100,7 @@ def generateViewer(
     :param showValidationMessages: True if validation messages should be shown in the viewer.
     :param useStubViewer: True if the stub viewer should be used.
     :param zipViewerOutput: True if the destination is a zip archive.
+    :param features: List of feature names to enable via generated JSON data.
     """
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
@@ -121,6 +131,9 @@ def generateViewer(
         out = saveViewerDest
         if out:
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
+            if features:
+                for feature in features:
+                    viewerBuilder.enableFeature(feature)
             iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer)
             if iv is not None:
                 iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
@@ -143,6 +156,14 @@ def getAbsoluteViewerPath(saveViewerPath: str, relativeViewerPath: str) -> str:
     return os.path.join(saveViewerDir, relativeViewerPath)
 
 
+def getFeaturesFromOptions(options: Union[argparse.Namespace, OptionParser]):
+    return [
+        featureName
+        for featureName in VIEWER_FEATURES_AND_DESCRIPTIONS.keys()
+        if getattr(options, f'viewer_feature_{featureName}') or getattr(options, f'viewer_feature_{featureName.lower()}')
+    ]
+
+
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     generateViewer(
         cntlr,
@@ -150,7 +171,8 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
         options.viewerURL,
         options.validationMessages,
         options.useStubViewer,
-        options.zipViewerOutput
+        options.zipViewerOutput,
+        getFeaturesFromOptions(options)
     )
 
 

@@ -23,7 +23,7 @@ import glob
 import argparse
 import iXBRLViewerPlugin.iXBRLViewer
 from arelle.plugin import inlineXbrlDocumentSet
-from iXBRLViewerPlugin import generateViewer
+from iXBRLViewerPlugin import generateViewer, getFeaturesFromOptions, VIEWER_FEATURES_AND_DESCRIPTIONS
 
 class CntlrCreateViewer(Cntlr.Cntlr):
 
@@ -40,7 +40,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
                 self.addToLog("Failed to load package", messageCode="error", file=p)
         PackageManager.rebuildRemappings(self)
     
-    def createViewer(self, f, scriptUrl=None, outPath=None, useStubViewer=False):
+    def createViewer(self, f, scriptUrl=None, outPath=None, useStubViewer=False, features=None):
         if os.path.isdir(f):
             files = glob.glob(os.path.join(f, "*.xhtml")) + glob.glob(os.path.join(f, "*.html")) + glob.glob(os.path.join(f, "*.htm"))
             files.sort()
@@ -56,7 +56,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         self.modelManager.validate()
 
         try:
-            generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer)
+            generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer, features=features)
         except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
             print(e.message)
             sys.exit(1)
@@ -70,6 +70,11 @@ parser.add_argument("--use-stub-viewer",
                     help="Use stub viewer for faster loading of inspector (requires web server)")
 parser.add_argument('files', metavar='FILES', nargs='+',
                     help='Files to process')
+featureGroup = parser.add_argument_group('Viewer Features')
+for featureName, featureDescription in VIEWER_FEATURES_AND_DESCRIPTIONS.items():
+    arg = f'--viewer-feature-{featureName}'
+    featureGroup.add_argument(arg, arg.lower(), action="store_true", default=False, help=featureDescription)
+
 args = parser.parse_args()
 
 cntlr = CntlrCreateViewer()
@@ -91,4 +96,9 @@ if args.package_dir:
     cntlr.loadPackagesFromDir(args.package_dir)
 
 for f in args.files:
-    cntlr.createViewer(f, outPath = args.out, scriptUrl = args.viewer_url, useStubViewer = args.use_stub_viewer)
+    cntlr.createViewer(
+        f,
+        outPath=args.out,
+        scriptUrl=args.viewer_url,
+        useStubViewer=args.use_stub_viewer,
+        features=getFeaturesFromOptions(args))

@@ -585,6 +585,19 @@ class TestIXBRLViewer(unittest.TestCase):
         self.assertEqual(facts["fact_id2"]["a"]["u"], "iso4217:USD")
         self.assertEqual(facts["fact_id3"]["a"]["u"], None)
 
+    def test_enableFeature_valid(self):
+        """
+        Enable a defined feature
+        """
+        self.builder_1.enableFeature('review')
+        self.assertEqual(self.builder_1.taxonomyData["features"], ['review'])
+
+    def test_enableFeature_invalid(self):
+        """
+        Attempt to enable an undefined feature
+        """
+        with self.assertRaisesRegex(AssertionError, rf'^Given feature name `unknown` does not match any defined features'):
+            self.builder_1.enableFeature('unknown')
 
     def test_xhtmlNamespaceHandling(self):
         # Check the prefix used for our inserted script tags
@@ -626,4 +639,3 @@ class TestIXBRLViewer(unittest.TestCase):
             self.assertEqual(body[2].prefix, None)
             self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
             self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
-

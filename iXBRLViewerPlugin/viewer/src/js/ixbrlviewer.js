@@ -14,7 +14,6 @@ export function iXBRLViewer(options) {
     options = options || {};
     const defaults = {
         continuationElementLimit: 10000,
-        reviewMode: false,
         showValidationWarningOnStart: false,
     }
     this.options = {...defaults, ...options};
@@ -162,7 +161,7 @@ iXBRLViewer.prototype._reparentDocument = function () {
      * the body tag in an HTML DOM, so move them so that they are */
     $('body script').appendTo($('body'));
     const iframeBody = $(iframe).contents().find('body');
-    if (this.options.reviewMode) {
+    if (this.isReviewModeEnabled()) {
         iframeBody.addClass('review');
     }
     $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);

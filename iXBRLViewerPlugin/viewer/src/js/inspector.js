@@ -190,7 +190,7 @@ export class Inspector {
         const iv = this._iv;
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
-        if (iv.options.reviewMode) {
+        if (iv.isReviewModeEnabled()) {
             this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");
                 if (checked) {
@@ -217,7 +217,7 @@ export class Inspector {
     buildHighlightKey() {
         $(".highlight-key .items").empty();
         let key;
-        if (this._iv.options.reviewMode) {
+        if (this._iv.isReviewModeEnabled()) {
             key = [
                 "XBRL Elements",
                 "Untagged Numbers",

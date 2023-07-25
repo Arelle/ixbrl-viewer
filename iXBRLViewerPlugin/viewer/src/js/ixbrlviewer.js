@@ -7,6 +7,7 @@ import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
 export function iXBRLViewer(options) {
+    this._features = new Set();
     this._plugins = [];
     this.inspector = new Inspector(this);
     this.viewer = null;
@@ -75,6 +76,41 @@ iXBRLViewer.prototype.pluginPromise = function (methodName, ...args) {
             resolve();
         });
     });
+}
+
+iXBRLViewer.prototype.setFeatures = function(featureNames, queryString) {
+    const iv = this;
+    const featureMap = {}
+    // Enable given features initially
+    featureNames.forEach(f => {
+        featureMap[f] = true;
+    });
+
+    // Enable/disable features based on query string
+    const urlParams = new URLSearchParams(queryString);
+    urlParams.forEach((value, key) => {
+        // Do nothing if feature has already been disabled by query
+        if (featureMap[key] !== false) {
+            // Disable feature if value is exactly 'false', anything else enables the feature
+            featureMap[key] = value !== 'false';
+        }
+    });
+
+    // Gather results in _features set
+    iv._features = new Set();
+    Object.keys(featureMap).forEach(f => {
+        if (featureMap[f]) {
+            iv._features.add(f);
+        }
+    });
+}
+
+iXBRLViewer.prototype.isFeatureEnabled = function (featureName) {
+    return this._features.has(featureName);
+}
+
+iXBRLViewer.prototype.isReviewModeEnabled = function () {
+    return this.isFeatureEnabled('review');
 }
 
 iXBRLViewer.prototype._loadInspectorHTML = function () {
@@ -161,6 +197,12 @@ iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function () {
 iXBRLViewer.prototype.load = function () {
     var iv = this;
     var inspector = this.inspector;
+
+    // We need to parse JSON first so that we can determine feature enablement before loading begins.
+    const taxonomyData = iv._getTaxonomyData();
+    const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
+    iv.setFeatures((parsedTaxonomyData && parsedTaxonomyData["features"]) || [], window.location.search);
+
     setTimeout(function () {
 
         iv._loadInspectorHTML();
@@ -172,14 +214,12 @@ iXBRLViewer.prototype.load = function () {
         else {
             iframes = $();
         }
-
-        var taxonomyData = iv._getTaxonomyData();
-        if (taxonomyData === null) {
+        if (parsedTaxonomyData === null) {
             $('#ixv .loader .text').text("Error: Could not find viewer data");
             $('#ixv .loader').removeClass("loading");
             return;
         }
-        const report = new iXBRLReport(JSON.parse(taxonomyData));
+        const report = new iXBRLReport(parsedTaxonomyData);
         const ds = report.documentSetFiles();
         var hasExternalIframe = false;
         for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {

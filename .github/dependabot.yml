@@ -63,17 +63,3 @@ updates:
           - "*"
     reviewers:
       - Workiva/xt
-  - package-ecosystem: docker
-    directory: "/"
-    schedule:
-      interval: weekly
-    reviewers:
-      - Workiva/xt
-    allow:
-      - dependency-name: "node"
-      - dependency-name: "python"
-    ignore:
-      - dependency-name: "node"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "python"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]

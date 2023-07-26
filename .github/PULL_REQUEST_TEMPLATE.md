@@ -7,5 +7,5 @@
 #### Steps to Test
 
 **review**:
-@Workiva/xt
+@Arelle/arelle
 @paulwarren-wk

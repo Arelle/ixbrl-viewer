@@ -5,11 +5,9 @@ updates:
     schedule:
       interval: weekly
     groups:
-      dependencies:
+      github-action-dependencies:
         patterns:
           - "*"
-    reviewers:
-      - Workiva/xt
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -17,7 +15,7 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      dependencies:
+      npm-dependencies:
         patterns:
           - "*"
         exclude-patterns:
@@ -29,8 +27,6 @@ updates:
       stylelint:
         patterns:
           - "stylelint*"
-    reviewers:
-      - Workiva/xt
     ignore:
       - dependency-name: chart.js
         versions:
@@ -58,22 +54,6 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      dependencies:
+      pip-dependencies:
         patterns:
           - "*"
-    reviewers:
-      - Workiva/xt
-  - package-ecosystem: docker
-    directory: "/"
-    schedule:
-      interval: weekly
-    reviewers:
-      - Workiva/xt
-    allow:
-      - dependency-name: "node"
-      - dependency-name: "python"
-    ignore:
-      - dependency-name: "node"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "python"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]

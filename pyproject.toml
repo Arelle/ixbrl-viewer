@@ -47,8 +47,8 @@ ixbrl-viewer = "iXBRLViewerPlugin:load_plugin_url"
 "Downloads" = "https://arelle.org/arelle/pub/"
 "Documentation" = "https://arelle.org/arelle/documentation/"
 "Blog" = "https://arelle.org/arelle/blog/"
-"Source Code" = "https://github.com/workiva/ixbrl-viewer"
-"Bug Reports" = "https://github.com/workiva/ixbrl-viewer/issues/"
+"Source Code" = "https://github.com/Arelle/ixbrl-viewer"
+"Bug Reports" = "https://github.com/Arelle/ixbrl-viewer/issues/"
 "Support" = "https://groups.google.com/g/arelle-users/"
 
 [tool.setuptools]

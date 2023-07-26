@@ -15,7 +15,7 @@ from copy import deepcopy
 from typing import Optional, Union
 
 import pycountry
-from arelle import XbrlConst
+from arelle import ModelXbrl, XbrlConst
 from arelle.ModelDocument import Type
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import QName, INVALIDixVALUE
@@ -37,6 +37,10 @@ LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
 }
 
 WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
+
+VIEWER_FEATURES_AND_DESCRIPTIONS = {
+    "review": "Enables highlighting of untagged numbers and dates.",
+}
 
 class NamespaceMap:
     """
@@ -82,7 +86,7 @@ class IXBRLViewerBuilderError(Exception):
 
 class IXBRLViewerBuilder:
 
-    def __init__(self, dts, basenameSuffix = ''):
+    def __init__(self, dts: ModelXbrl, basenameSuffix: str = ''):
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.dts = dts
@@ -90,9 +94,17 @@ class IXBRLViewerBuilder:
             "concepts": {},
             "languages": {},
             "facts": {},
+            "features": [],
         }
         self.footnoteRelationshipSet = ModelRelationshipSet(dts, "XBRL-footnotes")
         self.basenameSuffix = basenameSuffix
+
+    def enableFeature(self, featureName: str):
+        if featureName in self.taxonomyData["features"]:
+            return
+        assert featureName in VIEWER_FEATURES_AND_DESCRIPTIONS, \
+            f'Given feature name `{featureName}` does not match any defined features: {VIEWER_FEATURES_AND_DESCRIPTIONS.keys()}'
+        self.taxonomyData["features"].append(featureName)
 
     def outputFilename(self, filename):
         (base, ext) = os.path.splitext(filename)

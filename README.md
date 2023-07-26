@@ -190,16 +190,37 @@ e.g.
 ```shell
 PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --out out-dir --package-dir /my/packages/ ixds-dir
 ```
+# Optional Features
+Some features are disabled by default but can be enabled at generation time or with query parameters.
 
-## Review mode
+To enable features:
+- Via CLI: `--viewer-feature-{feature name}`
+- Via query parameter:`?{feature name}=true`
+
+Features enabled by CLI/JSON can be disabled by query parameter via `?{feature name}=false`.
+Note that *any other value* besides "false" (case-sensitive) will *enable* the feature.
+This will override any enabling query parameters, so `?review=true&review=false&review=true` would result in the 'review' feature being disabled.
+
+This table uses the 'review' feature as an example to demonstrate how these options interact:
+
+| CLI/JSON | Query Param | Result     |
+|----------|-------------|------------|
+| `unset`  | `unset`     | `disabled` |
+| `unset`  | `true`      | `enabled`  |
+| `unset`  | `false`     | `disabled` |
+| `review` | `unset`     | `enabled`  |
+| `review` | `true`      | `enabled`  |
+| `review` | `false`     | `disabled` |
+
+## Feature: Review Mode
 ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/review-mode.png)
 
 A review mode is available that is intended to assist in reviewing partially tagged or incomplete documents.
 This mode replaces the namespace-based highlighting with optional highlighting based on untagged numbers and/or dates.
 
-To enable review mode while viewing a document, include a "review" entry in the URL query string.
-
-Example: `file://path-to-your-document/ixbrl-report-viewer.html?review`
+| CLI/JSON                  | Query Param    |
+|---------------------------|----------------|
+| `--viewer-feature-review` | `?review=true` |
 
 
 ## Running tests

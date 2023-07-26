@@ -73,7 +73,7 @@ export class Viewer {
                         for (const [docIndex, iframe] of viewer._iframes.toArray().entries()) {
                             const body = $(iframe).contents().find("body").get(0);
                             await viewer._iv.pluginPromise('preProcessiXBRL', body, docIndex);
-                            if (viewer._iv.options.reviewMode) {
+                            if (viewer._iv.isReviewModeEnabled()) {
                                 await new Promise((resolve, _) => {
                                     viewer._iv.setProgress("Finding untagged numbers").then(() => {
                                         // Temporarily hide all children of "body" to avoid constant

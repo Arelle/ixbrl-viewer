@@ -135,7 +135,7 @@ describe('ixbrl-viewer:', () => {
     });
 
     test('Highlight Test - Review', async () => {
-        await viewerPage.navigateToViewer('highlights.zip', '?review');
+        await viewerPage.navigateToViewer('highlights.zip', '?review=true');
 
         // Assert on load values are not highlighted
         await viewerPage.docFrame.assertHighlights([

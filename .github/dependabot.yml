@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      dependencies:
+      github-action-dependencies:
         patterns:
           - "*"
   - package-ecosystem: npm
@@ -15,7 +15,7 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      dependencies:
+      npm-dependencies:
         patterns:
           - "*"
         exclude-patterns:
@@ -54,6 +54,6 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      dependencies:
+      pip-dependencies:
         patterns:
           - "*"

@@ -8,8 +8,6 @@ updates:
       dependencies:
         patterns:
           - "*"
-    reviewers:
-      - Workiva/xt
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -29,8 +27,6 @@ updates:
       stylelint:
         patterns:
           - "stylelint*"
-    reviewers:
-      - Workiva/xt
     ignore:
       - dependency-name: chart.js
         versions:
@@ -61,5 +57,3 @@ updates:
       dependencies:
         patterns:
           - "*"
-    reviewers:
-      - Workiva/xt

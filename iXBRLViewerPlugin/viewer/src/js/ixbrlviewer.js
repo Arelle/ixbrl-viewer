@@ -96,12 +96,14 @@ iXBRLViewer.prototype.setFeatures = function(featureNames, queryString) {
     });
 
     // Gather results in _features set
-    iv._features = new Set();
-    Object.keys(featureMap).forEach(f => {
-        if (featureMap[f]) {
-            iv._features.add(f);
+    if (iv._features.size > 0) {
+        iv._features = new Set();
+    }
+    for (const [feature, enabled] of Object.entries(featureMap)) {
+        if (enabled) {
+            iv._features.add(feature);
         }
-    });
+    }
 }
 
 iXBRLViewer.prototype.isFeatureEnabled = function (featureName) {

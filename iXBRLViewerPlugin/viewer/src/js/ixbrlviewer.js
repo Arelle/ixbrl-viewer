@@ -163,9 +163,6 @@ iXBRLViewer.prototype._reparentDocument = function () {
      * the body tag in an HTML DOM, so move them so that they are */
     $('body script').appendTo($('body'));
     const iframeBody = $(iframe).contents().find('body');
-    if (this.isReviewModeEnabled()) {
-        iframeBody.addClass('review');
-    }
     $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
 
     /* Move all attributes on the body tag to the new body */

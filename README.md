@@ -47,10 +47,10 @@ The python portion of this repo is developed using Python 3.11.
 The JavaScript file is available via a CDN. It can be accessed via the following url:
 
 ```text
-https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
+https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 ```
 
-Where `<version tag>` is the current version of ixbrl-viewer you are using. For instance [1.0.0][CDN].
+Where `<version>` is the current version of ixbrl-viewer you are using. For instance [1.2.0][CDN].
 
 ### Accessing via Github
 
@@ -68,7 +68,7 @@ the ixbrl-viewer.
    iXBRLViewerPlugin/viewer/dist directory.
 
 [ixbrlviewer-github]: https://github.com/Arelle/ixbrl-viewer
-[CDN]: https://cdn-prod.wdesk.com/ixbrl-viewer/1.0.0/ixbrlviewer.js
+[CDN]: https://cdn.jsdelivr.net/npm/ixbrl-viewer@1.2.0/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 [ixbrlviewer-github-releases]: https://github.com/Arelle/ixbrl-viewer/releases/tag/0.1.58
 [arelle-download]: http://arelle.org/pub
 
@@ -96,7 +96,7 @@ on that minor version will have to use at least that minor version for the javas
 
    This url can be one of the following:
 
-   1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
+   1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
    2. A relative url to the downloaded ixviewer.js from github
    3. A relative url to the locally built ixviewer.js
 
@@ -119,7 +119,7 @@ output location, rather than a file.
 The plugin can also be used on the command line:
 
 ```shell
-python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
+python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 ```
 
 Notes:
@@ -128,7 +128,7 @@ Notes:
 * The plugin path needs to an absolute file path to the ixbrl-viewer plugin
 * The viewer url can be one of the following:
 
-  1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
+  1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js
 
@@ -151,7 +151,7 @@ The input is specified using JSON in the following form:
 The output must be specified as a directory.  For example:
 
 ```shell
-python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
+python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 ```
 
 Notes:
@@ -163,7 +163,7 @@ Notes:
 * The plugin path needs to an absolute file path to the ixbrl-viewer plugin
 * The viewer url can be one of the following:
 
-  1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
+  1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js
 

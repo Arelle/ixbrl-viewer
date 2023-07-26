@@ -379,7 +379,7 @@ class IXBRLViewerBuilder:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
             return etree.parse(fin)
 
-    def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True) -> Optional[iXBRLViewer]:
+    def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
@@ -437,7 +437,10 @@ class IXBRLViewerBuilder:
         else:
             xmlDocument = deepcopy(dts.modelDocument.xmlDocument)
             iv.addFile(iXBRLViewerFile('xbrlviewer.html', xmlDocument))
-        if os.path.dirname(self.dts.modelDocument.filepath).endswith('.zip'):
+
+        if packageDownloadURL is not None:
+            self.taxonomyData["filingDocuments"] = packageDownloadURL
+        elif os.path.dirname(self.dts.modelDocument.filepath).endswith('.zip'):
             filingDocZipPath = os.path.dirname(self.dts.modelDocument.filepath)
             filingDocZipName = os.path.basename(filingDocZipPath)
             iv.addFilingDoc(filingDocZipPath)

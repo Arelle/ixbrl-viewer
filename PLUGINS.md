@@ -33,7 +33,7 @@ The `ixbrl-viewer` project can be added as a dev dependency in `package.json`:
 
 ```
    "devDependencies": {
-       "ixbrl-viewer": "Workiva/ixbrl-viewer"
+       "ixbrl-viewer": "Arelle/ixbrl-viewer"
    }
 ```
 

@@ -1,6 +1,6 @@
 # Arelle iXBRL Viewer
 
-![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
+![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
 
 The [Arelle](https://arelle.org/) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be
 viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL
@@ -12,7 +12,7 @@ report.  Key features include:
 * Visualize and navigate calculation relationships
 * Produce on-the-fly graphs using XBRL data
 
-A sample viewer is provided in the [examples](https://github.com/Workiva/ixbrl-viewer/blob/master/examples/README.md) for those interested.
+A sample viewer is provided in the [examples](https://github.com/Arelle/ixbrl-viewer/blob/master/examples/README.md) for those interested.
 
 The viewer project consists of two components:
 
@@ -67,9 +67,9 @@ the ixbrl-viewer.
 3. Run `npm run prod`. This will create the ixbrlviewer.js in the
    iXBRLViewerPlugin/viewer/dist directory.
 
-[ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
+[ixbrlviewer-github]: https://github.com/Arelle/ixbrl-viewer
 [CDN]: https://cdn-prod.wdesk.com/ixbrl-viewer/1.0.0/ixbrlviewer.js
-[ixbrlviewer-github-releases]: https://github.com/Workiva/ixbrl-viewer/releases/tag/0.1.58
+[ixbrlviewer-github-releases]: https://github.com/Arelle/ixbrl-viewer/releases/tag/0.1.58
 [arelle-download]: http://arelle.org/pub
 
 ## JavaScript Versioning
@@ -192,7 +192,7 @@ PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --out
 ```
 
 ## Review mode
-![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/examples/review-mode.png)
+![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/review-mode.png)
 
 A review mode is available that is intended to assist in reviewing partially tagged or incomplete documents.
 This mode replaces the namespace-based highlighting with optional highlighting based on untagged numbers and/or dates.
@@ -242,5 +242,5 @@ All commands should be run from repository root
 
     * IDE:
       * Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
-      ![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
+      ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
       * Debug runs with breakpoints are also typically supported.

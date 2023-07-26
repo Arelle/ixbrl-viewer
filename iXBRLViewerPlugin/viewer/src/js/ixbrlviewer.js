@@ -197,12 +197,12 @@ iXBRLViewer.prototype.load = function () {
     var iv = this;
     var inspector = this.inspector;
 
-    // We need to parse JSON first so that we can determine feature enablement before loading begins.
-    const taxonomyData = iv._getTaxonomyData();
-    const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
-    iv.setFeatures((parsedTaxonomyData && parsedTaxonomyData["features"]) || [], window.location.search);
-
     setTimeout(function () {
+
+        // We need to parse JSON first so that we can determine feature enablement before loading begins.
+        const taxonomyData = iv._getTaxonomyData();
+        const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
+        iv.setFeatures((parsedTaxonomyData && parsedTaxonomyData["features"]) || [], window.location.search);
 
         iv._loadInspectorHTML();
         var iframes;

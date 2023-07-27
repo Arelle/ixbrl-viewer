@@ -70,6 +70,10 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       default="",
                       dest="viewerBasenameSuffix",
                       help="Suffix for basename of viewer files")
+    parser.add_option("--package-download-url",
+                      action="store",
+                      dest="packageDownloadURL",
+                      help="URL where the original report package can be downloaded.  This will be available to the user as a download link in the viewer.")
     parser.add_option("--zip-viewer-output",
                       action="store_true",
                       default=False,
@@ -90,7 +94,8 @@ def generateViewer(
         showValidationMessages: bool = False,
         useStubViewer: bool = False,
         zipViewerOutput: bool = False,
-        features: Optional[list[str]] = None):
+        features: Optional[list[str]] = None,
+        packageDownloadURL: str = None):
     """
     Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
     If the viewer URL is a location on the local file system, a copy will be placed included in the output destination.
@@ -134,7 +139,7 @@ def generateViewer(
             if features:
                 for feature in features:
                     viewerBuilder.enableFeature(feature)
-            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer)
+            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer, packageDownloadURL=packageDownloadURL)
             if iv is not None:
                 iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
     except IXBRLViewerBuilderError as ex:
@@ -172,7 +177,8 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
         options.validationMessages,
         options.useStubViewer,
         options.zipViewerOutput,
-        getFeaturesFromOptions(options)
+        getFeaturesFromOptions(options),
+        options.packageDownloadURL,
     )
 
 

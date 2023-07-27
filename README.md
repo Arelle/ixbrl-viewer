@@ -1,6 +1,6 @@
 # Arelle iXBRL Viewer
 
-![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
+![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
 
 The [Arelle](https://arelle.org/) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be
 viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL
@@ -12,7 +12,7 @@ report.  Key features include:
 * Visualize and navigate calculation relationships
 * Produce on-the-fly graphs using XBRL data
 
-A sample viewer is provided in the [examples](https://github.com/Workiva/ixbrl-viewer/blob/master/examples/README.md) for those interested.
+A sample viewer is provided in the [examples](https://github.com/Arelle/ixbrl-viewer/blob/master/examples/README.md) for those interested.
 
 The viewer project consists of two components:
 
@@ -47,10 +47,10 @@ The python portion of this repo is developed using Python 3.11.
 The JavaScript file is available via a CDN. It can be accessed via the following url:
 
 ```text
-https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
+https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 ```
 
-Where `<version tag>` is the current version of ixbrl-viewer you are using. For instance [1.0.0][CDN].
+Where `<version>` is the current version of ixbrl-viewer you are using. For instance [1.2.0][CDN].
 
 ### Accessing via Github
 
@@ -67,9 +67,9 @@ the ixbrl-viewer.
 3. Run `npm run prod`. This will create the ixbrlviewer.js in the
    iXBRLViewerPlugin/viewer/dist directory.
 
-[ixbrlviewer-github]: https://github.com/Workiva/ixbrl-viewer
-[CDN]: https://cdn-prod.wdesk.com/ixbrl-viewer/1.0.0/ixbrlviewer.js
-[ixbrlviewer-github-releases]: https://github.com/Workiva/ixbrl-viewer/releases/tag/0.1.58
+[ixbrlviewer-github]: https://github.com/Arelle/ixbrl-viewer
+[CDN]: https://cdn.jsdelivr.net/npm/ixbrl-viewer@1.2.0/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
+[ixbrlviewer-github-releases]: https://github.com/Arelle/ixbrl-viewer/releases/tag/0.1.58
 [arelle-download]: http://arelle.org/pub
 
 ## JavaScript Versioning
@@ -96,7 +96,7 @@ on that minor version will have to use at least that minor version for the javas
 
    This url can be one of the following:
 
-   1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
+   1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
    2. A relative url to the downloaded ixviewer.js from github
    3. A relative url to the locally built ixviewer.js
 
@@ -119,7 +119,7 @@ output location, rather than a file.
 The plugin can also be used on the command line:
 
 ```shell
-python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
+python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-report.html --save-viewer ixbrl-report-viewer.html --viewer-url https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 ```
 
 Notes:
@@ -128,7 +128,7 @@ Notes:
 * The plugin path needs to an absolute file path to the ixbrl-viewer plugin
 * The viewer url can be one of the following:
 
-  1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
+  1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js
 
@@ -151,7 +151,7 @@ The input is specified using JSON in the following form:
 The output must be specified as a directory.  For example:
 
 ```shell
-python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js
+python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrlDocumentSet' -f '[{"ixds":[{"file":"document1.html"},{"file":"document2.html"}]}]'  --save-viewer out-dir --viewer-url https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 ```
 
 Notes:
@@ -163,7 +163,7 @@ Notes:
 * The plugin path needs to an absolute file path to the ixbrl-viewer plugin
 * The viewer url can be one of the following:
 
-  1. `https://cdn-prod.wdesk.com/ixbrl-viewer/<version tag>/ixbrlviewer.js`
+  1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js
 
@@ -190,6 +190,38 @@ e.g.
 ```shell
 PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --out out-dir --package-dir /my/packages/ ixds-dir
 ```
+# Optional Features
+Some features are disabled by default but can be enabled at generation time or with query parameters.
+
+To enable features:
+- Via CLI: `--viewer-feature-{feature name}`
+- Via query parameter:`?{feature name}=true`
+
+Features enabled by CLI/JSON can be disabled by query parameter via `?{feature name}=false`.
+Note that *any other value* besides "false" (case-sensitive) will *enable* the feature.
+This will override any enabling query parameters, so `?review=true&review=false&review=true` would result in the 'review' feature being disabled.
+
+This table uses the 'review' feature as an example to demonstrate how these options interact:
+
+| CLI/JSON | Query Param | Result     |
+|----------|-------------|------------|
+| `unset`  | `unset`     | `disabled` |
+| `unset`  | `true`      | `enabled`  |
+| `unset`  | `false`     | `disabled` |
+| `review` | `unset`     | `enabled`  |
+| `review` | `true`      | `enabled`  |
+| `review` | `false`     | `disabled` |
+
+## Feature: Review Mode
+![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/review-mode.png)
+
+A review mode is available that is intended to assist in reviewing partially tagged or incomplete documents.
+This mode replaces the namespace-based highlighting with optional highlighting based on untagged numbers and/or dates.
+
+| CLI/JSON                  | Query Param    |
+|---------------------------|----------------|
+| `--viewer-feature-review` | `?review=true` |
+
 
 ## Running tests
 
@@ -231,5 +263,5 @@ All commands should be run from repository root
 
     * IDE:
       * Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
-      ![ixbrl-viewer](https://raw.githubusercontent.com/Workiva/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
+      ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
       * Debug runs with breakpoints are also typically supported.

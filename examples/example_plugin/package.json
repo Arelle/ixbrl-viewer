@@ -6,6 +6,6 @@
     "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "ixbrl-viewer": "Workiva/ixbrl-viewer"
+    "ixbrl-viewer": "^1.2.0"
   }
 }

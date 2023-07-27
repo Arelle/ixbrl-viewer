@@ -48,6 +48,7 @@ export class Highlight {
     static darkBlue = 'rgb(2, 109, 206)';
     static green = 'rgb(217, 243, 190)';
     static lightBlue = 'rgb(0, 148, 255)';
+    static yellow = 'rgb(255, 240, 179)';
     static purple = 'rgb(234, 168, 255)';
     static propBgColor = 'background-color';
     static propOutline = 'outline';
@@ -87,4 +88,18 @@ export class Highlight {
         const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
         return new Highlight(color, locator, this.propOutline, docContent);
     };
+
+    static untaggedDate(docContent, active = true) {
+        const color = active ? this.yellow : this.transparent;
+        const locator =
+                `//*[contains(@class,"review-untagged-date") and contains(text(),"${docContent}")]`;
+        return new Highlight(color, locator, this.propBgColor, docContent)
+    }
+
+    static untaggedNumber(docContent, active = true) {
+        const color = active ? this.purple : this.transparent;
+        const locator =
+            `//*[contains(@class,"review-untagged-number") and contains(text(),"${docContent}")]`;
+        return new Highlight(color, locator, this.propBgColor, docContent);
+    }
 }

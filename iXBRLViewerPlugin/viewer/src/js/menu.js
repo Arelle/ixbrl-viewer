@@ -46,11 +46,11 @@ export class Menu {
     addDownloadButton(name, filename) {
         const menu = this;
         const item = $('<a></a>')
+                .addClass("item")
                 .attr({
                     href: filename})
-                .prepend($('<input type="button">')
-                        .prop("value", name)
-                        .click(() => menu.close()));
+                .text(name)
+                .click(() => menu.close());
         this._add(item);
     }
 

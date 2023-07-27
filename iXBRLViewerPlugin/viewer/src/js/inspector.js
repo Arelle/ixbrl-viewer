@@ -528,12 +528,14 @@ export class Inspector {
         } = this.summary.getLocalDocuments();
 
         const summaryFilesContent = summaryDom.find(".files-summary");
+        let visibleItems = 0;
 
         function insertFileSummary(docs, classSelector) {
             if (docs.length === 0) {
                 summaryFilesContent.find(classSelector).hide();
             } else {
                 const ul = summaryFilesContent.find(classSelector + ' ul')
+                visibleItems += 1;
                 for (const doc of docs) {
                     ul.append($("<li></li>").text(doc));
                 }
@@ -548,6 +550,9 @@ export class Inspector {
         insertFileSummary(labelLinkbase, ".label-links");
         insertFileSummary(refLinkbase, ".ref-links");
         insertFileSummary(unrecognizedLinkbase, ".other-links");
+        if (visibleItems == 0) {
+            summaryFilesContent.hide();
+        }
     };
 
     createOutline() {

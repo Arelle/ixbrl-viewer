@@ -34,8 +34,6 @@
     "core-js": "^3.31.1",
     "css-loader": "^3.4.2",
     "dateformat": "^5.0.3",
-    "exceljs": "^4.0.1",
-    "file-saver": "^2.0.2",
     "i18next": "^20.3.2",
     "interactjs": "^1.8.5",
     "jquery": "^3.4.1",
@@ -44,7 +42,8 @@
     "less-loader": "^6.0.0",
     "lunr": "^2.3.8",
     "moment": "^2.24.0",
-    "postcss-less": "^6.0.0"
+    "postcss-less": "^6.0.0",
+    "write-excel-file": "^1.4.27"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

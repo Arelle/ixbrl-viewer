@@ -154,7 +154,15 @@ export class Inspector {
 
     handleMessage(event) {
         const jsonString = event.originalEvent.data;
-        const data = JSON.parse(jsonString);
+        let data;
+        try {
+            data = JSON.parse(jsonString);
+        }
+        catch (e) {
+            // Silently ignore any non-JSON messages as write-excel-file sends
+            // messages to itself when exporting files.
+            return;
+        }
 
         if (data.task == 'SHOW_FACT') {
             this.selectItem(data.factId);

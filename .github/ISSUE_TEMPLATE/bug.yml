@@ -26,7 +26,7 @@ body:
       description: |
         What version of ixbrl-viewer are you using?
         - In the browser, right click + inspect
-        - Scroll to the bottom of the `<body>` tag and find the script tag containing the version eg: `<script type="text/javascript" src="https://cdn-prod.wdesk.com/ixbrl-viewer/<version>/ixbrlviewer.js"></script>`
+        - Scroll to the bottom of the `<body>` tag and find the script tag containing the version eg: `<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js"></script>`
       placeholder: e.g. 1.1.43
     validations:
       required: true

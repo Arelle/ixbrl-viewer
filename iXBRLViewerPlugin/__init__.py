@@ -253,6 +253,9 @@ class iXBRLViewerLocalViewer(LocalViewer):
 
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
+    if not cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD):
+        # Don't run on launch if the option has been disabled
+        return
     try:
         import webbrowser
         global tempViewer

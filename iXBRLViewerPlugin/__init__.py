@@ -16,8 +16,10 @@ from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
 from arelle.webserver.bottle import static_file
 
-from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
-from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError, VIEWER_FEATURES_AND_DESCRIPTIONS
+from .constants import CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
+    CONFIG_SCRIPT_URL, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
+    DEFAULT_VIEWER_PATH, FEATURE_CONFIGS
+from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 
 
 #
@@ -77,9 +79,9 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       help="Converts the viewer output into a self contained zip")
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
-    for featureName, featureDescription in VIEWER_FEATURES_AND_DESCRIPTIONS.items():
-        arg = f'--viewer-feature-{featureName}'
-        featureGroup.add_option(arg, arg.lower(), action="store_true", default=False, help=featureDescription)
+    for featureConfig in FEATURE_CONFIGS:
+        arg = f'--viewer-feature-{featureConfig.key}'
+        featureGroup.add_option(arg, arg.lower(), action="store_true", default=False, help=featureConfig.description)
     parser.add_option_group(featureGroup)
 
 
@@ -158,9 +160,9 @@ def getAbsoluteViewerPath(saveViewerPath: str, relativeViewerPath: str) -> str:
 
 def getFeaturesFromOptions(options: Union[argparse.Namespace, OptionParser]):
     return [
-        featureName
-        for featureName in VIEWER_FEATURES_AND_DESCRIPTIONS.keys()
-        if getattr(options, f'viewer_feature_{featureName}') or getattr(options, f'viewer_feature_{featureName.lower()}')
+        featureConfig.key
+        for featureConfig in FEATURE_CONFIGS
+        if getattr(options, f'viewer_feature_{featureConfig.key}') or getattr(options, f'viewer_feature_{featureConfig.key.lower()}')
     ]
 
 
@@ -255,8 +257,19 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         import webbrowser
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
-        viewer_file_name = 'ixbrlviewer.html'
-        generateViewer(cntlr, tempViewer.name, useStubViewer=True)
+        viewer_file_name = DEFAULT_OUTPUT_NAME
+        features = [
+            c.key
+            for c in FEATURE_CONFIGS
+            if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
+        ]
+        generateViewer(
+            cntlr,
+            saveViewerDest=tempViewer.name,
+            viewerURL=cntlr.config.setdefault(CONFIG_SCRIPT_URL, DEFAULT_VIEWER_PATH),
+            useStubViewer=True,
+            features=features
+        )
         localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
         localhost = localViewer.init(cntlr, tempViewer.name)
         webbrowser.open(f'{localhost}/{viewer_file_name}')

@@ -23,7 +23,7 @@ import glob
 import argparse
 import iXBRLViewerPlugin.iXBRLViewer
 from arelle.plugin import inlineXbrlDocumentSet
-from iXBRLViewerPlugin import generateViewer, getFeaturesFromOptions, VIEWER_FEATURES_AND_DESCRIPTIONS
+from iXBRLViewerPlugin import generateViewer, getFeaturesFromOptions, FEATURE_CONFIGS
 
 class CntlrCreateViewer(Cntlr.Cntlr):
 
@@ -71,9 +71,9 @@ parser.add_argument("--use-stub-viewer",
 parser.add_argument('files', metavar='FILES', nargs='+',
                     help='Files to process')
 featureGroup = parser.add_argument_group('Viewer Features')
-for featureName, featureDescription in VIEWER_FEATURES_AND_DESCRIPTIONS.items():
-    arg = f'--viewer-feature-{featureName}'
-    featureGroup.add_argument(arg, arg.lower(), action="store_true", default=False, help=featureDescription)
+for featureConfig in FEATURE_CONFIGS:
+    arg = f'--viewer-feature-{featureConfig.key}'
+    featureGroup.add_argument(arg, arg.lower(), action="store_true", default=False, help=featureConfig.description)
 
 args = parser.parse_args()
 

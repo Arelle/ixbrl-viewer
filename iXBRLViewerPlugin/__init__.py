@@ -178,7 +178,7 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     )
 
 
-def iXBRLViewerMenuCommand(cntlr):
+def iXBRLViewerSaveCommand(cntlr):
     from .ui import SaveViewerDialog
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
         cntlr.addToLog("No document loaded.")
@@ -188,20 +188,37 @@ def iXBRLViewerMenuCommand(cntlr):
         cntlr.addToLog("No inline XBRL document loaded.")
         return
     dialog = SaveViewerDialog(cntlr)
+    dialog.render()
     if dialog.accepted and dialog.filename():
         generateViewer(
             cntlr,
             dialog.filename(),
             dialog.scriptUrl(),
             zipViewerOutput=dialog.zipViewerOutput(),
+            features=dialog.features()
         )
 
 
+def iXBRLViewerSettingsCommand(cntlr):
+    from .ui import SettingsDialog
+    SettingsDialog(cntlr).render()
+
+
 def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):
-    # Extend menu with an item for the savedts plugin
-    menu.add_command(label="Save iXBRL Viewer Instance",
-                     underline=0,
-                     command=lambda: iXBRLViewerMenuCommand(cntlr))
+    # Add Tools menu
+    from tkinter import Menu  # must only import if GUI present (no tkinter on GUI-less servers)
+    viewerMenu = Menu(cntlr.menubar, tearoff=0)
+    menu.add_cascade(label=_("iXBRL Viewer"), menu=viewerMenu, underline=0)
+
+    # Extend menu with settings and save dialogs
+    viewerMenu.add_command(
+        label="Settings...",
+        underline=0,
+        command=lambda: iXBRLViewerSettingsCommand(cntlr))
+    viewerMenu.add_command(
+        label="Save Viewer...",
+        underline=0,
+        command=lambda: iXBRLViewerSaveCommand(cntlr))
 
 
 def toolsMenuExtender(cntlr, menu, *args, **kwargs):
@@ -214,19 +231,6 @@ def commandLineOptionExtender(*args, **kwargs):
 
 def commandLineRun(*args, **kwargs):
     iXBRLViewerCommandLineXbrlRun(*args, **kwargs)
-
-
-def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
-    # persist menu selections for showing filing data and tables menu
-    from tkinter import Menu, BooleanVar  # must only import if GUI present (no tkinter on GUI-less servers)
-    def setLaunchIXBRLViewer(self, *args):
-        cntlr.config["LaunchIXBRLViewer"] = cntlr.launchIXBRLViewer.get()
-        cntlr.saveConfig()
-    erViewMenu = Menu(cntlr.menubar, tearoff=0)
-    viewMenu.add_cascade(label=_("iXBRL Viewer"), menu=erViewMenu, underline=0)
-    cntlr.launchIXBRLViewer = BooleanVar(value=cntlr.config.get("LaunchIXBRLViewer", True))
-    cntlr.launchIXBRLViewer.trace("w", setLaunchIXBRLViewer)
-    erViewMenu.add_checkbutton(label=_("Launch viewer on load"), underline=0, variable=cntlr.launchIXBRLViewer, onvalue=True, offvalue=False)
 
 
 class iXBRLViewerLocalViewer(LocalViewer):
@@ -298,6 +302,5 @@ __pluginInfo__ = {
     'CntlrCmdLine.Options': commandLineOptionExtender,
     'CntlrCmdLine.Xbrl.Run': commandLineRun,
     'CntlrWinMain.Menu.Tools': toolsMenuExtender,
-    'CntlrWinMain.Menu.View': viewMenuExtender,
     'CntlrWinMain.Xbrl.Loaded': guiRun,
 }

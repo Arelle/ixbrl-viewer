@@ -73,19 +73,19 @@ class BaseViewerDialog(Toplevel):
             featureLabel.grid(row=y, column=1, columnspan=2, pady=3, padx=3, sticky=W)
         return y
 
-    def close(self):
+    def close(self, event=None):
         """
         Closes the dialog.
         """
         self.parent.focus_set()
         self.destroy()
 
-    def confirm(self):
+    def confirm(self, event=None):
         """
         Closes the dialog after calling `onConfirm`.
         """
         self.onConfirm()
-        self.close()
+        self.close(event)
 
     def getTitle(self) -> str:
         """
@@ -242,7 +242,7 @@ class SettingsDialog(BaseViewerDialog):
         self.cntlr.saveConfig()
         self.close()
 
-    def reset(self):
+    def reset(self, event=None):
         """
         Resets dialog variable values to default values
         """

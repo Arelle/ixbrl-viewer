@@ -16,8 +16,10 @@ from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
 from arelle.webserver.bottle import static_file
 
-from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
-from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError, VIEWER_FEATURES_AND_DESCRIPTIONS
+from .constants import CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
+    CONFIG_SCRIPT_URL, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
+    DEFAULT_VIEWER_PATH, FEATURE_CONFIGS
+from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 
 
 #
@@ -81,9 +83,9 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       help="Converts the viewer output into a self contained zip")
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
-    for featureName, featureDescription in VIEWER_FEATURES_AND_DESCRIPTIONS.items():
-        arg = f'--viewer-feature-{featureName}'
-        featureGroup.add_option(arg, arg.lower(), action="store_true", default=False, help=featureDescription)
+    for featureConfig in FEATURE_CONFIGS:
+        arg = f'--viewer-feature-{featureConfig.key}'
+        featureGroup.add_option(arg, arg.lower(), action="store_true", default=False, help=featureConfig.description)
     parser.add_option_group(featureGroup)
 
 
@@ -163,9 +165,9 @@ def getAbsoluteViewerPath(saveViewerPath: str, relativeViewerPath: str) -> str:
 
 def getFeaturesFromOptions(options: Union[argparse.Namespace, OptionParser]):
     return [
-        featureName
-        for featureName in VIEWER_FEATURES_AND_DESCRIPTIONS.keys()
-        if getattr(options, f'viewer_feature_{featureName}') or getattr(options, f'viewer_feature_{featureName.lower()}')
+        featureConfig.key
+        for featureConfig in FEATURE_CONFIGS
+        if getattr(options, f'viewer_feature_{featureConfig.key}') or getattr(options, f'viewer_feature_{featureConfig.key.lower()}')
     ]
 
 
@@ -182,7 +184,7 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     )
 
 
-def iXBRLViewerMenuCommand(cntlr):
+def iXBRLViewerSaveCommand(cntlr):
     from .ui import SaveViewerDialog
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
         cntlr.addToLog("No document loaded.")
@@ -192,20 +194,37 @@ def iXBRLViewerMenuCommand(cntlr):
         cntlr.addToLog("No inline XBRL document loaded.")
         return
     dialog = SaveViewerDialog(cntlr)
+    dialog.render()
     if dialog.accepted and dialog.filename():
         generateViewer(
             cntlr,
             dialog.filename(),
             dialog.scriptUrl(),
             zipViewerOutput=dialog.zipViewerOutput(),
+            features=dialog.features()
         )
 
 
+def iXBRLViewerSettingsCommand(cntlr):
+    from .ui import SettingsDialog
+    SettingsDialog(cntlr).render()
+
+
 def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):
-    # Extend menu with an item for the savedts plugin
-    menu.add_command(label="Save iXBRL Viewer Instance",
-                     underline=0,
-                     command=lambda: iXBRLViewerMenuCommand(cntlr))
+    # Add Tools menu
+    from tkinter import Menu  # must only import if GUI present (no tkinter on GUI-less servers)
+    viewerMenu = Menu(cntlr.menubar, tearoff=0)
+    menu.add_cascade(label=_("iXBRL Viewer"), menu=viewerMenu, underline=0)
+
+    # Extend menu with settings and save dialogs
+    viewerMenu.add_command(
+        label="Settings...",
+        underline=0,
+        command=lambda: iXBRLViewerSettingsCommand(cntlr))
+    viewerMenu.add_command(
+        label="Save Viewer...",
+        underline=0,
+        command=lambda: iXBRLViewerSaveCommand(cntlr))
 
 
 def toolsMenuExtender(cntlr, menu, *args, **kwargs):
@@ -218,19 +237,6 @@ def commandLineOptionExtender(*args, **kwargs):
 
 def commandLineRun(*args, **kwargs):
     iXBRLViewerCommandLineXbrlRun(*args, **kwargs)
-
-
-def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
-    # persist menu selections for showing filing data and tables menu
-    from tkinter import Menu, BooleanVar  # must only import if GUI present (no tkinter on GUI-less servers)
-    def setLaunchIXBRLViewer(self, *args):
-        cntlr.config["LaunchIXBRLViewer"] = cntlr.launchIXBRLViewer.get()
-        cntlr.saveConfig()
-    erViewMenu = Menu(cntlr.menubar, tearoff=0)
-    viewMenu.add_cascade(label=_("iXBRL Viewer"), menu=erViewMenu, underline=0)
-    cntlr.launchIXBRLViewer = BooleanVar(value=cntlr.config.get("LaunchIXBRLViewer", True))
-    cntlr.launchIXBRLViewer.trace("w", setLaunchIXBRLViewer)
-    erViewMenu.add_checkbutton(label=_("Launch viewer on load"), underline=0, variable=cntlr.launchIXBRLViewer, onvalue=True, offvalue=False)
 
 
 class iXBRLViewerLocalViewer(LocalViewer):
@@ -257,12 +263,26 @@ class iXBRLViewerLocalViewer(LocalViewer):
 
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
+    if not cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD):
+        # Don't run on launch if the option has been disabled
+        return
     try:
         import webbrowser
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
-        viewer_file_name = 'ixbrlviewer.html'
-        generateViewer(cntlr, tempViewer.name, useStubViewer=True)
+        viewer_file_name = DEFAULT_OUTPUT_NAME
+        features = [
+            c.key
+            for c in FEATURE_CONFIGS
+            if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
+        ]
+        generateViewer(
+            cntlr,
+            saveViewerDest=tempViewer.name,
+            viewerURL=cntlr.config.setdefault(CONFIG_SCRIPT_URL, DEFAULT_VIEWER_PATH),
+            useStubViewer=True,
+            features=features
+        )
         localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
         localhost = localViewer.init(cntlr, tempViewer.name)
         webbrowser.open(f'{localhost}/{viewer_file_name}')
@@ -288,6 +308,5 @@ __pluginInfo__ = {
     'CntlrCmdLine.Options': commandLineOptionExtender,
     'CntlrCmdLine.Xbrl.Run': commandLineRun,
     'CntlrWinMain.Menu.Tools': toolsMenuExtender,
-    'CntlrWinMain.Menu.View': viewMenuExtender,
     'CntlrWinMain.Xbrl.Loaded': guiRun,
 }

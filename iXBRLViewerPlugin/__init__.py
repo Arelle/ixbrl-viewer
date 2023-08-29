@@ -1,28 +1,24 @@
-# Copyright 2019 Workiva Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# See COPYRIGHT.md for copyright information
+from __future__ import annotations
+
 import argparse
+import io
 import logging
 import os
 import sys
 import tempfile
 import traceback
+from optparse import OptionGroup, OptionParser
+from typing import Optional, Union
 
+from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
 from arelle.webserver.bottle import static_file
 
-from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
+from .constants import CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
+    CONFIG_SCRIPT_URL, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
+    DEFAULT_VIEWER_PATH, FEATURE_CONFIGS
 from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 
 
@@ -53,7 +49,7 @@ from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer",
                       action="store",
-                      dest="saveViewerFile",
+                      dest="saveViewerDest",
                       help="Save an HTML viewer file for an iXBRL report. Specify either a filename or directory.")
     parser.add_option("--viewer-url",
                       action="store",
@@ -76,14 +72,43 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       default="",
                       dest="viewerBasenameSuffix",
                       help="Suffix for basename of viewer files")
+    parser.add_option("--package-download-url",
+                      action="store",
+                      dest="packageDownloadURL",
+                      help="URL where the original report package can be downloaded.  This will be available to the user as a download link in the viewer.")
     parser.add_option("--zip-viewer-output",
                       action="store_true",
                       default=False,
                       dest="zipViewerOutput",
                       help="Converts the viewer output into a self contained zip")
+    featureGroup = OptionGroup(parser, "Viewer Features",
+                            "See viewer README for information on enabling/disabling features.")
+    for featureConfig in FEATURE_CONFIGS:
+        arg = f'--viewer-feature-{featureConfig.key}'
+        featureGroup.add_option(arg, arg.lower(), action="store_true", default=False, help=featureConfig.description)
+    parser.add_option_group(featureGroup)
 
 
-def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showValidationMessages=False, useStubViewer=False, zipViewerOutput=False):
+def generateViewer(
+        cntlr: Cntlr,
+        saveViewerDest: Union[io.BytesIO, str],
+        viewerURL: str = DEFAULT_VIEWER_PATH,
+        showValidationMessages: bool = False,
+        useStubViewer: bool = False,
+        zipViewerOutput: bool = False,
+        features: Optional[list[str]] = None,
+        packageDownloadURL: str = None):
+    """
+    Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
+    If the viewer URL is a location on the local file system, a copy will be placed included in the output destination.
+    :param cntlr: The arelle controller that contains the model to be included in the viewer
+    :param saveViewerDest: The target that viewer data/files will be written to (path to file or directory, or a file object itself).
+    :param viewerURL: The filepath or URL location of the viewer script.
+    :param showValidationMessages: True if validation messages should be shown in the viewer.
+    :param useStubViewer: True if the stub viewer should be used.
+    :param zipViewerOutput: True if the destination is a zip archive.
+    :param features: List of feature names to enable via generated JSON data.
+    """
     # extend XBRL-loaded run processing for this option
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
         cntlr.addToLog("No taxonomy loaded.")
@@ -92,31 +117,74 @@ def generateViewer(cntlr, saveViewerFile, viewerURL=DEFAULT_VIEWER_PATH, showVal
     if modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
         cntlr.addToLog("No inline XBRL document loaded.")
         return
+    copyScriptPath = None
+    if isinstance(saveViewerDest, str):
+        # Note on URLs: Rather than rely on logic to determine if the input is a file
+        # path or web address, we can allow web addresses to be considered relative paths.
+        # Unless the URL happens to resolve to an existing file on the local filesystem,
+        # it will skip this step and pass through into the viewer as expected.
+        if os.path.isabs(viewerURL):
+            viewerAbsolutePath = viewerURL
+        else:
+            viewerAbsolutePath = getAbsoluteViewerPath(saveViewerDest, viewerURL)
+
+        if os.path.isfile(viewerAbsolutePath):
+            # The script was found on the local file system and will be copied into the
+            # destination directory, so the local path (just the basename) of viewerURL should
+            # be passed to the script tag
+            copyScriptPath = viewerURL
+            viewerURL = os.path.basename(viewerURL)
     try:
-        out = saveViewerFile
+        out = saveViewerDest
         if out:
             viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer)
+            if features:
+                for feature in features:
+                    viewerBuilder.enableFeature(feature)
+            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer, packageDownloadURL=packageDownloadURL)
             if iv is not None:
-                iv.save(out, zipOutput=zipViewerOutput)
+                iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
     except IXBRLViewerBuilderError as ex:
         print(ex.message)
     except Exception as ex:
         cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
 
 
+def getAbsoluteViewerPath(saveViewerPath: str, relativeViewerPath: str) -> str:
+    """
+    Generate a path to the viewer script given the save destination path as a starting point.
+    :param saveViewerPath: Path to file or directory where viewer output will be saved.
+    :param relativeViewerPath: Path to save destination relative to viewer save path.
+    :return: An absolute file path to the viewer.
+    """
+    saveViewerDir = saveViewerPath
+    if os.path.isfile(saveViewerDir):
+        saveViewerDir = os.path.dirname(os.path.join(os.getcwd(), saveViewerDir))
+    return os.path.join(saveViewerDir, relativeViewerPath)
+
+
+def getFeaturesFromOptions(options: Union[argparse.Namespace, OptionParser]):
+    return [
+        featureConfig.key
+        for featureConfig in FEATURE_CONFIGS
+        if getattr(options, f'viewer_feature_{featureConfig.key}') or getattr(options, f'viewer_feature_{featureConfig.key.lower()}')
+    ]
+
+
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     generateViewer(
         cntlr,
-        options.saveViewerFile or kwargs.get("responseZipStream"),
+        options.saveViewerDest or kwargs.get("responseZipStream"),
         options.viewerURL,
         options.validationMessages,
         options.useStubViewer,
-        options.zipViewerOutput
+        options.zipViewerOutput,
+        getFeaturesFromOptions(options),
+        options.packageDownloadURL,
     )
 
 
-def iXBRLViewerMenuCommand(cntlr):
+def iXBRLViewerSaveCommand(cntlr):
     from .ui import SaveViewerDialog
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
         cntlr.addToLog("No document loaded.")
@@ -126,18 +194,37 @@ def iXBRLViewerMenuCommand(cntlr):
         cntlr.addToLog("No inline XBRL document loaded.")
         return
     dialog = SaveViewerDialog(cntlr)
+    dialog.render()
     if dialog.accepted and dialog.filename():
-        viewerBuilder = IXBRLViewerBuilder(modelXbrl)
-        iv = viewerBuilder.createViewer(scriptUrl=dialog.scriptUrl(), showValidations=False)
-        if iv is not None:
-            iv.save(dialog.filename(), zipOutput=dialog.zipViewerOutput())
+        generateViewer(
+            cntlr,
+            dialog.filename(),
+            dialog.scriptUrl(),
+            zipViewerOutput=dialog.zipViewerOutput(),
+            features=dialog.features()
+        )
+
+
+def iXBRLViewerSettingsCommand(cntlr):
+    from .ui import SettingsDialog
+    SettingsDialog(cntlr).render()
 
 
 def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):
-    # Extend menu with an item for the savedts plugin
-    menu.add_command(label="Save iXBRL Viewer Instance",
-                     underline=0,
-                     command=lambda: iXBRLViewerMenuCommand(cntlr))
+    # Add Tools menu
+    from tkinter import Menu  # must only import if GUI present (no tkinter on GUI-less servers)
+    viewerMenu = Menu(cntlr.menubar, tearoff=0)
+    menu.add_cascade(label=_("iXBRL Viewer"), menu=viewerMenu, underline=0)
+
+    # Extend menu with settings and save dialogs
+    viewerMenu.add_command(
+        label="Settings...",
+        underline=0,
+        command=lambda: iXBRLViewerSettingsCommand(cntlr))
+    viewerMenu.add_command(
+        label="Save Viewer...",
+        underline=0,
+        command=lambda: iXBRLViewerSaveCommand(cntlr))
 
 
 def toolsMenuExtender(cntlr, menu, *args, **kwargs):
@@ -150,19 +237,6 @@ def commandLineOptionExtender(*args, **kwargs):
 
 def commandLineRun(*args, **kwargs):
     iXBRLViewerCommandLineXbrlRun(*args, **kwargs)
-
-
-def viewMenuExtender(cntlr, viewMenu, *args, **kwargs):
-    # persist menu selections for showing filing data and tables menu
-    from tkinter import Menu, BooleanVar  # must only import if GUI present (no tkinter on GUI-less servers)
-    def setLaunchIXBRLViewer(self, *args):
-        cntlr.config["LaunchIXBRLViewer"] = cntlr.launchIXBRLViewer.get()
-        cntlr.saveConfig()
-    erViewMenu = Menu(cntlr.menubar, tearoff=0)
-    viewMenu.add_cascade(label=_("iXBRL Viewer"), menu=erViewMenu, underline=0)
-    cntlr.launchIXBRLViewer = BooleanVar(value=cntlr.config.get("LaunchIXBRLViewer", True))
-    cntlr.launchIXBRLViewer.trace("w", setLaunchIXBRLViewer)
-    erViewMenu.add_checkbutton(label=_("Launch viewer on load"), underline=0, variable=cntlr.launchIXBRLViewer, onvalue=True, offvalue=False)
 
 
 class iXBRLViewerLocalViewer(LocalViewer):
@@ -189,12 +263,26 @@ class iXBRLViewerLocalViewer(LocalViewer):
 
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
+    if not cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD):
+        # Don't run on launch if the option has been disabled
+        return
     try:
         import webbrowser
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
-        viewer_file_name = 'ixbrlviewer.html'
-        generateViewer(cntlr, tempViewer.name, useStubViewer = True)
+        viewer_file_name = DEFAULT_OUTPUT_NAME
+        features = [
+            c.key
+            for c in FEATURE_CONFIGS
+            if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
+        ]
+        generateViewer(
+            cntlr,
+            saveViewerDest=tempViewer.name,
+            viewerURL=cntlr.config.setdefault(CONFIG_SCRIPT_URL, DEFAULT_VIEWER_PATH),
+            useStubViewer=True,
+            features=features
+        )
         localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
         localhost = localViewer.init(cntlr, tempViewer.name)
         webbrowser.open(f'{localhost}/{viewer_file_name}')
@@ -220,6 +308,5 @@ __pluginInfo__ = {
     'CntlrCmdLine.Options': commandLineOptionExtender,
     'CntlrCmdLine.Xbrl.Run': commandLineRun,
     'CntlrWinMain.Menu.Tools': toolsMenuExtender,
-    'CntlrWinMain.Menu.View': viewMenuExtender,
     'CntlrWinMain.Xbrl.Loaded': guiRun,
 }

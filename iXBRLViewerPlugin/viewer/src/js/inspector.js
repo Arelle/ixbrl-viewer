@@ -1,16 +1,4 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
 import i18next from 'i18next';
@@ -157,7 +145,6 @@ export class Inspector {
         runGenerator(this._search.buildSearchIndex(() => this.searchReady()));
     }
 
-
     /*
      * Check for fragment identifier pointing to a specific fact and select it if
      * present.
@@ -170,7 +157,15 @@ export class Inspector {
 
     handleMessage(event) {
         const jsonString = event.originalEvent.data;
-        const data = JSON.parse(jsonString);
+        let data;
+        try {
+            data = JSON.parse(jsonString);
+        }
+        catch (e) {
+            // Silently ignore any non-JSON messages as write-excel-file sends
+            // messages to itself when exporting files.
+            return;
+        }
 
         if (data.task == 'SHOW_FACT') {
             this.selectItem(data.factId);
@@ -203,15 +198,46 @@ export class Inspector {
     }
 
     buildToolbarHighlightMenu() {
+        const iv = this._iv;
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
         this._toolbarMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => { this._useCalc11 = useCalc11 }, "calculation-mode", "select-language", this._useCalc11);
+        if (iv.isReviewModeEnabled()) {
+            this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
+                const body = iv.viewer.contents().find("body");
+                if (checked) {
+                    body.addClass("review-highlight-untagged-numbers");
+                }
+                else {
+                    body.removeClass("review-highlight-untagged-numbers");
+                }
+            }, "highlight-untagged-numbers", "highlight-tags");
+
+            this._toolbarMenu.addCheckboxItem("Untagged Dates", function (checked) {
+                const body = iv.viewer.contents().find("body");
+                if (checked) {
+                    body.addClass("review-highlight-untagged-dates");
+                }
+                else {
+                    body.removeClass("review-highlight-untagged-dates");
+                }
+            }, "highlight-untagged-dates", "highlight-untagged-numbers");
+        }
         this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
     }
 
     buildHighlightKey() {
         $(".highlight-key .items").empty();
-        const key = this._report.namespaceGroups();
+        let key;
+        if (this._iv.isReviewModeEnabled()) {
+            key = [
+                "XBRL Elements",
+                "Untagged Numbers",
+                "Untagged Dates",
+            ]
+        } else {
+            key = this._report.namespaceGroups();
+        }
         this._iv.callPluginMethod("extendHighlightKey", key);
 
         for (const [i, name] of key.entries()) {
@@ -506,12 +532,14 @@ export class Inspector {
         } = this.summary.getLocalDocuments();
 
         const summaryFilesContent = summaryDom.find(".files-summary");
+        let visibleItems = 0;
 
         function insertFileSummary(docs, classSelector) {
             if (docs.length === 0) {
                 summaryFilesContent.find(classSelector).hide();
             } else {
                 const ul = summaryFilesContent.find(classSelector + ' ul')
+                visibleItems += 1;
                 for (const doc of docs) {
                     ul.append($("<li></li>").text(doc));
                 }
@@ -526,6 +554,9 @@ export class Inspector {
         insertFileSummary(labelLinkbase, ".label-links");
         insertFileSummary(refLinkbase, ".ref-links");
         insertFileSummary(unrecognizedLinkbase, ".other-links");
+        if (visibleItems == 0) {
+            summaryFilesContent.hide();
+        }
     };
 
     createOutline() {

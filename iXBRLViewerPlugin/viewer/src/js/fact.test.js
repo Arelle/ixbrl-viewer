@@ -1,16 +1,4 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import { Fact } from "./fact.js";
 import { iXBRLReport } from "./report.js";
@@ -440,6 +428,34 @@ describe("Readable accuracy", () => {
 
     });
 });
+
+describe("Readable accuracy", () => {
+    test("With units", () => {
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": "iso4217:GBP" }
+        }).getScaleLabel(-2)).toBe("pence");
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": "iso4217:GBP" }
+        }).getScaleLabel(-4)).toBe(null);
+    });
+    test("Without units", () => {
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": {}
+        }).getScaleLabel(-2)).toBe("hundredths");
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": {}
+        }).getScaleLabel(-4)).toBe(null);
+    });
+});
+
 
 describe("Readable scale", () => {
     test("Non-numeric", () => {

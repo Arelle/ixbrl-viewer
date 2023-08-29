@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  release:
+    types: [released]
+
+permissions: {}
+
+jobs:
+  node-tests:
+    uses: ./.github/workflows/node-tests.yml
+  npm-package:
+    permissions:
+      contents: write
+    needs: node-tests
+    uses: ./.github/workflows/npm-package.yml
+    secrets: inherit
+
+  python-tests:
+    uses: ./.github/workflows/python-tests.yml
+  python-package:
+    permissions:
+      contents: write
+    needs: python-tests
+    uses: ./.github/workflows/python-package.yml
+    secrets: inherit

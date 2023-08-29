@@ -1,3 +1,5 @@
+// See COPYRIGHT.md for copyright information
+
 module.exports = {
     input: [
         "src/js/*.js",

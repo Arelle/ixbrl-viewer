@@ -1,61 +1,59 @@
 version: 2
-
 updates:
-- package-ecosystem: npm
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "02:00"
-    timezone: America/Chicago
-  open-pull-requests-limit: 99
-  allow:
-    - dependency-type: all
-  reviewers:
-  - Workiva/xt
-  ignore:
-  - dependency-name: babel-jest
-    versions:
-    - ">=27"
-  - dependency-name: chart.js
-    versions:
-    - ">=3"
-  - dependency-name: css-loader
-    versions:
-    - ">=4"
-  - dependency-name: html-loader
-    versions:
-    - ">=1"
-  - dependency-name: i18next
-    versions:
-    - ">=21"
-  - dependency-name: less
-    versions:
-    - ">=4"
-  - dependency-name: less-loader
-    versions:
-    - ">=7"
-- package-ecosystem: pip
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "02:00"
-    timezone: America/Chicago
-  open-pull-requests-limit: 99
-  allow:
-    - dependency-type: all
-  reviewers:
-  - Workiva/xt
-- package-ecosystem: docker
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "02:00"
-    timezone: America/Chicago
-  open-pull-requests-limit: 5
-  reviewers:
-    - Workiva/xt
-  allow:
-    - dependency-name: "python"
-  ignore:
-    - dependency-name: "python"
-      update-types: ["version-update:semver-major", "version-update:semver-minor"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      github-action-dependencies:
+        patterns:
+          - "*"
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-type: all
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "*jest*"
+          - "stylelint*"
+      jest:
+        patterns:
+          - "*jest*"
+      stylelint:
+        patterns:
+          - "stylelint*"
+    ignore:
+      - dependency-name: chart.js
+        versions:
+          - ">=3"
+      - dependency-name: css-loader
+        versions:
+          - ">=4"
+      - dependency-name: html-loader
+        versions:
+          - ">=1"
+      - dependency-name: i18next
+        versions:
+          - ">=21"
+      - dependency-name: less
+        versions:
+          - ">=4"
+      - dependency-name: less-loader
+        versions:
+          - ">=7"
+  - package-ecosystem: pip
+    directory: "/"
+    insecure-external-code-execution: allow
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-type: all
+    groups:
+      pip-dependencies:
+        patterns:
+          - "*"

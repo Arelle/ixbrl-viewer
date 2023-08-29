@@ -32,9 +32,9 @@ if (document.readyState === 'loading') {  // Loading hasn't finished yet
 The `ixbrl-viewer` project can be added as a dev dependency in `package.json`:
 
 ```
-   "devDependencies": {
-       "ixbrl-viewer": "Workiva/ixbrl-viewer"
-   }
+    "devDependencies": {
+        "ixbrl-viewer": "^1.2.0"
+    }
 ```
 
 This will cause the project to be fetched from github by `npm install`.

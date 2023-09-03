@@ -11,9 +11,12 @@ webfont({
   formats: ['woff'],
 })
   .then((result) => {
-    fs.mkdir(path.join(srcDir, "less/generated"), (err) => { if (err) { throw err } });
-    fs.writeFile(path.join(srcDir, "fonts/viewer-icons-min.woff"), result.woff, err => { if (err) { throw err } });
-    fs.writeFile(path.join(srcDir, "less/generated/icons.less"), result.template, err => { if (err) { throw err } });
+    const lessDir = path.join(srcDir, "less/generated");
+    if (!fs.existsSync(lessDir)) {
+        fs.mkdirSync(lessDir);
+    }
+    fs.writeFileSync(path.join(srcDir, "fonts/viewer-icons-min.woff"), result.woff);
+    fs.writeFileSync(path.join(lessDir, "icons.less"), result.template);
   })
   .catch((error) => {
     throw error;

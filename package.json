@@ -14,7 +14,7 @@
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
     "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js",
     "puppeteerServe": "npm run prod && ./tests/puppeteer/tools/generate.sh && npx http-server .",
-    "font": "cd iXBRLViewerPlugin/viewer/src/fonts/ && fontforge build-font.pe"
+    "font": "node iXBRLViewerPlugin/viewer/tools/build-font.js"
   },
   "repository": {
     "type": "git",

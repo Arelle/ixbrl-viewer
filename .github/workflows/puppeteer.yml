@@ -43,6 +43,8 @@ jobs:
         run: npm ci
       - name: Install Arelle
         run: pip install arelle-release .
+      - name: Build font
+        run: npm run font
       - name: Build viewer js
         run: npm run prod
       - name: Generate test viewers

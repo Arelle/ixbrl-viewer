@@ -5,7 +5,7 @@ const path = require("path");
 const srcDir = path.join("iXBRLViewerPlugin", "viewer", "src");
 
 webfont({
-  files: path.join(srcDir, "icons", "*.svg"),
+  files: "iXBRLViewerPlugin/viewer/src/icons/*.svg",
   fontName: "ixbrlviewer",
   template: path.join(srcDir, "less", "icons.less.njk"),
   formats: ['woff'],

@@ -15,7 +15,11 @@ webfont({
     if (!fs.existsSync(lessDir)) {
         fs.mkdirSync(lessDir);
     }
-    fs.writeFileSync(path.join(srcDir, "fonts/viewer-icons-min.woff"), result.woff);
+    const fontsDir = path.join(srcDir, "fonts");
+    if (!fs.existsSync(fontsDir)) {
+        fs.mkdirSync(fontsDir);
+    }
+    fs.writeFileSync(path.join(fontsDir, "viewer-icons-min.woff"), result.woff);
     fs.writeFileSync(path.join(lessDir, "icons.less"), result.template);
   })
   .catch((error) => {

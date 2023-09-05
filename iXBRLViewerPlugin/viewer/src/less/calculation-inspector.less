@@ -18,9 +18,11 @@
       white-space: nowrap;
     }
 
-    td.icons,
-    th.icons {
-      border-right: solid 1px;
+    &.calc11 {
+        td.icons,
+        th.icons {
+          border-right: solid 1px;
+        }
     }
 
     &.has-icons {
@@ -49,6 +51,10 @@
         font-weight: bold;
       }
 
+      &.unchecked .icon::before {
+        .icon-question();
+      }
+
       &.consistent .icon::before {
         .icon-circle-tick();
 
@@ -66,6 +72,12 @@
       &::before {
         .icon-multi-tag();
       }
+    }
+
+    &:not(.calc11) {
+        td.calc11-only, th.calc11-only {
+            display: none;
+        }
     }
   }
 }

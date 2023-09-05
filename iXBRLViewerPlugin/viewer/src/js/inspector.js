@@ -201,7 +201,7 @@ export class Inspector {
         const iv = this._iv;
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
-        this._toolbarMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => { this._useCalc11 = useCalc11 }, "calculation-mode", "select-language", this._useCalc11);
+        this._toolbarMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         if (iv.isReviewModeEnabled()) {
             this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");
@@ -246,6 +246,13 @@ export class Inspector {
                 .append($("<span></span>").addClass("sample").addClass("sample-" + i))
                 .append($("<span></span>").text(name))
                 .appendTo($(".highlight-key .items"));
+        }
+    }
+
+    setCalculationMode(useCalc11) {
+        this._useCalc11 = useCalc11;
+        if (this._currentItem instanceof Fact) {
+            this.updateCalculation(this._currentItem);
         }
     }
 

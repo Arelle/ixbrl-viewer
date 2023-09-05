@@ -153,7 +153,7 @@ class AbstractResolvedCalculation {
 
 }
 
-class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
+export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
 
 
     calculatedTotalInterval() {
@@ -181,7 +181,7 @@ class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
     }
 }
 
-class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
+export class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
 
     binds() {
         return super.binds() && this.rows.every((r) => r.facts.completeDuplicates());

@@ -4,5 +4,7 @@ node_modules/
 dist/
 __pycache__
 /tests/puppeteer/artifacts/
+iXBRLViewerPlugin/viewer/src/fonts/
+iXBRLViewerPlugin/viewer/src/less/generated/
 iXBRLViewerPlugin/_version.py
 /ixbrl-viewer*.tgz

@@ -177,7 +177,8 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
      * Is the calculation consistent under Calculations v1.1 rules?
      */
     isConsistent() {
-        return this.calculatedTotalInterval().intersection(Interval.fromFact(this.totalFact)) !== undefined;
+        const cti = this.calculatedTotalInterval();
+        return cti !== undefined && cti.intersection(Interval.fromFact(this.totalFact)) !== undefined;
     }
 }
 

@@ -58,7 +58,9 @@ export class CalculationInspector extends Dialog {
                 let f = row.facts.items[0];
                 const reportedInterval = row.facts.valueIntersection();
                 if (reportedInterval === undefined) {
-                    factText = "Inconsistent duplicates"; // XXX untested
+                    factText = "n/a";
+                    minText = "n/a"; 
+                    maxText = "n/a";
                 }
                 else {
                     factText = f.readableValue(reportedInterval.midpoint().toNumber());
@@ -80,14 +82,14 @@ export class CalculationInspector extends Dialog {
         }
         const fact = resolvedCalculation.totalFact;
         const cvi = resolvedCalculation.calculatedTotalInterval();
-        $("<tr></tr>").addClass("total")
-            .append($("<td></td>"))
-            .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.calculated-total')})`).addClass("line-item"))
-            .append($("<td></td>").text(fact.readableValue(cvi.midpoint().toNumber())).addClass("figure"))
-            .append($("<td></td>").addClass("icons"))
-            .append($("<td></td>").text(fact.readableValue(cvi.a.toNumber())).addClass("figure"))
-            .append($("<td></td>").text(fact.readableValue(cvi.b.toNumber())).addClass("figure"))
-            .appendTo(tbody);
+            $("<tr></tr>").addClass("total")
+                .append($("<td></td>"))
+                .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.calculated-total')})`).addClass("line-item"))
+                .append($("<td></td>").text(cvi === undefined ? 'n/a' : fact.readableValue(cvi.midpoint().toNumber())).addClass("figure"))
+                .append($("<td></td>").addClass("icons"))
+                .append($("<td></td>").text(cvi === undefined ? 'n/a' : fact.readableValue(cvi.a.toNumber())).addClass("figure"))
+                .append($("<td></td>").text(cvi === undefined ? 'n/a' : fact.readableValue(cvi.b.toNumber())).addClass("figure"))
+                .appendTo(tbody);
 
         const rvi = fact.valueInterval();
         $("<tr></tr>")

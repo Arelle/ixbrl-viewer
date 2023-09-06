@@ -23,11 +23,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout ixbrl-viewer
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3.6.0
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
       - name: Install Node.js
-        uses: actions/setup-node@v3.7.0
+        uses: actions/setup-node@v3.8.1
         with:
           cache: 'npm'
           check-latest: true
@@ -65,7 +65,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags')
     steps:
       - name: Install Node.js
-        uses: actions/setup-node@v3.7.0
+        uses: actions/setup-node@v3.8.1
         with:
           check-latest: true
           node-version: ${{ inputs.node_version }}

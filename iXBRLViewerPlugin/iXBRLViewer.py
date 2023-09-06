@@ -23,7 +23,7 @@ from arelle.UrlUtil import isHttpUrl
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
-from iXBRLViewerPlugin.constants import DEFAULT_VIEWER_PATH
+from .constants import DEFAULT_OUTPUT_NAME, DEFAULT_VIEWER_PATH, FEATURE_CONFIGS
 from .xhtmlserialize import XHTMLSerializer
 
 
@@ -37,10 +37,6 @@ LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
 }
 
 WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
-
-VIEWER_FEATURES_AND_DESCRIPTIONS = {
-    "review": "Enables highlighting of untagged numbers and dates.",
-}
 
 class NamespaceMap:
     """
@@ -102,8 +98,9 @@ class IXBRLViewerBuilder:
     def enableFeature(self, featureName: str):
         if featureName in self.taxonomyData["features"]:
             return
-        assert featureName in VIEWER_FEATURES_AND_DESCRIPTIONS, \
-            f'Given feature name `{featureName}` does not match any defined features: {VIEWER_FEATURES_AND_DESCRIPTIONS.keys()}'
+        featureNames = [c.key for c in FEATURE_CONFIGS]
+        assert featureName in featureNames, \
+            f'Given feature name `{featureName}` does not match any defined features: {featureNames}'
         self.taxonomyData["features"].append(featureName)
 
     def outputFilename(self, filename):
@@ -420,7 +417,7 @@ class IXBRLViewerBuilder:
 
             if useStubViewer:
                 xmlDocument = self.getStubDocument()
-                iv.addFile(iXBRLViewerFile("ixbrlviewer.html", xmlDocument))
+                iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
             else:
                 xmlDocument = next(iter(xmlDocsByFilename.values()))
 
@@ -431,7 +428,7 @@ class IXBRLViewerBuilder:
             xmlDocument = self.getStubDocument()
             filename = self.outputFilename(os.path.basename(dts.modelDocument.filepath))
             docSetFiles = [ filename ]
-            iv.addFile(iXBRLViewerFile("ixbrlviewer.html", xmlDocument))
+            iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
             iv.addFile(iXBRLViewerFile(filename, dts.modelDocument.xmlDocument))
 
         else:

@@ -46,6 +46,6 @@ export class IXNode {
     }
 
     htmlHidden() {
-        return this.wrapperNodes.is(':hidden') || this.wrapperNodes.filter((i,e) => isTransparent($(e).css('color'))).length > 0;
+        return this.wrapperNodes.is(':hidden') || this.wrapperNodes.is((i,e) => isTransparent($(e).css('color')));
     }
 }

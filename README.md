@@ -64,7 +64,8 @@ the ixbrl-viewer.
 2. Install the dependencies for javascript by running: `npm install`.  This
    command must be run from within the `ixbrl-viewer directory` (i.e. the root
    of your checkout of the repository).
-3. Run `npm run prod`. This will create the ixbrlviewer.js in the
+3. Run `npm run font`. This will build the icon files.
+4. Run `npm run prod`. This will create the ixbrlviewer.js in the
    iXBRLViewerPlugin/viewer/dist directory.
 
 [ixbrlviewer-github]: https://github.com/Arelle/ixbrl-viewer

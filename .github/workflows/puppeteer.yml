@@ -44,7 +44,7 @@ jobs:
       - name: Install Arelle
         run: pip install arelle-release .
       - name: Build viewer js
-        run: npm run prod
+        run: make prod
       - name: Generate test viewers
         shell: bash
         run: ./tests/puppeteer/tools/generate.sh

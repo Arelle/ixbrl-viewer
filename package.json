@@ -13,7 +13,8 @@
     "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
     "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js",
-    "puppeteerServe": "npm run prod && ./tests/puppeteer/tools/generate.sh && npx http-server ."
+    "puppeteerServe": "npm run font && npm run prod && ./tests/puppeteer/tools/generate.sh && npx http-server .",
+    "font": "node iXBRLViewerPlugin/viewer/tools/build-font.js"
   },
   "repository": {
     "type": "git",
@@ -60,6 +61,7 @@
     "puppeteer-screen-recorder": "2.1.2",
     "stylelint": "^15.10.2",
     "stylelint-config-standard": "^34.0.0",
+    "webfont": "^11.2.26",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.0.1",
     "webpack-merge": "^5.8.0"

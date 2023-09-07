@@ -35,7 +35,7 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
       - name: Build ixbrlviewer.js
-        run: npm run prod
+        run: make prod
       - name: Create npm package
         run: |
           npm config set git-tag-version=false

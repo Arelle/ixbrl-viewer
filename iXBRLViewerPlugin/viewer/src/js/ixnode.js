@@ -1,5 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
+import $ from 'jquery';
+import { isTransparent } from './util.js';
 
 /*
  * Object to hold information related to iXBRL nodes in the HTML document.
@@ -44,6 +46,6 @@ export class IXNode {
     }
 
     htmlHidden() {
-        return this.wrapperNodes.is(':hidden');
+        return this.wrapperNodes.is(':hidden') || this.wrapperNodes.is((i,e) => isTransparent($(e).css('color')));
     }
 }

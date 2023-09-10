@@ -200,7 +200,7 @@ Profit Loss double tagged: {{ monetary eg:ProfitLoss[] }}{{ monetary eg:ProfitLo
                 <tr class="top-border bottom-border"><td>Sub Total</td><td class="figure">{{ monetary eg:CalculationSubTotal[decimals="-3"] }}125,000{{end}}</td><td /></tr>
                 <tr><td>Item 1 (with complete duplicate)</td><td class="figure">{{ monetary eg:CalculationItem1[decimals="-3"] }}1,100,000{{end}}</td><td>{{ monetary eg:CalculationItem1[decimals="-3"] }}1,100,000{{end}}</td></tr>
                 <tr><td>Item 3</td><td class="figure">{{ monetary eg:CalculationItem3[decimals="-3"] }}200,000{{end}}</td><td /></tr>
-                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}1,025,500{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}1,025,000{{end}}</td><td /></tr>
             </tbody>
         </table>
 

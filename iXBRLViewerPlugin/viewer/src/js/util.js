@@ -149,3 +149,14 @@ export function titleCase(text) {
                 .join('');
     }).join(' ');
 }
+
+/**
+ * Extract the alpha value from an rgba(r,g,b,a) string and returns true if
+ * transparent (a < 10%).  Returns false on rgb(r,g,b) strings.
+ * @param  {String}  rgba   color string to parse
+ * @return {Boolean} whether the value is transparent
+ */
+export function isTransparent(rgba) {
+    const val = parseFloat(rgba.split(",")[3]);
+    return !isNaN(val) && val < 0.1;
+}

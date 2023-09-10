@@ -196,12 +196,12 @@ export class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
         let total = new Decimal(0);
 
         for (const row of this.rows) {
-            // XXX need to check for exact duplicates
             if (!row.facts.isConsistent()) {
-                console.log(row.facts);
                 return undefined;
             }
             if (!row.facts.isEmpty()) {
+                // Calculation does not bind if there are consistent (non-exact)
+                // duplicates, so we can just take the first duplicate value
                 total = total.plus(row.facts.items[0].roundedValue().times(row.weight));
             }
         }

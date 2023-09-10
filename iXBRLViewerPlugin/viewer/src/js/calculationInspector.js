@@ -118,7 +118,7 @@ export class CalculationInspector extends Dialog {
                 let f = row.facts.items[0];
                 const reportedInterval = row.facts.valueIntersection();
                 if (reportedInterval === undefined) {
-                    factText = "Inconsistent duplicates"; // XXX untested
+                    factText = "Inconsistent duplicates";
                 }
                 else if (!row.facts.completeDuplicates()) {
                     factText = "Duplicate facts"; 

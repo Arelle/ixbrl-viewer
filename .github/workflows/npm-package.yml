@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout ixbrl-viewer
-        uses: actions/checkout@v3.6.0
+        uses: actions/checkout@v4.0.0
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
       - name: Install Node.js
@@ -42,13 +42,13 @@ jobs:
           npm version $(git describe --tags)
           npm pack
       - name: Upload ixbrlviewer.js artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: ixbrlviewer.js
           if-no-files-found: error
           path: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
       - name: Upload npm artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: npm package
           if-no-files-found: error

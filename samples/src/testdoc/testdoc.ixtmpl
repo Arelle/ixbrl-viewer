@@ -254,6 +254,93 @@ Profit Loss double tagged: {{ monetary eg:ProfitLoss[] }}{{ monetary eg:ProfitLo
                 <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}2,225,000{{end}}</td><td /></tr>
             </tbody>
         </table>
+
+        <div style="height: 100px; border: solid 1px #9f9; position: relative">
+            <ix:nonNumeric contextRef="c1" escape="true" id="f100" name="eg:TextBlockConceptD1">
+                <div style="position: absolute; top: 5px; left: 5px;">
+                    This is line 1 of an <b>absolutely positioned</b> paragraph.
+                </div>
+                <div style="position: absolute; top: 25px; left: 5px;">
+                    Line 2 of an absolutely positioned paragraph.<br/>New line within paragraph.  Empty div <div style="color: red"></div> Is this red?
+                </div>
+            </ix:nonNumeric>
+        </div>
+
+        <div style="height: 100px; border: solid 1px #f99; position: relative">
+            <ix:footnote id="fn1">
+                <div style="position: absolute; top: 50px; left: 5px;">
+                    This is line 1 of an absolutely positioned paragraph in a footnote.
+                </div>
+                <div style="position: absolute; top: 75px; left: 5px;">
+                    Line 2 of an absolutely positioned paragraph.
+                </div>
+                <p> 
+                This is some non-absolute text.
+                </p>
+            </ix:footnote>
+        </div>
+
+        <div style="height: 100px; border: solid 1px #9f9; position: relative">
+            <ix:nonNumeric contextRef="c1" escape="true" id="f101" name="eg:StringConceptD2">
+                <div style="position: absolute; top: 5px; left: 5px;">
+                    This is line 1 of an absolutely positioned paragraph.  <ix:nonNumeric contextRef="c3" continuedAt="cont1" id="f102" name="eg:StringConceptI1"> Nest tag that</ix:nonNumeric>
+                </div>
+                <ix:continuation id="cont1">
+                <div style="position: absolute; top: 25px; left: 5px;">
+                    spans all of this line and then 
+                </div>
+                <div style="position: absolute; top: 50px; left: 5px;">
+                    into the next one.  <ix:nonFraction contextRef="c2" decimals="0" format="ixt:numdotdecimal" id="f108" name="eg:MonetaryConceptD3" unitRef="u1">1234</ix:nonFraction>
+                </div>
+                </ix:continuation>
+            </ix:nonNumeric>
+        </div>
+
+        <div>
+            <ix:nonNumeric contextRef="c2" id="f103" name="eg:StringConceptD2">
+                <p>
+                Test for absolutely positioned table cells nested within text tag.
+                </p>
+                <table>
+                    <tr>
+                        <th>Absolutely positioned cells</th>
+                        <th>Non-absolutely positioned cells</th>
+                    </tr>
+                    <tr>
+                        <td style="position: absolute">
+                            <ix:nonFraction contextRef="c2" decimals="0" format="ixt:numdotdecimal" id="f104" name="eg:MonetaryConceptD3" unitRef="u1">1234</ix:nonFraction>
+                        </td>
+                        <td>
+                            <ix:nonFraction contextRef="c1" decimals="0" format="ixt:numdotdecimal" id="f105" name="eg:MonetaryConceptD3" unitRef="u1">1234</ix:nonFraction>
+                        </td>
+                    </tr>
+                </table>
+            </ix:nonNumeric>
+        </div>
+
+        <div style="height: 100px; border: solid 1px #9f9; position: relative">
+            <ix:nonNumeric contextRef="c1" continuedAt="cont3" id="f106" name="eg:StringConceptD2" target="foo">
+                <div style="position: absolute; top: 5px; left: 5px;">
+                    This whole block is in a different target document <ix:nonNumeric contextRef="c3" continuedAt="cont2" id="f107" name="eg:StringConceptI1"> But this nested tag is in the default target</ix:nonNumeric>
+                </div>
+                <ix:continuation id="cont2">
+                <div style="position: absolute; top: 25px; left: 5px;">
+                    and is continued here.
+                </div>
+                </ix:continuation>
+            </ix:nonNumeric>
+            <ix:continuation id="cont3">
+                <div style="position: absolute; top: 50px; left: 5px;">
+                    Continuation of tag in different target document.
+                </div>
+            </ix:continuation>
+        </div>
+
+        <ix:nonNumeric contextRef="c1" escape="false" id="f109" name="eg:TextBlockConceptD1">
+            <p>
+                Profit &amp; Loss not escaped - invalid XML
+            </p>
+        </ix:nonNumeric>
         
     </body>
      

@@ -82,17 +82,15 @@ class IXBRLViewerBuilderError(Exception):
 
 class IXBRLViewerBuilder:
 
-    def __init__(self, dts: ModelXbrl, basenameSuffix: str = ''):
+    def __init__(self, reports: List[ModelXbrl], basenameSuffix: str = ''):
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
-        self.dts = dts
+        self.reports = reports
         self.taxonomyData = {
-            "concepts": {},
-            "languages": {},
-            "facts": {},
+            "reports": [],
             "features": [],
+            "languages": {},
         }
-        self.footnoteRelationshipSet = ModelRelationshipSet(dts, "XBRL-footnotes")
         self.basenameSuffix = basenameSuffix
 
     def enableFeature(self, featureName: str):
@@ -146,22 +144,26 @@ class IXBRLViewerBuilder:
     def addLanguage(self, langCode):
         if langCode not in self.taxonomyData["languages"]:
             self.taxonomyData["languages"][langCode] = self.makeLanguageName(langCode)
+
+    @property
+    def currentReportData(self):
+        return self.taxonomyData["reports"][-1]
             
-    def addELR(self, elr):
+    def addELR(self, report: ModelXbrl, elr):
         prefix = self.roleMap.getPrefix(elr)
-        if self.taxonomyData.setdefault("roleDefs",{}).get(prefix, None) is None:
-            rts = self.dts.roleTypes.get(elr, [])
+        if self.currentReportData.setdefault("roleDefs",{}).get(prefix, None) is None:
+            rts = report.roleTypes.get(elr, [])
             label = next((rt.definition for rt in rts if rt.definition is not None), None)
             if label is not None:
-                self.taxonomyData["roleDefs"].setdefault(prefix,{})["en"] = label
+                self.currentReportData["roleDefs"].setdefault(prefix,{})["en"] = label
 
-    def addConcept(self, concept, dimensionType = None):
+    def addConcept(self, report: ModelXbrl, concept, dimensionType = None):
         if concept is None:
             return
-        labelsRelationshipSet = self.dts.relationshipSet(XbrlConst.conceptLabel)
+        labelsRelationshipSet = report.relationshipSet(XbrlConst.conceptLabel)
         labels = labelsRelationshipSet.fromModelObject(concept)
         conceptName = self.nsmap.qname(concept.qname)
-        if conceptName not in self.taxonomyData["concepts"]:
+        if conceptName not in self.currentReportData["concepts"]:
             conceptData = {
                 "labels": {  }
             }
@@ -194,24 +196,24 @@ class IXBRLViewerBuilder:
                 if typedDomainElement is not None:
                     typedDomainName = self.nsmap.qname(typedDomainElement.qname)
                     conceptData['td'] = typedDomainName
-                    self.addConcept(typedDomainElement)
+                    self.addConcept(report, typedDomainElement)
 
-            self.taxonomyData["concepts"][conceptName] = conceptData
+            self.currentReportData["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):
         for r in rels.fromModelObject(item):
             if r.toModelObject is not None:
                 self.treeWalk(rels, r.toModelObject, indent + 1)
 
-    def getRelationships(self):
+    def getRelationships(self, report: ModelXbrl):
         rels = {}
 
-        for baseSetKey, baseSetModelLinks  in self.dts.baseSets.items():
+        for baseSetKey, baseSetModelLinks  in report.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
             if arcrole in (XbrlConst.summationItem, WIDER_NARROWER_ARCROLE, XbrlConst.parentChild, XbrlConst.dimensionDefault) and ELR is not None:
-                self.addELR(ELR)
+                self.addELR(report, ELR)
                 rr = dict()
-                relSet = self.dts.relationshipSet(arcrole, ELR)
+                relSet = report.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
                     if r.fromModelObject is not None and r.toModelObject is not None:
                         fromKey = self.nsmap.qname(r.fromModelObject.qname)
@@ -221,8 +223,8 @@ class IXBRLViewerBuilder:
                         if r.weight is not None:
                             rel['w'] = r.weight
                         rr.setdefault(fromKey, []).append(rel)
-                        self.addConcept(r.toModelObject)
-                        self.addConcept(r.fromModelObject)
+                        self.addConcept(report, r.toModelObject)
+                        self.addConcept(report, r.fromModelObject)
 
                 rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
         return rels
@@ -245,7 +247,7 @@ class IXBRLViewerBuilder:
 
         return errors
 
-    def addFact(self, f):
+    def addFact(self, report: ModelXbrl, f):
         if f.id is None:
             f.set("id","ixv-%d" % (self.idGen))
 
@@ -270,7 +272,7 @@ class IXBRLViewerBuilder:
                 qnEnums = (qnEnums,)
             factData["v"] = " ".join(self.nsmap.qname(qn) for qn in qnEnums)
             for qn in qnEnums:
-                self.addConcept(self.dts.qnameConcepts.get(qn))
+                self.addConcept(report, report.qnameConcepts.get(qn))
         else:
             factData["v"] = f.value 
             if f.value == INVALIDixVALUE:
@@ -295,11 +297,11 @@ class IXBRLViewerBuilder:
         for d, v in f.context.qnameDims.items():
             if v.memberQname is not None:
                 aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
-                self.addConcept(v.member)
-                self.addConcept(v.dimension, dimensionType = "e")
+                self.addConcept(report, v.member)
+                self.addConcept(report, v.dimension, dimensionType = "e")
             elif v.typedMember is not None:
                 aspects[self.nsmap.qname(v.dimensionQname)] = v.typedMember.text
-                self.addConcept(v.dimension, dimensionType = "t")
+                self.addConcept(report, v.dimension, dimensionType = "t")
 
         if f.context.isForeverPeriod:
             aspects["p"] = "f"
@@ -317,8 +319,8 @@ class IXBRLViewerBuilder:
                 if frel.toModelObject is not None:
                     factData.setdefault("fn", []).append(frel.toModelObject.id)
 
-        self.taxonomyData["facts"][f.id] = factData
-        self.addConcept(f.concept)
+        self.currentReportData["facts"][f.id] = factData
+        self.addConcept(report, f.concept)
 
     def oimUnitString(self, unit):
         """
@@ -384,8 +386,8 @@ class IXBRLViewerBuilder:
         :param showValidations: True if validation errors should be included in output taxonomy data.
         :return: An iXBRLViewer instance that is ready to be saved.
         """
-        dts = self.dts
-        iv = iXBRLViewer(dts)
+        # This "dts" is only used for logging
+        iv = iXBRLViewer(self.reports[0])
         self.idGen = 0
         self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
         self.roleMap.getPrefix(XbrlConst.documentationLabel, "doc")
@@ -394,79 +396,98 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
 
-        docSetFiles = None
+        # This is the document that we will embed the JSON taxonomy data in.
+        # This will be either the first document processed, or the stub document
+        xmlDocument = None
 
-        for f in dts.facts:
-            self.addFact(f)
+        for n, report in enumerate(self.reports):
+            self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
+            self.taxonomyData["reports"].append({
+                "concepts": {},
+                "facts": {},
+            })
+            for f in report.facts:
+                self.addFact(report, f)
+            self.currentReportData["rels"] = self.getRelationships(report)
+
+            docSetFiles = None
+            report.info("viewer:info", "Creating iXBRL viewer (%d of %d)" % (n+1, len(self.reports)))
+            if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
+                # Sort by object index to preserve order in which files were specified.
+                xmlDocsByFilename = {
+                    os.path.basename(self.outputFilename(doc.filepath)): deepcopy(doc.xmlDocument)
+                    for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+                }
+                docSetFiles = list(xmlDocsByFilename.keys())
+
+                if xmlDocument is None:
+                    if useStubViewer:
+                        xmlDocument = self.getStubDocument()
+                        iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
+                    else:
+                        xmlDocument = next(iter(xmlDocsByFilename.values()))
+
+                for filename, docSetXMLDoc in xmlDocsByFilename.items():
+                    iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
+
+            elif useStubViewer:
+                if xmlDocument is None:
+                    xmlDocument = self.getStubDocument()
+                    iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
+                filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+                docSetFiles = [ filename ]
+                iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+
+            else:
+                if len(self.reports) == 1:
+                    filename = "xbrlviewer.html"
+                else:
+                    filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+                if xmlDocument is None:
+                    xmlDocument = deepcopy(report.modelDocument.xmlDocument)
+                    iv.addFile(iXBRLViewerFile(filename, xmlDocument))
+                else:
+                    iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+
+            localDocs = defaultdict(set)
+            for path, doc in report.urlDocs.items():
+                if isHttpUrl(path):
+                    continue
+                if doc.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
+                    localDocs[doc.basename].add('inline')
+                elif doc.type == Type.SCHEMA:
+                    localDocs[doc.basename].add('schema')
+                elif doc.type == Type.LINKBASE:
+                    linkbaseIdentifed = False
+                    for child in doc.xmlRootElement.iterchildren():
+                        linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
+                        if linkbaseLocalDocumentsKey is not None:
+                            localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
+                            linkbaseIdentifed = True
+                    if not linkbaseIdentifed:
+                        localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
+            self.currentReportData["localDocs"] = {
+                localDoc: sorted(docTypes)
+                for localDoc, docTypes in localDocs.items()
+            }
+
+        if docSetFiles is not None:
+            self.currentReportData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
-        self.taxonomyData["rels"] = self.getRelationships()
 
         if showValidations:
             self.taxonomyData["validation"] = self.validationErrors()
 
-        dts.info("viewer:info", "Creating iXBRL viewer")
-        if dts.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
-            # Sort by object index to preserve order in which files were specified.
-            xmlDocsByFilename = {
-                os.path.basename(self.outputFilename(doc.filepath)): deepcopy(doc.xmlDocument)
-                for doc in sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
-            }
-            docSetFiles = list(xmlDocsByFilename.keys())
-
-            if useStubViewer:
-                xmlDocument = self.getStubDocument()
-                iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
-            else:
-                xmlDocument = next(iter(xmlDocsByFilename.values()))
-
-            for filename, docSetXMLDoc in xmlDocsByFilename.items():
-                iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
-
-        elif useStubViewer:
-            xmlDocument = self.getStubDocument()
-            filename = self.outputFilename(os.path.basename(dts.modelDocument.filepath))
-            docSetFiles = [ filename ]
-            iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
-            iv.addFile(iXBRLViewerFile(filename, dts.modelDocument.xmlDocument))
-
-        else:
-            xmlDocument = deepcopy(dts.modelDocument.xmlDocument)
-            iv.addFile(iXBRLViewerFile('xbrlviewer.html', xmlDocument))
-
         if packageDownloadURL is not None:
             self.taxonomyData["filingDocuments"] = packageDownloadURL
-        elif os.path.dirname(self.dts.modelDocument.filepath).endswith('.zip'):
+        elif len(self.reports) == 1 and os.path.dirname(self.reports[0].modelDocument.filepath).endswith('.zip'):
             filingDocZipPath = os.path.dirname(self.dts.modelDocument.filepath)
             filingDocZipName = os.path.basename(filingDocZipPath)
             iv.addFilingDoc(filingDocZipPath)
             self.taxonomyData["filingDocuments"] = filingDocZipName
 
-        localDocs = defaultdict(set)
-        for path, doc in dts.urlDocs.items():
-            if isHttpUrl(path):
-                continue
-            if doc.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-                localDocs[doc.basename].add('inline')
-            elif doc.type == Type.SCHEMA:
-                localDocs[doc.basename].add('schema')
-            elif doc.type == Type.LINKBASE:
-                linkbaseIdentifed = False
-                for child in doc.xmlRootElement.iterchildren():
-                    linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
-                    if linkbaseLocalDocumentsKey is not None:
-                        localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
-                        linkbaseIdentifed = True
-                if not linkbaseIdentifed:
-                    localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
-        self.taxonomyData["localDocs"] = {
-            localDoc: sorted(docTypes)
-            for localDoc, docTypes in localDocs.items()
-        }
-
-        if docSetFiles is not None:
-            self.taxonomyData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         if not self.addViewerToXMLDocument(xmlDocument, scriptUrl):
             return None

@@ -443,6 +443,7 @@ class IXBRLViewerBuilder:
                     filename = "xbrlviewer.html"
                 else:
                     filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+                    docSetFiles = [ filename ]
                 if xmlDocument is None:
                     xmlDocument = deepcopy(report.modelDocument.xmlDocument)
                     iv.addFile(iXBRLViewerFile(filename, xmlDocument))
@@ -471,8 +472,8 @@ class IXBRLViewerBuilder:
                 for localDoc, docTypes in localDocs.items()
             }
 
-        if docSetFiles is not None:
-            self.currentReportData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
+            if docSetFiles is not None:
+                self.currentReportData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap

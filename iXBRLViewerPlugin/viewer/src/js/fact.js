@@ -9,8 +9,8 @@ import Decimal from "decimal.js";
 
 export class Fact {
     
-    constructor(report, factId) {
-        this.f = report.data.facts[factId];
+    constructor(report, factId, factData) {
+        this.f = factData;
         this.ixNode = report.getIXNodeForItemId(factId);
         this._report = report;
         this.id = factId;

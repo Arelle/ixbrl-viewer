@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import { numberMatchSearch, fullDateMatch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
-import { escapeRegex } from './util.js'
+import { escapeRegex, viewerUniqueId } from './util.js'
 import { IXNode } from './ixnode.js';
 import { setDefault, runGenerator } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
@@ -65,7 +65,8 @@ export class Viewer {
 
                     viewer._iframes.each(function (docIndex) { 
                         $(this).data("selected", docIndex == viewer._currentDocumentIndex);
-                        viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+                        const reportIndex = $(this).data("report-index");
+                        viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex);
                     });
 
                     /* Call plugin promise for each document in turn */
@@ -299,18 +300,21 @@ export class Viewer {
         const nextContinuationMap = {};
         // map of items in default target document to all their continuations
         const itemContinuationMap = {};
-        this._iframes.contents().find("body *").each(function () {
-            const name = localName(this.nodeName).toUpperCase();
-            if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
-                const nodeId = this.getAttribute('id');
-                const continuedAtId = this.getAttribute("continuedAt");
-                if (continuedAtId !== null) {
-                    nextContinuationMap[nodeId] = continuedAtId;
+        this._iframes.each((n, iframe) => {
+            const reportIndex = $(iframe).data("report-index");
+            $(iframe).contents().find("body *").each((m, node) => {
+                const name = localName(node.nodeName).toUpperCase();
+                if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
+                    const nodeId = viewerUniqueId(reportIndex, node.getAttribute('id'));
+                    const continuedAtId = viewerUniqueId(reportIndex, node.getAttribute("continuedAt"));
+                    if (continuedAtId !== null) {
+                        nextContinuationMap[nodeId] = continuedAtId;
+                    }
+                    if (name != 'CONTINUATION' && !node.hasAttribute('target')) {
+                        itemContinuationMap[nodeId] = [];
+                    }
                 }
-                if (name != 'CONTINUATION' && !this.hasAttribute('target')) {
-                    itemContinuationMap[nodeId] = [];
-                }
-            }
+            });
         });
 
         // Map of continuation IDs to list of (default target doc) items that
@@ -359,7 +363,7 @@ export class Viewer {
     // Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
     // fact and footnotes in document order.
     //
-    _preProcessiXBRL(n, docIndex, inHidden) {
+    _preProcessiXBRL(n, reportIndex, docIndex, inHidden) {
         const name = localName(n.nodeName).toUpperCase();
         const isFootnote = name === 'FOOTNOTE';
         const isContinuation = name === 'CONTINUATION';
@@ -370,7 +374,7 @@ export class Viewer {
             // Ignore iXBRL elements that are not in the default target document, as
             // the viewer builder does not handle these, and the builder does not
             // ensure that they have ID attributes.
-            const id = n.getAttribute("id");
+            const id = viewerUniqueId(reportIndex, n.getAttribute("id"));
             if (((isFact || isFootnote) && !n.hasAttribute("target"))
                 || (isContinuation && this.continuationOfMap[id] !== undefined)) {
                 var nodes;
@@ -449,7 +453,7 @@ export class Viewer {
                 }
             }
         }
-        this._preProcessChildNodes(n, docIndex, inHidden);
+        this._preProcessChildNodes(n, reportIndex, docIndex, inHidden);
     }
 
     _getIXHiddenLinkStyle(domNode) {
@@ -463,9 +467,9 @@ export class Viewer {
         return null;
     }
 
-    _preProcessChildNodes(domNode, docIndex, inHidden) {
+    _preProcessChildNodes(domNode, reportIndex, docIndex, inHidden) {
         for (const childNode of domNode.childNodes) {
-            this._preProcessiXBRL(childNode, docIndex, inHidden);
+            this._preProcessiXBRL(childNode, reportIndex, docIndex, inHidden);
         }
     }
 

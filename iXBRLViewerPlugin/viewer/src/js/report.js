@@ -6,7 +6,7 @@ import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
 import { Unit } from "./unit";
 import { ViewerOptions } from "./viewerOptions.js";
-import { setDefault, titleCase } from "./util.js";
+import { setDefault, titleCase, viewerUniqueId } from "./util.js";
 import $ from 'jquery'
 import i18next from "i18next";
 
@@ -35,8 +35,11 @@ iXBRLReport.prototype._initialize = function () {
     fnorder.sort((a,b) => this._ixNodeMap[a].docOrderindex - this._ixNodeMap[b].docOrderindex);
 
     // Create Fact objects for all facts.
-    for (const id in this.data.facts) {
-        this._items[id] = new Fact(this, id);
+    for (const [reportIndex, report] of this.reportsData().entries()) {
+        for (const [id, factData] of Object.entries(report.facts)) {
+            const vuid = viewerUniqueId(reportIndex, id);
+            this._items[vuid] = new Fact(this, vuid, factData);
+        }
     }
 
     // Now resolve footnote references, creating footnote objects for "normal"
@@ -44,17 +47,17 @@ iXBRLReport.prototype._initialize = function () {
     //
     // Associate source facts with target footnote/facts to allow two way
     // navigation.
-    for (const id in this.data.facts) {
-        const f = this._items[id];
-        const fns = this.data.facts[id].fn || [];
+    for (const [id, fact] of Object.entries(this._items)) {
+        const fns = fact.fn || [];
         fns.forEach((fnid) => {
-            var fn = this._items[fnid];
+            const fnvuid = viewerUniqueId(fnid);
+            var fn = this._items[fnvuid];
             if (fn === undefined) {
-                fn = new Footnote(this, fnid, "Footnote " + (fnorder.indexOf(fnid) + 1));
-                this._items[fnid] = fn;
+                fn = new Footnote(this, fnid, "Footnote " + (fnorder.indexOf(fnvuid) + 1));
+                this._items[fnvuid] = fn;
             }
             // Associate fact with footnote
-            fn.addLinkedFact(f);
+            fn.addLinkedFact(fact);
         });
     }
 }
@@ -314,6 +317,7 @@ iXBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
 }
 
 iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
+    // XXX this.facts() call
     var all = this.facts();
     var aligned = [];
     if (!coveredAspects) {
@@ -349,6 +353,7 @@ iXBRLReport.prototype.setViewerOptions = function (vo) {
 
 iXBRLReport.prototype.namespaceGroups = function () {
     var counts = {};
+    // XXX this.facts() call
     $.each(this.facts(), function (i, f) {
         counts[f.conceptQName().prefix] = counts[f.conceptQName().prefix] || 0;
         counts[f.conceptQName().prefix]++;
@@ -388,11 +393,13 @@ iXBRLReport.prototype.localDocuments = function() {
     return this.data.localDocs;
 }
 
+iXBRLReport.prototype.reportsData = function() {
+    return this.data.reports ?? [ this.data ];
+}
+
+// Returns an array (one per report) of arrays (one per document set file)
 iXBRLReport.prototype.documentSetFiles = function() {
-    if (this.data.docSetFiles === undefined) {
-        return []
-    }
-    return this.data.docSetFiles;
+    return this.reportsData().map((x, n) => (x.docSetFiles ?? []).map(file => ({ index: n, file: file }))).flat();
 }
 
 iXBRLReport.prototype.isDocumentSet = function() {

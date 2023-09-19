@@ -160,3 +160,10 @@ export function isTransparent(rgba) {
     const val = parseFloat(rgba.split(",")[3]);
     return !isNaN(val) && val < 0.1;
 }
+
+export function viewerUniqueId(reportIndex, id) {
+    if (id === null) {
+        return null;
+    }
+    return reportIndex.toString() + "-" + id;
+}

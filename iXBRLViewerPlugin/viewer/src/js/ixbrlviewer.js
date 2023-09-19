@@ -137,7 +137,9 @@ iXBRLViewer.prototype._loadInspectorHTML = function () {
 iXBRLViewer.prototype._reparentDocument = function () {
     var iframeContainer = $('#ixv #iframe-container');
 
-    var iframe = $('<iframe title="iXBRL document view"/>').appendTo(iframeContainer)[0];
+    var iframe = $('<iframe title="iXBRL document view"/>')
+        .data("report-index", 0)
+        .appendTo(iframeContainer)[0];
 
     var doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
@@ -221,7 +223,7 @@ iXBRLViewer.prototype.load = function () {
         const ds = report.documentSetFiles();
         var hasExternalIframe = false;
         for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {
-            const iframe = $("<iframe />").attr("src", ds[i]).appendTo("#ixv #iframe-container");
+            const iframe = $("<iframe />").attr("src", ds[i].file).data("report-index", ds[i].index).appendTo("#ixv #iframe-container");
             iframes = iframes.add(iframe);
             hasExternalIframe = true;
         }

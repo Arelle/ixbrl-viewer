@@ -93,7 +93,8 @@ iXBRLReport.prototype.isCalculationSummation = function(c) {
 iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     rolePrefix = rolePrefix || 'std';
     var lang = this._viewerOptions.language;
-    const concept = this.data.concepts[c];
+    // XXX hard coded to first report
+    const concept = this.reportsData()[0].concepts[c];
     if (concept === undefined) {
         console.log("Attempt to get label for undefined concept: " + c);
         return "<no label>";
@@ -160,7 +161,7 @@ iXBRLReport.prototype.getIXNodeForItemId = function(id) {
 }
 
 iXBRLReport.prototype.facts = function() {
-    return Object.keys(this.data.facts).map(id => this.getItemById(id));
+    return Object.values(this._items).filter(i => i instanceof Fact);
 }
 
 iXBRLReport.prototype.filingDocuments = function() {
@@ -241,7 +242,8 @@ iXBRLReport.prototype.qname = function(v) {
 
 iXBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
     var rels = {}
-    const elrs = this.data.rels[arcrole] || {};
+    //  XXX hard-coded to first report
+    const elrs = this.reportsData()[0].rels[arcrole] || {};
     for (const elr in elrs) {
         if (conceptName in elrs[elr]) {
             rels[elr] = elrs[elr][conceptName];
@@ -261,7 +263,8 @@ iXBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
 iXBRLReport.prototype._reverseRelationships = function(arcrole) {
     if (!(arcrole in this._reverseRelationshipCache)) {
         const rrc = {};
-        const elrs = this.data.rels[arcrole] || {};
+        // XXX hard-coded to first report
+        const elrs = this.reportsData()[0].rels[arcrole] || {};
         for (const [elr, relSet] of Object.entries(elrs)) {
             for (const [src, rels] of Object.entries(relSet)) {
                 for (const r of rels) {
@@ -294,7 +297,8 @@ iXBRLReport.prototype.getParentRelationshipsInGroup = function(conceptName, arcr
 iXBRLReport.prototype.dimensionDefault = function(dimensionName) {
     // ELR is irrelevant for dimension-default relationships, so check all of
     // them, and return the first (illegal for there to be more than one
-    for (const rel of Object.values(this.data.rels["d-d"] || {})) {
+    // XXX hard coded to first report
+    for (const rel of Object.values(this.reportsData()[0].rels["d-d"] || {})) {
         if (dimensionName in rel) {
             return rel[dimensionName][0].t;
         }
@@ -303,12 +307,14 @@ iXBRLReport.prototype.dimensionDefault = function(dimensionName) {
 }
 
 iXBRLReport.prototype.relationshipGroups = function(arcrole) {
-    return Object.keys(this.data.rels[arcrole] || {});
+    // XXX hard coded to first document
+    return Object.keys(this.reportsData()[0].rels[arcrole] || {});
 }
 
 iXBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
     var roots = [];
-    for (const conceptName in this.data.rels[arcrole][elr]) {
+    // XXX hard-coded to first report
+    for (const conceptName in this.reportsData()[0].rels[arcrole][elr]) {
         if (!(elr in this.getParentRelationships(conceptName, arcrole))) {
             roots.push(conceptName);
         }
@@ -317,7 +323,6 @@ iXBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
 }
 
 iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
-    // XXX this.facts() call
     var all = this.facts();
     var aligned = [];
     if (!coveredAspects) {
@@ -353,7 +358,6 @@ iXBRLReport.prototype.setViewerOptions = function (vo) {
 
 iXBRLReport.prototype.namespaceGroups = function () {
     var counts = {};
-    // XXX this.facts() call
     $.each(this.facts(), function (i, f) {
         counts[f.conceptQName().prefix] = counts[f.conceptQName().prefix] || 0;
         counts[f.conceptQName().prefix]++;
@@ -374,7 +378,8 @@ iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
      *
      * Returns the ELR URI if there is no label
      */
-    const labels = this.data.roleDefs[rolePrefix];
+    // XXX hard-coded to first report
+    const labels = this.reportsData()[0].roleDefs[rolePrefix];
     if (labels !== undefined) {
         const label = labels["en"];
         // Earlier versions of the generator added a "null" label if no labels
@@ -397,7 +402,6 @@ iXBRLReport.prototype.reportsData = function() {
     return this.data.reports ?? [ this.data ];
 }
 
-// Returns an array (one per report) of arrays (one per document set file)
 iXBRLReport.prototype.documentSetFiles = function() {
     return this.reportsData().map((x, n) => (x.docSetFiles ?? []).map(file => ({ index: n, file: file }))).flat();
 }
@@ -407,7 +411,8 @@ iXBRLReport.prototype.isDocumentSet = function() {
 }
 
 iXBRLReport.prototype.usesAnchoring = function() {
-    return this.data.rels["w-n"] !== undefined;
+    // XXX hard-coded to first report
+    return this.reportsData()[0].rels["w-n"] !== undefined;
 }
 
 iXBRLReport.prototype.hasValidationErrors = function() {

@@ -4,7 +4,8 @@ import $ from 'jquery'
 
 export class Concept {
     constructor(report, name) {
-        this._c = report.data.concepts[name] || {};
+        // XXX hard coded to first report
+        this._c = report.reportsData()[0].concepts[name] || {};
     }
 
     /*

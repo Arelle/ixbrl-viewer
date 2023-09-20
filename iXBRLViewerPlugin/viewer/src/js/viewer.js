@@ -110,8 +110,8 @@ export class Viewer {
             $('#ixv .ixds-tabs').show();
             for (const [i, doc] of this._report.documentSetFiles().entries()) {
                 $('<div class="tab">')
-                    .text(doc)
-                    .prop('title', doc)
+                    .text(doc.file)
+                    .prop('title', doc.file)
                     .data('ix-doc-id', i)
                     .click(() => this.selectDocument(i))
                     .appendTo($('#ixv #viewer-pane .ixds-tabs .tab-area'));

@@ -7,15 +7,16 @@ import $ from 'jquery'
 // fact participates in (see factInGroup()) and then finding the longest
 // continuous run of facts in document order that participate in each ELR.
 export class DocumentOutline {
-    constructor(report) {
-        this._report = report;
-        const facts = report.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
+    constructor(reportSet) {
+        this._reportSet = reportSet;
+        const facts = reportSet.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
         const runLength = {};
         const runStart = {};
         const longestRun = {};
         const longestRunStart = {};
         this._buildDimensionMap();
-        const elrs = report.relationshipGroups("pres");
+        // XXX Hard coded to first report
+        const elrs = reportSet.reports[0].relationshipGroups("pres");
         for (const f of facts) {
             if (f.isHidden()) {
                 continue;
@@ -57,7 +58,9 @@ export class DocumentOutline {
     factInGroup(fact, elr) {
         // Roots are abstract so no need to check for concepts with outgoing
         // relationships only.
-        if (this._report.getParentRelationshipsInGroup(fact.conceptName(), "pres", elr).length == 0) {
+
+        // XXX
+        if (this._reportSet.reports[0].getParentRelationshipsInGroup(fact.conceptName(), "pres", elr).length == 0) {
             return false;
         }
         const fd = fact.dimensions();
@@ -97,18 +100,21 @@ export class DocumentOutline {
     //   between presentation and dimensional ELRs.
     //
     _buildDimensionMap() {
-        const groups = this._report.relationshipGroups("pres");
+        // XXX hard-coded to first report
+        const groups = this._reportSet.reports[0].relationshipGroups("pres");
         this.dimensionMap = {};
         for (const elr of groups) {
             this.dimensionMap[elr] = {};
-            for (const root of this._report.relationshipGroupRoots("pres", elr)) {
+            // XXX
+            for (const root of this._reportSet.reports[0].relationshipGroupRoots("pres", elr)) {
                 this.buildDimensionMapFromSubTree("pres", elr, null, root);
             }
         }
     }
 
     buildDimensionMapFromSubTree(arcrole, elr, dimension, conceptName) {
-        const c = this._report.getConcept(conceptName);
+        // XXX
+        const c = this._reportSet.reports[0].getConcept(conceptName);
         if (c.isTypedDimension()) {
             this.dimensionMap[elr][conceptName] = { typed: true };
             return
@@ -117,13 +123,15 @@ export class DocumentOutline {
             dimension = conceptName;
             this.dimensionMap[elr][dimension] = { members: {}, allowDefault: false};
         }
-        var children = this._report.getChildRelationships(conceptName, arcrole);
+        // XXX
+        var children = this._reportSet.reports[0].getChildRelationships(conceptName, arcrole);
         if (!(elr in children)) {
             return
         }
         for (var rel of children[elr]) {
             if (dimension) {
-                if (this._report.dimensionDefault(dimension) == rel.t) {
+                // XXX
+                if (this._reportSet.reports[0].dimensionDefault(dimension) == rel.t) {
                     this.dimensionMap[elr][dimension].allowDefault = true;
                 }
                 else {
@@ -137,7 +145,8 @@ export class DocumentOutline {
     // Returns a list of presentation groups that this fact participates in
     groupsForFact(fact) {
         var factGroups = [];
-        for (const group of this._report.relationshipGroups("pres")) {
+        // XXX
+        for (const group of this._reportSet.reports[0].relationshipGroups("pres")) {
             if (this.factInGroup(fact, group)) {
                 factGroups.push(group);
             }
@@ -152,7 +161,9 @@ export class DocumentOutline {
     sortedSections() {
         const sections = Object.keys(this.sections);
         const re = /\(parenthetical\)\s*$/i;
-        const filteredSections = sections.filter(s => !re.test(this._report.getRoleLabel(s)));
-        return filteredSections.sort((a, b) => this._report.getRoleLabel(a).localeCompare(this._report.getRoleLabel(b)));
+        // XXX
+        const filteredSections = sections.filter(s => !re.test(this._reportSet.reports[0].getRoleLabel(s)));
+        // XXX
+        return filteredSections.sort((a, b) => this._reportSet.reports[0].getRoleLabel(a).localeCompare(this._reportSet.reports[0].getRoleLabel(b)));
     }
 }

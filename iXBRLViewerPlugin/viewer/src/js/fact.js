@@ -11,7 +11,7 @@ export class Fact {
     
     constructor(report, factId, factData) {
         this.f = factData;
-        this.ixNode = report.getIXNodeForItemId(factId);
+        this.ixNode = report.reportSet.getIXNodeForItemId(factId);
         this._report = report;
         this.id = factId;
         this.linkedFacts = [];
@@ -323,7 +323,7 @@ export class Fact {
     }
 
     footnotes() {
-        return (this.f.fn || []).map((fn, i) => this._report.getItemById(fn));
+        return (this.f.fn || []).map((fn, i) => this._report.reportSet.getItemById(fn));
     }
 
     isHidden() {

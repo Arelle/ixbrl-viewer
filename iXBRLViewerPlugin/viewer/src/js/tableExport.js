@@ -7,17 +7,17 @@ import { Fact } from './fact.js';
 
 
 export class TableExport {
-    constructor(table, report) {
+    constructor(table, reportSet) {
         this._table = table;
-        this._report = report;
+        this._reportSet = reportSet;
     } 
 
-    static addHandles(iframe, report) {
+    static addHandles(iframe, reportSet) {
         $('table', iframe).each(function () {
             const table = $(this);
             if (table.find(".ixbrl-element").length > 0) {
                 table.css("position", "relative");
-                const exporter = new TableExport(table, report);
+                const exporter = new TableExport(table, reportSet);
                 $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
                     .appendTo(table)
                     .click(() => exporter.exportTable());
@@ -27,7 +27,7 @@ export class TableExport {
 
     _getRawTable() {
         const table = this._table;
-        const report = this._report;
+        const reportSet = this._reportSet;
         let maxRowLength = 0;
         const rows = [];
         table.find("tr").each(function () {
@@ -44,7 +44,7 @@ export class TableExport {
                 let fact = null;
                 if (facts.length > 0) {
                     const id = facts.first().data('ivids');
-                    fact = report.getItemById(id);
+                    fact = reportSet.getItemById(id);
                 }
                 if (fact instanceof Fact) {
                     const cell = { type: "fact", fact: fact};

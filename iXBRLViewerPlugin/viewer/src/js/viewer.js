@@ -22,9 +22,9 @@ function localName(e) {
 
 
 export class Viewer {
-    constructor(iv, iframes, report) {
+    constructor(iv, iframes, reportSet) {
         this._iv = iv;
-        this._report = report;
+        this._reportSet = reportSet;
         this._iframes = iframes;
         this._contents = iframes.contents();
         this.onSelect = $.Callbacks();
@@ -92,7 +92,7 @@ export class Viewer {
                     })()
                         .then(() => viewer._iv.setProgress("Preparing document") )
                         .then(() => {
-                            this._report.setIXNodeMap(this._ixNodeMap);
+                            this._reportSet.setIXNodeMap(this._ixNodeMap);
                             this._applyStyles();
                             this._bindHandlers();
                             this.scale = 1;
@@ -106,9 +106,9 @@ export class Viewer {
     }
 
     _addDocumentSetTabs() {
-        if (this._report.isDocumentSet()) {
+        if (this._reportSet.isDocumentSet()) {
             $('#ixv .ixds-tabs').show();
-            for (const [i, doc] of this._report.documentSetFiles().entries()) {
+            for (const [i, doc] of this._reportSet.documentSetFiles().entries()) {
                 $('<div class="tab">')
                     .text(doc.file)
                     .prop('title', doc.file)
@@ -231,7 +231,7 @@ export class Viewer {
         const url = $(n).attr("href");
         if (url !== undefined) {
             const [file, fragment] = url.split('#', 2);
-            const docIndex = this._report.documentSetFiles().indexOf(file);
+            const docIndex = this._reportSet.documentSetFiles().indexOf(file);
             if (!url.includes('/') && docIndex != -1) {
                 $(n).click((e) => { 
                     this._showDocumentAndElement(docIndex, fragment);
@@ -529,7 +529,7 @@ export class Viewer {
         $('#iframe-container .zoom-out').click(() => this.zoomOut());
         $('#iframe-container .print').click(() => this.currentDocument().get(0).contentWindow.print());
 
-        TableExport.addHandles(this._contents, this._report);
+        TableExport.addHandles(this._contents, this._reportSet);
     }
 
     selectNextTag(currentFact) {
@@ -739,7 +739,7 @@ export class Viewer {
         $.each(namespaceGroups, function (i, ns) {
             groups[ns] = i;
         });
-        const report = this._report;
+        const reportSet = this._reportSet;
         const viewer = this;
         if (on) {
             $(".ixbrl-element", this._contents)
@@ -752,7 +752,7 @@ export class Viewer {
                     const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
                     if (ixn != undefined) {
                         const elements = viewer.elementsForItemIds(ixn.chainIXIds());
-                        const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
+                        const i = groups[reportSet.getItemById(ixn.id).conceptQName().prefix];
                         if (i !== undefined) {
                             elements.addClass("ixbrl-highlight-" + i);
                         }

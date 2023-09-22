@@ -2,7 +2,7 @@
 
 import interact from 'interactjs'
 import $ from 'jquery'
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 
@@ -219,8 +219,8 @@ iXBRLViewer.prototype.load = function () {
             $('#ixv .loader').removeClass("loading");
             return;
         }
-        const report = new iXBRLReport(parsedTaxonomyData);
-        const ds = report.documentSetFiles();
+        const reportSet = new ReportSet(parsedTaxonomyData);
+        const ds = reportSet.documentSetFiles();
         var hasExternalIframe = false;
         for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {
             const iframe = $("<iframe />").attr("src", ds[i].file).data("report-index", ds[i].index).appendTo("#ixv #iframe-container");
@@ -246,10 +246,10 @@ iXBRLViewer.prototype.load = function () {
                 if (complete) {
                     clearInterval(timer);
 
-                    var viewer = iv.viewer = new Viewer(iv, iframes, report);
+                    var viewer = iv.viewer = new Viewer(iv, iframes, reportSet);
 
                     viewer.initialize()
-                        .then(() => inspector.initialize(report, viewer))
+                        .then(() => inspector.initialize(reportSet, viewer))
                         .then(() => {
                             interact('#viewer-pane').resizable({
                                 edges: { left: false, right: ".resize", bottom: false, top: false},

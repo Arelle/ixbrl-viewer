@@ -61,12 +61,12 @@ export class Inspector {
         });
     }
 
-    initialize(report, viewer) {
+    initialize(reportSet, viewer) {
         const inspector = this;
         this._viewer = viewer;
         return new Promise(function (resolve, reject) {
             inspector._chart = new IXBRLChart();
-            inspector._report = report;
+            inspector._reportSet = reportSet;
             inspector.i18nInit().then((t) => {
                 
                 $(".collapsible-header").on("click", function () { 
@@ -112,13 +112,13 @@ export class Inspector {
 
                 // Listen to messages posted to this window
                 $(window).on("message", (e) => inspector.handleMessage(e));
-                report.setViewerOptions(inspector._viewerOptions);
-                inspector.summary = new DocumentSummary(report);
+                reportSet.setViewerOptions(inspector._viewerOptions);
+                inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
-                inspector.outline = new DocumentOutline(report);
+                inspector.outline = new DocumentOutline(reportSet);
                 inspector.createOutline();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
-                    inspector._search = new ReportSearch(report);
+                    inspector._search = new ReportSearch(reportSet);
                     inspector.buildDisplayOptionsMenu();
                     inspector.buildToolbarHighlightMenu();
                     inspector.buildHighlightKey();
@@ -183,12 +183,12 @@ export class Inspector {
 
     buildDisplayOptionsMenu() {
         this._optionsMenu.reset();
-        if (this._report) {
+        if (this._reportSet) {
             const dl = this.selectDefaultLanguage();
-            this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
+            this._optionsMenu.addCheckboxGroup(this._reportSet.availableLanguages(), this._reportSet.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
             this.setLanguage(dl);
-            if (this._report.filingDocuments()) {
-                this._optionsMenu.addDownloadButton("Download filing documents", this._report.filingDocuments())
+            if (this._reportSet.filingDocuments()) {
+                this._optionsMenu.addDownloadButton("Download filing documents", this._reportSet.filingDocuments())
             }
         }
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
@@ -232,7 +232,7 @@ export class Inspector {
                 "Untagged Dates",
             ]
         } else {
-            key = this._report.namespaceGroups();
+            key = this._reportSet.namespaceGroups();
         }
         this._iv.callPluginMethod("extendHighlightKey", key);
 
@@ -246,7 +246,7 @@ export class Inspector {
     }
 
     highlightAllTags(checked) {
-        this._viewer.highlightAllTags(checked, this._report.namespaceGroups());
+        this._viewer.highlightAllTags(checked, this._reportSet.namespaceGroups());
     }
 
     factListRow(f) {
@@ -343,16 +343,16 @@ export class Inspector {
                 .text(this._search.periods[key])
                 .appendTo('#search-filter-period select');
         }
-        for (const prefix of this._report.getUsedPrefixes()) {
+        for (const prefix of this._reportSet.getUsedPrefixes()) {
             $("<option>")
                 .attr("value", prefix)
-                .text(`${prefix} (${this._report.prefixMap()[prefix]})`)
+                .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)
                 .appendTo('#search-filter-namespaces select');
         }
-        for (const unit of this._report.getUsedUnits()) {
+        for (const unit of this._reportSet.getUsedUnits()) {
             $("<option>")
                     .attr("value", unit)
-                    .text(`${this._report.getUnit(unit)?.label()} (${unit})`)
+                    .text(`${this._reportSet.getUnit(unit)?.label()} (${unit})`)
                     .appendTo('#search-filter-units select');
         }
         const scalesOptions = this._getScalesOptions();
@@ -366,7 +366,7 @@ export class Inspector {
 
     _getScalesOptions() {
         const scalesOptions = {}
-        const usedScalesMap = this._report.getUsedScalesMap();
+        const usedScalesMap = this._reportSet.getUsedScalesMap();
         Object.keys(usedScalesMap).sort().forEach(scale => {
             const labels = Array.from(usedScalesMap[scale]).sort();
             if (labels.length > 0) {
@@ -561,7 +561,8 @@ export class Inspector {
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
             for (const elr of this.outline.sortedSections()) {
                 $('<div class="fact-list-item"></div>')
-                    .text(this._report.getRoleLabel(elr))
+                    // XXX hard-coded to first report
+                    .text(this._reportSet.reports[0].getRoleLabel(elr))
                     .click(() => this.selectItem(this.outline.sections[elr].id))
                     .dblclick(() => $('#inspector').removeClass("outline-mode"))
                     .mousedown((e) => {
@@ -579,7 +580,7 @@ export class Inspector {
         $('.fact-groups').empty();
         for (const elr of this.outline.groupsForFact(cf)) {
             $('<div class="fact-list-item"></div>')
-                .text(this._report.getRoleLabel(elr))
+                .text(cf.report().getRoleLabel(elr))
                 .click(() => this.selectItem(this.outline.sections[elr].id))
                 .appendTo($('.fact-groups'));
         }
@@ -608,8 +609,8 @@ export class Inspector {
         const html = $("<ul></ul>");
         if (anchors.length > 0) {
             for (const c of anchors) {
-                const otherFacts = this._report.getAlignedFacts(fact, { "c": c });
-                const label = this._report.getLabel(c, "std", true);
+                const otherFacts = fact.report().getAlignedFacts(fact, { "c": c });
+                const label = fact.report().getLabel(c, "std", true);
 
                 $("<li></li>")
                     .appendTo(html)
@@ -625,7 +626,7 @@ export class Inspector {
     }
 
     updateAnchoring(fact) {
-        if (!this._report.usesAnchoring()) {
+        if (!this._reportSet.usesAnchoring()) {
             $('.anchoring').hide();
         }
         else {
@@ -673,7 +674,7 @@ export class Inspector {
         if (!elr) {
             elr = calc.bestELRForFactSet(tableFacts);
         }
-        const report = this._report;
+        const report = fact.report();
         const inspector = this;
         const a = new Accordian();
 
@@ -775,7 +776,7 @@ export class Inspector {
     getPeriodIncrease(fact) {
         let s = "";
         if (fact.isNumeric()) {
-            const otherFacts = this._report.getAlignedFacts(fact, {"p":null });
+            const otherFacts = fact.report().getAlignedFacts(fact, {"p":null });
             var mostRecent;
             if (fact.periodTo()) {
                 for (const other of otherFacts) {
@@ -785,7 +786,7 @@ export class Inspector {
                 }
             }
             if (mostRecent) {
-                const allMostRecent = this._report.getAlignedFacts(mostRecent);
+                const allMostRecent = fact.report().getAlignedFacts(mostRecent);
                 s = $("<span></span>")
                         .text(this.describeChange(mostRecent, fact))
                         .append(this.factLinkHTML(mostRecent.periodString(), allMostRecent));
@@ -1027,12 +1028,12 @@ export class Inspector {
      */
     selectItem(id, itemIdList, noScroll) {
         if (itemIdList === undefined) {
-            this._currentItemList = [ this._report.getItemById(id) ];
+            this._currentItemList = [ this._reportSet.getItemById(id) ];
         }
         else {
             this._currentItemList = [];
             for (const itemId of itemIdList) {
-                this._currentItemList.push(this._report.getItemById(itemId));
+                this._currentItemList.push(this._reportSet.getItemById(itemId));
             }
         }
         this.switchItem(id, noScroll);
@@ -1048,7 +1049,7 @@ export class Inspector {
      */
     switchItem(id, noScroll) {
         if (id !== null) {
-            this._currentItem = this._report.getItemById(id);
+            this._currentItem = this._reportSet.getItemById(id);
             if (!noScroll) {
                 this._viewer.showItemById(id);
             }
@@ -1074,7 +1075,7 @@ export class Inspector {
     }
 
     selectDefaultLanguage() {
-        const al = this._report.availableLanguages();
+        const al = this._reportSet.availableLanguages();
         for (const pl of this.preferredLanguages()) {
             for (const l of al) {
                 if (l.toLowerCase() == pl.toLowerCase()) {
@@ -1082,7 +1083,7 @@ export class Inspector {
                 }
             }
         }
-        return this._report.availableLanguages()[0];
+        return this._reportSet.availableLanguages()[0];
     }
 
     setLanguage(lang) {
@@ -1091,18 +1092,18 @@ export class Inspector {
 
     showValidationReport() {
         const vr = new ValidationReportDialog();
-        vr.displayErrors(this._report.data.validation);
+        vr.displayErrors(this._reportSet.validation());
         vr.show();
     }
 
     setupValidationReportIcon() {
-        if (this._report.hasValidationErrors()) {
+        if (this._reportSet.hasValidationErrors()) {
             $("#ixv .validation-warning").show().on("click", () => this.showValidationReport());
         }
     }
 
     showValidationWarning() {
-        if (this._report.hasValidationErrors()) {
+        if (this._reportSet.hasValidationErrors()) {
             const message = $("<div></div>").append("<p>This report contains <b>XBRL validation errors</b>.  These errors may prevent this document from opening correctly in other XBRL software.</p>");
             const mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
             mb.show(() => this.showValidationReport());

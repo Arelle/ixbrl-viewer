@@ -15,6 +15,7 @@ export class Fact {
         this._report = report;
         this.id = factId;
         this.linkedFacts = [];
+        this._footnotes = [];
     }
 
     report() {
@@ -322,8 +323,12 @@ export class Fact {
         return this.concept().isEnumeration();
     }
 
+    addFootnote(fn) {
+        this._footnotes.push(fn);
+    }
+
     footnotes() {
-        return (this.f.fn || []).map((fn, i) => this._report.reportSet.getItemById(fn));
+        return this._footnotes;
     }
 
     isHidden() {

@@ -38,25 +38,28 @@ export class ReportSet {
                 const vuid = viewerUniqueId(reportIndex, id);
                 this._items[vuid] = new Fact(report, vuid, factData);
             }
-        }
 
-        // Now resolve footnote references, creating footnote objects for "normal"
-        // footnotes, and finding Fact objects for fact->fact footnotes.  
-        //
-        // Associate source facts with target footnote/facts to allow two way
-        // navigation.
-        for (const [id, fact] of Object.entries(this._items)) {
-            const fns = fact.fn || [];
-            fns.forEach((fnid) => {
-                const fnvuid = viewerUniqueId(fnid);
-                var fn = this._items[fnvuid];
-                if (fn === undefined) {
-                    fn = new Footnote(fact.report(), fnid, "Footnote " + (fnorder.indexOf(fnvuid) + 1));
-                    this._items[fnvuid] = fn;
-                }
-                // Associate fact with footnote
-                fn.addLinkedFact(fact);
-            });
+            // Now resolve footnote references, creating footnote objects for "normal"
+            // footnotes, and finding Fact objects for fact->fact footnotes.  
+            //
+            // Associate source facts with target footnote/facts to allow two way
+            // navigation.
+            for (const [id, factData] of Object.entries(reportData.facts)) {
+                const vuid = viewerUniqueId(reportIndex, id);
+                const fact = this._items[vuid];
+                const fns = factData.fn || [];
+                fns.forEach((fnid) => {
+                    const fnvuid = viewerUniqueId(reportIndex, fnid);
+                    var fn = this._items[fnvuid];
+                    if (fn === undefined) {
+                        fn = new Footnote(fact.report(), fnvuid, "Footnote " + (fnorder.indexOf(fnvuid) + 1));
+                        this._items[fnvuid] = fn;
+                    }
+                    // Associate fact with footnote
+                    fn.addLinkedFact(fact);
+                    fact.addFootnote(fn);
+                });
+            }
         }
     }
 

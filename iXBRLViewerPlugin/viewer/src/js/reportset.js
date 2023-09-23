@@ -1,12 +1,17 @@
 // See COPYRIGHT.md for copyright information
 
-import { iXBRLReport } from './report.js';
+import { XBRLReport } from './report.js';
 import { Fact } from "./fact.js"
 import { Footnote } from "./footnote.js"
 import { Unit } from "./unit";
 import { titleCase, viewerUniqueId } from "./util.js";
 import { QName } from "./qname.js"
 import $ from 'jquery'
+
+
+// Class represents the set of XBRL "target" reports shown in the viewer.
+// Each contained report represents the data from a single target document in a
+// single iXBRL Document or iXBRL Document Set
 
 export class ReportSet {
     constructor(data) {
@@ -32,7 +37,7 @@ export class ReportSet {
 
         // Create Fact objects for all facts.
         for (const [reportIndex, reportData] of this.reportsData().entries()) {
-            const report = new iXBRLReport(this, reportData);
+            const report = new XBRLReport(this, reportData);
             this.reports.push(report);
             for (const [id, factData] of Object.entries(reportData.facts)) {
                 const vuid = viewerUniqueId(reportIndex, id);

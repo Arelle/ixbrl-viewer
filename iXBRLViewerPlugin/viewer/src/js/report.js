@@ -9,7 +9,10 @@ import { setDefault, viewerUniqueId } from "./util.js";
 import $ from 'jquery'
 import i18next from "i18next";
 
-export function iXBRLReport(reportSet, reportData) {
+// Class to represent the XBRL data from a single target document in a single
+// Inline XBRL Document or Document Set.
+
+export function XBRLReport(reportSet, reportData) {
     this.reportSet = reportSet;
     this._reportData = reportData;
     // A map of IDs to Fact and Footnote objects
@@ -17,7 +20,7 @@ export function iXBRLReport(reportSet, reportData) {
     this._reverseRelationshipCache = {};
 }
 
-iXBRLReport.prototype.availableLanguages = function() {
+XBRLReport.prototype.availableLanguages = function() {
     if (!this._availableLanguages) {
         this._availableLanguages = new Set()
         for (const c of Object.values(this._reportData.concepts)) {
@@ -31,7 +34,7 @@ iXBRLReport.prototype.availableLanguages = function() {
     return this._availableLanguages;
 }
 
-iXBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
+XBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
     var rels = {}
     const elrs = this._reportData.rels[arcrole] || {};
     for (const elr in elrs) {
@@ -50,7 +53,7 @@ iXBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
  *
  * "rel" is modified to have a "src" property with the source concept.
  */
-iXBRLReport.prototype._reverseRelationships = function(arcrole) {
+XBRLReport.prototype._reverseRelationships = function(arcrole) {
     if (!(arcrole in this._reverseRelationshipCache)) {
         const rrc = {};
         const elrs = this._reportData.rels[arcrole] || {};
@@ -67,7 +70,7 @@ iXBRLReport.prototype._reverseRelationships = function(arcrole) {
     return this._reverseRelationshipCache[arcrole];
 }
 
-iXBRLReport.prototype.getParentRelationships = function(conceptName, arcrole) {
+XBRLReport.prototype.getParentRelationships = function(conceptName, arcrole) {
     const rels = {}
     for (const [elr, relSet] of Object.entries(this._reverseRelationships(arcrole))) {
         if (conceptName in relSet) {
@@ -77,12 +80,12 @@ iXBRLReport.prototype.getParentRelationships = function(conceptName, arcrole) {
     return rels;
 }
 
-iXBRLReport.prototype.getParentRelationshipsInGroup = function(conceptName, arcrole, elr) {
+XBRLReport.prototype.getParentRelationshipsInGroup = function(conceptName, arcrole, elr) {
     const relSet = this._reverseRelationships(arcrole)[elr] || {};
     return relSet[conceptName] || [];
 }
 
-iXBRLReport.prototype.dimensionDefault = function(dimensionName) {
+XBRLReport.prototype.dimensionDefault = function(dimensionName) {
     // ELR is irrelevant for dimension-default relationships, so check all of
     // them, and return the first (illegal for there to be more than one
     for (const rel of Object.values(this._reportData.rels["d-d"] || {})) {
@@ -93,11 +96,11 @@ iXBRLReport.prototype.dimensionDefault = function(dimensionName) {
     return undefined;
 }
 
-iXBRLReport.prototype.relationshipGroups = function(arcrole) {
+XBRLReport.prototype.relationshipGroups = function(arcrole) {
     return Object.keys(this._reportData.rels[arcrole] || {});
 }
 
-iXBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
+XBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
     const roots = [];
     for (const conceptName in this._reportData.rels[arcrole][elr]) {
         if (!(elr in this.getParentRelationships(conceptName, arcrole))) {
@@ -107,7 +110,7 @@ iXBRLReport.prototype.relationshipGroupRoots = function(arcrole, elr) {
     return roots;
 }
 
-iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
+XBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
     // XXX should filter to current report facts?
     var all = this.reportSet.facts();
     var aligned = [];
@@ -122,7 +125,7 @@ iXBRLReport.prototype.getAlignedFacts = function(f, coveredAspects) {
     return aligned; 
 }
 
-iXBRLReport.prototype.deduplicate = function (facts) {
+XBRLReport.prototype.deduplicate = function (facts) {
     const ff = [];
     $.each(facts, function (i, f) {
         var dupe = false;
@@ -139,11 +142,11 @@ iXBRLReport.prototype.deduplicate = function (facts) {
 }
 
 
-iXBRLReport.prototype.getConcept = function(name) {
+XBRLReport.prototype.getConcept = function(name) {
     return new Concept(this, name);
 }
 
-iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
+XBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
     /* This is currently hard-coded to "en" as the generator does not yet
      * support generic labels, and instead provides the (non-localisable) role
      * definition as a single "en" label.
@@ -162,18 +165,18 @@ iXBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
     return this.roleMap()[rolePrefix];
 }
 
-iXBRLReport.prototype.localDocuments = function() {
+XBRLReport.prototype.localDocuments = function() {
     if (this._reportData.localDocs === undefined) {
         return {}
     }
     return this._reportData.localDocs;
 }
 
-iXBRLReport.prototype.qname = function(v) {
+XBRLReport.prototype.qname = function(v) {
     return this.reportSet.qname(v);
 }
 
-iXBRLReport.prototype.getScaleLabel = function(scale, isMonetaryValue, currency=null) {
+XBRLReport.prototype.getScaleLabel = function(scale, isMonetaryValue, currency=null) {
     var label = i18next.t(`scale.${scale}`, {defaultValue:"noName"});
     if (isMonetaryValue && scale === -2) {
         label = i18next.t(`currencies:cents${currency}`, {defaultValue: label});
@@ -184,11 +187,11 @@ iXBRLReport.prototype.getScaleLabel = function(scale, isMonetaryValue, currency=
     return label;
 }
 
-iXBRLReport.prototype.concepts = function() {
+XBRLReport.prototype.concepts = function() {
     return this._reportData.concepts;
 }
 
-iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
+XBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     rolePrefix = rolePrefix || 'std';
     const lang = this._viewerOptions.language;
     const concept = this._reportData.concepts[c];
@@ -221,7 +224,7 @@ iXBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     }
 }
 
-iXBRLReport.prototype.getLabelOrName = function(c, rolePrefix, showPrefix) {
+XBRLReport.prototype.getLabelOrName = function(c, rolePrefix, showPrefix) {
     const label = this.getLabel(c, rolePrefix, showPrefix);
     if (label === undefined) {
         return c;

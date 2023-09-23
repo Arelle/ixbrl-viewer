@@ -2,7 +2,7 @@
 
 import { Fact } from "./fact.js";
 import { FactSet } from "./factset.js";
-import { iXBRLReport } from "./report.js";
+import { XBRLReport } from "./report.js";
 
 var i = 0;
 
@@ -75,7 +75,7 @@ function testReport(facts) {
     // Deep copy of standing data
     var data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new iXBRLReport(data);
+    var report = new XBRLReport(data);
     return report;
 }
 

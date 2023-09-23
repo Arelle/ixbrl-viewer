@@ -18,6 +18,10 @@ export class Fact {
         this._footnotes = [];
     }
 
+    localId() {
+        return this.id.replace(/^\d+-/,"");
+    }
+
     report() {
         return this._report;
     }
@@ -134,7 +138,7 @@ export class Fact {
             if (!unitKey) {
                 return undefined;
             }
-            this._unit = this.report().getUnit(unitKey);
+            this._unit = this.report().reportSet.getUnit(unitKey);
         }
         return this._unit;
     }

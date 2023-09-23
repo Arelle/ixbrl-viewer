@@ -2,7 +2,7 @@
 
 import { Fact } from "./fact.js";
 import { IXBRLChart } from "./chart.js";
-import { iXBRLReport } from "./report.js";
+import { XBRLReport } from "./report.js";
 import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
@@ -76,7 +76,7 @@ function testReport(facts, ixData) {
     // Deep copy of standing data
     var data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new iXBRLReport(data);
+    var report = new XBRLReport(data);
     report.setIXNodeMap(ixData);
     return report;
 }

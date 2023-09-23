@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import { Aspect, AspectSet } from "./aspect.js";
-import { iXBRLReport } from "./report.js";
+import { XBRLReport } from "./report.js";
 import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
@@ -48,7 +48,7 @@ beforeAll(() => {
     return insp.i18nInit();
 });
 
-var testReport = new iXBRLReport(testReportData);
+var testReport = new XBRLReport(testReportData);
 
 test("Concept aspect labels", () => {
     var conceptAspect = new Aspect("c", "eg:Concept1", testReport);

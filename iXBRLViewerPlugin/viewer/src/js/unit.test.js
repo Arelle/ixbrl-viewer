@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import { Unit } from "./unit.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
@@ -9,13 +9,14 @@ var testReportData = {
         "eg": "http://www.example.com",
         "iso4217": "http://www.xbrl.org/2003/iso4217",
         "e": "http://example.com/entity",
-    }
+    },
+    "facts": {}
 };
 
 function testReport() {
     // Deep copy of standing data
     const data = JSON.parse(JSON.stringify(testReportData));
-    const report = new iXBRLReport(data);
+    const report = new ReportSet(data);
     report.setIXNodeMap({});
     return report;
 }

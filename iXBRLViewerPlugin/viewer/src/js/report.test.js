@@ -1,6 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
-import { iXBRLReport } from "./report.js";
+import { XBRLReport } from "./report.js";
 import { ViewerOptions } from "./viewerOptions.js";
 
 var testReportData = {
@@ -66,8 +66,7 @@ var testReportData = {
 
 
 describe("Language options", () => {
-    var testReport = new iXBRLReport(testReportData);
-    testReport._initialize();
+    var testReport = new XBRLReport(testReportData);
     test("Available languages", () => {
         var al = testReport.availableLanguages();
         expect(al).toHaveLength(6);
@@ -83,12 +82,10 @@ describe("Language options", () => {
 });
 
 describe("Fetching facts", () => {
-    var testReport = new iXBRLReport(testReportData);
-    testReport._initialize();
+    var testReport = new XBRLReport(testReportData);
 
     test("Successful", () => {
         var f = testReport.getItemById("f1");
-        testReport._initialize();
         expect(f).not.toBeNull();
         expect(f.decimals()).toEqual(-3);
     });
@@ -100,7 +97,7 @@ describe("Fetching facts", () => {
 });
 
 describe("Concept labels", () => {
-    var testReport = new iXBRLReport(testReportData);
+    var testReport = new XBRLReport(testReportData);
     var vo = new ViewerOptions();
     testReport.setViewerOptions(vo);
     test("Label fallback", () => {
@@ -132,7 +129,7 @@ describe("Concept labels", () => {
 });
 
 describe("ELR labels", () => {
-    const testReport = new iXBRLReport(testReportData);
+    const testReport = new XBRLReport(testReportData);
     test("Present", () => {
         expect(testReport.getRoleLabel("role1")).toBe("Role 1 Label");
     });

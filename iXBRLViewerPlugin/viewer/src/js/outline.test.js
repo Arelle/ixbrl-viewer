@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { DocumentOutline } from "./outline.js";
 import { IXNode } from "./ixnode.js";
 
@@ -175,7 +175,7 @@ function testReport(factList) {
         data.facts[f] = testFacts[f];
         ixNodeMap[f] = new IXNode(f, $('<span></span>'), i++);
     }
-    var report = new iXBRLReport(data);
+    var report = new ReportSet(data);
     report.setIXNodeMap(ixNodeMap);
     return report;
 }

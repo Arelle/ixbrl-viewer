@@ -1,6 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
-import { iXBRLReport } from "./report.js";
+import { XBRLReport } from "./report.js";
 
 var testReportData = {
     "prefixes": {
@@ -48,7 +48,7 @@ var testReportData = {
 };
 
 describe("Concept references", () => {
-    var r = new iXBRLReport(testReportData);
+    var r = new XBRLReport(testReportData);
     test("Absent reference", () => {
         var c1 = r.getConcept("eg:Concept1");
         expect(c1.referenceValuesAsString()).toEqual("");

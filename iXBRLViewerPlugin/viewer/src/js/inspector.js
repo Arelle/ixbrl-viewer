@@ -112,7 +112,7 @@ export class Inspector {
 
                 // Listen to messages posted to this window
                 $(window).on("message", (e) => inspector.handleMessage(e));
-                reportSet.setViewerOptions(inspector._viewerOptions);
+                reportSet.viewerOptions = inspector._viewerOptions;
                 inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
                 inspector.outline = new DocumentOutline(reportSet);
@@ -679,7 +679,7 @@ export class Inspector {
         const a = new Accordian();
 
         for (const [e, rolePrefix] of Object.entries(calc.elrs())) {
-            const label = report.getRoleLabel(rolePrefix, inspector._viewerOptions);
+            const label = report.getRoleLabel(rolePrefix);
 
             const rCalc = calc.resolvedCalculation(e);
             const calcBody = $('<div></div>');

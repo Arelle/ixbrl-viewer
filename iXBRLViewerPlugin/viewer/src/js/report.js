@@ -4,7 +4,6 @@ import { Fact } from "./fact.js"
 import { Footnote } from "./footnote.js"
 import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
-import { ViewerOptions } from "./viewerOptions.js";
 import { setDefault, viewerUniqueId } from "./util.js";
 import $ from 'jquery'
 import i18next from "i18next";
@@ -16,7 +15,6 @@ export function XBRLReport(reportSet, reportData) {
     this.reportSet = reportSet;
     this._reportData = reportData;
     // A map of IDs to Fact and Footnote objects
-    this._viewerOptions = new ViewerOptions();
     this._reverseRelationshipCache = {};
 }
 
@@ -146,7 +144,7 @@ XBRLReport.prototype.getConcept = function(name) {
     return new Concept(this, name);
 }
 
-XBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
+XBRLReport.prototype.getRoleLabel = function(rolePrefix) {
     /* This is currently hard-coded to "en" as the generator does not yet
      * support generic labels, and instead provides the (non-localisable) role
      * definition as a single "en" label.
@@ -162,7 +160,7 @@ XBRLReport.prototype.getRoleLabel = function(rolePrefix, viewerOptions) {
             return label;
         }
     }
-    return this.roleMap()[rolePrefix];
+    return this.reportSet.roleMap()[rolePrefix];
 }
 
 XBRLReport.prototype.localDocuments = function() {
@@ -193,7 +191,7 @@ XBRLReport.prototype.concepts = function() {
 
 XBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
     rolePrefix = rolePrefix || 'std';
-    const lang = this._viewerOptions.language;
+    const lang = this.reportSet.viewerOptions.language;
     const concept = this._reportData.concepts[c];
     if (concept === undefined) {
         console.log("Attempt to get label for undefined concept: " + c);
@@ -216,7 +214,7 @@ XBRLReport.prototype.getLabel = function(c, rolePrefix, showPrefix) {
             return undefined;
         }
         var s = '';
-        if (showPrefix && this._viewerOptions.showPrefixes) {
+        if (showPrefix && this.reportSet.viewerOptions.showPrefixes) {
             s = "(" + this.qname(c).prefix + ") ";
         }
         s += label;

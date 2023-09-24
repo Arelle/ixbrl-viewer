@@ -5,7 +5,8 @@ import { Fact } from "./fact.js"
 import { Footnote } from "./footnote.js"
 import { Unit } from "./unit";
 import { titleCase, viewerUniqueId } from "./util.js";
-import { QName } from "./qname.js"
+import { QName } from "./qname.js";
+import { ViewerOptions } from './viewerOptions.js';
 import $ from 'jquery'
 
 
@@ -17,6 +18,7 @@ export class ReportSet {
     constructor(data) {
         this._data = data;
         this._ixNodeMap = {};
+        this.viewerOptions = new ViewerOptions()
     }
 
     /*
@@ -71,10 +73,10 @@ export class ReportSet {
 
 
     availableLanguages() {
-        return this.reports.reduce(
+        return Array.from(this.reports.reduce(
             (langs, report) => new Set([...langs, ...report.availableLanguages()]), 
             new Set()
-        );
+        ));
     }
 
     getItemById(id) {
@@ -205,8 +207,4 @@ export class ReportSet {
         return this._data.validation;
     }
     
-    setViewerOptions(vo) {
-        this._viewerOptions = vo;
-    }
-
 }

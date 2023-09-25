@@ -1,11 +1,12 @@
 // See COPYRIGHT.md for copyright information
 
 import { Fact } from "./fact.js";
-import { XBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
+import { viewerUniqueId } from "./util.js";
 
 
-var testReportData = {
+const testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
         "iso4217": "http://www.xbrl.org/2003/iso4217",
@@ -44,37 +45,38 @@ var testReportData = {
 
 function testReport(facts, ixData) {
     // Deep copy of standing data
-    var data = JSON.parse(JSON.stringify(testReportData));
+    const data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new XBRLReport(data);
-    report.setIXNodeMap(ixData);
-    return report;
+    const reportSet = new ReportSet(data);
+    reportSet.setIXNodeMap(ixData);
+    return reportSet;
 }
 
 function fromFact(value) {
-    var factData = {
+    const factData = {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
                     "u": "iso4217:USD", 
                     "p": "2017-01-01/2018-01-01",
                 }};
-    return new Fact(testReport({"f1": factData}, {"f1": {} }), "f1");
+    return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
 }
 
 function toFact(value) {
-    var factData = {
+    const factData = {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
                     "u": "iso4217:USD", 
                     "p": "2018-01-01/2019-01-01",
                 }};
-    return new Fact(testReport({"f1": factData}, {"f1": {} }), "f1");
+    
+    return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
 }
 
 describe("Describe changes", () => {
-    var insp = new TestInspector();
+    const insp = new TestInspector();
     beforeAll(() => {
         return insp.i18nInit();
     });
@@ -117,7 +119,7 @@ describe("Scales filter options", () => {
         if (scale !== 0) {
             ixNode["scale"] = scale;
         }
-        ixData[id] = ixNode;
+        ixData[viewerUniqueId(0, id)] = ixNode;
     }
     const nonMonetaryFactData = {};
     for (let scale = -4; scale < 11; scale++) {
@@ -127,16 +129,16 @@ describe("Scales filter options", () => {
         if (scale !== 0) {
             ixNode["scale"] = scale;
         }
-        ixData[id] = ixNode;
+        ixData[viewerUniqueId(0, id)] = ixNode;
     }
 
     test("Scales filter options with monetary and non-monetary facts", () => {
-        var insp = new TestInspector();
-        const report = testReport({
+        const insp = new TestInspector();
+        const reportSet = testReport({
             ...monetaryFactData,
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(report)
+        insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual({
@@ -159,10 +161,10 @@ describe("Scales filter options", () => {
 
     test("Scales filter options with only monetary facts", () => {
         var insp = new TestInspector();
-        const report = testReport({
+        const reportSet = testReport({
             ...monetaryFactData,
         }, ixData);
-        insp.initialize(report)
+        insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual({
@@ -184,11 +186,11 @@ describe("Scales filter options", () => {
     })
 
     test("Scales filter options with only non-monetary facts", () => {
-        var insp = new TestInspector();
-        const report = testReport({
+        const insp = new TestInspector();
+        const reportSet = testReport({
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(report)
+        insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual({

@@ -10,10 +10,10 @@ export class FactSet {
 
     /* Returns the union of dimensions present on facts in the set */
     _allDimensions() {
-        var dims = {};
-        var facts = this._items.filter((item) => item instanceof Fact);
-        for (var i = 0; i < facts.length; i++) {
-            var dd = Object.keys(facts[i].dimensions());
+        const dims = {};
+        const facts = this._items.filter((item) => item instanceof Fact);
+        for (const fact of facts) {
+            const dd = Object.keys(fact.dimensions());
             for (var j = 0; j < dd.length; j++) {
                 dims[dd[j]] = true;
             }

@@ -35,7 +35,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     'nose2==0.13.0',
-    'typing-extensions==4.7.1'
+    'typing-extensions==4.8.0'
 ]
 
 # https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins

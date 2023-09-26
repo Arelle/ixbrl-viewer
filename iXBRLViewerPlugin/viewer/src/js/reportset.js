@@ -59,7 +59,7 @@ export class ReportSet {
                     const fnvuid = viewerUniqueId(reportIndex, fnid);
                     var fn = this._items[fnvuid];
                     if (fn === undefined) {
-                        fn = new Footnote(fact.report(), fnvuid, "Footnote " + (fnorder.indexOf(fnvuid) + 1));
+                        fn = new Footnote(fact.report, fnvuid, "Footnote " + (fnorder.indexOf(fnvuid) + 1));
                         this._items[fnvuid] = fn;
                     }
                     // Associate fact with footnote
@@ -205,6 +205,10 @@ export class ReportSet {
 
     validation() {
         return this._data.validation;
+    }
+
+    factsForReport(report) {
+        return Object.values(this._items).filter(i => i instanceof Fact && i.report == report);
     }
     
 }

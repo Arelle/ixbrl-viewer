@@ -17,7 +17,7 @@ import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
-import { DocumentOutline } from './outline.js';
+import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
 
 const SEARCH_PAGE_SIZE = 100
@@ -115,7 +115,7 @@ export class Inspector {
                 reportSet.viewerOptions = inspector._viewerOptions;
                 inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
-                inspector.outline = new DocumentOutline(reportSet);
+                inspector.outline = new ReportSetOutline(reportSet);
                 inspector.createOutline();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
@@ -559,11 +559,10 @@ export class Inspector {
         if (this.outline.hasOutline()) {
             $('.outline .no-outline-overlay').hide();
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
-            for (const elr of this.outline.sortedSections()) {
+            for (const group of this.outline.sortedSections()) {
                 $('<div class="fact-list-item"></div>')
-                    // XXX hard-coded to first report
-                    .text(this._reportSet.reports[0].getRoleLabel(elr))
-                    .click(() => this.selectItem(this.outline.sections[elr].id))
+                    .text(group.report.getRoleLabel(group.elr))
+                    .click(() => this.selectItem(group.fact.id))
                     .dblclick(() => $('#inspector').removeClass("outline-mode"))
                     .mousedown((e) => {
                         // Prevent text selection by double click
@@ -578,10 +577,10 @@ export class Inspector {
 
     updateOutline(cf) {
         $('.fact-groups').empty();
-        for (const elr of this.outline.groupsForFact(cf)) {
+        for (const group of this.outline.groupsForFact(cf)) {
             $('<div class="fact-list-item"></div>')
-                .text(cf.report().getRoleLabel(elr))
-                .click(() => this.selectItem(this.outline.sections[elr].id))
+                .text(cf.report.getRoleLabel(group.elr))
+                .click(() => this.selectItem(group.fact.id))
                 .appendTo($('.fact-groups'));
         }
 
@@ -609,8 +608,8 @@ export class Inspector {
         const html = $("<ul></ul>");
         if (anchors.length > 0) {
             for (const c of anchors) {
-                const otherFacts = fact.report().getAlignedFacts(fact, { "c": c });
-                const label = fact.report().getLabel(c, "std", true);
+                const otherFacts = fact.report.getAlignedFacts(fact, { "c": c });
+                const label = fact.report.getLabel(c, "std", true);
 
                 $("<li></li>")
                     .appendTo(html)
@@ -674,7 +673,7 @@ export class Inspector {
         if (!elr) {
             elr = calc.bestELRForFactSet(tableFacts);
         }
-        const report = fact.report();
+        const report = fact.report;
         const inspector = this;
         const a = new Accordian();
 
@@ -776,7 +775,7 @@ export class Inspector {
     getPeriodIncrease(fact) {
         let s = "";
         if (fact.isNumeric()) {
-            const otherFacts = fact.report().getAlignedFacts(fact, {"p":null });
+            const otherFacts = fact.report.getAlignedFacts(fact, {"p":null });
             var mostRecent;
             if (fact.periodTo()) {
                 for (const other of otherFacts) {
@@ -786,7 +785,7 @@ export class Inspector {
                 }
             }
             if (mostRecent) {
-                const allMostRecent = fact.report().getAlignedFacts(mostRecent);
+                const allMostRecent = fact.report.getAlignedFacts(mostRecent);
                 s = $("<span></span>")
                         .text(this.describeChange(mostRecent, fact))
                         .append(this.factLinkHTML(mostRecent.periodString(), allMostRecent));

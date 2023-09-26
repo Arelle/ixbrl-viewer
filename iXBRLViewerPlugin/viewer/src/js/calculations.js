@@ -24,7 +24,7 @@ export function Calculation(fact) {
 
 Calculation.prototype.calculationFacts = function () {
     var fact = this._fact;
-    var report = fact.report();
+    var report = fact.report;
     if (!this._conceptToFact) {
         var rels = report.getChildRelationships(fact.conceptName(), "calc")
         var ctf = {};
@@ -91,7 +91,7 @@ Calculation.prototype.bestELRForFactSet = function(facts) {
 Calculation.prototype.resolvedCalculation = function(elr) {
     var calc = [];
     var calcFacts = this.calculationFacts()[elr];
-    var rels = this._fact.report().getChildRelationships(this._fact.conceptName(), "calc")[elr];
+    var rels = this._fact.report.getChildRelationships(this._fact.conceptName(), "calc")[elr];
     $.each(rels, function (i, r) {
         var s;
         if (r.w == 1) {

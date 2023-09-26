@@ -93,7 +93,7 @@ export class DocumentSummary {
                 counter = this._getTagCounter(tagCounts, dimension);
                 counter.addDimension(dimension);
 
-                const dimensionConcept = fact.report().getConcept(dimension);
+                const dimensionConcept = fact.report.getConcept(dimension);
                 if (dimensionConcept.isTypedDimension()) {
                     const typedDomainElement = dimensionConcept.typedDomainElement();
                     if (typedDomainElement) {

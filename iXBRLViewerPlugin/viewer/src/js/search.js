@@ -25,22 +25,22 @@ export class ReportSearch {
             doc.startDate = f.periodFrom();
             var dims = f.dimensions();
             for (var d in dims) {
-                if (f.report().getConcept(d).isTypedDimension()) {
+                if (f.report.getConcept(d).isTypedDimension()) {
                     if (dims[d] !== null) {
                         l += " " + dims[d];
                     }
                 }
                 else {
-                    l += " " + f.report().getLabel(dims[d], "std");
+                    l += " " + f.report.getLabel(dims[d], "std");
                 }
             }
             doc.label = l;
             doc.ref = f.concept().referenceValuesAsString();
             const wider = f.widerConcepts();
             if (wider.length > 0) {
-                doc.widerConcept = f.report().qname(wider[0]).localname;
-                doc.widerLabel = f.report().getLabel(wider[0], "std");
-                doc.widerDoc = f.report().getLabel(wider[0], "doc");
+                doc.widerConcept = f.report.qname(wider[0]).localname;
+                doc.widerLabel = f.report.getLabel(wider[0], "std");
+                doc.widerDoc = f.report.getLabel(wider[0], "doc");
             }
             docs.push(doc);
 

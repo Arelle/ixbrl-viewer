@@ -32,6 +32,10 @@ XBRLReport.prototype.availableLanguages = function() {
     return this._availableLanguages;
 }
 
+XBRLReport.prototype.facts = function() {
+    return this.reportSet.factsForReport(this);
+}
+
 XBRLReport.prototype.getChildRelationships = function(conceptName, arcrole) {
     var rels = {}
     const elrs = this._reportData.rels[arcrole] || {};

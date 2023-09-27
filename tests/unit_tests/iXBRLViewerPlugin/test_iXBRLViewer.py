@@ -425,29 +425,33 @@ class TestIXBRLViewer(unittest.TestCase):
         typed_dimension_concept.modelXbrl = self.modelXbrl_1
         typed_dimension_domain_concept.modelXbrl = self.modelXbrl_1
         member_concept.modelXbrl = self.modelXbrl_1
-        self.builder_1 = IXBRLViewerBuilder(self.modelXbrl_1)
-        self.builder_2 = IXBRLViewerBuilder(self.modelXbrl_1)
-        self.builder_3 = IXBRLViewerBuilder(self.modelXbrl_2)
-        self.builder_doc_set = IXBRLViewerBuilder(self.modelXbrlDocSet)
+
+
+        self.builder_1 = IXBRLViewerBuilder([self.modelXbrl_1])
+        self.builder_2 = IXBRLViewerBuilder([self.modelXbrl_1])
+        self.builder_3 = IXBRLViewerBuilder([self.modelXbrl_2])
+        self.builder_doc_set = IXBRLViewerBuilder([self.modelXbrlDocSet])
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     def test_addConcept_simple_case(self):
-        self.builder_1.addConcept(self.cash_concept)
-        self.assertTrue(self.builder_1.taxonomyData.get('concepts').get('us-gaap:Cash'))
+        self.builder_1.addReport()
+        self.builder_1.addConcept(self.modelXbrl_1, self.cash_concept)
+        self.assertTrue(self.builder_1.taxonomyData["reports"][0].get('concepts').get('us-gaap:Cash'))
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_simple_case(self):
         modelXbrl = Mock(baseSets=defaultdict(list), relationshipSets={})
         builder = IXBRLViewerBuilder(modelXbrl)
-        result = builder.getRelationships()
+        result = builder.getRelationships(modelXbrl)
         self.assertDictEqual(result, {})
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_returns_a_rel(self):
-        result = self.builder_1.getRelationships()
+        self.builder_1.addReport()
+        result = self.builder_1.getRelationships(self.modelXbrl_1)
         roleMap = self.builder_1.roleMap
         siPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/summation-item')
         self.assertTrue(result.get(siPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept'))
@@ -457,18 +461,20 @@ class TestIXBRLViewer(unittest.TestCase):
         Adding an ELR with no definition should result in no entry in the roleDefs map
         """
         elr = "http://example.com/unknownELR"
-        self.builder_1.addELR(elr)
+        self.builder_1.addReport()
+        self.builder_1.addELR(self.modelXbrl_1, elr)
         elrPrefix = self.builder_1.roleMap.getPrefix(elr)
-        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix), None)
+        self.assertEqual(self.builder_1.currentReportData.get('roleDefs').get(elrPrefix), None)
 
     def test_addELR_with_definition(self):
         """
         Adding an ELR with a definition should result in an "en" label with the definition as its value.
         """
         elr = "ELR"
-        self.builder_1.addELR(elr)
+        self.builder_1.addReport()
+        self.builder_1.addELR(self.modelXbrl_1, elr)
         elrPrefix = self.builder_1.roleMap.getPrefix(elr)
-        self.assertEqual(self.builder_1.taxonomyData.get('roleDefs').get(elrPrefix).get("en"), "ELR Label")
+        self.assertEqual(self.builder_1.currentReportData.get('roleDefs').get(elrPrefix).get("en"), "ELR Label")
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -491,7 +497,7 @@ class TestIXBRLViewer(unittest.TestCase):
         jsdata = json.loads(body[2].text)
         errors = jsdata["validation"]
         self.assertEqual(errors, [{"sev": "ERROR", "msg": "Error message", "code": "code1" }])
-        self.assertEqual(set(jsdata["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+        self.assertEqual(set(jsdata["reports"][0]["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -513,8 +519,9 @@ class TestIXBRLViewer(unittest.TestCase):
 
         jsdata = json.loads(body[2].text)
         self.assertNotIn("validation", jsdata)
-        self.assertEqual(set(jsdata["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
-        self.assertEqual(jsdata["concepts"], {
+        print(jsdata["reports"])
+        self.assertEqual(set(jsdata["reports"][0]["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+        self.assertEqual(jsdata["reports"][0]["concepts"], {
             'us-gaap:Cash': {'e': True, 't': True, 'labels': {}},
             'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}},
             'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}},
@@ -523,7 +530,7 @@ class TestIXBRLViewer(unittest.TestCase):
             'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}},
             'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain'},
         })
-        self.assertEqual(jsdata["localDocs"], {
+        self.assertEqual(jsdata["reports"][0]["localDocs"], {
             'local-inline.htm': ['inline'],
             'local-docset': ['inline'],
             'local-schema.xsd': ['schema'],
@@ -555,7 +562,7 @@ class TestIXBRLViewer(unittest.TestCase):
 
         jsdata = json.loads(body[2].text)
         self.assertNotIn("validation", jsdata)
-        self.assertEqual(set(jsdata["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+        self.assertEqual(set(jsdata["reports"][0]["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -580,7 +587,7 @@ class TestIXBRLViewer(unittest.TestCase):
         self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
 
         jsdata = json.loads(body[2].text)
-        facts = jsdata["facts"]
+        facts = jsdata["reports"][0]["facts"]
         self.assertEqual(facts.keys(), {"fact_id2", "fact_id3"})
         self.assertEqual(facts["fact_id2"]["a"]["u"], "iso4217:USD")
         self.assertEqual(facts["fact_id3"]["a"]["u"], None)

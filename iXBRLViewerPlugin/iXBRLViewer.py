@@ -230,7 +230,7 @@ class IXBRLViewerBuilder:
         return rels
 
     def validationErrors(self):
-        dts = self.dts
+        dts = self.reports[0]
 
         logHandler = dts.modelManager.cntlr.logHandler
         if getattr(logHandler, "logRecordBuffer") is None:
@@ -378,6 +378,12 @@ class IXBRLViewerBuilder:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
             return etree.parse(fin)
 
+    def addReport(self):
+        self.taxonomyData["reports"].append({
+            "concepts": {},
+            "facts": {},
+        })
+
     def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
@@ -402,10 +408,7 @@ class IXBRLViewerBuilder:
 
         for n, report in enumerate(self.reports):
             self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
-            self.taxonomyData["reports"].append({
-                "concepts": {},
-                "facts": {},
-            })
+            self.addReport()
             for f in report.facts:
                 self.addFact(report, f)
             self.currentReportData["rels"] = self.getRelationships(report)

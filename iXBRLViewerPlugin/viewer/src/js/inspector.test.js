@@ -211,3 +211,44 @@ describe("Scales filter options", () => {
         });
     })
 });
+
+describe("Fact deep link", () => {
+    const insp = new TestInspector();
+    insp._reportSet = {
+        getItemById: jest.fn(id => ["0-123", "1-abc"].includes(id) ? true : undefined),
+    };
+    const mockSelect = jest.fn(id => true);
+    insp.selectItem = mockSelect;
+    test("Old style fact deep link", () => {
+        mockSelect.mockClear();
+        location.hash = "#f-123";
+        insp.handleFactDeepLink();
+        expect(mockSelect).toHaveBeenCalledWith("0-123");
+    })
+    test("Old style fact deep link (non-existent)", () => {
+        mockSelect.mockClear();
+        location.hash = "#f-1234";
+        insp.handleFactDeepLink();
+        expect(mockSelect).not.toHaveBeenCalled();
+    })
+    test("New style fact deep link", () => {
+        mockSelect.mockClear();
+        location.hash = "#f0-123";
+        insp.handleFactDeepLink();
+        expect(mockSelect).toHaveBeenCalledWith("0-123");
+    })
+    test("New style fact deep link", () => {
+        mockSelect.mockClear();
+        location.hash = "#f1-abc";
+        insp.handleFactDeepLink();
+        expect(mockSelect).toHaveBeenCalledWith("1-abc");
+    })
+    test("New style fact deep link (non-existent)", () => {
+        mockSelect.mockClear();
+        location.hash = "#f0-1234";
+        insp.handleFactDeepLink();
+        expect(mockSelect).not.toHaveBeenCalled();
+    })
+
+
+});

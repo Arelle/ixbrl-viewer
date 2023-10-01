@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel, runGenerator } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, viewerUniqueId } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -145,10 +145,20 @@ export class Inspector {
     /*
      * Check for fragment identifier pointing to a specific fact and select it if
      * present.
+     *
+     * Legacy format: #f-FACT_ID
+     * New format: #fN-FACT_ID where N is report index
+     *
      */
     handleFactDeepLink() {
-        if (location.hash.startsWith("#f-")) {
-            this.selectItem(location.hash.slice(3));
+        const match = location.hash.match(/^#f(-|([0-9]+)-)(.*)$/);
+        if (match !== undefined) {
+            const reportId = match[1] === "-" ? 0 : match[2];
+            const id = viewerUniqueId(reportId, match[3]);
+            console.log(id);
+            if (this._reportSet.getItemById(id) !== undefined) {
+                this.selectItem(id);
+            }
         }
     }
 
@@ -174,7 +184,7 @@ export class Inspector {
 
     updateURLFragment() {
         if (this._currentItem) {
-            location.hash = "#f-" + this._currentItem.id;
+            location.hash = "#f" + this._currentItem.id;
         }
         else {
             location.hash = "";

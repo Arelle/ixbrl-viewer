@@ -3,6 +3,7 @@
 import { ReportSearch } from "./search.js"
 import { ReportSet } from "./reportset.js";
 import { viewerUniqueId } from "./util.js";
+import { createSimpleFact, createNumericFact } from './test-utils.js';
 
 const testReportData = {
     "concepts": {},
@@ -50,28 +51,6 @@ function createDimensionalizedFact(id, concept, options=null, dimensions= {}) {
     return fact;
 }
 
-function createSimpleFact(id, concept, options=null) {
-    options = options || {};
-    return {
-        [id]: {
-            "a": {
-                "c": concept,
-                "u": options["unit"],
-                "p": options["period"],
-            },
-            "d": options["decimals"],
-            "v": options["value"]
-        }
-    };
-}
-
-function createNumericFact(id, concept, unit, period, value) {
-    return createSimpleFact(id, concept, {
-        "unit": unit,
-        "period": period,
-        "value": value
-    });
-}
 
 function testReport(ixData, testData) {
     // Deep copy of standing data

@@ -70,8 +70,6 @@ export class ReportSet {
         }
     }
 
-
-
     availableLanguages() {
         return Array.from(this.reports.reduce(
             (langs, report) => new Set([...langs, ...report.availableLanguages()]), 

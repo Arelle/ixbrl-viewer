@@ -23,7 +23,7 @@ function testReportSet(concepts, facts, documents) {
         localDocuments: () => documents
     }
     for (const f of facts) {
-        f.report = () => report;
+        f.report = report;
     }
     return {
         facts: () => facts,

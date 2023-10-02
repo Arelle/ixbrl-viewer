@@ -133,7 +133,7 @@ export class Viewer {
             }
         }
         $(n).wrap(wrapper);
-        return $(n).parent();
+        return n.parentNode;
     }
 
 
@@ -251,40 +251,44 @@ export class Viewer {
         const v = this;
         /* Is the element the only significant content within a <td> or <th> ? If
          * so, use that as the wrapper element. */
-        var nodes = $(domNode).closest("td,th").eq(0);
+        const tableNode = domNode.closest("td,th");
+        const nodes = [];
         const innerText = $(domNode).text();
-        if (nodes.length == 1 && innerText.length > 0) {
+        if (tableNode !== null && innerText.length > 0) {
             // Use indexOf rather than a single regex because innerText may
             // be too long for the regex engine 
-            const outerText = $(nodes).text();
+            const outerText = $(tableNode).text();
             const start = outerText.indexOf(innerText);
             const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
-            if (/[0-9A-Za-z]/.test(wrapper)) {
-                nodes = $();
+            if (!/[0-9A-Za-z]/.test(wrapper)) {
+                nodes.push(tableNode)
             } 
         }
         /* Otherwise, insert a <span> as wrapper */
         if (nodes.length == 0) {
-            nodes = this._wrapNode(domNode);
-            // Create a node set of current node and all absolutely positioned
+            nodes.push(this._wrapNode(domNode));
+
+            // Create a list of the wrapper node, and all absolutely positioned
             // descendants.
-            nodes = nodes.find("*").addBack().filter(function (n, e) {
-                return (this == nodes[0] || (getComputedStyle(this).getPropertyValue('position') === "absolute"));
-            });
+            for (const e of domNode.querySelectorAll("*")) { 
+                if (getComputedStyle(e).getPropertyValue('position') === "absolute") { 
+                    nodes.push(e);
+                } 
+            }
         }
-        nodes.each(function (i) {
+        for (const [i, n] of nodes.entries()) {
             // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
             if (nodes.length > 1) {
-                this.classList.add("ixbrl-contains-absolute");
+                n.classList.add("ixbrl-contains-absolute");
             }
             if (i == 0) {
-                this.classList.add("ixbrl-element");
+                n.classList.add("ixbrl-element");
             }
             else {
-                this.classList.add("ixbrl-sub-element");
+                n.classList.add("ixbrl-sub-element");
             }
-        });
-        return nodes;
+        }
+        return $(nodes);
     }
 
 
@@ -400,13 +404,13 @@ export class Viewer {
                     nodes.addClass("ixbrl-element-hidden");
                 }
                 if (isContinuation) {
-                    $(nodes).addClass("ixbrl-continuation");
+                    nodes.addClass("ixbrl-continuation");
                 }
                 else {
                     this._docOrderItemIndex.addItem(id, docIndex);
                 }
                 if (isNonFraction) {
-                    $(nodes).addClass("ixbrl-element-nonfraction");
+                    nodes.addClass("ixbrl-element-nonfraction");
                     if (n.hasAttribute('scale')) {
                         const scale = Number(n.getAttribute('scale'));
                         // Set scale if the value is a valid number and is not a redundant 0/"ones" scale.
@@ -416,13 +420,13 @@ export class Viewer {
                     }
                 }
                 if (isNonNumeric) {
-                    $(nodes).addClass("ixbrl-element-nonnumeric");
+                    nodes.addClass("ixbrl-element-nonnumeric");
                     if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
                         ixn.escaped = true;
                     }
                 }
                 if (isFootnote) {
-                    $(nodes).addClass("ixbrl-element-footnote");
+                    nodes.addClass("ixbrl-element-footnote");
                     ixn.footnote = true;
                 }
             }

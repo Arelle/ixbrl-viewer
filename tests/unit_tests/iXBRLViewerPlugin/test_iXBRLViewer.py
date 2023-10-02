@@ -377,8 +377,8 @@ class TestIXBRLViewer(unittest.TestCase):
             urlDocs=dict((
                 urlDocEntry('/filesystem/local-inline.htm', Type.INLINEXBRL),
                 urlDocEntry('https://example.com/remote-inline.htm', Type.INLINEXBRL),
-                urlDocEntry('/filesystem/local-docset', Type.INLINEXBRLDOCUMENTSET),
-                urlDocEntry('https://example.com/remote-docset', Type.INLINEXBRLDOCUMENTSET),
+                urlDocEntry('/filesystem/local-docset/_IXDS', Type.INLINEXBRLDOCUMENTSET),
+                urlDocEntry('https://example.com/remote-docset/_IXDS', Type.INLINEXBRLDOCUMENTSET),
                 urlDocEntry('/filesystem/local-schema.xsd', Type.SCHEMA),
                 urlDocEntry('https://example.com/remote-schema.xsd', Type.SCHEMA),
                 urlDocEntry('/filesystem/local-label-linkbase.xml', Type.LINKBASE, XbrlConst.qnLinkLabelLink),
@@ -525,7 +525,6 @@ class TestIXBRLViewer(unittest.TestCase):
         })
         self.assertEqual(jsdata["localDocs"], {
             'local-inline.htm': ['inline'],
-            'local-docset': ['inline'],
             'local-schema.xsd': ['schema'],
             'local-pres-linkbase.xml': ['presLinkbase'],
             'local-calc-linkbase.xml': ['calcLinkbase'],

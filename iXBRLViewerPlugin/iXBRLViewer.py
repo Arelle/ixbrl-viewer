@@ -445,9 +445,9 @@ class IXBRLViewerBuilder:
 
         localDocs = defaultdict(set)
         for path, doc in dts.urlDocs.items():
-            if isHttpUrl(path):
+            if isHttpUrl(path) or doc.type == Type.INLINEXBRLDOCUMENTSET:
                 continue
-            if doc.type in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
+            if doc.type == Type.INLINEXBRL:
                 localDocs[doc.basename].add('inline')
             elif doc.type == Type.SCHEMA:
                 localDocs[doc.basename].add('schema')

@@ -487,7 +487,7 @@ class IXBRLViewerBuilder:
         if packageDownloadURL is not None:
             self.taxonomyData["filingDocuments"] = packageDownloadURL
         elif len(self.reports) == 1 and os.path.dirname(self.reports[0].modelDocument.filepath).endswith('.zip'):
-            filingDocZipPath = os.path.dirname(self.dts.modelDocument.filepath)
+            filingDocZipPath = os.path.dirname(self.reports[0].modelDocument.filepath)
             filingDocZipName = os.path.basename(filingDocZipPath)
             iv.addFilingDoc(filingDocZipPath)
             self.taxonomyData["filingDocuments"] = filingDocZipName

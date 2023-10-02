@@ -5,143 +5,164 @@ import { ViewerOptions } from "./viewerOptions.js";
 import { viewerUniqueId } from "./util.js";
 import { createNumericFact } from "./test-utils.js";
 
-const multiReportTestData = {
-    "features": [],
-    "languages": {
-        "en-us": "English (US)",
-        "en": "English",
-        "fr": "French",
-    },
-    "prefixes": {
-        "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217"
-    },
-    "roles": {
-        "role1": "https://www.example.com/role1",
-        "role2": "https://www.example.com/role2",
-        "role3": "https://www.example.com/role3",
-        "role4": "https://www.example.com/role4"
-    },
-    "reports": [
-        {
-            "roleDefs": {
-                "role1": { "en": "Role 1 Label" },
-                "role2": { "en": null },
-                "role3": {}
-            },
-            "concepts": {
-                "eg:Concept1": {
-                    "labels": {
-                        "std": {
-                            "en": "English label"
-                        }
-                    }
-                },
-                "eg:Concept2": {
-                    "labels": {
-                        "std": {
-                            "en": "English label for concept two",
-                            "en-us": "English (US) label for concept two",
-                        }
-                    }
-                },
-                "eg:Concept3": {
-                    "labels": {
-                        "std": {
-                            "en": "Concept three"
-                        }
-                    }
-                }
-            },
-
-            "facts": {
-                ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
-                ...createNumericFact("f2", "eg:Concept2", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
+function anchoringRelationShips(include) {
+    if (include) {
+        return {
+          "w-n": {
+            "role1": {
+              "eg:Concept1": [{"t": "eg:Concept2"}],
             }
-        },
-        {
-            "roleDefs": {
-            },
-            "concepts": {
-                "eg:Concept1": {
-                    "labels": {
-                        "std": {
-                            "en": "English label"
-                        }
-                    }
-                },
-                "eg:Concept2": {
-                    "labels": {
-                        "std": {
-                            "en": "Report 2 English label for concept two",
-                        }
-                    }
-                },
-                "eg:Concept3": {
-                    "labels": {
-                        "std": {
-                            "en-gb": "Concept three"
-                        }
-                    }
-                }
-            },
-
-            "facts": {
-                ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 2000, -3),
-            }
+          }
         }
-    ]
-};
+    }
+    return {}
+}
+
+function multiReportTestData(withAnchoring) {
+    return {
+        "features": [],
+        "languages": {
+            "en-us": "English (US)",
+            "en": "English",
+            "fr": "French",
+        },
+        "prefixes": {
+            "eg": "http://www.example.com",
+            "iso4217": "http://www.xbrl.org/2003/iso4217"
+        },
+        "roles": {
+            "role1": "https://www.example.com/role1",
+            "role2": "https://www.example.com/role2",
+            "role3": "https://www.example.com/role3",
+            "role4": "https://www.example.com/role4"
+        },
+        "reports": [
+            {
+                "roleDefs": {
+                    "role1": { "en": "Role 1 Label" },
+                    "role2": { "en": null },
+                    "role3": {}
+                },
+                "concepts": {
+                    "eg:Concept1": {
+                        "labels": {
+                            "std": {
+                                "en": "English label"
+                            }
+                        }
+                    },
+                    "eg:Concept2": {
+                        "labels": {
+                            "std": {
+                                "en": "English label for concept two",
+                                "en-us": "English (US) label for concept two",
+                            }
+                        }
+                    },
+                    "eg:Concept3": {
+                        "labels": {
+                            "std": {
+                                "en": "Concept three"
+                            }
+                        }
+                    }
+                },
+
+                "facts": {
+                    ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
+                    ...createNumericFact("f2", "eg:Concept2", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
+                }
+            },
+            {
+                "roleDefs": {
+                },
+                "concepts": {
+                    "eg:Concept1": {
+                        "labels": {
+                            "std": {
+                                "en": "English label"
+                            }
+                        }
+                    },
+                    "eg:Concept2": {
+                        "labels": {
+                            "std": {
+                                "en": "Report 2 English label for concept two",
+                            }
+                        }
+                    },
+                    "eg:Concept3": {
+                        "labels": {
+                            "std": {
+                                "en-gb": "Concept three"
+                            }
+                        }
+                    }
+                },
+
+                "facts": {
+                    ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 2000, -3),
+                },
+
+                "rels": {
+                  ...anchoringRelationShips(withAnchoring)
+                }
+            }
+        ]
+    };
+}
 
 // Legacy report data format - no "reports" array
-const singleReportTestData = {
-    "features": [],
-    "languages": {
-        "en-us": "English (US)",
-        "en": "English",
-        "fr": "French",
-    },
-    "prefixes": {
-        "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217"
-    },
-    "roles": {
-        "role1": "https://www.example.com/role1",
-        "role2": "https://www.example.com/role2",
-        "role3": "https://www.example.com/role3",
-        "role4": "https://www.example.com/role4"
-    },
-    "roleDefs": {
-        "role1": { "en": "Role 1 Label" },
-        "role2": { "en": null },
-        "role3": {}
-    },
-    "concepts": {
-        "eg:Concept1": {
-            "labels": {
-                "std": {
-                    "en": "English label"
-                }
-            }
+function singleReportTestData() {
+    return {
+        "features": [],
+        "languages": {
+            "en-us": "English (US)",
+            "en": "English",
+            "fr": "French",
         },
-        "eg:Concept2": {
-            "labels": {
-                "std": {
-                    "en": "English label for concept two",
-                    "en-us": "English (US) label for concept two",
-                }
-            }
+        "prefixes": {
+            "eg": "http://www.example.com",
+            "iso4217": "http://www.xbrl.org/2003/iso4217"
         },
-    },
+        "roles": {
+            "role1": "https://www.example.com/role1",
+            "role2": "https://www.example.com/role2",
+            "role3": "https://www.example.com/role3",
+            "role4": "https://www.example.com/role4"
+        },
+        "roleDefs": {
+            "role1": { "en": "Role 1 Label" },
+            "role2": { "en": null },
+            "role3": {}
+        },
+        "concepts": {
+            "eg:Concept1": {
+                "labels": {
+                    "std": {
+                        "en": "English label"
+                    }
+                }
+            },
+            "eg:Concept2": {
+                "labels": {
+                    "std": {
+                        "en": "English label for concept two",
+                        "en-us": "English (US) label for concept two",
+                    }
+                }
+            },
+        },
 
-    "facts": {
-        ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
-        ...createNumericFact("f2", "eg:Concept2", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
-    }
-};
+        "facts": {
+            ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
+            ...createNumericFact("f2", "eg:Concept2", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
+        }
+    };
+}
 
 describe("Multi report - basic", () => {
-    const testReportSet = new ReportSet(multiReportTestData);
+    const testReportSet = new ReportSet(multiReportTestData());
     testReportSet._initialize();
     test("Report count", () => {
         expect(testReportSet.reports).toHaveLength(2);
@@ -149,7 +170,7 @@ describe("Multi report - basic", () => {
 });
 
 describe("Multi report - Language options", () => {
-    const testReportSet = new ReportSet(multiReportTestData);
+    const testReportSet = new ReportSet(multiReportTestData());
     testReportSet._initialize();
     test("Available languages", () => {
         const al = testReportSet.availableLanguages();
@@ -167,7 +188,7 @@ describe("Multi report - Language options", () => {
 });
 
 describe("Multi report - Fetching facts", () => {
-    const testReportSet = new ReportSet(multiReportTestData);
+    const testReportSet = new ReportSet(multiReportTestData());
     testReportSet._initialize();
 
     test("Successful f1 (report 1)", () => {
@@ -193,7 +214,7 @@ describe("Multi report - Fetching facts", () => {
 });
 
 describe("Multi report - Concept labels", () => {
-    const testReportSet = new ReportSet(multiReportTestData);
+    const testReportSet = new ReportSet(multiReportTestData());
     testReportSet._initialize();
     const testReport = testReportSet.reports[0];
     const vo = new ViewerOptions();
@@ -207,7 +228,7 @@ describe("Multi report - Concept labels", () => {
 });
 
 describe("Multi report - ELR labels", () => {
-    const testReportSet = new ReportSet(multiReportTestData);
+    const testReportSet = new ReportSet(multiReportTestData());
     testReportSet._initialize();
 
     test("Present", () => {
@@ -217,8 +238,21 @@ describe("Multi report - ELR labels", () => {
     });
 });
 
+describe("Multi anchoring - ELR labels", () => {
+    test("Without anchoring", () => {
+        const testReportSet = new ReportSet(multiReportTestData(false));
+        testReportSet._initialize();
+        expect(testReportSet.usesAnchoring()).toBe(false);
+    });
+    test("With anchoring", () => {
+        const testReportSet = new ReportSet(multiReportTestData(true));
+        testReportSet._initialize();
+        expect(testReportSet.usesAnchoring()).toBe(true);
+    });
+});
+
 describe("Single report - basic", () => {
-    const testReportSet = new ReportSet(singleReportTestData);
+    const testReportSet = new ReportSet(singleReportTestData());
     testReportSet._initialize();
     test("Report count", () => {
         expect(testReportSet.reports).toHaveLength(1);
@@ -226,7 +260,7 @@ describe("Single report - basic", () => {
 });
 
 describe("Single report - Language options", () => {
-    const testReportSet = new ReportSet(singleReportTestData);
+    const testReportSet = new ReportSet(singleReportTestData());
     testReportSet._initialize();
     test("Available languages", () => {
         const al = testReportSet.availableLanguages();
@@ -244,7 +278,7 @@ describe("Single report - Language options", () => {
 });
 
 describe("Single report - Fetching facts", () => {
-    const testReportSet = new ReportSet(singleReportTestData);
+    const testReportSet = new ReportSet(singleReportTestData());
     testReportSet._initialize();
 
     test("Successful f1", () => {
@@ -265,7 +299,7 @@ describe("Single report - Fetching facts", () => {
 });
 
 describe("Single report - Concept labels", () => {
-    const testReportSet = new ReportSet(singleReportTestData);
+    const testReportSet = new ReportSet(singleReportTestData());
     testReportSet._initialize();
     const testReport = testReportSet.reports[0];
     const vo = new ViewerOptions();
@@ -277,7 +311,7 @@ describe("Single report - Concept labels", () => {
 });
 
 describe("ELR labels", () => {
-    const testReportSet = new ReportSet(singleReportTestData);
+    const testReportSet = new ReportSet(singleReportTestData());
     testReportSet._initialize();
 
     test("Present", () => {

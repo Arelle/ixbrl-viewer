@@ -193,8 +193,7 @@ export class ReportSet {
     }
 
     usesAnchoring() {
-        // XXX hard-coded to first report
-        return this.reportsData()[0].rels["w-n"] !== undefined;
+        return this.reportsData().some(r => r.rels?.["w-n"] !== undefined);
     }
 
     hasValidationErrors() {

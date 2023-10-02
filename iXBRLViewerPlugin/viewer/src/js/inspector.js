@@ -152,7 +152,7 @@ export class Inspector {
      */
     handleFactDeepLink() {
         const match = location.hash.match(/^#f(-|([0-9]+)-)(.*)$/);
-        if (match !== undefined) {
+        if (match !== null) {
             const reportId = match[1] === "-" ? 0 : match[2];
             const id = viewerUniqueId(reportId, match[3]);
             console.log(id);

@@ -412,6 +412,7 @@ class IXBRLViewerBuilder:
             xmlDocsByFilename = {
                 os.path.basename(self.outputFilename(doc.filepath)): deepcopy(doc.xmlDocument)
                 for doc in sorted(dts.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+                if doc.type == Type.INLINEXBRL
             }
             docSetFiles = list(xmlDocsByFilename.keys())
 

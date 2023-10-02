@@ -329,13 +329,21 @@ class TestIXBRLViewer(unittest.TestCase):
                 Mock(
                     xmlDocument=etree.ElementTree(root),
                     filepath='a.xml',
-                    objectIndex=0
+                    objectIndex=0,
+                    type=Type.INLINEXBRL,
                 ): [],
                 Mock(
                     xmlDocument=etree.ElementTree(root),
                     filepath='b.xml',
-                    objectIndex=1
-                ): []
+                    objectIndex=1,
+                    type=Type.INLINEXBRL,
+                ): [],
+                Mock(
+                    xmlDocument=etree.ElementTree(root),
+                    filepath='a.xsd',
+                    objectIndex=2,
+                    type=Type.SCHEMA,
+                ): [],
             },
             filepath=self.modelDocument.filepath,
             type=Type.INLINEXBRLDOCUMENTSET

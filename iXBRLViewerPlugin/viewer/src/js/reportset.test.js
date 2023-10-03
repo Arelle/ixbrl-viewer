@@ -238,7 +238,7 @@ describe("Multi report - ELR labels", () => {
     });
 });
 
-describe("Multi anchoring - ELR labels", () => {
+describe("Multi report - anchoring", () => {
     test("Without anchoring", () => {
         const testReportSet = new ReportSet(multiReportTestData(false));
         testReportSet._initialize();
@@ -248,6 +248,25 @@ describe("Multi anchoring - ELR labels", () => {
         const testReportSet = new ReportSet(multiReportTestData(true));
         testReportSet._initialize();
         expect(testReportSet.usesAnchoring()).toBe(true);
+    });
+});
+
+describe("Multi report - doc set files", () => {
+    test("Not overlapping", () => {
+        const data = multiReportTestData(false);
+        data.reports[0].docSetFiles = ["a.html", "b.html"];
+        data.reports[1].docSetFiles = ["c.html", "d.html"];
+        const testReportSet = new ReportSet(data);
+        testReportSet._initialize();
+        expect(testReportSet.reportFiles()).toStrictEqual([{"index": 0, "file": "a.html"}, {"index": 0, "file": "b.html"}, {"index": 1, "file": "c.html"}, {"index": 1, "file": "d.html"}]);
+    });
+    test("Repeated document set", () => {
+        const data = multiReportTestData(false);
+        data.reports[0].docSetFiles = ["a.html", "b.html"];
+        data.reports[1].docSetFiles = ["a.html", "b.html"];
+        const testReportSet = new ReportSet(data);
+        testReportSet._initialize();
+        expect(testReportSet.reportFiles()).toStrictEqual([{"index": 0, "file": "a.html"}, {"index": 0, "file": "b.html"}, {"index": 1, "file": "a.html"}, {"index": 1, "file": "b.html"}]);
     });
 });
 

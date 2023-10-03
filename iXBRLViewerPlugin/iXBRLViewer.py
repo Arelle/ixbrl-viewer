@@ -444,8 +444,10 @@ class IXBRLViewerBuilder:
 
             else:
                 if len(self.reports) == 1:
+                    # If there is only a single report, call the output file "xbrlviewer.html"
                     filename = "xbrlviewer.html"
                 else:
+                    # Otherwise, preserve filenames
                     filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
                     docSetFiles = [ filename ]
                 if xmlDocument is None:

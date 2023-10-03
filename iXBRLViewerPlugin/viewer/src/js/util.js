@@ -161,6 +161,15 @@ export function isTransparent(rgba) {
     return !isNaN(val) && val < 0.1;
 }
 
+/**
+ * Prefix an item ID with the index of the report document that it appears in,
+ * in order to generate an ID that is guaranteed to be unique within the
+ * viewer. This is already within an iXBRL Document Set, but not across
+ * separate iXBRL documents or document sets.
+ * @param  {Integer}  reportIndex  Index of the report document containing the fact
+ * @return {String}   a viewer unique ID
+ */
+
 export function viewerUniqueId(reportIndex, id) {
     if (id === null) {
         return null;

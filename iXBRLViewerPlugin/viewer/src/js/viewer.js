@@ -106,9 +106,9 @@ export class Viewer {
     }
 
     _addDocumentSetTabs() {
-        if (this._reportSet.isDocumentSet()) {
+        if (this._reportSet.isMultiDocumentViewer()) {
             $('#ixv .ixds-tabs').show();
-            for (const [i, doc] of this._reportSet.documentSetFiles().entries()) {
+            for (const [i, doc] of this._reportSet.reportFiles().entries()) {
                 $('<div class="tab">')
                     .text(doc.file)
                     .prop('title', doc.file)
@@ -231,7 +231,7 @@ export class Viewer {
         const url = $(n).attr("href");
         if (url !== undefined) {
             const [file, fragment] = url.split('#', 2);
-            const docIndex = this._reportSet.documentSetFiles().indexOf(file);
+            const docIndex = this._reportSet.reportFiles().indexOf(file);
             if (!url.includes('/') && docIndex != -1) {
                 $(n).click((e) => { 
                     this._showDocumentAndElement(docIndex, fragment);

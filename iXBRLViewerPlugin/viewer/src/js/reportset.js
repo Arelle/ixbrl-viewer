@@ -184,12 +184,28 @@ export class ReportSet {
         return this._data.reports ?? [ this._data ];
     }
 
-    documentSetFiles() {
+    /**
+     * Returns a flat list of source files for all reports in the report set.
+     * Each entry in the list is an object with:
+     *   file - name of the file
+     *   index - index of the report that it is for
+     * May return an empty list for single file, non-stub viewers.
+     * @return {List}   A list of objects describing each file
+     */
+    reportFiles() {
         return this.reportsData().map((x, n) => (x.docSetFiles ?? []).map(file => ({ index: n, file: file }))).flat();
     }
 
-    isDocumentSet() {
-        return this.documentSetFiles().length > 1;
+    /**
+     * Returns true if the viewer is for more than one Inline XBRL document
+     * This may be a single document set with multiple files, or multiple
+     * document sets
+     * @return {Boolean}   true if the viewer covers more than one iXBRL
+     *                     document
+     */
+
+    isMultiDocumentViewer() {
+        return this.reportFiles().length > 1;
     }
 
     usesAnchoring() {

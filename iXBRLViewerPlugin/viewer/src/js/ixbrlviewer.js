@@ -220,7 +220,7 @@ iXBRLViewer.prototype.load = function () {
             return;
         }
         const reportSet = new ReportSet(parsedTaxonomyData);
-        const ds = reportSet.documentSetFiles();
+        const ds = reportSet.reportFiles();
         var hasExternalIframe = false;
         for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {
             const iframe = $("<iframe />").attr("src", ds[i].file).data("report-index", ds[i].index).appendTo("#ixv #iframe-container");

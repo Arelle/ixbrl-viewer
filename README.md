@@ -22,20 +22,23 @@ The viewer project consists of two components:
 In order to view an iXBRL report in the viewer, it must first be prepared using
 the Arelle plugin.  The preparation process updates the iXBRL file to include:
 
-1. A link to the Javascript viewer
+1. A link to the JavaScript viewer
 2. A block of JSON data that contains the results of processing the XBRL data and associated taxonomy
 
-Once prepared, the resulting file provides an entirely standalone viewer.  Once
-prepared, the viewer is entirely standalone, and does not require access to the
-taxonomy, or to any online services.  The only dependency is on the javascript
-viewer application, which is a single file which can be accessed directly online, downloaded or built locally.
+Once prepared, the resulting file provides an entirely standalone viewer, and
+does not require access to the taxonomy, or to any online services.  The only
+dependency is on the JavaScript viewer application, which is a single file
+which can be accessed directly online, downloaded or built locally.
 
-The javascript viewer application is a single Javascript file called ixbrlviewer.js. It
-contains all of the javascript that runs the viewer functionality.
+It is also possible to place the link to the viewer, and the block of JSON data
+in a separate file.  See Stub Viewer Mode below.
+
+The JavaScript viewer application is a single JavaScript file called ixbrlviewer.js. It
+contains all of the JavaScript that runs the viewer functionality.
 
 ## Installation
 
-The python portion of this repo is developed using Python 3.11.
+The Python portion of this repo is developed using Python 3.11.
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
 2. Download and install [Arelle][arelle-download]
@@ -75,11 +78,15 @@ the ixbrl-viewer.
 
 ## JavaScript Versioning
 
-The ixbrl-viewer plugin embeds processed XBRL metadata in the HTML that has a specific format read
-by the JavaScript. The metadata produced by a version will be broken if a major version bump is
-released. The new javascript won't necessarily work with older versions of the generated metadata.
-if a minor version bump is released, then the metadata format was updated, any ixbrl-viewer produced
-on that minor version will have to use at least that minor version for the javascript.
+The ixbrl-viewer plugin embeds processed XBRL metadata in the HTML that has a
+specific format read by the JavaScript. The metadata produced will work with a
+viewer application that has the same major version, and the same or later minor
+version as the plugin used to create it.
+
+This means that once an XBRL report has been prepared by the plugin, the
+associated JavaScript viewer application can be upgraded within the same major
+version.  Any features introduced in newer versions of the viewer that rely on
+additional metadata will degrade gracefully if that metadata is not present.
 
 ## Producing an ixbrl-viewer via the Arelle GUI
 
@@ -168,6 +175,9 @@ Notes:
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js
 
+* Due to browser security restrictions, the resulting viewer cannot be loaded
+  directly from `file:` URLs; it must be served by a web server.
+
 ### Using build-viewer.py
 
 As an alternative to the standard Arelle command line, the
@@ -191,7 +201,29 @@ e.g.
 ```shell
 PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --out out-dir --package-dir /my/packages/ ixds-dir
 ```
+
+## Stub viewer mode
+
+By default, the link to the JavaScript viewer and the JSON data block are added
+to the iXBRL report file (or to the first file, in the case of a document set).  
+
+Stub viewer mode is an optional generation mode that creates an an additional,
+minimal HTML file containing the JSON data block, and the link to the
+JavaScript viewer.  This mode has two advantages over the default approach of
+embedding the JSON data and JavaScript link in the iXBRL report:
+
+1. Provided that all facts and footnotes in the iXBRL report already have ID
+   attributes, no modification of the iXBRL report is required.
+2. The iXBRL viewer loading mask will be displayed much more quickly.  This is
+   helpful for very large iXBRL reports which can otherwise result in a long
+   delay before there is any sign of the iXBRL Viewer loading.
+
+The downside of this mode is that due to browser security restrictions, the
+viewer cannot be loaded directly from files (using `file:` URLs); they must be
+served by a web server.
+
 # Optional Features
+
 Some features are disabled by default but can be enabled at generation time or with query parameters.
 
 To enable features:

@@ -36,83 +36,91 @@ function multiReportTestData(withAnchoring) {
             "role3": "https://www.example.com/role3",
             "role4": "https://www.example.com/role4"
         },
-        "reports": [
-            {
-                "roleDefs": {
-                    "role1": { "en": "Role 1 Label" },
-                    "role2": { "en": null },
-                    "role3": {}
-                },
-                "concepts": {
-                    "eg:Concept1": {
-                        "labels": {
-                            "std": {
-                                "en": "English label"
+        "sourceReports": [
+            { 
+                "targetReports": [
+                    {
+                        "roleDefs": {
+                            "role1": { "en": "Role 1 Label" },
+                            "role2": { "en": null },
+                            "role3": {}
+                        },
+                        "concepts": {
+                            "eg:Concept1": {
+                                "labels": {
+                                    "std": {
+                                        "en": "English label"
+                                    }
+                                }
+                            },
+                            "eg:Concept2": {
+                                "labels": {
+                                    "std": {
+                                        "en": "English label for concept two",
+                                        "en-us": "English (US) label for concept two",
+                                    }
+                                }
+                            },
+                            "eg:Concept3": {
+                                "labels": {
+                                    "std": {
+                                        "en": "Concept three"
+                                    }
+                                }
                             }
-                        }
-                    },
-                    "eg:Concept2": {
-                        "labels": {
-                            "std": {
-                                "en": "English label for concept two",
-                                "en-us": "English (US) label for concept two",
-                            }
-                        }
-                    },
-                    "eg:Concept3": {
-                        "labels": {
-                            "std": {
-                                "en": "Concept three"
-                            }
-                        }
-                    }
-                },
+                        },
 
-                "facts": {
-                    ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
-                    ...createNumericFact("f2", "eg:Concept2", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
-                }
+                        "facts": {
+                            ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
+                            ...createNumericFact("f2", "eg:Concept2", "iso2417:USD", "2018-01-01/2019-01-01", 1000, -3),
+                        }
+                    },
+                ]
             },
             {
-                "roleDefs": {
-                },
-                "concepts": {
-                    "eg:Concept1": {
-                        "labels": {
-                            "std": {
-                                "en": "English label"
+                "targetReports": [
+                    {
+                        "roleDefs": {
+                        },
+                        "concepts": {
+                            "eg:Concept1": {
+                                "labels": {
+                                    "std": {
+                                        "en": "English label"
+                                    }
+                                }
+                            },
+                            "eg:Concept2": {
+                                "labels": {
+                                    "std": {
+                                        "en": "Report 2 English label for concept two",
+                                    }
+                                }
+                            },
+                            "eg:Concept3": {
+                                "labels": {
+                                    "std": {
+                                        "en-gb": "Concept three"
+                                    }
+                                }
                             }
-                        }
-                    },
-                    "eg:Concept2": {
-                        "labels": {
-                            "std": {
-                                "en": "Report 2 English label for concept two",
-                            }
-                        }
-                    },
-                    "eg:Concept3": {
-                        "labels": {
-                            "std": {
-                                "en-gb": "Concept three"
-                            }
+                        },
+
+                        "facts": {
+                            ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 2000, -3),
+                        },
+
+                        "rels": {
+                          ...anchoringRelationShips(withAnchoring)
                         }
                     }
-                },
-
-                "facts": {
-                    ...createNumericFact("f1", "eg:Concept1", "iso2417:USD", "2018-01-01/2019-01-01", 2000, -3),
-                },
-
-                "rels": {
-                  ...anchoringRelationShips(withAnchoring)
-                }
+                ]
             }
         ]
     };
 }
 
-// Legacy report data format - no "reports" array
+// Legacy report data format - no "sourceReports" array
 function singleReportTestData() {
     return {
         "features": [],
@@ -254,16 +262,16 @@ describe("Multi report - anchoring", () => {
 describe("Multi report - doc set files", () => {
     test("Not overlapping", () => {
         const data = multiReportTestData(false);
-        data.reports[0].docSetFiles = ["a.html", "b.html"];
-        data.reports[1].docSetFiles = ["c.html", "d.html"];
+        data.sourceReports[0].docSetFiles = ["a.html", "b.html"];
+        data.sourceReports[1].docSetFiles = ["c.html", "d.html"];
         const testReportSet = new ReportSet(data);
         testReportSet._initialize();
         expect(testReportSet.reportFiles()).toStrictEqual([{"index": 0, "file": "a.html"}, {"index": 0, "file": "b.html"}, {"index": 1, "file": "c.html"}, {"index": 1, "file": "d.html"}]);
     });
     test("Repeated document set", () => {
         const data = multiReportTestData(false);
-        data.reports[0].docSetFiles = ["a.html", "b.html"];
-        data.reports[1].docSetFiles = ["a.html", "b.html"];
+        data.sourceReports[0].docSetFiles = ["a.html", "b.html"];
+        data.sourceReports[1].docSetFiles = ["a.html", "b.html"];
         const testReportSet = new ReportSet(data);
         testReportSet._initialize();
         expect(testReportSet.reportFiles()).toStrictEqual([{"index": 0, "file": "a.html"}, {"index": 0, "file": "b.html"}, {"index": 1, "file": "a.html"}, {"index": 1, "file": "b.html"}]);

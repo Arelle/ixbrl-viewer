@@ -166,13 +166,13 @@ export function isTransparent(rgba) {
  * in order to generate an ID that is guaranteed to be unique within the
  * viewer. This is already within an iXBRL Document Set, but not across
  * separate iXBRL documents or document sets.
- * @param  {Integer}  reportIndex  Index of the report document containing the fact
+ * @param  {Integer}  sourceReportIndex - index of the report document containing the fact
  * @return {String}   a viewer unique ID
  */
 
-export function viewerUniqueId(reportIndex, id) {
+export function viewerUniqueId(sourceReportIndex, id) {
     if (id === null) {
         return null;
     }
-    return reportIndex.toString() + "-" + id;
+    return sourceReportIndex.toString() + "-" + id;
 }

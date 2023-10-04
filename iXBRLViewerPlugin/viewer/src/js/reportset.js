@@ -38,34 +38,36 @@ export class ReportSet {
         fnorder.sort((a,b) => this._ixNodeMap[a].docOrderindex - this._ixNodeMap[b].docOrderindex);
 
         // Create Fact objects for all facts.
-        for (const [reportIndex, reportData] of this.reportsData().entries()) {
-            const report = new XBRLReport(this, reportData);
-            this.reports.push(report);
-            for (const [id, factData] of Object.entries(reportData.facts)) {
-                const vuid = viewerUniqueId(reportIndex, id);
-                this._items[vuid] = new Fact(report, vuid, factData);
-            }
+        for (const [reportIndex, sourceReport] of (this._data.sourceReports ?? [ { "targetReports": [ this._data ] } ]).entries()) {
+            for (const reportData of sourceReport.targetReports) {
+                const report = new XBRLReport(this, reportData);
+                this.reports.push(report);
+                for (const [id, factData] of Object.entries(reportData.facts)) {
+                    const vuid = viewerUniqueId(reportIndex, id);
+                    this._items[vuid] = new Fact(report, vuid, factData);
+                }
 
-            // Now resolve footnote references, creating footnote objects for "normal"
-            // footnotes, and finding Fact objects for fact->fact footnotes.  
-            //
-            // Associate source facts with target footnote/facts to allow two way
-            // navigation.
-            for (const [id, factData] of Object.entries(reportData.facts)) {
-                const vuid = viewerUniqueId(reportIndex, id);
-                const fact = this._items[vuid];
-                const fns = factData.fn || [];
-                fns.forEach((fnid) => {
-                    const fnvuid = viewerUniqueId(reportIndex, fnid);
-                    var fn = this._items[fnvuid];
-                    if (fn === undefined) {
-                        fn = new Footnote(fact.report, fnvuid, "Footnote " + (fnorder.indexOf(fnvuid) + 1));
-                        this._items[fnvuid] = fn;
-                    }
-                    // Associate fact with footnote
-                    fn.addLinkedFact(fact);
-                    fact.addFootnote(fn);
-                });
+                // Now resolve footnote references, creating footnote objects for "normal"
+                // footnotes, and finding Fact objects for fact->fact footnotes.  
+                //
+                // Associate source facts with target footnote/facts to allow two way
+                // navigation.
+                for (const [id, factData] of Object.entries(reportData.facts)) {
+                    const vuid = viewerUniqueId(reportIndex, id);
+                    const fact = this._items[vuid];
+                    const fns = factData.fn || [];
+                    fns.forEach((fnid) => {
+                        const fnvuid = viewerUniqueId(reportIndex, fnid);
+                        var fn = this._items[fnvuid];
+                        if (fn === undefined) {
+                            fn = new Footnote(fact.report, fnvuid, "Footnote " + (fnorder.indexOf(fnvuid) + 1));
+                            this._items[fnvuid] = fn;
+                        }
+                        // Associate fact with footnote
+                        fn.addLinkedFact(fact);
+                        fact.addFootnote(fn);
+                    });
+                }
             }
         }
     }
@@ -181,7 +183,7 @@ export class ReportSet {
     }
 
     reportsData() {
-        return this._data.reports ?? [ this._data ];
+        return this._data.sourceReports?.flatMap(sr => sr.targetReports) ?? [ this._data ];
     }
 
     /**
@@ -193,7 +195,8 @@ export class ReportSet {
      * @return {List}   A list of objects describing each file
      */
     reportFiles() {
-        return this.reportsData().map((x, n) => (x.docSetFiles ?? []).map(file => ({ index: n, file: file }))).flat();
+        const sourceReports = this._data.sourceReports ?? [ this._data ];
+        return sourceReports.map((x, n) => (x.docSetFiles ?? []).map(file => ({ index: n, file: file }))).flat();
     }
 
     /**

@@ -87,7 +87,7 @@ class IXBRLViewerBuilder:
         self.roleMap = NamespaceMap()
         self.reports = reports
         self.taxonomyData = {
-            "reports": [],
+            "sourceReports": [],
             "features": [],
             "languages": {},
         }
@@ -146,8 +146,12 @@ class IXBRLViewerBuilder:
             self.taxonomyData["languages"][langCode] = self.makeLanguageName(langCode)
 
     @property
+    def currentSourceReportData(self):
+        return self.taxonomyData["sourceReports"][-1]
+
+    @property
     def currentReportData(self):
-        return self.taxonomyData["reports"][-1]
+        return self.currentSourceReportData["targetReports"][-1]
             
     def addELR(self, report: ModelXbrl, elr):
         prefix = self.roleMap.getPrefix(elr)
@@ -379,9 +383,13 @@ class IXBRLViewerBuilder:
             return etree.parse(fin)
 
     def addReport(self):
-        self.taxonomyData["reports"].append({
-            "concepts": {},
-            "facts": {},
+        self.taxonomyData["sourceReports"].append({
+            "targetReports": [
+                {
+                    "concepts": {},
+                    "facts": {},
+                }
+            ]
         })
 
     def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
@@ -479,7 +487,7 @@ class IXBRLViewerBuilder:
             }
 
             if docSetFiles is not None:
-                self.currentReportData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
+                self.currentSourceReportData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap

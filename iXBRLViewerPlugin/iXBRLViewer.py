@@ -234,9 +234,7 @@ class IXBRLViewerBuilder:
         return rels
 
     def validationErrors(self):
-        dts = self.reports[0]
-
-        logHandler = dts.modelManager.cntlr.logHandler
+        logHandler = self.reports[0].modelManager.cntlr.logHandler
         if getattr(logHandler, "logRecordBuffer") is None:
             raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
 

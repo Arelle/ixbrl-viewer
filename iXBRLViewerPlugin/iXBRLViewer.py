@@ -86,6 +86,8 @@ class IXBRLViewerBuilder:
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.reports = reports
+        # Arbitrary ModelXbrl used for logging
+        self.logger_model = reports[0]
         self.taxonomyData = {
             "sourceReports": [],
             "features": [],
@@ -234,7 +236,7 @@ class IXBRLViewerBuilder:
         return rels
 
     def validationErrors(self):
-        logHandler = self.reports[0].modelManager.cntlr.logHandler
+        logHandler = self.logger_model.modelManager.cntlr.logHandler
         if getattr(logHandler, "logRecordBuffer") is None:
             raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
 
@@ -352,7 +354,7 @@ class IXBRLViewerBuilder:
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 for body_child in child:
                     if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type','') == 'application/x.ixbrl-viewer+json':
-                        self.dts.error("viewer:error", "File already contains iXBRL viewer")
+                        self.logger_model.error("viewer:error", "File already contains iXBRL viewer")
                         return False
 
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
@@ -516,10 +518,12 @@ class iXBRLViewerFile:
 
 class iXBRLViewer:
 
-    def __init__(self, dts):
+    def __init__(self, logger_model: ModelXbrl):
         self.files = []
         self.filingDocuments = None
-        self.dts = dts
+        # This is an arbitrary ModelXbrl used for logging only
+        self.logger_model = logger_model
+
     def addFile(self, ivf):
         self.files.append(ivf)
 
@@ -544,15 +548,15 @@ class iXBRLViewer:
                 fileMode = 'w'
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.dts.error("viewer:error", "Directory %s does not exist" % destination)
+                self.logger_model.error("viewer:error", "Directory %s does not exist" % destination)
                 return
             elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
+                self.logger_model.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
                 return
             elif not destination.endswith('.zip'):
                 # File extension isn't a zip
-                self.dts.error("viewer:error", "File extension %s is not a zip" % os.path.splitext(destination)[0])
+                self.logger_model.error("viewer:error", "File extension %s is not a zip" % os.path.splitext(destination)[0])
                 return
             else:
                 file = destination
@@ -560,50 +564,50 @@ class iXBRLViewer:
 
             with zipfile.ZipFile(file, fileMode, zipfile.ZIP_DEFLATED, True) as zout:
                 for f in self.files:
-                    self.dts.info("viewer:info", "Saving in output zip %s" % f.filename)
+                    self.logger_model.info("viewer:info", "Saving in output zip %s" % f.filename)
                     with zout.open(f.filename, "w") as fout:
                         writer = XHTMLSerializer(fout)
                         writer.serialize(f.xmlDocument)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
-                    self.dts.info("viewer:info", "Writing %s" % filename)
+                    self.logger_model.info("viewer:info", "Writing %s" % filename)
                     zout.write(self.filingDocuments, filename)
                 if copyScriptPath is not None:
                     scriptSrc = os.path.join(destination, copyScriptPath)
-                    self.dts.info("viewer:info", "Writing script from %s" % scriptSrc)
+                    self.logger_model.info("viewer:info", "Writing script from %s" % scriptSrc)
                     zout.write(scriptSrc, os.path.basename(copyScriptPath))
         elif os.path.isdir(destination):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
             for f in self.files:
                 filename = os.path.join(destination, f.filename)
-                self.dts.info("viewer:info", "Writing %s" % filename)
+                self.logger_model.info("viewer:info", "Writing %s" % filename)
                 with open(filename, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(f.xmlDocument)
             if self.filingDocuments:
                 filename = os.path.basename(self.filingDocuments)
-                self.dts.info("viewer:info", "Writing %s" % filename)
+                self.logger_model.info("viewer:info", "Writing %s" % filename)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
             if copyScriptPath is not None:
                 self._copyScript(destination, copyScriptPath)
         else:
             if len(self.files) > 1:
-                self.dts.error("viewer:error", "More than one file in input, but output is not a directory")
+                self.logger_model.error("viewer:error", "More than one file in input, but output is not a directory")
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.dts.error("viewer:error", "Directory %s does not exist" % destination)
+                self.logger_model.error("viewer:error", "Directory %s does not exist" % destination)
             elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.dts.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
+                self.logger_model.error("viewer:error", "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
             else:
-                self.dts.info("viewer:info", "Writing %s" % destination)
+                self.logger_model.info("viewer:info", "Writing %s" % destination)
                 with open(destination, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(self.files[0].xmlDocument)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
-                    self.dts.info("viewer:info", "Writing %s" % filename)
+                    self.logger_model.info("viewer:info", "Writing %s" % filename)
                     shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(destination), filename))
                 if copyScriptPath is not None:
                     outDirectory = os.path.dirname(os.path.join(os.getcwd(), destination))
@@ -612,5 +616,5 @@ class iXBRLViewer:
     def _copyScript(self, directory: str, scriptPath: str):
         scriptSrc = os.path.join(directory, scriptPath)
         scriptDest = os.path.join(directory, os.path.basename(scriptPath))
-        self.dts.info("viewer:info", "Copying script from %s to %s" % (scriptSrc, scriptDest))
+        self.logger_model.info("viewer:info", "Copying script from %s to %s" % (scriptSrc, scriptDest))
         shutil.copy2(scriptSrc, scriptDest)

@@ -148,13 +148,14 @@ export class Inspector {
      *
      * Legacy format: #f-FACT_ID
      * New format: #fN-FACT_ID where N is report index
+     * For N == 0, we use the legacy format.
      *
      */
     handleFactDeepLink() {
-        const match = location.hash.match(/^#f(-|([0-9]+)-)(.*)$/);
+        const match = location.hash.match(/^#f([0-9]+)?-(.*)$/);
         if (match !== null) {
-            const reportId = match[1] === "-" ? 0 : match[2];
-            const id = viewerUniqueId(reportId, match[3]);
+            const reportId = match[1] ?? 0;
+            const id = viewerUniqueId(reportId, match[2]);
             if (this._reportSet.getItemById(id) !== undefined) {
                 this.selectItem(id);
             }

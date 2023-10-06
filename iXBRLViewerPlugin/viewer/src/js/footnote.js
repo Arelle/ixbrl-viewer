@@ -2,7 +2,7 @@
 
 export class Footnote {
     constructor(report, footnoteId, title) {
-        this.id = footnoteId;
+        this.vuid = footnoteId;
         this.linkedFacts = [];
         this.title = title;
         this.ixNode = report.reportSet.getIXNodeForItemId(footnoteId);

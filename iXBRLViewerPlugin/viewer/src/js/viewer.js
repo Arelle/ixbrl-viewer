@@ -499,7 +499,7 @@ export class Viewer {
     _selectAdjacentTag(offset, currentItem) {
         var nextId;
         if (currentItem !== null) {
-            nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.id, offset);
+            nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
             this.showDocumentForItemId(nextId);
         }
         // If no fact selected go to the first or last in the current document
@@ -682,12 +682,12 @@ export class Viewer {
     }
 
     highlightRelatedFact(f) {
-        this.changeItemClass(f.id, "ixbrl-related");
+        this.changeItemClass(f.vuid, "ixbrl-related");
     }
 
     highlightRelatedFacts(facts) {
         for (const f of facts) {
-            this.changeItemClass(f.id, "ixbrl-related");
+            this.changeItemClass(f.vuid, "ixbrl-related");
         }
     }
 
@@ -792,7 +792,7 @@ export class Viewer {
 
     factsInSameTable(fact) {
         var facts = [];
-        const e = this.elementsForItemId(fact.id);
+        const e = this.elementsForItemId(fact.vuid);
         e.closest("table").find(".ixbrl-element").each(function () {
             facts = facts.concat($(this).data('ivids'));
         });
@@ -800,11 +800,11 @@ export class Viewer {
     }
 
     linkedHighlightFact(f) {
-        this.changeItemClass(f.id, "ixbrl-linked-highlight");
+        this.changeItemClass(f.vuid, "ixbrl-linked-highlight");
     }
 
     clearLinkedHighlightFact(f) {
-        this.changeItemClass(f.id, "ixbrl-linked-highlight", true);
+        this.changeItemClass(f.vuid, "ixbrl-linked-highlight", true);
     }
 
     _setTitle(docIndex) {

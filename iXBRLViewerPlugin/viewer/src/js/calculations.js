@@ -32,7 +32,7 @@ Calculation.prototype.calculationFacts = function () {
             ctf[elr] = {};
             if (rr.length > 0) {
                 var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
-                $.each(otherFacts, (i,ff) => setDefault(ctf[elr], ff.conceptName(), {})[ff.id] = ff);
+                $.each(otherFacts, (i,ff) => setDefault(ctf[elr], ff.conceptName(), {})[ff.vuid] = ff);
             }
         });
         this._conceptToFact = ctf;

@@ -155,7 +155,6 @@ export class Inspector {
         if (match !== null) {
             const reportId = match[1] === "-" ? 0 : match[2];
             const id = viewerUniqueId(reportId, match[3]);
-            console.log(id);
             if (this._reportSet.getItemById(id) !== undefined) {
                 this.selectItem(id);
             }
@@ -186,7 +185,7 @@ export class Inspector {
         if (this._currentItem) {
             // Don't include report number for first report for compatibility
             // with legacy fragments
-            location.hash = "#f" + this._currentItem.id.replace(/^0-/,  "-");
+            location.hash = "#f" + this._currentItem.vuid.replace(/^0-/,  "-");
         }
         else {
             location.hash = "";
@@ -263,7 +262,7 @@ export class Inspector {
 
     factListRow(f) {
         const row = $('<div class="fact-list-item"></div>')
-            .click(() => this.selectItem(f.id))
+            .click(() => this.selectItem(f.vuid))
             .dblclick(() => $('#inspector').removeClass("search-mode"))
             .mousedown((e) => { 
                 /* Prevents text selection via double click without
@@ -276,10 +275,10 @@ export class Inspector {
             })
             .mouseenter(() => this._viewer.linkedHighlightFact(f))
             .mouseleave(() => this._viewer.clearLinkedHighlightFact(f))
-            .data('ivid', f.id);
+            .data('ivid', f.vuid);
         $('<div class="select-icon"></div>')
             .click(() => {
-                this.selectItem(f.id);
+                this.selectItem(f.vuid);
                 $('#inspector').removeClass("search-mode");
             })
             .appendTo(row)
@@ -574,7 +573,7 @@ export class Inspector {
             for (const group of this.outline.sortedSections()) {
                 $('<div class="fact-list-item"></div>')
                     .text(group.report.getRoleLabel(group.elr))
-                    .click(() => this.selectItem(group.fact.id))
+                    .click(() => this.selectItem(group.fact.vuid))
                     .dblclick(() => $('#inspector').removeClass("outline-mode"))
                     .mousedown((e) => {
                         // Prevent text selection by double click
@@ -592,7 +591,7 @@ export class Inspector {
         for (const group of this.outline.groupsForFact(cf)) {
             $('<div class="fact-list-item"></div>')
                 .text(cf.report.getRoleLabel(group.elr))
-                .click(() => this.selectItem(group.fact.id))
+                .click(() => this.selectItem(group.fact.vuid))
                 .appendTo($('.fact-groups'));
         }
 
@@ -705,7 +704,7 @@ export class Inspector {
                 if (r.facts) {
                     itemHTML.addClass("calc-fact-link");
                     itemHTML.data('ivids', Object.keys(r.facts));
-                    itemHTML.click(() => inspector.selectItem(Object.values(r.facts)[0].id));
+                    itemHTML.click(() => inspector.selectItem(Object.values(r.facts)[0].vuid));
                     itemHTML.mouseenter(() => Object.values(r.facts).forEach(f => this._viewer.linkedHighlightFact(f)));
                     itemHTML.mouseleave(() => Object.values(r.facts).forEach(f => this._viewer.clearLinkedHighlightFact(f)));
                     Object.values(r.facts).forEach(f => this._viewer.highlightRelatedFact(f));
@@ -731,7 +730,7 @@ export class Inspector {
                     .text(truncateLabel(fn.textContent(), 120))
                     .mouseenter(() => this._viewer.linkedHighlightFact(fn))
                     .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
-                    .click(() => this.selectItem(fn.id))
+                    .click(() => this.selectItem(fn.vuid))
                     .appendTo(html);
             }
             else if (fn instanceof Fact) {
@@ -777,7 +776,7 @@ export class Inspector {
         if (factList.length > 0) {
             html
             .addClass("fact-link")
-            .click(() => this.selectItem(factList[0].id))
+            .click(() => this.selectItem(factList[0].vuid))
             .mouseenter(() => factList.forEach(f => this._viewer.linkedHighlightFact(f)))
             .mouseleave(() => factList.forEach(f => this._viewer.clearLinkedHighlightFact(f)));
         }
@@ -960,8 +959,8 @@ export class Inspector {
             a.addCard(
                 title,
                 factHTML, 
-                fact.id == cf.id,
-                fact.id
+                fact.vuid == cf.vuid,
+                fact.vuid
             );
         }
         return a;
@@ -994,19 +993,19 @@ export class Inspector {
                 this.updateAnchoring(cf);
                 $('div.references').empty().append(this._referencesHTML(cf));
                 $('#inspector .search-results .fact-list-item').removeClass('selected');
-                $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.id).addClass('selected');
+                $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
 
                 const duplicates = cf.duplicates();
                 let n = 0;
                 const ndup = duplicates.length;
                 for (var i = 0; i < ndup; i++) {
-                    if (cf.id == duplicates[i].id) {
+                    if (cf.vuid == duplicates[i].vuid) {
                         n = i;
                     }
                 }
                 $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().click(() => this.selectItem(duplicates[(n+ndup-1) % ndup].id));
-                $('.duplicates .next').off().click(() => this.selectItem(duplicates[(n+1) % ndup].id));
+                $('.duplicates .prev').off().click(() => this.selectItem(duplicates[(n+ndup-1) % ndup].vuid));
+                $('.duplicates .next').off().click(() => this.selectItem(duplicates[(n+1) % ndup].vuid));
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {

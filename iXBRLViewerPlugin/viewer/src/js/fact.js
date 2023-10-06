@@ -4,7 +4,7 @@ import $ from 'jquery'
 import i18next from "i18next";
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
-import { formatNumber } from "./util.js";
+import { formatNumber, localId } from "./util.js";
 import Decimal from "decimal.js";
 
 export class Fact {
@@ -13,13 +13,13 @@ export class Fact {
         this.f = factData;
         this.ixNode = report.reportSet.getIXNodeForItemId(factId);
         this.report = report;
-        this.id = factId;
+        this.vuid = factId;
         this.linkedFacts = [];
         this._footnotes = [];
     }
 
     localId() {
-        return this.id.replace(/^\d+-/,"");
+        localId(this.vuid);
     }
 
     getLabel(rolePrefix, withPrefix) {

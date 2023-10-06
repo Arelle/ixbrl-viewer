@@ -170,9 +170,13 @@ export function isTransparent(rgba) {
  * @return {String}   a viewer unique ID
  */
 
-export function viewerUniqueId(sourceReportIndex, id) {
-    if (id === null) {
+export function viewerUniqueId(sourceReportIndex, localId) {
+    if (localId === null) {
         return null;
     }
-    return sourceReportIndex.toString() + "-" + id;
+    return sourceReportIndex.toString() + "-" + localId;
+}
+
+export function localId(viewerUniqueId) {
+    return viewerUniqueId.replace(/^\d+-/,"");
 }

@@ -17,7 +17,7 @@ export class ReportSearch {
         this.periods = {};
         for (var i = 0; i < facts.length; i++) {
             var f = facts[i];
-            var doc = { "id": f.id };
+            var doc = { "id": f.vuid };
             var l = f.getLabel("std");
             doc.concept = f.conceptQName().localname;
             doc.doc = f.getLabel("doc");

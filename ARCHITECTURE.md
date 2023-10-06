@@ -111,7 +111,11 @@ The viewer requires all iXBRL facts to have `id` attributes.  The Python plugin
 will add `id` attributes to facts if not present.  IDs are required to be unique
 within an Inline XBRL Document Set, but in order to avoid collisions between IDs
 in different Inline XBRL Document Sets when multiple source reports are
-present, the JavaScript viewer prefixes IDs with a source report index when
-loading (e.g `0-f1` is `f1` in the first report).
+present, the JavaScript viewer internally uses "viewer unique IDs", which are
+the `id` attribute values prefixed by the source report index (e.g `0-f1` is
+`f1` in the first report).  The original `id` attributes are only used to
+resolve footnotes and continuation chains during the pre-process phase.  Facts
+are selected via the `ivids` data attribute on wrapper nodes, which uses viewer
+unique IDs.
 
 

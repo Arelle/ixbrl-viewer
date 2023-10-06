@@ -184,7 +184,9 @@ export class Inspector {
 
     updateURLFragment() {
         if (this._currentItem) {
-            location.hash = "#f" + this._currentItem.id;
+            // Don't include report number for first report for compatibility
+            // with legacy fragments
+            location.hash = "#f" + this._currentItem.id.replace(/^0-/,  "-");
         }
         else {
             location.hash = "";

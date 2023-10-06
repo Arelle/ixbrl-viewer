@@ -81,9 +81,11 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       default=False,
                       dest="zipViewerOutput",
                       help="Converts the viewer output into a self contained zip")
+
     # Force "keepOpen" to true, so that all models are retained.  Needed for
     # multi-instance viewers.
-    parser.add_option("--keepOpen", dest="keepOpen", default=True, action="store_true", help=argparse.SUPPRESS)
+    next(o for o in parser.option_list if o.dest == 'keepOpen').default=True
+
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
     for featureConfig in FEATURE_CONFIGS:

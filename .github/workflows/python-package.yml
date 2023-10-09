@@ -47,7 +47,7 @@ jobs:
       - name: Build ixbrlviewer.js
         run: make prod
       - name: Install Python
-        uses: actions/setup-python@v4.7.0
+        uses: actions/setup-python@v4.7.1
         with:
           cache: 'pip'
           cache-dependency-path: '**/pyproject.toml'

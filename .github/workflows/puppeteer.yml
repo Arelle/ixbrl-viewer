@@ -33,7 +33,7 @@ jobs:
           check-latest: true
           node-version: ${{ matrix.node-version }}
       - name: Install Python 3
-        uses: actions/setup-python@v4.7.0
+        uses: actions/setup-python@v4.7.1
         with:
           cache: 'pip'
           cache-dependency-path: '**/pyproject.toml'

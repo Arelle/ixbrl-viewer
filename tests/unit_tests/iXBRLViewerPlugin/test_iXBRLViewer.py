@@ -457,7 +457,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_simple_case(self):
         modelXbrl = Mock(baseSets=defaultdict(list), relationshipSets={})
-        builder = IXBRLViewerBuilder(modelXbrl)
+        builder = IXBRLViewerBuilder([modelXbrl])
         result = builder.getRelationships(modelXbrl)
         self.assertDictEqual(result, {})
 

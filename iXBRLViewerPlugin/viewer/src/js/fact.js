@@ -19,7 +19,7 @@ export class Fact {
     }
 
     localId() {
-        localId(this.vuid);
+        return localId(this.vuid);
     }
 
     getLabel(rolePrefix, withPrefix) {

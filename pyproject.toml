@@ -34,7 +34,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 dev = [
-    'nose2==0.13.0',
+    'nose2==0.14.0',
     'typing-extensions==4.8.0'
 ]
 

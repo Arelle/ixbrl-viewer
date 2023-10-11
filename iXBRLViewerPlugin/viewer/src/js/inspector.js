@@ -355,7 +355,7 @@ export class Inspector {
                 .text(this._search.periods[key])
                 .appendTo('#search-filter-period select');
         }
-        for (const prefix of this._reportSet.getUsedPrefixes()) {
+        for (const prefix of this._reportSet.getUsedConceptPrefixes()) {
             $("<option>")
                 .attr("value", prefix)
                 .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)

@@ -247,7 +247,7 @@ describe("Search namespaces filter", () => {
     const reportSearch = getReportSearch(report)
 
     test("Namespaces filter only shows used prefixes", () => {
-        const prefixes = Array.from(report.getUsedPrefixes()).sort();
+        const prefixes = Array.from(report.getUsedConceptPrefixes()).sort();
         expect(prefixes).toEqual(['a', 'b', 'c']);
     });
 
@@ -274,7 +274,7 @@ describe("Search namespaces filter", () => {
 
     test("Namespaces filter works with all selections", () => {
         const spec1 = testSearchSpec();
-        spec1.namespacesFilter = Array.from(report.getUsedPrefixes());
+        spec1.namespacesFilter = Array.from(report.getUsedConceptPrefixes());
         const results1 = reportSearch.search(spec1).map(r => r.fact.localId()).sort();
         const spec2 = testSearchSpec();
         spec2.namespacesFilter = [];

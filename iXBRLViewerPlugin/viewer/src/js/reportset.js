@@ -110,7 +110,7 @@ export class ReportSet {
         return prefixes;
     }
 
-    getUsedPrefixes() {
+    getUsedConceptPrefixes() {
         if (this._usedPrefixes === undefined) {
             this._usedPrefixes = new Set(Object.values(this._items)
                     .filter(f => f instanceof Fact)

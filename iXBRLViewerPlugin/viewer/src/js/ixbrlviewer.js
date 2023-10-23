@@ -114,6 +114,11 @@ iXBRLViewer.prototype.isReviewModeEnabled = function () {
     return this.isFeatureEnabled('review');
 }
 
+iXBRLViewer.prototype.isViewerEnabled = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    return (urlParams.get('disable-viewer') ?? 'false') === 'false'
+}
+
 iXBRLViewer.prototype._loadInspectorHTML = function () {
     /* Insert HTML and CSS styles into body */
     $(require('../html/inspector.html')).prependTo('body');
@@ -193,8 +198,12 @@ iXBRLViewer.prototype._checkDocumentSetBrowserSupport = function () {
 }
 
 iXBRLViewer.prototype.load = function () {
-    var iv = this;
-    var inspector = this.inspector;
+    const iv = this;
+    const inspector = this.inspector;
+
+    if (!this.isViewerEnabled()) {
+        return;
+    }
 
     setTimeout(function () {
 

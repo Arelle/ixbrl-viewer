@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import { numberMatchSearch, fullDateMatch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
-import { escapeRegex } from './util.js'
+import { escapeRegex, viewerUniqueId } from './util.js'
 import { IXNode } from './ixnode.js';
 import { setDefault, runGenerator } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
@@ -22,9 +22,9 @@ function localName(e) {
 
 
 export class Viewer {
-    constructor(iv, iframes, report) {
+    constructor(iv, iframes, reportSet) {
         this._iv = iv;
-        this._report = report;
+        this._reportSet = reportSet;
         this._iframes = iframes;
         this._contents = iframes.contents();
         this.onSelect = $.Callbacks();
@@ -65,7 +65,8 @@ export class Viewer {
 
                     viewer._iframes.each(function (docIndex) { 
                         $(this).data("selected", docIndex == viewer._currentDocumentIndex);
-                        viewer._preProcessiXBRL($(this).contents().find("body").get(0), docIndex);
+                        const reportIndex = $(this).data("report-index");
+                        viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex);
                     });
 
                     /* Call plugin promise for each document in turn */
@@ -91,7 +92,7 @@ export class Viewer {
                     })()
                         .then(() => viewer._iv.setProgress("Preparing document") )
                         .then(() => {
-                            this._report.setIXNodeMap(this._ixNodeMap);
+                            this._reportSet.setIXNodeMap(this._ixNodeMap);
                             this._applyStyles();
                             this._bindHandlers();
                             this.scale = 1;
@@ -105,12 +106,12 @@ export class Viewer {
     }
 
     _addDocumentSetTabs() {
-        if (this._report.isDocumentSet()) {
+        if (this._reportSet.isMultiDocumentViewer()) {
             $('#ixv .ixds-tabs').show();
-            for (const [i, doc] of this._report.documentSetFiles().entries()) {
+            for (const [i, doc] of this._reportSet.reportFiles().entries()) {
                 $('<div class="tab">')
-                    .text(doc)
-                    .prop('title', doc)
+                    .text(doc.file)
+                    .prop('title', doc.file)
                     .data('ix-doc-id', i)
                     .click(() => this.selectDocument(i))
                     .appendTo($('#ixv #viewer-pane .ixds-tabs .tab-area'));
@@ -230,7 +231,7 @@ export class Viewer {
         const url = $(n).attr("href");
         if (url !== undefined) {
             const [file, fragment] = url.split('#', 2);
-            const docIndex = this._report.documentSetFiles().indexOf(file);
+            const docIndex = this._reportSet.reportFiles().indexOf(file);
             if (!url.includes('/') && docIndex != -1) {
                 $(n).click((e) => { 
                     this._showDocumentAndElement(docIndex, fragment);
@@ -303,18 +304,21 @@ export class Viewer {
         const nextContinuationMap = {};
         // map of items in default target document to all their continuations
         const itemContinuationMap = {};
-        this._iframes.contents().find("body *").each(function () {
-            const name = localName(this.nodeName).toUpperCase();
-            if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
-                const nodeId = this.getAttribute('id');
-                const continuedAtId = this.getAttribute("continuedAt");
-                if (continuedAtId !== null) {
-                    nextContinuationMap[nodeId] = continuedAtId;
+        this._iframes.each((n, iframe) => {
+            const reportIndex = $(iframe).data("report-index");
+            $(iframe).contents().find("body *").each((m, node) => {
+                const name = localName(node.nodeName).toUpperCase();
+                if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
+                    const nodeId = viewerUniqueId(reportIndex, node.getAttribute('id'));
+                    const continuedAtId = viewerUniqueId(reportIndex, node.getAttribute("continuedAt"));
+                    if (continuedAtId !== null) {
+                        nextContinuationMap[nodeId] = continuedAtId;
+                    }
+                    if (name != 'CONTINUATION' && !node.hasAttribute('target')) {
+                        itemContinuationMap[nodeId] = [];
+                    }
                 }
-                if (name != 'CONTINUATION' && !this.hasAttribute('target')) {
-                    itemContinuationMap[nodeId] = [];
-                }
-            }
+            });
         });
 
         // Map of continuation IDs to list of (default target doc) items that
@@ -363,7 +367,7 @@ export class Viewer {
     // Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
     // fact and footnotes in document order.
     //
-    _preProcessiXBRL(n, docIndex, inHidden) {
+    _preProcessiXBRL(n, reportIndex, docIndex, inHidden) {
         const name = localName(n.nodeName).toUpperCase();
         const isFootnote = name === 'FOOTNOTE';
         const isContinuation = name === 'CONTINUATION';
@@ -374,7 +378,7 @@ export class Viewer {
             // Ignore iXBRL elements that are not in the default target document, as
             // the viewer builder does not handle these, and the builder does not
             // ensure that they have ID attributes.
-            const id = n.getAttribute("id");
+            const id = viewerUniqueId(reportIndex, n.getAttribute("id"));
             if (((isFact || isFootnote) && !n.hasAttribute("target"))
                 || (isContinuation && this.continuationOfMap[id] !== undefined)) {
                 var nodes;
@@ -453,7 +457,7 @@ export class Viewer {
                 }
             }
         }
-        this._preProcessChildNodes(n, docIndex, inHidden);
+        this._preProcessChildNodes(n, reportIndex, docIndex, inHidden);
     }
 
     _getIXHiddenLinkStyle(domNode) {
@@ -467,9 +471,9 @@ export class Viewer {
         return null;
     }
 
-    _preProcessChildNodes(domNode, docIndex, inHidden) {
+    _preProcessChildNodes(domNode, reportIndex, docIndex, inHidden) {
         for (const childNode of domNode.childNodes) {
-            this._preProcessiXBRL(childNode, docIndex, inHidden);
+            this._preProcessiXBRL(childNode, reportIndex, docIndex, inHidden);
         }
     }
 
@@ -495,7 +499,7 @@ export class Viewer {
     _selectAdjacentTag(offset, currentItem) {
         var nextId;
         if (currentItem !== null) {
-            nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.id, offset);
+            nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
             this.showDocumentForItemId(nextId);
         }
         // If no fact selected go to the first or last in the current document
@@ -529,7 +533,7 @@ export class Viewer {
         $('#iframe-container .zoom-out').click(() => this.zoomOut());
         $('#iframe-container .print').click(() => this.currentDocument().get(0).contentWindow.print());
 
-        TableExport.addHandles(this._contents, this._report);
+        TableExport.addHandles(this._contents, this._reportSet);
     }
 
     selectNextTag(currentFact) {
@@ -678,12 +682,12 @@ export class Viewer {
     }
 
     highlightRelatedFact(f) {
-        this.changeItemClass(f.id, "ixbrl-related");
+        this.changeItemClass(f.vuid, "ixbrl-related");
     }
 
     highlightRelatedFacts(facts) {
         for (const f of facts) {
-            this.changeItemClass(f.id, "ixbrl-related");
+            this.changeItemClass(f.vuid, "ixbrl-related");
         }
     }
 
@@ -739,7 +743,7 @@ export class Viewer {
         $.each(namespaceGroups, function (i, ns) {
             groups[ns] = i;
         });
-        const report = this._report;
+        const reportSet = this._reportSet;
         const viewer = this;
         if (on) {
             $(".ixbrl-element", this._contents)
@@ -752,7 +756,7 @@ export class Viewer {
                     const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
                     if (ixn != undefined) {
                         const elements = viewer.elementsForItemIds(ixn.chainIXIds());
-                        const i = groups[report.getItemById(ixn.id).conceptQName().prefix];
+                        const i = groups[reportSet.getItemById(ixn.id).conceptQName().prefix];
                         if (i !== undefined) {
                             elements.addClass("ixbrl-highlight-" + i);
                         }
@@ -788,7 +792,7 @@ export class Viewer {
 
     factsInSameTable(fact) {
         var facts = [];
-        const e = this.elementsForItemId(fact.id);
+        const e = this.elementsForItemId(fact.vuid);
         e.closest("table").find(".ixbrl-element").each(function () {
             facts = facts.concat($(this).data('ivids'));
         });
@@ -796,11 +800,11 @@ export class Viewer {
     }
 
     linkedHighlightFact(f) {
-        this.changeItemClass(f.id, "ixbrl-linked-highlight");
+        this.changeItemClass(f.vuid, "ixbrl-linked-highlight");
     }
 
     clearLinkedHighlightFact(f) {
-        this.changeItemClass(f.id, "ixbrl-linked-highlight", true);
+        this.changeItemClass(f.vuid, "ixbrl-linked-highlight", true);
     }
 
     _setTitle(docIndex) {

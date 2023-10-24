@@ -2,10 +2,10 @@
 
 export class Footnote {
     constructor(report, footnoteId, title) {
-        this.id = footnoteId;
+        this.vuid = footnoteId;
         this.linkedFacts = [];
         this.title = title;
-        this.ixNode = report.getIXNodeForItemId(footnoteId);
+        this.ixNode = report.reportSet.getIXNodeForItemId(footnoteId);
     }
 
     // Facts that are the source of relationships to this fact.

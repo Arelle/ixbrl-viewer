@@ -17,19 +17,25 @@ function testFact(conceptName, dimensions) {
     }
 }
 
-function testReport(concepts, facts, documents) {
-    return {
+function testReportSet(concepts, facts, documents) {
+    const report = {
         getConcept: conceptName => concepts[conceptName],
-        facts: () => facts,
         localDocuments: () => documents
+    }
+    for (const f of facts) {
+        f.report = report;
+    }
+    return {
+        facts: () => facts,
+        reports: [ report ]
     }
 }
 
 describe("Facts summary", () => {
 
     test("no facts", () => {
-        const report = testReport({}, [], {});
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet({}, [], {});
+        const summary = new DocumentSummary(reportSet);
 
         expect(summary.totalFacts()).toBe(0);
     });
@@ -39,8 +45,8 @@ describe("Facts summary", () => {
         for (let i = 0; i < 10; i++) {
             facts.push(testFact("eg:Concept1", {}));
         }
-        const report = testReport({}, facts, {});
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet({}, facts, {});
+        const summary = new DocumentSummary(reportSet);
 
         expect(summary.totalFacts()).toBe(10);
     });
@@ -49,8 +55,8 @@ describe("Facts summary", () => {
         const conceptName = "eg:Concept1";
         const fact1 = testFact(conceptName, {});
         const fact2 = testFact(conceptName, {});
-        const report = testReport({}, [fact1, fact2], {});
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet({}, [fact1, fact2], {});
+        const summary = new DocumentSummary(reportSet);
 
         expect(summary.totalFacts()).toBe(2);
     });
@@ -60,8 +66,8 @@ describe("Facts summary", () => {
 describe("Tags summary", () => {
 
     test("no tags", () => {
-        const report = testReport({}, [], {})
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet({}, [], {})
+        const summary = new DocumentSummary(reportSet);
 
         expect(summary.tagCounts()).toEqual(new Map());
     });
@@ -70,8 +76,8 @@ describe("Tags summary", () => {
         const fact1 = testFact("eg:Concept1", {});
         const fact2 = testFact("eg:Concept2", {});
         const fact3 = testFact("xz:Concept1", {});
-        const report = testReport({}, [fact1, fact2, fact3], {})
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet({}, [fact1, fact2, fact3], {})
+        const summary = new DocumentSummary(reportSet);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
             'eg': {
@@ -99,8 +105,8 @@ describe("Tags summary", () => {
         const concepts = {
             [dimension]: testConcept(),
         }
-        const report = testReport(concepts, [fact], {})
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet(concepts, [fact], {})
+        const summary = new DocumentSummary(reportSet);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
             'eg': {
@@ -129,8 +135,8 @@ describe("Tags summary", () => {
             [dimension2]: testConcept(),
             [dimension3]: testConcept(),
         }
-        const report = testReport(concepts, [fact], {})
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet(concepts, [fact], {})
+        const summary = new DocumentSummary(reportSet);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
             'ab': {
@@ -170,8 +176,8 @@ describe("Tags summary", () => {
         const concepts = {
             [dimension]: testConcept(typedDomain),
         }
-        const report = testReport(concepts, [fact], {})
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet(concepts, [fact], {})
+        const summary = new DocumentSummary(reportSet);
 
         expect(Object.fromEntries(summary.tagCounts())).toEqual({
             'eg': {
@@ -194,8 +200,8 @@ describe("Files summary", () => {
 
     test("no files", () => {
         const documentData = {}
-        const report = testReport({}, [], documentData);
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet({}, [], documentData);
+        const summary = new DocumentSummary(reportSet);
 
         expect(summary.getLocalDocuments()).toEqual({
             inline: [],
@@ -222,8 +228,8 @@ describe("Files summary", () => {
             'labelLinkbase.xml': ['labelLinkbase'],
             'unrecognizedLinkbase.xml': ['unrecognizedLinkbase'],
         }
-        const report = testReport({}, [], documentData);
-        const summary = new DocumentSummary(report);
+        const reportSet = testReportSet({}, [], documentData);
+        const summary = new DocumentSummary(reportSet);
 
         expect(summary.getLocalDocuments()).toEqual({
             inline: ['docset', 'inline.htm'],

@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import { Fact } from "./fact.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
 
 var testReportData = {
@@ -75,16 +75,16 @@ function testReport(facts, ixData) {
     // Deep copy of standing data
     var data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new iXBRLReport(data);
-    report.setIXNodeMap(ixData);
-    return report;
+    var reportSet = new ReportSet(data);
+    reportSet.setIXNodeMap(ixData);
+    return reportSet.reports[0];
 }
 
 function testFact(factData, ixData) {
     factData.a = factData.a || {};
     factData.a.c = factData.a.c || 'eg:Concept1';
     ixData = ixData || {};
-    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
+    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1", factData);
 }
 
 var insp = new TestInspector();

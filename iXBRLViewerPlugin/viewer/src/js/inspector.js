@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel, runGenerator } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, viewerUniqueId } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -17,7 +17,7 @@ import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
-import { DocumentOutline } from './outline.js';
+import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
 
 const SEARCH_PAGE_SIZE = 100
@@ -61,12 +61,12 @@ export class Inspector {
         });
     }
 
-    initialize(report, viewer) {
+    initialize(reportSet, viewer) {
         const inspector = this;
         this._viewer = viewer;
         return new Promise(function (resolve, reject) {
             inspector._chart = new IXBRLChart();
-            inspector._report = report;
+            inspector._reportSet = reportSet;
             inspector.i18nInit().then((t) => {
                 
                 $(".collapsible-header").on("click", function () { 
@@ -112,13 +112,13 @@ export class Inspector {
 
                 // Listen to messages posted to this window
                 $(window).on("message", (e) => inspector.handleMessage(e));
-                report.setViewerOptions(inspector._viewerOptions);
-                inspector.summary = new DocumentSummary(report);
+                reportSet.viewerOptions = inspector._viewerOptions;
+                inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
-                inspector.outline = new DocumentOutline(report);
+                inspector.outline = new ReportSetOutline(reportSet);
                 inspector.createOutline();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
-                    inspector._search = new ReportSearch(report);
+                    inspector._search = new ReportSearch(reportSet);
                     inspector.buildDisplayOptionsMenu();
                     inspector.buildToolbarHighlightMenu();
                     inspector.buildHighlightKey();
@@ -145,10 +145,20 @@ export class Inspector {
     /*
      * Check for fragment identifier pointing to a specific fact and select it if
      * present.
+     *
+     * Legacy format: #f-FACT_ID
+     * New format: #fN-FACT_ID where N is report index
+     * For N == 0, we use the legacy format.
+     *
      */
     handleFactDeepLink() {
-        if (location.hash.startsWith("#f-")) {
-            this.selectItem(location.hash.slice(3));
+        const match = location.hash.match(/^#f([0-9]+)?-(.*)$/);
+        if (match !== null) {
+            const reportId = match[1] ?? 0;
+            const id = viewerUniqueId(reportId, match[2]);
+            if (this._reportSet.getItemById(id) !== undefined) {
+                this.selectItem(id);
+            }
         }
     }
 
@@ -174,7 +184,9 @@ export class Inspector {
 
     updateURLFragment() {
         if (this._currentItem) {
-            location.hash = "#f-" + this._currentItem.id;
+            // Don't include report number for first report for compatibility
+            // with legacy fragments
+            location.hash = "#f" + this._currentItem.vuid.replace(/^0-/,  "-");
         }
         else {
             location.hash = "";
@@ -183,12 +195,12 @@ export class Inspector {
 
     buildDisplayOptionsMenu() {
         this._optionsMenu.reset();
-        if (this._report) {
+        if (this._reportSet) {
             const dl = this.selectDefaultLanguage();
-            this._optionsMenu.addCheckboxGroup(this._report.availableLanguages(), this._report.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
+            this._optionsMenu.addCheckboxGroup(this._reportSet.availableLanguages(), this._reportSet.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
             this.setLanguage(dl);
-            if (this._report.filingDocuments()) {
-                this._optionsMenu.addDownloadButton("Download filing documents", this._report.filingDocuments())
+            if (this._reportSet.filingDocuments()) {
+                this._optionsMenu.addDownloadButton("Download filing documents", this._reportSet.filingDocuments())
             }
         }
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
@@ -232,7 +244,7 @@ export class Inspector {
                 "Untagged Dates",
             ]
         } else {
-            key = this._report.namespaceGroups();
+            key = this._reportSet.namespaceGroups();
         }
         this._iv.callPluginMethod("extendHighlightKey", key);
 
@@ -246,12 +258,12 @@ export class Inspector {
     }
 
     highlightAllTags(checked) {
-        this._viewer.highlightAllTags(checked, this._report.namespaceGroups());
+        this._viewer.highlightAllTags(checked, this._reportSet.namespaceGroups());
     }
 
     factListRow(f) {
         const row = $('<div class="fact-list-item"></div>')
-            .click(() => this.selectItem(f.id))
+            .click(() => this.selectItem(f.vuid))
             .dblclick(() => $('#inspector').removeClass("search-mode"))
             .mousedown((e) => { 
                 /* Prevents text selection via double click without
@@ -264,10 +276,10 @@ export class Inspector {
             })
             .mouseenter(() => this._viewer.linkedHighlightFact(f))
             .mouseleave(() => this._viewer.clearLinkedHighlightFact(f))
-            .data('ivid', f.id);
+            .data('ivid', f.vuid);
         $('<div class="select-icon"></div>')
             .click(() => {
-                this.selectItem(f.id);
+                this.selectItem(f.vuid);
                 $('#inspector').removeClass("search-mode");
             })
             .appendTo(row)
@@ -343,16 +355,16 @@ export class Inspector {
                 .text(this._search.periods[key])
                 .appendTo('#search-filter-period select');
         }
-        for (const prefix of this._report.getUsedPrefixes()) {
+        for (const prefix of this._reportSet.getUsedConceptPrefixes()) {
             $("<option>")
                 .attr("value", prefix)
-                .text(`${prefix} (${this._report.prefixMap()[prefix]})`)
+                .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)
                 .appendTo('#search-filter-namespaces select');
         }
-        for (const unit of this._report.getUsedUnits()) {
+        for (const unit of this._reportSet.getUsedUnits()) {
             $("<option>")
                     .attr("value", unit)
-                    .text(`${this._report.getUnit(unit)?.label()} (${unit})`)
+                    .text(`${this._reportSet.getUnit(unit)?.label()} (${unit})`)
                     .appendTo('#search-filter-units select');
         }
         const scalesOptions = this._getScalesOptions();
@@ -366,7 +378,7 @@ export class Inspector {
 
     _getScalesOptions() {
         const scalesOptions = {}
-        const usedScalesMap = this._report.getUsedScalesMap();
+        const usedScalesMap = this._reportSet.getUsedScalesMap();
         Object.keys(usedScalesMap).sort().forEach(scale => {
             const labels = Array.from(usedScalesMap[scale]).sort();
             if (labels.length > 0) {
@@ -559,10 +571,10 @@ export class Inspector {
         if (this.outline.hasOutline()) {
             $('.outline .no-outline-overlay').hide();
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
-            for (const elr of this.outline.sortedSections()) {
+            for (const group of this.outline.sortedSections()) {
                 $('<div class="fact-list-item"></div>')
-                    .text(this._report.getRoleLabel(elr))
-                    .click(() => this.selectItem(this.outline.sections[elr].id))
+                    .text(group.report.getRoleLabel(group.elr))
+                    .click(() => this.selectItem(group.fact.vuid))
                     .dblclick(() => $('#inspector').removeClass("outline-mode"))
                     .mousedown((e) => {
                         // Prevent text selection by double click
@@ -577,10 +589,10 @@ export class Inspector {
 
     updateOutline(cf) {
         $('.fact-groups').empty();
-        for (const elr of this.outline.groupsForFact(cf)) {
+        for (const group of this.outline.groupsForFact(cf)) {
             $('<div class="fact-list-item"></div>')
-                .text(this._report.getRoleLabel(elr))
-                .click(() => this.selectItem(this.outline.sections[elr].id))
+                .text(cf.report.getRoleLabel(group.elr))
+                .click(() => this.selectItem(group.fact.vuid))
                 .appendTo($('.fact-groups'));
         }
 
@@ -608,8 +620,8 @@ export class Inspector {
         const html = $("<ul></ul>");
         if (anchors.length > 0) {
             for (const c of anchors) {
-                const otherFacts = this._report.getAlignedFacts(fact, { "c": c });
-                const label = this._report.getLabel(c, "std", true);
+                const otherFacts = fact.report.getAlignedFacts(fact, { "c": c });
+                const label = fact.report.getLabel(c, "std", true);
 
                 $("<li></li>")
                     .appendTo(html)
@@ -625,7 +637,7 @@ export class Inspector {
     }
 
     updateAnchoring(fact) {
-        if (!this._report.usesAnchoring()) {
+        if (!this._reportSet.usesAnchoring()) {
             $('.anchoring').hide();
         }
         else {
@@ -673,12 +685,12 @@ export class Inspector {
         if (!elr) {
             elr = calc.bestELRForFactSet(tableFacts);
         }
-        const report = this._report;
+        const report = fact.report;
         const inspector = this;
         const a = new Accordian();
 
         for (const [e, rolePrefix] of Object.entries(calc.elrs())) {
-            const label = report.getRoleLabel(rolePrefix, inspector._viewerOptions);
+            const label = report.getRoleLabel(rolePrefix);
 
             const rCalc = calc.resolvedCalculation(e);
             const calcBody = $('<div></div>');
@@ -693,7 +705,7 @@ export class Inspector {
                 if (r.facts) {
                     itemHTML.addClass("calc-fact-link");
                     itemHTML.data('ivids', Object.keys(r.facts));
-                    itemHTML.click(() => inspector.selectItem(Object.values(r.facts)[0].id));
+                    itemHTML.click(() => inspector.selectItem(Object.values(r.facts)[0].vuid));
                     itemHTML.mouseenter(() => Object.values(r.facts).forEach(f => this._viewer.linkedHighlightFact(f)));
                     itemHTML.mouseleave(() => Object.values(r.facts).forEach(f => this._viewer.clearLinkedHighlightFact(f)));
                     Object.values(r.facts).forEach(f => this._viewer.highlightRelatedFact(f));
@@ -719,7 +731,7 @@ export class Inspector {
                     .text(truncateLabel(fn.textContent(), 120))
                     .mouseenter(() => this._viewer.linkedHighlightFact(fn))
                     .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
-                    .click(() => this.selectItem(fn.id))
+                    .click(() => this.selectItem(fn.vuid))
                     .appendTo(html);
             }
             else if (fn instanceof Fact) {
@@ -765,7 +777,7 @@ export class Inspector {
         if (factList.length > 0) {
             html
             .addClass("fact-link")
-            .click(() => this.selectItem(factList[0].id))
+            .click(() => this.selectItem(factList[0].vuid))
             .mouseenter(() => factList.forEach(f => this._viewer.linkedHighlightFact(f)))
             .mouseleave(() => factList.forEach(f => this._viewer.clearLinkedHighlightFact(f)));
         }
@@ -775,7 +787,7 @@ export class Inspector {
     getPeriodIncrease(fact) {
         let s = "";
         if (fact.isNumeric()) {
-            const otherFacts = this._report.getAlignedFacts(fact, {"p":null });
+            const otherFacts = fact.report.getAlignedFacts(fact, {"p":null });
             var mostRecent;
             if (fact.periodTo()) {
                 for (const other of otherFacts) {
@@ -785,7 +797,7 @@ export class Inspector {
                 }
             }
             if (mostRecent) {
-                const allMostRecent = this._report.getAlignedFacts(mostRecent);
+                const allMostRecent = fact.report.getAlignedFacts(mostRecent);
                 s = $("<span></span>")
                         .text(this.describeChange(mostRecent, fact))
                         .append(this.factLinkHTML(mostRecent.periodString(), allMostRecent));
@@ -948,8 +960,8 @@ export class Inspector {
             a.addCard(
                 title,
                 factHTML, 
-                fact.id == cf.id,
-                fact.id
+                fact.vuid == cf.vuid,
+                fact.vuid
             );
         }
         return a;
@@ -982,19 +994,19 @@ export class Inspector {
                 this.updateAnchoring(cf);
                 $('div.references').empty().append(this._referencesHTML(cf));
                 $('#inspector .search-results .fact-list-item').removeClass('selected');
-                $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.id).addClass('selected');
+                $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
 
                 const duplicates = cf.duplicates();
                 let n = 0;
                 const ndup = duplicates.length;
                 for (var i = 0; i < ndup; i++) {
-                    if (cf.id == duplicates[i].id) {
+                    if (cf.vuid == duplicates[i].vuid) {
                         n = i;
                     }
                 }
                 $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().click(() => this.selectItem(duplicates[(n+ndup-1) % ndup].id));
-                $('.duplicates .next').off().click(() => this.selectItem(duplicates[(n+1) % ndup].id));
+                $('.duplicates .prev').off().click(() => this.selectItem(duplicates[(n+ndup-1) % ndup].vuid));
+                $('.duplicates .next').off().click(() => this.selectItem(duplicates[(n+1) % ndup].vuid));
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {
@@ -1027,12 +1039,12 @@ export class Inspector {
      */
     selectItem(id, itemIdList, noScroll) {
         if (itemIdList === undefined) {
-            this._currentItemList = [ this._report.getItemById(id) ];
+            this._currentItemList = [ this._reportSet.getItemById(id) ];
         }
         else {
             this._currentItemList = [];
             for (const itemId of itemIdList) {
-                this._currentItemList.push(this._report.getItemById(itemId));
+                this._currentItemList.push(this._reportSet.getItemById(itemId));
             }
         }
         this.switchItem(id, noScroll);
@@ -1048,7 +1060,7 @@ export class Inspector {
      */
     switchItem(id, noScroll) {
         if (id !== null) {
-            this._currentItem = this._report.getItemById(id);
+            this._currentItem = this._reportSet.getItemById(id);
             if (!noScroll) {
                 this._viewer.showItemById(id);
             }
@@ -1074,7 +1086,7 @@ export class Inspector {
     }
 
     selectDefaultLanguage() {
-        const al = this._report.availableLanguages();
+        const al = this._reportSet.availableLanguages();
         for (const pl of this.preferredLanguages()) {
             for (const l of al) {
                 if (l.toLowerCase() == pl.toLowerCase()) {
@@ -1082,7 +1094,7 @@ export class Inspector {
                 }
             }
         }
-        return this._report.availableLanguages()[0];
+        return this._reportSet.availableLanguages()[0];
     }
 
     setLanguage(lang) {
@@ -1091,18 +1103,18 @@ export class Inspector {
 
     showValidationReport() {
         const vr = new ValidationReportDialog();
-        vr.displayErrors(this._report.data.validation);
+        vr.displayErrors(this._reportSet.validation());
         vr.show();
     }
 
     setupValidationReportIcon() {
-        if (this._report.hasValidationErrors()) {
+        if (this._reportSet.hasValidationErrors()) {
             $("#ixv .validation-warning").show().on("click", () => this.showValidationReport());
         }
     }
 
     showValidationWarning() {
-        if (this._report.hasValidationErrors()) {
+        if (this._reportSet.hasValidationErrors()) {
             const message = $("<div></div>").append("<p>This report contains <b>XBRL validation errors</b>.  These errors may prevent this document from opening correctly in other XBRL software.</p>");
             const mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
             mb.show(() => this.showValidationReport());

@@ -1,8 +1,9 @@
 // See COPYRIGHT.md for copyright information
 
-import { iXBRLReport } from "./report.js";
+import { XBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 
-var testReportData = {
+const testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
         "iso4217": "http://www.xbrl.org/2003/iso4217",
@@ -48,7 +49,9 @@ var testReportData = {
 };
 
 describe("Concept references", () => {
-    var r = new iXBRLReport(testReportData);
+    const rs = new ReportSet(testReportData);
+    rs._initialize();
+    const r = rs.reports[0];
     test("Absent reference", () => {
         var c1 = r.getConcept("eg:Concept1");
         expect(c1.referenceValuesAsString()).toEqual("");

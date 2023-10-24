@@ -4,7 +4,7 @@ import $ from 'jquery'
 
 export class Concept {
     constructor(report, name) {
-        this._c = report.data.concepts[name] || {};
+        this._c = report.concepts()[name] || {};
     }
 
     /*

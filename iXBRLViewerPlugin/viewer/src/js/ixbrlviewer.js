@@ -201,32 +201,44 @@ iXBRLViewer.prototype.load = function () {
     const iv = this;
     const inspector = this.inspector;
 
-    if (!this.isViewerEnabled()) {
-        return;
-    }
-
     setTimeout(function () {
+        const stubViewer = $('body').hasClass('ixv-stub-viewer');
+
+        // If viewer is disabled, but not in stub viewer mode, just abort
+        // loading to leave the iXBRL file as-is
+        if (!iv.isViewerEnabled() && !stubViewer) {
+            return;
+        }
+
+        // Loading mask starts here
+        iv._loadInspectorHTML();
+        var iframes;
 
         // We need to parse JSON first so that we can determine feature enablement before loading begins.
         const taxonomyData = iv._getTaxonomyData();
         const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
         iv.setFeatures((parsedTaxonomyData && parsedTaxonomyData["features"]) || [], window.location.search);
 
-        iv._loadInspectorHTML();
-        var iframes;
-        const stubViewer = $('body').hasClass('ixv-stub-viewer');
+        const report = new iXBRLReport(parsedTaxonomyData);
+
+        // Viewer disabled in stub viewer mode => redirect to first iXBRL document
+        if (!iv.isViewerEnabled()) {
+            window.location.replace(report.documentSetFiles()[0]); 
+            return;
+        }
+
+        if (parsedTaxonomyData === null) {
+            $('#ixv .loader .text').text("Error: Could not find viewer data");
+            $('#ixv .loader').removeClass("loading");
+            return;
+        }
+
         if (!stubViewer) {
             iframes = $(iv._reparentDocument());
         } 
         else {
             iframes = $();
         }
-        if (parsedTaxonomyData === null) {
-            $('#ixv .loader .text').text("Error: Could not find viewer data");
-            $('#ixv .loader').removeClass("loading");
-            return;
-        }
-        const report = new iXBRLReport(parsedTaxonomyData);
         const ds = report.documentSetFiles();
         var hasExternalIframe = false;
         for (var i = stubViewer ? 0 : 1; i < ds.length; i++) {

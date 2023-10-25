@@ -225,7 +225,7 @@ iXBRLViewer.prototype.load = function () {
 
         // Viewer disabled in stub viewer mode => redirect to first iXBRL document
         if (!iv.isViewerEnabled()) {
-            window.location.replace(report.documentSetFiles()[0]); 
+            window.location.replace(reportSet.reportFiles()[0].file); 
             return;
         }
 

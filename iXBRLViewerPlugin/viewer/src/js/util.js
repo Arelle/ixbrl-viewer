@@ -160,3 +160,23 @@ export function isTransparent(rgba) {
     const val = parseFloat(rgba.split(",")[3]);
     return !isNaN(val) && val < 0.1;
 }
+
+/**
+ * Prefix an item ID with the index of the report document that it appears in,
+ * in order to generate an ID that is guaranteed to be unique within the
+ * viewer. This is already within an iXBRL Document Set, but not across
+ * separate iXBRL documents or document sets.
+ * @param  {Integer}  sourceReportIndex - index of the report document containing the fact
+ * @return {String}   a viewer unique ID
+ */
+
+export function viewerUniqueId(sourceReportIndex, localId) {
+    if (localId === null) {
+        return null;
+    }
+    return sourceReportIndex.toString() + "-" + localId;
+}
+
+export function localId(viewerUniqueId) {
+    return viewerUniqueId.replace(/^\d+-/,"");
+}

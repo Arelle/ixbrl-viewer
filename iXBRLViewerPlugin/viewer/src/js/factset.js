@@ -10,10 +10,10 @@ export class FactSet {
 
     /* Returns the union of dimensions present on facts in the set */
     _allDimensions() {
-        var dims = {};
-        var facts = this._items.filter((item) => item instanceof Fact);
-        for (var i = 0; i < facts.length; i++) {
-            var dd = Object.keys(facts[i].dimensions());
+        const dims = {};
+        const facts = this._items.filter((item) => item instanceof Fact);
+        for (const fact of facts) {
+            const dd = Object.keys(fact.dimensions());
             for (var j = 0; j < dd.length; j++) {
                 dims[dd[j]] = true;
             }
@@ -37,10 +37,10 @@ export class FactSet {
              * consistent order */
             for (var i = 0; i < facts.length; i++) {
                 var f = facts[i];
-                allLabels[f.id] = [];
+                allLabels[f.vuid] = [];
                 for (var j = 0; j < allAspects.length; j++) {
                     var dd = f.aspect(allAspects[j]);
-                    allLabels[f.id].push(dd ? dd.valueLabel() : null);
+                    allLabels[f.vuid].push(dd ? dd.valueLabel() : null);
                 }
             }
             /* Iterate each aspect label and compare that label across all facts in
@@ -49,7 +49,7 @@ export class FactSet {
             for (var j = 0; j < allAspects.length; j++) {
                 var labelMap = {};
                 for (var i = 0; i < facts.length; i++) {
-                    labelMap[allLabels[facts[i].id][j]] = true;
+                    labelMap[allLabels[facts[i].vuid][j]] = true;
                 }
 
                 var uniqueLabelsByLabel = {};
@@ -57,7 +57,7 @@ export class FactSet {
                     /* We have at least two different labels, so include this
                      * aspect in the label for all facts in the set */
                     for (var i = 0; i < facts.length; i++) {
-                        var fid = facts[i].id;
+                        var fid = facts[i].vuid;
                         var l = allLabels[fid][j];
                         var ul = uniqueLabels[fid] || [];
                         if (l !== null) {
@@ -79,7 +79,7 @@ export class FactSet {
              * of them */
             if (Object.keys(uniqueLabels).length < facts.length) {
                 for (var i = 0; i < facts.length; i++) {
-                    var fid = facts[i].id;
+                    var fid = facts[i].vuid;
                     var ul = uniqueLabels[fid] || [];
                     ul.unshift(allLabels[fid][0]);
                     uniqueLabels[fid] = ul;
@@ -87,11 +87,11 @@ export class FactSet {
             }
 
             this._items.filter((item) => item instanceof Footnote).forEach((fn) => {
-                uniqueLabels[fn.id] = [fn.title];
+                uniqueLabels[fn.vuid] = [fn.title];
             });
 
             this._minimallyUniqueLabels = uniqueLabels;
         }
-        return this._minimallyUniqueLabels[fact.id].join(", ");
+        return this._minimallyUniqueLabels[fact.vuid].join(", ");
     }
 }

@@ -1,6 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { ViewerOptions } from "./viewerOptions.js";
 
 var testReportData = {
@@ -66,16 +66,16 @@ var testReportData = {
 
 
 describe("Language options", () => {
-    var testReport = new iXBRLReport(testReportData);
-    testReport._initialize();
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
     test("Available languages", () => {
-        var al = testReport.availableLanguages();
+        const al = testReportSet.availableLanguages();
         expect(al).toHaveLength(6);
         expect(al).toEqual(expect.arrayContaining(["en", "en-us", "en-gb", "fr", "de", "es"]));
     });
 
     test("Names for available languages", () => {
-        var ln = testReport.languageNames();
+        const ln = testReportSet.languageNames();
         expect(Object.keys(ln)).toHaveLength(2);
         expect(ln['en']).toBe("English");
         expect(ln['en-us']).toBe("English (US)");
@@ -83,26 +83,27 @@ describe("Language options", () => {
 });
 
 describe("Fetching facts", () => {
-    var testReport = new iXBRLReport(testReportData);
-    testReport._initialize();
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
 
     test("Successful", () => {
-        var f = testReport.getItemById("f1");
-        testReport._initialize();
+        const f = testReportSet.getItemById("0-f1");
         expect(f).not.toBeNull();
         expect(f.decimals()).toEqual(-3);
     });
 
     test("Non-existent fact", () => {
-        var f = testReport.getItemById("fact-does-not-exist");
+        const f = testReportSet.getItemById("fact-does-not-exist");
         expect(f).toBeUndefined();
     });
 });
 
 describe("Concept labels", () => {
-    var testReport = new iXBRLReport(testReportData);
-    var vo = new ViewerOptions();
-    testReport.setViewerOptions(vo);
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
+    const testReport = testReportSet.reports[0];
+    const vo = new ViewerOptions();
+    testReportSet.viewerOptions = vo;
     test("Label fallback", () => {
         vo.language = 'fr';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept trois");
@@ -132,7 +133,9 @@ describe("Concept labels", () => {
 });
 
 describe("ELR labels", () => {
-    const testReport = new iXBRLReport(testReportData);
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
+    const testReport = testReportSet.reports[0];
     test("Present", () => {
         expect(testReport.getRoleLabel("role1")).toBe("Role 1 Label");
     });

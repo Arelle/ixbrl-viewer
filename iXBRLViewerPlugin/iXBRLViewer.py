@@ -15,10 +15,11 @@ from copy import deepcopy
 from typing import Optional, Union
 
 import pycountry
-from arelle import ModelXbrl, XbrlConst
+from arelle import XbrlConst
 from arelle.ModelDocument import Type
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import QName, INVALIDixVALUE
+from arelle.ModelXbrl import ModelXbrl
 from arelle.UrlUtil import isHttpUrl
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
@@ -82,7 +83,7 @@ class IXBRLViewerBuilderError(Exception):
 
 class IXBRLViewerBuilder:
 
-    def __init__(self, reports: List[ModelXbrl], basenameSuffix: str = ''):
+    def __init__(self, reports: list[ModelXbrl], basenameSuffix: str = ''):
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.reports = reports

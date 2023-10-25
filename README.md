@@ -207,7 +207,7 @@ PYTHONPATH=/path/to/Arelle:/path/to/ixbrl-viewer ./samples/build-viewer.py --out
 By default, the link to the JavaScript viewer and the JSON data block are added
 to the iXBRL report file (or to the first file, in the case of a document set).  
 
-Stub viewer mode is an optional generation mode that creates an an additional,
+Stub viewer mode is an optional generation mode that creates an additional,
 minimal HTML file containing the JSON data block, and the link to the
 JavaScript viewer.  This mode has two advantages over the default approach of
 embedding the JSON data and JavaScript link in the iXBRL report:

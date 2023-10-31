@@ -255,6 +255,12 @@ This mode replaces the namespace-based highlighting with optional highlighting b
 |---------------------------|----------------|
 | `--viewer-feature-review` | `?review=true` |
 
+# Disable viewer loading
+
+Loading of the viewer can be disabled by specifying `?disable-viewer` as a
+query parameter.  This will leave the iXBRL document loaded in the browser, but
+without any viewer functionality.  In the case of an iXBRL document set, or
+multi-document viewer, the first document will be shown.
 
 ## Running tests
 

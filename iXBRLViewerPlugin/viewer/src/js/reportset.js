@@ -101,12 +101,11 @@ export class ReportSet {
 
     namespaceGroups() {
         const counts = {};
-        $.each(this.facts(), function (i, f) {
-            counts[f.conceptQName().prefix] = counts[f.conceptQName().prefix] || 0;
-            counts[f.conceptQName().prefix]++;
-        });
+        for (const f of this.facts()) {
+            counts[f.conceptQName().prefix] = (counts[f.conceptQName().prefix] || 0) + 1;
+        }
         const prefixes = Object.keys(counts);
-        prefixes.sort(function (a, b) { return counts[b] - counts[a] });
+        prefixes.sort((a, b) => counts[b] - counts[a]);
         return prefixes;
     }
 

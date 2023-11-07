@@ -874,7 +874,10 @@
           position: relative;
 
           .inconsistent-flag {
-            padding-left: 0.5rem;
+            padding-right: 0.75rem;
+            position: relative;
+            top: 0.2rem;
+            color: @warning-orange;
 
             &::before {
               .icon-circle-cross();
@@ -882,7 +885,10 @@
           }
 
           .consistent-flag {
-            padding-left: 0.5rem;
+            padding-right: 0.75rem;
+            position: relative;
+            top: 0.2rem;
+            color: @workiva-green;
 
             &::before {
               .icon-circle-tick();
@@ -890,24 +896,15 @@
           }
 
           .unchecked-flag {
-            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            position: relative;
+            top: 0.2rem;
 
             &::before {
               .icon-question();
             }
           }
 
-          .calculation-details-link {
-            position: absolute;
-            right: 0.9rem;
-            top: 1.2rem;
-            color: @primary;
-            font-weight: normal;
-
-            &::before {
-              .icon-calculator();
-            }
-          }
         }
 
         table.calculation-table {
@@ -947,6 +944,11 @@
               padding-bottom: 1.2rem;
             }
           }
+        }
+
+        .calculation-details-link {
+          color: @primary;
+          cursor: pointer;
         }
       }
     }

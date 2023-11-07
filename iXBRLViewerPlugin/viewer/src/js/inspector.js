@@ -688,7 +688,10 @@ export class Inspector {
 
         for (const rCalc of calc.resolvedCalculations()) {
             const label = report.getRoleLabel(rCalc.elr, this._viewerOptions);
-            const calcBody = $('<table></table>').addClass("calculation-table");
+            const calcBody = $('<div></div>');
+            const calcTable = $('<table></table>')
+                .addClass("calculation-table")
+                .appendTo(calcBody);
 
             for (const r of rCalc.rows) {
                 const itemHTML = $("<tr></tr>")
@@ -696,7 +699,7 @@ export class Inspector {
                     .append($("<td></td>").addClass("weight").text(r.weightSign + " "))
                     .append($("<td></td>").addClass("concept-name").text(r.concept.label()))
                     .append($("<td></td>").addClass("value"))
-                    .appendTo(calcBody);
+                    .appendTo(calcTable);
 
                 if (!r.facts.isEmpty()) {
                     itemHTML.addClass("calc-fact-link");
@@ -713,40 +716,49 @@ export class Inspector {
                 .append($("<td></td>").addClass("weight"))
                 .append($("<td></td>").addClass("concept-name").text(fact.concept().label()))
                 .append($("<td></td>").addClass("value").text(fact.readableValue()))
-                .appendTo(calcBody);
+                .appendTo(calcTable);
 
+            const calcStatusIcon = $("<span></span>");
             const cardTitle = $("<span></span>")
+                .append(calcStatusIcon)
                 .append($("<span></span>").text(label));
-            const calcStatus = $("<span></span>").appendTo(cardTitle);
-            if (rCalc.binds()) {
-                if (rCalc.isConsistent()) {
-                    calcStatus
-                        .addClass("consistent-flag")
-                        .attr("title", i18next.t('factDetails.calculationIsConsistent'))
-                }
-                else {
-                    calcStatus
-                        .addClass("inconsistent-flag")
-                        .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
-                }
-            }
-            else if (rCalc.unchecked()) {
-                calcStatus
-                    .addClass("unchecked-flag")
-                    .attr("title", i18next.t('factDetails.calculationUnchecked'))
-            }
-
-            cardTitle
-                .append($("<span></span>")
+            const calcStatusText = $("<span></span>");
+            const calcDetailsLink = $("<span></span>")
                     .addClass("calculation-details-link")
                     .attr("title", i18next.t('factDetails.viewCalculationDetails'))
+                    .text("details")
                     .click((e) => {
                         const dialog = new CalculationInspector();
                         dialog.displayCalculation(rCalc);
                         dialog.show();
                         e.stopPropagation();
                     })
-                );
+            const calcStatus = $("<p></p>")
+                .append(calcStatusText)
+                .append($("<span></span>").text(" ("))
+                .append(calcDetailsLink)
+                .append($("<span></span>").text(")"))
+                .appendTo(calcBody);
+            if (rCalc.binds()) {
+                if (rCalc.isConsistent()) {
+                    calcStatusIcon
+                        .addClass("consistent-flag")
+                        .attr("title", i18next.t('factDetails.calculationIsConsistent'))
+                    calcStatusText.text(i18next.t('factDetails.calculationIsConsistent'));
+                }
+                else {
+                    calcStatusIcon
+                        .addClass("inconsistent-flag")
+                        .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
+                    calcStatusText.text(i18next.t('factDetails.calculationIsInconsistent'));
+                }
+            }
+            else if (rCalc.unchecked()) {
+                calcStatusIcon
+                    .addClass("unchecked-flag")
+                    .attr("title", i18next.t('factDetails.calculationUnchecked'))
+                calcStatusText.text(i18next.t('factDetails.calculationUnchecked'));
+            }
 
             a.addCard(cardTitle, calcBody, rCalc.elr == selectedELR);
         }

@@ -3,7 +3,7 @@
 import { Fact } from "./fact.js";
 import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
-import { viewerUniqueId } from "./util.js";
+import { SHOW_FACT, viewerUniqueId } from "./util.js";
 
 
 const testReportData = {
@@ -249,6 +249,83 @@ describe("Fact deep link", () => {
         insp.handleFactDeepLink();
         expect(mockSelect).not.toHaveBeenCalled();
     })
+});
 
-
+describe("Handle message", () => {
+    const generateEvent = (data) => {
+        return {
+            originalEvent: {
+                data: JSON.stringify(data)
+            }
+        };
+    }
+    const insp = new TestInspector();
+    insp._reportSet = {
+        getItemById: jest.fn(id => ["0-123", "1-abc"].includes(id) ? true : undefined),
+    };
+    const mockSelect = jest.fn(id => true);
+    insp.selectItem = mockSelect;
+    it.each([
+        ["0", "0-123"],
+        [0, "0-123"],
+        [undefined, "0-123"],
+        ["1", "1-123"],
+        [1, "1-123"],
+        ["X", "0-123"],
+    ])("SHOW_FACT task with valid factID and %p docSetId selects VUID %p", (docSetId, result) => {
+        mockSelect.mockClear();
+        const data = {
+            task: SHOW_FACT,
+            factId: "123",
+        }
+        if (docSetId !== undefined) {
+            data["docSetId"] = docSetId
+        }
+        const event = generateEvent({
+            task: SHOW_FACT,
+            factId: "123",
+            docSetId: docSetId
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).toHaveBeenCalledWith(result);
+    });
+    test("SHOW_FACT with no factId", () => {
+        mockSelect.mockClear();
+        const event = generateEvent({
+            task: SHOW_FACT,
+            docSetId: "0",
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).toHaveBeenCalledWith(null);
+    })
+    test("SHOW_FACT with empty factId", () => {
+        mockSelect.mockClear();
+        const event = generateEvent({
+            task: SHOW_FACT,
+            factId: "",
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).toHaveBeenCalledWith("0-");
+    })
+    test("Invalid task", () => {
+        mockSelect.mockClear();
+        const event = generateEvent({
+            task: "INVALID_TASK",
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).not.toHaveBeenCalled();
+    })
+    test("Invalid JSON", () => {
+        mockSelect.mockClear();
+        const event = {
+            originalEvent: {
+                data: `{
+                    task: "SHOW_TASK"
+                    factId: "f1-abc"
+                }`
+            }
+        };
+        insp.handleMessage(event);
+        expect(mockSelect).not.toHaveBeenCalled();
+    })
 });

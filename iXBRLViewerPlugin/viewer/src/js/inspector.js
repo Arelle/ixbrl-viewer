@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel, runGenerator, viewerUniqueId } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, viewerUniqueId } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -173,9 +173,14 @@ export class Inspector {
             // messages to itself when exporting files.
             return;
         }
-
-        if (data.task == 'SHOW_FACT') {
-            this.selectItem(data.factId);
+        const task = data["task"];
+        if (task === SHOW_FACT) {
+            let docSetId = Number(data["docSetId"]);
+            if (!docSetId) { // Handles NaN
+                docSetId = 0;
+            }
+            const vuid = viewerUniqueId(docSetId, data['factId']);
+            this.selectItem(vuid);
         }
         else {
             console.log("Not handling unsupported task message: " + jsonString);

@@ -3,6 +3,9 @@
 import moment from "moment";
 import Decimal from "decimal.js";
 
+
+export const SHOW_FACT = 'SHOW_FACT';
+
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a

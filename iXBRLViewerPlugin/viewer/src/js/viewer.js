@@ -687,8 +687,11 @@ export class Viewer {
     // Return a jQuery node list for wrapper elements corresponding to 
     // the factId.  May contain more than one node if the IX node contains
     // absolutely positioned elements.
-    elementsForItemId(factId) {
-        return this._ixNodeMap[factId].wrapperNodes; 
+    elementsForItemId(vuid) {
+        if (!(vuid in this._ixNodeMap)){
+            throw new Error(`Attempting to retrieve IXNode with missing key: ${vuid}`);
+        }
+        return this._ixNodeMap[vuid].wrapperNodes;
     }
 
     elementsForItemIds(ids) {

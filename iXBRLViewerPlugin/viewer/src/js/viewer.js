@@ -5,7 +5,7 @@ import { numberMatchSearch, fullDateMatch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
 import { escapeRegex, viewerUniqueId } from './util.js'
 import { IXNode } from './ixnode.js';
-import { setDefault, runGenerator } from './util.js';
+import { getIXHiddenLinkStyle, runGenerator } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 
@@ -435,21 +435,21 @@ export class Viewer {
             }
             else {
                 // Handle SEC/ESEF links-to-hidden
-                const id = this._getIXHiddenLinkStyle(n);
-                if (id !== null) {
-                    nodes = $(n);
-                    nodes.addClass("ixbrl-element").data('ivids', [id]);
-                    this._docOrderItemIndex.addItem(id, docIndex);
+                const vuid = viewerUniqueId(reportIndex, getIXHiddenLinkStyle(n));
+                if (vuid !== null) {
+                    let nodes = $(n);
+                    nodes.addClass("ixbrl-element").data('ivids', [vuid]);
+                    this._docOrderItemIndex.addItem(vuid, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */
-                    const ixn = this._ixNodeMap[id];
+                    const ixn = this._ixNodeMap[vuid];
                     if (ixn) {
                         /* ... if so, update the node and docIndex so we can navigate to it */
                         ixn.wrapperNodes = nodes;
                         ixn.docIndex = docIndex;
                     }
                     else {
-                        this._ixNodeMap[id] = new IXNode(id, nodes, docIndex);
+                        this._ixNodeMap[vuid] = new IXNode(vuid, nodes, docIndex);
                     }
                 }
                 if (name == 'A') {
@@ -458,17 +458,6 @@ export class Viewer {
             }
         }
         this._preProcessChildNodes(n, reportIndex, docIndex, inHidden);
-    }
-
-    _getIXHiddenLinkStyle(domNode) {
-        if (domNode.hasAttribute('style')) {
-            const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
-            const m = domNode.getAttribute('style').match(re);
-            if (m) {
-                return m[1];
-            }
-        }
-        return null;
     }
 
     _preProcessChildNodes(domNode, reportIndex, docIndex, inHidden) {

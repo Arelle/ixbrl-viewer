@@ -180,3 +180,14 @@ export function viewerUniqueId(sourceReportIndex, localId) {
 export function localId(viewerUniqueId) {
     return viewerUniqueId.replace(/^\d+-/,"");
 }
+
+export function getIXHiddenLinkStyle(domNode) {
+    if (domNode.hasAttribute('style')) {
+        const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const m = domNode.getAttribute('style').match(re);
+        if (m) {
+            return m[1];
+        }
+    }
+    return null;
+}

@@ -79,12 +79,12 @@ export class ReportSet {
         ));
     }
 
-    getItemById(id) {
-        return this._items[id];
+    getItemById(vuid) {
+        return this._items[vuid];
     }
 
-    getIXNodeForItemId(id) {
-        return this._ixNodeMap[id] || {};
+    getIXNodeForItemId(vuid) {
+        return this._ixNodeMap[vuid] || {};
     }
 
     facts() {

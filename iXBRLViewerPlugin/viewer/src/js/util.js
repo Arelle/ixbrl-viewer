@@ -185,6 +185,18 @@ export function localId(viewerUniqueId) {
     return viewerUniqueId.replace(/^\d+-/,"");
 }
 
+/**
+ * Parses fact IDs from -sec-ix-hidden and -esef-ix-hidden style 
+ * attributes on a DOM node.  
+ * Any returned ID should be the ID of a fact in ix:hidden corresponding
+ * to the content contained in the DOM node.
+ * 
+ * @param  {Node}     domNode - DOM node to parse
+ * @return {String}   A fact ID, or null if the element does not have 
+ * a style attribute containing a custom CSS property in the required 
+ * format.
+ */
+
 export function getIXHiddenLinkStyle(domNode) {
     if (domNode.hasAttribute('style')) {
         const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;

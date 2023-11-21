@@ -5,7 +5,7 @@ import { numberMatchSearch, fullDateMatch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
 import { escapeRegex, viewerUniqueId } from './util.js'
 import { IXNode } from './ixnode.js';
-import { setDefault, runGenerator } from './util.js';
+import { getIXHiddenLinkStyle, runGenerator } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 
@@ -378,10 +378,10 @@ export class Viewer {
             // Ignore iXBRL elements that are not in the default target document, as
             // the viewer builder does not handle these, and the builder does not
             // ensure that they have ID attributes.
-            const id = viewerUniqueId(reportIndex, n.getAttribute("id"));
+            const vuid = viewerUniqueId(reportIndex, n.getAttribute("id"));
             if (((isFact || isFootnote) && !n.hasAttribute("target"))
-                || (isContinuation && this.continuationOfMap[id] !== undefined)) {
-                var nodes;
+                || (isContinuation && this.continuationOfMap[vuid] !== undefined)) {
+                let nodes;
                 if (inHidden) {
                     nodes = $(n);
                 } else {
@@ -389,15 +389,15 @@ export class Viewer {
                 }
 
                 // For a continuation, store the IX ID(s) of the item(s), not the continuation
-                const headId = isContinuation ? this.continuationOfMap[id] : id;
+                const headId = isContinuation ? this.continuationOfMap[vuid] : vuid;
                 this._addIdToNode(nodes.first(), headId);
 
                 // We may have already created an IXNode for this ID from a -sec-ix-hidden
                 // element 
-                var ixn = this._ixNodeMap[id];
+                let ixn = this._ixNodeMap[vuid];
                 if (!ixn) {
-                    ixn = new IXNode(id, nodes, docIndex);
-                    this._ixNodeMap[id] = ixn;
+                    ixn = new IXNode(vuid, nodes, docIndex);
+                    this._ixNodeMap[vuid] = ixn;
                 }
                 if (inHidden) {
                     ixn.isHidden = true;
@@ -407,7 +407,7 @@ export class Viewer {
                     nodes.addClass("ixbrl-continuation");
                 }
                 else {
-                    this._docOrderItemIndex.addItem(id, docIndex);
+                    this._docOrderItemIndex.addItem(vuid, docIndex);
                 }
                 if (isNonFraction) {
                     nodes.addClass("ixbrl-element-nonfraction");
@@ -435,21 +435,21 @@ export class Viewer {
             }
             else {
                 // Handle SEC/ESEF links-to-hidden
-                const id = this._getIXHiddenLinkStyle(n);
-                if (id !== null) {
-                    nodes = $(n);
-                    nodes.addClass("ixbrl-element").data('ivids', [id]);
-                    this._docOrderItemIndex.addItem(id, docIndex);
+                const vuid = viewerUniqueId(reportIndex, getIXHiddenLinkStyle(n));
+                if (vuid !== null) {
+                    let nodes = $(n);
+                    nodes.addClass("ixbrl-element").data('ivids', [vuid]);
+                    this._docOrderItemIndex.addItem(vuid, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */
-                    const ixn = this._ixNodeMap[id];
+                    const ixn = this._ixNodeMap[vuid];
                     if (ixn) {
                         /* ... if so, update the node and docIndex so we can navigate to it */
                         ixn.wrapperNodes = nodes;
                         ixn.docIndex = docIndex;
                     }
                     else {
-                        this._ixNodeMap[id] = new IXNode(id, nodes, docIndex);
+                        this._ixNodeMap[vuid] = new IXNode(vuid, nodes, docIndex);
                     }
                 }
                 if (name == 'A') {
@@ -458,17 +458,6 @@ export class Viewer {
             }
         }
         this._preProcessChildNodes(n, reportIndex, docIndex, inHidden);
-    }
-
-    _getIXHiddenLinkStyle(domNode) {
-        if (domNode.hasAttribute('style')) {
-            const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
-            const m = domNode.getAttribute('style').match(re);
-            if (m) {
-                return m[1];
-            }
-        }
-        return null;
     }
 
     _preProcessChildNodes(domNode, reportIndex, docIndex, inHidden) {
@@ -497,24 +486,24 @@ export class Viewer {
     // moving to the next/prev element
     //
     _selectAdjacentTag(offset, currentItem) {
-        var nextId;
+        var nextVuid;
         if (currentItem !== null) {
-            nextId = this._docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
-            this.showDocumentForItemId(nextId);
+            nextVuid = this._docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
+            this.showDocumentForItemId(nextVuid);
         }
         // If no fact selected go to the first or last in the current document
         else if (offset > 0) {
-            nextId = this._docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
+            nextVuid = this._docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
         } 
         else {
-            nextId = this._docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
+            nextVuid = this._docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
         }
         
-        const nextElement = this.elementsForItemId(nextId); 
+        const nextElement = this.elementsForItemId(nextVuid);
         this.showElement(nextElement);
         // If this is a table cell with multiple nested tags pass all tags so that
         // all are shown in the inspector. 
-        this.selectElement(nextId, this._ixIdsForElement(nextElement));
+        this.selectElement(nextVuid, this._ixIdsForElement(nextElement));
     }
 
     _bindHandlers() {
@@ -624,9 +613,9 @@ export class Viewer {
      * byClick indicates that the element was clicked directly, and in this
      * case we never scroll to make it more visible.
      */
-    selectElement(itemId, itemIdList, byClick) {
-        if (itemId !== null) {
-            this.onSelect.fire(itemId, itemIdList, byClick);
+    selectElement(vuid, itemIdList, byClick) {
+        if (vuid !== null) {
+            this.onSelect.fire(vuid, itemIdList, byClick);
         }
         else {
             this.onSelect.fire(null);
@@ -643,9 +632,9 @@ export class Viewer {
     // have nested elements, we select the innermost, as this gives the most
     // intuitive behaviour when clicking "next".
     selectElementByClick(e) {
-        var itemIDList = [];
+        let itemIDList = [];
         const viewer = this;
-        var sameContentAncestorId;
+        let sameContentAncestorVuid;
         // If the user clicked on a sub-element (and which is not also a proper
         // ixbrl-element) treat as if we clicked the first non-sub-element
         // ancestor in the DOM hierarchy - which would typically be
@@ -662,13 +651,13 @@ export class Viewer {
         // of the first one (sameContentAncestorId) that has exactly the same
         // content as "e"
         e.parents(".ixbrl-element").addBack().each(function () { 
-            const ids = viewer._ixIdsForElement($(this));
-            itemIDList = itemIDList.concat(ids); 
-            if ($(this).text() == e.text() && sameContentAncestorId === undefined) {
-                sameContentAncestorId = ids[0];
+            const vuids = viewer._ixIdsForElement($(this));
+            itemIDList = itemIDList.concat(vuids);
+            if ($(this).text() == e.text() && sameContentAncestorVuid === undefined) {
+                sameContentAncestorVuid = vuids[0];
             }
         });
-        this.selectElement(sameContentAncestorId, itemIDList, true);
+        this.selectElement(sameContentAncestorVuid, itemIDList, true);
     }
 
     _mouseEnter(e) {
@@ -698,19 +687,22 @@ export class Viewer {
     // Return a jQuery node list for wrapper elements corresponding to 
     // the factId.  May contain more than one node if the IX node contains
     // absolutely positioned elements.
-    elementsForItemId(factId) {
-        return this._ixNodeMap[factId].wrapperNodes; 
+    elementsForItemId(vuid) {
+        if (!(vuid in this._ixNodeMap)){
+            throw new Error(`Attempting to retrieve IXNode with missing key: ${vuid}`);
+        }
+        return this._ixNodeMap[vuid].wrapperNodes;
     }
 
-    elementsForItemIds(ids) {
-        return $(ids.map(id => this._ixNodeMap[id].wrapperNodes.get()).flat());
+    elementsForItemIds(vuids) {
+        return $(vuids.map(vuid => this.elementsForItemId(vuid).get()).flat());
     }
 
     /*
      * Add or remove a class to an item (fact or footnote) and any continuation elements
      */
-    changeItemClass(itemId, highlightClass, removeClass) {
-        const elements = this.elementsForItemIds([itemId].concat(this.itemContinuationMap[itemId]))
+    changeItemClass(vuid, highlightClass, removeClass) {
+        const elements = this.elementsForItemIds([vuid].concat(this.itemContinuationMap[vuid]))
         if (removeClass) {
             elements.removeClass(highlightClass);
         }
@@ -722,15 +714,15 @@ export class Viewer {
     /*
      * Change the currently highlighted item
      */
-    highlightItem(factId) {
+    highlightItem(vuid) {
         this.clearHighlighting();
-        this.changeItemClass(factId, "ixbrl-selected");
+        this.changeItemClass(vuid, "ixbrl-selected");
     }
 
-    showItemById(id) {
-        if (id !== null) {
-            let elts = this.elementsForItemId(id);
-            this.showDocumentForItemId(id);
+    showItemById(vuid) {
+        if (vuid !== null) {
+            let elts = this.elementsForItemId(vuid);
+            this.showDocumentForItemId(vuid);
             /* Hidden elements will return an empty node list */
             if (elts.length > 0) {
                 this.showElement(elts);
@@ -811,8 +803,8 @@ export class Viewer {
         $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
     }
 
-    showDocumentForItemId(itemId) {
-        this.selectDocument(this._ixNodeMap[itemId].docIndex);
+    showDocumentForItemId(vuid) {
+        this.selectDocument(this._ixNodeMap[vuid].docIndex);
     }
 
     currentDocument() {

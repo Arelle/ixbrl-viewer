@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel, runGenerator, viewerUniqueId } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, viewerUniqueId } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -131,7 +131,7 @@ export class Inspector {
     }
 
     initializeViewer() {
-        this._viewer.onSelect.add((id, eltSet, byClick) => this.selectItem(id, eltSet, byClick));
+        this._viewer.onSelect.add((vuid, eltSet, byClick) => this.selectItem(vuid, eltSet, byClick));
         this._viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
         $('.ixbrl-next-tag').click(() => this._viewer.selectNextTag(this._currentItem));
@@ -173,9 +173,14 @@ export class Inspector {
             // messages to itself when exporting files.
             return;
         }
-
-        if (data.task == 'SHOW_FACT') {
-            this.selectItem(data.factId);
+        const task = data["task"];
+        if (task === SHOW_FACT) {
+            let docSetId = Number(data["docSetId"]);
+            if (!docSetId) { // Handles NaN
+                docSetId = 0;
+            }
+            const vuid = viewerUniqueId(docSetId, data['factId']);
+            this.selectItem(vuid);
         }
         else {
             console.log("Not handling unsupported task message: " + jsonString);
@@ -884,7 +889,7 @@ export class Inspector {
 
         // dissolveSingle => title not shown if only one item in accordian
         const a = new Accordian({
-            onSelect: (id) => this.switchItem(id),
+            onSelect: (vuid) => this.switchItem(vuid),
             alwaysOpen: true,
             dissolveSingle: true,
         });
@@ -1037,9 +1042,9 @@ export class Inspector {
      * If itemIdList is omitted, the currently selected item list is reset to just
      * the primary item.
      */
-    selectItem(id, itemIdList, noScroll) {
+    selectItem(vuid, itemIdList, noScroll) {
         if (itemIdList === undefined) {
-            this._currentItemList = [ this._reportSet.getItemById(id) ];
+            this._currentItemList = [ this._reportSet.getItemById(vuid) ];
         }
         else {
             this._currentItemList = [];
@@ -1047,7 +1052,7 @@ export class Inspector {
                 this._currentItemList.push(this._reportSet.getItemById(itemId));
             }
         }
-        this.switchItem(id, noScroll);
+        this.switchItem(vuid, noScroll);
     }
 
     /*
@@ -1058,13 +1063,13 @@ export class Inspector {
      *
      * For footnotes, we currently only support a single footnote being selected.
      */
-    switchItem(id, noScroll) {
-        if (id !== null) {
-            this._currentItem = this._reportSet.getItemById(id);
+    switchItem(vuid, noScroll) {
+        if (vuid !== null) {
+            this._currentItem = this._reportSet.getItemById(vuid);
             if (!noScroll) {
-                this._viewer.showItemById(id);
+                this._viewer.showItemById(vuid);
             }
-            this._viewer.highlightItem(id);
+            this._viewer.highlightItem(vuid);
         }
         else {
             this._currentItem = null;

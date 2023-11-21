@@ -3,6 +3,9 @@
 import moment from "moment";
 import Decimal from "decimal.js";
 
+
+export const SHOW_FACT = 'SHOW_FACT';
+
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a
@@ -166,12 +169,13 @@ export function isTransparent(rgba) {
  * in order to generate an ID that is guaranteed to be unique within the
  * viewer. This is already within an iXBRL Document Set, but not across
  * separate iXBRL documents or document sets.
- * @param  {Integer}  sourceReportIndex - index of the report document containing the fact
+ * @param  {Number}  sourceReportIndex - index of the report document containing the fact
+ * @param  {String}  localId - local ID of the fact
  * @return {String}   a viewer unique ID
  */
 
 export function viewerUniqueId(sourceReportIndex, localId) {
-    if (localId === null) {
+    if (localId === null || localId === undefined) {
         return null;
     }
     return sourceReportIndex.toString() + "-" + localId;
@@ -179,4 +183,27 @@ export function viewerUniqueId(sourceReportIndex, localId) {
 
 export function localId(viewerUniqueId) {
     return viewerUniqueId.replace(/^\d+-/,"");
+}
+
+/**
+ * Parses fact IDs from -sec-ix-hidden and -esef-ix-hidden style 
+ * attributes on a DOM node.  
+ * Any returned ID should be the ID of a fact in ix:hidden corresponding
+ * to the content contained in the DOM node.
+ * 
+ * @param  {Node}     domNode - DOM node to parse
+ * @return {String}   A fact ID, or null if the element does not have 
+ * a style attribute containing a custom CSS property in the required 
+ * format.
+ */
+
+export function getIXHiddenLinkStyle(domNode) {
+    if (domNode.hasAttribute('style')) {
+        const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const m = domNode.getAttribute('style').match(re);
+        if (m) {
+            return m[1];
+        }
+    }
+    return null;
 }

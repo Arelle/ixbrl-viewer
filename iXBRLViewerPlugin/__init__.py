@@ -307,6 +307,9 @@ def load_plugin_url():
 
 __pluginInfo__ = {
     'name': 'ixbrl-viewer',
+    'aliases': [
+        'iXBRLViewerPlugin',
+    ],
     'version': '0.1',
     'description': "iXBRL Viewer creator",
     'license': 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',

@@ -78,10 +78,10 @@ export class Fact {
                 formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
-                v = this.measureLabel() + " " + formattedNumber;
+                v = this.unitLabel() + " " + formattedNumber;
             }
             else {
-                v = formattedNumber + " " + this.measureLabel();
+                v = formattedNumber + " " + this.unitLabel();
             }
         }
         else if (this.isNil()) {
@@ -117,14 +117,6 @@ export class Fact {
     }
 
     /**
-     * Returns a readable label representing the first numerator in the fact's unit
-     * @return {String} Label representing measure
-     */
-    measureLabel() {
-        return this.unit()?.measureLabel() ?? i18next.t("factDetails.noUnit");
-    }
-
-    /**
      * Returns details about this fact's unit
      * @return {Unit} Unit instance
      */
@@ -137,6 +129,14 @@ export class Fact {
             this._unit = this.report.reportSet.getUnit(unitKey);
         }
         return this._unit;
+    }
+
+    /**
+     * Returns a readable label representing the fact's unit
+     * @return {String} Label representing unit
+     */
+    unitLabel() {
+        return this.unit()?.label() ?? i18next.t("factDetails.noUnit");
     }
 
     getConceptPrefix() {

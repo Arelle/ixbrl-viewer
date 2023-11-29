@@ -1,14 +1,14 @@
 // See COPYRIGHT.md for copyright information
 
-import { Fact } from "./fact.js";
 import { IXBRLChart } from "./chart.js";
 import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
+import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
     "concepts": {

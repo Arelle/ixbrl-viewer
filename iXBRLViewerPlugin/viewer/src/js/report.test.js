@@ -2,6 +2,7 @@
 
 import { ReportSet } from "./reportset.js";
 import { ViewerOptions } from "./viewerOptions.js";
+import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
     "languages": {
@@ -10,7 +11,7 @@ var testReportData = {
     },
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217"
+        "iso4217": NAMESPACE_ISO4217
     },
     "roles": {
         "role1": "https://www.example.com/role1",

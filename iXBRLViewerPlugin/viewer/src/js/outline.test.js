@@ -2,14 +2,14 @@
 
 import $ from 'jquery'
 import { ReportSet } from "./reportset.js";
-import { ReportSetOutline, DocumentOutline } from "./outline.js";
+import { DocumentOutline } from "./outline.js";
 import { IXNode } from "./ixnode.js";
-import { viewerUniqueId } from "./util.js";
+import { NAMESPACE_ISO4217, viewerUniqueId } from "./util.js";
 
 const testReportData = {
     prefixes: {
         eg: "http://www.example.com",
-        iso4217: "http://www.xbrl.org/2003/iso4217",
+        iso4217: NAMESPACE_ISO4217,
         e: "http://example.com/entity",
     },
     roles: {

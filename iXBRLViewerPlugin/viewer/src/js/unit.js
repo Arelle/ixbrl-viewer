@@ -1,7 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
-import i18next from "i18next";
-import {titleCase} from "./util";
+import { measureLabel, NAMESPACE_ISO4217 } from "./util";
 
 export class Unit {
     
@@ -13,13 +12,16 @@ export class Unit {
                 .split('/');
         this._numerators = split[0].split('*');
         this._denominators = split.length > 1 ? split[1].split('*') : [];
-        this._isMonetary = Boolean(this._numerators.find(n => this._report.qname(n).namespace === "http://www.xbrl.org/2003/iso4217"));
-        this._label = split.map(x => {
-                const part = x.split('*').map(y => {
-                    return titleCase(y.split(':')[1]);
-                }).join('*');
+        this._isMonetary = Boolean(this._numerators.find(n => this._report.qname(n).namespace === NAMESPACE_ISO4217));
+        this._label = split
+            .map(measure => {
+                const part = measure
+                    .split('*')
+                    .map(x => measureLabel(report, x))
+                    .join('*');
                 return part.includes('*') ? `(${part})` : part;
-            }).join('/');
+            })
+            .join('/');
         this._measure = this._numerators[0];
     }
 
@@ -46,19 +48,6 @@ export class Unit {
      */
     measure() {
         return this._measure;
-    }
-
-    /**
-     * Returns a readable label representing the first numerator in the unit
-     * @return {String} Label representing measure
-     */
-    measureLabel() {
-        const measure = this.measure();
-        const qname = this._report.qname(measure);
-        if (qname.namespace === "http://www.xbrl.org/2003/iso4217") {
-            return i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
-        }
-        return measure;
     }
 
     /**

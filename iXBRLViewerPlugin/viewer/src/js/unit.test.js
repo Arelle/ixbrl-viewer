@@ -30,22 +30,22 @@ beforeAll(() => {
 describe("Unit label", () => {
     test("Unit label for simple unit", () => {
         var unit = new Unit(testReport(), 'iso4217:USD');
-        expect(unit.label()).toEqual('USD');
+        expect(unit.label()).toEqual('US $');
     });
 
     test("Unit label for complex unit", () => {
         var unit = new Unit(testReport(), 'iso4217:USD/eg:share');
-        expect(unit.label()).toEqual('USD/Share');
+        expect(unit.label()).toEqual('US $/Share');
     });
 
     test("Unit label for complex unit with numerator parentheses", () => {
         var unit = new Unit(testReport(), '(iso4217:USD*eg:share)/eg:shareholder');
-        expect(unit.label()).toEqual('(USD*Share)/Shareholder');
+        expect(unit.label()).toEqual('(US $*Share)/Shareholder');
     });
 
     test("Unit label for complex unit with denominator parentheses", () => {
         var unit = new Unit(testReport(), 'iso4217:USD/(eg:share*eg:shareholder)');
-        expect(unit.label()).toEqual('USD/(Share*Shareholder)');
+        expect(unit.label()).toEqual('US $/(Share*Shareholder)');
     });
 });
 
@@ -61,20 +61,20 @@ describe("Unit measure", () => {
     });
 });
 
-describe("Unit measure label", () => {
-    test("Unit measure label - known currency", () => {
+describe("Unit label", () => {
+    test("Unit label - known currency", () => {
         var unit = new Unit(testReport(), 'eg:share');
-        expect(unit.measureLabel()).toEqual('eg:share');
+        expect(unit.label()).toEqual('Share');
     });
 
-    test("Unit measure label - known currency", () => {
+    test("Unit label - known currency", () => {
         var unit = new Unit(testReport(), 'iso4217:USD');
-        expect(unit.measureLabel()).toEqual('US $');
+        expect(unit.label()).toEqual('US $');
     });
 
-    test("Unit measure label - unknown", () => {
+    test("Unit label - unknown", () => {
         var unit = new Unit(testReport(), 'iso4217:ZAR');
-        expect(unit.measureLabel()).toEqual('ZAR');
+        expect(unit.label()).toEqual('ZAR');
     });
 });
 

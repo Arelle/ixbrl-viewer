@@ -129,7 +129,7 @@ describe("Simple fact properties", () => {
         expect(f.isNumeric()).toBeTruthy();
         expect(f.decimals()).toEqual(-3);
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("1,000 eg:USD");
+        expect(f.readableValue()).toEqual("1,000 USD");
         expect(f.unit().value()).toEqual("eg:USD");
         expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
@@ -150,7 +150,7 @@ describe("Simple fact properties", () => {
         expect(f.decimals()).toBeUndefined();
         expect(f.isNumeric()).toBeTruthy();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("1,000,000.0125 eg:USD");
+        expect(f.readableValue()).toEqual("1,000,000.0125 USD");
         expect(f.unit().value()).toEqual("eg:USD");
         expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
@@ -540,7 +540,7 @@ describe("Readable value", () => {
     test("Other numeric", () => {
 
         expect(testFact({ "v": "10", d: -2, a: { u: "xbrli:foo" } }).readableValue())
-            .toBe("10 xbrli:foo");
+            .toBe("10 Foo");
 
     });
 
@@ -637,7 +637,7 @@ describe("Unit aspect handling", () => {
         expect(f.isMonetaryValue()).toBeFalsy();
         expect(f.unit()).toBeUndefined();
         expect(f.measure()).toBeUndefined();
-        expect(f.measureLabel()).toBe("<NOUNIT>");
+        expect(f.unitLabel()).toBe("<NOUNIT>");
     });
 
     test("Non-numeric, no unit", () => {    

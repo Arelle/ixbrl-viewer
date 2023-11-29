@@ -12,6 +12,7 @@ export class Unit {
                 .split('/');
         this._numerators = split[0].split('*');
         this._denominators = split.length > 1 ? split[1].split('*') : [];
+        this._isSimple = this._numerators.length === 1 && this._denominators.length === 0;
         this._isMonetary = Boolean(this._numerators.find(n => this._report.qname(n).namespace === NAMESPACE_ISO4217));
         this._label = split
             .map(measure => {
@@ -32,6 +33,15 @@ export class Unit {
      */
     isMonetary() {
         return this._isMonetary;
+    }
+
+
+    /**
+     * Returns whether the unit is a simple measure (single numerator, no denominators).
+     * @return {Boolean}
+     */
+    isSimple() {
+        return this._isSimple;
     }
 
     /**

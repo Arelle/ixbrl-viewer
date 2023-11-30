@@ -179,10 +179,14 @@ export class XBRLReport {
         return this.reportSet.qname(v);
     }
 
-    getScaleLabel(scale, isMonetaryValue, currency=null) {
+    getScaleLabel(scale, unit) {
         let label = i18next.t(`scale.${scale}`, {defaultValue:"noName"});
-        if (isMonetaryValue && scale === -2) {
-            label = i18next.t(`currencies:cents${currency}`, {defaultValue: label});
+        if (unit && unit.isMonetary() && scale === -2) {
+            let measure = unit.value() ?? '';
+            if (measure) {
+                measure = this.qname(measure).localname;
+            }
+            label = i18next.t(`currencies:cents${measure}`, {defaultValue: label});
         }
         if (label === "noName") {
             return null;

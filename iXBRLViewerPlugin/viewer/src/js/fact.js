@@ -77,7 +77,7 @@ export class Fact {
             else {
                 formattedNumber = formatNumber(v, d);
             }
-            if (this.isMonetaryValue() && this.unit().isSimple()) {
+            if (this.isMonetaryValue()) {
                 v = this.unitLabel() + " " + formattedNumber;
             }
             else {

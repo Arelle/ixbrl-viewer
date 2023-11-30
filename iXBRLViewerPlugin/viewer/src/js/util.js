@@ -7,7 +7,7 @@ import i18next from "i18next";
 
 export const SHOW_FACT = 'SHOW_FACT';
 
-export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217'
+export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217';
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date

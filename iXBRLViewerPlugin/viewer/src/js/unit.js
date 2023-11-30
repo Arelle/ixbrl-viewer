@@ -4,44 +4,36 @@ import { measureLabel, NAMESPACE_ISO4217 } from "./util";
 
 export class Unit {
     
-    constructor(report, unitKey) {
-        this._report = report;
+    constructor(reportSet, unitKey) {
+        this._reportSet = reportSet;
         this._value = unitKey;
         const split = unitKey
                 .split(/[()]/ig).join('') // TODO: replace with .replaceAll(/[()]/ig,'') when no longer supporting node 14
                 .split('/');
         this._numerators = split[0].split('*');
         this._denominators = split.length > 1 ? split[1].split('*') : [];
-        this._isSimple = this._numerators.length === 1 && this._denominators.length === 0;
-        this._isMonetary = Boolean(this._numerators.find(n => this._report.qname(n).namespace === NAMESPACE_ISO4217));
+        this._isMonetary =
+                this._denominators.length === 0 &&
+                this._numerators.length === 1 &&
+                this._reportSet.qname(this._numerators[0]).namespace === NAMESPACE_ISO4217;
         this._label = split
             .map(measure => {
                 const part = measure
                     .split('*')
-                    .map(x => measureLabel(report, x))
+                    .map(x => measureLabel(this._reportSet, x))
                     .join('*');
                 return part.includes('*') ? `(${part})` : part;
             })
             .join('/');
         this._measure = this._numerators[0];
     }
-
-
+    
     /**
      * Returns whether any of the numerators are an iso4217 monetary measure.
      * @return {Boolean}
      */
     isMonetary() {
         return this._isMonetary;
-    }
-
-
-    /**
-     * Returns whether the unit is a simple measure (single numerator, no denominators).
-     * @return {Boolean}
-     */
-    isSimple() {
-        return this._isSimple;
     }
 
     /**

@@ -537,7 +537,7 @@ describe("Readable value", () => {
     test("Other numeric", () => {
 
         expect(testFact({ "v": "10", d: -2, a: { u: "xbrli:foo" } }).readableValue())
-            .toBe("10 Foo");
+            .toBe("10 foo");
 
     });
 

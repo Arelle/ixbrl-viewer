@@ -35,24 +35,24 @@ describe("Unit label", () => {
 
     test("Unit label for complex unit", () => {
         var unit = new Unit(testReport(), 'iso4217:USD/eg:share');
-        expect(unit.label()).toEqual('US $/Share');
+        expect(unit.label()).toEqual('US $/share');
     });
 
     test("Unit label for complex unit with numerator parentheses", () => {
         var unit = new Unit(testReport(), '(iso4217:USD*eg:share)/eg:shareholder');
-        expect(unit.label()).toEqual('(US $*Share)/Shareholder');
+        expect(unit.label()).toEqual('(US $*share)/shareholder');
     });
 
     test("Unit label for complex unit with denominator parentheses", () => {
         var unit = new Unit(testReport(), 'iso4217:USD/(eg:share*eg:shareholder)');
-        expect(unit.label()).toEqual('US $/(Share*Shareholder)');
+        expect(unit.label()).toEqual('US $/(share*shareholder)');
     });
 });
 
 describe("Unit label", () => {
     test("Unit label - known currency", () => {
         var unit = new Unit(testReport(), 'eg:share');
-        expect(unit.label()).toEqual('Share');
+        expect(unit.label()).toEqual('share');
     });
 
     test("Unit label - known currency", () => {

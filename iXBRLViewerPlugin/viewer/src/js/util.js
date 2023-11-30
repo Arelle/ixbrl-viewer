@@ -221,9 +221,7 @@ export function measureLabel(report, measure) {
     if (qname.namespace === NAMESPACE_ISO4217) {
         measure = i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
     } else if (measure.includes(':')) {
-        measure = titleCase(measure.split(':')[1]);
-    } else {
-        measure = titleCase(measure);
+        measure = measure.split(':')[1];
     }
     return measure;
 }

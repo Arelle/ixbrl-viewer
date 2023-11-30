@@ -25,9 +25,8 @@ export class Unit {
                 return part.includes('*') ? `(${part})` : part;
             })
             .join('/');
-        this._measure = this._numerators[0];
     }
-    
+
     /**
      * Returns whether any of the numerators are an iso4217 monetary measure.
      * @return {Boolean}
@@ -42,14 +41,6 @@ export class Unit {
      */
     label() {
         return this._label;
-    }
-
-    /**
-     * Returns the qname of the first numerator in the unit
-     * @return {String} QName string of a measure
-     */
-    measure() {
-        return this._measure;
     }
 
     /**

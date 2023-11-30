@@ -109,14 +109,6 @@ export class Fact {
     }
 
     /**
-     * Returns the qname of the first numerator in the fact's unit
-     * @return {String} QName string of a measure
-     */
-    measure() {
-        return this.unit()?.measure();
-    }
-
-    /**
      * Returns details about this fact's unit
      * @return {Unit} Unit instance
      */

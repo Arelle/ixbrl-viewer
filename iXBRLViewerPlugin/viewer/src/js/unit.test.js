@@ -49,18 +49,6 @@ describe("Unit label", () => {
     });
 });
 
-describe("Unit measure", () => {
-    test("Unit measure is simple unit", () => {
-        var unit = new Unit(testReport(), 'iso4217:USD');
-        expect(unit.measure()).toEqual('iso4217:USD');
-    });
-
-    test("Unit measure is first numerator of complex unit", () => {
-        var unit = new Unit(testReport(), '(iso4217:USD*eg:share)/eg:shareholder');
-        expect(unit.measure()).toEqual('iso4217:USD');
-    });
-});
-
 describe("Unit label", () => {
     test("Unit label - known currency", () => {
         var unit = new Unit(testReport(), 'eg:share');
@@ -94,5 +82,9 @@ describe("Unit value", () => {
     test("Unit value is key", () => {
         var unit = new Unit(testReport(), '(iso4217:USD*eg:share)/eg:shareholder');
         expect(unit.value()).toEqual('(iso4217:USD*eg:share)/eg:shareholder');
+    });
+    test("Unit value is simple unit", () => {
+        var unit = new Unit(testReport(), 'iso4217:USD');
+        expect(unit.value()).toEqual('iso4217:USD');
     });
 });

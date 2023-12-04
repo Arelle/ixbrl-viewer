@@ -1,9 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
-import { Fact } from "./fact.js";
 import { FactSet } from "./factset.js";
-import { viewerUniqueId } from "./util.js";
-import { XBRLReport } from "./report.js";
+import { NAMESPACE_ISO4217, viewerUniqueId } from "./util.js";
 import { ReportSet } from "./reportset.js";
 
 var i = 0;
@@ -11,7 +9,7 @@ var i = 0;
 var testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
     "concepts": {

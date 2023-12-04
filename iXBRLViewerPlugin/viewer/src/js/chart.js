@@ -97,7 +97,7 @@ export class IXBRLChart extends Dialog {
         const uv2 = set2av.uniqueValues();
 
         const scale = this._chooseMultiplier(facts);
-        const yLabel = fact.measureLabel() + " " + this._multiplierDescription(scale);
+        const yLabel = fact.unitLabel() + " " + this._multiplierDescription(scale);
         const labels = [];
         
         const dataSets = [];

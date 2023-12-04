@@ -1,15 +1,14 @@
 // See COPYRIGHT.md for copyright information
 
-import { Fact } from "./fact.js";
 import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
-import { SHOW_FACT, viewerUniqueId } from "./util.js";
+import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId } from "./util.js";
 
 
 const testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
     "concepts": {

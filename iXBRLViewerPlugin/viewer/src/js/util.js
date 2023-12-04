@@ -2,9 +2,12 @@
 
 import moment from "moment";
 import Decimal from "decimal.js";
+import i18next from "i18next";
 
 
 export const SHOW_FACT = 'SHOW_FACT';
+
+export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217';
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
@@ -206,4 +209,19 @@ export function getIXHiddenLinkStyle(domNode) {
         }
     }
     return null;
+}
+
+/**
+ * Transforms measure qname into title case label (or currency symbol, if applicable).
+ * @return {String} Measure Label
+ */
+
+export function measureLabel(report, measure) {
+    const qname = report.qname(measure);
+    if (qname.namespace === NAMESPACE_ISO4217) {
+        measure = i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
+    } else if (measure.includes(':')) {
+        measure = measure.split(':')[1];
+    }
+    return measure;
 }

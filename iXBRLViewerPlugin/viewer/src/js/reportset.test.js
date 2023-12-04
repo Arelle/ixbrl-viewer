@@ -2,7 +2,7 @@
 
 import { ReportSet } from "./reportset.js";
 import { ViewerOptions } from "./viewerOptions.js";
-import { viewerUniqueId } from "./util.js";
+import { NAMESPACE_ISO4217, viewerUniqueId } from "./util.js";
 import { createNumericFact } from "./test-utils.js";
 
 function anchoringRelationShips(include) {
@@ -28,7 +28,7 @@ function multiReportTestData(withAnchoring) {
         },
         "prefixes": {
             "eg": "http://www.example.com",
-            "iso4217": "http://www.xbrl.org/2003/iso4217"
+            "iso4217": NAMESPACE_ISO4217
         },
         "roles": {
             "role1": "https://www.example.com/role1",
@@ -131,7 +131,7 @@ function singleReportTestData() {
         },
         "prefixes": {
             "eg": "http://www.example.com",
-            "iso4217": "http://www.xbrl.org/2003/iso4217"
+            "iso4217": NAMESPACE_ISO4217
         },
         "roles": {
             "role1": "https://www.example.com/role1",

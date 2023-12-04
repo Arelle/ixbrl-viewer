@@ -78,10 +78,10 @@ export class Fact {
                 formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
-                v = this.measureLabel() + " " + formattedNumber;
+                v = this.unitLabel() + " " + formattedNumber;
             }
             else {
-                v = formattedNumber + " " + this.measureLabel();
+                v = formattedNumber + " " + this.unitLabel();
             }
         }
         else if (this.isNil()) {
@@ -109,22 +109,6 @@ export class Fact {
     }
 
     /**
-     * Returns the qname of the first numerator in the fact's unit
-     * @return {String} QName string of a measure
-     */
-    measure() {
-        return this.unit()?.measure();
-    }
-
-    /**
-     * Returns a readable label representing the first numerator in the fact's unit
-     * @return {String} Label representing measure
-     */
-    measureLabel() {
-        return this.unit()?.measureLabel() ?? i18next.t("factDetails.noUnit");
-    }
-
-    /**
      * Returns details about this fact's unit
      * @return {Unit} Unit instance
      */
@@ -137,6 +121,14 @@ export class Fact {
             this._unit = this.report.reportSet.getUnit(unitKey);
         }
         return this._unit;
+    }
+
+    /**
+     * Returns a readable label representing the fact's unit
+     * @return {String} Label representing unit
+     */
+    unitLabel() {
+        return this.unit()?.label() ?? i18next.t("factDetails.noUnit");
     }
 
     getConceptPrefix() {
@@ -264,17 +256,12 @@ export class Fact {
     }
 
     getScaleLabel(value, isAccuracy=false) {
-        let measure = this.measure() ?? '';
-        if (measure) {
-            measure = this.report.qname(measure).localname;
-        }
         return this.report.getScaleLabel(
                 // We use the same table of labels for scale and accuracy,
                 // but decimals means "accurate to 10^-N" whereas scale means 10^N,
                 // so invert N for accuracy.
                 isAccuracy ? -value : value,
-                this.isMonetaryValue(),
-                measure
+                this.unit()
         );
     }
 

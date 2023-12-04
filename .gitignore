@@ -1,5 +1,9 @@
 .idea
+.mypy_cache
+.pytest_cache
+.tox
 .vscode
+build
 node_modules/
 dist/
 __pycache__
@@ -8,3 +12,4 @@ iXBRLViewerPlugin/viewer/src/fonts/
 iXBRLViewerPlugin/viewer/src/less/generated/
 iXBRLViewerPlugin/_version.py
 /ixbrl-viewer*.tgz
+ixbrl_viewer.egg-info

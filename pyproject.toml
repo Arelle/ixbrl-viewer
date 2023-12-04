@@ -34,8 +34,11 @@ dependencies = [
 ]
 [project.optional-dependencies]
 dev = [
+    'flake8==6.1.0',
+    'lxml-stubs==0.4.0',
+    'mypy==1.7.0',
     'nose2==0.14.0',
-    'typing-extensions==4.8.0'
+    'typing-extensions==4.8.0',
 ]
 
 # https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins
@@ -60,3 +63,34 @@ namespaces = false
 [tool.setuptools_scm]
 tag_regex = "^(?:[\\w-]+-?)?(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
 write_to = "iXBRLViewerPlugin/_version.py"
+
+[tool.mypy]
+# Warn when a # type: ignore comment does not specify any error codes
+enable_error_code = "ignore-without-code"
+python_version = "3.11"
+show_error_codes = true
+strict = true
+
+# --- ignore modules ---
+# remove from list below as each module is updated with type hinting
+[[tool.mypy.overrides]]
+module = [
+    'iXBRLViewerPlugin',
+    'iXBRLViewerPlugin.iXBRLViewer',
+    'iXBRLViewerPlugin.ui',
+    'iXBRLViewerPlugin.xhtmlserialize',
+    'tests.unit_tests.iXBRLViewerPlugin/mock_arelle',
+    'tests.unit_tests.iXBRLViewerPlugin/test_iXBRLViewer',
+    'tests.unit_tests.iXBRLViewerPlugin/test_xhtmlserialize',
+]
+ignore_errors = true
+
+# --- Modules lacking stubs ---
+# Add any module missing library stubs or not having
+# the py.typed marker here
+[[tool.mypy.overrides]]
+module = [
+    'ttk',
+    'arelle.*',
+]
+ignore_missing_imports = true

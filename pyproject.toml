@@ -28,11 +28,13 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-    'arelle_release==2.*',
     'lxml==4.*',
     'pycountry==22.*'
 ]
 [project.optional-dependencies]
+arelle = [
+    'arelle_release==2.*',
+]
 dev = [
     'flake8==6.1.0',
     'lxml-stubs==0.4.0',

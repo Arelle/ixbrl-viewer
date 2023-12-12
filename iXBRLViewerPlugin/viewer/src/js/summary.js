@@ -68,8 +68,8 @@ class LocalDocuments {
 }
 
 export class DocumentSummary {
-    constructor(report) {
-        this._report = report;
+    constructor(reportSet) {
+        this._reportSet = reportSet;
     }
 
     _getTagCounter(tagCounts, element) {
@@ -86,14 +86,14 @@ export class DocumentSummary {
 
     _buildTagCounts() {
         const tagCounts = new Map();
-        for (const fact of this._report.facts()) {
+        for (const fact of this._reportSet.facts()) {
             let counter = this._getTagCounter(tagCounts, fact.conceptName());
             counter.addPrimaryItem(fact.conceptName());
             for (const [dimension, member] of Object.entries(fact.dimensions())) {
                 counter = this._getTagCounter(tagCounts, dimension);
                 counter.addDimension(dimension);
 
-                const dimensionConcept = this._report.getConcept(dimension);
+                const dimensionConcept = fact.report.getConcept(dimension);
                 if (dimensionConcept.isTypedDimension()) {
                     const typedDomainElement = dimensionConcept.typedDomainElement();
                     if (typedDomainElement) {
@@ -113,14 +113,14 @@ export class DocumentSummary {
 
     _buildLocalFileSummary() {
         this._localFileSummary = new LocalDocuments();
-        for (const [document, documentTypes] of Object.entries(this._report.localDocuments())) {
+        for (const [document, documentTypes] of this._reportSet.reports.flatMap(r => Object.entries(r.localDocuments()))) {
             this._localFileSummary.addDocument(document, documentTypes);
         }
     }
 
     totalFacts() {
         if (this._totalFacts === undefined) {
-            this._totalFacts = this._report.facts().length;
+            this._totalFacts = this._reportSet.facts().length;
         }
         return this._totalFacts;
     }

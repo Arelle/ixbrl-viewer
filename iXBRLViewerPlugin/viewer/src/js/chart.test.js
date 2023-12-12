@@ -1,14 +1,14 @@
 // See COPYRIGHT.md for copyright information
 
-import { Fact } from "./fact.js";
 import { IXBRLChart } from "./chart.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
+import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
     "concepts": {
@@ -74,21 +74,22 @@ var testReportData = {
 
 function testReport(facts, ixData) {
     // Deep copy of standing data
-    var data = JSON.parse(JSON.stringify(testReportData));
+    const data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new iXBRLReport(data);
-    report.setIXNodeMap(ixData);
-    return report;
+    const reportSet = new ReportSet(data);
+    reportSet.setIXNodeMap(ixData);
+    return reportSet;
 }
 
 function testFact(factData, ixData) {
     factData.a = factData.a || {};
     factData.a.c = factData.a.c || 'eg:Concept1';
     ixData = ixData || {};
-    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
+    const reportSet = testReport({"f1": factData}, {"f1": ixData });
+    return reportSet.getItemById("0-f1"); 
 }
 
-var insp = new TestInspector();
+const insp = new TestInspector();
 beforeAll(() => {
     return insp.i18nInit();
 });

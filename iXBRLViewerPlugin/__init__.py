@@ -81,6 +81,11 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
                       default=False,
                       dest="zipViewerOutput",
                       help="Converts the viewer output into a self contained zip")
+
+    # Force "keepOpen" to true, so that all models are retained.  Needed for
+    # multi-instance viewers.
+    parser.set_defaults(keepOpen = True)
+
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
     for featureConfig in FEATURE_CONFIGS:
@@ -111,7 +116,9 @@ def generateViewer(
     :param features: List of feature names to enable via generated JSON data.
     """
     # extend XBRL-loaded run processing for this option
-    if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None or not cntlr.modelManager.modelXbrl.modelDocument:
+    if (cntlr.modelManager is None 
+        or len(cntlr.modelManager.loadedModelXbrls) == 0 
+        or any(not mx.modelDocument for mx in cntlr.modelManager.loadedModelXbrls)):
         cntlr.addToLog("No taxonomy loaded.")
         return
     modelXbrl = cntlr.modelManager.modelXbrl
@@ -138,7 +145,7 @@ def generateViewer(
     try:
         out = saveViewerDest
         if out:
-            viewerBuilder = IXBRLViewerBuilder(modelXbrl)
+            viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.loadedModelXbrls)
             if features:
                 for feature in features:
                     viewerBuilder.enableFeature(feature)
@@ -301,13 +308,16 @@ def load_plugin_url():
 
 __pluginInfo__ = {
     'name': 'ixbrl-viewer',
+    'aliases': [
+        'iXBRLViewerPlugin',
+    ],
     'version': '0.1',
     'description': "iXBRL Viewer creator",
     'license': 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
     'author': 'Paul Warren',
     'copyright': 'Copyright :: Workiva Inc. :: 2019',
     'CntlrCmdLine.Options': commandLineOptionExtender,
-    'CntlrCmdLine.Xbrl.Run': commandLineRun,
+    'CntlrCmdLine.Filing.End': commandLineRun,
     'CntlrWinMain.Menu.Tools': toolsMenuExtender,
     'CntlrWinMain.Xbrl.Loaded': guiRun,
 }

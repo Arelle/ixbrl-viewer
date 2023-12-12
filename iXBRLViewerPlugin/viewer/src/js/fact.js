@@ -7,30 +7,31 @@ import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
-import { formatNumber } from "./util.js";
-import { Footnote } from "./footnote.js";
+import { formatNumber, localId } from "./util.js";
+import Decimal from "decimal.js";
 import { Interval } from './interval.js';
 
 export class Fact {
     
-    constructor(report, factId) {
-        this.f = report.data.facts[factId];
-        this.ixNode = report.getIXNodeForItemId(factId);
-        this._report = report;
-        this.id = factId;
+    constructor(report, factId, factData) {
+        this.f = factData;
+        this.ixNode = report.reportSet.getIXNodeForItemId(factId);
+        this.report = report;
+        this.vuid = factId;
         this.linkedFacts = [];
+        this._footnotes = [];
     }
 
-    report() {
-        return this._report;
+    localId() {
+        return localId(this.vuid);
     }
 
     getLabel(rolePrefix, withPrefix) {
-        return this._report.getLabel(this.f.a.c, rolePrefix, withPrefix);
+        return this.report.getLabel(this.f.a.c, rolePrefix, withPrefix);
     }
 
     getLabelOrName(rolePrefix, withPrefix) {
-        return this._report.getLabelOrName(this.f.a.c, rolePrefix, withPrefix);
+        return this.report.getLabelOrName(this.f.a.c, rolePrefix, withPrefix);
     }
 
     conceptName() {
@@ -38,11 +39,11 @@ export class Fact {
     }
 
     concept() {
-        return this._report.getConcept(this.f.a.c); 
+        return this.report.getConcept(this.f.a.c); 
     }
 
     conceptQName() {
-        return this._report.qname(this.f.a.c);
+        return this.report.qname(this.f.a.c);
     }
 
     period(){
@@ -81,10 +82,10 @@ export class Fact {
                 formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
-                v = this.measureLabel() + " " + formattedNumber;
+                v = this.unitLabel() + " " + formattedNumber;
             }
             else {
-                v = formattedNumber + " " + this.measureLabel();
+                v = formattedNumber + " " + this.unitLabel();
             }
         }
         else if (this.isNil()) {
@@ -104,27 +105,11 @@ export class Fact {
         else if (this.isEnumeration()) {
             const labels = [];
             for (const qn of v.split(' ')) {
-                labels.push(this._report.getLabelOrName(qn, 'std'));
+                labels.push(this.report.getLabelOrName(qn, 'std'));
             }
             v = labels.join(', ');
         }
         return v;
-    }
-
-    /**
-     * Returns the qname of the first numerator in the fact's unit
-     * @return {String} QName string of a measure
-     */
-    measure() {
-        return this.unit()?.measure();
-    }
-
-    /**
-     * Returns a readable label representing the first numerator in the fact's unit
-     * @return {String} Label representing measure
-     */
-    measureLabel() {
-        return this.unit()?.measureLabel() ?? i18next.t("factDetails.noUnit");
     }
 
     /**
@@ -137,9 +122,17 @@ export class Fact {
             if (!unitKey) {
                 return undefined;
             }
-            this._unit = this.report().getUnit(unitKey);
+            this._unit = this.report.reportSet.getUnit(unitKey);
         }
         return this._unit;
+    }
+
+    /**
+     * Returns a readable label representing the fact's unit
+     * @return {String} Label representing unit
+     */
+    unitLabel() {
+        return this.unit()?.label() ?? i18next.t("factDetails.noUnit");
     }
 
     getConceptPrefix() {
@@ -148,14 +141,14 @@ export class Fact {
 
     isCalculationContributor() {
         if (this._isCalculationContributor === undefined) {
-            this._isCalculationContributor = this._report.isCalculationContributor(this.f.a.c);
+            this._isCalculationContributor = this.report.isCalculationContributor(this.f.a.c);
         }
         return this._isCalculationContributor;
     }
 
     isCalculationSummation() {
         if (this._isCalculationSummation === undefined) {
-            this._isCalculationSummation = this._report.isCalculationSummation(this.f.a.c);
+            this._isCalculationSummation = this.report.isCalculationSummation(this.f.a.c);
         }
         return this._isCalculationSummation;
     }
@@ -175,11 +168,11 @@ export class Fact {
     }
 
     hasExplicitDimension() {
-        return Object.keys(this.dimensions()).some(d => !this._report.getConcept(d).isTypedDimension());
+        return Object.keys(this.dimensions()).some(d => !this.report.getConcept(d).isTypedDimension());
     }
 
     hasTypedDimension() {
-        return Object.keys(this.dimensions()).some(d => this._report.getConcept(d).isTypedDimension());
+        return Object.keys(this.dimensions()).some(d => this.report.getConcept(d).isTypedDimension());
     }
 
     isMonetaryValue() {
@@ -200,7 +193,7 @@ export class Fact {
         }
         if (this._aspects[a] === undefined) {
             if (this.f.a[a] !== undefined) {
-                this._aspects[a] = new Aspect(a, this.f.a[a], this._report);
+                this._aspects[a] = new Aspect(a, this.f.a[a], this.report);
             }
         }
         return this._aspects[a];
@@ -246,7 +239,7 @@ export class Fact {
     }
 
     duplicates() {
-        return this._report.getAlignedFacts(this);
+        return this.report.getAlignedFacts(this);
     }
 
     isNil() {
@@ -267,17 +260,12 @@ export class Fact {
     }
 
     getScaleLabel(value, isAccuracy=false) {
-        let measure = this.measure() ?? '';
-        if (measure) {
-            measure = this.report().qname(measure).localname;
-        }
-        return this._report.getScaleLabel(
+        return this.report.getScaleLabel(
                 // We use the same table of labels for scale and accuracy,
                 // but decimals means "accurate to 10^-N" whereas scale means 10^N,
                 // so invert N for accuracy.
                 isAccuracy ? -value : value,
-                this.isMonetaryValue(),
-                measure
+                this.unit()
         );
     }
 
@@ -315,7 +303,7 @@ export class Fact {
     }
 
     identifier() {
-        return this._report.qname(this.f.a.e);
+        return this.report.qname(this.f.a.e);
     }
 
     escaped() {
@@ -326,8 +314,12 @@ export class Fact {
         return this.concept().isEnumeration();
     }
 
+    addFootnote(fn) {
+        this._footnotes.push(fn);
+    }
+
     footnotes() {
-        return (this.f.fn || []).map((fn, i) => this._report.getItemById(fn));
+        return this._footnotes;
     }
 
     isHidden() {
@@ -340,7 +332,7 @@ export class Fact {
 
     widerConcepts() {
         const concepts = [];
-        const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");
+        const parentsByELR = this.report.getParentRelationships(this.conceptName(), "w-n");
         for (const elr in parentsByELR) {
             concepts.push(...$.map(parentsByELR[elr], (rel) => rel.src));
         }
@@ -349,7 +341,7 @@ export class Fact {
 
     narrowerConcepts() {
         const concepts = [];
-        const childrenByELR = this._report.getChildRelationships(this.conceptName(), "w-n");
+        const childrenByELR = this.report.getChildRelationships(this.conceptName(), "w-n");
         for (const elr in childrenByELR) {
             concepts.push(...$.map(childrenByELR[elr], (rel) => rel.t));
         }

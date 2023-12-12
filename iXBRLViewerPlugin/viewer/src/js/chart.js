@@ -76,7 +76,7 @@ export class IXBRLChart extends Dialog {
             covered[dims[1]] = null;
         }
 
-        const facts = fact.report().deduplicate(fact.report().getAlignedFacts(fact, covered));
+        const facts = fact.report.deduplicate(fact.report.getAlignedFacts(fact, covered));
 
         /* Get the unique aspect values along each dimension.  This is to ensure
          * that we assign facts to datasets consistently (we have one dataset per value
@@ -97,7 +97,7 @@ export class IXBRLChart extends Dialog {
         const uv2 = set2av.uniqueValues();
 
         const scale = this._chooseMultiplier(facts);
-        const yLabel = fact.measureLabel() + " " + this._multiplierDescription(scale);
+        const yLabel = fact.unitLabel() + " " + this._multiplierDescription(scale);
         const labels = [];
         
         const dataSets = [];
@@ -123,7 +123,7 @@ export class IXBRLChart extends Dialog {
                 if (dims[1]) {
                     covered[dims[1]] = uv2[j].value();
                 }
-                const dp = fact.report().getAlignedFacts(fact, covered);
+                const dp = fact.report.getAlignedFacts(fact, covered);
                 if (dp.length > 0) {
                     dataSets[j].data[i] = dp[0].value()/(10**scale);
                 }

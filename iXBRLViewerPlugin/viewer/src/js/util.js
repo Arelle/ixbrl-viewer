@@ -2,6 +2,12 @@
 
 import moment from "moment";
 import Decimal from "decimal.js";
+import i18next from "i18next";
+
+
+export const SHOW_FACT = 'SHOW_FACT';
+
+export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217';
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
@@ -159,4 +165,63 @@ export function titleCase(text) {
 export function isTransparent(rgba) {
     const val = parseFloat(rgba.split(",")[3]);
     return !isNaN(val) && val < 0.1;
+}
+
+/**
+ * Prefix an item ID with the index of the report document that it appears in,
+ * in order to generate an ID that is guaranteed to be unique within the
+ * viewer. This is already within an iXBRL Document Set, but not across
+ * separate iXBRL documents or document sets.
+ * @param  {Number}  sourceReportIndex - index of the report document containing the fact
+ * @param  {String}  localId - local ID of the fact
+ * @return {String}   a viewer unique ID
+ */
+
+export function viewerUniqueId(sourceReportIndex, localId) {
+    if (localId === null || localId === undefined) {
+        return null;
+    }
+    return sourceReportIndex.toString() + "-" + localId;
+}
+
+export function localId(viewerUniqueId) {
+    return viewerUniqueId.replace(/^\d+-/,"");
+}
+
+/**
+ * Parses fact IDs from -sec-ix-hidden and -esef-ix-hidden style 
+ * attributes on a DOM node.  
+ * Any returned ID should be the ID of a fact in ix:hidden corresponding
+ * to the content contained in the DOM node.
+ * 
+ * @param  {Node}     domNode - DOM node to parse
+ * @return {String}   A fact ID, or null if the element does not have 
+ * a style attribute containing a custom CSS property in the required 
+ * format.
+ */
+
+export function getIXHiddenLinkStyle(domNode) {
+    if (domNode.hasAttribute('style')) {
+        const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const m = domNode.getAttribute('style').match(re);
+        if (m) {
+            return m[1];
+        }
+    }
+    return null;
+}
+
+/**
+ * Transforms measure qname into title case label (or currency symbol, if applicable).
+ * @return {String} Measure Label
+ */
+
+export function measureLabel(report, measure) {
+    const qname = report.qname(measure);
+    if (qname.namespace === NAMESPACE_ISO4217) {
+        measure = i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
+    } else if (measure.includes(':')) {
+        measure = measure.split(':')[1];
+    }
+    return measure;
 }

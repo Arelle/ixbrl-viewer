@@ -1,14 +1,15 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { DocumentOutline } from "./outline.js";
 import { IXNode } from "./ixnode.js";
+import { NAMESPACE_ISO4217, viewerUniqueId } from "./util.js";
 
 const testReportData = {
     prefixes: {
         eg: "http://www.example.com",
-        iso4217: "http://www.xbrl.org/2003/iso4217",
+        iso4217: NAMESPACE_ISO4217,
         e: "http://example.com/entity",
     },
     roles: {
@@ -165,56 +166,60 @@ const testFacts =  {
         },
     };
 
-function testReport(factList) {
+function testReportSet(factList) {
     // Deep copy of standing data
-    var data = JSON.parse(JSON.stringify(testReportData));
-    var ixNodeMap = {};
-    var i = 0;
+    const data = JSON.parse(JSON.stringify(testReportData));
+    const ixNodeMap = {};
+    let i = 0;
     data.facts = {};
     for (const f of factList) {
         data.facts[f] = testFacts[f];
-        ixNodeMap[f] = new IXNode(f, $('<span></span>'), i++);
+        ixNodeMap[viewerUniqueId(0,f)] = new IXNode(f, $('<span></span>'), i++);
     }
-    var report = new iXBRLReport(data);
-    report.setIXNodeMap(ixNodeMap);
-    return report;
+    const reportSet = new ReportSet(data);
+    reportSet.setIXNodeMap(ixNodeMap);
+    return reportSet;
+}
+
+function getFact(rs, id) {
+    return rs.getItemById(viewerUniqueId(0, id));
 }
 
 describe("Section filtering", () => {
     // f1 has a line item from elr1, f2 has a line item from elr3
     test("Both groups", () => {
-        var report = testReport(["f1", "f2"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.factInGroup(report.getItemById("f1"), "elr1")).toBe(true);
-        expect(outline.factInGroup(report.getItemById("f1"), "elr2")).toBe(false);
-        expect(outline.factInGroup(report.getItemById("f1"), "elr3")).toBe(false);
+        const reportSet = testReportSet(["f1", "f2"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.factInGroup(getFact(reportSet, "f1"), "elr1")).toBe(true);
+        expect(outline.factInGroup(getFact(reportSet, "f1"), "elr2")).toBe(false);
+        expect(outline.factInGroup(getFact(reportSet, "f1"), "elr3")).toBe(false);
 
-        expect(outline.factInGroup(report.getItemById("f2"), "elr1")).toBe(false);
-        expect(outline.factInGroup(report.getItemById("f2"), "elr2")).toBe(false);
-        expect(outline.factInGroup(report.getItemById("f2"), "elr3")).toBe(true);
+        expect(outline.factInGroup(getFact(reportSet, "f2"), "elr1")).toBe(false);
+        expect(outline.factInGroup(getFact(reportSet, "f2"), "elr2")).toBe(false);
+        expect(outline.factInGroup(getFact(reportSet, "f2"), "elr3")).toBe(true);
 
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
     });
 
     test("First group", () => {
-        var report = testReport(["f1"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1"]);
+        const reportSet = testReportSet(["f1"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1"]);
     });
 
     test("Last group", () => {
-        var report = testReport(["f2"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr3"]);
+        const reportSet = testReportSet(["f2"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr3"]);
     });
 });
 
 describe("Dimensional filtering", () => {
     test("Simple", () => {
-        var report = testReport(["f3"]);
-        var outline = new DocumentOutline(report);
+        const reportSet = testReportSet(["f3"]);
+        let outline = new DocumentOutline(reportSet.reports[0]);
         // ELR1 does not mention Dimension 1, so f3 is included.
-        var f3 = report.getItemById("f3");
+        const f3 = getFact(reportSet, "f3");
         expect(outline.factInGroup(f3, "elr1")).toBe(true);
         // ELR1 includes Dimension 2 with specified member, so included
         expect(outline.factInGroup(f3, "elr2")).toBe(true);
@@ -222,17 +227,17 @@ describe("Dimensional filtering", () => {
         // Missing required TypedDimensions1
         expect(outline.factInGroup(f3, "elr4")).toBe(false);
 
-        expect(outline.sortedSections()).toEqual(["elr1", "elr2"]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr2"]);
 
-        expect(outline.groupsForFact(f3)).toEqual(["elr1", "elr2"]);
+        expect(outline.groupsForFact(f3).map(g => g.elr)).toEqual(["elr1", "elr2"]);
 
         // Exclude Member1 from Dimension1 in ELR2
-        report.data.rels.pres.elr2['eg:Dimension1'] = [
+        reportSet.reports[0]._reportData.rels.pres.elr2['eg:Dimension1'] = [
             { "t": "eg:Member2" }
         ];
-        report._reverseRelationshipCache = {}; 
+        reportSet.reports[0]._reverseRelationshipCache = {}; 
 
-        outline = new DocumentOutline(report);
+        outline = new DocumentOutline(reportSet.reports[0]);
 
         // ELR1 does not mention Dimension 1, so f3 is included.
         expect(outline.factInGroup(f3, "elr1")).toBe(true);
@@ -242,15 +247,15 @@ describe("Dimensional filtering", () => {
         // Missing required TypedDimensions1
         expect(outline.factInGroup(f3, "elr4")).toBe(false);
 
-        expect(outline.sortedSections()).toEqual(["elr1"]);
-        expect(outline.groupsForFact(f3)).toEqual(["elr1"]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1"]);
+        expect(outline.groupsForFact(f3).map(g => g.elr)).toEqual(["elr1"]);
 
     });
 
     test("Typed Dimensions", () => {
-        var report = testReport(["ft"]);
-        var outline = new DocumentOutline(report);
-        var ft = report.getItemById("ft");
+        const reportSet = testReportSet(["ft"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        const ft = getFact(reportSet, "ft");
         expect(outline.factInGroup(ft, "elr1")).toBe(true);
         // Missing required Dimension1
         expect(outline.factInGroup(ft, "elr2")).toBe(false);
@@ -261,24 +266,25 @@ describe("Dimensional filtering", () => {
 
     test("Defaults", () => {
         // Make Member1 the default for Dimension1
-        var report = testReport(["f1", "f2", "f3"]);
-        report.data.rels["d-d"] = { elr1: { 'eg:Dimension1': [ { t: 'eg:Member1' } ] } };
+        const reportSet = testReportSet(["f1", "f2", "f3"]);
+        const report = reportSet.reports[0];
+        report._reportData.rels["d-d"] = { elr1: { 'eg:Dimension1': [ { t: 'eg:Member1' } ] } };
 
-        var outline = new DocumentOutline(report);
-        var f1 = report.getItemById("f1");
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        const f1 = getFact(reportSet, "f1");
         expect(outline.factInGroup(f1, "elr1")).toBe(true);
         // f1 is now included in elr2 because the default member is in ELR2
         expect(outline.factInGroup(f1, "elr2")).toBe(true);
         expect(outline.factInGroup(f1, "elr3")).toBe(false);
 
         // This should be unchanged
-        var f1 = report.getItemById("f2");
-        expect(outline.factInGroup(report.getItemById("f2"), "elr1")).toBe(false);
-        expect(outline.factInGroup(report.getItemById("f2"), "elr2")).toBe(false);
-        expect(outline.factInGroup(report.getItemById("f2"), "elr3")).toBe(true);
+        const f2 = getFact(reportSet, "f2");
+        expect(outline.factInGroup(f2, "elr1")).toBe(false);
+        expect(outline.factInGroup(f2, "elr2")).toBe(false);
+        expect(outline.factInGroup(f2, "elr3")).toBe(true);
 
         // f3 is now technically illegal because it includes the default value for a dimension
-        var f3 = report.getItemById("f3");
+        const f3 = getFact(reportSet, "f3");
         expect(outline.factInGroup(f3, "elr1")).toBe(true);
         // ELR2 now excludeds f3 because the default must be omitted
         expect(outline.factInGroup(f3, "elr2")).toBe(false);
@@ -292,71 +298,71 @@ describe("Section grouping", () => {
     // f1* in ELR1, f2* in ELR3
     test("Single group", () => {
         // All facts in a single group
-        var report = testReport(["f1", "f1a"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1"]);
-        expect(outline.sections["elr1"].id).toEqual("f1");
+        const reportSet = testReportSet(["f1", "f1a"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1");
         expect(outline.sections["elr3"]).toBeUndefined();
     });
 
     test("Longest runs 1", () => {
         // ELR1 is the f1, f1a run
         // ELR3 is the f2a, f2b run
-        var report = testReport(["f1", "f1a", "f2", "f1b", "f2a", "f2b"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].id).toEqual("f1");
-        expect(outline.sections["elr3"].id).toEqual("f2a");
+        const reportSet = testReportSet(["f1", "f1a", "f2", "f1b", "f2a", "f2b"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1");
+        expect(outline.sections["elr3"].localId()).toEqual("f2a");
     });
 
     test("Longest runs 2", () => {
         // ELR1 is the f1a, f1b run
         // ELR3 is the f2, f2b run
-        var report = testReport(["f1", "f2", "f2b", "f1a", "f1b", "f2a"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].id).toEqual("f1a");
-        expect(outline.sections["elr3"].id).toEqual("f2");
+        const reportSet = testReportSet(["f1", "f2", "f2b", "f1a", "f1b", "f2a"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1a");
+        expect(outline.sections["elr3"].localId()).toEqual("f2");
     });
 
     test("Equal length runs", () => {
         // If multiple runs have the same length, we arbitrarily assign the ELR
         // to the first.
-        var report = testReport(["f1", "f1a", "f2", "f1b", "f1c", "f2b" ]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].id).toEqual("f1");
-        expect(outline.sections["elr3"].id).toEqual("f2");
+        const reportSet = testReportSet(["f1", "f1a", "f2", "f1b", "f1c", "f2b" ]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1");
+        expect(outline.sections["elr3"].localId()).toEqual("f2");
     });
 
     test("Hidden facts", () => {
         // Start with ELR1*2 ELR3*1 ELR1*3
-        var report = testReport(["f1a", "f1", "f2", "f1b", "f1c", "f1d"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].id).toEqual("f1b");
-        expect(outline.sections["elr3"].id).toEqual("f2");
+        const reportSet = testReportSet(["f1a", "f1", "f2", "f1b", "f1c", "f1d"]);
+        let outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1b");
+        expect(outline.sections["elr3"].localId()).toEqual("f2");
 
         // Make f1c hidden.  We now have ELR1*2 ELR3*1 ELR1*2
         // The first ELR1 run should be selected.
-        report.getItemById("f1c").ixNode.isHidden = true;
-        outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].id).toEqual("f1a");
-        expect(outline.sections["elr3"].id).toEqual("f2");
+        getFact(reportSet, "f1c").ixNode.isHidden = true;
+        outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1a");
+        expect(outline.sections["elr3"].localId()).toEqual("f2");
 
         // Make f1a hidden.  f1b-[f1c]-f1d is now the longest run.
-        report.getItemById("f1a").ixNode.isHidden = true;
-        outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].id).toEqual("f1b");
-        expect(outline.sections["elr3"].id).toEqual("f2");
+        getFact(reportSet, "f1a").ixNode.isHidden = true;
+        outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1b");
+        expect(outline.sections["elr3"].localId()).toEqual("f2");
 
         // Hide f2.  We now have a single run for ELR1
-        report.getItemById("f2").ixNode.isHidden = true;
-        outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1"]);
-        expect(outline.sections["elr1"].id).toEqual("f1");
+        getFact(reportSet, "f2").ixNode.isHidden = true;
+        outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1"]);
+        expect(outline.sections["elr1"].localId()).toEqual("f1");
 
     });
 });
@@ -364,14 +370,14 @@ describe("Section grouping", () => {
 describe("No presentation", () => {
     // f1 has a line item from elr1, f2 has a line item from elr3
     test("Remove presentation relationships", () => {
-        var report = testReport(["f1", "f2"]);
-        var outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual(["elr1", "elr3"]);
+        const reportSet = testReportSet(["f1", "f2"]);
+        let outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
         expect(outline.hasOutline()).toEqual(true);
 
-        delete report.data.rels.pres;
-        outline = new DocumentOutline(report);
-        expect(outline.sortedSections()).toEqual([]);
+        delete reportSet.reports[0]._reportData.rels.pres;
+        outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sortedSections().map(g => g.elr)).toEqual([]);
         expect(outline.hasOutline()).toEqual(false);
     });
 });

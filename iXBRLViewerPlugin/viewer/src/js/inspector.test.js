@@ -1,14 +1,14 @@
 // See COPYRIGHT.md for copyright information
 
-import { Fact } from "./fact.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
+import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId } from "./util.js";
 
 
-var testReportData = {
+const testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
     "concepts": {
@@ -44,37 +44,38 @@ var testReportData = {
 
 function testReport(facts, ixData) {
     // Deep copy of standing data
-    var data = JSON.parse(JSON.stringify(testReportData));
+    const data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new iXBRLReport(data);
-    report.setIXNodeMap(ixData);
-    return report;
+    const reportSet = new ReportSet(data);
+    reportSet.setIXNodeMap(ixData);
+    return reportSet;
 }
 
 function fromFact(value) {
-    var factData = {
+    const factData = {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
                     "u": "iso4217:USD", 
                     "p": "2017-01-01/2018-01-01",
                 }};
-    return new Fact(testReport({"f1": factData}, {"f1": {} }), "f1");
+    return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
 }
 
 function toFact(value) {
-    var factData = {
+    const factData = {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
                     "u": "iso4217:USD", 
                     "p": "2018-01-01/2019-01-01",
                 }};
-    return new Fact(testReport({"f1": factData}, {"f1": {} }), "f1");
+    
+    return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
 }
 
 describe("Describe changes", () => {
-    var insp = new TestInspector();
+    const insp = new TestInspector();
     beforeAll(() => {
         return insp.i18nInit();
     });
@@ -117,7 +118,7 @@ describe("Scales filter options", () => {
         if (scale !== 0) {
             ixNode["scale"] = scale;
         }
-        ixData[id] = ixNode;
+        ixData[viewerUniqueId(0, id)] = ixNode;
     }
     const nonMonetaryFactData = {};
     for (let scale = -4; scale < 11; scale++) {
@@ -127,16 +128,16 @@ describe("Scales filter options", () => {
         if (scale !== 0) {
             ixNode["scale"] = scale;
         }
-        ixData[id] = ixNode;
+        ixData[viewerUniqueId(0, id)] = ixNode;
     }
 
     test("Scales filter options with monetary and non-monetary facts", () => {
-        var insp = new TestInspector();
-        const report = testReport({
+        const insp = new TestInspector();
+        const reportSet = testReport({
             ...monetaryFactData,
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(report)
+        insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual({
@@ -159,10 +160,10 @@ describe("Scales filter options", () => {
 
     test("Scales filter options with only monetary facts", () => {
         var insp = new TestInspector();
-        const report = testReport({
+        const reportSet = testReport({
             ...monetaryFactData,
         }, ixData);
-        insp.initialize(report)
+        insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual({
@@ -184,11 +185,11 @@ describe("Scales filter options", () => {
     })
 
     test("Scales filter options with only non-monetary facts", () => {
-        var insp = new TestInspector();
-        const report = testReport({
+        const insp = new TestInspector();
+        const reportSet = testReport({
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(report)
+        insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual({
@@ -207,5 +208,123 @@ describe("Scales filter options", () => {
             "-3": "Thousandths",
             "-4": "-4",
         });
+    })
+});
+
+describe("Fact deep link", () => {
+    const insp = new TestInspector();
+    insp._reportSet = {
+        getItemById: jest.fn(id => ["0-123", "1-abc"].includes(id) ? true : undefined),
+    };
+    const mockSelect = jest.fn(id => true);
+    insp.selectItem = mockSelect;
+    test("Old style fact deep link", () => {
+        mockSelect.mockClear();
+        location.hash = "#f-123";
+        insp.handleFactDeepLink();
+        expect(mockSelect).toHaveBeenCalledWith("0-123");
+    })
+    test("Old style fact deep link (non-existent)", () => {
+        mockSelect.mockClear();
+        location.hash = "#f-1234";
+        insp.handleFactDeepLink();
+        expect(mockSelect).not.toHaveBeenCalled();
+    })
+    test("New style fact deep link", () => {
+        mockSelect.mockClear();
+        location.hash = "#f0-123";
+        insp.handleFactDeepLink();
+        expect(mockSelect).toHaveBeenCalledWith("0-123");
+    })
+    test("New style fact deep link", () => {
+        mockSelect.mockClear();
+        location.hash = "#f1-abc";
+        insp.handleFactDeepLink();
+        expect(mockSelect).toHaveBeenCalledWith("1-abc");
+    })
+    test("New style fact deep link (non-existent)", () => {
+        mockSelect.mockClear();
+        location.hash = "#f0-1234";
+        insp.handleFactDeepLink();
+        expect(mockSelect).not.toHaveBeenCalled();
+    })
+});
+
+describe("Handle message", () => {
+    const generateEvent = (data) => {
+        return {
+            originalEvent: {
+                data: JSON.stringify(data)
+            }
+        };
+    }
+    const insp = new TestInspector();
+    insp._reportSet = {
+        getItemById: jest.fn(id => ["0-123", "1-abc"].includes(id) ? true : undefined),
+    };
+    const mockSelect = jest.fn(id => true);
+    insp.selectItem = mockSelect;
+    it.each([
+        ["0", "0-123"],
+        [0, "0-123"],
+        [undefined, "0-123"],
+        ["1", "1-123"],
+        [1, "1-123"],
+        ["X", "0-123"],
+    ])("SHOW_FACT task with valid factID and %p docSetId selects VUID %p", (docSetId, result) => {
+        mockSelect.mockClear();
+        const data = {
+            task: SHOW_FACT,
+            factId: "123",
+        }
+        if (docSetId !== undefined) {
+            data["docSetId"] = docSetId
+        }
+        const event = generateEvent({
+            task: SHOW_FACT,
+            factId: "123",
+            docSetId: docSetId
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).toHaveBeenCalledWith(result);
+    });
+    test("SHOW_FACT with no factId", () => {
+        mockSelect.mockClear();
+        const event = generateEvent({
+            task: SHOW_FACT,
+            docSetId: "0",
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).toHaveBeenCalledWith(null);
+    })
+    test("SHOW_FACT with empty factId", () => {
+        mockSelect.mockClear();
+        const event = generateEvent({
+            task: SHOW_FACT,
+            factId: "",
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).toHaveBeenCalledWith("0-");
+    })
+    test("Invalid task", () => {
+        mockSelect.mockClear();
+        const event = generateEvent({
+            task: "INVALID_TASK",
+        });
+        insp.handleMessage(event);
+        expect(mockSelect).not.toHaveBeenCalled();
+    })
+    test("Invalid JSON", () => {
+        mockSelect.mockClear();
+        const event = {
+            originalEvent: {
+                data: `{
+                    task: "SHOW_TASK"
+                    factId: "f1-abc"
+                }`
+            }
+        };
+        insp.handleMessage(event);
+        expect(mockSelect).not.toHaveBeenCalled();
     })
 });

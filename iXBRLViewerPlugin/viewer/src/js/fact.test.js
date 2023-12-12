@@ -1,13 +1,14 @@
 // See COPYRIGHT.md for copyright information
 
 import { Fact } from "./fact.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
+import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
     "concepts": {
@@ -75,16 +76,16 @@ function testReport(facts, ixData) {
     // Deep copy of standing data
     var data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new iXBRLReport(data);
-    report.setIXNodeMap(ixData);
-    return report;
+    var reportSet = new ReportSet(data);
+    reportSet.setIXNodeMap(ixData);
+    return reportSet.reports[0];
 }
 
 function testFact(factData, ixData) {
     factData.a = factData.a || {};
     factData.a.c = factData.a.c || 'eg:Concept1';
     ixData = ixData || {};
-    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
+    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1", factData);
 }
 
 var insp = new TestInspector();
@@ -108,7 +109,6 @@ describe("Simple fact properties", () => {
         expect(f.isMonetaryValue()).toBeTruthy();
         expect(f.readableValue()).toEqual("US $ 1,000");
         expect(f.unit().value()).toEqual("iso4217:USD");
-        expect(f.measure()).toEqual("iso4217:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -128,9 +128,8 @@ describe("Simple fact properties", () => {
         expect(f.isNumeric()).toBeTruthy();
         expect(f.decimals()).toEqual(-3);
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("1,000 eg:USD");
+        expect(f.readableValue()).toEqual("1,000 USD");
         expect(f.unit().value()).toEqual("eg:USD");
-        expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -149,9 +148,8 @@ describe("Simple fact properties", () => {
         expect(f.decimals()).toBeUndefined();
         expect(f.isNumeric()).toBeTruthy();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("1,000,000.0125 eg:USD");
+        expect(f.readableValue()).toEqual("1,000,000.0125 USD");
         expect(f.unit().value()).toEqual("eg:USD");
-        expect(f.measure()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");
@@ -539,7 +537,7 @@ describe("Readable value", () => {
     test("Other numeric", () => {
 
         expect(testFact({ "v": "10", d: -2, a: { u: "xbrli:foo" } }).readableValue())
-            .toBe("10 xbrli:foo");
+            .toBe("10 foo");
 
     });
 
@@ -635,8 +633,7 @@ describe("Unit aspect handling", () => {
         expect(f.isNumeric()).toBeTruthy();
         expect(f.isMonetaryValue()).toBeFalsy();
         expect(f.unit()).toBeUndefined();
-        expect(f.measure()).toBeUndefined();
-        expect(f.measureLabel()).toBe("<NOUNIT>");
+        expect(f.unitLabel()).toBe("<NOUNIT>");
     });
 
     test("Non-numeric, no unit", () => {    
@@ -647,7 +644,6 @@ describe("Unit aspect handling", () => {
         });
         expect(f.isNumeric()).toBeFalsy();
         expect(f.unit()).toBeUndefined();
-        expect(f.measure()).toBeUndefined();
     });
 });
 
@@ -707,7 +703,6 @@ describe("Fact errors", () => {
         expect(f.isMonetaryValue()).toBeTruthy();
         expect(f.readableValue()).toEqual("Invalid value");
         expect(f.unit().value()).toEqual("iso4217:USD");
-        expect(f.measure()).toEqual("iso4217:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
         expect(f.conceptQName().namespace).toEqual("http://www.example.com");

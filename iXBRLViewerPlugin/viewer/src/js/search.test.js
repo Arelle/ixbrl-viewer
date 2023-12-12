@@ -1,7 +1,9 @@
 // See COPYRIGHT.md for copyright information
 
 import { ReportSearch } from "./search.js"
-import {iXBRLReport} from "./report";
+import { ReportSet } from "./reportset.js";
+import { viewerUniqueId } from "./util.js";
+import { createSimpleFact, createNumericFact } from './test-utils.js';
 
 const testReportData = {
     "concepts": {},
@@ -49,28 +51,6 @@ function createDimensionalizedFact(id, concept, options=null, dimensions= {}) {
     return fact;
 }
 
-function createSimpleFact(id, concept, options=null) {
-    options = options || {};
-    return {
-        [id]: {
-            "a": {
-                "c": concept,
-                "u": options["unit"],
-                "p": options["period"],
-            },
-            "d": options["decimals"],
-            "v": options["value"]
-        }
-    };
-}
-
-function createNumericFact(id, concept, unit, period, value) {
-    return createSimpleFact(id, concept, {
-        "unit": unit,
-        "period": period,
-        "value": value
-    });
-}
 
 function testReport(ixData, testData) {
     // Deep copy of standing data
@@ -83,7 +63,10 @@ function testReport(ixData, testData) {
             ixData[id] = {};
         }
     })
-    const report = new iXBRLReport(data);
+    ixData = Object.fromEntries(
+        Object.entries(ixData).map(([id, v]) => [viewerUniqueId(0,id), v])
+    );
+    const report = new ReportSet(data);
     report.setIXNodeMap(ixData);
     return report;
 }
@@ -129,7 +112,7 @@ describe("Search fact value filter", () => {
         spec.factValueFilter = 'negative'
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
-        expect(results[0]["fact"]["id"]).toEqual("negative")
+        expect(results[0]["fact"].localId()).toEqual("negative")
     });
 
     test("Fact Value Negative filter works with other filter", () => {
@@ -138,7 +121,7 @@ describe("Search fact value filter", () => {
         spec.periodFilter = ['2018-01-01/2019-01-01']
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
-        expect(results[0]["fact"]["id"]).toEqual("negative")
+        expect(results[0]["fact"].localId()).toEqual("negative")
     });
 
     test("Fact Value Positive filter works", () => {
@@ -146,7 +129,7 @@ describe("Search fact value filter", () => {
         spec.factValueFilter = 'positive'
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
-        expect(results[0]["fact"]["id"]).toEqual("positive")
+        expect(results[0]["fact"].localId()).toEqual("positive")
     });
 
     test("Fact Value Positive filter works with other filter", () => {
@@ -155,7 +138,7 @@ describe("Search fact value filter", () => {
         spec.periodFilter = ['2018-01-01/2019-01-01']
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
-        expect(results[0]["fact"]["id"]).toEqual("positive")
+        expect(results[0]["fact"].localId()).toEqual("positive")
     });
 });
 
@@ -192,28 +175,28 @@ describe("Search calculation filter", () => {
     test("Calculations 'all' filter works", () => {
         const spec = testSearchSpec();
         spec.calculationsFilter = [];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item1', 'item2', 'other', 'summation']);
     });
 
     test("Calculations 'contributor' filter works", () => {
         const spec = testSearchSpec();
         spec.calculationsFilter = ['contributor'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item1', 'item2']);
     });
 
     test("Calculations 'summation' filter works", () => {
         const spec = testSearchSpec();
         spec.calculationsFilter = ['summation'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['summation']);
     });
 
     test("Calculations 'summation' and 'contributor' filter works", () => {
         const spec = testSearchSpec();
         spec.calculationsFilter = ['summation', 'contributor'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item1', 'item2', 'summation']);
     });
     const emptyReport = testReport(
@@ -232,7 +215,7 @@ describe("Search calculation filter", () => {
     test("Calculations filter works on empty report", () => {
         const spec = testSearchSpec();
         spec.calculationsFilter = ['summation', 'contributor'];
-        const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = emptyReportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual([]);
     });
 });
@@ -264,38 +247,38 @@ describe("Search namespaces filter", () => {
     const reportSearch = getReportSearch(report)
 
     test("Namespaces filter only shows used prefixes", () => {
-        const prefixes = Array.from(report.getUsedPrefixes()).sort();
+        const prefixes = Array.from(report.getUsedConceptPrefixes()).sort();
         expect(prefixes).toEqual(['a', 'b', 'c']);
     });
 
     test("Namespaces filter works without selection", () => {
         const spec = testSearchSpec();
         spec.namespacesFilter = [];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['itemA1', 'itemA2', 'itemB1', 'itemC1']);
     });
 
     test("Namespaces filter works with single selection", () => {
         const spec = testSearchSpec();
         spec.namespacesFilter = ['a'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['itemA1', 'itemA2']);
     });
 
     test("Namespaces filter works with multiple selections", () => {
         const spec = testSearchSpec();
         spec.namespacesFilter = ['a', 'b'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['itemA1', 'itemA2', 'itemB1']);
     });
 
     test("Namespaces filter works with all selections", () => {
         const spec1 = testSearchSpec();
-        spec1.namespacesFilter = Array.from(report.getUsedPrefixes());
-        const results1 = reportSearch.search(spec1).map(r => r.fact.id).sort();
+        spec1.namespacesFilter = Array.from(report.getUsedConceptPrefixes());
+        const results1 = reportSearch.search(spec1).map(r => r.fact.localId()).sort();
         const spec2 = testSearchSpec();
         spec2.namespacesFilter = [];
-        const results2 = reportSearch.search(spec2).map(r => r.fact.id).sort();
+        const results2 = reportSearch.search(spec2).map(r => r.fact.localId()).sort();
         expect(results1).toEqual(results2);
         expect(results1).toEqual(['itemA1', 'itemA2', 'itemB1', 'itemC1'])
     });
@@ -343,31 +326,31 @@ describe("Search units filter", () => {
     test("Units filter works without selection", () => {
         const spec = testSearchSpec();
         spec.unitsFilter = [];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['itemA', 'itemAB', 'itemB', 'itemBA', 'other']);
     });
 
     test("Units filter works with single selection", () => {
         const spec = testSearchSpec();
         spec.unitsFilter = [cashShareUnit];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['itemAB']);
     });
 
     test("Units filter works with multiple selections", () => {
         const spec = testSearchSpec();
         spec.unitsFilter = [cashUnit, cashShareUnit];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['itemA', 'itemAB']);
     });
 
     test("Units filter with all selections matches numeric filter", () => {
         const spec1 = testSearchSpec();
         spec1.unitsFilter = Array.from(report.getUsedUnits());
-        const results1 = reportSearch.search(spec1).map(r => r.fact.id).sort();
+        const results1 = reportSearch.search(spec1).map(r => r.fact.localId()).sort();
         const spec2 = testSearchSpec()
         spec2.conceptTypeFilter = 'numeric';
-        const results2 = reportSearch.search(spec2).map(r => r.fact.id).sort();
+        const results2 = reportSearch.search(spec2).map(r => r.fact.localId()).sort();
         expect(results1).toEqual(results2);
         expect(results1).toEqual(['itemA', 'itemAB', 'itemB', 'itemBA'])
     });
@@ -403,28 +386,28 @@ describe("Search dimension type filter", () => {
     test("Dimension 'all' filter works", () => {
         const spec = testSearchSpec();
         spec.dimensionTypeFilter = [];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'simple', 'simple2', 'typed', 'typed2']);
     });
 
     test("Dimension 'explicit' filter works", () => {
         const spec = testSearchSpec();
         spec.dimensionTypeFilter = ['explicit'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2']);
     });
 
     test("Dimension 'typed' filter works", () => {
         const spec = testSearchSpec();
         spec.dimensionTypeFilter = ['typed'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
     });
 
     test("Dimension 'explicit' and 'typed' filter works", () => {
         const spec = testSearchSpec();
         spec.dimensionTypeFilter = ['explicit', 'typed'];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
     });
 
@@ -444,7 +427,7 @@ describe("Search dimension type filter", () => {
     test("Dimension filter works on empty report", () => {
         const spec = testSearchSpec();
         spec.dimensionTypeFilter = ['explicit'];
-        const results = emptyReportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = emptyReportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual([]);
     });
 });
@@ -499,21 +482,21 @@ describe("Search scales filter", () => {
     test("Scales filter works without selection", () => {
         const spec = testSearchSpec();
         spec.scalesFilter = [];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item-1', 'item-2', 'item-3', 'item0', 'item1', 'item12', 'item2', 'item3', 'item6', 'item9', 'itemOther']);
     });
 
     test("Scales filter works with single selection", () => {
         const spec = testSearchSpec();
         spec.scalesFilter = [-2];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item-2']);
     });
 
     test("Scales filter works with multiple selections", () => {
         const spec = testSearchSpec();
         spec.scalesFilter = [-2, 2];
-        const results = reportSearch.search(spec).map(r => r.fact.id).sort();
+        const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item-2', 'item2']);
     });
 });

@@ -56,7 +56,7 @@ export class Aspect {
             return this._report.getLabel(this._value, rolePrefix) || this._value;
         }
         else if (this._aspect === 'u') {
-            return this._report.getUnit(this._value).measureLabel();
+            return this._report.reportSet.getUnit(this._value).label();
         }
         else if (this._aspect === 'p') {
             const p = new Period(this._value);

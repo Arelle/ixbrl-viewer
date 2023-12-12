@@ -1,21 +1,23 @@
 // See COPYRIGHT.md for copyright information
 
 import { Unit } from "./unit.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
+import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
-    }
+    },
+    "facts": {}
 };
 
 function testReport() {
     // Deep copy of standing data
     const data = JSON.parse(JSON.stringify(testReportData));
-    const report = new iXBRLReport(data);
+    const report = new ReportSet(data);
     report.setIXNodeMap({});
     return report;
 }
@@ -28,51 +30,39 @@ beforeAll(() => {
 describe("Unit label", () => {
     test("Unit label for simple unit", () => {
         var unit = new Unit(testReport(), 'iso4217:USD');
-        expect(unit.label()).toEqual('USD');
+        expect(unit.label()).toEqual('US $');
     });
 
     test("Unit label for complex unit", () => {
         var unit = new Unit(testReport(), 'iso4217:USD/eg:share');
-        expect(unit.label()).toEqual('USD/Share');
+        expect(unit.label()).toEqual('US $/share');
     });
 
     test("Unit label for complex unit with numerator parentheses", () => {
         var unit = new Unit(testReport(), '(iso4217:USD*eg:share)/eg:shareholder');
-        expect(unit.label()).toEqual('(USD*Share)/Shareholder');
+        expect(unit.label()).toEqual('(US $*share)/shareholder');
     });
 
     test("Unit label for complex unit with denominator parentheses", () => {
         var unit = new Unit(testReport(), 'iso4217:USD/(eg:share*eg:shareholder)');
-        expect(unit.label()).toEqual('USD/(Share*Shareholder)');
+        expect(unit.label()).toEqual('US $/(share*shareholder)');
     });
 });
 
-describe("Unit measure", () => {
-    test("Unit measure is simple unit", () => {
-        var unit = new Unit(testReport(), 'iso4217:USD');
-        expect(unit.measure()).toEqual('iso4217:USD');
-    });
-
-    test("Unit measure is first numerator of complex unit", () => {
-        var unit = new Unit(testReport(), '(iso4217:USD*eg:share)/eg:shareholder');
-        expect(unit.measure()).toEqual('iso4217:USD');
-    });
-});
-
-describe("Unit measure label", () => {
-    test("Unit measure label - known currency", () => {
+describe("Unit label", () => {
+    test("Unit label - known currency", () => {
         var unit = new Unit(testReport(), 'eg:share');
-        expect(unit.measureLabel()).toEqual('eg:share');
+        expect(unit.label()).toEqual('share');
     });
 
-    test("Unit measure label - known currency", () => {
+    test("Unit label - known currency", () => {
         var unit = new Unit(testReport(), 'iso4217:USD');
-        expect(unit.measureLabel()).toEqual('US $');
+        expect(unit.label()).toEqual('US $');
     });
 
-    test("Unit measure label - unknown", () => {
+    test("Unit label - unknown", () => {
         var unit = new Unit(testReport(), 'iso4217:ZAR');
-        expect(unit.measureLabel()).toEqual('ZAR');
+        expect(unit.label()).toEqual('ZAR');
     });
 });
 
@@ -92,5 +82,9 @@ describe("Unit value", () => {
     test("Unit value is key", () => {
         var unit = new Unit(testReport(), '(iso4217:USD*eg:share)/eg:shareholder');
         expect(unit.value()).toEqual('(iso4217:USD*eg:share)/eg:shareholder');
+    });
+    test("Unit value is simple unit", () => {
+        var unit = new Unit(testReport(), 'iso4217:USD');
+        expect(unit.value()).toEqual('iso4217:USD');
     });
 });

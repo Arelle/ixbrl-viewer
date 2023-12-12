@@ -65,25 +65,25 @@ export class Calculation {
      * Select the ELR which is the best match for a given array of facts
      */
     bestELRForFactSet(facts) {
-        var ctf = this.calculationFacts();
-        var bestMatchELR = "";
-        var bestMatchCount = -1;
-        $.each(ctf, function (elr, rr) {
-            var matchCount = 0;
-            $.each(rr, function (concept, ff) {
-                var matched = 0;
-                $.each(ff, function (fid, calcFact) {
+        const ctf = this.calculationFacts();
+        let bestMatchELR = "";
+        let bestMatchCount = -1;
+        for (const [elr, rr] of Object.entries(ctf)) {
+            let matchCount = 0;
+            for (const [concept, ff] of Object.entries(rr)) {
+                let matched = 0;
+                for (const [fid, calcFact] of Object.entries(ff)) {
                     if ($.inArray(fid, facts) >  -1) {
                         matched = 1;
                     } 
-                });
+                }
                 matchCount += matched;
-            });
+            }
             if (matchCount/Object.keys(rr).length > bestMatchCount) {
                 bestMatchCount = matchCount/Object.keys(rr).length;    
                 bestMatchELR = elr;
             }
-        }); 
+        } 
         return bestMatchELR;
     }
 
@@ -91,10 +91,10 @@ export class Calculation {
      * Returns a ResolvedCalculation object for the specified ELR
      */
     resolvedCalculation(elr) {
-        var calc = [];
-        var calcFacts = this.calculationFacts()[elr];
+        const calc = [];
+        const calcFacts = this.calculationFacts()[elr];
         const report = this.fact.report;
-        var rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
+        const rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
         const resolvedCalcClass = this.calc11 ? ResolvedCalc11Calculation : ResolvedLegacyCalculation;
         const resolvedCalculation = new resolvedCalcClass(elr, this.fact);
         for (const r of rels) {

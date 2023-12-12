@@ -29,14 +29,14 @@ export class Calculation {
      * (ELR->conceptName->fact id->fact object) */
     calculationFacts() {
         const fact = this.fact;
-        const report = fact.report();
+        const report = fact.report;
         if (!this._conceptToFact) {
             const rels = report.getChildRelationships(fact.conceptName(), "calc")
             const ctf = {};
             for (const [elr, rr] of Object.entries(rels)) {
                 ctf[elr] = {};
                 if (rr.length > 0) {
-                    var otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
+                    const otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
                     otherFacts.forEach(ff => setDefault(ctf[elr], ff.conceptName(), {})[ff.vuid] = ff);
                 }
             }
@@ -93,7 +93,7 @@ export class Calculation {
     resolvedCalculation(elr) {
         var calc = [];
         var calcFacts = this.calculationFacts()[elr];
-        const report = this.fact.report();
+        const report = this.fact.report;
         var rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
         const resolvedCalcClass = this.calc11 ? ResolvedCalc11Calculation : ResolvedLegacyCalculation;
         const resolvedCalculation = new resolvedCalcClass(elr, this.fact);
@@ -154,8 +154,6 @@ class AbstractResolvedCalculation {
 }
 
 export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
-
-
     calculatedTotalInterval() {
         let total = new Interval(0, 0);
         for (const item of this.rows) {
@@ -171,7 +169,6 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
         }
         return total;
     }
-
 
     /*
      * Is the calculation consistent under Calculations v1.1 rules?

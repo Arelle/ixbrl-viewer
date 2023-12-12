@@ -699,7 +699,7 @@ export class Inspector {
         }
         const tableFacts = this._viewer.factsInSameTable(fact);
         const selectedELR = calc.bestELRForFactSet(tableFacts);
-        const report = this.report;
+        const report = fact.report;
         const inspector = this;
         const a = new Accordian();
 

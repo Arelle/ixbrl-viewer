@@ -109,7 +109,7 @@ export class Viewer {
         if (this._reportSet.isMultiDocumentViewer()) {
             $('#ixv .ixds-tabs').show();
             for (const [i, doc] of this._reportSet.reportFiles().entries()) {
-                $('<div class="tab">')
+                $('<div class="tab"></div>')
                     .text(doc.file)
                     .prop('title', doc.file)
                     .data('ix-doc-id', i)

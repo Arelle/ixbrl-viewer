@@ -524,9 +524,13 @@ class iXBRLViewer:
         self.filingDocuments = None
         # This is an arbitrary ModelXbrl used for logging only
         self.logger_model = logger_model
+        self.filenames = set()
 
     def addFile(self, ivf):
+        if ivf.filename in self.filenames:
+            return
         self.files.append(ivf)
+        self.filenames.add(ivf.filename)
 
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments

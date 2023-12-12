@@ -2,7 +2,6 @@
 
 import $ from 'jquery'
 import i18next from "i18next";
-import Decimal from "decimal.js";
 import { isodateToHuman } from "./util.js"
 import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";

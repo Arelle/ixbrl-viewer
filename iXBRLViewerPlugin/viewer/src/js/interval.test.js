@@ -14,16 +14,19 @@
 
 import { Fact } from "./fact.js";
 import { Interval } from "./interval.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import Decimal from 'decimal.js';
+import { viewerUniqueId } from "./util.js";
 import './test-utils.js';
 
-function testReport(facts) {
-    return new iXBRLReport({
+function testReportSet(facts) {
+    const reportset = new ReportSet({
             prefixes: {},
             concepts: {},
             facts: facts
         });
+    reportset._initialize();
+    return reportset;
 }
 
 function testFact(factData) {
@@ -35,7 +38,7 @@ function testFact(factData) {
     else if (factData.a.u === undefined) {
         delete factData.a.u;
     }
-    return new Fact(testReport({"f1": factData}), "f1");
+    return testReportSet({"f1": factData}).getItemById(viewerUniqueId(0, "f1"));
 }
 
 describe("From facts", () => {

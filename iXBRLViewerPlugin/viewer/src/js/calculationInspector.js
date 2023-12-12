@@ -91,14 +91,15 @@ export class CalculationInspector extends Dialog {
                 .append($("<td></td>").text(cvi === undefined ? 'n/a' : fact.readableValue(cvi.b.toNumber())).addClass("figure"))
                 .appendTo(tbody);
 
-        const rvi = fact.valueInterval();
+        const tvi = resolvedCalculation.totalFactSet.valueIntersection();
+        const icons = this.duplicateFactIcons(resolvedCalculation.totalFactSet);
         $("<tr></tr>")
             .append($("<td></td>"))
             .append($("<td></td>").text(`${fact.concept().label()} (${i18next.t('calculation.reported-total')})`).addClass("line-item"))
-            .append($("<td></td>").text(fact.readableValue()).addClass("figure"))
-            .append($("<td></td>").addClass("icons"))
-            .append($("<td></td>").text(fact.readableValue(rvi.a.toNumber())).addClass("figure"))
-            .append($("<td></td>").text(fact.readableValue(rvi.b.toNumber())).addClass("figure"))
+            .append($("<td></td>").text(tvi === undefined ? 'n/a' : fact.readableValue(tvi.midpoint().toNumber())).addClass("figure"))
+            .append(icons)
+            .append($("<td></td>").text(tvi === undefined ? 'n/a' : fact.readableValue(tvi.a.toNumber())).addClass("figure"))
+            .append($("<td></td>").text(tvi === undefined ? 'n/a' : fact.readableValue(tvi.b.toNumber())).addClass("figure"))
             .appendTo(tbody);
         if (hasIcons) {
             table.addClass("has-icons");

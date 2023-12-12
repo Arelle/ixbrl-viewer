@@ -134,7 +134,8 @@ class CalculationContribution {
 
 class AbstractResolvedCalculation {
     constructor(elr, fact) {
-        this.totalFact = fact; // XXX  this needs to be factset
+        this.totalFact = fact;
+        this.totalFactSet = new FactSet(fact.report.getAlignedFacts(fact));
         this.elr = elr;
         this.rows = [];
     }
@@ -150,7 +151,6 @@ class AbstractResolvedCalculation {
     unchecked() {
         return false;
     }
-
 }
 
 export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
@@ -175,7 +175,8 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
      */
     isConsistent() {
         const cti = this.calculatedTotalInterval();
-        return cti !== undefined && cti.intersection(Interval.fromFact(this.totalFact)) !== undefined;
+        const ti = this.totalFactSet.valueIntersection();
+        return cti !== undefined && cti.intersection(ti) !== undefined;
     }
 }
 

@@ -308,13 +308,13 @@ export class Viewer {
             const reportIndex = $(iframe).data("report-index");
             $(iframe).contents().find("body *").each((m, node) => {
                 const name = localName(node.nodeName).toUpperCase();
-                if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name)) {
+                if (['NONNUMERIC', 'NONFRACTION', 'FOOTNOTE', 'CONTINUATION'].includes(name) && node.hasAttribute('id')) {
                     const nodeId = viewerUniqueId(reportIndex, node.getAttribute('id'));
                     const continuedAtId = viewerUniqueId(reportIndex, node.getAttribute("continuedAt"));
                     if (continuedAtId !== null) {
                         nextContinuationMap[nodeId] = continuedAtId;
                     }
-                    if (name != 'CONTINUATION' && !node.hasAttribute('target')) {
+                    if (name != 'CONTINUATION') {
                         itemContinuationMap[nodeId] = [];
                     }
                 }
@@ -336,6 +336,17 @@ export class Viewer {
             }
         }
         this.itemContinuationMap = itemContinuationMap;
+    }
+
+    _getOrCreateIXNode(vuid, nodes, docIndex) {
+        // We may have already created an IXNode for this ID from a -sec-ix-hidden
+        // element 
+        let ixn = this._ixNodeMap[vuid];
+        if (!ixn) {
+            ixn = new IXNode(vuid, nodes, docIndex);
+            this._ixNodeMap[vuid] = ixn;
+        }
+        return ixn;
     }
 
     //
@@ -375,59 +386,66 @@ export class Viewer {
         const isNonFraction = name === 'NONFRACTION';
         const isFact = isNonNumeric || isNonFraction;
         if (n.nodeType === 1) {
-            // Ignore iXBRL elements that are not in the default target document, as
-            // the viewer builder does not handle these, and the builder does not
-            // ensure that they have ID attributes.
             const vuid = viewerUniqueId(reportIndex, n.getAttribute("id"));
-            if (((isFact || isFootnote) && !n.hasAttribute("target"))
-                || (isContinuation && this.continuationOfMap[vuid] !== undefined)) {
-                let nodes;
-                if (inHidden) {
-                    nodes = $(n);
-                } else {
-                    nodes = this._findOrCreateWrapperNode(n);
-                }
+            if (isFact || isFootnote) {
+                // If @id is not present, it must be for a target document that wasn't processed.
+                if (n.hasAttribute("id")) {
+                    let nodes;
+                    if (inHidden) {
+                        nodes = $(n);
+                    } else {
+                        nodes = this._findOrCreateWrapperNode(n);
+                    }
 
-                // For a continuation, store the IX ID(s) of the item(s), not the continuation
-                const headId = isContinuation ? this.continuationOfMap[vuid] : vuid;
-                this._addIdToNode(nodes.first(), headId);
+                    this._addIdToNode(nodes.first(), vuid);
 
-                // We may have already created an IXNode for this ID from a -sec-ix-hidden
-                // element 
-                let ixn = this._ixNodeMap[vuid];
-                if (!ixn) {
-                    ixn = new IXNode(vuid, nodes, docIndex);
-                    this._ixNodeMap[vuid] = ixn;
-                }
-                if (inHidden) {
-                    ixn.isHidden = true;
-                    nodes.addClass("ixbrl-element-hidden");
-                }
-                if (isContinuation) {
-                    nodes.addClass("ixbrl-continuation");
-                }
-                else {
+                    let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex);
+                    if (inHidden) {
+                        ixn.isHidden = true;
+                        nodes.addClass("ixbrl-element-hidden");
+                    }
                     this._docOrderItemIndex.addItem(vuid, docIndex);
-                }
-                if (isNonFraction) {
-                    nodes.addClass("ixbrl-element-nonfraction");
-                    if (n.hasAttribute('scale')) {
-                        const scale = Number(n.getAttribute('scale'));
-                        // Set scale if the value is a valid number and is not a redundant 0/"ones" scale.
-                        if (!Number.isNaN(scale) && scale !== 0) {
-                            ixn.scale = scale;
+                    if (isNonFraction) {
+                        nodes.addClass("ixbrl-element-nonfraction");
+                        if (n.hasAttribute('scale')) {
+                            const scale = Number(n.getAttribute('scale'));
+                            // Set scale if the value is a valid number and is not a redundant 0/"ones" scale.
+                            if (!Number.isNaN(scale) && scale !== 0) {
+                                ixn.scale = scale;
+                            }
                         }
                     }
-                }
-                if (isNonNumeric) {
-                    nodes.addClass("ixbrl-element-nonnumeric");
-                    if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
-                        ixn.escaped = true;
+                    if (isNonNumeric) {
+                        nodes.addClass("ixbrl-element-nonnumeric");
+                        if (n.hasAttribute('escape') && n.getAttribute('escape').match(/^(true|1)$/)) {
+                            ixn.escaped = true;
+                        }
+                    }
+                    if (isFootnote) {
+                        nodes.addClass("ixbrl-element-footnote");
+                        ixn.footnote = true;
                     }
                 }
-                if (isFootnote) {
-                    nodes.addClass("ixbrl-element-footnote");
-                    ixn.footnote = true;
+            }
+            else if (isContinuation) {
+                if (n.hasAttribute("id") && this.continuationOfMap[vuid] !== undefined) {
+                    let nodes;
+                    if (inHidden) {
+                        nodes = $(n);
+                    } else {
+                        nodes = this._findOrCreateWrapperNode(n);
+                    }
+
+                    // For a continuation, store the IX ID(s) of the item(s), not the continuation
+                    this._addIdToNode(nodes.first(), this.continuationOfMap[vuid]);
+
+                    let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex);
+
+                    if (inHidden) {
+                        ixn.isHidden = true;
+                        nodes.addClass("ixbrl-element-hidden");
+                    }
+                    nodes.addClass("ixbrl-continuation");
                 }
             }
             else if(name == 'HIDDEN') {

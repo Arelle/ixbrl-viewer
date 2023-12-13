@@ -436,7 +436,7 @@ export class Inspector {
             $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
             overlay.show();
         }
-        $("#matching-concepts-count").text(results.length);
+        $("#matching-facts-count").text(results.length);
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));

@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, viewerUniqueId } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { Calculation } from "./calculations.js";
 import { IXBRLChart } from './chart.js';
@@ -256,7 +256,7 @@ export class Inspector {
         for (const [i, name] of key.entries()) {
             $("<div>")
                 .addClass("item")
-                .append($("<span></span>").addClass("sample").addClass("sample-" + i))
+                .append($("<span></span>").addClass("sample").addClass("sample-" + (i % HIGHLIGHT_COLORS)))
                 .append($("<span></span>").text(name))
                 .appendTo($(".highlight-key .items"));
         }

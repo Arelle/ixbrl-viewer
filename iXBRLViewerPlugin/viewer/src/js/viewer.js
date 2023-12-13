@@ -3,9 +3,8 @@
 import $ from 'jquery'
 import { numberMatchSearch, fullDateMatch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
-import { escapeRegex, viewerUniqueId } from './util.js'
 import { IXNode } from './ixnode.js';
-import { getIXHiddenLinkStyle, runGenerator } from './util.js';
+import { getIXHiddenLinkStyle, runGenerator, escapeRegex, viewerUniqueId, HIGHLIGHT_COLORS } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 
@@ -751,7 +750,7 @@ export class Viewer {
     highlightAllTags(on, namespaceGroups) {
         const groups = {};
         $.each(namespaceGroups, function (i, ns) {
-            groups[ns] = i;
+            groups[ns] = i % HIGHLIGHT_COLORS;
         });
         const reportSet = this._reportSet;
         const viewer = this;

@@ -9,6 +9,9 @@ export const SHOW_FACT = 'SHOW_FACT';
 
 export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217';
 
+// The number of distinct highlight colors defined in inspector.less
+export const HIGHLIGHT_COLORS = 3;
+
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a

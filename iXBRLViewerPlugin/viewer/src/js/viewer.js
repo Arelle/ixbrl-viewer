@@ -246,8 +246,13 @@ export class Viewer {
         }
     }
 
-    _findOrCreateWrapperNode(domNode) {
+    _findOrCreateWrapperNode(domNode, inHidden) {
         const v = this;
+
+        if (inHidden) {
+            return $(domNode).addClass("ixbrl-element-hidden");
+        }
+
         /* Is the element the only significant content within a <td> or <th> ? If
          * so, use that as the wrapper element. */
         const tableNode = domNode.closest("td,th");
@@ -337,13 +342,14 @@ export class Viewer {
         this.itemContinuationMap = itemContinuationMap;
     }
 
-    _getOrCreateIXNode(vuid, nodes, docIndex) {
+    _getOrCreateIXNode(vuid, nodes, docIndex, isHidden) {
         // We may have already created an IXNode for this ID from a -sec-ix-hidden
         // element 
         let ixn = this._ixNodeMap[vuid];
         if (!ixn) {
             ixn = new IXNode(vuid, nodes, docIndex);
             this._ixNodeMap[vuid] = ixn;
+            ixn.isHidden = isHidden;
         }
         return ixn;
     }
@@ -389,21 +395,12 @@ export class Viewer {
             if (isFact || isFootnote) {
                 // If @id is not present, it must be for a target document that wasn't processed.
                 if (n.hasAttribute("id")) {
-                    let nodes;
-                    if (inHidden) {
-                        nodes = $(n);
-                    } else {
-                        nodes = this._findOrCreateWrapperNode(n);
-                    }
+                    let nodes = this._findOrCreateWrapperNode(n, inHidden);
 
                     this._addIdToNode(nodes.first(), vuid);
-
-                    let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex);
-                    if (inHidden) {
-                        ixn.isHidden = true;
-                        nodes.addClass("ixbrl-element-hidden");
-                    }
+                    let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
                     this._docOrderItemIndex.addItem(vuid, docIndex);
+
                     if (isNonFraction) {
                         nodes.addClass("ixbrl-element-nonfraction");
                         if (n.hasAttribute('scale')) {
@@ -428,22 +425,13 @@ export class Viewer {
             }
             else if (isContinuation) {
                 if (n.hasAttribute("id") && this.continuationOfMap[vuid] !== undefined) {
-                    let nodes;
-                    if (inHidden) {
-                        nodes = $(n);
-                    } else {
-                        nodes = this._findOrCreateWrapperNode(n);
-                    }
+                    let nodes = this._findOrCreateWrapperNode(n, inHidden);
 
                     // For a continuation, store the IX ID(s) of the item(s), not the continuation
                     this._addIdToNode(nodes.first(), this.continuationOfMap[vuid]);
 
-                    let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex);
+                    this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
 
-                    if (inHidden) {
-                        ixn.isHidden = true;
-                        nodes.addClass("ixbrl-element-hidden");
-                    }
                     nodes.addClass("ixbrl-continuation");
                 }
             }

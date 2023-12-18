@@ -14,7 +14,7 @@ from .mock_arelle import mock_arelle
 
 mock_arelle()
 
-from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder
+from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewerFile
 
 class TestNamespaceMap(unittest.TestCase):
 
@@ -449,7 +449,8 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     def test_addConcept_simple_case(self):
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.addReport()
+        builder.currentTargetReport = builder.newTargetReport()
+        builder.addSourceReport()["targetReports"].append(builder.currentTargetReport)
         builder.addConcept(self.modelXbrl_1, self.cash_concept)
         self.assertTrue(builder.taxonomyData["sourceReports"][0]["targetReports"][0].get('concepts').get('us-gaap:Cash'))
 
@@ -465,7 +466,7 @@ class TestIXBRLViewer(unittest.TestCase):
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_returns_a_rel(self):
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.addReport()
+        builder.currentTargetReport = builder.newTargetReport()
         result = builder.getRelationships(self.modelXbrl_1)
         roleMap = builder.roleMap
         siPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/summation-item')
@@ -477,10 +478,10 @@ class TestIXBRLViewer(unittest.TestCase):
         """
         elr = "http://example.com/unknownELR"
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.addReport()
+        builder.currentTargetReport = builder.newTargetReport()
         builder.addELR(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
-        self.assertEqual(builder.currentReportData.get('roleDefs').get(elrPrefix), None)
+        self.assertEqual(builder.currentTargetReport.get('roleDefs').get(elrPrefix), None)
 
     def test_addELR_with_definition(self):
         """
@@ -488,10 +489,10 @@ class TestIXBRLViewer(unittest.TestCase):
         """
         elr = "ELR"
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.addReport()
+        builder.currentTargetReport = builder.newTargetReport()
         builder.addELR(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
-        self.assertEqual(builder.currentReportData.get('roleDefs').get(elrPrefix).get("en"), "ELR Label")
+        self.assertEqual(builder.currentTargetReport.get('roleDefs').get(elrPrefix).get("en"), "ELR Label")
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -560,9 +561,7 @@ class TestIXBRLViewer(unittest.TestCase):
             'local-unrecognized-linkbase.xml': ['unrecognizedLinkbase'],
         })
 
-        # There's not actually a good reason for not including "docSetFiles"
-        # now, but it's what we do currently.
-        self.assertNotIn("docSetFiles", jsdata["sourceReports"][0]);
+        self.assertEqual(jsdata["sourceReports"][0]["docSetFiles"], ["a.html"]);
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -710,9 +709,15 @@ class TestIXBRLViewer(unittest.TestCase):
             xml = etree.parse(StringIO(xmls))
 
             js_uri = 'https://example.com/script-url'
-            result = self.builder_1.addViewerToXMLDocument(xml, js_uri)
+            viewer_file = iXBRLViewerFile("test.xhtml", xml)
+            result = self.builder_1.addViewerData(viewer_file, js_uri)
 
-            body = xml.getroot()[0]
+            # addViewerData takes a copy, so original body tag should be empty
+            original_body = xml.getroot()[0]
+            self.assertEqual(len(original_body), 0)
+
+            body = viewer_file.xmlDocument.getroot()[0]
+            self.assertEqual(len(body), 4)
             self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
             self.assertEqual(body[1].tag, '{http://www.w3.org/1999/xhtml}script')
             self.assertEqual(body[1].prefix, None)

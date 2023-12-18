@@ -42,13 +42,13 @@ jobs:
           npm version $(git describe --tags)
           npm pack
       - name: Upload ixbrlviewer.js artifact
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@v4.0.0
         with:
           name: ixbrlviewer.js
           if-no-files-found: error
           path: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
       - name: Upload npm artifact
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@v4.0.0
         with:
           name: npm package
           if-no-files-found: error
@@ -69,11 +69,11 @@ jobs:
           node-version: ${{ inputs.node_version }}
           registry-url: 'https://registry.npmjs.org' # Must explicitly set this for NODE_AUTH_TOKEN to work below
       - name: Download ixbrlviewer.js artifact
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4.0.0
         with:
           name: ixbrlviewer.js
       - name: Download npm artifact
-        uses: actions/download-artifact@v3.0.2
+        uses: actions/download-artifact@v4.0.0
         with:
           name: npm package
       - name: Publish with npm

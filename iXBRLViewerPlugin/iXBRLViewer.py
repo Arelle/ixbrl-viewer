@@ -413,7 +413,7 @@ class IXBRLViewerBuilder:
         sourceReportsByFiles = dict()
 
         if useStubViewer:
-            iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocumet()))
+            iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocument()))
 
         for n, report in enumerate(self.reports):
             self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")

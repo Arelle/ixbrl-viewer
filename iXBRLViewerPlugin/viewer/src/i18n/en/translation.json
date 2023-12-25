@@ -47,7 +47,7 @@
     "highlight": "Highlight",
     "initializing": "Initializing",
     "loadingViewer": "Loading iXBRL Viewer",
-    "matchingConcepts": " matching concept(s)",
+    "matchingFacts": " matching facts(s)",
     "namespaces": "Namespaces",
     "narrowerAnchor": "Narrower anchors",
     "negative": "Negative",

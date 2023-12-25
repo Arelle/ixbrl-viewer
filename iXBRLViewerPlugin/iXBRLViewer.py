@@ -390,7 +390,6 @@ class IXBRLViewerBuilder:
         self.taxonomyData["sourceReports"].append(sourceReport)
         return sourceReport
 
-
     def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
@@ -408,7 +407,6 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
-
 
         sourceReportsByFiles = dict()
 
@@ -482,7 +480,6 @@ class IXBRLViewerBuilder:
                 localDoc: sorted(docTypes)
                 for localDoc, docTypes in localDocs.items()
             }
-
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap

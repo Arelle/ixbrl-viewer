@@ -250,7 +250,7 @@ class iXBRLViewerLocalViewer(LocalViewer):
     # plugin-specific local file handler
     def getLocalFile(self, file, relpath, request):
         _report, _sep, _file = file.partition("/")
-        if file == 'ixbrlviewer.js':
+        if _file in ('ixbrlviewer.js', 'dist/js'):
             return static_file('ixbrlviewer.js', os.path.dirname(DEFAULT_VIEWER_PATH))
         elif _report.isnumeric():  # in reportsFolder folder
             # check if file is in the current or parent directory
@@ -258,7 +258,7 @@ class iXBRLViewerLocalViewer(LocalViewer):
             _fileExists = False
             if os.path.exists(os.path.join(_fileDir, _file)):
                 _fileExists = True
-            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.filepart(_file))):
+            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.basename(_file))):
                 # xhtml in a subdirectory for output files may refer to an image file in parent directory
                 _fileExists = True
                 _file = os.path.filepart(_file)

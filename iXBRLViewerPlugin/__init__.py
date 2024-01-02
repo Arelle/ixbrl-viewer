@@ -106,7 +106,8 @@ def generateViewer(
         useStubViewer: bool | str = False,
         zipViewerOutput: bool = False,
         features: Optional[list[str]] = None,
-        packageDownloadURL: str = None):
+        packageDownloadURL: str = None,
+        saveStubOnly: bool | None = None):
     """
     Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
     If the viewer URL is a location on the local file system, a copy will be placed included in the output destination.
@@ -117,6 +118,7 @@ def generateViewer(
     :param useStubViewer: True if the stub viewer should be used or custom stub viewer file name as needed
     :param zipViewerOutput: True if the destination is a zip archive.
     :param features: List of feature names to enable via generated JSON data.
+    :param saveStubOnly: True if only the stub viewer file is to be saved, blocks saving any source inline or other files
     """
     # extend XBRL-loaded run processing for this option
     if (cntlr.modelManager is None 
@@ -154,7 +156,7 @@ def generateViewer(
                     viewerBuilder.enableFeature(feature)
             iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer, packageDownloadURL=packageDownloadURL)
             if iv is not None:
-                iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
+                iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath, saveStubOnly=saveStubOnly)
     except IXBRLViewerBuilderError as ex:
         print(ex.message)
     except Exception as ex:

@@ -21,6 +21,7 @@ from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import QName, INVALIDixVALUE
 from arelle.ModelXbrl import ModelXbrl
 from arelle.UrlUtil import isHttpUrl
+from arelle.PluginManager import pluginClassMethods
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
@@ -535,7 +536,7 @@ class iXBRLViewer:
         :param copyScriptPath: If provided, the path from where the viewer JS will be copied into the output from.
         """
         securityIsActive = securityHasWritten = False
-        for pluginMethod in PluginManager.pluginClassMethods("Security.Crypt.IsActive"):
+        for pluginMethod in pluginClassMethods("Security.Crypt.IsActive"):
             securityIsActive = pluginMethod(self) # must be active for the save method to save encrypted files
 
         if isinstance(destination, io.BytesIO) or zipOutput: # zip output stream
@@ -586,7 +587,7 @@ class iXBRLViewer:
                 filename = os.path.join(destination, f.filename)
                 self.logger_model.info("viewer:info", "Writing %s" % filename)
                 if securityIsActive:
-                    for pluginMethod in PluginManager.pluginClassMethods("Security.Crypt.Write"):
+                    for pluginMethod in pluginClassMethods("Security.Crypt.Write"):
                         fout = io.BytesIO()
                         writer = XHTMLSerializer(fout)
                         writer.serialize(f.xmlDocument)

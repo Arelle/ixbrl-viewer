@@ -14,6 +14,7 @@ from typing import Optional, Union
 from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
+from arelle.PluginManager import pluginClassMethods
 from arelle.webserver.bottle import static_file
 
 from .constants import CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
@@ -44,7 +45,10 @@ from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 #
 #     In the zip, the iXBRLViewer files are in a subdirectory VIEWER_BASENAME_SUFFIX to separate them from possible EdgarRenderer and other output files
 #
-
+# Operation under control of other application such as EdgarRenderer
+#     If application implements 'iXBRLViewer.GenerateOnCall' and returns True then default generation by GUI and cmdLine operation is blocked
+#     then application calls 'iXBRLViewer.Generate' with parameters of iXBRLViewerCommandLineXbrlRun to generate
+#
 
 def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     parser.add_option("--save-viewer",
@@ -99,7 +103,7 @@ def generateViewer(
         saveViewerDest: Union[io.BytesIO, str],
         viewerURL: str = DEFAULT_VIEWER_PATH,
         showValidationMessages: bool = False,
-        useStubViewer: bool = False,
+        useStubViewer: bool | str = False,
         zipViewerOutput: bool = False,
         features: Optional[list[str]] = None,
         packageDownloadURL: str = None):
@@ -110,7 +114,7 @@ def generateViewer(
     :param saveViewerDest: The target that viewer data/files will be written to (path to file or directory, or a file object itself).
     :param viewerURL: The filepath or URL location of the viewer script.
     :param showValidationMessages: True if validation messages should be shown in the viewer.
-    :param useStubViewer: True if the stub viewer should be used.
+    :param useStubViewer: True if the stub viewer should be used or custom stub viewer file name as needed
     :param zipViewerOutput: True if the destination is a zip archive.
     :param features: List of feature names to enable via generated JSON data.
     """
@@ -243,14 +247,29 @@ def commandLineOptionExtender(*args, **kwargs):
 
 
 def commandLineRun(*args, **kwargs):
+    for generateOnCall in pluginClassMethods("iXBRLViewer.GenerateOnCall"):
+        if generateOnCall(cntlr, modelXbrl):
+            return
     iXBRLViewerCommandLineXbrlRun(*args, **kwargs)
 
+def generate(cntlr, saveViewerDest, viewerURL=None, validationMessages=False, useStubViewer=False, zipViewerOutput=False, features=(),  packageDownloadURL=None, saveStubOnly=False):
+    generateViewer(
+        cntlr,
+        saveViewerDest,
+        viewerURL,
+        validationMessages,
+        useStubViewer,
+        zipViewerOutput,
+        features,
+        packageDownloadURL,
+        saveStubOnly,
+        )
 
 class iXBRLViewerLocalViewer(LocalViewer):
     # plugin-specific local file handler
     def getLocalFile(self, file, relpath, request):
         _report, _sep, _file = file.partition("/")
-        if file == 'ixbrlviewer.js':
+        if _file in ('ixbrlviewer.js', 'dist/js'):
             return static_file('ixbrlviewer.js', os.path.dirname(DEFAULT_VIEWER_PATH))
         elif _report.isnumeric():  # in reportsFolder folder
             # check if file is in the current or parent directory
@@ -258,7 +277,7 @@ class iXBRLViewerLocalViewer(LocalViewer):
             _fileExists = False
             if os.path.exists(os.path.join(_fileDir, _file)):
                 _fileExists = True
-            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.filepart(_file))):
+            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.basename(_file))):
                 # xhtml in a subdirectory for output files may refer to an image file in parent directory
                 _fileExists = True
                 _file = os.path.filepart(_file)
@@ -269,10 +288,17 @@ class iXBRLViewerLocalViewer(LocalViewer):
 
 
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
+    for generateOnCall in pluginClassMethods("iXBRLViewer.GenerateOnCall"):
+        if generateOnCall(cntlr, modelXbrl):
+            return
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
     if not cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD):
         # Don't run on launch if the option has been disabled
         return
+    for runOnRequestOnly in pluginClassMethods("iXBRLViewer.RunOnRequestOnly"):
+        if runOnRequestOnly(cntlr, modelXbrl):
+            return
+
     try:
         import webbrowser
         global tempViewer
@@ -319,4 +345,5 @@ __pluginInfo__ = {
     'CntlrCmdLine.Filing.End': commandLineRun,
     'CntlrWinMain.Menu.Tools': toolsMenuExtender,
     'CntlrWinMain.Xbrl.Loaded': guiRun,
+    'iXBRLViewer.Generate': generate,
 }

@@ -390,11 +390,11 @@ class IXBRLViewerBuilder:
         self.taxonomyData["sourceReports"].append(sourceReport)
         return sourceReport
 
-    def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
+    def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool | str = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
-        :param useStubViewer: True if stub document should be included in output.
+        :param useStubViewer: True if stub document should be included in output or stub viewer file name if 
         :param showValidations: True if validation errors should be included in output taxonomy data.
         :return: An iXBRLViewer instance that is ready to be saved.
         """
@@ -407,11 +407,12 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
+        iv.stubViewerFileName = DEFAULT_OUTPUT_NAME if useStubViewer == True else useStubViewer
 
         sourceReportsByFiles = dict()
 
         if useStubViewer:
-            iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocument()))
+            iv.addFile(iXBRLViewerFile(iv.stubViewerFileName, self.getStubDocument()))
 
         for n, report in enumerate(self.reports):
             self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
@@ -526,13 +527,17 @@ class iXBRLViewer:
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments
 
-    def save(self, destination: Union[io.BytesIO, str], zipOutput: bool = False, copyScriptPath: Optional[str] = None):
+    def save(self, destination: Union[io.BytesIO, str], zipOutput: bool = False, copyScriptPath: Optional[str] = None, saveStubOnly: bool  = False):
         """
         Save the iXBRL viewer.
         :param destination: The target that viewer data/files will be written to (path to file/directory, or a file object itself).
         :param zipOutput: True if the destination is a zip archive.
         :param copyScriptPath: If provided, the path from where the viewer JS will be copied into the output from.
         """
+        securityIsActive = securityHasWritten = False
+        for pluginMethod in PluginManager.pluginClassMethods("Security.Crypt.IsActive"):
+            securityIsActive = pluginMethod(self) # must be active for the save method to save encrypted files
+
         if isinstance(destination, io.BytesIO) or zipOutput: # zip output stream
             # zipfile may be cumulatively added to by inline extraction, EdgarRenderer etc
             if isinstance(destination, io.BytesIO):
@@ -576,16 +581,27 @@ class iXBRLViewer:
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
             for f in self.files:
+                if saveStubOnly and f.filename != self.stubViewerFileName:
+                    continue
                 filename = os.path.join(destination, f.filename)
                 self.logger_model.info("viewer:info", "Writing %s" % filename)
-                with open(filename, "wb") as fout:
-                    writer = XHTMLSerializer(fout)
-                    writer.serialize(f.xmlDocument)
-            if self.filingDocuments:
+                if securityIsActive:
+                    for pluginMethod in PluginManager.pluginClassMethods("Security.Crypt.Write"):
+                        fout = io.BytesIO()
+                        writer = XHTMLSerializer(fout)
+                        writer.serialize(f.xmlDocument)
+                        fout.seek(0)
+                        securityHasWritten = pluginMethod(self, self.filename, fout.read())
+                        fout.close()
+                if not securityHasWritten:
+                    with open(filename, "wb") as fout:
+                        writer = XHTMLSerializer(fout)
+                        writer.serialize(f.xmlDocument)
+            if self.filingDocuments and not saveStubOnly:
                 filename = os.path.basename(self.filingDocuments)
                 self.logger_model.info("viewer:info", "Writing %s" % filename)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
-            if copyScriptPath is not None:
+            if copyScriptPath is not None and not saveStubOnly:
                 self._copyScript(destination, copyScriptPath)
         else:
             if len(self.files) > 1:

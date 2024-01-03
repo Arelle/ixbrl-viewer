@@ -296,7 +296,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     except Exception as ex:
         modelXbrl.error(
             "viewer:exception",
-            "Exception %(exception)s \sTraceback %(traceback)s",
+            "Exception %(exception)s \nTraceback %(traceback)s",
             modelObject=modelXbrl, exception=ex, traceback=traceback.format_tb(sys.exc_info()[2])
         )
 

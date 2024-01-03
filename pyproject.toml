@@ -82,9 +82,6 @@ module = [
     'iXBRLViewerPlugin.iXBRLViewer',
     'iXBRLViewerPlugin.ui',
     'iXBRLViewerPlugin.xhtmlserialize',
-    'tests.unit_tests.iXBRLViewerPlugin/mock_arelle',
-    'tests.unit_tests.iXBRLViewerPlugin/test_iXBRLViewer',
-    'tests.unit_tests.iXBRLViewerPlugin/test_xhtmlserialize',
 ]
 ignore_errors = true
 

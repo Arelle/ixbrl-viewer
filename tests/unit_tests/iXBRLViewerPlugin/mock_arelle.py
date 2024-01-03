@@ -1,5 +1,6 @@
-from unittest.mock import Mock, patch
 import sys
+from unittest.mock import Mock
+
 
 def qname_effect(prefix, namespaceURI, localName):
     return Mock(

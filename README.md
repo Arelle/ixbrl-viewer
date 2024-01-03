@@ -272,7 +272,7 @@ Run the following command to run javascript unit tests: `npm run test`
 
 In order to run the python unit tests make sure that you have pip installed requirements-dev.txt.
 
-Run the following command to run python unit tests: `nose2`
+Run the following command to run python unit tests: `pytest tests/unit_tests`
 
 ### Running Puppeteer tests
 

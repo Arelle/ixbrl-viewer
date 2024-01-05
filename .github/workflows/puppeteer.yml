@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+  workflow_dispatch:
 
 permissions: {}
 
@@ -21,7 +22,7 @@ jobs:
           - '18'
           - '20'
         python-version:
-          - '3.11'
+          - '3.12'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4.1.1

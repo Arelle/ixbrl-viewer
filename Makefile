@@ -37,7 +37,7 @@ iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js:	iXBRLViewerPlugin/viewer/src/*/* 
 test: testplugin testviewer
 
 testplugin:
-	nose2
+	pytest tests/unit_tests
 
 Arelle:
 	git clone https://github.com/Arelle/Arelle.git Arelle

@@ -1,15 +1,15 @@
-import lxml
-import sys
-import unittest
-from unittest.mock import Mock
 import io
+
+import lxml
+
 from .mock_arelle import mock_arelle
 
 mock_arelle()
 
 from iXBRLViewerPlugin.xhtmlserialize import XHTMLSerializer
 
-class TestXHTMLSerializer(unittest.TestCase):
+
+class TestXHTMLSerializer:
 
     def _html(self, s):
         return '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>%s</body></html>' % s
@@ -22,7 +22,7 @@ class TestXHTMLSerializer(unittest.TestCase):
 
     def _checkTagExpansion(self, html_in, html_out):
         doc = lxml.etree.fromstring(self._html(html_in))
-        self.assertEqual(self._serialiseToString(doc), self._html(html_out))
+        assert self._serialiseToString(doc) == self._html(html_out)
 
     def test_expandEmptyTags(self):
         self._checkTagExpansion('<div/>', '<div></div>')
@@ -52,7 +52,7 @@ class TestXHTMLSerializer(unittest.TestCase):
         writer.serialize(doc)
 
         # XML declaration should be added.
-        self.assertEqual(f.getvalue().decode('utf-8'), '<?xml version="1.0" encoding="utf-8"?>\n' + htmlsrc)
+        assert f.getvalue().decode('utf-8') == '<?xml version="1.0" encoding="utf-8"?>\n' + htmlsrc
 
     def test_custom_xml_serializer(self):
         tests = (
@@ -227,7 +227,7 @@ class TestXHTMLSerializer(unittest.TestCase):
         )
 
         for (test_in, test_out) in tests:
-            f = io.StringIO(test_in)
+            f = io.BytesIO(test_in.encode('utf-8'))
             x = lxml.etree.parse(f)
             s = self._serialiseToString(x)
             assert s == test_out
@@ -271,9 +271,9 @@ class TestXHTMLSerializer(unittest.TestCase):
         )
 
         for (test_in, test_out) in tests:
-            f = io.StringIO(test_in)
+            f = io.BytesIO(test_in.encode('utf-8'))
             x = lxml.etree.parse(f)
-            s = self._serialiseToString(x, xml_declaration = True)
+            s = self._serialiseToString(x, xml_declaration=True)
             assert s == test_out
 
     def test_document_modification(self):
@@ -301,7 +301,7 @@ class TestXHTMLSerializer(unittest.TestCase):
         )
 
         for (test_in, test_out) in tests:
-            f = io.StringIO(test_in)
+            f = io.BytesIO(test_in.encode('utf-8'))
             x = lxml.etree.parse(f)
             e = lxml.etree.Element("{http://www.example.com/ns2}abc")
             x.getroot().append(e)

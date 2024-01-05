@@ -1,22 +1,23 @@
-import os
-import unittest
+import io
 import json
 import logging
-from io import StringIO
+import os
 from collections import defaultdict
+from unittest.mock import Mock, patch
 
+import pytest
 from arelle import XbrlConst
 from arelle.ModelDocument import Type
 from arelle.ModelValue import qname
 from lxml import etree
-from unittest.mock import Mock, patch
+
 from .mock_arelle import mock_arelle
 
 mock_arelle()
 
 from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewerFile
 
-class TestNamespaceMap(unittest.TestCase):
+class TestNamespaceMap:
 
     def test_getPrefix_with_none(self):
         """
@@ -24,7 +25,7 @@ class TestNamespaceMap(unittest.TestCase):
         """
         ns_map = NamespaceMap()
         result = ns_map.getPrefix(None)
-        self.assertEqual(result, 'ns0')
+        assert result == 'ns0'
 
     def test_getPrefix_with_none_with_prefix(self):
         """
@@ -33,7 +34,7 @@ class TestNamespaceMap(unittest.TestCase):
         ns_map = NamespaceMap()
         prefix = 'prefix'
         result = ns_map.getPrefix(None, prefix)
-        self.assertEqual(result, prefix)
+        assert result == prefix
 
     def test_getPrefix_with_namespace(self):
         """
@@ -43,7 +44,7 @@ class TestNamespaceMap(unittest.TestCase):
         ns_map = NamespaceMap()
         namespace = 'namespace'
         result = ns_map.getPrefix(namespace)
-        self.assertEqual(result, 'ns0')
+        assert result == 'ns0'
 
     def test_getPrefix_with_namespace_with_prefix(self):
         """
@@ -54,7 +55,7 @@ class TestNamespaceMap(unittest.TestCase):
         namespace = 'namespace'
         prefix = 'prefix'
         result = ns_map.getPrefix(namespace, prefix)
-        self.assertEqual(result, prefix)
+        assert result == prefix
 
     def test_getPrefix_subsequent_call_with_namespace(self):
         """
@@ -64,9 +65,9 @@ class TestNamespaceMap(unittest.TestCase):
         ns_map = NamespaceMap()
         namespace = 'namespace'
         result = ns_map.getPrefix(namespace)
-        self.assertEqual(result, 'ns0')
+        assert result == 'ns0'
         result_2 = ns_map.getPrefix(namespace)
-        self.assertEqual(result_2, 'ns0')
+        assert result_2 == 'ns0'
 
     def test_getPrefix_subsequent_call_with_namespace_and_prefix(self):
         """
@@ -77,9 +78,9 @@ class TestNamespaceMap(unittest.TestCase):
         namespace = 'namespace'
         prefix = 'prefix'
         result = ns_map.getPrefix(namespace, prefix)
-        self.assertEqual(result, prefix)
+        assert result == prefix
         result_2 = ns_map.getPrefix(namespace, prefix)
-        self.assertEqual(result_2, prefix)
+        assert result_2 == prefix
 
     def test_getPrefix_subsequent_call_with_two_namespaces_and_prefix(self):
         """
@@ -90,14 +91,14 @@ class TestNamespaceMap(unittest.TestCase):
         namespace_1 = 'namespace_1'
         namespace_2 = 'namespace_2'
         result = ns_map.getPrefix(namespace_1)
-        self.assertEqual(result, 'ns0')
+        assert result == 'ns0'
         result_2 = ns_map.getPrefix(namespace_2)
-        self.assertEqual(result_2, 'ns1')
+        assert result_2 == 'ns1'
 
 
-class TestIXBRLViewer(unittest.TestCase):
+class TestIXBRLViewer:
 
-    def setUp(self):
+    def setup_method(self, method):
         self.usd_qname = Mock(
             localName='USD',
             prefix='iso4217',
@@ -452,7 +453,7 @@ class TestIXBRLViewer(unittest.TestCase):
         builder.currentTargetReport = builder.newTargetReport()
         builder.addSourceReport()["targetReports"].append(builder.currentTargetReport)
         builder.addConcept(self.modelXbrl_1, self.cash_concept)
-        self.assertTrue(builder.taxonomyData["sourceReports"][0]["targetReports"][0].get('concepts').get('us-gaap:Cash'))
+        assert builder.taxonomyData["sourceReports"][0]["targetReports"][0].get('concepts').get('us-gaap:Cash')
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
@@ -460,7 +461,7 @@ class TestIXBRLViewer(unittest.TestCase):
         modelXbrl = Mock(baseSets=defaultdict(list), relationshipSets={})
         builder = IXBRLViewerBuilder([modelXbrl])
         result = builder.getRelationships(modelXbrl)
-        self.assertDictEqual(result, {})
+        assert result == {}
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
@@ -470,7 +471,7 @@ class TestIXBRLViewer(unittest.TestCase):
         result = builder.getRelationships(self.modelXbrl_1)
         roleMap = builder.roleMap
         siPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/summation-item')
-        self.assertTrue(result.get(siPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept'))
+        assert result.get(siPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept')
 
     def test_addELR_no_definition(self):
         """
@@ -481,7 +482,7 @@ class TestIXBRLViewer(unittest.TestCase):
         builder.currentTargetReport = builder.newTargetReport()
         builder.addELR(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
-        self.assertEqual(builder.currentTargetReport.get('roleDefs').get(elrPrefix), None)
+        assert builder.currentTargetReport.get('roleDefs').get(elrPrefix) is None
 
     def test_addELR_with_definition(self):
         """
@@ -492,7 +493,7 @@ class TestIXBRLViewer(unittest.TestCase):
         builder.currentTargetReport = builder.newTargetReport()
         builder.addELR(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
-        self.assertEqual(builder.currentTargetReport.get('roleDefs').get(elrPrefix).get("en"), "ELR Label")
+        assert builder.currentTargetReport.get('roleDefs').get(elrPrefix).get("en") == "ELR Label"
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -505,18 +506,18 @@ class TestIXBRLViewer(unittest.TestCase):
         js_uri = 'ixbrlviewer.js'
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
         result = builder.createViewer(js_uri)
-        self.assertEqual(len(result.files),1)
+        assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]
-        self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
-        self.assertEqual(body[1].attrib.get('src'), js_uri)
-        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
-        self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
-        self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+        assert body[0].text == 'BEGIN IXBRL VIEWER EXTENSIONS'
+        assert body[1].attrib.get('src') == js_uri
+        assert body[1].attrib.get('type') == 'text/javascript'
+        assert body[2].attrib.get('type') == 'application/x.ixbrl-viewer+json'
+        assert body[3].text == 'END IXBRL VIEWER EXTENSIONS'
 
         jsdata = json.loads(body[2].text)
         errors = jsdata["validation"]
-        self.assertEqual(errors, [{"sev": "ERROR", "msg": "Error message", "code": "code1" }])
-        self.assertEqual(set(jsdata["sourceReports"][0]["targetReports"][0]["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+        assert errors == [{"sev": "ERROR", "msg": "Error message", "code": "code1" }]
+        assert set(jsdata["sourceReports"][0]["targetReports"][0]["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -529,19 +530,19 @@ class TestIXBRLViewer(unittest.TestCase):
         js_uri = 'ixbrlviewer.js'
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
         result = builder.createViewer(js_uri, showValidations = False)
-        self.assertEqual(len(result.files), 1)
+        assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]
-        self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
-        self.assertEqual(body[1].attrib.get('src'), js_uri)
-        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
-        self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
-        self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+        assert body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS'
+        assert body[1].attrib.get('src') == js_uri
+        assert body[1].attrib.get('type') == 'text/javascript'
+        assert body[2].attrib.get('type') == 'application/x.ixbrl-viewer+json'
+        assert body[3].text == 'END IXBRL VIEWER EXTENSIONS'
 
         jsdata = json.loads(body[2].text)
-        self.assertNotIn("validation", jsdata)
+        assert "validation" not in jsdata
         reportData = jsdata["sourceReports"][0]["targetReports"][0]
-        self.assertEqual(set(reportData["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
-        self.assertEqual(reportData["concepts"], {
+        assert set(reportData["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
+        assert reportData["concepts"] == {
             'us-gaap:Cash': {'e': True, 't': True, 'labels': {}},
             'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}},
             'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}},
@@ -549,8 +550,8 @@ class TestIXBRLViewer(unittest.TestCase):
             'us-gaap:member': {'e': True, 't': True, 'labels': {}},
             'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}},
             'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain'},
-        })
-        self.assertEqual(reportData["localDocs"], {
+        }
+        assert reportData["localDocs"] == {
             'local-inline.htm': ['inline'],
             'local-schema.xsd': ['schema'],
             'local-pres-linkbase.xml': ['presLinkbase'],
@@ -559,9 +560,9 @@ class TestIXBRLViewer(unittest.TestCase):
             'local-label-linkbase.xml': ['labelLinkbase'],
             'local-ref-linkbase.xml': ['refLinkbase'],
             'local-unrecognized-linkbase.xml': ['unrecognizedLinkbase'],
-        })
+        }
 
-        self.assertEqual(jsdata["sourceReports"][0]["docSetFiles"], ["a.html"]);
+        assert jsdata["sourceReports"][0]["docSetFiles"] == ["a.html"]
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -574,19 +575,19 @@ class TestIXBRLViewer(unittest.TestCase):
         js_uri = 'ixbrlviewer.js'
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
         result = builder.createViewer(js_uri, showValidations = False, useStubViewer = True)
-        self.assertEqual(len(result.files), 2)
+        assert len(result.files) == 2
         body = result.files[0].xmlDocument.getroot().find('{http://www.w3.org/1999/xhtml}body')
-        self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
-        self.assertEqual(body[1].attrib.get('src'), js_uri)
-        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
-        self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
-        self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+        assert body[0].text == 'BEGIN IXBRL VIEWER EXTENSIONS'
+        assert body[1].attrib.get('src') == js_uri
+        assert body[1].attrib.get('type') == 'text/javascript'
+        assert body[2].attrib.get('type') == 'application/x.ixbrl-viewer+json'
+        assert body[3].text == 'END IXBRL VIEWER EXTENSIONS'
 
         jsdata = json.loads(body[2].text)
-        self.assertNotIn("validation", jsdata)
+        assert "validation" not in jsdata
         reportData = jsdata["sourceReports"][0]["targetReports"][0]
-        self.assertEqual(set(reportData["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
-        self.assertEqual(reportData["concepts"], {
+        assert set(reportData["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
+        assert reportData["concepts"] == {
             'us-gaap:Cash': {'e': True, 't': True, 'labels': {}},
             'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}},
             'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}},
@@ -594,8 +595,8 @@ class TestIXBRLViewer(unittest.TestCase):
             'us-gaap:member': {'e': True, 't': True, 'labels': {}},
             'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}},
             'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain'},
-        })
-        self.assertEqual(reportData["localDocs"], {
+        }
+        assert reportData["localDocs"] == {
             'local-inline.htm': ['inline'],
             'local-schema.xsd': ['schema'],
             'local-pres-linkbase.xml': ['presLinkbase'],
@@ -604,9 +605,9 @@ class TestIXBRLViewer(unittest.TestCase):
             'local-label-linkbase.xml': ['labelLinkbase'],
             'local-ref-linkbase.xml': ['refLinkbase'],
             'local-unrecognized-linkbase.xml': ['unrecognizedLinkbase'],
-        })
+        }
 
-        self.assertEqual(jsdata["sourceReports"][0]["docSetFiles"], [ "a.html" ]);
+        assert jsdata["sourceReports"][0]["docSetFiles"] == [ "a.html" ]
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -618,23 +619,23 @@ class TestIXBRLViewer(unittest.TestCase):
     def test_createViewer_docset(self):
         js_uri = 'ixbrlviewer.js'
         result = self.builder_doc_set.createViewer(js_uri, showValidations=False)
-        self.assertEqual(len(result.files), 2)
+        assert len(result.files) == 2
         body = result.files[0].xmlDocument.getroot()[0]
-        self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
-        self.assertEqual(body[1].attrib.get('src'), js_uri)
-        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
-        self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
-        self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+        assert body[0].text == 'BEGIN IXBRL VIEWER EXTENSIONS'
+        assert body[1].attrib.get('src') == js_uri
+        assert body[1].attrib.get('type') == 'text/javascript'
+        assert body[2].attrib.get('type') == 'application/x.ixbrl-viewer+json'
+        assert body[3].text == 'END IXBRL VIEWER EXTENSIONS'
 
         jsdata = json.loads(body[2].text)
-        self.assertNotIn("validation", jsdata)
+        assert "validation" not in jsdata
         reportData = jsdata["sourceReports"][0]["targetReports"][0]
-        self.assertEqual(set(reportData["facts"]), {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"})
+        assert set(reportData["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
 
-        self.assertEqual(jsdata["sourceReports"][0]["docSetFiles"], [
+        assert jsdata["sourceReports"][0]["docSetFiles"] == [
             'a.html',
             'b.html'
-        ])
+        ]
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -647,23 +648,23 @@ class TestIXBRLViewer(unittest.TestCase):
         js_uri = 'ixbrlviewer.js'
         builder = IXBRLViewerBuilder([self.modelXbrl_2])
         result = builder.createViewer(js_uri)
-        self.assertEqual(len(result.files),1)
+        assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]
-        self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
-        self.assertEqual(body[1].tag, '{http://www.w3.org/1999/xhtml}script')
-        self.assertEqual(body[1].prefix, None)
-        self.assertEqual(body[1].attrib.get('src'), js_uri)
-        self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
-        self.assertEqual(body[2].tag, '{http://www.w3.org/1999/xhtml}script')
-        self.assertEqual(body[2].prefix, None)
-        self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
-        self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+        assert body[0].text == 'BEGIN IXBRL VIEWER EXTENSIONS'
+        assert body[1].tag == '{http://www.w3.org/1999/xhtml}script'
+        assert body[1].prefix is None
+        assert body[1].attrib.get('src') == js_uri
+        assert body[1].attrib.get('type') == 'text/javascript'
+        assert body[2].tag == '{http://www.w3.org/1999/xhtml}script'
+        assert body[2].prefix is None
+        assert body[2].attrib.get('type') == 'application/x.ixbrl-viewer+json'
+        assert body[3].text == 'END IXBRL VIEWER EXTENSIONS'
 
         jsdata = json.loads(body[2].text)
         facts = jsdata["sourceReports"][0]["targetReports"][0]["facts"]
-        self.assertEqual(facts.keys(), {"fact_id2", "fact_id3"})
-        self.assertEqual(facts["fact_id2"]["a"]["u"], "iso4217:USD")
-        self.assertEqual(facts["fact_id3"]["a"]["u"], None)
+        assert facts.keys() == {"fact_id2", "fact_id3"}
+        assert facts["fact_id2"]["a"]["u"] == "iso4217:USD"
+        assert facts["fact_id3"]["a"]["u"] is None
 
     def test_enableFeature_valid(self):
         """
@@ -671,25 +672,25 @@ class TestIXBRLViewer(unittest.TestCase):
         """
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
         builder.enableFeature('review')
-        self.assertEqual(builder.taxonomyData["features"], ['review'])
+        assert builder.taxonomyData["features"] == ['review']
 
     def test_enableFeature_invalid(self):
         """
         Attempt to enable an undefined feature
         """
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        with self.assertRaisesRegex(AssertionError, rf'^Given feature name `unknown` does not match any defined features'):
+        with pytest.raises(AssertionError, match=rf'^Given feature name `unknown` does not match any defined features'):
             builder.enableFeature('unknown')
 
     def test_xhtmlNamespaceHandling(self):
         # Check the prefix used for our inserted script tags
-        tests = ('''
+        tests = (rb'''
             <html xmlns="http://www.w3.org/1999/xhtml">
                 <body>
                 </body>
             </html>
         ''',
-        '''
+        rb'''
             <html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml">
                 <body>
                 </body>
@@ -697,7 +698,7 @@ class TestIXBRLViewer(unittest.TestCase):
         ''',
         # In this case we won't fix the root element to be in the default NS,
         # but our <script> tags will be.
-        '''
+        rb'''
             <xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml">
                 <body>
                 </body>
@@ -706,7 +707,7 @@ class TestIXBRLViewer(unittest.TestCase):
         )
 
         for xmls in tests:
-            xml = etree.parse(StringIO(xmls))
+            xml = etree.parse(io.BytesIO(xmls))
 
             js_uri = 'https://example.com/script-url'
             viewer_file = iXBRLViewerFile("test.xhtml", xml)
@@ -714,16 +715,16 @@ class TestIXBRLViewer(unittest.TestCase):
 
             # addViewerData takes a copy, so original body tag should be empty
             original_body = xml.getroot()[0]
-            self.assertEqual(len(original_body), 0)
+            assert len(original_body) == 0
 
             body = viewer_file.xmlDocument.getroot()[0]
-            self.assertEqual(len(body), 4)
-            self.assertEqual(body[0].text, 'BEGIN IXBRL VIEWER EXTENSIONS')
-            self.assertEqual(body[1].tag, '{http://www.w3.org/1999/xhtml}script')
-            self.assertEqual(body[1].prefix, None)
-            self.assertEqual(body[1].attrib.get('src'), js_uri)
-            self.assertEqual(body[1].attrib.get('type'), 'text/javascript')
-            self.assertEqual(body[2].tag, '{http://www.w3.org/1999/xhtml}script')
-            self.assertEqual(body[2].prefix, None)
-            self.assertEqual(body[2].attrib.get('type'), 'application/x.ixbrl-viewer+json')
-            self.assertEqual(body[3].text, 'END IXBRL VIEWER EXTENSIONS')
+            assert len(body) == 4
+            assert body[0].text == 'BEGIN IXBRL VIEWER EXTENSIONS'
+            assert body[1].tag == '{http://www.w3.org/1999/xhtml}script'
+            assert body[1].prefix is None
+            assert body[1].attrib.get('src') == js_uri
+            assert body[1].attrib.get('type') == 'text/javascript'
+            assert body[2].tag == '{http://www.w3.org/1999/xhtml}script'
+            assert body[2].prefix is None
+            assert body[2].attrib.get('type') == 'application/x.ixbrl-viewer+json'
+            assert body[3].text == 'END IXBRL VIEWER EXTENSIONS'

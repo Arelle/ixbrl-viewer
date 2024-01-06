@@ -107,7 +107,7 @@ def generateViewer(
         zipViewerOutput: bool = False,
         features: Optional[list[str]] = None,
         packageDownloadURL: str = None,
-        saveStubOnly: bool | None = None):
+        saveStubOnly: bool = False):
     """
     Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
     If the viewer URL is a location on the local file system, a copy will be placed included in the output destination.
@@ -250,28 +250,15 @@ def commandLineOptionExtender(*args, **kwargs):
 
 def commandLineRun(*args, **kwargs):
     for generateOnCall in pluginClassMethods("iXBRLViewer.GenerateOnCall"):
-        if generateOnCall(cntlr, modelXbrl):
+        if generateOnCall(*args, **kwargs):
             return
     iXBRLViewerCommandLineXbrlRun(*args, **kwargs)
-
-def generate(cntlr, saveViewerDest, viewerURL=None, validationMessages=False, useStubViewer=False, zipViewerOutput=False, features=(),  packageDownloadURL=None, saveStubOnly=False):
-    generateViewer(
-        cntlr,
-        saveViewerDest,
-        viewerURL,
-        validationMessages,
-        useStubViewer,
-        zipViewerOutput,
-        features,
-        packageDownloadURL,
-        saveStubOnly,
-        )
 
 class iXBRLViewerLocalViewer(LocalViewer):
     # plugin-specific local file handler
     def getLocalFile(self, file, relpath, request):
         _report, _sep, _file = file.partition("/")
-        if _file in ('ixbrlviewer.js', 'dist/js'):
+        if _file == 'ixbrlviewer.js':
             return static_file('ixbrlviewer.js', os.path.dirname(DEFAULT_VIEWER_PATH))
         elif _report.isnumeric():  # in reportsFolder folder
             # check if file is in the current or parent directory
@@ -347,5 +334,5 @@ __pluginInfo__ = {
     'CntlrCmdLine.Filing.End': commandLineRun,
     'CntlrWinMain.Menu.Tools': toolsMenuExtender,
     'CntlrWinMain.Xbrl.Loaded': guiRun,
-    'iXBRLViewer.Generate': generate,
+    'iXBRLViewer.Generate': generateViewer,
 }

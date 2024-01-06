@@ -587,13 +587,13 @@ class iXBRLViewer:
                 filename = os.path.join(destination, f.filename)
                 self.logger_model.info("viewer:info", "Writing %s" % filename)
                 if securityIsActive:
-                    for pluginMethod in pluginClassMethods("Security.Crypt.Write"):
-                        fout = io.BytesIO()
+                    with io.BytesIO() as fout:
                         writer = XHTMLSerializer(fout)
                         writer.serialize(f.xmlDocument)
                         fout.seek(0)
-                        securityHasWritten = pluginMethod(self, self.filename, fout.read())
-                        fout.close()
+                        serializedDocument = fout.read()
+                    for pluginMethod in pluginClassMethods("Security.Crypt.Write"):
+                        securityHasWritten = pluginMethod(self, filename, serializedDocument)
                 if not securityHasWritten:
                     with open(filename, "wb") as fout:
                         writer = XHTMLSerializer(fout)

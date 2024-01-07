@@ -115,6 +115,8 @@ def generateViewer(
     :param features: List of feature names to enable via generated JSON data.
     """
     # extend XBRL-loaded run processing for this option
+    if saveViewerDest is None:
+        return
     if (cntlr.modelManager is None 
         or len(cntlr.modelManager.loadedModelXbrls) == 0 
         or any(not mx.modelDocument for mx in cntlr.modelManager.loadedModelXbrls)):
@@ -142,15 +144,13 @@ def generateViewer(
             copyScriptPath = viewerURL
             viewerURL = os.path.basename(viewerURL)
     try:
-        out = saveViewerDest
-        if out:
-            viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.loadedModelXbrls)
-            if features:
-                for feature in features:
-                    viewerBuilder.enableFeature(feature)
-            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer, packageDownloadURL=packageDownloadURL)
-            if iv is not None:
-                iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
+        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.loadedModelXbrls)
+        if features:
+            for feature in features:
+                viewerBuilder.enableFeature(feature)
+        iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer, packageDownloadURL=packageDownloadURL)
+        if iv is not None:
+            iv.save(saveViewerDest, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
     except IXBRLViewerBuilderError as ex:
         print(ex)
     except Exception as ex:

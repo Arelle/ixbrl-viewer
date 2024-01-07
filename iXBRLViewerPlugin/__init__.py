@@ -9,7 +9,6 @@ import sys
 import tempfile
 import traceback
 from optparse import OptionGroup, OptionParser
-from typing import Optional, Union
 
 from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
@@ -96,13 +95,14 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
 
 def generateViewer(
         cntlr: Cntlr,
-        saveViewerDest: Union[io.BytesIO, str],
+        saveViewerDest: io.BytesIO | str | None,
         viewerURL: str = DEFAULT_VIEWER_PATH,
         showValidationMessages: bool = False,
         useStubViewer: bool = False,
         zipViewerOutput: bool = False,
-        features: Optional[list[str]] = None,
-        packageDownloadURL: str = None):
+        features: list[str] | None = None,
+        packageDownloadURL: str | None = None,
+) -> None:
     """
     Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
     If the viewer URL is a location on the local file system, a copy will be placed included in the output destination.
@@ -170,7 +170,7 @@ def getAbsoluteViewerPath(saveViewerPath: str, relativeViewerPath: str) -> str:
     return os.path.join(saveViewerDir, relativeViewerPath)
 
 
-def getFeaturesFromOptions(options: Union[argparse.Namespace, OptionParser]):
+def getFeaturesFromOptions(options: argparse.Namespace | OptionParser):
     return [
         featureConfig.key
         for featureConfig in FEATURE_CONFIGS

@@ -395,7 +395,7 @@ class IXBRLViewerBuilder:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
-        :param useStubViewer: True if stub document should be included in output or stub viewer file name if 
+        :param useStubViewer: True if stub document should be included in output or stub viewer file name
         :param showValidations: True if validation errors should be included in output taxonomy data.
         :return: An iXBRLViewer instance that is ready to be saved.
         """
@@ -408,7 +408,7 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
-        iv.stubViewerFileName = DEFAULT_OUTPUT_NAME if useStubViewer == True else useStubViewer
+        iv.stubViewerFileName = DEFAULT_OUTPUT_NAME if useStubViewer is True else useStubViewer
 
         sourceReportsByFiles = dict()
 
@@ -528,7 +528,7 @@ class iXBRLViewer:
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments
 
-    def save(self, destination: Union[io.BytesIO, str], zipOutput: bool = False, copyScriptPath: Optional[str] = None, saveStubOnly: bool  = False):
+    def save(self, destination: Union[io.BytesIO, str], zipOutput: bool = False, copyScriptPath: Optional[str] = None, saveStubOnly: bool = False):
         """
         Save the iXBRL viewer.
         :param destination: The target that viewer data/files will be written to (path to file/directory, or a file object itself).

@@ -258,10 +258,10 @@ class iXBRLViewerLocalViewer(LocalViewer):
             _fileExists = False
             if os.path.exists(os.path.join(_fileDir, _file)):
                 _fileExists = True
-            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.filepart(_file))):
+            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.basename(_file))):
                 # xhtml in a subdirectory for output files may refer to an image file in parent directory
                 _fileExists = True
-                _file = os.path.filepart(_file)
+                _file = os.path.basename(_file)
             if not _fileExists:
                 self.cntlr.addToLog("http://localhost:{}/{}".format(self.port, file), messageCode="localViewer:fileNotFound", level=logging.DEBUG)
             return static_file(_file, root=_fileDir, headers=self.noCacheHeaders)  # extra_headers modification to py-bottle

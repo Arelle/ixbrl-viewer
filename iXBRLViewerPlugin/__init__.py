@@ -152,7 +152,7 @@ def generateViewer(
             if iv is not None:
                 iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
     except IXBRLViewerBuilderError as ex:
-        print(ex.message)
+        print(ex)
     except Exception as ex:
         cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
 

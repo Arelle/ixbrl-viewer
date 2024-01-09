@@ -10,8 +10,9 @@ import os
 
 from .constants import CONFIG_FEATURE_PREFIX, CONFIG_FILE_DIRECTORY, CONFIG_LAUNCH_ON_LOAD, \
     CONFIG_OUTPUT_FILE, CONFIG_SCRIPT_URL, CONFIG_ZIP_OUTPUT, DEFAULT_LAUNCH_ON_LOAD, \
-    DEFAULT_VIEWER_PATH, GUI_FEATURE_CONFIGS
+    GUI_FEATURE_CONFIGS
 
+UNSET_SCRIPT_URL = ''
 
 class BaseViewerDialog(Toplevel):
     """
@@ -28,7 +29,7 @@ class BaseViewerDialog(Toplevel):
             featureVar.set(self.cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', featureConfig.guiDefault))
             self._features[featureConfig.key] = featureVar
         self._scriptUrl = StringVar()
-        self._scriptUrl.set(self.cntlr.config.setdefault(CONFIG_SCRIPT_URL, DEFAULT_VIEWER_PATH))
+        self._scriptUrl.set(self.cntlr.config.setdefault(CONFIG_SCRIPT_URL, UNSET_SCRIPT_URL))
 
     def addButtons(self, frame: Frame, x: int, y: int) -> int:
         """
@@ -56,7 +57,7 @@ class BaseViewerDialog(Toplevel):
         :return: Row `y` that the last field was added on
         """
         y += 1
-        scriptUrlLabel = Label(frame, text="Script URL")
+        scriptUrlLabel = Label(frame, text="Script URL (leave blank for default)")
         scriptUrlEntry = Entry(frame, textvariable=self._scriptUrl, width=80)
         scriptUrlLabel.grid(row=y, column=0, sticky=W, pady=3, padx=3)
         scriptUrlEntry.grid(row=y, column=1, columnspan=2, sticky=EW, pady=3, padx=3)
@@ -247,6 +248,6 @@ class SettingsDialog(BaseViewerDialog):
         Resets dialog variable values to default values
         """
         self._launchOnLoad.set(DEFAULT_LAUNCH_ON_LOAD)
-        self._scriptUrl.set(DEFAULT_VIEWER_PATH)
+        self._scriptUrl.set(UNSET_SCRIPT_URL)
         for featureConfig in GUI_FEATURE_CONFIGS:
             self._features[featureConfig.key].set(featureConfig.guiDefault)

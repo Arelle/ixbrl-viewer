@@ -12,7 +12,6 @@ import urllib.parse
 import zipfile
 from collections import defaultdict
 from copy import deepcopy
-from typing import Optional, Union
 
 import pycountry
 from arelle import XbrlConst
@@ -390,7 +389,13 @@ class IXBRLViewerBuilder:
         self.taxonomyData["sourceReports"].append(sourceReport)
         return sourceReport
 
-    def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
+    def createViewer(
+            self,
+            scriptUrl: str = DEFAULT_VIEWER_PATH,
+            useStubViewer: bool = False,
+            showValidations: bool = True,
+            packageDownloadURL: str | None = None,
+    ) -> iXBRLViewer | None:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
@@ -526,7 +531,7 @@ class iXBRLViewer:
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments
 
-    def save(self, destination: Union[io.BytesIO, str], zipOutput: bool = False, copyScriptPath: Optional[str] = None):
+    def save(self, destination: io.BytesIO | str, zipOutput: bool = False, copyScriptPath: str | None = None):
         """
         Save the iXBRL viewer.
         :param destination: The target that viewer data/files will be written to (path to file/directory, or a file object itself).

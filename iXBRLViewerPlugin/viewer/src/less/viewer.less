@@ -45,15 +45,15 @@ div,
 span {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 2px @primary-focus;
-      outline-offset: 1px;
+      outline: solid 0.125em @primary-focus;
+      outline-offset: 0.0625em;
     }
 
     &.ixbrl-element,
     &.ixbrl-sub-element {
       &:hover:not(.ixbrl-selected) {
-        outline: dashed 2px @primary-focus;
-        outline-offset: 1px;
+        outline: dashed 0.125em @primary-focus;
+        outline-offset: 0.0625em;
       }
     }
   }
@@ -65,10 +65,10 @@ span {
     cursor: pointer;
 
     &.ixbrl-related {
-      outline: dashed 2px @related-fact;
+      outline: dashed 0.125em @related-fact;
 
       &:not(td, th) {
-        outline-offset: 1px;
+        outline-offset: 0.0625em;
       }
     }
   }
@@ -78,19 +78,19 @@ td,
 th {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 2px @primary-focus !important;
-      outline-offset: -1px !important;
+      outline: solid 0.125em @primary-focus !important;
+      outline-offset: -0.0625em !important;
     }
 
     &.ixbrl-element:hover:not(.ixbrl-selected),
     &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
-      outline: dashed 2px @primary-focus !important;
-      outline-offset: -1px !important;
+      outline: dashed 0.125em @primary-focus !important;
+      outline-offset: -0.0625em !important;
     }
   }
 
   &.ixbrl-related {
-    outline-offset: -1px;
+    outline-offset: -0.0625em;
   }
 }
 
@@ -103,7 +103,7 @@ td.ixbrl-related.ixbrl-linked-highlight:not(.ixbrl-no-highlight),
 td.ixbrl-linked-highlight:not(.ixbrl-no-highlight) {
   .linked-highlight-cell();
 
-  outline-offset: -1px;
+  outline-offset: -0.0625em;
 }
 
 div.ixbrl-table-handle {

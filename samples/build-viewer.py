@@ -58,7 +58,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         try:
             generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer, features=features)
         except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
-            print(e.message)
+            print(e)
             sys.exit(1)
 
 parser = argparse.ArgumentParser(description="Create iXBRL Viewer instances")

@@ -271,14 +271,12 @@ export class Viewer {
         /* Otherwise, insert a <span> as wrapper */
         if (nodes.length == 0) {
             nodes.push(this._wrapNode(domNode));
-
-            // Create a list of the wrapper node, and all absolutely positioned
-            // descendants.
-            for (const e of domNode.querySelectorAll("*")) { 
-                if (getComputedStyle(e).getPropertyValue('position') === "absolute") { 
-                    nodes.push(e);
-                } 
-            }
+        }
+        // Create a list of the wrapper node, and all absolutely positioned descendants.
+        for (const e of nodes[0].querySelectorAll("*")) { 
+            if (getComputedStyle(e).getPropertyValue('position') === "absolute") { 
+                nodes.push(e);
+            } 
         }
         for (const [i, n] of nodes.entries()) {
             // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes

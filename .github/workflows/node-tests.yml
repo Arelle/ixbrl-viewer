@@ -19,9 +19,9 @@ jobs:
           - ubuntu-22.04
           - windows-2022
         node-version:
-          - '16'
           - '18'
           - '20'
+          - '21'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4.1.1

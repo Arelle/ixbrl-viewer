@@ -5,6 +5,7 @@ import { Footnote } from "./footnote.js";
 import { Interval } from './interval.js';
 
 export class FactSet {
+
     constructor (items) {
         this.items = items;
     }
@@ -100,6 +101,10 @@ export class FactSet {
         return this.items.length == 0;
     }
 
+    /*
+     * Returns an Interval for the intersection of all values in the set, or
+     * undefined if there is no intersection (inconsistent duplicates)
+     */
     valueIntersection() {
         const duplicates = Object.values(this.items).map(fact => Interval.fromFact(fact));
         return Interval.intersection(...duplicates);
@@ -126,7 +131,7 @@ export class FactSet {
      * decimals of "undefined" indicates infinite precision
      */
     mostPrecise() {
-        var mostPrecise;
+        let mostPrecise;
         for (const f of Object.values(this.items)) {
             if (f.decimals() === undefined || mostPrecise === undefined || f.decimals() > mostPrecise.decimals()) {
                 mostPrecise = f;

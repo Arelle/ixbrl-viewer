@@ -13,7 +13,8 @@ CONFIG_ZIP_OUTPUT = 'iXBRLViewerZipOutput'
 
 DEFAULT_LAUNCH_ON_LOAD = True
 DEFAULT_OUTPUT_NAME = 'ixbrlviewer.html'
-DEFAULT_VIEWER_PATH = os.path.join(os.path.dirname(__file__), "viewer", "dist", "ixbrlviewer.js")
+DEFAULT_JS_FILENAME = 'ixbrlviewer.js'
+DEFAULT_VIEWER_PATH = os.path.join(os.path.dirname(__file__), "viewer", "dist", DEFAULT_JS_FILENAME)
 
 FEATURE_CONFIGS = [
     FeatureConfig(

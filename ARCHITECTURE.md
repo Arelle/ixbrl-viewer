@@ -82,8 +82,9 @@ the viewer.
 ### docSetFiles
 
 `docSetFiles` is a list of files in the document set.  It is used to load other
-documents in the document set into iframes in tabs in the viewer.  For single
-file, non-stub viewers, this property is not present.
+documents in the document set into iframes in tabs in the viewer.  
+
+`docSetFiles` is a list of relative URLs.
 
 ### targetReports
 

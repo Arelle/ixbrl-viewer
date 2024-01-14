@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools~=68.0", "wheel~=0.40", "setuptools_scm[toml]~=7.1"]
+requires = ["setuptools~=69.0", "wheel~=0.42", "setuptools_scm[toml]~=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,12 +23,13 @@ classifiers = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Operating System :: OS Independent',
     'Topic :: Text Processing :: Markup :: XML'
 ]
 requires-python = ">=3.8"
 dependencies = [
-    'lxml==4.*',
+    'lxml>=4,<6',
     'pycountry>=22,<24'
 ]
 [project.optional-dependencies]
@@ -36,10 +37,10 @@ arelle = [
     'arelle_release==2.*',
 ]
 dev = [
-    'flake8==6.1.0',
+    'flake8==7.0.0',
     'lxml-stubs==0.4.0',
-    'mypy==1.7.1',
-    'nose2==0.14.0',
+    'mypy==1.8.0',
+    'pytest==7.4.4',
     'typing-extensions==4.9.0',
 ]
 
@@ -69,7 +70,7 @@ write_to = "iXBRLViewerPlugin/_version.py"
 [tool.mypy]
 # Warn when a # type: ignore comment does not specify any error codes
 enable_error_code = "ignore-without-code"
-python_version = "3.11"
+python_version = "3.12"
 show_error_codes = true
 strict = true
 
@@ -81,9 +82,6 @@ module = [
     'iXBRLViewerPlugin.iXBRLViewer',
     'iXBRLViewerPlugin.ui',
     'iXBRLViewerPlugin.xhtmlserialize',
-    'tests.unit_tests.iXBRLViewerPlugin/mock_arelle',
-    'tests.unit_tests.iXBRLViewerPlugin/test_iXBRLViewer',
-    'tests.unit_tests.iXBRLViewerPlugin/test_xhtmlserialize',
 ]
 ignore_errors = true
 

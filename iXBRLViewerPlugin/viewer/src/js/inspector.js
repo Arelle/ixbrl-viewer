@@ -4,6 +4,7 @@ import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
 import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, viewerUniqueId } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -260,7 +261,7 @@ export class Inspector {
         for (const [i, name] of key.entries()) {
             $("<div>")
                 .addClass("item")
-                .append($("<span></span>").addClass("sample").addClass("sample-" + i))
+                .append($("<span></span>").addClass("sample").addClass("sample-" + (i % HIGHLIGHT_COLORS)))
                 .append($("<span></span>").text(name))
                 .appendTo($(".highlight-key .items"));
         }
@@ -447,7 +448,7 @@ export class Inspector {
             $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
             overlay.show();
         }
-        $("#matching-concepts-count").text(results.length);
+        $("#matching-facts-count").text(results.length);
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));

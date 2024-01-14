@@ -12,7 +12,6 @@ import urllib.parse
 import zipfile
 from collections import defaultdict
 from copy import deepcopy
-from typing import Optional, Union
 
 import pycountry
 from arelle import XbrlConst
@@ -95,6 +94,7 @@ class IXBRLViewerBuilder:
             "languages": {},
         }
         self.basenameSuffix = basenameSuffix
+        self.currentTargetReport = None
 
     def enableFeature(self, featureName: str):
         if featureName in self.taxonomyData["features"]:
@@ -148,21 +148,13 @@ class IXBRLViewerBuilder:
         if langCode not in self.taxonomyData["languages"]:
             self.taxonomyData["languages"][langCode] = self.makeLanguageName(langCode)
 
-    @property
-    def currentSourceReportData(self):
-        return self.taxonomyData["sourceReports"][-1]
-
-    @property
-    def currentReportData(self):
-        return self.currentSourceReportData["targetReports"][-1]
-            
     def addELR(self, report: ModelXbrl, elr):
         prefix = self.roleMap.getPrefix(elr)
-        if self.currentReportData.setdefault("roleDefs",{}).get(prefix, None) is None:
+        if self.currentTargetReport.setdefault("roleDefs",{}).get(prefix, None) is None:
             rts = report.roleTypes.get(elr, [])
             label = next((rt.definition for rt in rts if rt.definition is not None), None)
             if label is not None:
-                self.currentReportData["roleDefs"].setdefault(prefix,{})["en"] = label
+                self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = label
 
     def addConcept(self, report: ModelXbrl, concept, dimensionType = None):
         if concept is None:
@@ -170,7 +162,7 @@ class IXBRLViewerBuilder:
         labelsRelationshipSet = report.relationshipSet(XbrlConst.conceptLabel)
         labels = labelsRelationshipSet.fromModelObject(concept)
         conceptName = self.nsmap.qname(concept.qname)
-        if conceptName not in self.currentReportData["concepts"]:
+        if conceptName not in self.currentTargetReport["concepts"]:
             conceptData = {
                 "labels": {  }
             }
@@ -205,7 +197,7 @@ class IXBRLViewerBuilder:
                     conceptData['td'] = typedDomainName
                     self.addConcept(report, typedDomainElement)
 
-            self.currentReportData["concepts"][conceptName] = conceptData
+            self.currentTargetReport["concepts"][conceptName] = conceptData
 
     def treeWalk(self, rels, item, indent = 0):
         for r in rels.fromModelObject(item):
@@ -324,7 +316,7 @@ class IXBRLViewerBuilder:
                 if frel.toModelObject is not None:
                     factData.setdefault("fn", []).append(frel.toModelObject.id)
 
-        self.currentReportData["facts"][f.id] = factData
+        self.currentTargetReport["facts"][f.id] = factData
         self.addConcept(report, f.concept)
 
     def oimUnitString(self, unit):
@@ -348,10 +340,11 @@ class IXBRLViewerBuilder:
                 return "{}/{}".format(numeratorsString, denominatorsString)
         return numeratorsString
 
-    def addViewerToXMLDocument(self, xmlDocument, scriptUrl):
+    def addViewerData(self, viewerFile, scriptUrl):
+        viewerFile.xmlDocument = deepcopy(viewerFile.xmlDocument)
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 
-        for child in xmlDocument.getroot():
+        for child in viewerFile.xmlDocument.getroot():
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 for body_child in child:
                     if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type','') == 'application/x.ixbrl-viewer+json':
@@ -383,17 +376,26 @@ class IXBRLViewerBuilder:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
             return etree.parse(fin)
 
-    def addReport(self):
-        self.taxonomyData["sourceReports"].append({
-            "targetReports": [
-                {
-                    "concepts": {},
-                    "facts": {},
-                }
-            ]
-        })
+    def newTargetReport(self):
+        return {
+            "concepts": {},
+            "facts": {},
+        }
 
-    def createViewer(self, scriptUrl: str = DEFAULT_VIEWER_PATH, useStubViewer: bool = False, showValidations: bool = True, packageDownloadURL: str = None) -> Optional[iXBRLViewer]:
+    def addSourceReport(self):
+        sourceReport = {
+            "targetReports": []
+        }
+        self.taxonomyData["sourceReports"].append(sourceReport)
+        return sourceReport
+
+    def createViewer(
+            self,
+            scriptUrl: str = DEFAULT_VIEWER_PATH,
+            useStubViewer: bool = False,
+            showValidations: bool = True,
+            packageDownloadURL: str | None = None,
+    ) -> iXBRLViewer | None:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
@@ -411,59 +413,56 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
 
-        # This is the document that we will embed the JSON taxonomy data in.
-        # This will be either the first document processed, or the stub document
-        xmlDocument = None
+        sourceReportsByFiles = dict()
+
+        if useStubViewer:
+            iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocument()))
 
         for n, report in enumerate(self.reports):
             self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
-            self.addReport()
+            self.currentTargetReport = self.newTargetReport()
             for f in report.facts:
                 self.addFact(report, f)
-            self.currentReportData["rels"] = self.getRelationships(report)
+            self.currentTargetReport["rels"] = self.getRelationships(report)
 
             docSetFiles = None
             report.info("viewer:info", "Creating iXBRL viewer (%d of %d)" % (n+1, len(self.reports)))
             if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
                 # Sort by object index to preserve order in which files were specified.
                 xmlDocsByFilename = {
-                    os.path.basename(self.outputFilename(doc.filepath)): deepcopy(doc.xmlDocument)
+                    os.path.basename(self.outputFilename(doc.filepath)): doc.xmlDocument
                     for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
                     if doc.type == Type.INLINEXBRL
                 }
                 docSetFiles = list(xmlDocsByFilename.keys())
 
-                if xmlDocument is None:
-                    if useStubViewer:
-                        xmlDocument = self.getStubDocument()
-                        iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
-                    else:
-                        xmlDocument = next(iter(xmlDocsByFilename.values()))
-
                 for filename, docSetXMLDoc in xmlDocsByFilename.items():
                     iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
 
             elif useStubViewer:
-                if xmlDocument is None:
-                    xmlDocument = self.getStubDocument()
-                    iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, xmlDocument))
                 filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
                 docSetFiles = [ filename ]
                 iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
 
             else:
+                srcFilename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+                docSetFiles = [ srcFilename ]
                 if len(self.reports) == 1:
                     # If there is only a single report, call the output file "xbrlviewer.html"
                     filename = "xbrlviewer.html"
                 else:
                     # Otherwise, preserve filenames
-                    filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
-                    docSetFiles = [ filename ]
-                if xmlDocument is None:
-                    xmlDocument = deepcopy(report.modelDocument.xmlDocument)
-                    iv.addFile(iXBRLViewerFile(filename, xmlDocument))
-                else:
-                    iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+                    filename = srcFilename
+                iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+
+            docSetKey = frozenset(docSetFiles)
+            sourceReport = sourceReportsByFiles.get(docSetKey)
+            if sourceReport is None:
+                sourceReport = self.addSourceReport()
+                sourceReportsByFiles[docSetKey] = sourceReport
+                sourceReport["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
+
+            sourceReport["targetReports"].append(self.currentTargetReport)
 
             localDocs = defaultdict(set)
             for path, doc in report.urlDocs.items():
@@ -482,13 +481,10 @@ class IXBRLViewerBuilder:
                             linkbaseIdentifed = True
                     if not linkbaseIdentifed:
                         localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
-            self.currentReportData["localDocs"] = {
+            self.currentTargetReport["localDocs"] = {
                 localDoc: sorted(docTypes)
                 for localDoc, docTypes in localDocs.items()
             }
-
-            if docSetFiles is not None:
-                self.currentSourceReportData["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
@@ -504,7 +500,7 @@ class IXBRLViewerBuilder:
             iv.addFilingDoc(filingDocZipPath)
             self.taxonomyData["filingDocuments"] = filingDocZipName
 
-        if not self.addViewerToXMLDocument(xmlDocument, scriptUrl):
+        if not self.addViewerData(iv.files[0], scriptUrl):
             return None
 
         return iv
@@ -524,14 +520,18 @@ class iXBRLViewer:
         self.filingDocuments = None
         # This is an arbitrary ModelXbrl used for logging only
         self.logger_model = logger_model
+        self.filenames = set()
 
     def addFile(self, ivf):
+        if ivf.filename in self.filenames:
+            return
         self.files.append(ivf)
+        self.filenames.add(ivf.filename)
 
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments
 
-    def save(self, destination: Union[io.BytesIO, str], zipOutput: bool = False, copyScriptPath: Optional[str] = None):
+    def save(self, destination: io.BytesIO | str, zipOutput: bool = False, copyScriptPath: str | None = None):
         """
         Save the iXBRL viewer.
         :param destination: The target that viewer data/files will be written to (path to file/directory, or a file object itself).

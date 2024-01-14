@@ -9,7 +9,6 @@ import sys
 import tempfile
 import traceback
 from optparse import OptionGroup, OptionParser
-from typing import Optional, Union
 
 from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
@@ -18,7 +17,7 @@ from arelle.webserver.bottle import static_file
 
 from .constants import CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
     CONFIG_SCRIPT_URL, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
-    DEFAULT_VIEWER_PATH, FEATURE_CONFIGS
+    DEFAULT_JS_FILENAME, DEFAULT_VIEWER_PATH, FEATURE_CONFIGS
 from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
 
 
@@ -96,14 +95,15 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
 
 def generateViewer(
         cntlr: Cntlr,
-        saveViewerDest: Union[io.BytesIO, str],
+        saveViewerDest: io.BytesIO | str | None,
         viewerURL: str = DEFAULT_VIEWER_PATH,
         showValidationMessages: bool = False,
         useStubViewer: bool = False,
         zipViewerOutput: bool = False,
-        features: Optional[list[str]] = None,
-        packageDownloadURL: str = None,
-        copyScript = True):
+        features: list[str] | None = None,
+        packageDownloadURL: str | None = None,
+        copyScript = True
+) -> None:
     """
     Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
     If the viewer URL is a location on the local file system, a copy will be placed included in the output destination.
@@ -116,6 +116,8 @@ def generateViewer(
     :param features: List of feature names to enable via generated JSON data.
     """
     # extend XBRL-loaded run processing for this option
+    if saveViewerDest is None:
+        return
     if (cntlr.modelManager is None 
         or len(cntlr.modelManager.loadedModelXbrls) == 0 
         or any(not mx.modelDocument for mx in cntlr.modelManager.loadedModelXbrls)):
@@ -143,17 +145,15 @@ def generateViewer(
             copyScriptPath = viewerURL
             viewerURL = os.path.basename(viewerURL)
     try:
-        out = saveViewerDest
-        if out:
-            viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.loadedModelXbrls)
-            if features:
-                for feature in features:
-                    viewerBuilder.enableFeature(feature)
-            iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer, packageDownloadURL=packageDownloadURL)
-            if iv is not None:
-                iv.save(out, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
+        viewerBuilder = IXBRLViewerBuilder(cntlr.modelManager.loadedModelXbrls)
+        if features:
+            for feature in features:
+                viewerBuilder.enableFeature(feature)
+        iv = viewerBuilder.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, useStubViewer=useStubViewer, packageDownloadURL=packageDownloadURL)
+        if iv is not None:
+            iv.save(saveViewerDest, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
     except IXBRLViewerBuilderError as ex:
-        print(ex.message)
+        print(ex)
     except Exception as ex:
         cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
 
@@ -171,7 +171,7 @@ def getAbsoluteViewerPath(saveViewerPath: str, relativeViewerPath: str) -> str:
     return os.path.join(saveViewerDir, relativeViewerPath)
 
 
-def getFeaturesFromOptions(options: Union[argparse.Namespace, OptionParser]):
+def getFeaturesFromOptions(options: argparse.Namespace | OptionParser):
     return [
         featureConfig.key
         for featureConfig in FEATURE_CONFIGS
@@ -207,7 +207,7 @@ def iXBRLViewerSaveCommand(cntlr):
         generateViewer(
             cntlr,
             dialog.filename(),
-            dialog.scriptUrl(),
+            dialog.scriptUrl() or DEFAULT_VIEWER_PATH,
             zipViewerOutput=dialog.zipViewerOutput(),
             features=dialog.features()
         )
@@ -250,23 +250,23 @@ def commandLineRun(*args, **kwargs):
 class iXBRLViewerLocalViewer(LocalViewer):
     # plugin-specific local file handler
     def getLocalFile(self, file, relpath, request):
-        _report, _sep, _file = file.partition("/")
-        if file == 'ixbrlviewer.js':
-            return static_file('ixbrlviewer.js', os.path.dirname(DEFAULT_VIEWER_PATH))
-        elif _report.isnumeric():  # in reportsFolder folder
+        if file == DEFAULT_JS_FILENAME:
+            return static_file(DEFAULT_JS_FILENAME, os.path.dirname(DEFAULT_VIEWER_PATH))
+        _report, _, _file = file.partition("/")
+        if _report.isnumeric():  # in reportsFolder folder
             # check if file is in the current or parent directory
             _fileDir = self.reportsFolders[int(_report)]
             _fileExists = False
             if os.path.exists(os.path.join(_fileDir, _file)):
                 _fileExists = True
-            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.filepart(_file))):
+            elif "/" in _file and os.path.exists(os.path.join(_fileDir, os.path.basename(_file))):
                 # xhtml in a subdirectory for output files may refer to an image file in parent directory
                 _fileExists = True
-                _file = os.path.filepart(_file)
+                _file = os.path.basename(_file)
             if not _fileExists:
                 self.cntlr.addToLog("http://localhost:{}/{}".format(self.port, file), messageCode="localViewer:fileNotFound", level=logging.DEBUG)
             return static_file(_file, root=_fileDir, headers=self.noCacheHeaders)  # extra_headers modification to py-bottle
-        return static_file(file, root="/")  # probably can't get here unless path is wrong
+        return static_file(file, root="/")  # absolute path used for ixbrlviewer.js.
 
 
 def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
@@ -287,7 +287,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         generateViewer(
             cntlr,
             saveViewerDest=tempViewer.name,
-            viewerURL=cntlr.config.setdefault(CONFIG_SCRIPT_URL, DEFAULT_VIEWER_PATH),
+            viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL) or DEFAULT_VIEWER_PATH,
             useStubViewer=True,
             features=features
         )
@@ -297,7 +297,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
     except Exception as ex:
         modelXbrl.error(
             "viewer:exception",
-            "Exception %(exception)s \sTraceback %(traceback)s",
+            "Exception %(exception)s \nTraceback %(traceback)s",
             modelObject=modelXbrl, exception=ex, traceback=traceback.format_tb(sys.exc_info()[2])
         )
 

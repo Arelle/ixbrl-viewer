@@ -207,7 +207,6 @@ export class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
     }
 
     isConsistent() {
-        console.log(this.calculatedTotal().toString());
         return this.calculatedTotal().equals(this.totalFact.roundedValue());
     }
 }

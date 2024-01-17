@@ -2,6 +2,12 @@
 
 import Decimal from 'decimal.js';
 
+/*
+ * Class for working with numeric intervals, of the form: [a, b]
+ *
+ * Interval is closed (includes both bounds)
+ * a must be <= b
+ */
 export class Interval {
 
     constructor(a, b) {

@@ -9,6 +9,7 @@ import sys
 import tempfile
 import traceback
 from optparse import OptionGroup, OptionParser
+from pathlib import Path
 
 from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
@@ -292,9 +293,10 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
             useStubViewer=True,
             features=features
         )
-        localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
-        localhost = localViewer.init(cntlr, tempViewer.name)
-        webbrowser.open(f'{localhost}/{viewer_file_name}')
+        if Path(tempViewer.name, viewer_file_name).exists():
+            localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
+            localhost = localViewer.init(cntlr, tempViewer.name)
+            webbrowser.open(f'{localhost}/{viewer_file_name}')
     except Exception as ex:
         modelXbrl.error(
             EXCEPTION_MESSAGE_CODE,

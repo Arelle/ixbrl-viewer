@@ -53,7 +53,7 @@ class XHTMLSerializer:
         elif node.nsmap.get(node.prefix, None) == qname.namespace:
             prefix = node.prefix
         else:
-            prefix = next(iter(sorted((p for p, ns in nsmap.items() if ns == qname.namespace), key = self.prefix_sort)))
+            prefix = next(iter(sorted((p for p, ns in node.nsmap.items() if ns == qname.namespace), key = self.prefix_sort)))
         if prefix is None:
             return qname.localname
         return "%s:%s" % (prefix, qname.localname)

@@ -13,8 +13,8 @@ export class Calculation {
         this.calc11 = calc11;
     }
 
-    /* Resolve calculation relationships to a map of maps of maps 
-     * (ELR->conceptName->fact id->fact object) */
+    /* Resolve calculation relationships to a map of maps of arrays 
+     * (ELR->conceptName->facts) */
     calculationFacts() {
         const fact = this.fact;
         const report = fact.report;
@@ -24,8 +24,8 @@ export class Calculation {
             for (const [elr, rr] of Object.entries(rels)) {
                 ctf[elr] = {};
                 if (rr.length > 0) {
-                    const otherFacts = report.getAlignedFacts(fact, {"c": $.map(rr, (r,i) => r.t ) });
-                    otherFacts.forEach(ff => setDefault(ctf[elr], ff.conceptName(), {})[ff.vuid] = ff);
+                    const otherFacts = report.getAlignedFacts(fact, {"c": rr.map(r => r.t )});
+                    otherFacts.forEach(otherFact => setDefault(ctf[elr], otherFact.conceptName(), []).push(otherFact));
                 }
             }
             this._conceptToFact = ctf;
@@ -58,10 +58,10 @@ export class Calculation {
         let bestMatchCount = -1;
         for (const [elr, rr] of Object.entries(ctf)) {
             let matchCount = 0;
-            for (const [concept, ff] of Object.entries(rr)) {
+            for (const [concept, calcFacts] of Object.entries(rr)) {
                 let matched = 0;
-                for (const [fid, calcFact] of Object.entries(ff)) {
-                    if ($.inArray(fid, facts) >  -1) {
+                for (const [calcFact] of calcFacts) {
+                    if (facts.includes(calcFact.vuid)) {
                         matched = 1;
                     } 
                 }
@@ -86,7 +86,7 @@ export class Calculation {
         const resolvedCalcClass = this.calc11 ? ResolvedCalc11Calculation : ResolvedLegacyCalculation;
         const resolvedCalculation = new resolvedCalcClass(elr, this.fact);
         for (const r of rels) {
-            const factset = new FactSet(Object.values(calcFacts[r.t] || {}));
+            const factset = new FactSet(calcFacts[r.t] ?? []);
             resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
         }
         return resolvedCalculation;

@@ -45,7 +45,7 @@ export class Fact {
         return this.report.qname(this.f.a.c);
     }
 
-    period(){
+    period() {
         return new Period(this.f.a.p);
     }
 

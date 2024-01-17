@@ -17,9 +17,9 @@ from arelle.webserver.bottle import static_file
 
 from .constants import CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
     CONFIG_SCRIPT_URL, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
-    DEFAULT_JS_FILENAME, DEFAULT_VIEWER_PATH, FEATURE_CONFIGS
+    DEFAULT_JS_FILENAME, DEFAULT_VIEWER_PATH, ERROR_MESSAGE_CODE, \
+    EXCEPTION_MESSAGE_CODE, FEATURE_CONFIGS
 from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
-
 
 #
 # GUI operation:
@@ -118,14 +118,14 @@ def generateViewer(
     # extend XBRL-loaded run processing for this option
     if saveViewerDest is None:
         return
-    if (cntlr.modelManager is None 
+    if (cntlr.modelManager is None
         or len(cntlr.modelManager.loadedModelXbrls) == 0 
         or any(not mx.modelDocument for mx in cntlr.modelManager.loadedModelXbrls)):
-        cntlr.addToLog("No taxonomy loaded.")
+        cntlr.addToLog("No taxonomy loaded.", messageCode=ERROR_MESSAGE_CODE)
         return
     modelXbrl = cntlr.modelManager.modelXbrl
     if modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-        cntlr.addToLog("No inline XBRL document loaded.")
+        cntlr.addToLog("No inline XBRL document loaded.", messageCode=ERROR_MESSAGE_CODE)
         return
     copyScriptPath = None
     if isinstance(saveViewerDest, str):
@@ -155,7 +155,8 @@ def generateViewer(
     except IXBRLViewerBuilderError as ex:
         print(ex)
     except Exception as ex:
-        cntlr.addToLog("Exception {} \nTraceback {}".format(ex, traceback.format_tb(sys.exc_info()[2])))
+        tb = traceback.format_tb(sys.exc_info()[2])
+        cntlr.addToLog(f"Exception {ex} \nTraceback {tb}", messageCode=EXCEPTION_MESSAGE_CODE)
 
 
 def getAbsoluteViewerPath(saveViewerPath: str, relativeViewerPath: str) -> str:
@@ -195,11 +196,11 @@ def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
 def iXBRLViewerSaveCommand(cntlr):
     from .ui import SaveViewerDialog
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
-        cntlr.addToLog("No document loaded.")
+        cntlr.addToLog("No document loaded.", messageCode=ERROR_MESSAGE_CODE)
         return
     modelXbrl = cntlr.modelManager.modelXbrl
     if modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-        cntlr.addToLog("No inline XBRL document loaded.")
+        cntlr.addToLog("No inline XBRL document loaded.", messageCode=ERROR_MESSAGE_CODE)
         return
     dialog = SaveViewerDialog(cntlr)
     dialog.render()
@@ -296,7 +297,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         webbrowser.open(f'{localhost}/{viewer_file_name}')
     except Exception as ex:
         modelXbrl.error(
-            "viewer:exception",
+            EXCEPTION_MESSAGE_CODE,
             "Exception %(exception)s \nTraceback %(traceback)s",
             modelObject=modelXbrl, exception=ex, traceback=traceback.format_tb(sys.exc_info()[2])
         )

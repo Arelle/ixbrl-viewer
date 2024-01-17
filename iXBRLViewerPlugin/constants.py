@@ -11,6 +11,10 @@ CONFIG_OUTPUT_FILE = 'iXBRLViewerOutputFile'
 CONFIG_SCRIPT_URL = 'iXBRLViewerScriptURL'
 CONFIG_ZIP_OUTPUT = 'iXBRLViewerZipOutput'
 
+ERROR_MESSAGE_CODE = 'viewer:error'
+EXCEPTION_MESSAGE_CODE = 'viewer:exception'
+INFO_MESSAGE_CODE = 'viewer:info'
+
 DEFAULT_LAUNCH_ON_LOAD = True
 DEFAULT_OUTPUT_NAME = 'ixbrlviewer.html'
 DEFAULT_JS_FILENAME = 'ixbrlviewer.js'

@@ -393,4 +393,15 @@ export class Fact {
     valueInterval() {
         return Interval.fromFact(this);
     }
+
+    isMorePrecise(of) {
+        // decimals of "undefined" indicates infinite precision
+        if (of.decimals() === undefined) {
+            return false;
+        }
+        if (this.decimals() === undefined) {
+            return true;
+        }
+        return this.decimals() > of.decimals();
+    }
 }

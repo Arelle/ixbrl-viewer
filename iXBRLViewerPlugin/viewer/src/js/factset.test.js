@@ -246,3 +246,27 @@ describe("Consistency", () => {
     });
   
 });
+
+describe("Most precise", () => {
+    const reportSet = testReportSet({ 
+        "f1": numericTestFact(150, -1), 
+        "f2": numericTestFact(200, 0), 
+        "f3": numericTestFact(140, 2),
+        "f4": numericTestFact(160, undefined)
+    });
+
+    const f1 = getFact(reportSet, "f1");
+    const f2 = getFact(reportSet, "f2");
+    const f3 = getFact(reportSet, "f3");
+    const f4 = getFact(reportSet, "f4");
+
+    test("Most precise - finite decimals", () => {
+        const factSet = new FactSet([f1, f2, f3]);
+        expect(factSet.mostPrecise()).toEqual(f3);
+    });
+
+    test("Most precise - mixture of finite and infinite", () => {
+        const factSet = new FactSet([f1, f2, f3, f4]);
+        expect(factSet.mostPrecise()).toEqual(f4);
+    });
+});

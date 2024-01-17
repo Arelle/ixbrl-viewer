@@ -128,15 +128,8 @@ export class FactSet {
 
     /*
      * Return the most precise (highest decimals) value within the set.
-     * decimals of "undefined" indicates infinite precision
      */
     mostPrecise() {
-        let mostPrecise;
-        for (const f of Object.values(this.items)) {
-            if (f.decimals() === undefined || mostPrecise === undefined || f.decimals() > mostPrecise.decimals()) {
-                mostPrecise = f;
-            }
-        }
-        return mostPrecise;
+        return Object.values(this.items).reduce((a, b) => b.isMorePrecise(a) ? b : a);
     }
 }

@@ -107,7 +107,7 @@ class CalculationContribution {
             this.weightSign = '-';
         }
         else {
-            this.WeightSign = weight;
+            this.weightSign = weight;
         }
     }
 

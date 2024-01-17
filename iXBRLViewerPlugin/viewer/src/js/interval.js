@@ -19,15 +19,17 @@ export class Interval {
             const x = new Decimal(10);
             width = x.pow(0-decimals).times(0.5);
         }
+        let value;
+        const factValue = fact.value();
         try {
-            const value = new Decimal(fact.value());
-            return new Interval(value.minus(width), value.plus(width));
+            value = new Decimal(factValue);
         } catch (e) {
             if (e instanceof Error && /DecimalError/.test(e.message)) {
                 return undefined;
             }
             throw e;
         }
+        return new Interval(value.minus(width), value.plus(width));
     }
 
     intersection(other) {

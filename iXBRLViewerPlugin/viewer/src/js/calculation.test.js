@@ -37,7 +37,14 @@ const testReportData = {
                     "en": "Item 2"
                 }
             }
-        }
+        },
+        "eg:Total2": {
+            "labels": {
+                "std": {
+                    "en": "Total 2"
+                }
+            }
+        },
     },
     "facts": {
     },
@@ -47,6 +54,10 @@ const testReportData = {
                 "eg:Total": [
                     {"t": "eg:Item1", "w": 1},
                     {"t": "eg:Item2", "w": -1}
+                ],
+                "eg:Total2": [
+                    {"t": "eg:Item1", "w": 2},
+                    {"t": "eg:Item2", "w": -2}
                 ]
             }
         }
@@ -129,6 +140,16 @@ describe("Consistent only under 1.1", () => {
         expect(Interval.fromFact(rCalc.totalFact)).toEqual(new Interval(10500, 11500));
         expect(rCalc.isConsistent()).toBe(true);
 
+        expect(rCalc.rows[0].concept.name).toBe("eg:Item1");
+        expect(rCalc.rows[0].weight).toBe(1);
+        expect(rCalc.rows[0].weightSign).toBe("+");
+        expect(rCalc.rows[0].facts.size()).toBe(1);
+
+        expect(rCalc.rows[1].concept.name).toBe("eg:Item2");
+        expect(rCalc.rows[1].weight).toBe(-1);
+        expect(rCalc.rows[1].weightSign).toBe("-");
+        expect(rCalc.rows[1].facts.size()).toBe(1);
+
     });
 
     test("Calc contributor", () => {
@@ -170,6 +191,16 @@ describe("Consistent duplicate contributor", () => {
         expect(rCalc.calculatedTotalInterval()).toEqual(new Interval(9505, 10515));
         expect(Interval.fromFact(rCalc.totalFact)).toEqual(new Interval(9500, 10500));
         expect(rCalc.isConsistent()).toBe(true);
+
+        expect(rCalc.rows[0].concept.name).toBe("eg:Item1");
+        expect(rCalc.rows[0].weight).toBe(1);
+        expect(rCalc.rows[0].weightSign).toBe("+");
+        expect(rCalc.rows[0].facts.size()).toBe(1);
+
+        expect(rCalc.rows[1].concept.name).toBe("eg:Item2");
+        expect(rCalc.rows[1].weight).toBe(-1);
+        expect(rCalc.rows[1].weightSign).toBe("-");
+        expect(rCalc.rows[1].facts.size()).toBe(2);
 
     });
 
@@ -223,5 +254,53 @@ describe("Single contributor", () => {
         expect(rCalc.calculatedTotal()).toEqual(new Decimal(9990));
         expect(rCalc.unchecked()).toBe(false);
         expect(rCalc.isConsistent()).toBe(false);
+    });
+});
+
+describe("Weights", () => {
+    const reportSet = testReportSet({
+        "f1": testFact({"c": "eg:Total2", "u": "iso2417:GBP"}, 4000, -3),
+        "f2": testFact({"c": "eg:Item1", "u": "iso2417:GBP"}, 3000, -3),
+        "f3": testFact({"c": "eg:Item2", "u": "iso2417:GBP"}, 1000, -3),
+    });
+
+    test("Calc 1.1 total", () => {
+        const calc = new Calculation(getFact(reportSet, "f1"), true);
+        expect(calc.hasCalculations()).toBe(true);
+        const rCalcs = calc.resolvedCalculations();
+        expect(rCalcs.length).toBe(1);
+        const rCalc = rCalcs[0];
+        expect(rCalc.elr).toBe("group");
+        expect(rCalc.calculatedTotalInterval()).toEqual(new Interval(2000, 6000));
+        expect(Interval.fromFact(rCalc.totalFact)).toEqual(new Interval(3500, 4500));
+        expect(rCalc.isConsistent()).toBe(true);
+
+        expect(rCalc.rows[0].concept.name).toBe("eg:Item1");
+        expect(rCalc.rows[0].weight).toBe(2);
+        expect(rCalc.rows[0].weightSign).toBe("2");
+
+        expect(rCalc.rows[1].concept.name).toBe("eg:Item2");
+        expect(rCalc.rows[1].weight).toBe(-2);
+        expect(rCalc.rows[1].weightSign).toBe("-2");
+
+    });
+
+    test("Calc contributor", () => {
+        const calc11 = new Calculation(getFact(reportSet, "f2"), true);
+        expect(calc11.hasCalculations()).toBe(false);
+        const calc10 = new Calculation(getFact(reportSet, "f2"), false);
+        expect(calc10.hasCalculations()).toBe(false);
+    });
+
+    test("Calc 1.0 total", () => {
+        const calc = new Calculation(getFact(reportSet, "f1"), false);
+        expect(calc.hasCalculations()).toBe(true);
+        const rCalcs = calc.resolvedCalculations();
+        expect(rCalcs.length).toBe(1);
+        const rCalc = rCalcs[0];
+        expect(rCalc.elr).toBe("group");
+        expect(rCalc.calculatedTotal()).toEqual(new Decimal(4000));
+        expect(rCalc.unchecked()).toBe(false);
+        expect(rCalc.isConsistent()).toBe(true);
     });
 });

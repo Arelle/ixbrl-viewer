@@ -7,13 +7,24 @@ import { Interval } from './interval.js';
 export class FactSet {
 
     constructor (items) {
-        this.items = items;
+        this.itemMap = new Map();
+        for (const item of items ?? []) {
+            this.add(item)
+        }
+    }
+
+    add(item) {
+        this.itemMap.set(item.vuid, item);
+    }
+
+    items() {
+        return Array.from(this.itemMap.values());
     }
 
     /* Returns the union of dimensions present on facts in the set */
     _allDimensions() {
         const dims = {};
-        const facts = this.items.filter((item) => item instanceof Fact);
+        const facts = this.items().filter((item) => item instanceof Fact);
         for (const fact of facts) {
             const dd = Object.keys(fact.dimensions());
             for (var j = 0; j < dd.length; j++) {
@@ -32,7 +43,7 @@ export class FactSet {
      */
     minimallyUniqueLabel(fact) {
         if (!this._minimallyUniqueLabels) {
-            var facts = this.items.filter((item) => item instanceof Fact);
+            var facts = this.items().filter((item) => item instanceof Fact);
             var allLabels = {};
             var allAspects = ["c", "p"].concat(this._allDimensions());
             /* Assemble a map of arrays of all aspect labels for all facts, in a
@@ -88,7 +99,7 @@ export class FactSet {
                 }
             }
 
-            this.items.filter((item) => item instanceof Footnote).forEach((fn) => {
+            this.items().filter((item) => item instanceof Footnote).forEach((fn) => {
                 uniqueLabels[fn.vuid] = [fn.title];
             });
 
@@ -98,7 +109,7 @@ export class FactSet {
     }
 
     isEmpty() {
-        return this.items.length == 0;
+        return this.itemMap.size == 0;
     }
 
     /*
@@ -106,30 +117,30 @@ export class FactSet {
      * undefined if there is no intersection (inconsistent duplicates)
      */
     valueIntersection() {
-        const duplicates = Object.values(this.items).map(fact => Interval.fromFact(fact));
+        const duplicates = this.items().map(fact => Interval.fromFact(fact));
         return Interval.intersection(...duplicates);
     }
 
     completeDuplicates() {
-        return this.items.every(f => f.isCompleteDuplicate(this.items[0]));
+        return this.items().every(f => f.isCompleteDuplicate(this.items()[0]));
     }
 
     isConsistent() {
-        if (this.items.length == 0) {
+        if (this.itemMap.size == 0) {
             return true;
         }
-        const duplicates = Object.values(this.items).map(fact => Interval.fromFact(fact));
+        const duplicates = this.items().map(fact => Interval.fromFact(fact));
         return Interval.intersection(...duplicates) !== undefined;
     }
 
     size() {
-        return this.items.length;
+        return this.itemMap.size;
     }
 
     /*
      * Return the most precise (highest decimals) value within the set.
      */
     mostPrecise() {
-        return Object.values(this.items).reduce((a, b) => b.isMorePrecise(a) ? b : a);
+        return this.items().reduce((a, b) => b.isMorePrecise(a) ? b : a);
     }
 }

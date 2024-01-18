@@ -25,7 +25,7 @@ export class Calculation {
                 ctf[elr] = {};
                 if (rr.length > 0) {
                     const otherFacts = report.getAlignedFacts(fact, {"c": rr.map(r => r.t )});
-                    otherFacts.forEach(otherFact => setDefault(ctf[elr], otherFact.conceptName(), []).push(otherFact));
+                    otherFacts.forEach(otherFact => setDefault(ctf[elr], otherFact.conceptName(), new FactSet()).add(otherFact));
                 }
             }
             this._conceptToFact = ctf;
@@ -58,9 +58,9 @@ export class Calculation {
         let bestMatchCount = -1;
         for (const [elr, rr] of Object.entries(ctf)) {
             let matchCount = 0;
-            for (const [concept, calcFacts] of Object.entries(rr)) {
+            for (const [concept, calcFactSet] of Object.entries(rr)) {
                 let matched = 0;
-                for (const calcFact of calcFacts) {
+                for (const calcFact of calcFactSet.items()) {
                     if (facts.includes(calcFact.vuid)) {
                         matched = 1;
                     } 
@@ -86,7 +86,7 @@ export class Calculation {
         const resolvedCalcClass = this.calc11 ? ResolvedCalc11Calculation : ResolvedLegacyCalculation;
         const resolvedCalculation = new resolvedCalcClass(elr, this.fact);
         for (const r of rels) {
-            const factset = new FactSet(calcFacts[r.t] ?? []);
+            const factset = calcFacts[r.t] ?? new FactSet();
             resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
         }
         return resolvedCalculation;
@@ -190,7 +190,7 @@ export class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
             if (!row.facts.isEmpty()) {
                 // Calculation does not bind if there are consistent (non-exact)
                 // duplicates, so we can just take the first duplicate value
-                total = total.plus(row.facts.items[0].roundedValue().times(row.weight));
+                total = total.plus(row.facts.items()[0].roundedValue().times(row.weight));
             }
         }
         return total;

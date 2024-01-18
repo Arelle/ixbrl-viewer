@@ -721,11 +721,11 @@ export class Inspector {
                 if (!r.facts.isEmpty()) {
                     itemHTML.addClass("calc-fact-link");
                     itemHTML.addClass("calc-fact-link");
-                    itemHTML.data('ivids', r.facts.items.map(f => f.vuid));
+                    itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
                     itemHTML.click(() => this.selectItem(r.facts.items[0].vuid));
-                    itemHTML.mouseenter(() => r.facts.items.forEach(f => this._viewer.linkedHighlightFact(f)));
-                    itemHTML.mouseleave(() => r.facts.items.forEach(f => this._viewer.clearLinkedHighlightFact(f)));
-                    r.facts.items.forEach(f => this._viewer.highlightRelatedFact(f));
+                    itemHTML.mouseenter(() => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
+                    itemHTML.mouseleave(() => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
+                    r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
                     itemHTML.find(".value").text(r.facts.mostPrecise().readableValue());
                 }
             }

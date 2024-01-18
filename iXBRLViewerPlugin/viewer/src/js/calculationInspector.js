@@ -55,7 +55,7 @@ export class CalculationInspector extends Dialog {
             let maxText = "";
 
             if (!row.facts.isEmpty()) {
-                let f = row.facts.items[0];
+                let f = row.facts.items()[0];
                 const reportedInterval = row.facts.valueIntersection();
                 if (reportedInterval === undefined) {
                     factText = "n/a";
@@ -116,7 +116,7 @@ export class CalculationInspector extends Dialog {
             let maxText = "";
 
             if (!row.facts.isEmpty()) {
-                let f = row.facts.items[0];
+                let f = row.facts.items()[0];
                 const reportedInterval = row.facts.valueIntersection();
                 if (reportedInterval === undefined) {
                     factText = "Inconsistent duplicates";

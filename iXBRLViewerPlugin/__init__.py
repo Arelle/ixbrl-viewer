@@ -183,14 +183,14 @@ def getFeaturesFromOptions(options: argparse.Namespace | OptionParser):
 
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
     generateViewer(
-        cntlr,
-        options.saveViewerDest or kwargs.get("responseZipStream"),
-        options.viewerURL,
-        options.validationMessages,
-        options.useStubViewer,
-        options.zipViewerOutput,
-        getFeaturesFromOptions(options),
-        options.packageDownloadURL,
+        cntlr=cntlr,
+        saveViewerDest=options.saveViewerDest or kwargs.get("responseZipStream"),
+        viewerURL=options.viewerURL,
+        showValidationMessages=options.validationMessages,
+        useStubViewer=options.useStubViewer,
+        zipViewerOutput=options.zipViewerOutput,
+        features=getFeaturesFromOptions(options),
+        packageDownloadURL=options.packageDownloadURL,
     )
 
 
@@ -207,9 +207,9 @@ def iXBRLViewerSaveCommand(cntlr):
     dialog.render()
     if dialog.accepted and dialog.filename():
         generateViewer(
-            cntlr,
-            dialog.filename(),
-            dialog.scriptUrl() or DEFAULT_VIEWER_PATH,
+            cntlr=cntlr,
+            saveViewerDest=dialog.filename(),
+            viewerURL=dialog.scriptUrl() or DEFAULT_VIEWER_PATH,
             zipViewerOutput=dialog.zipViewerOutput(),
             features=dialog.features()
         )
@@ -287,7 +287,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
             if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
         ]
         generateViewer(
-            cntlr,
+            cntlr=cntlr,
             saveViewerDest=tempViewer.name,
             viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL) or DEFAULT_VIEWER_PATH,
             useStubViewer=True,

@@ -265,11 +265,15 @@ class IXBRLViewerBuilder:
             factData["v"] = None
         elif f.concept is not None and f.concept.isEnumeration:
             qnEnums = f.xValue
-            if not isinstance(qnEnums, list):
-                qnEnums = (qnEnums,)
-            factData["v"] = " ".join(self.nsmap.qname(qn) for qn in qnEnums)
-            for qn in qnEnums:
-                self.addConcept(report, report.qnameConcepts.get(qn))
+            if qnEnums is None:
+                factData["v"] = f.value
+                factData["err"] = 'INVALID_IX_VALUE'
+            else:
+                if not isinstance(qnEnums, list):
+                    qnEnums = (qnEnums,)
+                factData["v"] = " ".join(self.nsmap.qname(qn) for qn in qnEnums)
+                for qn in qnEnums:
+                    self.addConcept(report, report.qnameConcepts.get(qn))
         else:
             factData["v"] = f.value 
             if f.value == INVALIDixVALUE:

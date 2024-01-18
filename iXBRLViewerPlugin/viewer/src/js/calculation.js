@@ -60,7 +60,7 @@ export class Calculation {
             let matchCount = 0;
             for (const [concept, calcFacts] of Object.entries(rr)) {
                 let matched = 0;
-                for (const [calcFact] of calcFacts) {
+                for (const calcFact of calcFacts) {
                     if (facts.includes(calcFact.vuid)) {
                         matched = 1;
                     } 

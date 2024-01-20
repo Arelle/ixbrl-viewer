@@ -1,12 +1,11 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId } from "./util.js";
-import { ReportSearch } from "./search.js";
-import { Calculation } from "./calculations.js";
-import { IXBRLChart } from './chart.js';
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId } from "./util.js";
+import { ReportSearch } from "./search.js";
+import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
 import { Identifiers } from './identifiers.js';
 import { Menu } from './menu.js';
@@ -17,6 +16,9 @@ import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
+import { Interval } from './interval.js';
+import { Calculation } from "./calculation.js";
+import { CalculationInspector } from './calculationInspector.js';
 import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
 
@@ -27,6 +29,7 @@ export class Inspector {
         this._iv = iv;
         this._viewerOptions = new ViewerOptions()
         this._currentItem = null;
+        this._useCalc11 = true;
     }
 
     i18nInit() {
@@ -215,6 +218,7 @@ export class Inspector {
         const iv = this._iv;
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
+        this._toolbarMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         if (iv.isReviewModeEnabled()) {
             this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");
@@ -259,6 +263,13 @@ export class Inspector {
                 .append($("<span></span>").addClass("sample").addClass("sample-" + (i % HIGHLIGHT_COLORS)))
                 .append($("<span></span>").text(name))
                 .appendTo($(".highlight-key .items"));
+        }
+    }
+
+    setCalculationMode(useCalc11) {
+        this._useCalc11 = useCalc11;
+        if (this._currentItem instanceof Fact) {
+            this.updateCalculation(this._currentItem);
         }
     }
 
@@ -464,7 +475,7 @@ export class Inspector {
     }
 
     updateCalculation(fact, elr) {
-        $('.calculations .tree').empty().append(this._calculationHTML(fact, elr));
+        $('.calculations .tree').empty().append(this._calculationHTML(fact));
     }
 
     createSummary() {
@@ -682,47 +693,91 @@ export class Inspector {
     }
 
     _calculationHTML(fact, elr) {
-        const calc = new Calculation(fact);
+        const calc = new Calculation(fact, this._useCalc11);
         if (!calc.hasCalculations()) {
             return "";
         }
         const tableFacts = this._viewer.factsInSameTable(fact);
-        if (!elr) {
-            elr = calc.bestELRForFactSet(tableFacts);
-        }
+        const selectedELR = calc.bestELRForFactSet(tableFacts);
         const report = fact.report;
         const inspector = this;
         const a = new Accordian();
 
-        for (const [e, rolePrefix] of Object.entries(calc.elrs())) {
-            const label = report.getRoleLabel(rolePrefix);
-
-            const rCalc = calc.resolvedCalculation(e);
+        for (const rCalc of calc.resolvedCalculations()) {
+            const label = report.getRoleLabel(rCalc.elr);
             const calcBody = $('<div></div>');
-            for (const [i, r] of rCalc.entries()) {
-                const itemHTML = $("<div></div>")
-                    .addClass("item")
-                    .append($("<span></span>").addClass("weight").text(r.weightSign + " "))
-                    .append($("<span></span>").addClass("concept-name").text(report.getLabelOrName(r.concept, "std")))
-                    .appendTo(calcBody);
-
-                // r.facts is a map of fact IDs to Fact objects
-                if (r.facts) {
-                    itemHTML.addClass("calc-fact-link");
-                    itemHTML.data('ivids', Object.keys(r.facts));
-                    itemHTML.click(() => inspector.selectItem(Object.values(r.facts)[0].vuid));
-                    itemHTML.mouseenter(() => Object.values(r.facts).forEach(f => this._viewer.linkedHighlightFact(f)));
-                    itemHTML.mouseleave(() => Object.values(r.facts).forEach(f => this._viewer.clearLinkedHighlightFact(f)));
-                    Object.values(r.facts).forEach(f => this._viewer.highlightRelatedFact(f));
-                }
-            }
-            $("<div></div>").addClass("item").addClass("total")
-                .append($("<span></span>").addClass("weight"))
-                .append($("<span></span>").addClass("concept-name").text(fact.getLabelOrName("std")))
+            const calcTable = $('<table></table>')
+                .addClass("calculation-table")
                 .appendTo(calcBody);
 
-            a.addCard($("<span></span>").text(label), calcBody, e == elr);
+            for (const r of rCalc.rows) {
+                const itemHTML = $("<tr></tr>")
+                    .addClass("item")
+                    .append($("<td></td>").addClass("weight").text(r.weightSign + " "))
+                    .append($("<td></td>").addClass("concept-name").text(r.concept.label()))
+                    .append($("<td></td>").addClass("value"))
+                    .appendTo(calcTable);
 
+                if (!r.facts.isEmpty()) {
+                    itemHTML.addClass("calc-fact-link");
+                    itemHTML.addClass("calc-fact-link");
+                    itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
+                    itemHTML.click(() => this.selectItem(r.facts.items[0].vuid));
+                    itemHTML.mouseenter(() => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
+                    itemHTML.mouseleave(() => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
+                    r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
+                    itemHTML.find(".value").text(r.facts.mostPrecise().readableValue());
+                }
+            }
+            $("<tr></tr>").addClass("item").addClass("total")
+                .append($("<td></td>").addClass("weight"))
+                .append($("<td></td>").addClass("concept-name").text(fact.concept().label()))
+                .append($("<td></td>").addClass("value").text(fact.readableValue()))
+                .appendTo(calcTable);
+
+            const calcStatusIcon = $("<span></span>");
+            const cardTitle = $("<span></span>")
+                .append(calcStatusIcon)
+                .append($("<span></span>").text(label));
+            const calcStatusText = $("<span></span>");
+            const calcDetailsLink = $("<span></span>")
+                    .addClass("calculation-details-link")
+                    .attr("title", i18next.t('factDetails.viewCalculationDetails'))
+                    .text("details")
+                    .click((e) => {
+                        const dialog = new CalculationInspector();
+                        dialog.displayCalculation(rCalc);
+                        dialog.show();
+                        e.stopPropagation();
+                    })
+            const calcStatus = $("<p></p>")
+                .append(calcStatusText)
+                .append($("<span></span>").text(" ("))
+                .append(calcDetailsLink)
+                .append($("<span></span>").text(")"))
+                .appendTo(calcBody);
+            if (rCalc.binds()) {
+                if (rCalc.isConsistent()) {
+                    calcStatusIcon
+                        .addClass("consistent-flag")
+                        .attr("title", i18next.t('factDetails.calculationIsConsistent'))
+                    calcStatusText.text(i18next.t('factDetails.calculationIsConsistent'));
+                }
+                else {
+                    calcStatusIcon
+                        .addClass("inconsistent-flag")
+                        .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
+                    calcStatusText.text(i18next.t('factDetails.calculationIsInconsistent'));
+                }
+            }
+            else if (rCalc.unchecked()) {
+                calcStatusIcon
+                    .addClass("unchecked-flag")
+                    .attr("title", i18next.t('factDetails.calculationUnchecked'))
+                calcStatusText.text(i18next.t('factDetails.calculationUnchecked'));
+            }
+
+            a.addCard(cardTitle, calcBody, rCalc.elr == selectedELR);
         }
         return a.contents();
     }
@@ -813,7 +868,7 @@ export class Inspector {
             }
         }
         else {
-            s = $("<i>").text("n/a").attr("title", "non-numeric fact");
+            s = $("<i>").text("n/a").attr("title", i18next.t('factDetails.nonNumericFact'));
         }
         $(".fact-properties tr.change td").html(s);
 

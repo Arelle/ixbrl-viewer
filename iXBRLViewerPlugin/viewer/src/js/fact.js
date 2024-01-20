@@ -2,10 +2,13 @@
 
 import $ from 'jquery'
 import i18next from "i18next";
+import { isodateToHuman } from "./util.js"
+import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber, localId } from "./util.js";
 import Decimal from "decimal.js";
+import { Interval } from './interval.js';
 
 export class Fact {
     
@@ -42,7 +45,7 @@ export class Fact {
         return this.report.qname(this.f.a.c);
     }
 
-    period(){
+    period() {
         return new Period(this.f.a.p);
     }
 
@@ -63,8 +66,8 @@ export class Fact {
         return this.f.v;
     }
 
-    readableValue() {
-        let v = this.f.v;
+    readableValue(val) {
+        let v = val === undefined ? this.f.v : val;
         if (this.isInvalidIXValue()) {
             v = "Invalid value";
         }
@@ -241,9 +244,11 @@ export class Fact {
     isNil() {
         return this.f.v === null;
     }
+
     isNegative() {
         return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isNegative() && !this.isZero();
     }
+
     isPositive() {
         return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isPositive() && !this.isZero();
     }
@@ -251,6 +256,7 @@ export class Fact {
     isZero() {
         return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isZero();
     }
+
     isInvalidIXValue() {
         return this.f.err == 'INVALID_IX_VALUE';
     }
@@ -344,10 +350,58 @@ export class Fact {
         return concepts;
     }
 
-    // Facts that are the source of relationships to this fact.
+    /*
+     * Facts that are the source of relationships to this fact.
+     */
     addLinkedFact(f) {
         this.linkedFacts.push(f);
     }
+
+    /*
+     * Returns the fact's value, rounded according to the value of its decimals
+     * property.  This is an odd thing to do, as it implies that more figures
+     * were reported than the decimals property suggest are accurate, but this
+     * is required for Calc 1.0 validation.
+     *
+     * valueInterval() is a more meaningful.
+     */
+    roundedValue() {
+        Decimal.rounding = Decimal.ROUND_HALF_UP;
+        const v = new Decimal(this.value());
+        const d = this.decimals();
+        if (d === undefined) {
+            return v;
+        }
+        return v.mul(10 ** d).round().mul(10 ** (0-d));
+    }
+
+    isCompleteDuplicate(other) {
+        return this.value() === other.value() && this.decimals() === other.decimals();
+    }
+
+    /*
+     * Facts that are the source of relationships to this fact.
+     */
+    addLinkedFact(f) {
+        this.linkedFacts.push(f);
+    }
+
+    /*
+     * Returns an Interval for the fact's value, as implied by its decimals
+     * property.
+     */
+    valueInterval() {
+        return Interval.fromFact(this);
+    }
+
+    isMorePrecise(of) {
+        // decimals of "undefined" indicates infinite precision
+        if (of.decimals() === undefined) {
+            return false;
+        }
+        if (this.decimals() === undefined) {
+            return true;
+        }
+        return this.decimals() > of.decimals();
+    }
 }
-
-

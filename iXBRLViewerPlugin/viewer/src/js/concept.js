@@ -5,6 +5,8 @@ import $ from 'jquery'
 export class Concept {
     constructor(report, name) {
         this._c = report.concepts()[name] || {};
+        this.name = name;
+        this.report = report;
     }
 
     /*
@@ -48,7 +50,11 @@ export class Concept {
     }
 
     isEnumeration() {
-        return Boolean(this._c.e);
+        return Boolean(this._c && this._c.e);
+    }
+
+    label() {
+        return this.report.getLabelOrName(this.name);
     }
 
     isTextBlock() {

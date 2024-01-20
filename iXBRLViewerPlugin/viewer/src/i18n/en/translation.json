@@ -1,4 +1,15 @@
 {
+  "calculation": {
+    "calculated-total": "Calculated",
+    "calculations11": "Calculations v1.1",
+    "concept": "Concept",
+    "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
+    "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
+    "maximum": "Maximum",
+    "mininum": "Minimum",
+    "reported-total": "Reported",
+    "reported-value": "Reported value"
+  },
   "common": {
     "accuracyInfinite": "Infinite precision",
     "none": "None",
@@ -8,6 +19,9 @@
   },
   "factDetails": {
     "accuracy": "Accuracy",
+    "calculationIsConsistent": "Calculation is consistent",
+    "calculationIsInconsistent": "Calculation is inconsistent",
+    "calculationUnchecked": "Calculation not checked due to presence of duplicate facts",
     "change": "Change",
     "changeFromIn": "From {{from}} in ",
     "changePercentageDecrease": "{{decrease}}% decrease on ",
@@ -18,10 +32,12 @@
     "duplicatesCount": "{{current}} of {{total}}",
     "entity": "Entity",
     "factValue": "Fact Value",
+    "nonNumericFact": "non-numeric fact",
     "noPriorFactInThisReport": "No prior fact in this report",
     "noUnit": "<NOUNIT>",
     "properties": "Properties",
-    "scale": "Scale"
+    "scale": "Scale",
+    "viewCalculationDetails": "View calculation details"
   },
   "footnotes": {
     "footnote": "Footnote"
@@ -29,6 +45,7 @@
   "inspector": {
     "anchoring": "Anchoring",
     "associatedFacts": "Associated facts",
+    "calculationDetails": "",
     "calculations": "Calculations",
     "concealedFact": "Concealed fact",
     "conceptType": "Concept Type",

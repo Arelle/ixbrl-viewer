@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:eg="https://example.com/taxonomy" xmlns:formula="http://xbrl.org/2008/formula" xmlns:variable="http://xbrl.org/2008/variable" xmlns:label="http://xbrl.org/2008/label" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:types="http://www.xbrl.org/dtr/type/2020-01-21" targetNamespace="https://example.com/taxonomy" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <annotation>
+    <appinfo>
+      <link:linkbaseRef xlink:type="simple" xlink:href="example-label.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+      <link:linkbaseRef xlink:type="simple" xlink:href="example-calc.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+      <link:roleType id="group1" roleURI="https://example.com/group1">
+        <link:definition>Group 1</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+      </link:roleType>
+    </appinfo>
+  </annotation>
+
+  <import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" />
+  <import namespace="http://www.xbrl.org/dtr/type/2020-01-21" schemaLocation="http://www.xbrl.org/dtr/type/2020-01-21/types.xsd"/>
+  <import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd" />
+
+  <element id="StringConceptI1" name="StringConceptI1" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+  <element id="StringConceptI2" name="StringConceptI2" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+
+  <element id="StringConceptD1" name="StringConceptD1" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="StringConceptD2" name="StringConceptD2" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="DescriptionOfSomething" name="DescriptionOfSomething" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+
+  <element id="MonetaryConceptI1" name="MonetaryConceptI1" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+
+  <element id="MonetaryConceptD1" name="MonetaryConceptD1" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="Goodwill" name="Goodwill" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+
+  <element id="ProfitLoss" name="ProfitLoss" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CostOfSales" name="CostOfSales" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="Adjustments" name="Adjustments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="InterestIncome" name="InterestIncome" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="AdjustmentsForFinanceIncomeCost" name="AdjustmentsForFinanceIncomeCost" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CashFlowsFromUsedInOperatingActivities" name="CashFlowsFromUsedInOperatingActivities" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="FinanceIncomeCost" name="FinanceIncomeCost" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="LicenceFeeIncome" name="LicenceFeeIncome" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+
+  <element id="Row1" name="Row1" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+  <element id="Row2" name="Row2" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+  <element id="Row3" name="Row3" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+  <element id="Row4" name="Row4" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+  <element id="Row5" name="Row5" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+  <element id="Row6" name="Row6" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
+
+  <element id="CalculationTotal" name="CalculationTotal" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CalculationItem1" name="CalculationItem1" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CalculationItem2" name="CalculationItem2" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CalculationItem3" name="CalculationItem3" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CalculationItem4" name="CalculationItem4" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CalculationItem5" name="CalculationItem5" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CalculationItem6" name="CalculationItem6" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="CalculationSubTotal" name="CalculationSubTotal" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+
+  <element
+    id="containerDimension"
+    name="containerDimension"
+    type="xbrli:stringItemType"
+    substitutionGroup="xbrldt:dimensionItem"
+    xbrli:periodType="instant"
+    abstract="true"
+    nillable="true"
+    xbrldt:typedDomainRef="#containerNum" />
+  <element
+    id="containerNum"
+    name="containerNum"
+    type="integer" />
+</schema>

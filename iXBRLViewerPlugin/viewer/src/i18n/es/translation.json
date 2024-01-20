@@ -1,4 +1,15 @@
 {
+  "calculation": {
+    "calculated-total": "",
+    "calculations11": "",
+    "concept": "",
+    "consistent-duplicate-facts-present": "",
+    "inconsistent-duplicate-facts-present": "",
+    "maximum": "",
+    "mininum": "",
+    "reported-total": "",
+    "reported-value": ""
+  },
   "common": {
     "accuracyInfinite": "Precisió infinita",
     "none": "Ninguno",
@@ -8,6 +19,9 @@
   },
   "factDetails": {
     "accuracy": "Precisión",
+    "calculationIsConsistent": "",
+    "calculationIsInconsistent": "",
+    "calculationUnchecked": "",
     "change": "Cambio",
     "changeFromIn": "Anteriormente {{from}} en ",
     "changePercentageDecrease": "{{decrease}}% menos que en ",
@@ -18,10 +32,12 @@
     "duplicatesCount": "{{current}} de {{total}}",
     "entity": "Entidad",
     "factValue": "Valor del hecho",
+    "nonNumericFact": "",
     "noPriorFactInThisReport": "No hay un hecho previo",
     "noUnit": "Sin unidad",
     "properties": "Características",
-    "scale": "Escala"
+    "scale": "Escala",
+    "viewCalculationDetails": ""
   },
   "footnotes": {
     "footnote": "Nota al pie de página"
@@ -29,6 +45,7 @@
   "inspector": {
     "anchoring": "Anclaje",
     "associatedFacts": "Hechos asociados",
+    "calculationDetails": "",
     "calculations": "Cálculos",
     "concealedFact": "",
     "conceptType": "Tipo de concepto",

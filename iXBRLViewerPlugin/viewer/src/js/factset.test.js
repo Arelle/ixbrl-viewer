@@ -1,8 +1,10 @@
 // See COPYRIGHT.md for copyright information
 
 import { FactSet } from "./factset.js";
+import { Fact  } from "./fact.js";
 import { NAMESPACE_ISO4217, viewerUniqueId } from "./util.js";
 import { ReportSet } from "./reportset.js";
+import './test-utils.js';
 
 var i = 0;
 
@@ -71,7 +73,7 @@ var testReportData = {
     }
 };
 
-function testReport(facts) {
+function testReportSet(facts) {
     // Deep copy of standing data
     const data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
@@ -90,7 +92,7 @@ function getFact(reportSet, id) {
 }
 
 describe("Minimally unique labels (non-dimensional)", () => {
-  const reportSet = testReport({ 
+  const reportSet = testReportSet({ 
       "f1": testFact({"c": "eg:Concept1", "p": "2018-01-01"}),
       "f2": testFact({"c": "eg:Concept2", "p": "2018-01-01"}),
       "f3": testFact({"c": "eg:Concept2", "p": "2019-01-01"}),
@@ -133,7 +135,7 @@ describe("Minimally unique labels (non-dimensional)", () => {
 });
 
 describe("Minimally unique labels (dimensional)", () => {
-  const reportSet = testReport({ 
+  const reportSet = testReportSet({ 
       "f1": testFact({"c": "eg:Concept1", "p": "2018-01-01", "eg:Dimension1": "eg:DimensionValue1"}),
       "f2": testFact({"c": "eg:Concept1", "p": "2018-01-01", "eg:Dimension1": "eg:DimensionValue2"}),
       "f3": testFact({"c": "eg:Concept1", "p": "2019-01-01", "eg:Dimension1": "eg:DimensionValue2"}),
@@ -172,7 +174,7 @@ describe("Minimally unique labels (dimensional)", () => {
 });
 
 describe("Minimally unique labels (duplicate facts)", () => {
-  const reportSet = testReport({ 
+  const reportSet = testReportSet({ 
       "f1": testFact({"c": "eg:Concept1", "p": "2018-01-01", "eg:Dimension1": "eg:DimensionValue1"}),
       "f2": testFact({"c": "eg:Concept1", "p": "2018-01-01", "eg:Dimension1": "eg:DimensionValue1"}),
   });
@@ -189,7 +191,7 @@ describe("Minimally unique labels (duplicate facts)", () => {
 });
 
 describe("Minimally unique labels (missing labels)", () => {
-  const reportSet = testReport({ 
+  const reportSet = testReportSet({ 
       "f1": testFact({"c": "eg:Concept1", "p": "2018-01-01" }),
       "f2": testFact({"c": "eg:Concept4", "p": "2018-01-01" }),
   });
@@ -203,4 +205,68 @@ describe("Minimally unique labels (missing labels)", () => {
     expect(fs.minimallyUniqueLabel(f1)).toEqual("Concept 1");
     expect(fs.minimallyUniqueLabel(f2)).toEqual("eg:Concept4");
   });
+});
+
+function numericTestFact(value, decimals) {
+    var factData = { "d": decimals, "v": value, "a": { "c": "eg:Concept1", "u": "eg:pure" }};
+    return factData;
+}
+
+describe("Consistency", () => {
+    const reportSet = testReportSet({ 
+        "f1": numericTestFact(150, -1), // 145-155
+        "f2": numericTestFact(200, -2), // 150-250
+        "f3": numericTestFact(140, -1), // 135-145
+    });
+
+    const f1 = getFact(reportSet, "f1");
+    const f2 = getFact(reportSet, "f2");
+    const f3 = getFact(reportSet, "f3");
+
+    test("Inconsistent fact set", () => {
+      const factSet = new FactSet([f1, f2, f3]);
+      expect(factSet.valueIntersection()).toBeUndefined();
+      expect(factSet.isConsistent()).toBeFalsy();
+    });
+
+    test("Consistent fact sets - overlap", () => {
+      const factSet = new FactSet([f1, f2]);
+      const intersection = factSet.valueIntersection();
+      expect(intersection.a).toEqualDecimal(150);
+      expect(intersection.b).toEqualDecimal(155);
+      expect(factSet.isConsistent()).toBeTruthy();
+    });
+
+    test("Consistent fact sets - bounds coincide", () => {
+      const factSet = new FactSet([f1, f3]);
+      const intersection = factSet.valueIntersection();
+      expect(intersection.a).toEqualDecimal(145);
+      expect(intersection.b).toEqualDecimal(145);
+      expect(factSet.isConsistent()).toBeTruthy();
+    });
+  
+});
+
+describe("Most precise", () => {
+    const reportSet = testReportSet({ 
+        "f1": numericTestFact(150, -1), 
+        "f2": numericTestFact(200, 0), 
+        "f3": numericTestFact(140, 2),
+        "f4": numericTestFact(160, undefined)
+    });
+
+    const f1 = getFact(reportSet, "f1");
+    const f2 = getFact(reportSet, "f2");
+    const f3 = getFact(reportSet, "f3");
+    const f4 = getFact(reportSet, "f4");
+
+    test("Most precise - finite decimals", () => {
+        const factSet = new FactSet([f1, f2, f3]);
+        expect(factSet.mostPrecise()).toEqual(f3);
+    });
+
+    test("Most precise - mixture of finite and infinite", () => {
+        const factSet = new FactSet([f1, f2, f3, f4]);
+        expect(factSet.mostPrecise()).toEqual(f4);
+    });
 });

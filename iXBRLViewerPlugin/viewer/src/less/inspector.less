@@ -15,6 +15,7 @@
 @import (reference) "text-mixins.less";
 @import url("block-list.less");
 @import url("validation-report.less");
+@import url("calculation-inspector.less");
 @import url("text-block-viewer.less");
 @import url("summary.less");
 
@@ -869,42 +870,85 @@
       }
 
       .calculations {
-        .item {
-          padding: 5px 0;
+        .card .title {
           position: relative;
-          line-height: 1.8rem;
 
-          &:not(.calc-fact-link, .total) .concept-name {
-            color: #777;
-          }
+          .inconsistent-flag {
+            padding-right: 0.75rem;
+            position: relative;
+            top: 0.2rem;
+            color: @warning-orange;
 
-          .concept-name {
-            display: block;
-            margin-left: 15px;
-          }
-
-          &.calc-fact-link {
-            cursor: pointer;
-
-            .concept-name {
-              color: @primary;
+            &::before {
+              .icon-circle-cross();
             }
           }
 
-          .weight {
-            display: block;
-            position: absolute;
+          .consistent-flag {
+            padding-right: 0.75rem;
+            position: relative;
+            top: 0.2rem;
+            color: @workiva-green;
+
+            &::before {
+              .icon-circle-tick();
+            }
           }
 
-          &.linked-highlight,
-          &.calc-fact-link:hover {
-            .linked-highlight-text();
+          .unchecked-flag {
+            padding-right: 0.5rem;
+            position: relative;
+            top: 0.2rem;
+
+            &::before {
+              .icon-question();
+            }
           }
 
-          &.total {
-            border-top: solid 1px @border-grey;
-            padding-bottom: 1.2rem;
+        }
+
+        table.calculation-table {
+          width: 100%;
+          border-collapse: collapse;
+
+          tr.item {
+            td {
+              padding: 5px 0;
+              line-height: 1.8rem;
+
+              &.value {
+                text-align: right;
+              }
+            }
+
+            &:not(.calc-fact-link, .total) .concept-name {
+              color: #777;
+            }
+
+            &.calc-fact-link {
+              cursor: pointer;
+
+              .concept-name,
+              .value {
+                color: @primary;
+              }
+            }
+
+            &.linked-highlight,
+            &.calc-fact-link:hover {
+              .linked-highlight-text();
+            }
+
+            &.total td {
+              border-top: solid 1px @border-grey;
+              padding-bottom: 1.2rem;
+            }
           }
+        }
+
+        .calculation-details-link {
+          color: @primary;
+          cursor: pointer;
         }
       }
     }

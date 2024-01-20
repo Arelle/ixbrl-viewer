@@ -15,6 +15,10 @@
     height: calc(100vh - 5em);
   }
 
+  &.full-width {
+    width: calc(100vw - 5em);
+  }
+
   &.message-box {
     max-width: 800px;
     width: 100%;
@@ -26,6 +30,10 @@
     box-sizing: border-box;
     height: 100%;
     width: 100%;
+
+    & > h2:first-child {
+      margin-top: 0;
+    }
   }
 
   .close {
@@ -46,10 +54,6 @@
     &:hover {
       opacity: 1;
     }
-  }
-
-  .title {
-    margin-top: 0;
   }
 
   .buttons {

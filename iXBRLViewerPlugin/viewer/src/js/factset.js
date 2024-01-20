@@ -2,16 +2,29 @@
 
 import { Fact } from "./fact.js";
 import { Footnote } from "./footnote.js";
+import { Interval } from './interval.js';
 
 export class FactSet {
-    constructor(items) {
-        this._items = items;
+
+    constructor (items) {
+        this.itemMap = new Map();
+        for (const item of items ?? []) {
+            this.add(item)
+        }
+    }
+
+    add(item) {
+        this.itemMap.set(item.vuid, item);
+    }
+
+    items() {
+        return Array.from(this.itemMap.values());
     }
 
     /* Returns the union of dimensions present on facts in the set */
     _allDimensions() {
         const dims = {};
-        const facts = this._items.filter((item) => item instanceof Fact);
+        const facts = this.items().filter((item) => item instanceof Fact);
         for (const fact of facts) {
             const dd = Object.keys(fact.dimensions());
             for (var j = 0; j < dd.length; j++) {
@@ -30,7 +43,7 @@ export class FactSet {
      */
     minimallyUniqueLabel(fact) {
         if (!this._minimallyUniqueLabels) {
-            var facts = this._items.filter((item) => item instanceof Fact);
+            var facts = this.items().filter((item) => item instanceof Fact);
             var allLabels = {};
             var allAspects = ["c", "p"].concat(this._allDimensions());
             /* Assemble a map of arrays of all aspect labels for all facts, in a
@@ -86,12 +99,48 @@ export class FactSet {
                 }
             }
 
-            this._items.filter((item) => item instanceof Footnote).forEach((fn) => {
+            this.items().filter((item) => item instanceof Footnote).forEach((fn) => {
                 uniqueLabels[fn.vuid] = [fn.title];
             });
 
             this._minimallyUniqueLabels = uniqueLabels;
         }
         return this._minimallyUniqueLabels[fact.vuid].join(", ");
+    }
+
+    isEmpty() {
+        return this.itemMap.size == 0;
+    }
+
+    /*
+     * Returns an Interval for the intersection of all values in the set, or
+     * undefined if there is no intersection (inconsistent duplicates)
+     */
+    valueIntersection() {
+        const duplicates = this.items().map(fact => Interval.fromFact(fact));
+        return Interval.intersection(...duplicates);
+    }
+
+    completeDuplicates() {
+        return this.items().every(f => f.isCompleteDuplicate(this.items()[0]));
+    }
+
+    isConsistent() {
+        if (this.itemMap.size == 0) {
+            return true;
+        }
+        const duplicates = this.items().map(fact => Interval.fromFact(fact));
+        return Interval.intersection(...duplicates) !== undefined;
+    }
+
+    size() {
+        return this.itemMap.size;
+    }
+
+    /*
+     * Return the most precise (highest decimals) value within the set.
+     */
+    mostPrecise() {
+        return this.items().reduce((a, b) => b.isMorePrecise(a) ? b : a);
     }
 }

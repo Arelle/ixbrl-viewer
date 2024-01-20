@@ -31,7 +31,7 @@ export class Accordian {
                     }
                 })
             )
-            .append($('<div class="body"></div>').append(body))
+            .append($('<div class="card-body"></div>').append(body))
             .appendTo(this._contents);
 
         if (data !== null) {
@@ -48,7 +48,7 @@ export class Accordian {
             this._contents.find(".card").first().addClass("active");
         }
         if (this.options.dissolveSingle && this._contents.children().length == 1) {
-            return this._contents.children().first().find(".body");
+            return this._contents.children().first().find(".card-body");
         }
         return this._contents;
     }

@@ -102,6 +102,7 @@ def generateViewer(
         zipViewerOutput: bool = False,
         features: list[str] | None = None,
         packageDownloadURL: str | None = None,
+        copyScript = True
 ) -> None:
     """
     Generate and save a viewer at the given destination (file, directory, or in-memory file) with the given viewer URL.
@@ -137,7 +138,7 @@ def generateViewer(
         else:
             viewerAbsolutePath = getAbsoluteViewerPath(saveViewerDest, viewerURL)
 
-        if os.path.isfile(viewerAbsolutePath):
+        if copyScript and os.path.isfile(viewerAbsolutePath):
             # The script was found on the local file system and will be copied into the
             # destination directory, so the local path (just the basename) of viewerURL should
             # be passed to the script tag

@@ -381,10 +381,11 @@ class IXBRLViewerBuilder:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
             return etree.parse(fin)
 
-    def newTargetReport(self):
+    def newTargetReport(self, target):
         return {
             "concepts": {},
             "facts": {},
+            "target": target,
         }
 
     def addSourceReport(self):
@@ -425,7 +426,7 @@ class IXBRLViewerBuilder:
 
         for n, report in enumerate(self.reports):
             self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
-            self.currentTargetReport = self.newTargetReport()
+            self.currentTargetReport = self.newTargetReport(report.ixdsTarget)
             for f in report.facts:
                 self.addFact(report, f)
             self.currentTargetReport["rels"] = self.getRelationships(report)

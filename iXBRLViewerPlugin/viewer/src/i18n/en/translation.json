@@ -1,14 +1,14 @@
 {
   "calculation": {
     "calculated-total": "Calculated",
-    "calculations11": "Calculations v1.1",
     "concept": "Concept",
     "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
     "maximum": "Maximum",
     "mininum": "Minimum",
     "reported-total": "Reported",
-    "reported-value": "Reported value"
+    "reported-value": "Reported value",
+    "useCalculations11": "Use Calculations v1.1"
   },
   "common": {
     "accuracyInfinite": "Infinite precision",

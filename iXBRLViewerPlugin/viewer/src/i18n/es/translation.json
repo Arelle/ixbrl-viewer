@@ -1,14 +1,14 @@
 {
   "calculation": {
     "calculated-total": "",
-    "calculations11": "",
     "concept": "",
     "consistent-duplicate-facts-present": "",
     "inconsistent-duplicate-facts-present": "",
     "maximum": "",
     "mininum": "",
     "reported-total": "",
-    "reported-value": ""
+    "reported-value": "",
+    "useCalculations11": ""
   },
   "common": {
     "accuracyInfinite": "Precisió infinita",

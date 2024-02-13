@@ -210,6 +210,7 @@ export class Inspector {
             if (this._reportSet.filingDocuments()) {
                 this._optionsMenu.addDownloadButton("Download filing documents", this._reportSet.filingDocuments())
             }
+            this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         }
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
     }
@@ -218,7 +219,6 @@ export class Inspector {
         const iv = this._iv;
         this._toolbarMenu.reset();
         this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
-        this._toolbarMenu.addCheckboxItem(i18next.t("calculation.calculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         if (iv.isReviewModeEnabled()) {
             this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");

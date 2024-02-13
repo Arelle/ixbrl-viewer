@@ -27,7 +27,7 @@ jobs:
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
       - name: Install Node.js
-        uses: actions/setup-node@v4.0.1
+        uses: actions/setup-node@v4.0.2
         with:
           cache: 'npm'
           check-latest: true
@@ -42,13 +42,13 @@ jobs:
           npm version $(git describe --tags)
           npm pack
       - name: Upload ixbrlviewer.js artifact
-        uses: actions/upload-artifact@v4.3.0
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: ixbrlviewer.js
           if-no-files-found: error
           path: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
       - name: Upload npm artifact
-        uses: actions/upload-artifact@v4.3.0
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: npm package
           if-no-files-found: error
@@ -63,17 +63,17 @@ jobs:
     if: startsWith(github.ref, 'refs/tags')
     steps:
       - name: Install Node.js
-        uses: actions/setup-node@v4.0.1
+        uses: actions/setup-node@v4.0.2
         with:
           check-latest: true
           node-version: ${{ inputs.node_version }}
           registry-url: 'https://registry.npmjs.org' # Must explicitly set this for NODE_AUTH_TOKEN to work below
       - name: Download ixbrlviewer.js artifact
-        uses: actions/download-artifact@v4.1.1
+        uses: actions/download-artifact@v4.1.2
         with:
           name: ixbrlviewer.js
       - name: Download npm artifact
-        uses: actions/download-artifact@v4.1.1
+        uses: actions/download-artifact@v4.1.2
         with:
           name: npm package
       - name: Publish with npm

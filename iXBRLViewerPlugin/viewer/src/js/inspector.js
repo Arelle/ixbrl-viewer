@@ -314,7 +314,7 @@ export class Inspector {
             }
         }
         const tags = $("<div></div>").addClass("tags").appendTo(row);
-        if (f.targetDocument() !== undefined) {
+        if (f.targetDocument() !== null) {
             $('<div class="hidden"></div>')
                 .text(f.targetDocument())
                 .appendTo(tags);
@@ -1083,7 +1083,7 @@ export class Inspector {
                 }
 
                 const target = cf.targetDocument();
-                if (target !== undefined) {
+                if (target !== null) {
                     $('#inspector .target-document').text(target).show();
                 }
                 else {

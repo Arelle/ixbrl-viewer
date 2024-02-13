@@ -39,7 +39,7 @@ export class XBRLReport {
     }
 
     targetDocument() {
-        return this._reportData.target ?? undefined;
+        return this._reportData.target ?? null;
     }
 
     getChildRelationships(conceptName, arcrole) {

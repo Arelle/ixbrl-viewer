@@ -38,6 +38,10 @@ export class XBRLReport {
         return this.reportSet.factsForReport(this);
     }
 
+    targetDocument() {
+        return this._reportData.target ?? null;
+    }
+
     getChildRelationships(conceptName, arcrole) {
         const rels = {}
         const elrs = this._reportData.rels[arcrole] || {};

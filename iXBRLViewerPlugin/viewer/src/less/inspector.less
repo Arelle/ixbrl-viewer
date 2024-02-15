@@ -676,13 +676,19 @@
       top: 1px;
     }
 
-    .hidden-fact-tag,
-    .html-hidden-fact-tag {
-      .tag();
-
+    .inspector-body-fact .tags {
       position: absolute;
       top: 1.5rem;
       right: 0.9rem;
+    }
+
+    .target-document {
+      .tag();
+    }
+
+    .hidden-fact-tag,
+    .html-hidden-fact-tag {
+      .tag();
 
       &.html-hidden-fact-tag {
         background-color: #c63018;

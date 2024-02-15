@@ -313,15 +313,21 @@ export class Inspector {
                     .appendTo(row);
             }
         }
+        const tags = $("<div></div>").addClass("tags").appendTo(row);
+        if (f.targetDocument() !== null) {
+            $('<div class="hidden"></div>')
+                .text(f.targetDocument())
+                .appendTo(tags);
+        }
         if (f.isHidden()) {
             $('<div class="hidden"></div>')
                 .text(i18next.t("search.hiddenFact"))
-                .appendTo(row);
+                .appendTo(tags);
         }
         else if (f.isHTMLHidden()) {
             $('<div class="hidden"></div>')
                 .text(i18next.t("search.concealedFact"))
-                .appendTo(row);
+                .appendTo(tags);
         }
         return row;
     }
@@ -1074,6 +1080,14 @@ export class Inspector {
                 }
                 else if (cf.isHTMLHidden()) {
                     $('#inspector').addClass('html-hidden-fact');
+                }
+
+                const target = cf.targetDocument();
+                if (target !== null) {
+                    $('#inspector .target-document').text(target).show();
+                }
+                else {
+                    $('#inspector .target-document').hide();
                 }
 
             }

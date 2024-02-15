@@ -404,4 +404,8 @@ export class Fact {
         }
         return this.decimals() > of.decimals();
     }
+
+    targetDocument() {
+        return this.report.targetDocument();
+    }
 }

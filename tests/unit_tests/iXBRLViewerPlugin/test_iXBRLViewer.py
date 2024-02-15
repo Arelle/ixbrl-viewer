@@ -328,7 +328,8 @@ class TestIXBRLViewer:
                 "filepath":'a.html',
                 "objectIndex":0,
                 "type":Type.INLINEXBRL,
-            }
+            },
+            ixdsTarget=None,
         )
 
         self.modelDocumentInlineSet = Mock(
@@ -353,7 +354,8 @@ class TestIXBRLViewer:
                 ): [],
             },
             filepath=self.modelDocument.filepath,
-            type=Type.INLINEXBRLDOCUMENTSET
+            type=Type.INLINEXBRLDOCUMENTSET,
+            ixdsTarget=None,
         )
 
         error1 = logging.LogRecord("arelle", logging.ERROR, "", 0, "Error message", {}, None)    
@@ -389,6 +391,7 @@ class TestIXBRLViewer:
             info=info_effect,
             modelDocument=self.modelDocument,
             modelManager=self.modelManager,
+            ixdsTarget=None,
             urlDocs=dict((
                 urlDocEntry('/filesystem/local-inline.htm', Type.INLINEXBRL),
                 urlDocEntry('https://example.com/remote-inline.htm', Type.INLINEXBRL),
@@ -419,6 +422,7 @@ class TestIXBRLViewer:
             info=info_effect,
             modelDocument=self.modelDocument,
             modelManager=self.modelManager,
+            ixdsTarget=None,
             urlDocs={}
         )
         self.modelXbrlDocSet = Mock(
@@ -430,6 +434,7 @@ class TestIXBRLViewer:
             info=info_effect,
             modelDocument=self.modelDocumentInlineSet,
             modelManager=self.modelManager,
+            ixdsTarget=None,
             urlDocs={}
         )
 
@@ -450,7 +455,7 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     def test_addConcept_simple_case(self):
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.currentTargetReport = builder.newTargetReport()
+        builder.currentTargetReport = builder.newTargetReport(None)
         builder.addSourceReport()["targetReports"].append(builder.currentTargetReport)
         builder.addConcept(self.modelXbrl_1, self.cash_concept)
         assert builder.taxonomyData["sourceReports"][0]["targetReports"][0].get('concepts').get('us-gaap:Cash')
@@ -467,7 +472,7 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_returns_a_rel(self):
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.currentTargetReport = builder.newTargetReport()
+        builder.currentTargetReport = builder.newTargetReport(None)
         result = builder.getRelationships(self.modelXbrl_1)
         roleMap = builder.roleMap
         siPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/summation-item')
@@ -479,7 +484,7 @@ class TestIXBRLViewer:
         """
         elr = "http://example.com/unknownELR"
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.currentTargetReport = builder.newTargetReport()
+        builder.currentTargetReport = builder.newTargetReport(None)
         builder.addELR(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
         assert builder.currentTargetReport.get('roleDefs').get(elrPrefix) is None
@@ -490,7 +495,7 @@ class TestIXBRLViewer:
         """
         elr = "ELR"
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.currentTargetReport = builder.newTargetReport()
+        builder.currentTargetReport = builder.newTargetReport(None)
         builder.addELR(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
         assert builder.currentTargetReport.get('roleDefs').get(elrPrefix).get("en") == "ELR Label"

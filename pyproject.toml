@@ -40,7 +40,7 @@ dev = [
     'flake8==7.0.0',
     'lxml-stubs==0.5.1',
     'mypy==1.8.0',
-    'pytest==8.0.0',
+    'pytest==8.0.1',
     'typing-extensions==4.9.0',
 ]
 

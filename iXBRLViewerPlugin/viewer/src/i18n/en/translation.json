@@ -134,6 +134,7 @@
   },
   "search": {
     "concealedFact": "Concealed fact",
+    "default": "default",
     "hiddenFact": "Hidden fact",
     "noMatchFound": "No match found",
     "selected": "selected",

@@ -118,6 +118,15 @@ export class ReportSet {
         return this._usedPrefixes;
     }
 
+    getTargetDocuments() {
+        if (this._targetDocuments === undefined) {
+            this._targetDocuments = new Set(Object.values(this._items)
+                    .filter(f => f instanceof Fact)
+                    .map(f => f.targetDocument()));
+        }
+        return this._targetDocuments;
+    }
+
     /**
      * Returns a set of OIM format unit strings used by facts on this report. Lazy-loaded.
      * @return {Set[String]} Set of OIM format unit strings

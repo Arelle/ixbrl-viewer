@@ -17,10 +17,7 @@ export class Search {
     }
 
     async getSearchResults() {
-        const elements = await this.#viewerPage.page.$x(
-            '//*[contains(@class,"search-results")]' +
-            '//*[contains(@class,"fact-list-item")]' +
-            '//*[contains(@class,"title")]');
+        const elements = await this.#viewerPage.page.$$('.search-results .fact-list-item .title');
         return Promise.all(elements.map(async (e) => {
             return getTextContent(e);
         }));

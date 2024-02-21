@@ -282,7 +282,7 @@ All commands should be run from repository root
 2. Install Arelle
 
     ```shell
-    pip install arelle-release .
+    pip install .[arelle]
     ```
 
 3. [Terminal 1] Start the puppeteer serve

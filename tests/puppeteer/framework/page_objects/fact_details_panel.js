@@ -48,32 +48,36 @@ export class FactDetailsPanel {
         this.#viewerPage.log(`Asserting Calculations for section ${sectionTitle}`);
 
         // Pull the title elements and assert the section exists
-        const titleElems = await this.#viewerPage.page.$x('//*[contains(@class,"calculations")]//*[contains(@class,"title")]');
+        const titleElems = await this.#viewerPage.page.$$('.calculations .title');
 
         const titles = await Promise.all(titleElems.map(async (e) => await getTextContent(e)));
         expect(titles).toContain(sectionTitle)
 
         // Pull the concepts from the expected section
-        const conceptElems = await this.#viewerPage.page.$x(`
-            //*[contains(@class,"calculations")]//*[text()="${sectionTitle}"]
-            //ancestor::*[contains(@class,"card")]//*[contains(@class,"item")]
-        `);
+        const calc = await this.#viewerPage.page.evaluate((sectionTitle) => {
+            const conceptElemsXPath = `
+                //*[contains(@class,"calculations")]//*[text()="${sectionTitle}"]
+                //ancestor::*[contains(@class,"card")]//*[contains(@class,"item")]
+            `;
+            const conceptElems = document.evaluate(conceptElemsXPath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-        let calc = {};
-        for(const elem of conceptElems){
-            const nameElem = await elem.waitForSelector('xpath/' + '*[contains(@class,"concept-name")]');
-            const name = await getTextContent(nameElem)
-            const weightElem = await elem.waitForSelector('xpath/' + '*[contains(@class,"weight")]');
-            const weight = await getTextContent(weightElem);
-            calc[name] = weight;
-        }
+            let calculations = {};
+            for (let i = 0; i < conceptElems.snapshotLength; i++) {
+                let elem = conceptElems.snapshotItem(i);
+                const nameElem = document.evaluate('.//*[contains(@class,"concept-name")]', elem, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                const weightElem = document.evaluate('.//*[contains(@class,"weight")]', elem, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                calculations[nameElem.textContent] = weightElem.textContent;
+            }
+
+            return calculations;
+        }, sectionTitle);
+
         expect(calc).toEqual(expectedCalculations);
     }
 
     async assertFootnotes(expectedFootnotes) {
         this.#viewerPage.log('Asserting footnotes');
-        const conceptElems = await this.#viewerPage.page.$x(
-                '//*[contains(@class,"footnotes")]//*[contains(@class,"block-list-item")]');
+        const conceptElems = await this.#viewerPage.page.$$('.footnotes .block-list-item');
         const footnotes = await Promise.all(conceptElems.map(async (e) => await getTextContent(e)));
         expect(footnotes).toEqual(expectedFootnotes);
     }

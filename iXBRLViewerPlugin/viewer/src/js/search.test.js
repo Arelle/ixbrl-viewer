@@ -15,6 +15,7 @@ const testReportData = {
     "rels": {},
 };
 
+
 function getReportSearch(report) {
     const reportSearch = new ReportSearch(report);
     const searchIndex = reportSearch.buildSearchIndex(() => {});
@@ -52,24 +53,46 @@ function createDimensionalizedFact(id, concept, options=null, dimensions= {}) {
 }
 
 
-function testReport(ixData, testData) {
-    // Deep copy of standing data
-    const data = {
-        ...JSON.parse(JSON.stringify(testReportData)),
-        ...testData
-    }
-    Object.keys(data['facts']).forEach(id => {
-        if (!(id in ixData)) {
-            ixData[id] = {};
-        }
-    })
-    ixData = Object.fromEntries(
-        Object.entries(ixData).map(([id, v]) => [viewerUniqueId(0,id), v])
-    );
-    const report = new ReportSet(data);
-    report.setIXNodeMap(ixData);
-    return report;
+// Returns a report set with a single report
+function testReport(testData, sourceIXData) {
+    return testReportSet([ {data: testData, ixData: sourceIXData ?? {} } ])
 }
+
+function mergeDicts(a, b) {
+    a ??= {};
+    b ??= {};
+    return { ...a, ...b };
+}
+
+function testReportSet(reports) {
+    const targetReports = [];
+    const reportSetData = {
+        "sourceReports": [{ "targetReports": targetReports }],
+    };
+
+    const ixData = {};
+    for (const [n, report] of reports.entries()) {
+        const targetReport = {};
+        for (const key of ["languages", "prefixes", "roles"]) {
+            reportSetData[key] = mergeDicts(reportSetData[key], report.data[key]);
+        }
+        for (const key of ["concepts", "facts", "roleDefs", "rels"]) {
+            targetReport[key] = report.data[key] ?? {};
+        }
+        targetReport["target"] = report.data["target"] ?? null;
+
+        for (const id of Object.keys(targetReport.facts)) {
+            if (!(id in ixData)) {
+                ixData[viewerUniqueId(n,id)] = report.ixData?.[id] ?? {};
+            }
+        } 
+        targetReports.push(targetReport);
+    }
+    const reportSet = new ReportSet(reportSetData);
+    reportSet.setIXNodeMap(ixData);
+    return reportSet;
+}
+
 
 function testSearchSpec(searchString='') {
     const spec = {};
@@ -84,6 +107,7 @@ function testSearchSpec(searchString='') {
     spec.dimensionTypeFilter = [];
     spec.factValueFilter = '*';
     spec.calculationsFilter = [];
+    spec.targetDocumentFilter = [];
     return spec;
 }
 
@@ -91,7 +115,6 @@ describe("Search fact value filter", () => {
     const cashConcept = 'us-gaap:Cash';
     const cashUnit = 'iso4217:USD';
     const report = testReport(
-            {'positive': {}, 'negative': {}, 'zero': {}, 'text': {}, 'undefined': {}},
             {
                 'concepts': {
                     ...createSimpleConcept(cashConcept, 'Cash')
@@ -144,7 +167,6 @@ describe("Search fact value filter", () => {
 
 describe("Search calculation filter", () => {
     const report = testReport(
-            {'summation': {}, 'item1': {}, 'item2': {}, 'other': {}},
             {
                 "concepts": {
                     ...createSimpleConcept("test:Summation", "Summation"),
@@ -200,7 +222,6 @@ describe("Search calculation filter", () => {
         expect(results).toEqual(['item1', 'item2', 'summation']);
     });
     const emptyReport = testReport(
-            {'fact': {}},
             {
                 "concepts": {
                     ...createSimpleConcept("test:Concept", "Concept"),
@@ -222,7 +243,6 @@ describe("Search calculation filter", () => {
 
 describe("Search namespaces filter", () => {
     const report = testReport(
-            {'itemA1': {}, 'itemA2': {}, 'itemB1': {}, 'itemC1': {}},
             {
                 "concepts": {
                     ...createSimpleConcept("a:ItemA1", "ItemA1"),
@@ -297,7 +317,6 @@ describe("Search units filter", () => {
 
     beforeAll(() => {
         report = testReport(
-                {'itemA': {}, 'itemAB': {}, 'itemB': {}, 'itemBA': {}},
                 {
                     "concepts": {
                         ...createSimpleConcept("a:ItemA", "ItemA"),
@@ -358,7 +377,6 @@ describe("Search units filter", () => {
 
 describe("Search dimension type filter", () => {
     const report = testReport(
-            {},
             {
                 "concepts": {
                     ...createSimpleConcept("test:Concept", "Concept"),
@@ -412,7 +430,6 @@ describe("Search dimension type filter", () => {
     });
 
     const emptyReport = testReport(
-            {'fact': {}},
             {
                 "concepts": {
                     ...createSimpleConcept("test:Concept", "Concept"),
@@ -436,18 +453,6 @@ describe("Search scales filter", () => {
     const cashUnit = 'test:USD';
     const period = '2018-01-01/2019-01-01';
     const report = testReport(
-            {
-                "item-3": { "scale": -3 },
-                "item-2": { "scale": -2 },
-                "item-1": { "scale": -1 },
-                "item0": { },
-                "item1": { "scale": 1 },
-                "item2": { "scale": 2 },
-                "item3": { "scale": 3 },
-                "item6": { "scale": 6 },
-                "item9": { "scale": 9 },
-                "item12": { "scale": 12 },
-            },
             {
                 "concepts": {
                     ...createSimpleConcept("a:Item-3"),
@@ -475,6 +480,18 @@ describe("Search scales filter", () => {
                     ...createNumericFact("item12", "a:Item12", cashUnit, period, 1000000000000),
                     ...createSimpleFact("itemOther", "a:Other"),
                 },
+            },
+            {
+                "item-3": { "scale": -3 },
+                "item-2": { "scale": -2 },
+                "item-1": { "scale": -1 },
+                "item0": { },
+                "item1": { "scale": 1 },
+                "item2": { "scale": 2 },
+                "item3": { "scale": 3 },
+                "item6": { "scale": 6 },
+                "item9": { "scale": 9 },
+                "item12": { "scale": 12 },
             }
     )
     const reportSearch = getReportSearch(report);
@@ -499,4 +516,103 @@ describe("Search scales filter", () => {
         const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item-2', 'item2']);
     });
+});
+
+describe("Search target document filter", () => {
+    const cashUnit = 'test:USD';
+    const period = '2018-01-01/2019-01-01';
+    const singleReport = testReport(
+            {
+                "concepts": {
+                    ...createSimpleConcept("a:Item0"),
+                    ...createSimpleConcept("a:Item1"),
+                    ...createSimpleConcept("a:Item2"),
+                },
+                "facts": {
+                    ...createNumericFact("item0", "a:Item0", cashUnit, period, 1),
+                    ...createNumericFact("item1", "a:Item1", cashUnit, period, 10),
+                    ...createNumericFact("item2", "a:Item2", cashUnit, period, 100),
+                },
+            },
+    );
+    const singleReportSearch = getReportSearch(singleReport);
+
+    test("Target document filter works without selection", () => {
+        const spec = testSearchSpec();
+        spec.targetDocumentFilter = [];
+        const results = singleReportSearch.search(spec).map(r => r.fact.localId()).sort();
+        expect(results).toEqual(['item0', 'item1', 'item2' ]);
+    });
+
+    test("Target document filter with default document", () => {
+        const spec = testSearchSpec();
+        spec.targetDocumentFilter = [ ':default' ];
+        const results = singleReportSearch.search(spec).map(r => r.fact.localId()).sort();
+        expect(results).toEqual(['item0', 'item1', 'item2' ]);
+    });
+
+    const multiReport = testReportSet([ 
+        {
+            data: {
+                target: null,
+                "concepts": {
+                    ...createSimpleConcept("a:Item0"),
+                    ...createSimpleConcept("a:Item1"),
+                    ...createSimpleConcept("a:Item2"),
+                },
+                "facts": {
+                    ...createNumericFact("item0", "a:Item0", cashUnit, period, 1),
+                    ...createNumericFact("item1", "a:Item1", cashUnit, period, 10),
+                    ...createNumericFact("item2", "a:Item2", cashUnit, period, 100),
+                },
+            },
+        },
+        {
+            data: {
+                target: "ABC",
+                "concepts": {
+                    ...createSimpleConcept("a:Item3"),
+                    ...createSimpleConcept("a:Item4"),
+                    ...createSimpleConcept("a:Item5"),
+                },
+                "facts": {
+                    ...createNumericFact("item3", "a:Item3", cashUnit, period, 1),
+                    ...createNumericFact("item4", "a:Item4", cashUnit, period, 10),
+                    ...createNumericFact("item5", "a:Item5", cashUnit, period, 100),
+                },
+            },
+        }
+
+    ]);
+
+    const multiReportSearch = getReportSearch(multiReport);
+
+    test("Target document filter works without selection (multiple targets)", () => {
+        const spec = testSearchSpec();
+        spec.targetDocumentFilter = [];
+        const results = multiReportSearch.search(spec).map(r => r.fact.localId()).sort();
+        expect(results).toEqual(['item0', 'item1', 'item2', 'item3', 'item4', 'item5' ]);
+    });
+
+    test("Target document filter works with default (multiple targets)", () => {
+        const spec = testSearchSpec();
+        spec.targetDocumentFilter = [ ':default' ];
+        const results = multiReportSearch.search(spec).map(r => r.fact.localId()).sort();
+        expect(results).toEqual(['item0', 'item1', 'item2']);
+    });
+
+    test("Target document filter works with second target (multiple targets)", () => {
+        const spec = testSearchSpec();
+        spec.targetDocumentFilter = [ 'ABC' ];
+        const results = multiReportSearch.search(spec).map(r => r.fact.localId()).sort();
+        expect(results).toEqual(['item3', 'item4', 'item5']);
+    });
+
+    test("Target document filter works with multi-select (multiple targets)", () => {
+        const spec = testSearchSpec();
+        spec.targetDocumentFilter = [ ':default', 'ABC' ];
+        const results = multiReportSearch.search(spec).map(r => r.fact.localId()).sort();
+        expect(results).toEqual(['item0', 'item1', 'item2', 'item3', 'item4', 'item5' ]);
+    });
+
 });

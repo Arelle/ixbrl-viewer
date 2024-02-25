@@ -28,6 +28,7 @@ function createDimensionConcept(name, label, isExplicit= true) {
     c[name]["d"] = isExplicit ? "e": "t";
     return c;
 }
+
 function createSimpleConcept(name, label=null) {
     return {
         [name]: {
@@ -51,7 +52,6 @@ function createDimensionalizedFact(id, concept, options=null, dimensions= {}) {
     }
     return fact;
 }
-
 
 // Returns a report set with a single report
 function testReport(testData, sourceIXData) {
@@ -92,7 +92,6 @@ function testReportSet(reports) {
     reportSet.setIXNodeMap(ixData);
     return reportSet;
 }
-
 
 function testSearchSpec(searchString='') {
     const spec = {};
@@ -305,7 +304,6 @@ describe("Search namespaces filter", () => {
 });
 
 describe("Search units filter", () => {
-
     const cashUnit = 'test:USD';
     const shareUnit = 'test:share';
     const cashShareUnit = `${cashUnit} / ${shareUnit}`

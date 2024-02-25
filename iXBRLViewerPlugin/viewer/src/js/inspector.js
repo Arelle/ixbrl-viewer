@@ -384,11 +384,17 @@ export class Inspector {
                 .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)
                 .appendTo('#search-filter-namespaces select');
         }
-        for (const targetDocument of this._reportSet.getTargetDocuments()) {
-            $("<option>")
-                .attr("value", targetDocument ?? ':default')
-                .text(targetDocument ?? `<${i18next.t("search.default")}>`)
-                .appendTo('#search-filter-target-document select');
+        const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
+        if (targetDocuments.length == 1 && targetDocuments[0] == null) {
+            $('#search-filter-target-document').hide();
+        }
+        else {
+            for (const targetDocument of targetDocuments) {
+                $("<option>")
+                    .attr("value", targetDocument ?? ':default')
+                    .text(targetDocument ?? `<${i18next.t("search.default")}>`)
+                    .appendTo('#search-filter-target-document select');
+            }
         }
         for (const unit of this._reportSet.getUsedUnits()) {
             $("<option>")

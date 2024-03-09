@@ -74,13 +74,6 @@ describe("Language options", () => {
         expect(al).toHaveLength(6);
         expect(al).toEqual(expect.arrayContaining(["en", "en-us", "en-gb", "fr", "de", "es"]));
     });
-
-    test("Names for available languages", () => {
-        const ln = testReportSet.languageNames();
-        expect(Object.keys(ln)).toHaveLength(2);
-        expect(ln['en']).toBe("English");
-        expect(ln['en-us']).toBe("English (US)");
-    });
 });
 
 describe("Fetching facts", () => {

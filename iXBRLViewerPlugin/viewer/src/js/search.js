@@ -154,6 +154,13 @@ export class ReportSearch {
         );
     }
 
+    targetDocumentFilter(s, item) {
+        return (
+            s.targetDocumentFilter.length === 0 ||
+            s.targetDocumentFilter.some(t => (item.targetDocument() ?? ':default') === t)
+        );
+    }
+
     search(s) {
         if (!this.ready) {
             return;
@@ -172,6 +179,7 @@ export class ReportSearch {
             this.namespacesFilter,
             this.unitsFilter,
             this.scalesFilter,
+            this.targetDocumentFilter
         ];
 
         rr.forEach((r,_) => {

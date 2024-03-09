@@ -359,6 +359,7 @@ export class Inspector {
         spec.factValueFilter = $('#search-filter-fact-value').val();
         spec.calculationsFilter = $('#search-filter-calculations select').val();
         spec.dimensionTypeFilter = $('#search-filter-dimension-type select').val();
+        spec.targetDocumentFilter = $('#search-filter-target-document select').val();
         return spec;
     }
 
@@ -382,6 +383,18 @@ export class Inspector {
                 .attr("value", prefix)
                 .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)
                 .appendTo('#search-filter-namespaces select');
+        }
+        const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
+        if (targetDocuments.length == 1 && targetDocuments[0] == null) {
+            $('#search-filter-target-document').hide();
+        }
+        else {
+            for (const targetDocument of targetDocuments) {
+                $("<option>")
+                    .attr("value", targetDocument ?? ':default')
+                    .text(targetDocument ?? `<${i18next.t("search.default")}>`)
+                    .appendTo('#search-filter-target-document select');
+            }
         }
         for (const unit of this._reportSet.getUsedUnits()) {
             $("<option>")
@@ -422,6 +435,7 @@ export class Inspector {
         $("#search-hidden-fact-filter").prop("checked", true);
         $("#search-visible-fact-filter").prop("checked", true);
         $("#search-filter-namespaces select option:selected").prop("selected", false);
+        $("#search-filter-target-document select option:selected").prop("selected", false);
         $("#search-filter-units select option:selected").prop("selected", false);
         $("#search-filter-scales select option:selected").prop("selected", false);
         this.search();
@@ -461,6 +475,7 @@ export class Inspector {
         this.updateMultiSelectSubheader('search-filter-scales');
         this.updateMultiSelectSubheader('search-filter-units');
         this.updateMultiSelectSubheader('search-filter-namespaces');
+        this.updateMultiSelectSubheader('search-filter-target-document');
         this.updateMultiSelectSubheader('search-filter-dimension-type');
         this.updateMultiSelectSubheader('search-filter-calculations');
         this.updateMultiSelectSubheader('search-filter-period');
@@ -1084,10 +1099,10 @@ export class Inspector {
 
                 const target = cf.targetDocument();
                 if (target !== null) {
-                    $('#inspector .target-document').text(target).show();
+                    $('#inspector .target-document-tag').text(target).show();
                 }
                 else {
-                    $('#inspector .target-document').hide();
+                    $('#inspector .target-document-tag').hide();
                 }
 
             }

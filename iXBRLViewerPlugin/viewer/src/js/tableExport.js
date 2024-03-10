@@ -16,11 +16,26 @@ export class TableExport {
         $('table', iframe).each(function () {
             const table = $(this);
             if (table.find(".ixbrl-element").length > 0) {
-                table.css("position", "relative");
-                const exporter = new TableExport(table, reportSet);
-                $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
-                    .appendTo(table)
-                    .click(() => exporter.exportTable());
+                const containsAbsolute = Array.from(this.querySelectorAll("*"))
+                    .reduce(
+                        (res, elt) => (res || getComputedStyle(elt).getPropertyValue('position') === 'absolute'),
+                        false
+                    );
+
+                // Don't add handles if the table contains absolutely
+                // positioned elements, as doing so will probably interfere
+                // with layout.
+                //
+                // Where a table has absolutely positioned content, it's quite
+                // likely that the table tag itself is positioned in a random
+                // place.
+                if (!containsAbsolute) {
+                    table.css("position", "relative");
+                    const exporter = new TableExport(table, reportSet);
+                    $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
+                        .appendTo(table)
+                        .click(() => exporter.exportTable());
+                }
             }
         });
     }

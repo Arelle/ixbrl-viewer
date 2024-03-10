@@ -164,13 +164,18 @@ Profit Loss double tagged: {{ monetary eg:ProfitLoss[] }}{{ monetary eg:ProfitLo
         {{ period cur3mo "2018-09-01" "2018-12-31" }}
         {{ period prev3mo "2017-09-01" "2017-12-31" }}
 
+        <p>
+            This table contains some absolutely position content, so should not
+            have a table export handle.
+        </p>
+
         <table class="accounts">
             {{ column-aspects static [period=cur] [period=prev] [period=cur3mo] [period=prev3mo] }}
             {{ column-styles "" "figure" "figure" "figure" "figure" }}
             <thead>
                 <tr>
                     <th></th>
-                    <th>2018</th>
+                    <th style="position: relative"><div style="position: absolute">2018</div></th>
                     <th>2017</th>
                     <th>3 months to <br></br>31 Dec 2018</th>
                     <th>3 months to <br></br>31 Dec 2017</th>

@@ -17,10 +17,7 @@ export class TableExport {
             const table = $(this);
             if (table.find(".ixbrl-element").length > 0) {
                 const containsAbsolute = Array.from(this.querySelectorAll("*"))
-                    .reduce(
-                        (res, elt) => (res || getComputedStyle(elt).getPropertyValue('position') === 'absolute'),
-                        false
-                    );
+                    .some((elt) => getComputedStyle(elt).getPropertyValue('position') === 'absolute');
 
                 // Don't add handles if the table contains absolutely
                 // positioned elements, as doing so will probably interfere

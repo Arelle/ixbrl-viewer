@@ -205,7 +205,16 @@ export class Inspector {
         this._optionsMenu.reset();
         if (this._reportSet) {
             const dl = this.selectDefaultLanguage();
-            this._optionsMenu.addCheckboxGroup(this._reportSet.availableLanguages(), this._reportSet.languageNames(), dl, (lang) => { this.setLanguage(lang); this.update() }, "select-language");
+            const langs = this._reportSet.availableLanguages();
+            const langNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+
+            this._optionsMenu.addCheckboxGroup(
+                langs,
+                Object.fromEntries(langs.map((l) => [l, langNames.of(l)])),
+                dl,
+                (lang) => { this.setLanguage(lang); this.update() },
+                "select-language"
+            );
             this.setLanguage(dl);
             if (this._reportSet.filingDocuments()) {
                 this._optionsMenu.addDownloadButton("Download filing documents", this._reportSet.filingDocuments())

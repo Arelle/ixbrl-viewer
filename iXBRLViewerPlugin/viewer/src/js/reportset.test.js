@@ -185,14 +185,6 @@ describe("Multi report - Language options", () => {
         expect(al).toHaveLength(3);
         expect(al).toEqual(expect.arrayContaining(["en", "en-us", "en-gb"]));
     });
-
-    test("Names for languages", () => {
-        const ln = testReportSet.languageNames();
-        expect(Object.keys(ln)).toHaveLength(3);
-        expect(ln['en']).toBe("English");
-        expect(ln['en-us']).toBe("English (US)");
-        expect(ln['fr']).toBe("French");
-    });
 });
 
 describe("Multi report - Fetching facts", () => {
@@ -293,14 +285,6 @@ describe("Single report - Language options", () => {
         const al = testReportSet.availableLanguages();
         expect(al).toHaveLength(2);
         expect(al).toEqual(expect.arrayContaining(["en", "en-us"]));
-    });
-
-    test("Names for languages", () => {
-        const ln = testReportSet.languageNames();
-        expect(Object.keys(ln)).toHaveLength(3);
-        expect(ln['en']).toBe("English");
-        expect(ln['en-us']).toBe("English (US)");
-        expect(ln['fr']).toBe("French");
     });
 });
 

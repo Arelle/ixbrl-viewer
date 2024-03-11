@@ -178,10 +178,6 @@ export class ReportSet {
         return usedScalesMap;
     }
 
-    languageNames() {
-        return this._data.languages;
-    }
-
     roleMap() {
         return this._data.roles;
     }

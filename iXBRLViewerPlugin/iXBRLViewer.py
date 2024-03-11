@@ -14,7 +14,6 @@ from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 
-import pycountry
 from arelle import XbrlConst
 from arelle.ModelDocument import Type
 from arelle.ModelRelationshipSet import ModelRelationshipSet

@@ -593,7 +593,7 @@ export class Viewer {
     /* If the specified element is not fully visible, scroll it into the center of
      * the viewport */
     showElement(e) {
-        const ee = e.get(0);
+        const ee = e.filter(':not(.ixbrl-no-highlight)').get(0);
         if (!this.isFullyVisible(ee)) {
             ee.scrollIntoView({ block: "center", inline: "center" });
         }

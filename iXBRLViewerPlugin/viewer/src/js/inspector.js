@@ -16,7 +16,6 @@ import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
-import { Interval } from './interval.js';
 import { Calculation } from "./calculation.js";
 import { CalculationInspector } from './calculationInspector.js';
 import { ReportSetOutline } from './outline.js';

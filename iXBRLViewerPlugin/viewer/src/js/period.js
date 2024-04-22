@@ -1,7 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
 import { xbrlDateToMoment, momentToHuman } from "./util.js"
-import moment from "moment";
 
 export class Period {
     constructor(p) {

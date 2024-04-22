@@ -1,7 +1,5 @@
 // See COPYRIGHT.md for copyright information
 
-import $ from 'jquery'
-
 export class ReportSetOutline {
     constructor(reportSet) {
         this._reportSet = reportSet;

@@ -1,10 +1,10 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { numberMatchSearch, fullDateMatch } from './number-matcher.js'
+import { numberMatchSearch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
 import { IXNode } from './ixnode.js';
-import { getIXHiddenLinkStyle, runGenerator, escapeRegex, viewerUniqueId, HIGHLIGHT_COLORS } from './util.js';
+import { getIXHiddenLinkStyle, runGenerator, viewerUniqueId, HIGHLIGHT_COLORS } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 

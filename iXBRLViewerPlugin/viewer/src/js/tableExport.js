@@ -1,7 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import FileSaver from 'file-saver'
 import writeXlsxFile from 'write-excel-file'
 import { Fact } from './fact.js';
 

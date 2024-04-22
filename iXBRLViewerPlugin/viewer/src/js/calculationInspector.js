@@ -16,7 +16,7 @@ import $ from 'jquery';
 import i18next from 'i18next';
 
 import { Dialog } from './dialog.js';
-import { ResolvedCalc11Calculation, ResolvedLegacyCalculation } from './calculation.js';
+import { ResolvedCalc11Calculation } from './calculation.js';
 
 export class CalculationInspector extends Dialog {
     constructor() {

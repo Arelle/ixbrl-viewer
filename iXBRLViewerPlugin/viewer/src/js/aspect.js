@@ -1,8 +1,5 @@
 // See COPYRIGHT.md for copyright information
 
-import $ from 'jquery';
-import i18next from 'i18next';
-import { QName } from './qname.js';
 import { Period } from './period.js';
 import { Identifiers } from './identifiers.js';
 

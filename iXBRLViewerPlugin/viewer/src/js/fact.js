@@ -2,8 +2,6 @@
 
 import $ from 'jquery'
 import i18next from "i18next";
-import { isodateToHuman } from "./util.js"
-import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
 import { formatNumber, localId } from "./util.js";

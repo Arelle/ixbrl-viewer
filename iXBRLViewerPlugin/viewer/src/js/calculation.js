@@ -1,6 +1,5 @@
 // See COPYRIGHT.md for copyright information
 
-import $ from 'jquery';
 import Decimal from 'decimal.js';
 import { setDefault } from './util.js';
 import { Interval } from './interval.js';

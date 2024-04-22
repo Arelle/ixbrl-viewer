@@ -704,7 +704,6 @@ export class Inspector {
     }
 
     _referencesHTML(fact) {
-        const c = fact.concept();
         const a = new Accordian();
         for (const [i, r] of fact.concept().references().entries()) {
             const title = $("<span></span>").text(r[0].value);
@@ -733,7 +732,6 @@ export class Inspector {
         const tableFacts = this._viewer.factsInSameTable(fact);
         const selectedELR = calc.bestELRForFactSet(tableFacts);
         const report = fact.report;
-        const inspector = this;
         const a = new Accordian();
 
         for (const rCalc of calc.resolvedCalculations()) {
@@ -783,7 +781,7 @@ export class Inspector {
                         dialog.show();
                         e.stopPropagation();
                     })
-            const calcStatus = $("<p></p>")
+            $("<p></p>")
                 .append(calcStatusText)
                 .append($("<span></span>").text(" ("))
                 .append(calcDetailsLink)

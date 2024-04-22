@@ -112,8 +112,6 @@ export class CalculationInspector extends Dialog {
         let hasIcons = false;
         for (const row of resolvedCalculation.rows) {
             let factText = "";
-            let minText = "";
-            let maxText = "";
 
             if (!row.facts.isEmpty()) {
                 let f = row.facts.items()[0];
@@ -162,7 +160,6 @@ export class CalculationInspector extends Dialog {
         const tbody = table.find("tbody");
         // We remove the padding on the icons column (used to indicate
         // duplicate facts) if it is empty to avoid an unsightly gap
-        var hasIcons = false;
         tbody.empty();
         table.removeClass("has-icons");
         if (resolvedCalculation instanceof ResolvedCalc11Calculation) {

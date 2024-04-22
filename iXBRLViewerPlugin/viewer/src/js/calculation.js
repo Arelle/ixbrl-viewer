@@ -78,7 +78,6 @@ export class Calculation {
      * Returns a ResolvedCalculation object for the specified ELR
      */
     resolvedCalculation(elr) {
-        const calc = [];
         const calcFacts = this.calculationFacts()[elr];
         const report = this.fact.report;
         const rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];

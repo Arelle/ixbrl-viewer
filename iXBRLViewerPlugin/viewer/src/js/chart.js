@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery';
-import Chart from 'chart.js';
+import { BarController, BarElement, CategoryScale, Chart, LinearScale } from 'chart.js';
 import { AspectSet } from './aspect.js';
 import { wrapLabel } from "./util.js";
 import { Dialog } from './dialog.js';
@@ -173,6 +173,7 @@ export class IXBRLChart extends Dialog {
         this.setChartSize();
 
         const ctx = $("canvas", c);
+        Chart.register(BarController, BarElement, CategoryScale, LinearScale);
         const chart = new Chart(ctx, {
             type: "bar",
             data: {
@@ -183,21 +184,18 @@ export class IXBRLChart extends Dialog {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true
-                        },
-                        scaleLabel: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
                             display: true,
-                            labelString:  yLabel,
-                        }
-
-                    }],
-                    xAxes: [{
+                            text: yLabel,
+                        },
+                    },
+                    x: {
                         ticks: {
                             autoSkip: false
                         }
-                    }]
+                    }
                 }
                 
             }

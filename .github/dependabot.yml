@@ -28,9 +28,6 @@ updates:
         patterns:
           - "stylelint*"
     ignore:
-      - dependency-name: chart.js
-        versions:
-          - ">=3"
       - dependency-name: css-loader
         versions:
           - ">=4"

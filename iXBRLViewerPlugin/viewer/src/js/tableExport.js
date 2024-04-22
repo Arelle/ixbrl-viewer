@@ -20,7 +20,7 @@ export class TableExport {
                 const exporter = new TableExport(table, reportSet);
                 $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
                     .appendTo(table)
-                    .click(() => exporter.exportTable());
+                    .on("click", () => exporter.exportTable());
             }
         });
     }

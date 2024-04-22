@@ -145,7 +145,7 @@ export class IXBRLChart extends Dialog {
                 if (dims.includes(av.name())) {
                     a.addClass("selected")
                         .text(av.label() + ": *")
-                        .click(() => this.removeAspect(av.name()));
+                        .on("click", () => this.removeAspect(av.name()));
                 }
                 else {
                     if (av.name() != 'u') {
@@ -154,7 +154,7 @@ export class IXBRLChart extends Dialog {
                     a.text(av.label() + ": " + av.valueLabel());
                     if (dims.length < 2) {
                         a.addClass("addable")
-                            .click(() => this.addAspect(av.name()));
+                            .on("click", () => this.addAspect(av.name()));
                     }
                 }
             }
@@ -202,7 +202,7 @@ export class IXBRLChart extends Dialog {
                 
             }
         });
-        $(window).resize(() => {  
+        $(window).on("resize", () => {  
             this.setChartSize();
             chart.resize();
         });

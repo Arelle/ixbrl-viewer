@@ -8,14 +8,14 @@ export class Menu {
         attr = attr || {};
         this.type = attr.type || "dropdown";
 
-        elt.find(".menu-title").click((e) => {
+        elt.find(".menu-title").on("click", (e) => {
             elt.find(".content-container").toggle();
             /* Stop an opening click from also being treated as an "out-of-menu"
              * closing click */
             e.stopPropagation();
         });
 
-        $('html').click((event) => {
+        $('html').on("click", (event) => {
             if ($(".content", elt).find($(event.target)).length === 0) {
                 this.close();
             }
@@ -50,7 +50,7 @@ export class Menu {
                 .attr({
                     href: filename})
                 .text(name)
-                .click(() => menu.close());
+                .on("click", () => menu.close());
         this._add(item);
     }
 
@@ -89,7 +89,7 @@ export class Menu {
                 .prepend(
                     $('<input type="radio"></input>')
                         .attr({ "name": name, "value": v})
-                        .change(function () {
+                        .on("change", function () {
                             callback($(this).val())
                             menu.close(); 
                         })

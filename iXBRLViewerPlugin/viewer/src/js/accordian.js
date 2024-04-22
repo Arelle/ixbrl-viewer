@@ -17,7 +17,7 @@ export class Accordian {
         const card = $('<div class="card"></div>')
             .append($('<div class="title"></div>')
                 .append(title)
-                .click(function () {
+                .on("click", function () {
                     var thisCard = $(this).closest(".card");
                     if (thisCard.hasClass("active")) {
                         if (!a.options.alwaysOpen) {

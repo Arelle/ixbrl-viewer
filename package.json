@@ -33,7 +33,7 @@
   "dependencies": {
     "chart.js": "^2.9.3",
     "core-js": "^3.31.1",
-    "css-loader": "^3.4.2",
+    "css-loader": "^7.1.1",
     "decimal.js": "^10.3.1",
     "dateformat": "^5.0.3",
     "i18next": "^20.3.2",

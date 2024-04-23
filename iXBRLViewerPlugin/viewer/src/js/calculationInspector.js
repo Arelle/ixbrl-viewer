@@ -173,13 +173,13 @@ export class CalculationInspector extends Dialog {
         const messageCell = table.find("td.status");
         messageCell.removeClass("inconsistent").removeClass("consistent").removeClass("unchecked");
         if (resolvedCalculation.unchecked()) {
-            messageCell.addClass("unchecked").find(".message").text("Calculation does not bind");
+            messageCell.addClass("unchecked").find(".message").text(i18next.t('calculation.does-not-bind'));
         } 
         else if (resolvedCalculation.isConsistent()) {
-            messageCell.addClass("consistent").find(".message").text("Calculation is consistent");
+            messageCell.addClass("consistent").find(".message").text(i18next.t('factDetails.calculationIsConsistent'));
         }
         else {
-            messageCell.addClass("inconsistent").find(".message").text("Calculation is inconsistent");
+            messageCell.addClass("inconsistent").find(".message").text(i18next.t('factDetails.calculationIsConsistent'));
         }
     }
 }

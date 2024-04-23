@@ -34,9 +34,6 @@ updates:
       - dependency-name: html-loader
         versions:
           - ">=1"
-      - dependency-name: i18next
-        versions:
-          - ">=21"
   - package-ecosystem: pip
     directory: "/"
     insecure-external-code-execution: allow

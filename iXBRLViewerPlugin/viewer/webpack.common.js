@@ -17,9 +17,11 @@ module.exports = {
                     use: [ { 
                         loader: "html-loader",
                         options: {
-                            minimize: true,
-                            removeAttributeQuotes: false,
-                            keepClosingSlash: true
+                            esModule: false,
+                            minimize: {
+                                removeAttributeQuotes: false,
+                                keepClosingSlash: true
+                            }
                         }
                     }]
                 },

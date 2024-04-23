@@ -27,10 +27,6 @@ updates:
       stylelint:
         patterns:
           - "stylelint*"
-    ignore:
-      - dependency-name: html-loader
-        versions:
-          - ">=1"
   - package-ecosystem: pip
     directory: "/"
     insecure-external-code-execution: allow

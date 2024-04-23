@@ -25,14 +25,22 @@ module.exports = {
                 },
                 {
                     test: /\.less$/,
-                    use: [ { 
-                        loader: "less-loader",
-                        options: {
-                            lessOptions: {
-                                math: "parens-division"
+                    use: [
+                        {
+                            loader: "css-loader",
+                            options: {
+                                esModule: false
+                            }
+                        },
+                        {
+                            loader: "less-loader",
+                            options: {
+                                lessOptions: {
+                                    math: "parens-division"
+                                }
                             }
                         }
-                    }]
+                    ]
                 }
             ]
 

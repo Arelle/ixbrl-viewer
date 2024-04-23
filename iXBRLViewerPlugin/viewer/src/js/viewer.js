@@ -472,7 +472,7 @@ export class Viewer {
     _applyStyles() {
         const stlyeElts = $("<style>")
             .prop("type", "text/css")
-            .text(require('css-loader!less-loader!../less/viewer.less').toString())
+            .text(require('../less/viewer.less').toString())
             .appendTo(this._iframes.contents().find("head"));
         this._iv.callPluginMethod("updateViewerStyleElements", stlyeElts);
     }

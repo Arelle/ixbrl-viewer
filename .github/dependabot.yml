@@ -28,9 +28,6 @@ updates:
         patterns:
           - "stylelint*"
     ignore:
-      - dependency-name: css-loader
-        versions:
-          - ">=4"
       - dependency-name: html-loader
         versions:
           - ">=1"

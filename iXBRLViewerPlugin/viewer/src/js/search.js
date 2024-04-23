@@ -1,8 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
 import lunr from 'lunr'
-import $ from 'jquery'
-import Decimal from "decimal.js";
 
 export class ReportSearch {
     constructor(reportSet) {

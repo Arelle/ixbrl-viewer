@@ -120,7 +120,7 @@ export class iXBRLViewer {
     _loadInspectorHTML() {
         /* Insert HTML and CSS styles into body */
         $(require('../html/inspector.html')).prependTo('body');
-        const inspector_css = require('css-loader!../less/inspector.less').toString(); 
+        const inspector_css = require('../less/inspector.less').toString(); 
         $('<style id="ixv-style"></style>')
             .prop("type", "text/css")
             .text(inspector_css)

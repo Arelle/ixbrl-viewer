@@ -6,9 +6,9 @@ export class Dialog {
     constructor(selector) {
         this.node = $("#dialog-templates").find(selector).clone().appendTo("#ixv #dialog-container");
 
-        $('.close', this.node).click(() => this.close());
-        $(document).bind("keyup", (e) => {
-            if (e.keyCode === 27) {
+        $('.close', this.node).on("click", () => this.close());
+        $(document).on("keyup", (e) => {
+            if (e.which === 27) {
                 this.close();
             }
         });

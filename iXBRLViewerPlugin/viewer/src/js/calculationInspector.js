@@ -16,7 +16,7 @@ import $ from 'jquery';
 import i18next from 'i18next';
 
 import { Dialog } from './dialog.js';
-import { ResolvedCalc11Calculation, ResolvedLegacyCalculation } from './calculation.js';
+import { ResolvedCalc11Calculation } from './calculation.js';
 
 export class CalculationInspector extends Dialog {
     constructor() {
@@ -112,8 +112,6 @@ export class CalculationInspector extends Dialog {
         let hasIcons = false;
         for (const row of resolvedCalculation.rows) {
             let factText = "";
-            let minText = "";
-            let maxText = "";
 
             if (!row.facts.isEmpty()) {
                 let f = row.facts.items()[0];
@@ -162,7 +160,6 @@ export class CalculationInspector extends Dialog {
         const tbody = table.find("tbody");
         // We remove the padding on the icons column (used to indicate
         // duplicate facts) if it is empty to avoid an unsightly gap
-        var hasIcons = false;
         tbody.empty();
         table.removeClass("has-icons");
         if (resolvedCalculation instanceof ResolvedCalc11Calculation) {
@@ -176,13 +173,13 @@ export class CalculationInspector extends Dialog {
         const messageCell = table.find("td.status");
         messageCell.removeClass("inconsistent").removeClass("consistent").removeClass("unchecked");
         if (resolvedCalculation.unchecked()) {
-            messageCell.addClass("unchecked").find(".message").text("Calculation does not bind");
+            messageCell.addClass("unchecked").find(".message").text(i18next.t('calculation.does-not-bind'));
         } 
         else if (resolvedCalculation.isConsistent()) {
-            messageCell.addClass("consistent").find(".message").text("Calculation is consistent");
+            messageCell.addClass("consistent").find(".message").text(i18next.t('factDetails.calculationIsConsistent'));
         }
         else {
-            messageCell.addClass("inconsistent").find(".message").text("Calculation is inconsistent");
+            messageCell.addClass("inconsistent").find(".message").text(i18next.t('factDetails.calculationIsConsistent'));
         }
     }
 }

@@ -48,9 +48,9 @@
     "write-excel-file": "^1.4.30"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
     "babel-jest": "^29.7.0",
-    "babel-preset-env": "^1.7.0",
     "base64-inline-loader": "^2.0.1",
     "html-loader": "^5.0.0",
     "http-server": "^14.1.1",

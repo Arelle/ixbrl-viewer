@@ -6,6 +6,6 @@
     "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "ixbrl-viewer": "^1.2.0"
+    "ixbrl-viewer": "^1.4.24"
   }
 }

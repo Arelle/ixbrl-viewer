@@ -48,8 +48,8 @@
     "write-excel-file": "^1.4.30"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
+    "@babel/core": "^7.24.4",
+    "@babel/preset-env": "^7.24.4",
     "babel-jest": "^29.7.0",
     "base64-inline-loader": "^2.0.1",
     "html-loader": "^5.0.0",
@@ -59,7 +59,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "puppeteer": "22.7.0",
     "puppeteer-screen-recorder": "3.0.3",
-    "stylelint": "^16.3.1",
+    "stylelint": "^16.4.0",
     "stylelint-config-standard": "^36.0.0",
     "webfont": "^11.2.26",
     "webpack": "^5.91.0",

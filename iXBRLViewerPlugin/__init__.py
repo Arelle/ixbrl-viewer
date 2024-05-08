@@ -128,7 +128,6 @@ def generateViewer(
         saveViewerDest: io.BytesIO | str | None,
         viewerURL: str = DEFAULT_VIEWER_PATH,
         showValidationMessages: bool = False,
-        useStubViewer: bool = False,
         zipViewerOutput: bool = False,
         features: list[str] | None = None,
         packageDownloadURL: str | None = None,
@@ -226,7 +225,6 @@ def iXBRLViewerCommandLineFilingEnd(cntlr, options, *args, **kwargs):
         viewerURL=options.viewerURL,
         copyScript=not options.viewerNoCopyScript,
         showValidationMessages=options.validationMessages,
-        useStubViewer=options.useStubViewer,
         zipViewerOutput=options.zipViewerOutput,
         features=getFeaturesFromOptions(options),
         packageDownloadURL=options.packageDownloadURL,
@@ -328,12 +326,13 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
             for c in FEATURE_CONFIGS
             if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
         ]
+        pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer = True)
+        processCurrentModels(cntlr)
         generateViewer(
             cntlr=cntlr,
             saveViewerDest=tempViewer.name,
             viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL) or DEFAULT_VIEWER_PATH,
             copyScript=cntlr.config.get(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT),
-            useStubViewer=True,
             features=features,
         )
         if Path(tempViewer.name, viewer_file_name).exists():

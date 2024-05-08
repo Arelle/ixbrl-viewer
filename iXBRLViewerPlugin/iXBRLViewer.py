@@ -111,6 +111,7 @@ class IXBRLViewerBuilder:
             self.iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocument()))
 
         self.fromSingleZIP = None
+        self.reportCount = 0
 
     def enableFeature(self, featureName: str):
         if featureName in self.taxonomyData["features"]:
@@ -391,85 +392,85 @@ class IXBRLViewerBuilder:
         self.taxonomyData["sourceReports"].append(sourceReport)
         return sourceReport
 
-    def processModels(
+    def processModel(
             self,
-            reports: list[ModelXbrl]
+            report: ModelXbrl
             ):
 
-        for n, report in enumerate(reports):
-            self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
-            self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
-            for f in report.facts:
-                self.addFact(report, f)
-            self.currentTargetReport["rels"] = self.getRelationships(report)
+        self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
+        self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
+        for f in report.facts:
+            self.addFact(report, f)
+        self.currentTargetReport["rels"] = self.getRelationships(report)
 
-            docSetFiles = None
-            report.info(INFO_MESSAGE_CODE, "Creating iXBRL viewer (%d of %d)" % (n+1, len(reports)))
-            if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
-                # Sort by object index to preserve order in which files were specified.
-                xmlDocsByFilename = {
-                    os.path.basename(self.outputFilename(doc.filepath)): doc.xmlDocument
-                    for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
-                    if doc.type == Type.INLINEXBRL
-                }
-                docSetFiles = list(xmlDocsByFilename.keys())
-
-                for filename, docSetXMLDoc in xmlDocsByFilename.items():
-                    self.iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
-
-            elif self.useStubViewer:
-                filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
-                docSetFiles = [ filename ]
-                self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
-
-            else:
-                srcFilename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
-                docSetFiles = [ srcFilename ]
-                if len(reports) == 1:
-                    # If there is only a single report, call the output file "xbrlviewer.html"
-                    filename = "xbrlviewer.html"
-                else:
-                    # Otherwise, preserve filenames
-                    filename = srcFilename
-                self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
-
-            docSetKey = frozenset(docSetFiles)
-            sourceReport = self.sourceReportsByFiles.get(docSetKey)
-            if sourceReport is None:
-                sourceReport = self.addSourceReport()
-                self.sourceReportsByFiles[docSetKey] = sourceReport
-                sourceReport["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
-
-            sourceReport["targetReports"].append(self.currentTargetReport)
-
-            localDocs = defaultdict(set)
-            for path, doc in report.urlDocs.items():
-                if isHttpUrl(path) or doc.type == Type.INLINEXBRLDOCUMENTSET:
-                    continue
-                if doc.type == Type.INLINEXBRL:
-                    localDocs[doc.basename].add('inline')
-                elif doc.type == Type.SCHEMA:
-                    localDocs[doc.basename].add('schema')
-                elif doc.type == Type.LINKBASE:
-                    linkbaseIdentifed = False
-                    for child in doc.xmlRootElement.iterchildren():
-                        linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
-                        if linkbaseLocalDocumentsKey is not None:
-                            localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
-                            linkbaseIdentifed = True
-                    if not linkbaseIdentifed:
-                        localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
-            self.currentTargetReport["localDocs"] = {
-                localDoc: sorted(docTypes)
-                for localDoc, docTypes in localDocs.items()
+        docSetFiles = None
+        self.reportCount += 1
+        report.info(INFO_MESSAGE_CODE, "Creating iXBRL viewer (%d) [%s]" % (self.reportCount, self.currentTargetReport["target"]))
+        if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
+            # Sort by object index to preserve order in which files were specified.
+            xmlDocsByFilename = {
+                os.path.basename(self.outputFilename(doc.filepath)): doc.xmlDocument
+                for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+                if doc.type == Type.INLINEXBRL
             }
+            docSetFiles = list(xmlDocsByFilename.keys())
+
+            for filename, docSetXMLDoc in xmlDocsByFilename.items():
+                self.iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
+
+        elif self.useStubViewer:
+            filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+            docSetFiles = [ filename ]
+            self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+
+        else:
+            srcFilename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+            docSetFiles = [ srcFilename ]
+            if len(reports) == 1:
+                # If there is only a single report, call the output file "xbrlviewer.html"
+                filename = "xbrlviewer.html"
+            else:
+                # Otherwise, preserve filenames
+                filename = srcFilename
+            self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+
+        docSetKey = frozenset(docSetFiles)
+        sourceReport = self.sourceReportsByFiles.get(docSetKey)
+        if sourceReport is None:
+            sourceReport = self.addSourceReport()
+            self.sourceReportsByFiles[docSetKey] = sourceReport
+            sourceReport["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
+
+        sourceReport["targetReports"].append(self.currentTargetReport)
+
+        localDocs = defaultdict(set)
+        for path, doc in report.urlDocs.items():
+            if isHttpUrl(path) or doc.type == Type.INLINEXBRLDOCUMENTSET:
+                continue
+            if doc.type == Type.INLINEXBRL:
+                localDocs[doc.basename].add('inline')
+            elif doc.type == Type.SCHEMA:
+                localDocs[doc.basename].add('schema')
+            elif doc.type == Type.LINKBASE:
+                linkbaseIdentifed = False
+                for child in doc.xmlRootElement.iterchildren():
+                    linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
+                    if linkbaseLocalDocumentsKey is not None:
+                        localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
+                        linkbaseIdentifed = True
+                if not linkbaseIdentifed:
+                    localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
+        self.currentTargetReport["localDocs"] = {
+            localDoc: sorted(docTypes)
+            for localDoc, docTypes in localDocs.items()
+        }
 
         # If we only process a single ZIP, add a download link to it as the
         # "filing documents" on the viewer menu.
-        if self.fromSingleZIP is None and len(reports) == 1:
-            self.fromSingleZIP = reports[0].modelDocument.filepath.endswith(".zip")
+        if self.fromSingleZIP is None:
+            self.fromSingleZIP = report.modelDocument.filepath.endswith(".zip")
             if self.fromSingleZIP:
-                self.filingDocZipPath = os.path.dirname(reports[0].modelDocument.filepath)
+                self.filingDocZipPath = os.path.dirname(report.modelDocument.filepath)
         else:
             self.fromSingleZIP = False
 

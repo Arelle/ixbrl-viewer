@@ -114,9 +114,9 @@ def pluginData(cntlr: Cntlr):
 def resetPluginData(cntlr: Cntlr):
     pluginData(cntlr).builder = None
 
-def processCurrentModels(cntlr: Cntlr):
+def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl):
     try:
-        pluginData(cntlr).builder.processModels(cntlr.modelManager.loadedModelXbrls)
+        pluginData(cntlr).builder.processModel(modelXbrl)
     except IXBRLViewerBuilderError as ex:
         print(ex)
     except Exception as ex:
@@ -212,11 +212,11 @@ def getFeaturesFromOptions(options: argparse.Namespace | OptionParser):
         if getattr(options, f'viewer_feature_{featureConfig.key}') or getattr(options, f'viewer_feature_{featureConfig.key.lower()}')
     ]
 
-def iXBRLViewerCommandLineXbrlRun(cntlr, options, *args, **kwargs):
+def iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs):
     pd = pluginData(cntlr)
     if pd.builder is None:
         pd.builder = IXBRLViewerBuilder(cntlr, useStubViewer = options.useStubViewer)
-    processCurrentModels(cntlr)
+    processModel(cntlr, modelXbrl)
 
 def iXBRLViewerCommandLineFilingEnd(cntlr, options, *args, **kwargs):
     generateViewer(
@@ -283,8 +283,8 @@ def commandLineOptionExtender(*args, **kwargs):
     iXBRLViewerCommandLineOptionExtender(*args, **kwargs)
 
 
-def commandLineRun(*args, **kwargs):
-    iXBRLViewerCommandLineXbrlRun(*args, **kwargs)
+def commandLineRun(cntlr, options, modelXbrl, *args, **kwargs):
+    iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs)
 
 def commandLineFilingEnd(*args, **kwargs):
     iXBRLViewerCommandLineFilingEnd(*args, **kwargs)
@@ -327,7 +327,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
             if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
         ]
         pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer = True)
-        processCurrentModels(cntlr)
+        processModel(modelXbrl)
         generateViewer(
             cntlr=cntlr,
             saveViewerDest=tempViewer.name,

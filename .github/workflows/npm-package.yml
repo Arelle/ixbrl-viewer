@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout ixbrl-viewer
-        uses: actions/checkout@v4.1.4
+        uses: actions/checkout@v4.1.5
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
       - name: Install Node.js
@@ -83,7 +83,7 @@ jobs:
           NPM_CONFIG_DRY_RUN: ${{ github.repository != 'Arelle/ixbrl-viewer' }}
         run: npm publish ixbrl-viewer-*.tgz --access public
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2.0.4
+        uses: softprops/action-gh-release@v2.0.5
         with:
           fail_on_unmatched_files: true
           files: './*'

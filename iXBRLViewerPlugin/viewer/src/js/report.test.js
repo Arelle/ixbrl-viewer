@@ -1,19 +1,8 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { ViewerOptions } from "./viewerOptions.js";
+import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
     "languages": {
@@ -22,7 +11,18 @@ var testReportData = {
     },
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217"
+        "iso4217": NAMESPACE_ISO4217
+    },
+    "roles": {
+        "role1": "https://www.example.com/role1",
+        "role2": "https://www.example.com/role2",
+        "role3": "https://www.example.com/role3",
+        "role4": "https://www.example.com/role4"
+    },
+    "roleDefs": {
+        "role1": { "en": "Role 1 Label" },
+        "role2": { "en": null },
+        "role3": {}
     },
     "concepts": {
         "eg:Concept1": {
@@ -67,43 +67,37 @@ var testReportData = {
 
 
 describe("Language options", () => {
-    var testReport = new iXBRLReport(testReportData);
-    testReport._initialize();
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
     test("Available languages", () => {
-        var al = testReport.availableLanguages();
+        const al = testReportSet.availableLanguages();
         expect(al).toHaveLength(6);
         expect(al).toEqual(expect.arrayContaining(["en", "en-us", "en-gb", "fr", "de", "es"]));
-    });
-
-    test("Names for available languages", () => {
-        var ln = testReport.languageNames();
-        expect(Object.keys(ln)).toHaveLength(2);
-        expect(ln['en']).toBe("English");
-        expect(ln['en-us']).toBe("English (US)");
     });
 });
 
 describe("Fetching facts", () => {
-    var testReport = new iXBRLReport(testReportData);
-    testReport._initialize();
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
 
     test("Successful", () => {
-        var f = testReport.getItemById("f1");
-        testReport._initialize();
+        const f = testReportSet.getItemById("0-f1");
         expect(f).not.toBeNull();
         expect(f.decimals()).toEqual(-3);
     });
 
     test("Non-existent fact", () => {
-        var f = testReport.getItemById("fact-does-not-exist");
+        const f = testReportSet.getItemById("fact-does-not-exist");
         expect(f).toBeUndefined();
     });
 });
 
 describe("Concept labels", () => {
-    var testReport = new iXBRLReport(testReportData);
-    var vo = new ViewerOptions();
-    testReport.setViewerOptions(vo);
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
+    const testReport = testReportSet.reports[0];
+    const vo = new ViewerOptions();
+    testReportSet.viewerOptions = vo;
     test("Label fallback", () => {
         vo.language = 'fr';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept trois");
@@ -128,6 +122,25 @@ describe("Concept labels", () => {
 
         expect(testReport.getLabel('eg:Concept3', 'doc', true)).toBeUndefined();
         expect(testReport.getLabelOrName('eg:Concept3', 'doc', true)).toBe("eg:Concept3");
+    });
+
+});
+
+describe("ELR labels", () => {
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
+    const testReport = testReportSet.reports[0];
+    test("Present", () => {
+        expect(testReport.getRoleLabel("role1")).toBe("Role 1 Label");
+    });
+    test("Null", () => {
+        expect(testReport.getRoleLabel("role2")).toBe("https://www.example.com/role2");
+    });
+    test("No label", () => {
+        expect(testReport.getRoleLabel("role3")).toBe("https://www.example.com/role3");
+    });
+    test("Not present in roleDef", () => {
+        expect(testReport.getRoleLabel("role4")).toBe("https://www.example.com/role4");
     });
 
 });

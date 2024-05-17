@@ -1,25 +1,14 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import { Fact } from "./fact.js";
-import { iXBRLReport } from "./report.js";
+import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
+import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
-        "iso4217": "http://www.xbrl.org/2003/iso4217",
+        "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
     "concepts": {
@@ -43,6 +32,14 @@ var testReportData = {
                     "en": "English label for concept three"
                 }
             }
+        },
+        "eg:TextBlockConcept1": {
+            "labels": {
+                "std": {
+                    "en": "Text block concept"
+                }
+            },
+            "t": true,
         },
         "eg:EnumConcept": {
             "labels": {
@@ -87,16 +84,16 @@ function testReport(facts, ixData) {
     // Deep copy of standing data
     var data = JSON.parse(JSON.stringify(testReportData));
     data.facts = facts;
-    var report = new iXBRLReport(data);
-    report.setIXNodeMap(ixData);
-    return report;
+    var reportSet = new ReportSet(data);
+    reportSet.setIXNodeMap(ixData);
+    return reportSet.reports[0];
 }
 
 function testFact(factData, ixData) {
     factData.a = factData.a || {};
     factData.a.c = factData.a.c || 'eg:Concept1';
     ixData = ixData || {};
-    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1");
+    return new Fact(testReport({"f1": factData}, {"f1": ixData }), "f1", factData);
 }
 
 var insp = new TestInspector();
@@ -139,7 +136,7 @@ describe("Simple fact properties", () => {
         expect(f.isNumeric()).toBeTruthy();
         expect(f.decimals()).toEqual(-3);
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("1,000 eg:USD");
+        expect(f.readableValue()).toEqual("1,000 USD");
         expect(f.unit().value()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
@@ -159,7 +156,7 @@ describe("Simple fact properties", () => {
         expect(f.decimals()).toBeUndefined();
         expect(f.isNumeric()).toBeTruthy();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("1,000,000.0125 eg:USD");
+        expect(f.readableValue()).toEqual("1,000,000.0125 USD");
         expect(f.unit().value()).toEqual("eg:USD");
         expect(f.conceptQName().prefix).toEqual("eg");
         expect(f.conceptQName().localname).toEqual("Concept1");
@@ -366,24 +363,30 @@ describe("Readable accuracy", () => {
             "v": "1234",
             "d": -6,
             "a": { "u": "eg:unit" }
-        }).readableAccuracy()).toBe("-6 (millions)");
+        }).readableAccuracy()).toBe("millions");
 
         expect(testFact({
             "v": "1234",
             "d": 0,
             "a": { "u": "eg:unit" }
-        }).readableAccuracy()).toBe("0 (ones)");
+        }).readableAccuracy()).toBe("ones");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "eg:unit" }
-        }).readableAccuracy()).toBe("2 (hundredths)");
+        }).readableAccuracy()).toBe("hundredths");
 
         expect(testFact({
             "v": "1234",
             "d": 4,
             "a": { "u": "eg:unit" }
+        }).readableAccuracy()).toBe("4");
+
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": null }
         }).readableAccuracy()).toBe("4");
 
     });
@@ -397,37 +400,128 @@ describe("Readable accuracy", () => {
             "v": "1234",
             "d": -6,
             "a": { "u": "iso4217:USD" }
-        }).readableAccuracy()).toBe("-6 (millions)");
+        }).readableAccuracy()).toBe("millions");
 
         expect(testFact({
             "v": "1234",
             "d": 0,
             "a": { "u": "iso4217:USD" }
-        }).readableAccuracy()).toBe("0 (ones)");
+        }).readableAccuracy()).toBe("ones");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:USD" }
-        }).readableAccuracy()).toBe("2 (cents)");
+        }).readableAccuracy()).toBe("cents");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:EUR" }
-        }).readableAccuracy()).toBe("2 (cents)");
+        }).readableAccuracy()).toBe("cents");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:YEN" }
-        }).readableAccuracy()).toBe("2 (hundredths)");
+        }).readableAccuracy()).toBe("hundredths");
 
         expect(testFact({
             "v": "1234",
             "d": 2,
             "a": { "u": "iso4217:GBP" }
-        }).readableAccuracy()).toBe("2 (pence)");
+        }).readableAccuracy()).toBe("pence");
+
+    });
+});
+
+describe("Readable accuracy", () => {
+    test("With units", () => {
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": "iso4217:GBP" }
+        }).getScaleLabel(-2)).toBe("pence");
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": { "u": "iso4217:GBP" }
+        }).getScaleLabel(-4)).toBe(null);
+    });
+    test("Without units", () => {
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": {}
+        }).getScaleLabel(-2)).toBe("hundredths");
+        expect(testFact({
+            "v": "1234",
+            "d": 4,
+            "a": {}
+        }).getScaleLabel(-4)).toBe(null);
+    });
+});
+
+
+describe("Readable scale", () => {
+    test("Non-numeric", () => {
+        expect(testFact({
+            "v": "1234",
+            "a": {  }
+        }, { "scale": 6 }).readableScale()).toBe("n/a");
+    });
+    test("Numeric, non-monetary", () => {
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }).readableScale()).toBe("Unscaled");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }, { "scale": 6 }).readableScale()).toBe("millions");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }, { "scale": -2 }).readableScale()).toBe("hundredths");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "eg:unit" }
+        }, { "scale": -4 }).readableScale()).toBe("-4");
+
+    });
+    test("Numeric, monetary", () => {
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:USD" }
+        }).readableScale()).toBe("Unscaled");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:USD" }
+        }, { "scale": 6 }).readableScale()).toBe("millions");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:EUR" }
+        }, { "scale": -2 }).readableScale()).toBe("cents");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:USD" }
+        }, { "scale": -2 }).readableScale()).toBe("cents");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:YEN" }
+        }, { "scale": -2 }).readableScale()).toBe("hundredths");
+
+        expect(testFact({
+            "v": "1234",
+            "a": { "u": "iso4217:GBP" }
+        }, { "scale": -2 }).readableScale()).toBe("pence");
 
     });
 });
@@ -451,7 +545,7 @@ describe("Readable value", () => {
     test("Other numeric", () => {
 
         expect(testFact({ "v": "10", d: -2, a: { u: "xbrli:foo" } }).readableValue())
-            .toBe("10 xbrli:foo");
+            .toBe("10 foo");
 
     });
 
@@ -464,20 +558,43 @@ describe("Readable value", () => {
 
     });
 
-    test("Strip HTML tags and normalise whitespace", () => {
+    test("Escaped string", () => {
 
         expect(testFact({ "v": "<b>foo</b>" }, {"escaped": true }).readableValue())
-            .toBe("foo");
+            .toBe("<b>foo</b>");
 
         expect(testFact({ "v": "    <b>foo</b>bar" }, {"escaped": true }).readableValue())
-            .toBe("foobar");
+            .toBe("    <b>foo</b>bar");
 
         expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escaped": true }).readableValue())
+            .toBe("\u00a0<b>foo</b>");
+
+    });
+
+    test("Strip HTML tags and normalise whitespace", () => {
+
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<b>foo</b>" }, {"escaped": true }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "    <b>foo</b>bar" }, {"escaped": true }).readableValue())
+            .toBe("foobar");
+
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "\u00a0<b>foo</b>" }, {"escaped": true }).readableValue())
             .toBe("foo");
 
     });
 
-    test("Don't strip non-escaped facts", () => {
+    test("Strip non-escaped text block facts", () => {
+
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "\u00a0<b>foo</b>" }, {"escaped": false }).readableValue())
+            .toBe("foo");
+
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "\u00a0<b>foo</b>" }, {  }).readableValue())
+            .toBe("foo");
+
+    });
+
+    test("Don't strip non-text-block facts", () => {
 
         expect(testFact({ "v": "\u00a0<b>foo</b>" }, {"escaped": false }).readableValue())
             .toBe("\u00a0<b>foo</b>");
@@ -488,40 +605,40 @@ describe("Readable value", () => {
     });
 
     test("Detect and strip HTML tags - XHTML tags and attributes", () => {
-        expect(testFact({ "v": "<xhtml:b>foo</xhtml:b>" }, {"escaped": true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<xhtml:b>foo</xhtml:b>" }, {"escaped": true }).readableValue())
             .toBe("foo");
 
-        expect(testFact({ "v": '<xhtml:span style="font-weight: bold">foo</xhtml:span>' }, {"escaped": true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": '<xhtml:span style="font-weight: bold">foo</xhtml:span>' }, {"escaped": true }).readableValue())
             .toBe("foo");
     });
 
     test("Detect and strip HTML tags - check behaviour with invalid HTML", () => {
         /* Invalid HTML  */
-        expect(testFact({ "v": "<b:b:b>foo</b:b:b>" }, {"escaped": true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<b:b:b>foo</b:b:b>" }, {"escaped": true }).readableValue())
             .toBe("foo");
 
-        expect(testFact({ "v": "<foo<bar>baz</bar>" }, {"escaped": true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<foo<bar>baz</bar>" }, {"escaped": true }).readableValue())
             .toBe("baz");
     });
 
     test("Text in consecutive inline elements should be contiguous", () => {
 
-        expect(testFact({ "v": "<b>foo</b><i>bar</i>" }, {"escaped":true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<b>foo</b><i>bar</i>" }, {"escaped":true }).readableValue())
             .toBe("foobar");
 
     });
 
     test("Text in block/table elements should be separated.", () => {
 
-        expect(testFact({ "v": "<p>foo</p><p>bar</p>" }, {"escaped":true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<p>foo</p><p>bar</p>" }, {"escaped":true }).readableValue())
             .toBe("foo bar");
 
         /* This should really return "foo bar", but we don't correctly detect
          * block tags in prefixed XHTML */
-        expect(testFact({ "v": '<xhtml:p xmlns:xhtml="https://www.w3.org/1999/xhtml/">foo</xhtml:p><xhtml:p>bar</xhtml:p>' }, {"escaped":true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": '<xhtml:p xmlns:xhtml="https://www.w3.org/1999/xhtml/">foo</xhtml:p><xhtml:p>bar</xhtml:p>' }, {"escaped":true }).readableValue())
             .toBe("foobar");
 
-        expect(testFact({ "v": "<table><tr><td>cell1</td><td>cell2</td></tr></table>" }, {"escaped":true })
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<table><tr><td>cell1</td><td>cell2</td></tr></table>" }, {"escaped":true })
             .readableValue())
             .toBe("cell1 cell2");
 
@@ -529,7 +646,7 @@ describe("Readable value", () => {
 
     test("Whitespace normalisation", () => {
 
-        expect(testFact({ "v": "<p>bar  foo</p> <p>bar</p>" }, {"escaped":true }).readableValue())
+        expect(testFact({ "a": { "c": "eg:TextBlockConcept1" }, "v": "<p>bar  foo</p> <p>bar</p>" }, {"escaped":true }).readableValue())
             .toBe("bar foo bar");
 
     });
@@ -545,10 +662,9 @@ describe("Unit aspect handling", () => {
             }
         });
         expect(f.isNumeric()).toBeTruthy();
-        expect(f.unit()).not.toBeUndefined();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.unit().value()).toBeNull();
-        expect(f.unit().valueLabel()).toBe("<NOUNIT>");
+        expect(f.unit()).toBeUndefined();
+        expect(f.unitLabel()).toBe("<NOUNIT>");
     });
 
     test("Non-numeric, no unit", () => {    

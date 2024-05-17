@@ -1,0 +1,88 @@
+// See COPYRIGHT.md for copyright information
+
+#inspector .summary {
+  .body {
+    .total-facts-title,
+    .files-summary-title {
+      font-weight: bold;
+    }
+
+    .file-summary-container {
+      display: flex;
+      flex-flow: row wrap;
+
+      .files {
+        flex: 1 1 auto;
+      }
+    }
+
+    .tag-summary-body {
+      overflow-x: auto;
+
+      sup {
+        font-size: 0.9rem;
+        display: block;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+
+        td,
+        th {
+          padding: 0.2rem;
+          text-align: left;
+        }
+
+        thead {
+          th {
+            white-space: nowrap;
+            position: relative;
+            height: 10rem;
+
+            &.namespace {
+              text-align: left;
+              vertical-align: bottom;
+            }
+
+            &.figure {
+              width: 5rem;
+
+              & > div {
+                position: absolute;
+                transform: translate(100px, -50%) rotate(45deg) translate(-50%, 50%);
+                text-align: right;
+                width: 200px;
+                right: 0;
+                bottom: 0;
+              }
+            }
+          }
+        }
+
+        tbody th {
+          font-weight: normal;
+        }
+
+        tbody,
+        tfoot {
+          tr {
+            transition: background-color 0.25s ease;
+
+            &:nth-child(odd) {
+              background-color: rgb(248 248 248);
+            }
+
+            &:hover {
+              background-color: rgb(230 230 230);
+            }
+
+            td.figure {
+              text-align: right;
+            }
+          }
+        }
+      }
+    }
+  }
+}

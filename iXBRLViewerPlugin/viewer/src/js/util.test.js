@@ -1,18 +1,6 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
-import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex } from "./util.js"
+import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel, getIXHiddenLinkStyle } from "./util.js"
 import moment from 'moment';
 import "./moment-jest.js";
 
@@ -92,6 +80,22 @@ describe("formatNumber", () => {
     test("Format negative number number, add some decimals", () => {
         expect(formatNumber(-123456,3)).toBe("-123,456.000")
     });
+
+    test("Format number, add some decimals", () => {
+        expect(formatNumber(12345678,4)).toBe("12,345,678.0000")
+    });
+
+    test("Format decimal with large number of digits", () => {
+        expect(formatNumber("10000000000.00000003", undefined)).toBe("10,000,000,000.00000003")
+    });
+
+    test("Format decimal with large number of digits", () => {
+        expect(formatNumber("10000000000.000000030", undefined)).toBe("10,000,000,000.00000003")
+    });
+
+    test("Format decimal with large number of digits", () => {
+        expect(formatNumber("10000000000.000000030", 10)).toBe("10,000,000,000.0000000300")
+    });
 });
 
 describe("wrapLabel", () => {
@@ -123,9 +127,51 @@ describe("wrapLabel", () => {
     });
 });
 
+describe("truncateLabel", () => {
+    test("Truncate at width 10", () => {
+        expect(truncateLabel("The cat sat on the mat.  My hovercraft is full of eels.", 10)).toEqual(
+            "The cat \u2026"
+        );
+        expect(truncateLabel("The cat", 10)).toEqual(
+            "The cat"
+        )
+    });
+});
+
 
 describe("Regex escape", () => {
     test("Regex escape", () => {
         expect(escapeRegex("a.b*{}")).toBe("a\\.b\\*\\{\\}")
     });
+});
+
+describe("Get IX Hidden Link Style", () => {
+    it.each([
+        ["-sec-ix-hidden:123", "123"],
+        ["-esef-ix-hidden:123", "123"],
+        ["-xxx-ix-hidden:123", null],
+        ["-sec-ix-hidden: 123", "123"],
+        ["-sec-ix-hidden:123 ", "123"],
+        ["-sec-ix-hidden:123;", "123"],
+        ["-sec-ix-hidden:123 abc", "123"],
+        ["xxx-sec-ix-hidden:123", null],
+        ["xxx;-sec-ix-hidden:123", "123"],
+        [" -sec-ix-hidden:123", "123"],
+        [";-sec-ix-hidden:123", "123"],
+        ["-sec-ix-Hidden:123", null],
+        ["-sec-ix-hidden:123;-sec-ix-hidden:abc", "123"],
+        ["", null],
+        [null, null],
+    ])("Style value %p returns %p", (style, result) => {
+        const domNode = document.createElement('div');
+        domNode.setAttribute("style", style);
+        const id = getIXHiddenLinkStyle(domNode);
+        expect(id).toEqual(result);
+    });
+
+    test("No style attribute returns null", () => {
+        const domNode = document.createElement('div');
+        const id = getIXHiddenLinkStyle(domNode);
+        expect(id).toEqual(null);
+    })
 });

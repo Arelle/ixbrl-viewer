@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html 
+    xmlns="http://www.w3.org/1999/xhtml" 
+    {{ namespaces }}
+>
+    <head>
+        <title>iXBRL Viewer Test Document</title>
+        <style type="text/css">
+            .time-series td { 
+                padding: 5px;
+            }
+            table.accounts td,
+            table.accounts th {
+                padding: 5px;
+            }
+            td.figure {
+                text-align: right;
+            }
+            .top-border td.figure {
+                border-top: solid 1px #000;
+            }
+            .bottom-border td.figure {
+                border-bottom: solid 1px #000;
+            }
+        </style>
+    </head>
+    <body xmlns="http://www.w3.org/1999/xhtml">
+        <div style="display: none">
+            {{ header }}
+        </div>
+{{ namespace eg = "https://example.com/taxonomy" }}
+{{ period cur "2018-01-01" "2018-12-31" }}
+{{ period prev "2017-01-01" "2017-12-31" }}
+{{ period prev2 "2016-01-01" "2016-12-31" }}
+{{ period prev3 "2015-01-01" "2015-12-31" }}
+{{ period prev4 "2014-01-01" "2014-12-31" }}
+{{ period prev5 "2013-01-01" "2013-12-31" }}
+{{ default period=cur }}
+{{ default decimals="0" }}
+{{ default monetary-units=GBP }}
+{{ default numeric-transform = numdotdecimal }}
+{{ default entity-scheme = "http://www.example.com/1234" }}
+{{ default entity-identifier= "1234" }}
+{{ schema-ref "example.xsd" }}
+
+        <div>
+            <img src="logo.png" alt="logo" />
+        </div>
+
+        <p>
+{{ string eg:StringConceptD1[period=prev] }}This is a text tag {{ end }}
+        </p>
+        <p>
+{{ string eg:StringConceptD1[] }}Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Phasellus egestas tellus rutrum tellus pellentesque eu tincidunt. Mauris rhoncus aenean vel elit. Turpis cursus in hac habitasse platea dictumst. Nulla porttitor massa id neque aliquam vestibulum morbi. At erat pellentesque adipiscing commodo elit at imperdiet dui  In egestas erat imperdiet sed euismod nisi porta lorem mollis. Ac ut consequat semper viverra nam. Sed ullamcorper morbi tincidunt ornare massa eget egestas purus. Risus ultricies tristique nulla aliquet. Pellentesque habitant morbi tristique senectus et. Ultrices neque ornare aenean euismod elementum nisi quis eleifend. {{ end }}
+        </p>
+        <p>
+Profit Loss: {{ monetary eg:MonetaryConceptD1[] }}1234{{end}}
+        </p>
+        <p>
+Profit Loss double tagged: {{ monetary eg:ProfitLoss[] }}{{ monetary eg:ProfitLoss[period = prev] }}1234{{end}}{{end}}
+        </p>
+        <p>
+{{ string [concept=eg:DescriptionOfSomething] }}Mattis rhoncus urna neque viverra justo nec ultrices. Amet tellus cras adipiscing enim. Sed arcu non odio euismod lacinia at. Odio euismod lacinia at quis risus sed vulputate odio. Ac odio tempor orci dapibus. In hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Quis risus sed vulputate odio ut enim. Adipiscing commodo elit at imperdiet dui accumsan sit. Quis vel eros donec ac odio tempor orci dapibus. Turpis nunc eget lorem dolor. Dui nunc mattis enim ut tellus elementum sagittis vitae et. Facilisis sed odio morbi quis commodo. Vitae auctor eu augue ut lectus arcu. <b>Embedded fact:</b> {{monetary eg:Goodwill[period-type=instant]}}1,234,576{{end}} Iaculis nunc sed augue lacus viverra vitae congue eu consequat. Neque sodales ut etiam sit amet nisl. Dictum sit amet justo donec enim diam vulputate ut. A diam maecenas sed enim ut sem. Nisl nisi scelerisque eu ultrices vitae auctor. Purus semper eget duis at tellus at. Vehicula ipsum a arcu cursus vitae congue mauris rhoncus. {{end}}
+        </p>
+        <h3>Table formatting</h3>
+        {{ default period-type=instant }}
+        <table>
+            <tr>
+                <td style="padding: 15px">Element in span with no other content</td>
+                <td style="padding: 15px"><span>{{monetary eg:Row1[]}}761,123{{end}}</span></td>
+                <td style="padding: 15px">{{monetary eg:Row1[period=prev]}}(461,123){{end}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 15px">Other HTML present - cell highlighting OK</td>
+                <td style="padding: 15px">$(<span>{{monetary eg:Row2[]}}761,123{{end}}</span>)</td>
+                <td style="padding: 15px"><span style="font-weight: bold">&#163;</span><i>{{monetary eg:Row2[period=prev]}}(461,123){{end}}</i></td>
+            </tr>
+            <tr>
+                <td style="padding: 15px">Other alpha numeric content present - cell highlighting not OK</td>
+                <td style="padding: 15px"><span>{{monetary eg:Row3[]}}761,123{{end}}</span> <span>{{monetary eg:Row3[]}}761,123{{end}}</span></td>
+                <td style="padding: 15px"><span style="font-weight: bold">GBP</span><i>{{monetary eg:Row3[period=prev]}}(461,123){{end}}</i></td>
+            </tr>
+            <tr>
+                <td style="padding: 5px">Border via style attribute</td>
+                <td style="border-bottom: solid 1px #000; padding: 15px">{{monetary eg:Row4[]}}761,123{{end}}</td>
+                <td style="border-bottom: solid 1px #000; padding: 15px">{{monetary eg:Row4[period=prev]}}461,123{{end}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 15px">Double border </td>
+                <td style="border-bottom: double 3px #000; padding: 15px">{{monetary eg:Row5[]}}761,123{{end}}</td>
+                <td style="border-bottom: double 3px #000; padding: 5px">{{monetary eg:Row5[period=prev]}}461,123{{end}}</td>
+            </tr>
+            <tr>
+                <td style="padding: 15px">Background colour</td>
+                <td style="border-bottom: solid 1px #000; padding: 15px; background-color: #f70;">{{monetary eg:Row6[]}}761,123{{end}}</td>
+                <td style="border-bottom: solid 1px #000 !important; padding: 5px; background-color: #f70;">{{monetary eg:Row6[period=prev]}}461,123{{end}}</td>
+            </tr>
+
+        </table>
+    
+        <h3>Styled via inline stylesheet</h3>
+
+        <table class="time-series">
+            {{ default period-type=duration }}
+            {{ column-aspects static eg:CostOfSales[] }}
+            {{ column-styles "" "" }}
+            {{ row "" [period=cur] "2018" "9,000" }}
+            {{ row "" [period=prev] "2017" "8,750" }}
+            {{ row "" [period=prev2] "2016" "6,750" }}
+            {{ row "" [period=prev3] "2015" "6,500" }}
+            {{ row "" [period=prev4] "2014" "6,509" }}
+            {{ row "" [period=prev5] "2013" "5,336" }}
+        </table>
+
+
+        <h3>Table export test</h3>
+
+        <p>The table below cannot be represented using the intersection of row and column aspects.</p>
+
+        <table class="accounts">
+            {{ column-aspects static [period=cur] [period=prev] }}
+            {{ column-styles "" "figure" "figure" }}
+
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>2018</th>
+                    <th>2017</th>
+                </tr>
+            </thead>
+            <tbody>
+{{ row ""                   eg:ProfitLoss[]                                       "Surplus" "252,867" "14,736" }}
+{{ row ""                   eg:Adjustments[] "Adjustments" "214,955" "165,030" }}
+            <tr>
+                <td>Manual row (periods swapped)</td>
+                <td class="figure">{{ monetary eg:ProfitLoss[period=prev] }}14,736{{end}}</td>
+                <td class="figure">{{ monetary eg:ProfitLoss[period=cur] }}252,867{{end}}</td>
+            </tr>
+{{ row ""                   eg:InterestIncome[]                         "Interest Income" "27,174" "19,596" }}
+{{ row "top-border"                   eg:AdjustmentsForFinanceIncomeCost[sign=flip]         "Financial income/expense" "300" "-479" }}
+{{ row "bottom-border" eg:CashFlowsFromUsedInOperatingActivities[]          "Cash flow from operating activities" "-1,765,126" "1,648,790" }}
+            </tbody>
+        
+
+        </table>
+
+        <h3>Decimals/precision tests</h3>
+
+        <table class="accounts">
+            {{ column-aspects static [period=cur] }}
+            {{ column-styles "" "figure" }}
+            <tbody>
+            {{ row "" eg:ProfitLoss[decimals="-3"] "Decimals = -3" "137,000" }}
+            {{ row "" eg:ProfitLoss[decimals="2"] "Decimals = 2" "137,456.00" }}
+            {{ row "" eg:ProfitLoss[precision="3"] "Precision = 3" "137,000" }}
+            {{ row "" eg:ProfitLoss[precision="INF"] "Precision = INF" "137,000.00" }}
+            {{ row "" eg:ProfitLoss[decimals="INF"] "Decimals = INF" "137,000.00" }}
+            {{ row "" eg:ProfitLoss[precision="0"] "Precision = 0" "137,000.00" }}
+            </tbody>
+        </table>
+
+        <h3>Prior period tests</h3>
+
+        {{ period cur3mo "2018-09-01" "2018-12-31" }}
+        {{ period prev3mo "2017-09-01" "2017-12-31" }}
+
+        <table class="accounts">
+            {{ column-aspects static [period=cur] [period=prev] [period=cur3mo] [period=prev3mo] }}
+            {{ column-styles "" "figure" "figure" "figure" "figure" }}
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>2018</th>
+                    <th>2017</th>
+                    <th>3 months to <br></br>31 Dec 2018</th>
+                    <th>3 months to <br></br>31 Dec 2017</th>
+                </tr>
+
+            </thead>
+            <tbody>
+            {{ row "" eg:LicenceFeeIncome[] "Licence fee income" "123,000" "99,000" "35,000" "22,000" }}
+            {{ row "" eg:FinanceIncomeCost[] "Finance Income (Cost)" "88,000" "(67,000)" "(35,000)" "(22,000)" }}
+            </tbody>
+        </table>
+
+
+        <h3>Calculations</h3>
+            
+
+        {{ default period=cur }}
+        <table class="accounts">
+            <thead>
+                <tr>
+                    <th>Exact calculations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Item 4</td><td class="figure">{{ monetary eg:CalculationItem4[decimals="-3"] }}150,000{{end}}</td><td /></tr>
+                <tr><td>Item 5</td><td class="figure">{{ monetary eg:CalculationItem5[decimals="-3"] }}(25,000){{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Sub Total</td><td class="figure">{{ monetary eg:CalculationSubTotal[decimals="-3"] }}125,000{{end}}</td><td /></tr>
+                <tr><td>Item 1 (with complete duplicate)</td><td class="figure">{{ monetary eg:CalculationItem1[decimals="-3"] }}1,100,000{{end}}</td><td>{{ monetary eg:CalculationItem1[decimals="-3"] }}1,100,000{{end}}</td></tr>
+                <tr><td>Item 3</td><td class="figure">{{ monetary eg:CalculationItem3[decimals="-3"] }}200,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}1,025,000{{end}}</td><td /></tr>
+            </tbody>
+        </table>
+
+        {{ default period=prev }}
+        <table class="accounts">
+            <thead>
+                <tr>
+                    <th>Consistent</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Item 4</td><td class="figure">{{ monetary eg:CalculationItem4[decimals="-3"] }}100,000{{end}}</td><td /></tr>
+                <tr><td>Item 5</td><td class="figure">{{ monetary eg:CalculationItem5[decimals="-3"] }}24,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Sub Total (consistent but not exact)</td><td class="figure">{{ monetary eg:CalculationSubTotal[decimals="-3"] }}125,000{{end}}</td><td /></tr>
+                <tr><td>Item 1 (consistent duplicate)</td><td class="figure">{{ monetary eg:CalculationItem1[decimals="-3"] }}1,075,000{{end}}</td><td>{{ monetary eg:CalculationItem1[decimals="-5"] }}1,100,000{{end}}</td></tr>
+                <tr><td>Item 3</td><td class="figure">{{ monetary eg:CalculationItem3[decimals="-3"] }}200,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}1,025,000{{end}}</td><td /></tr>
+            </tbody>
+        </table>
+
+        {{ default period=prev3 }}
+        <table class="accounts">
+            <thead>
+                <tr>
+                    <th>Inconsistent</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Item 4</td><td class="figure">{{ monetary eg:CalculationItem4[decimals="-3"] }}100,000{{end}}</td><td /></tr>
+                <tr><td>Item 5</td><td class="figure">{{ monetary eg:CalculationItem5[decimals="-3"] }}24,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Sub Total (consistent but not exact)</td><td class="figure">{{ monetary eg:CalculationSubTotal[decimals="-3"] }}125,000{{end}}</td><td /></tr>
+                <tr><td>Item 1</td><td class="figure">{{ monetary eg:CalculationItem1[decimals="-3"] }}1,075,000{{end}}</td> </tr>
+                <tr><td>Item 3</td><td class="figure">{{ monetary eg:CalculationItem3[decimals="-3"] }}200,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}2,225,000{{end}}</td><td /></tr>
+            </tbody>
+        </table>
+
+        {{ default period=prev4 }}
+        <table class="accounts">
+            <thead>
+                <tr>
+                    <th>Inconsistent contributing item</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Item 4</td><td class="figure">{{ monetary eg:CalculationItem4[decimals="-3"] }}100,000{{end}}</td><td /></tr>
+                <tr><td>Item 5</td><td class="figure">{{ monetary eg:CalculationItem5[decimals="-3"] }}24,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Sub Total (consistent but not exact)</td><td class="figure">{{ monetary eg:CalculationSubTotal[decimals="-3"] }}125,000{{end}}</td><td /></tr>
+                <tr><td>Item 1 (with inconsistent duplicate)</td><td class="figure">{{ monetary eg:CalculationItem1[decimals="-3"] }}1,100,000{{end}}</td><td>{{ monetary eg:CalculationItem1[decimals="-3"] }}2,100,000{{end}}</td></tr>
+                <tr><td>Item 3</td><td class="figure">{{ monetary eg:CalculationItem3[decimals="-3"] }}200,000{{end}}</td><td /></tr>
+                <tr class="top-border bottom-border"><td>Total</td><td class="figure">{{ monetary eg:CalculationTotal[decimals="-3"] }}2,225,000{{end}}</td><td /></tr>
+            </tbody>
+        </table>
+
+        <div style="height: 100px; border: solid 1px #9f9; position: relative">
+            <ix:nonNumeric contextRef="c1" escape="true" id="f100" name="eg:TextBlockConceptD1">
+                <div style="position: absolute; top: 5px; left: 5px;">
+                    This is line 1 of an <b>absolutely positioned</b> paragraph.
+                </div>
+                <div style="position: absolute; top: 25px; left: 5px;">
+                    Line 2 of an absolutely positioned paragraph.<br/>New line within paragraph.  Empty div <div style="color: red"></div> Is this red?
+                </div>
+            </ix:nonNumeric>
+        </div>
+
+        <div style="height: 100px; border: solid 1px #f99; position: relative">
+            <ix:footnote id="fn1">
+                <div style="position: absolute; top: 50px; left: 5px;">
+                    This is line 1 of an absolutely positioned paragraph in a footnote.
+                </div>
+                <div style="position: absolute; top: 75px; left: 5px;">
+                    Line 2 of an absolutely positioned paragraph.
+                </div>
+                <p> 
+                This is some non-absolute text.
+                </p>
+            </ix:footnote>
+        </div>
+
+        <div style="height: 100px; border: solid 1px #9f9; position: relative">
+            <ix:nonNumeric contextRef="c1" escape="true" id="f101" name="eg:StringConceptD2">
+                <div style="position: absolute; top: 5px; left: 5px;">
+                    This is line 1 of an absolutely positioned paragraph.  <ix:nonNumeric contextRef="c3" continuedAt="cont1" id="f102" name="eg:StringConceptI1"> Nest tag that</ix:nonNumeric>
+                </div>
+                <ix:continuation id="cont1">
+                <div style="position: absolute; top: 25px; left: 5px;">
+                    spans all of this line and then 
+                </div>
+                <div style="position: absolute; top: 50px; left: 5px;">
+                    into the next one.  <ix:nonFraction contextRef="c2" decimals="0" format="ixt:numdotdecimal" id="f108" name="eg:MonetaryConceptD3" unitRef="u1">1234</ix:nonFraction>
+                </div>
+                </ix:continuation>
+            </ix:nonNumeric>
+        </div>
+
+        <div>
+            <ix:nonNumeric contextRef="c2" id="f103" name="eg:StringConceptD2">
+                <p>
+                Test for absolutely positioned table cells nested within text tag.
+                </p>
+                <table>
+                    <tr>
+                        <th>Absolutely positioned cells</th>
+                        <th>Non-absolutely positioned cells</th>
+                    </tr>
+                    <tr>
+                        <td style="position: absolute">
+                            <ix:nonFraction contextRef="c2" decimals="0" format="ixt:numdotdecimal" id="f104" name="eg:MonetaryConceptD3" unitRef="u1">1234</ix:nonFraction>
+                        </td>
+                        <td>
+                            <ix:nonFraction contextRef="c1" decimals="0" format="ixt:numdotdecimal" id="f105" name="eg:MonetaryConceptD3" unitRef="u1">1234</ix:nonFraction>
+                        </td>
+                    </tr>
+                </table>
+            </ix:nonNumeric>
+        </div>
+
+        <div style="height: 100px; border: solid 1px #9f9; position: relative">
+            <ix:nonNumeric contextRef="c1" continuedAt="cont3" id="f106" name="eg:StringConceptD2" target="foo">
+                <div style="position: absolute; top: 5px; left: 5px;">
+                    This whole block is in a different target document <ix:nonNumeric contextRef="c3" continuedAt="cont2" id="f107" name="eg:StringConceptI1"> But this nested tag is in the default target</ix:nonNumeric>
+                </div>
+                <ix:continuation id="cont2">
+                <div style="position: absolute; top: 25px; left: 5px;">
+                    and is continued here.
+                </div>
+                </ix:continuation>
+            </ix:nonNumeric>
+            <ix:continuation id="cont3">
+                <div style="position: absolute; top: 50px; left: 5px;">
+                    Continuation of tag in different target document.
+                </div>
+            </ix:continuation>
+        </div>
+
+        <ix:nonNumeric contextRef="c1" escape="false" id="f109" name="eg:TextBlockConceptD1">
+            <p>
+                Profit &amp; Loss not escaped - invalid XML
+            </p>
+        </ix:nonNumeric>
+        
+    </body>
+     
+
+
+</html>

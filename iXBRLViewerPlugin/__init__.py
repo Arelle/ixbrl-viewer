@@ -156,15 +156,11 @@ def generateViewer(
         cntlr.addToLog(f"iXBRL Viewer script not provided. {abortGenerationMsg}", messageCode=EXCEPTION_MESSAGE_CODE)
         return
 
-#XXX
-#    if (cntlr.modelManager is None
-#        or len(cntlr.modelManager.loadedModelXbrls) == 0
-#        or any(not mx.modelDocument for mx in cntlr.modelManager.loadedModelXbrls)):
-#        cntlr.addToLog(f"No taxonomy loaded. {abortGenerationMsg}", messageCode=ERROR_MESSAGE_CODE)
-#        return
-#    if cntlr.modelManager.modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-#        cntlr.addToLog(f"No inline XBRL document loaded. {abortGenerationMsg}", messageCode=ERROR_MESSAGE_CODE)
-#        return
+    bldr = pluginData(cntlr).builder
+
+    if bldr.reportCount == 0:
+        cntlr.addToLog(f"No inline XBRL documents loaded. {abortGenerationMsg}", messageCode=ERROR_MESSAGE_CODE)
+        return
 
     copyScriptPath = None
     if copyScript:
@@ -189,7 +185,6 @@ def generateViewer(
             cntlr.addToLog(f"iXBRL Viewer script not found at '{viewerPath}'. {abortGenerationMsg}", messageCode=EXCEPTION_MESSAGE_CODE)
             return
 
-    bldr = pluginData(cntlr).builder
     try:
         if features:
             for feature in features:

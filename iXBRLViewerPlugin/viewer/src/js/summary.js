@@ -138,4 +138,12 @@ export class DocumentSummary {
         }
         return this._localFileSummary.getDocuments()
     }
+
+
+    /**
+     * @return {Array[String]} Report set's list of software credit text values.
+     */
+    getSoftwareCredits() {
+        return this._reportSet.getSoftwareCredits();
+    }
 }

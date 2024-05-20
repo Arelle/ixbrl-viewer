@@ -426,12 +426,7 @@ class IXBRLViewerBuilder:
         else:
             srcFilename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
             docSetFiles = [ srcFilename ]
-            if len(reports) == 1:
-                # If there is only a single report, call the output file "xbrlviewer.html"
-                filename = "xbrlviewer.html"
-            else:
-                # Otherwise, preserve filenames
-                filename = srcFilename
+            filename = srcFilename
             self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
 
         docSetKey = frozenset(docSetFiles)
@@ -502,6 +497,11 @@ class IXBRLViewerBuilder:
 
         if not self.addViewerData(self.iv.files[0], scriptUrl):
             return None
+
+        if len(self.iv.files) == 1:
+            # If there is only a single report, call the output file "xbrlviewer.html"
+            # We should probably preserve the source file extension here.
+            self.iv.files[0].filename = 'xbrlviewer.html'
 
         return self.iv
 

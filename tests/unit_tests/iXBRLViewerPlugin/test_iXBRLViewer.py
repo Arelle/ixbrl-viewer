@@ -506,7 +506,7 @@ class TestIXBRLViewer:
         self.logRecordBuffer.append(error1)
 
         builder = IXBRLViewerBuilder(self.cntlr_mock)
-        builder.processModels([self.modelXbrl_1])
+        builder.processModel(self.modelXbrl_1)
         result = builder.createViewer(js_uri)
         assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]
@@ -531,7 +531,7 @@ class TestIXBRLViewer:
     def test_createViewer(self):
         js_uri = 'ixbrlviewer.js'
         builder = IXBRLViewerBuilder(self.cntlr_mock)
-        builder.processModels([self.modelXbrl_1])
+        builder.processModel(self.modelXbrl_1)
         result = builder.createViewer(js_uri, showValidations = False)
         assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]
@@ -577,7 +577,7 @@ class TestIXBRLViewer:
     def test_createStubViewer(self):
         js_uri = 'ixbrlviewer.js'
         builder = IXBRLViewerBuilder(self.cntlr_mock, useStubViewer = True)
-        builder.processModels([self.modelXbrl_1])
+        builder.processModel(self.modelXbrl_1)
         result = builder.createViewer(js_uri, showValidations = False)
         assert len(result.files) == 2
         body = result.files[0].xmlDocument.getroot().find('{http://www.w3.org/1999/xhtml}body')
@@ -622,7 +622,7 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
     def test_createViewer_docset(self):
         js_uri = 'ixbrlviewer.js'
-        self.builder_doc_set.processModels([self.modelXbrlDocSet])
+        self.builder_doc_set.processModel(self.modelXbrlDocSet)
         result = self.builder_doc_set.createViewer(js_uri, showValidations=False)
         assert len(result.files) == 2
         body = result.files[0].xmlDocument.getroot()[0]
@@ -652,7 +652,7 @@ class TestIXBRLViewer:
     def test_createViewer_bad_path(self):
         js_uri = 'ixbrlviewer.js'
         builder = IXBRLViewerBuilder(self.cntlr_mock)
-        builder.processModels([self.modelXbrl_2])
+        builder.processModel(self.modelXbrl_2)
         result = builder.createViewer(js_uri)
         assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]

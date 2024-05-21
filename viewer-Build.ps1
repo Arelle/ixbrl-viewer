@@ -5,6 +5,7 @@ function viewer-Build {
     Push-Location $PSScriptRoot
     try {
         Exec { . $npmPath install }
+        Exec { . $npmPath run font }
         Exec { . $npmPath run prod }
     }
     finally {

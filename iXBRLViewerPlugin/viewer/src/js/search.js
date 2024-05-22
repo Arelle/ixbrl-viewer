@@ -1,100 +1,195 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import lunr from 'lunr'
-import $ from 'jquery'
 
-export function ReportSearch (report) {
-    this._report = report;
-    this.buildSearchIndex();
-}
+export class ReportSearch {
+    constructor(reportSet) {
+        this._reportSet = reportSet;
+        this.ready = false;
+    }
 
-ReportSearch.prototype.buildSearchIndex = function () {
-    var docs = [];
-    var dims = {};
-    var facts = this._report.facts();
-    this.periods = {};
-    for (var i = 0; i < facts.length; i++) {
-        var f = facts[i];
-        var doc = { "id": f.id };
-        var l = f.getLabel("std");
-        doc.concept = f.conceptQName().localname;
-        doc.doc = f.getLabel("doc");
-        doc.date = f.periodTo();
-        doc.startDate = f.periodFrom();
-        var dims = f.dimensions();
-        for (var d in dims) {
-            if (this._report.getConcept(d).isTypedDimension()) {
-                if (dims[d] !== null) {
-                    l += " " + dims[d];
+    * buildSearchIndex(doneCallback) {
+        var docs = [];
+        var dims = {};
+        var facts = this._reportSet.facts();
+        this.periods = {};
+        for (var i = 0; i < facts.length; i++) {
+            var f = facts[i];
+            var doc = { "id": f.vuid };
+            var l = f.getLabel("std");
+            doc.concept = f.conceptQName().localname;
+            doc.doc = f.getLabel("doc");
+            doc.date = f.periodTo();
+            doc.startDate = f.periodFrom();
+            var dims = f.dimensions();
+            for (var d in dims) {
+                if (f.report.getConcept(d).isTypedDimension()) {
+                    if (dims[d] !== null) {
+                        l += " " + dims[d];
+                    }
+                }
+                else {
+                    l += " " + f.report.getLabel(dims[d], "std");
                 }
             }
-            else {
-                l += " " + this._report.getLabel(dims[d], "std");
+            doc.label = l;
+            doc.ref = f.concept().referenceValuesAsString();
+            const wider = f.widerConcepts();
+            if (wider.length > 0) {
+                doc.widerConcept = f.report.qname(wider[0]).localname;
+                doc.widerLabel = f.report.getLabel(wider[0], "std");
+                doc.widerDoc = f.report.getLabel(wider[0], "doc");
+            }
+            docs.push(doc);
+
+            var p = f.period();
+            if (p) {
+                this.periods[p.key()] = p.toString();
+            }
+
+            if (i % 100 === 0) {
+                yield;
             }
         }
-        doc.label = l;
-        doc.ref = f.concept().referenceValuesAsString();
-        const wider = f.widerConcepts();
-        if (wider.length > 0) {
-            doc.widerConcept = this._report.qname(wider[0]).localname;
-            doc.widerLabel = this._report.getLabel(wider[0], "std");
-            doc.widerDoc = this._report.getLabel(wider[0], "doc");
-        }
-        docs.push(doc);
+        const builder = new lunr.Builder();
+        builder.pipeline.add(
+          lunr.trimmer,
+          lunr.stopWordFilter,
+          lunr.stemmer
+        )
 
-        var p = f.period();
-        if (p) {
-            this.periods[p.key()] = p.toString();
-        }
+        builder.searchPipeline.add(
+          lunr.stemmer
+        )
 
+        builder.ref('id');
+        builder.field('label');
+        builder.field('concept');
+        builder.field('startDate');
+        builder.field('date');
+        builder.field('doc');
+        builder.field('ref');
+        builder.field('widerLabel');
+        builder.field('widerDoc');
+        builder.field('widerConcept');
+
+
+        for (const [i, doc] of docs.entries()) {
+            builder.add(doc);
+            if (i % 100 === 0) {
+                yield;
+            }
+        }
+        this._searchIndex = builder.build();
+        this.ready = true;
+        doneCallback();
     }
-    this._searchIndex = lunr(function () {
-      this.ref('id');
-      this.field('label');
-      this.field('concept');
-      this.field('startDate');
-      this.field('date');
-      this.field('doc');
-      this.field('ref');
-      this.field('widerLabel');
-      this.field('widerDoc');
-      this.field('widerConcept');
 
-      docs.forEach(function (doc) {
-        this.add(doc);
-      }, this)
-    })
-}
+    visibilityFilter(s, item) {
+        return item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts;
+    }
 
-ReportSearch.prototype.search = function (s) {
-    var rr = this._searchIndex.search(s.searchString);
-    var results = []
-    var searchIndex = this;
+    periodFilter(s, item) {
+        return (
+            s.periodFilter.length === 0 ||
+            s.periodFilter.some(p => item.period().key() === p)
+        );
+    }
 
-    rr.forEach((r,i) => {
-            var item = searchIndex._report.getItemById(r.ref);
-            if (
-                (item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts) &&
-                (s.periodFilter == '*' || item.period().key() == s.periodFilter) &&
-                (s.conceptTypeFilter == '*' || s.conceptTypeFilter == (item.isNumeric() ? 'numeric' : 'text'))) {
-                results.push({
-                    "fact": item,
-                    "score": r.score
-                });
-            }
+    conceptTypeFilter(s, item) {
+        return (
+            s.conceptTypeFilter === '*' ||
+            s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')
+        );
+    }
+
+    dimensionTypeFilter(s, item) {
+        const typed = s.dimensionTypeFilter.includes('typed');
+        const explicit = s.dimensionTypeFilter.includes('explicit');
+        return (
+            s.dimensionTypeFilter.length === 0 ||
+            (typed && item.hasTypedDimension()) ||
+            (explicit && item.hasExplicitDimension())
+        )
+    }
+
+    factValueFilter(s, item) {
+        return (
+            s.factValueFilter === '*' ||
+            (s.factValueFilter === 'positive' && item.isPositive()) ||
+            (s.factValueFilter === 'negative' && item.isNegative())
+        );
+    }
+
+    calculationsFilter(s, item) {
+        const summation = s.calculationsFilter.includes('summation');
+        const contributor = s.calculationsFilter.includes('contributor');
+        return (
+            s.calculationsFilter.length === 0 ||
+            (summation && item.isCalculationSummation()) ||
+            (contributor && item.isCalculationContributor())
+        );
+    }
+
+    namespacesFilter(s, item) {
+        return (
+            s.namespacesFilter.length === 0 ||
+            s.namespacesFilter.some(p => item.getConceptPrefix() === p)
+        );
+    }
+
+    unitsFilter(s, item) {
+        return (
+                s.unitsFilter.length === 0 ||
+                s.unitsFilter.some(u => item.unit()?.value() === u)
+        );
+    }
+
+    scalesFilter(s, item) {
+        return (
+                s.scalesFilter.length === 0 ||
+                s.scalesFilter.some(x => item.scale() === Number(x))
+        );
+    }
+
+    targetDocumentFilter(s, item) {
+        return (
+            s.targetDocumentFilter.length === 0 ||
+            s.targetDocumentFilter.some(t => (item.targetDocument() ?? ':default') === t)
+        );
+    }
+
+    search(s) {
+        if (!this.ready) {
+            return;
         }
-    );
-    return results;
+        const rr = this._searchIndex.search(s.searchString);
+        const results = []
+        const searchIndex = this;
+
+        const filters = [
+            this.visibilityFilter,
+            this.periodFilter,
+            this.conceptTypeFilter,
+            this.dimensionTypeFilter,
+            this.factValueFilter,
+            this.calculationsFilter,
+            this.namespacesFilter,
+            this.unitsFilter,
+            this.scalesFilter,
+            this.targetDocumentFilter
+        ];
+
+        rr.forEach((r,_) => {
+                const item = searchIndex._reportSet.getItemById(r.ref);
+                if (filters.every(f => f(s, item))) {
+                    results.push({
+                        "fact": item,
+                        "score": r.score
+                    });
+                }
+            }
+        );
+        return results;
+    }
 }

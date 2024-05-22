@@ -1,0 +1,83 @@
+#ixv .dialog.calculation-inspector {
+  table.calculation-trace {
+    border-spacing: 1rem 0;
+    padding-bottom: 1.5rem;
+
+    th.value-column {
+      // Specify undersized column width to force line break in header, unless
+      // figures are really big.
+      width: 8rem;
+    }
+
+    td {
+      padding: 1rem 0;
+    }
+
+    td.figure {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    &.calc11 {
+        td.icons,
+        th.icons {
+          border-right: solid 1px;
+        }
+    }
+
+    &.has-icons {
+      td.icons,
+      th.icons {
+        padding-right: 1rem;
+      }
+    }
+
+    tr.total {
+      td.figure,
+      td.line-item {
+        border-top: solid 1px;
+      }
+    }
+
+    td.status {
+      .message {
+        font-style: italic;
+      }
+
+      .icon::before {
+        position: relative;
+        top: 0.1rem;
+        padding-right: 0.1rem;
+        font-weight: bold;
+      }
+
+      &.unchecked .icon::before {
+        .icon-question();
+      }
+
+      &.consistent .icon::before {
+        .icon-circle-tick();
+
+        color: @workiva-green;
+      }
+
+      &.inconsistent .icon::before {
+        .icon-circle-cross();
+
+        color: @warning-orange;
+      }
+    }
+
+    span.duplicate-facts {
+      &::before {
+        .icon-multi-tag();
+      }
+    }
+
+    &:not(.calc11) {
+        td.calc11-only, th.calc11-only {
+            display: none;
+        }
+    }
+  }
+}

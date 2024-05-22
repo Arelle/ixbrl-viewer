@@ -1,0 +1,22 @@
+{
+    "labels": {
+        "StringConceptI1": "String concept 1",
+        "StringConceptI2": "String concept 2",
+        "StringConceptD1": "String concept duration 1",
+        "StringConceptD2": "String concept duration 2",
+        "DescriptionOfSomething": "DescriptionOfSomething",
+        "Goodwill": "Goodwill",
+        "CostOfSales": "Cost of Sales",
+        "Adjustments": "Adjustments",
+        "InterestIncome": "Interest Income",
+        "ProfitLoss": "Profit (Loss)",
+        "CalculationTotal": "Calculation Total",
+        "CalculationItem1": "Calculation Item 1",
+        "CalculationItem2": "Calculation Item 2",
+        "CalculationItem3": "Calculation Item 3",
+        "CalculationItem4": "Calculation Item 4",
+        "CalculationSubTotal": "Calculation Sub Total",
+        "CalculationItem5": "Calculation Item 5",
+        "CalculationItem6": "Calculation Item 6"
+    }
+}

@@ -1,0 +1,13 @@
+// See COPYRIGHT.md for copyright information
+
+.viewericon(@char) {
+  font-family: viewericons;
+  content: @char;
+}
+
+{% for glyph in glyphs %}
+.icon-{{ glyph.name }} {
+  .viewericon("\{{ glyph.unicode[0].charCodeAt(0).toString(16) }}");
+}
+{% endfor %}
+

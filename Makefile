@@ -21,16 +21,23 @@ dev: iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js
 
 prod: iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js
 
-iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js:	iXBRLViewerPlugin/viewer/src/*/*
+font: iXBRLViewerPlugin/viewer/src/less/generated/icons.less
+
+FONT_FILES := iXBRLViewerPlugin/viewer/src/icons/*.svg iXBRLViewerPlugin/viewer/src/less/icons.less.njk iXBRLViewerPlugin/viewer/tools/build-font.js
+
+iXBRLViewerPlugin/viewer/src/less/generated/icons.less:	$(FONT_FILES)
+	npm run font
+
+iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js:	iXBRLViewerPlugin/viewer/src/*/* iXBRLViewerPlugin/viewer/src/less/generated/icons.less
 	npm run dev
 
-iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js:	iXBRLViewerPlugin/viewer/src/*/*
+iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js:	iXBRLViewerPlugin/viewer/src/*/* iXBRLViewerPlugin/viewer/src/less/generated/icons.less
 	npm run prod
 
 test: testplugin testviewer
 
 testplugin:
-	nosetests3 tests.unit_tests
+	pytest tests/unit_tests
 
 Arelle:
 	git clone https://github.com/Arelle/Arelle.git Arelle

@@ -516,6 +516,7 @@ export class Inspector {
         this._populateFactSummary(summaryDom);
         this._populateTagSummary(summaryDom);
         this._populateFileSummary(summaryDom);
+        this._populateReportCreation(summaryDom);
     }
 
     _populateFactSummary(summaryDom) {
@@ -613,6 +614,21 @@ export class Inspector {
         insertFileSummary(unrecognizedLinkbase, ".other-links");
         if (visibleItems == 0) {
             summaryFilesContent.hide();
+        }
+    };
+
+    _populateReportCreation(summaryDom) {
+        const softwareCredits = this.summary.getSoftwareCredits();
+
+        const reportCreationContent = summaryDom.find(".report-creation");
+
+        if (softwareCredits.length > 0) {
+            const ul = reportCreationContent.find('ul');
+            for (const softwareCredit of softwareCredits) {
+                ul.append($("<li></li>").text(softwareCredit));
+            }
+        } else {
+            reportCreationContent.hide();
         }
     };
 

@@ -117,6 +117,14 @@ export class ReportSet {
         return this._usedPrefixes;
     }
 
+    /**
+     * @return {Array[String]} Sorted list of unique software credit text values
+     */
+    getSoftwareCredits() {
+        let softwareCredits = new Set(this.reports.flatMap(r => r.softwareCredits()));
+        return Array.from(softwareCredits).sort();
+    }
+
     getTargetDocuments() {
         if (this._targetDocuments === undefined) {
             this._targetDocuments = new Set(Object.values(this._items)

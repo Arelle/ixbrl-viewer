@@ -296,6 +296,9 @@ class TestIXBRLViewer:
             format='format'
         )
 
+        def creationSoftwareMatches_effect(text):
+            return ["Example Software Name"]
+
         def fromModelObjects_effect(concept):
             return []
 
@@ -372,6 +375,7 @@ class TestIXBRLViewer:
 
         def urlDocEntry(path, docType, linkQName=None):
             return path, Mock(
+                creationSoftwareMatches=creationSoftwareMatches_effect,
                 type=docType,
                 basename=os.path.basename(path),
                 xmlRootElement=Mock(
@@ -523,6 +527,7 @@ class TestIXBRLViewer:
         errors = jsdata["validation"]
         assert errors == [{"sev": "ERROR", "msg": "Error message", "code": "code1" }]
         assert set(jsdata["sourceReports"][0]["targetReports"][0]["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
+        assert jsdata["sourceReports"][0]["targetReports"][0]["softwareCredits"] == ["Example Software Name"]
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')

@@ -98,7 +98,8 @@
         "other": "Other Linkbases",
         "presentation": "Presentation Linkbases",
         "references": "Reference Linkbases",
-        "schemas": "Schemas"
+        "schemas": "Schemas",
+        "reportCreation": "Report Creation"
       },
       "tag": {
         "colDimensions": "Dimensions",

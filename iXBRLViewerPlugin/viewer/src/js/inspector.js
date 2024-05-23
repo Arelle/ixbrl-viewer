@@ -516,7 +516,7 @@ export class Inspector {
         this._populateFactSummary(summaryDom);
         this._populateTagSummary(summaryDom);
         this._populateFileSummary(summaryDom);
-        this._populateFilingSoftware(summaryDom);
+        this._populateReportCreation(summaryDom);
     }
 
     _populateFactSummary(summaryDom) {
@@ -617,18 +617,18 @@ export class Inspector {
         }
     };
 
-    _populateFilingSoftware(summaryDom) {
+    _populateReportCreation(summaryDom) {
         const softwareCredits = this.summary.getSoftwareCredits();
 
-        const filingSoftwareContent = summaryDom.find(".software");
+        const reportCreationContent = summaryDom.find(".report-creation");
 
         if (softwareCredits.length > 0) {
-            const ul = filingSoftwareContent.find('ul');
+            const ul = reportCreationContent.find('ul');
             for (const softwareCredit of softwareCredits) {
                 ul.append($("<li></li>").text(softwareCredit));
             }
         } else {
-            filingSoftwareContent.hide();
+            reportCreationContent.hide();
         }
     };
 

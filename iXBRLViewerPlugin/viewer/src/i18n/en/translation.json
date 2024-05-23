@@ -99,7 +99,7 @@
         "presentation": "Presentation Linkbases",
         "references": "Reference Linkbases",
         "schemas": "Schemas",
-        "filingSoftware": "Filing Software"
+        "reportCreation": "Report Creation"
       },
       "tag": {
         "colDimensions": "Dimensions",

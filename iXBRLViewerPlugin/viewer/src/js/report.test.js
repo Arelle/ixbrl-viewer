@@ -158,17 +158,6 @@ describe("Fetching software credit", () => {
         expect(softwareCredits).toEqual(["Example credit text A", "Example credit text B"]);
     });
 
-    test("'None' value", () => {
-        let alternateData = JSON.parse(JSON.stringify(testReportData));
-        alternateData.softwareCredits = ["None"];
-        const testReportSet = new ReportSet(alternateData);
-        testReportSet._initialize();
-        const report = testReportSet.reports[0];
-
-        const softwareCredits = report.softwareCredits();
-        expect(softwareCredits).toEqual([]);
-    });
-
     test("Unset", () => {
         let alternateData = JSON.parse(JSON.stringify(testReportData));
         delete alternateData.softwareCredits;

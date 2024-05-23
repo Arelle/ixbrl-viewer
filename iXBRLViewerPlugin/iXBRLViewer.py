@@ -407,11 +407,12 @@ class IXBRLViewerBuilder:
         for n, report in enumerate(self.reports):
             self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
             self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
-            softwareCredits = {
-                match
-                for document in report.urlDocs.values()
-                for match in document.creationSoftwareMatches(document.creationSoftwareComment)
-            }
+            softwareCredits = set()
+            for document in report.urlDocs.values():
+                if document.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
+                    continue
+                matches = document.creationSoftwareMatches(document.creationSoftwareComment)
+                softwareCredits.update(matches)
             if softwareCredits:
                 self.currentTargetReport["softwareCredits"] = list(softwareCredits)
             for f in report.facts:

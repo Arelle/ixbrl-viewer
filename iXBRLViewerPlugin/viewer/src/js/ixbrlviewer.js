@@ -157,7 +157,7 @@ export class iXBRLViewer {
             docTitle = "Inline Viewer";
         }
         if ($('html').attr("lang") === undefined) {
-            $('html').attr("lang", "en-US");
+            $('html').attr("lang", $('html').attr("xml:lang") || "en-US");
         }
 
         $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));

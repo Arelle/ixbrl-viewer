@@ -47,9 +47,9 @@ const hyphen = '[-\u2014]';
 
 // everything that we allow immediately before a match 
 // (201c = left double quote, 2014 = em dash, 201d = right double quote)
-const begin_guard = '(?:^|(?<=(?:[/\u201c\u2014(]|' + one_ws + '|' + hyphen + ')))';
+const begin_guard = '(?:^|(?<=(?:[/\u201c\u2014([]|' + one_ws + '|' + hyphen + ')))';
 // everything that we allow immediately after a match
-const end_guard = '(?:$|(?=(?:[/,.:;\u201d\u2014)]|' + one_ws + '|' + hyphen + ')))';
+const end_guard = '(?:$|(?=(?:[/,.:;\u201d\u2014)\\]]|' + one_ws + '|' + hyphen + ')))';
 
 const ordinal_suffix = '(?:st|nd|rd|th)';
 const day = '[123]?\\d' + ordinal_suffix + '?';

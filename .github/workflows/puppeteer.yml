@@ -25,7 +25,7 @@ jobs:
           - '3.12'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.1.2
+      - uses: actions/checkout@v4.1.6
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
       - uses: actions/setup-node@v4.0.2
@@ -54,7 +54,7 @@ jobs:
         run: npx http-server . &> tests/puppeteer/artifacts/http_server.log &
       - name: Run puppeteer tests
         run: npm run test:puppeteer
-      - uses: actions/upload-artifact@v4.3.1
+      - uses: actions/upload-artifact@v4.3.3
         if: failure()
         with:
           name: ${{ github.run_id }}.${{ github.run_attempt }}_${{ matrix.os }}_${{ matrix.node-version }}_${{ matrix.python-version }}_artifacts

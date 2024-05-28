@@ -1,11 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
-import { Fact } from "./fact.js"
-import { Footnote } from "./footnote.js"
-import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
-import { setDefault, viewerUniqueId } from "./util.js";
-import $ from 'jquery'
+import { setDefault } from "./util.js";
 import i18next from "i18next";
 
 // Class to represent the XBRL data from a single target document in a single
@@ -269,5 +265,13 @@ export class XBRLReport {
             }
         }
         return this._calculationSummations.has(c);
+    }
+
+
+    /**
+     * @return {Array[String]} Software credit text labels provided with this report for display purposes.
+     */
+    softwareCredits() {
+        return this._reportData.softwareCredits ?? [];
     }
 }

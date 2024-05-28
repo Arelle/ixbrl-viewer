@@ -126,7 +126,7 @@ def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl):
 def generateViewer(
         cntlr: Cntlr,
         saveViewerDest: io.BytesIO | str | None,
-        viewerURL: str = DEFAULT_VIEWER_PATH,
+        viewerURL: str | None = None,
         showValidationMessages: bool = False,
         zipViewerOutput: bool = False,
         features: list[str] | None = None,
@@ -152,9 +152,7 @@ def generateViewer(
         cntlr.addToLog(f"iXBRL Viewer destination not provided. {abortGenerationMsg}", messageCode=EXCEPTION_MESSAGE_CODE)
         return
 
-    if not viewerURL:
-        cntlr.addToLog(f"iXBRL Viewer script not provided. {abortGenerationMsg}", messageCode=EXCEPTION_MESSAGE_CODE)
-        return
+    viewerURL = viewerURL or DEFAULT_VIEWER_PATH
 
     bldr = pluginData(cntlr).builder
 
@@ -241,7 +239,7 @@ def iXBRLViewerSaveCommand(cntlr):
         generateViewer(
             cntlr=cntlr,
             saveViewerDest=dialog.filename(),
-            viewerURL=dialog.scriptUrl() or DEFAULT_VIEWER_PATH,
+            viewerURL=dialog.scriptUrl(),
             copyScript=dialog.copyScript(),
             zipViewerOutput=dialog.zipViewerOutput(),
             features=dialog.features(),
@@ -326,7 +324,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         generateViewer(
             cntlr=cntlr,
             saveViewerDest=tempViewer.name,
-            viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL) or DEFAULT_VIEWER_PATH,
+            viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL),
             copyScript=cntlr.config.get(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT),
             features=features,
         )

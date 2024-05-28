@@ -7,7 +7,6 @@ import { Unit } from "./unit";
 import { titleCase, viewerUniqueId } from "./util.js";
 import { QName } from "./qname.js";
 import { ViewerOptions } from './viewerOptions.js';
-import $ from 'jquery'
 
 
 // Class represents the set of XBRL "target" reports shown in the viewer.
@@ -116,6 +115,14 @@ export class ReportSet {
                     .map(f => f.getConceptPrefix()));
         }
         return this._usedPrefixes;
+    }
+
+    /**
+     * @return {Array[String]} Sorted list of unique software credit text values
+     */
+    getSoftwareCredits() {
+        let softwareCredits = new Set(this.reports.flatMap(r => r.softwareCredits()));
+        return Array.from(softwareCredits).sort();
     }
 
     getTargetDocuments() {

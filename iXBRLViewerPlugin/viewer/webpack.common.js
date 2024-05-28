@@ -17,22 +17,32 @@ module.exports = {
                     use: [ { 
                         loader: "html-loader",
                         options: {
-                            minimize: true,
-                            removeAttributeQuotes: false,
-                            keepClosingSlash: true
+                            esModule: false,
+                            minimize: {
+                                removeAttributeQuotes: false,
+                                keepClosingSlash: true
+                            }
                         }
                     }]
                 },
                 {
                     test: /\.less$/,
-                    use: [ { 
-                        loader: "less-loader",
-                        options: {
-                            lessOptions: {
-                                math: "parens-division"
+                    use: [
+                        {
+                            loader: "css-loader",
+                            options: {
+                                esModule: false
+                            }
+                        },
+                        {
+                            loader: "less-loader",
+                            options: {
+                                lessOptions: {
+                                    math: "parens-division"
+                                }
                             }
                         }
-                    }]
+                    ]
                 }
             ]
 

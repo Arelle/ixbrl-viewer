@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout ixbrl-viewer
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@v4.1.6
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
       - name: Install Node.js
@@ -42,13 +42,13 @@ jobs:
           npm version $(git describe --tags)
           npm pack
       - name: Upload ixbrlviewer.js artifact
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: ixbrlviewer.js
           if-no-files-found: error
           path: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
       - name: Upload npm artifact
-        uses: actions/upload-artifact@v4.3.1
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: npm package
           if-no-files-found: error
@@ -69,11 +69,11 @@ jobs:
           node-version: ${{ inputs.node_version }}
           registry-url: 'https://registry.npmjs.org' # Must explicitly set this for NODE_AUTH_TOKEN to work below
       - name: Download ixbrlviewer.js artifact
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ixbrlviewer.js
       - name: Download npm artifact
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
           name: npm package
       - name: Publish with npm
@@ -83,7 +83,7 @@ jobs:
           NPM_CONFIG_DRY_RUN: ${{ github.repository != 'Arelle/ixbrl-viewer' }}
         run: npm publish ixbrl-viewer-*.tgz --access public
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2.0.4
+        uses: softprops/action-gh-release@v2.0.5
         with:
           fail_on_unmatched_files: true
           files: './*'

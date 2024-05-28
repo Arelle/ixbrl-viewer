@@ -16,7 +16,6 @@ import { Footnote } from './footnote.js';
 import { ValidationReportDialog } from './validationreport.js';
 import { TextBlockViewerDialog } from './textblockviewer.js';
 import { MessageBox } from './messagebox.js';
-import { Interval } from './interval.js';
 import { Calculation } from "./calculation.js";
 import { CalculationInspector } from './calculationInspector.js';
 import { ReportSetOutline } from './outline.js';
@@ -101,7 +100,11 @@ export class Inspector {
                 $("#inspector-head .back").on("click", function () {
                     $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode", "search-mode"]);
                 });
-                $(".popup-trigger").hover(function () { $(this).find(".popup-content").show() }, function () { $(this).find(".popup-content").hide() });
+                $(".popup-trigger").on("mouseenter", function () {
+                    $(this).find(".popup-content").show()
+                }).on("mouseleave", function () {
+                    $(this).find(".popup-content").hide()
+                });
                 $("#inspector").on("click", ".clipboard-copy", function () {
                     navigator.clipboard.writeText($(this).data("cb-text"));
                 });
@@ -137,8 +140,8 @@ export class Inspector {
         this._viewer.onSelect.add((vuid, eltSet, byClick) => this.selectItem(vuid, eltSet, byClick));
         this._viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
-        $('.ixbrl-next-tag').click(() => this._viewer.selectNextTag(this._currentItem));
-        $('.ixbrl-prev-tag').click(() => this._viewer.selectPrevTag(this._currentItem));
+        $('.ixbrl-next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
+        $('.ixbrl-prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
     }
 
     postLoadAsync() {
@@ -288,9 +291,9 @@ export class Inspector {
 
     factListRow(f) {
         const row = $('<div class="fact-list-item"></div>')
-            .click(() => this.selectItem(f.vuid))
-            .dblclick(() => $('#inspector').removeClass("search-mode"))
-            .mousedown((e) => { 
+            .on("click", () => this.selectItem(f.vuid))
+            .on("dblclick", () => $('#inspector').removeClass("search-mode"))
+            .on("mousedown", (e) => { 
                 /* Prevents text selection via double click without
                  * disabling click+drag text selection (which user-select:
                  * none would )
@@ -299,11 +302,11 @@ export class Inspector {
                     e.preventDefault() 
                 } 
             })
-            .mouseenter(() => this._viewer.linkedHighlightFact(f))
-            .mouseleave(() => this._viewer.clearLinkedHighlightFact(f))
+            .on("mouseenter", () => this._viewer.linkedHighlightFact(f))
+            .on("mouseleave", () => this._viewer.clearLinkedHighlightFact(f))
             .data('ivid', f.vuid);
         $('<div class="select-icon"></div>')
-            .click(() => {
+            .on("click", () => {
                 this.selectItem(f.vuid);
                 $('#inspector').removeClass("search-mode");
             })
@@ -374,9 +377,9 @@ export class Inspector {
 
     setupSearchControls(viewer) {
         const inspector = this;
-        $('.search-controls input, .search-controls select').change(() => this.search());
-        $(".search-controls div.filter-toggle").click(() => $(".search-controls").toggleClass('show-filters'));
-        $(".search-controls .search-filters .reset").click(() => this.resetSearchFilters());
+        $('.search-controls input, .search-controls select').on("change", () => this.search());
+        $(".search-controls div.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
+        $(".search-controls .search-filters .reset").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
             $(this).siblings().children('select option:selected').prop('selected', false);
             inspector.search();
@@ -513,6 +516,7 @@ export class Inspector {
         this._populateFactSummary(summaryDom);
         this._populateTagSummary(summaryDom);
         this._populateFileSummary(summaryDom);
+        this._populateReportCreation(summaryDom);
     }
 
     _populateFactSummary(summaryDom) {
@@ -613,6 +617,21 @@ export class Inspector {
         }
     };
 
+    _populateReportCreation(summaryDom) {
+        const softwareCredits = this.summary.getSoftwareCredits();
+
+        const reportCreationContent = summaryDom.find(".report-creation");
+
+        if (softwareCredits.length > 0) {
+            const ul = reportCreationContent.find('ul');
+            for (const softwareCredit of softwareCredits) {
+                ul.append($("<li></li>").text(softwareCredit));
+            }
+        } else {
+            reportCreationContent.hide();
+        }
+    };
+
     createOutline() {
         if (this.outline.hasOutline()) {
             $('.outline .no-outline-overlay').hide();
@@ -620,9 +639,9 @@ export class Inspector {
             for (const group of this.outline.sortedSections()) {
                 $('<div class="fact-list-item"></div>')
                     .text(group.report.getRoleLabel(group.elr))
-                    .click(() => this.selectItem(group.fact.vuid))
-                    .dblclick(() => $('#inspector').removeClass("outline-mode"))
-                    .mousedown((e) => {
+                    .on("click", () => this.selectItem(group.fact.vuid))
+                    .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
+                    .on("mousedown", (e) => {
                         // Prevent text selection by double click
                         if (e.detail > 1) { 
                             e.preventDefault() 
@@ -638,7 +657,7 @@ export class Inspector {
         for (const group of this.outline.groupsForFact(cf)) {
             $('<div class="fact-list-item"></div>')
                 .text(cf.report.getRoleLabel(group.elr))
-                .click(() => this.selectItem(group.fact.vuid))
+                .on("click", () => this.selectItem(group.fact.vuid))
                 .appendTo($('.fact-groups'));
         }
 
@@ -701,7 +720,6 @@ export class Inspector {
     }
 
     _referencesHTML(fact) {
-        const c = fact.concept();
         const a = new Accordian();
         for (const [i, r] of fact.concept().references().entries()) {
             const title = $("<span></span>").text(r[0].value);
@@ -730,7 +748,6 @@ export class Inspector {
         const tableFacts = this._viewer.factsInSameTable(fact);
         const selectedELR = calc.bestELRForFactSet(tableFacts);
         const report = fact.report;
-        const inspector = this;
         const a = new Accordian();
 
         for (const rCalc of calc.resolvedCalculations()) {
@@ -752,9 +769,9 @@ export class Inspector {
                     itemHTML.addClass("calc-fact-link");
                     itemHTML.addClass("calc-fact-link");
                     itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
-                    itemHTML.click(() => this.selectItem(r.facts.items[0].vuid));
-                    itemHTML.mouseenter(() => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
-                    itemHTML.mouseleave(() => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
+                    itemHTML.on("click", () => this.selectItem(r.facts.items[0].vuid));
+                    itemHTML.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
+                    itemHTML.on("mouseleave", () => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
                     r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
                     itemHTML.find(".value").text(r.facts.mostPrecise().readableValue());
                 }
@@ -774,13 +791,13 @@ export class Inspector {
                     .addClass("calculation-details-link")
                     .attr("title", i18next.t('factDetails.viewCalculationDetails'))
                     .text("details")
-                    .click((e) => {
+                    .on("click", (e) => {
                         const dialog = new CalculationInspector();
                         dialog.displayCalculation(rCalc);
                         dialog.show();
                         e.stopPropagation();
                     })
-            const calcStatus = $("<p></p>")
+            $("<p></p>")
                 .append(calcStatusText)
                 .append($("<span></span>").text(" ("))
                 .append(calcDetailsLink)
@@ -819,9 +836,9 @@ export class Inspector {
                 $("<div></div>")
                     .addClass("block-list-item")
                     .text(truncateLabel(fn.textContent(), 120))
-                    .mouseenter(() => this._viewer.linkedHighlightFact(fn))
-                    .mouseleave(() => this._viewer.clearLinkedHighlightFact(fn))
-                    .click(() => this.selectItem(fn.vuid))
+                    .on("mouseenter", () => this._viewer.linkedHighlightFact(fn))
+                    .on("mouseleave", () => this._viewer.clearLinkedHighlightFact(fn))
+                    .on("click", () => this.selectItem(fn.vuid))
                     .appendTo(html);
             }
             else if (fn instanceof Fact) {
@@ -867,9 +884,9 @@ export class Inspector {
         if (factList.length > 0) {
             html
             .addClass("fact-link")
-            .click(() => this.selectItem(factList[0].vuid))
-            .mouseenter(() => factList.forEach(f => this._viewer.linkedHighlightFact(f)))
-            .mouseleave(() => factList.forEach(f => this._viewer.clearLinkedHighlightFact(f)));
+            .on("click", () => this.selectItem(factList[0].vuid))
+            .on("mouseenter", () => factList.forEach(f => this._viewer.linkedHighlightFact(f)))
+            .on("mouseleave", () => factList.forEach(f => this._viewer.clearLinkedHighlightFact(f)));
         }
         return html;
     }
@@ -932,7 +949,7 @@ export class Inspector {
             tr
                 .addClass('text-block')
                 .find('.expand-text-block')
-                    .off().click(() => this.showTextBlock(item));
+                    .off().on("click", () => this.showTextBlock(item));
         }
         else {
             tr.removeClass('text-block');
@@ -1002,7 +1019,7 @@ export class Inspector {
                         $("<span></span>") 
                             .addClass("analyse")
                             .text("")
-                            .click(() => this.analyseDimension(fact, ["p"]))
+                            .on('click', () => this.analyseDimension(fact, ["p"]))
                     );
                 }
                 this._updateEntityIdentifier(fact, factHTML);
@@ -1095,8 +1112,8 @@ export class Inspector {
                     }
                 }
                 $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().click(() => this.selectItem(duplicates[(n+ndup-1) % ndup].vuid));
-                $('.duplicates .next').off().click(() => this.selectItem(duplicates[(n+1) % ndup].vuid));
+                $('.duplicates .prev').off().on("click", () => this.selectItem(duplicates[(n+ndup-1) % ndup].vuid));
+                $('.duplicates .next').off().on("click", () => this.selectItem(duplicates[(n+1) % ndup].vuid));
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {

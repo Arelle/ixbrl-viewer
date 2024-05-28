@@ -1,10 +1,10 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { numberMatchSearch, fullDateMatch } from './number-matcher.js'
+import { numberMatchSearch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
 import { IXNode } from './ixnode.js';
-import { getIXHiddenLinkStyle, runGenerator, escapeRegex, viewerUniqueId, HIGHLIGHT_COLORS } from './util.js';
+import { getIXHiddenLinkStyle, runGenerator, viewerUniqueId, HIGHLIGHT_COLORS } from './util.js';
 import { DocOrderIndex } from './docOrderIndex.js';
 import { MessageBox } from './messagebox.js';
 
@@ -112,7 +112,7 @@ export class Viewer {
                     .text(doc.file)
                     .prop('title', doc.file)
                     .data('ix-doc-id', i)
-                    .click(() => this.selectDocument(i))
+                    .on("click", () => this.selectDocument(i))
                     .appendTo($('#ixv #viewer-pane .ixds-tabs .tab-area'));
             }
             $('#ixv #viewer-pane .ixds-tabs .tab-area .tab').eq(0).addClass("active");
@@ -232,7 +232,7 @@ export class Viewer {
             const [file, fragment] = url.split('#', 2);
             const docIndex = this._reportSet.reportFiles().indexOf(file);
             if (!url.includes('/') && docIndex != -1) {
-                $(n).click((e) => { 
+                $(n).on("click", (e) => { 
                     this._showDocumentAndElement(docIndex, fragment);
                     e.preventDefault(); 
                 });
@@ -472,7 +472,7 @@ export class Viewer {
     _applyStyles() {
         const stlyeElts = $("<style>")
             .prop("type", "text/css")
-            .text(require('css-loader!less-loader!../less/viewer.less').toString())
+            .text(require('../less/viewer.less').toString())
             .appendTo(this._iframes.contents().find("head"));
         this._iv.callPluginMethod("updateViewerStyleElements", stlyeElts);
     }
@@ -512,18 +512,18 @@ export class Viewer {
     _bindHandlers() {
         const viewer = this;
         $('.ixbrl-element', this._contents)
-            .click(function (e) {
+            .on("click", function (e) {
                 e.stopPropagation();
                 viewer.selectElementByClick($(this));
             })
-            .mouseenter(function (e) { viewer._mouseEnter($(this)) })
-            .mouseleave(function (e) { viewer._mouseLeave($(this)) });
+            .on("mouseenter", function (e) { viewer._mouseEnter($(this)) })
+            .on("mouseleave", function (e) { viewer._mouseLeave($(this)) });
         $("body", this._contents)
-            .click(() => viewer.selectElement(null));
+            .on("click", () => viewer.selectElement(null));
         
-        $('#iframe-container .zoom-in').click(() => this.zoomIn());
-        $('#iframe-container .zoom-out').click(() => this.zoomOut());
-        $('#iframe-container .print').click(() => this.currentDocument().get(0).contentWindow.print());
+        $('#iframe-container .zoom-in').on("click", () => this.zoomIn());
+        $('#iframe-container .zoom-out').on("click", () => this.zoomOut());
+        $('#iframe-container .print').on("click", () => this.currentDocument().get(0).contentWindow.print());
 
         TableExport.addHandles(this._contents, this._reportSet);
     }

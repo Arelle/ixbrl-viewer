@@ -1,7 +1,5 @@
 // See COPYRIGHT.md for copyright information
 
-import $ from 'jquery'
-
 export class Concept {
     constructor(report, name) {
         this._c = report.concepts()[name] || {};

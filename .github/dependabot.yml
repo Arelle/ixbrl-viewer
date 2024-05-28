@@ -27,25 +27,6 @@ updates:
       stylelint:
         patterns:
           - "stylelint*"
-    ignore:
-      - dependency-name: chart.js
-        versions:
-          - ">=3"
-      - dependency-name: css-loader
-        versions:
-          - ">=4"
-      - dependency-name: html-loader
-        versions:
-          - ">=1"
-      - dependency-name: i18next
-        versions:
-          - ">=21"
-      - dependency-name: less
-        versions:
-          - ">=4"
-      - dependency-name: less-loader
-        versions:
-          - ">=7"
   - package-ecosystem: pip
     directory: "/"
     insecure-external-code-execution: allow

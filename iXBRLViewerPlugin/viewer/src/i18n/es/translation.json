@@ -3,6 +3,7 @@
     "calculated-total": "",
     "concept": "",
     "consistent-duplicate-facts-present": "",
+    "does-not-bind": "",
     "inconsistent-duplicate-facts-present": "",
     "maximum": "",
     "mininum": "",
@@ -50,8 +51,10 @@
     "concealedFact": "",
     "conceptType": "Tipo de concepto",
     "contributor": "",
+    "dimensions": "",
     "documentOutline": "",
     "documentSummary": "",
+    "explicitDimension": "",
     "fact-groups": "",
     "factProperties": "Propiedades del hecho",
     "factSearch": "Búsqueda de hechos",
@@ -95,7 +98,8 @@
         "other": "",
         "presentation": "",
         "references": "",
-        "schemas": ""
+        "schemas": "",
+        "reportCreation": ""
       },
       "tag": {
         "colDimensions": "",
@@ -108,7 +112,9 @@
       }
     },
     "summation": "",
+    "targetDocument": "",
     "textOption": "Texto",
+    "typedDimensions": "",
     "units": "Unidads",
     "validationCode": "",
     "validationMessage": "",
@@ -134,6 +140,7 @@
   },
   "search": {
     "concealedFact": "",
+    "default": "",
     "hiddenFact": "Hecho oculto",
     "noMatchFound": "No se encontró ninguna coincidencia",
     "selected": "seleccionados",

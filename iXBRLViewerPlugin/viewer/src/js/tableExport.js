@@ -1,7 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import FileSaver from 'file-saver'
 import writeXlsxFile from 'write-excel-file'
 import { Fact } from './fact.js';
 
@@ -20,7 +19,7 @@ export class TableExport {
                 const exporter = new TableExport(table, reportSet);
                 $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
                     .appendTo(table)
-                    .click(() => exporter.exportTable());
+                    .on("click", () => exporter.exportTable());
             }
         });
     }

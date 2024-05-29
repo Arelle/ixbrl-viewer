@@ -1,0 +1,15 @@
+.idea
+.mypy_cache
+.pytest_cache
+.tox
+.vscode
+/ixbrl-viewer*.tgz
+/tests/puppeteer/artifacts/
+Pipfile*
+__pycache__
+build
+iXBRLViewerPlugin/_version.py
+iXBRLViewerPlugin/viewer/src/fonts/
+iXBRLViewerPlugin/viewer/src/less/generated/
+ixbrl_viewer.egg-info
+node_modules/

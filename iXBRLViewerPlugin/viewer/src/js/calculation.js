@@ -4,6 +4,7 @@ import Decimal from 'decimal.js';
 import { setDefault } from './util.js';
 import { Interval } from './interval.js';
 import { FactSet } from './factset.js';
+import { CALC11_ARCROLE, CALC_ARCROLE } from './util.js';
 
 export class Calculation {
     
@@ -19,7 +20,7 @@ export class Calculation {
         const report = fact.report;
         if (!this._conceptToFact) {
             const ctf = {};
-            for (const version of ["calc", "calc11"]) {
+            for (const version of [CALC_ARCROLE, CALC11_ARCROLE]) {
                 const rels = report.getChildRelationships(fact.conceptName(), version)
                 for (const [elr, rr] of Object.entries(rels)) {
                     setDefault(ctf, version, {});
@@ -89,7 +90,7 @@ export class Calculation {
         const report = this.fact.report;
         const rels = report.getChildRelationships(this.fact.conceptName(), version)[elr];
         const resolvedCalcClass = this.calc11 ? ResolvedCalc11Calculation : ResolvedLegacyCalculation;
-        const resolvedCalculation = new resolvedCalcClass(elr, this.fact);
+        const resolvedCalculation = new resolvedCalcClass(elr, this.fact, version);
         for (const r of rels) {
             const factset = calcFacts[r.t] ?? new FactSet();
             resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
@@ -127,11 +128,12 @@ class CalculationContribution {
 
 class AbstractResolvedCalculation {
 
-    constructor(elr, fact) {
+    constructor(elr, fact, relationshipVersion) {
         this.totalFact = fact;
         this.totalFactSet = new FactSet(fact.report.getAlignedFacts(fact));
         this.elr = elr;
         this.rows = [];
+        this.relationshipVersion = relationshipVersion;
     }
 
     addRow(contribution) {
@@ -178,11 +180,15 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
 export class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
 
     binds() {
-        return super.binds() && this.rows.every((r) => r.facts.completeDuplicates());
+        return this.relationshipVersion == CALC_ARCROLE && super.binds() && this.rows.every((r) => r.facts.completeDuplicates());
     }
 
     unchecked() {
         return super.binds() && !this.binds();
+    }
+
+    uncheckedDueToVersionMismatch() {
+        return this.relationshipVersion !== CALC_ARCROLE;
     }
 
     calculatedTotal() {

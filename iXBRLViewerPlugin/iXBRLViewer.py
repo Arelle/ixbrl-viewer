@@ -85,7 +85,7 @@ class IXBRLViewerBuilder:
             cntlr: Cntlr,
             basenameSuffix: str = '',
             useStubViewer: bool = False,
-            ):
+                 ):
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.taxonomyData = {

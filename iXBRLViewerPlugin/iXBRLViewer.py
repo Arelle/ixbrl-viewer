@@ -519,8 +519,12 @@ class iXBRLViewerFile:
     def __init__(self, filename, xmlDocument):
         self.filename = filename
         self.xmlDocument = deepcopy(xmlDocument)
-        # Arelle's custom element class lookup relies on data that is stored on
-        # ModelXbrl, which has been cleaned-up by the time we want to serialize
+        # deepcopy does not retain the Python proxies, so iterating the node
+        # tree during serialization will create new ones. However, the original
+        # ModelObjectFactory is still referenced, and that references a
+        # ModelXbrl that will potentially be closed by the time we serialize.
+        # Serialization only requires standard XML features, so the default
+        # lxml.etree classes (and thus lookup) are fine.
         self.xmlDocument.parser.set_element_class_lookup(etree.ElementDefaultClassLookup())
 
 

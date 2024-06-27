@@ -104,6 +104,7 @@ class IXBRLViewerBuilder:
         self.taxonomyData = {
             "sourceReports": [],
             "features": features,
+            "units": {},
         }
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None
@@ -162,6 +163,14 @@ class IXBRLViewerBuilder:
             label = next((rt.definition for rt in rts if rt.definition is not None), None)
             if label is not None:
                 self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = label
+
+    def addUTRDefinition(self, utrEntry):
+        if utrEntry.isSimple:
+            name = self.nsmap.qname(QName(self.nsmap.getPrefix(utrEntry.nsUnit), utrEntry.nsUnit, utrEntry.unitId))
+            self.taxonomyData["units"].setdefault(name, {
+                "s": utrEntry.symbol,
+                "n": getattr(utrEntry, "unitName", utrEntry.unitId),
+            })
 
     def addConcept(self, report: ModelXbrl, concept, dimensionType = None):
         if concept is None:
@@ -301,6 +310,9 @@ class IXBRLViewerBuilder:
         if f.isNumeric:
             if f.unit is not None and len(f.unit.measures[0]):
                 aspects['u'] = self.oimUnitString(f.unit)
+                if len(f.utrEntries) == 1:
+                    self.addUTRDefinition(next(iter(f.utrEntries)))
+
             else:
                 # The presence of the unit aspect is used by the viewer to
                 # identify numeric facts.  If the fact has no unit (invalid
@@ -519,6 +531,7 @@ class IXBRLViewerBuilder:
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
+
         if showValidations:
             self.taxonomyData["validation"] = self.validationErrors()
 

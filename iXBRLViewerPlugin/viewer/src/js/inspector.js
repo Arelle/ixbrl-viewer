@@ -1205,11 +1205,11 @@ export class Inspector {
     }
 
     _updateValue(item, showAll, context) {
-        const text = item.readableValue();
+        const valueHTML = item.readableValueHTML();
         const tr = $('tr.value', context);
-        let v = text;
-        if (!showAll) {
-            const vv = wrapLabel(text, 120);
+        const valueSpan = tr.find('td .value').empty();
+        if (!item.isNumeric() && !showAll) {
+            const vv = wrapLabel(valueHTML.textContent, 120);
             if (vv.length > 1) {
                 tr.addClass("truncated");
                 tr.find('.show-all')
@@ -1219,10 +1219,11 @@ export class Inspector {
             else {
                 tr.removeClass('truncated');
             }
-            v = vv[0];
+            valueSpan.text(vv[0]);
         }
         else {
             tr.removeClass('truncated');
+            valueSpan.append(valueHTML);
         }
 
         // Only enable text block viewer for escaped, text block facts.  This
@@ -1236,11 +1237,6 @@ export class Inspector {
         }
         else {
             tr.removeClass('text-block');
-        }
-
-        const valueSpan = tr.find('td .value').empty().text(v);
-        if (item instanceof Fact && (item.isNil() || item.isInvalidIXValue())) {
-            valueSpan.wrapInner("<i></i>");
         }
 
     }

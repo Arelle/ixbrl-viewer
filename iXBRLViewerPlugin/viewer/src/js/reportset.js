@@ -8,6 +8,7 @@ import { titleCase, viewerUniqueId } from "./util.js";
 import { QName } from "./qname.js";
 import { ViewerOptions } from './viewerOptions.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
+import { UTREntry } from './utrentry.js';
 
 
 // Class represents the set of XBRL "target" reports shown in the viewer.
@@ -260,6 +261,14 @@ export class ReportSet {
 
     factsForReport(report) {
         return Object.values(this._items).filter(i => i instanceof Fact && i.report == report);
+    }
+
+    utrEntry(name) {
+        const entryData = this._data.units?.[name];
+        if (entryData === undefined) {
+            return undefined;
+        }
+        return new UTREntry(entryData);
     }
     
 }

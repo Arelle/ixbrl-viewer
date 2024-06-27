@@ -319,7 +319,6 @@ export class XBRLReport {
         return this._calculationSummations.has(c);
     }
 
-
     /**
      * @return {Array[String]} Software credit text labels provided with this report for display purposes.
      */

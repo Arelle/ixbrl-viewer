@@ -310,8 +310,9 @@ class IXBRLViewerBuilder:
         if f.isNumeric:
             if f.unit is not None and len(f.unit.measures[0]):
                 aspects['u'] = self.oimUnitString(f.unit)
-                if len(f.utrEntries) == 1:
-                    self.addUTRDefinition(next(iter(f.utrEntries)))
+                print(f.utrEntries)
+                for u in f.utrEntries:
+                    self.addUTRDefinition(u)
 
             else:
                 # The presence of the unit aspect is used by the viewer to

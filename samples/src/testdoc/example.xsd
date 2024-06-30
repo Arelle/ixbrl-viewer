@@ -40,6 +40,7 @@
   <element id="GHGEmissions" name="GHGEmissions" type="types:ghgEmissionsItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
   <element id="Power" name="Power" type="types:powerItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
   <element id="Energy" name="Energy" type="types:energyItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
+  <element id="EmissionsIntensity" name="EmissionsIntensity" type="types:ghgEmissionsPerMonetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" />
 
   <element id="Row1" name="Row1" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />
   <element id="Row2" name="Row2" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" />

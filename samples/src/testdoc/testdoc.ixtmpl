@@ -129,6 +129,10 @@ Profit Loss double tagged: {{ monetary eg:ProfitLoss[] }}{{ monetary eg:ProfitLo
                 <td>MWh</td>
                 <td>{{ num eg:Energy[period=cur, units=utr:MWh] }}147{{end}}</td>
             </tr>
+            <tr>
+                <td>MWh/$</td>
+                <td>{{ num eg:EmissionsIntensity[period=cur, units=utr:tCO2e/iso4217:USD] }}1,234{{end}}</td>
+            </tr>
         </table>
 
         <h3>Table export test</h3>

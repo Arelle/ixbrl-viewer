@@ -71,6 +71,7 @@ export class Unit {
         const name = measureName(this._reportSet, m);
         if (name !== undefined) {
             span.setAttribute("title", name);
+            span.classList.add("measure");
         }
         span.append(document.createTextNode(measureLabel(this._reportSet, m)));
         return span;

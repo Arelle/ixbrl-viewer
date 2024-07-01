@@ -361,17 +361,6 @@ class TestIXBRLViewer:
             ixdsTarget=None,
         )
 
-        error1 = logging.LogRecord("arelle", logging.ERROR, "", 0, "Error message", {}, None)    
-        error1.messageCode = "code1"
-        self.modelManager = Mock(
-            cntlr = Mock(
-                logHandler = Mock (
-                    logRecordBuffer = [
-                        error1
-                    ]
-                )
-            )
-        )
 
         def urlDocEntry(path, docType, linkQName=None):
             return path, Mock(
@@ -394,7 +383,6 @@ class TestIXBRLViewer:
             facts=[fact_1, fact_with_typed_dimension, fact_with_missing_member_on_dimension],
             info=info_effect,
             modelDocument=self.modelDocument,
-            modelManager=self.modelManager,
             ixdsTarget=None,
             urlDocs=dict((
                 urlDocEntry('/filesystem/local-inline.htm', Type.INLINEXBRL),
@@ -425,7 +413,6 @@ class TestIXBRLViewer:
             facts=[fact_2, fact_3],
             info=info_effect,
             modelDocument=self.modelDocument,
-            modelManager=self.modelManager,
             ixdsTarget=None,
             urlDocs={}
         )
@@ -437,7 +424,6 @@ class TestIXBRLViewer:
             facts=[fact_1, fact_with_typed_dimension, fact_with_missing_member_on_dimension],
             info=info_effect,
             modelDocument=self.modelDocumentInlineSet,
-            modelManager=self.modelManager,
             ixdsTarget=None,
             urlDocs={}
         )
@@ -450,10 +436,15 @@ class TestIXBRLViewer:
         typed_dimension_domain_concept.modelXbrl = self.modelXbrl_1
         member_concept.modelXbrl = self.modelXbrl_1
 
-        self.builder_1 = IXBRLViewerBuilder([self.modelXbrl_1])
-        self.builder_2 = IXBRLViewerBuilder([self.modelXbrl_1])
-        self.builder_3 = IXBRLViewerBuilder([self.modelXbrl_2])
-        self.builder_doc_set = IXBRLViewerBuilder([self.modelXbrlDocSet])
+        self.logRecordBuffer = []
+        self.cntlr_mock = Mock(
+            logHandler = Mock(
+                logRecordBuffer = self.logRecordBuffer
+            )
+        )
+        self.builder_1 = IXBRLViewerBuilder(self.cntlr_mock)
+        self.builder_doc_set = IXBRLViewerBuilder(self.cntlr_mock)
+
 
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
@@ -513,7 +504,13 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
     def test_createViewerWithValidation(self):
         js_uri = 'ixbrlviewer.js'
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
+
+        error1 = logging.LogRecord("arelle", logging.ERROR, "", 0, "Error message", {}, None)    
+        error1.messageCode = "code1"
+        self.logRecordBuffer.append(error1)
+
+        builder = IXBRLViewerBuilder(self.cntlr_mock)
+        builder.processModel(self.modelXbrl_1)
         result = builder.createViewer(js_uri)
         assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]
@@ -538,7 +535,8 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
     def test_createViewer(self):
         js_uri = 'ixbrlviewer.js'
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
+        builder = IXBRLViewerBuilder(self.cntlr_mock)
+        builder.processModel(self.modelXbrl_1)
         result = builder.createViewer(js_uri, showValidations = False)
         assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]
@@ -583,8 +581,9 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
     def test_createStubViewer(self):
         js_uri = 'ixbrlviewer.js'
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        result = builder.createViewer(js_uri, showValidations = False, useStubViewer = True)
+        builder = IXBRLViewerBuilder(self.cntlr_mock, useStubViewer = True)
+        builder.processModel(self.modelXbrl_1)
+        result = builder.createViewer(js_uri, showValidations = False)
         assert len(result.files) == 2
         body = result.files[0].xmlDocument.getroot().find('{http://www.w3.org/1999/xhtml}body')
         assert body[0].text == 'BEGIN IXBRL VIEWER EXTENSIONS'
@@ -628,6 +627,7 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.dimensionDefault', 'http://xbrl.org/int/dim/arcrole/dimension-default')
     def test_createViewer_docset(self):
         js_uri = 'ixbrlviewer.js'
+        self.builder_doc_set.processModel(self.modelXbrlDocSet)
         result = self.builder_doc_set.createViewer(js_uri, showValidations=False)
         assert len(result.files) == 2
         body = result.files[0].xmlDocument.getroot()[0]
@@ -656,7 +656,8 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.documentationLabel', 'http://www.xbrl.org/2003/role/documentation')
     def test_createViewer_bad_path(self):
         js_uri = 'ixbrlviewer.js'
-        builder = IXBRLViewerBuilder([self.modelXbrl_2])
+        builder = IXBRLViewerBuilder(self.cntlr_mock)
+        builder.processModel(self.modelXbrl_2)
         result = builder.createViewer(js_uri)
         assert len(result.files) == 1
         body = result.files[0].xmlDocument.getroot()[0]

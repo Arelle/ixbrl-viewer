@@ -23,6 +23,7 @@
     "calculationIsConsistent": "Calculation is consistent",
     "calculationIsInconsistent": "Calculation is inconsistent",
     "calculationUnchecked": "Calculation not checked due to presence of duplicate facts",
+    "calculationUncheckedIncorrectVersion": "Calculation 1.1 relationships not checked in legacy calculation mode",
     "change": "Change",
     "changeFromIn": "From {{from}} in ",
     "changePercentageDecrease": "{{decrease}}% decrease on ",

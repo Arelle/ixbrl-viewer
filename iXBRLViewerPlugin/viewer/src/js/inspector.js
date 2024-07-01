@@ -821,7 +821,12 @@ export class Inspector {
                 calcStatusIcon
                     .addClass("unchecked-flag")
                     .attr("title", i18next.t('factDetails.calculationUnchecked'))
-                calcStatusText.text(i18next.t('factDetails.calculationUnchecked'));
+                if (rCalc.uncheckedDueToVersionMismatch()) {
+                    calcStatusText.text(i18next.t('factDetails.calculationUncheckedIncorrectVersion'));
+                }
+                else {
+                    calcStatusText.text(i18next.t('factDetails.calculationUnchecked'));
+                }
             }
 
             a.addCard(cardTitle, calcBody, rCalc.elr == selectedELR);

@@ -4,6 +4,7 @@ import Decimal from 'decimal.js';
 import { setDefault } from './util.js';
 import { Interval } from './interval.js';
 import { FactSet } from './factset.js';
+import { CALC11_ARCROLE, CALC_ARCROLE } from './util.js';
 
 export class Calculation {
     
@@ -18,13 +19,16 @@ export class Calculation {
         const fact = this.fact;
         const report = fact.report;
         if (!this._conceptToFact) {
-            const rels = report.getChildRelationships(fact.conceptName(), "calc")
             const ctf = {};
-            for (const [elr, rr] of Object.entries(rels)) {
-                ctf[elr] = {};
-                if (rr.length > 0) {
-                    const otherFacts = report.getAlignedFacts(fact, {"c": rr.map(r => r.t )});
-                    otherFacts.forEach(otherFact => setDefault(ctf[elr], otherFact.conceptName(), new FactSet()).add(otherFact));
+            for (const version of [CALC_ARCROLE, CALC11_ARCROLE]) {
+                const rels = report.getChildRelationships(fact.conceptName(), version)
+                for (const [elr, rr] of Object.entries(rels)) {
+                    setDefault(ctf, version, {});
+                    ctf[version][elr] = {};
+                    if (rr.length > 0) {
+                        const otherFacts = report.getAlignedFacts(fact, {"c": rr.map(r => r.t )});
+                        otherFacts.forEach(otherFact => setDefault(ctf[version][elr], otherFact.conceptName(), new FactSet()).add(otherFact));
+                    }
                 }
             }
             this._conceptToFact = ctf;
@@ -40,11 +44,13 @@ export class Calculation {
     resolvedCalculations() {
         const calculations = [];
         const ctf = this.calculationFacts();
-        for (const [elr, concepts] of Object.entries(ctf)) {
-            if (Object.keys(concepts).length > 0) {
-                calculations.push(this.resolvedCalculation(elr));
-            }
-        } 
+        for (const [version, o] of Object.entries(ctf)) {
+            for (const [elr, concepts] of Object.entries(o)) {
+                if (Object.keys(concepts).length > 0) {
+                    calculations.push(this.resolvedCalculation(elr, version));
+                }
+            } 
+        }
         return calculations;
     }
 
@@ -55,34 +61,36 @@ export class Calculation {
         const ctf = this.calculationFacts();
         let bestMatchELR = "";
         let bestMatchCount = -1;
-        for (const [elr, rr] of Object.entries(ctf)) {
-            let matchCount = 0;
-            for (const [concept, calcFactSet] of Object.entries(rr)) {
-                let matched = 0;
-                for (const calcFact of calcFactSet.items()) {
-                    if (facts.includes(calcFact.vuid)) {
-                        matched = 1;
-                    } 
+        for (const [version, o] of Object.entries(ctf)) {
+            for (const [elr, rr] of Object.entries(o)) {
+                let matchCount = 0;
+                for (const [concept, calcFactSet] of Object.entries(rr)) {
+                    let matched = 0;
+                    for (const calcFact of calcFactSet.items()) {
+                        if (facts.includes(calcFact.vuid)) {
+                            matched = 1;
+                        } 
+                    }
+                    matchCount += matched;
                 }
-                matchCount += matched;
-            }
-            if (matchCount/Object.keys(rr).length > bestMatchCount) {
-                bestMatchCount = matchCount/Object.keys(rr).length;    
-                bestMatchELR = elr;
-            }
-        } 
+                if (matchCount/Object.keys(rr).length > bestMatchCount) {
+                    bestMatchCount = matchCount/Object.keys(rr).length;    
+                    bestMatchELR = elr;
+                }
+            } 
+        }
         return bestMatchELR;
     }
 
     /*
      * Returns a ResolvedCalculation object for the specified ELR
      */
-    resolvedCalculation(elr) {
-        const calcFacts = this.calculationFacts()[elr];
+    resolvedCalculation(elr, version) {
+        const calcFacts = this.calculationFacts()[version][elr];
         const report = this.fact.report;
-        const rels = report.getChildRelationships(this.fact.conceptName(), "calc")[elr];
+        const rels = report.getChildRelationships(this.fact.conceptName(), version)[elr];
         const resolvedCalcClass = this.calc11 ? ResolvedCalc11Calculation : ResolvedLegacyCalculation;
-        const resolvedCalculation = new resolvedCalcClass(elr, this.fact);
+        const resolvedCalculation = new resolvedCalcClass(elr, this.fact, version);
         for (const r of rels) {
             const factset = calcFacts[r.t] ?? new FactSet();
             resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
@@ -120,11 +128,12 @@ class CalculationContribution {
 
 class AbstractResolvedCalculation {
 
-    constructor(elr, fact) {
+    constructor(elr, fact, relationshipVersion) {
         this.totalFact = fact;
         this.totalFactSet = new FactSet(fact.report.getAlignedFacts(fact));
         this.elr = elr;
         this.rows = [];
+        this.relationshipVersion = relationshipVersion;
     }
 
     addRow(contribution) {
@@ -171,11 +180,15 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
 export class ResolvedLegacyCalculation extends AbstractResolvedCalculation {
 
     binds() {
-        return super.binds() && this.rows.every((r) => r.facts.completeDuplicates());
+        return this.relationshipVersion == CALC_ARCROLE && super.binds() && this.rows.every((r) => r.facts.completeDuplicates());
     }
 
     unchecked() {
         return super.binds() && !this.binds();
+    }
+
+    uncheckedDueToVersionMismatch() {
+        return this.relationshipVersion !== CALC_ARCROLE;
     }
 
     calculatedTotal() {

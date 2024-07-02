@@ -190,7 +190,7 @@ class IXBRLViewerBuilder:
 
         for baseSetKey, baseSetModelLinks  in report.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
-            if arcrole in (XbrlConst.summationItem, WIDER_NARROWER_ARCROLE, XbrlConst.parentChild, XbrlConst.dimensionDefault) and ELR is not None:
+            if arcrole in (XbrlConst.summationItem, XbrlConst.summationItem11, WIDER_NARROWER_ARCROLE, XbrlConst.parentChild, XbrlConst.dimensionDefault) and ELR is not None:
                 self.addELR(report, ELR)
                 rr = dict()
                 relSet = report.relationshipSet(arcrole, ELR)
@@ -395,6 +395,7 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
         self.roleMap.getPrefix(XbrlConst.documentationLabel, "doc")
         self.roleMap.getPrefix(XbrlConst.summationItem, "calc")
+        self.roleMap.getPrefix(XbrlConst.summationItem11, "calc11")
         self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")

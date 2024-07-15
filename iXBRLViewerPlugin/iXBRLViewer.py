@@ -630,5 +630,5 @@ class iXBRLViewer:
     def _copyScript(self, destDirectory: Path, scriptPath: Path):
         scriptDest = destDirectory / scriptPath.name
         if scriptPath != scriptDest:
-            self.cntlr.addToLog(f"Copying script from {scriptDest} to {scriptDest}.", messageCode=INFO_MESSAGE_CODE)
+            self.cntlr.addToLog(f"Copying script from {scriptPath} to {scriptDest}.", messageCode=INFO_MESSAGE_CODE)
             shutil.copy2(scriptPath, scriptDest)

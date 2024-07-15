@@ -320,7 +320,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
             if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
         ]
         pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer = True)
-        processModel(modelXbrl)
+        processModel(cntlr, modelXbrl)
         generateViewer(
             cntlr=cntlr,
             saveViewerDest=tempViewer.name,

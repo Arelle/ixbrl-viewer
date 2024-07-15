@@ -33,11 +33,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout ixbrl-viewer
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4.1.7
         with:
           fetch-depth: 0
       - name: Install Node.js
-        uses: actions/setup-node@v4.0.2
+        uses: actions/setup-node@v4.0.3
         with:
           cache: 'npm'
           check-latest: true
@@ -47,7 +47,7 @@ jobs:
       - name: Build ixbrlviewer.js
         run: make prod
       - name: Install Python
-        uses: actions/setup-python@v5.1.0
+        uses: actions/setup-python@v5.1.1
         with:
           cache: 'pip'
           cache-dependency-path: '**/pyproject.toml'
@@ -60,13 +60,13 @@ jobs:
       - name: Build Python package
         run: python -m build
       - name: Upload source distribution artifact
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: source distribution
           if-no-files-found: error
           path: dist/*.tar.gz
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: wheel
           if-no-files-found: error
@@ -83,11 +83,11 @@ jobs:
       - name: Install twine
         run: pip install -U twine
       - name: Download source distribution artifact
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: source distribution
       - name: Download wheel artifact
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4.1.8
         with:
           name: wheel
       - name: Publish package on release
@@ -97,7 +97,7 @@ jobs:
           TWINE_REPOSITORY: ${{ github.repository == 'Arelle/ixbrl-viewer' && 'pypi' || 'testpypi' }}
         run: twine upload ./*
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2.0.5
+        uses: softprops/action-gh-release@v2.0.6
         with:
           fail_on_unmatched_files: true
           files: './*'

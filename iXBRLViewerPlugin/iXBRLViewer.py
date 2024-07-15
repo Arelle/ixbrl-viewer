@@ -26,7 +26,6 @@ from lxml import etree
 from .constants import DEFAULT_JS_FILENAME, DEFAULT_OUTPUT_NAME, ERROR_MESSAGE_CODE, FEATURE_CONFIGS, INFO_MESSAGE_CODE
 from .xhtmlserialize import XHTMLSerializer
 
-
 UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = 'unrecognizedLinkbase'
 LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
     XbrlConst.qnLinkCalculationLink: 'calcLinkbase',
@@ -82,18 +81,38 @@ class IXBRLViewerBuilderError(Exception):
 
 class IXBRLViewerBuilder:
 
-    def __init__(self, reports: list[ModelXbrl], basenameSuffix: str = ''):
+    def __init__(self, 
+            cntlr: Cntlr,
+            basenameSuffix: str = '',
+            useStubViewer: bool = False,
+                 ):
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
-        self.reports = reports
-        # Arbitrary ModelXbrl used for logging
-        self.logger_model = reports[0]
         self.taxonomyData = {
             "sourceReports": [],
             "features": [],
         }
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None
+        self.useStubViewer = useStubViewer
+        self.cntlr = cntlr
+
+        self.idGen = 0
+        self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
+        self.roleMap.getPrefix(XbrlConst.documentationLabel, "doc")
+        self.roleMap.getPrefix(XbrlConst.summationItem, "calc")
+        self.roleMap.getPrefix(XbrlConst.summationItem, "calc11")
+        self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
+        self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
+        self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
+
+        self.sourceReportsByFiles = dict()
+        self.iv = iXBRLViewer(cntlr)
+        if self.useStubViewer:
+            self.iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocument()))
+
+        self.fromSingleZIP = None
+        self.reportCount = 0
 
     def enableFeature(self, featureName: str):
         if featureName in self.taxonomyData["features"]:
@@ -210,7 +229,7 @@ class IXBRLViewerBuilder:
         return rels
 
     def validationErrors(self):
-        logHandler = self.logger_model.modelManager.cntlr.logHandler
+        logHandler = self.cntlr.logHandler
         if getattr(logHandler, "logRecordBuffer") is None:
             raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
 
@@ -326,14 +345,13 @@ class IXBRLViewerBuilder:
         return numeratorsString
 
     def addViewerData(self, viewerFile, scriptUrl):
-        viewerFile.xmlDocument = deepcopy(viewerFile.xmlDocument)
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 
         for child in viewerFile.xmlDocument.getroot():
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 for body_child in child:
                     if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type','') == 'application/x.ixbrl-viewer+json':
-                        self.logger_model.error(ERROR_MESSAGE_CODE, "File already contains iXBRL viewer")
+                        self.cntlr.addToLog("File already contains iXBRL viewer", messageCode="error")
                         return False
 
                 child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
@@ -375,111 +393,103 @@ class IXBRLViewerBuilder:
         self.taxonomyData["sourceReports"].append(sourceReport)
         return sourceReport
 
+    def processModel(
+            self,
+            report: ModelXbrl
+            ):
+
+        self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
+        self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
+        softwareCredits = set()
+        for document in report.urlDocs.values():
+            if document.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
+                continue
+            matches = document.creationSoftwareMatches(document.creationSoftwareComment)
+            softwareCredits.update(matches)
+        if softwareCredits:
+            self.currentTargetReport["softwareCredits"] = list(softwareCredits)
+        for f in report.facts:
+            self.addFact(report, f)
+        self.currentTargetReport["rels"] = self.getRelationships(report)
+
+        docSetFiles = None
+        self.reportCount += 1
+        report.info(INFO_MESSAGE_CODE, "Creating iXBRL viewer (%d) [%s]" % (self.reportCount, self.currentTargetReport["target"]))
+        if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
+            # Sort by object index to preserve order in which files were specified.
+            xmlDocsByFilename = {
+                os.path.basename(self.outputFilename(doc.filepath)): doc.xmlDocument
+                for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
+                if doc.type == Type.INLINEXBRL
+            }
+            docSetFiles = list(xmlDocsByFilename.keys())
+
+            for filename, docSetXMLDoc in xmlDocsByFilename.items():
+                self.iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
+
+        elif self.useStubViewer:
+            filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+            docSetFiles = [ filename ]
+            self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+
+        else:
+            srcFilename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
+            docSetFiles = [ srcFilename ]
+            filename = srcFilename
+            self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+
+        docSetKey = frozenset(docSetFiles)
+        sourceReport = self.sourceReportsByFiles.get(docSetKey)
+        if sourceReport is None:
+            sourceReport = self.addSourceReport()
+            self.sourceReportsByFiles[docSetKey] = sourceReport
+            sourceReport["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
+
+        sourceReport["targetReports"].append(self.currentTargetReport)
+
+        localDocs = defaultdict(set)
+        for path, doc in report.urlDocs.items():
+            if isHttpUrl(path) or doc.type == Type.INLINEXBRLDOCUMENTSET:
+                continue
+            if doc.type == Type.INLINEXBRL:
+                localDocs[doc.basename].add('inline')
+            elif doc.type == Type.SCHEMA:
+                localDocs[doc.basename].add('schema')
+            elif doc.type == Type.LINKBASE:
+                linkbaseIdentifed = False
+                for child in doc.xmlRootElement.iterchildren():
+                    linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
+                    if linkbaseLocalDocumentsKey is not None:
+                        localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
+                        linkbaseIdentifed = True
+                if not linkbaseIdentifed:
+                    localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
+        self.currentTargetReport["localDocs"] = {
+            localDoc: sorted(docTypes)
+            for localDoc, docTypes in localDocs.items()
+        }
+
+        # If we only process a single ZIP, add a download link to it as the
+        # "filing documents" on the viewer menu.
+        if self.fromSingleZIP is None:
+            self.fromSingleZIP = report.modelDocument.filepath.endswith(".zip")
+            if self.fromSingleZIP:
+                self.filingDocZipPath = os.path.dirname(report.modelDocument.filepath)
+        else:
+            self.fromSingleZIP = False
+
     def createViewer(
             self,
             scriptUrl: str = DEFAULT_JS_FILENAME,
-            useStubViewer: bool = False,
             showValidations: bool = True,
             packageDownloadURL: str | None = None,
     ) -> iXBRLViewer | None:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
-        :param useStubViewer: True if stub document should be included in output.
         :param showValidations: True if validation errors should be included in output taxonomy data.
         :return: An iXBRLViewer instance that is ready to be saved.
         """
-        # This "dts" is only used for logging
-        iv = iXBRLViewer(self.reports[0])
-        self.idGen = 0
-        self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
-        self.roleMap.getPrefix(XbrlConst.documentationLabel, "doc")
-        self.roleMap.getPrefix(XbrlConst.summationItem, "calc")
-        self.roleMap.getPrefix(XbrlConst.summationItem11, "calc11")
-        self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
-        self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
-        self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
-
-        sourceReportsByFiles = dict()
-
-        if useStubViewer:
-            iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocument()))
-
-        for n, report in enumerate(self.reports):
-            self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
-            self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
-            softwareCredits = set()
-            for document in report.urlDocs.values():
-                if document.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-                    continue
-                matches = document.creationSoftwareMatches(document.creationSoftwareComment)
-                softwareCredits.update(matches)
-            if softwareCredits:
-                self.currentTargetReport["softwareCredits"] = list(softwareCredits)
-            for f in report.facts:
-                self.addFact(report, f)
-            self.currentTargetReport["rels"] = self.getRelationships(report)
-
-            docSetFiles = None
-            report.info(INFO_MESSAGE_CODE, "Creating iXBRL viewer (%d of %d)" % (n+1, len(self.reports)))
-            if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
-                # Sort by object index to preserve order in which files were specified.
-                xmlDocsByFilename = {
-                    os.path.basename(self.outputFilename(doc.filepath)): doc.xmlDocument
-                    for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
-                    if doc.type == Type.INLINEXBRL
-                }
-                docSetFiles = list(xmlDocsByFilename.keys())
-
-                for filename, docSetXMLDoc in xmlDocsByFilename.items():
-                    iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
-
-            elif useStubViewer:
-                filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
-                docSetFiles = [ filename ]
-                iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
-
-            else:
-                srcFilename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
-                docSetFiles = [ srcFilename ]
-                if len(self.reports) == 1:
-                    # If there is only a single report, call the output file "xbrlviewer.html"
-                    filename = "xbrlviewer.html"
-                else:
-                    # Otherwise, preserve filenames
-                    filename = srcFilename
-                iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
-
-            docSetKey = frozenset(docSetFiles)
-            sourceReport = sourceReportsByFiles.get(docSetKey)
-            if sourceReport is None:
-                sourceReport = self.addSourceReport()
-                sourceReportsByFiles[docSetKey] = sourceReport
-                sourceReport["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
-
-            sourceReport["targetReports"].append(self.currentTargetReport)
-
-            localDocs = defaultdict(set)
-            for path, doc in report.urlDocs.items():
-                if isHttpUrl(path) or doc.type == Type.INLINEXBRLDOCUMENTSET:
-                    continue
-                if doc.type == Type.INLINEXBRL:
-                    localDocs[doc.basename].add('inline')
-                elif doc.type == Type.SCHEMA:
-                    localDocs[doc.basename].add('schema')
-                elif doc.type == Type.LINKBASE:
-                    linkbaseIdentifed = False
-                    for child in doc.xmlRootElement.iterchildren():
-                        linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
-                        if linkbaseLocalDocumentsKey is not None:
-                            localDocs[doc.basename].add(linkbaseLocalDocumentsKey)
-                            linkbaseIdentifed = True
-                    if not linkbaseIdentifed:
-                        localDocs[doc.basename].add(UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE)
-            self.currentTargetReport["localDocs"] = {
-                localDoc: sorted(docTypes)
-                for localDoc, docTypes in localDocs.items()
-            }
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
@@ -489,32 +499,42 @@ class IXBRLViewerBuilder:
 
         if packageDownloadURL is not None:
             self.taxonomyData["filingDocuments"] = packageDownloadURL
-        elif len(self.reports) == 1 and os.path.dirname(self.reports[0].modelDocument.filepath).endswith('.zip'):
-            filingDocZipPath = os.path.dirname(self.reports[0].modelDocument.filepath)
-            filingDocZipName = os.path.basename(filingDocZipPath)
-            iv.addFilingDoc(filingDocZipPath)
+        elif self.fromSingleZIP:
+            filingDocZipName = os.path.basename(self.filingDocZipPath)
+            self.iv.addFilingDoc(self.filingDocZipPath)
             self.taxonomyData["filingDocuments"] = filingDocZipName
 
-        if not self.addViewerData(iv.files[0], scriptUrl):
+        if not self.addViewerData(self.iv.files[0], scriptUrl):
             return None
 
-        return iv
+        if len(self.iv.files) == 1:
+            # If there is only a single report, call the output file "xbrlviewer.html"
+            # We should probably preserve the source file extension here.
+            self.iv.files[0].filename = 'xbrlviewer.html'
+
+        return self.iv
 
 
 class iXBRLViewerFile:
 
     def __init__(self, filename, xmlDocument):
         self.filename = filename
-        self.xmlDocument = xmlDocument
+        self.xmlDocument = deepcopy(xmlDocument)
+        # deepcopy does not retain the Python proxies, so iterating the node
+        # tree during serialization will create new ones. However, the original
+        # ModelObjectFactory is still referenced, and that references a
+        # ModelXbrl that will potentially be closed by the time we serialize.
+        # Serialization only requires standard XML features, so the default
+        # lxml.etree classes (and thus lookup) are fine.
+        self.xmlDocument.parser.set_element_class_lookup(etree.ElementDefaultClassLookup())
 
 
 class iXBRLViewer:
 
-    def __init__(self, logger_model: ModelXbrl):
+    def __init__(self, cntlr: Cntlr):
         self.files = []
         self.filingDocuments = None
-        # This is an arbitrary ModelXbrl used for logging only
-        self.logger_model = logger_model
+        self.cntlr = cntlr
         self.filenames = set()
 
     def addFile(self, ivf):
@@ -544,15 +564,15 @@ class iXBRLViewer:
                 fileMode = 'w'
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.logger_model.error(ERROR_MESSAGE_CODE, "Directory %s does not exist" % destination)
+                self.cntlr.addToLog("Directory %s does not exist" % destination, messageCode=ERROR_MESSAGE_CODE)
                 return
             elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.logger_model.error(ERROR_MESSAGE_CODE, "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
+                self.cntlr.addToLog("Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)), messageCode=ERROR_MESSAGE_CODE)
                 return
             elif not destination.endswith('.zip'):
                 # File extension isn't a zip
-                self.logger_model.error(ERROR_MESSAGE_CODE, "File extension %s is not a zip" % os.path.splitext(destination)[0])
+                self.cntlr.addToLog("File extension %s is not a zip" % os.path.splitext(destination)[0], messageCode=ERROR_MESSAGE_CODE)
                 return
             else:
                 file = destination
@@ -560,49 +580,49 @@ class iXBRLViewer:
 
             with zipfile.ZipFile(file, fileMode, zipfile.ZIP_DEFLATED, True) as zout:
                 for f in self.files:
-                    self.logger_model.info(INFO_MESSAGE_CODE, "Saving in output zip %s" % f.filename)
+                    self.cntlr.addToLog("Saving in output zip %s" % f.filename, messageCode=INFO_MESSAGE_CODE)
                     with zout.open(f.filename, "w") as fout:
                         writer = XHTMLSerializer(fout)
                         writer.serialize(f.xmlDocument)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
-                    self.logger_model.info(INFO_MESSAGE_CODE, "Writing %s" % filename)
+                    self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
                     zout.write(self.filingDocuments, filename)
                 if copyScriptPath is not None:
-                    self.logger_model.info(INFO_MESSAGE_CODE, f"Writing script from {copyScriptPath}")
+                    self.cntlr.addToLog(f"Writing script from {copyScriptPath}", messageCode=INFO_MESSAGE_CODE)
                     zout.write(copyScriptPath, copyScriptPath.name)
         elif os.path.isdir(destination):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
             for f in self.files:
                 filename = os.path.join(destination, f.filename)
-                self.logger_model.info(INFO_MESSAGE_CODE, "Writing %s" % filename)
+                self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
                 with open(filename, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(f.xmlDocument)
             if self.filingDocuments:
                 filename = os.path.basename(self.filingDocuments)
-                self.logger_model.info(INFO_MESSAGE_CODE, "Writing %s" % filename)
+                self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
             if copyScriptPath is not None:
                 self._copyScript(Path(destination), copyScriptPath)
         else:
             if len(self.files) > 1:
-                self.logger_model.error(ERROR_MESSAGE_CODE, "More than one file in input, but output is not a directory")
+                self.cntlr.addToLog("More than one file in input, but output is not a directory", messageCode=ERROR_MESSAGE_CODE)
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.logger_model.error(ERROR_MESSAGE_CODE, "Directory %s does not exist" % destination)
+                self.cntlr.addToLog("Directory %s does not exist" % destination, messageCode=ERROR_MESSAGE_CODE)
             elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.logger_model.error(ERROR_MESSAGE_CODE, "Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)))
+                self.cntlr.addToLog("Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)), messageCode=ERROR_MESSAGE_CODE)
             else:
-                self.logger_model.info(INFO_MESSAGE_CODE, "Writing %s" % destination)
+                self.cntlr.addToLog("Writing %s" % destination, messageCode=INFO_MESSAGE_CODE)
                 with open(destination, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(self.files[0].xmlDocument)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
-                    self.logger_model.info(INFO_MESSAGE_CODE, "Writing %s" % filename)
+                    self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
                     shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(destination), filename))
                 if copyScriptPath is not None:
                     outDirectory = Path(destination).parent
@@ -611,5 +631,5 @@ class iXBRLViewer:
     def _copyScript(self, destDirectory: Path, scriptPath: Path):
         scriptDest = destDirectory / scriptPath.name
         if scriptPath != scriptDest:
-            self.logger_model.info(INFO_MESSAGE_CODE, f"Copying script from {scriptDest} to {scriptDest}.")
+            self.cntlr.addToLog(f"Copying script from {scriptPath} to {scriptDest}.", messageCode=INFO_MESSAGE_CODE)
             shutil.copy2(scriptPath, scriptDest)

@@ -106,6 +106,7 @@ class IXBRLViewerBuilder:
             "features": features,
             "units": {},
         }
+        self.utrMap = {}
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None
         self.useStubViewer = useStubViewer
@@ -165,12 +166,11 @@ class IXBRLViewerBuilder:
                 self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = label
 
     def addUTRDefinition(self, utrEntry):
-        if utrEntry.isSimple:
-            name = self.nsmap.qname(QName(self.nsmap.getPrefix(utrEntry.nsUnit), utrEntry.nsUnit, utrEntry.unitId))
-            self.taxonomyData["units"].setdefault(name, {
-                "s": utrEntry.symbol,
-                "n": getattr(utrEntry, "unitName", utrEntry.unitId),
-            })
+        name = self.nsmap.qname(QName(self.nsmap.getPrefix(utrEntry.nsUnit), utrEntry.nsUnit, utrEntry.unitId))
+        self.taxonomyData["units"].setdefault(name, {
+            "s": utrEntry.symbol,
+            "n": getattr(utrEntry, "unitName", utrEntry.unitId),
+        })
 
     def addConcept(self, report: ModelXbrl, concept, dimensionType = None):
         if concept is None:
@@ -310,10 +310,10 @@ class IXBRLViewerBuilder:
         if f.isNumeric:
             if f.unit is not None and len(f.unit.measures[0]):
                 aspects['u'] = self.oimUnitString(f.unit)
-                print(f.utrEntries)
-                for u in f.utrEntries:
-                    self.addUTRDefinition(u)
-
+                for measures in f.unit.measures:
+                    for measure in measures:
+                        if measure in report.qnameUtrUnits:
+                            self.addUTRDefinition(report.qnameUtrUnits[measure])
             else:
                 # The presence of the unit aspect is used by the viewer to
                 # identify numeric facts.  If the fact has no unit (invalid

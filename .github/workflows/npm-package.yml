@@ -42,13 +42,13 @@ jobs:
           npm version $(git describe --tags)
           npm pack
       - name: Upload ixbrlviewer.js artifact
-        uses: actions/upload-artifact@v4.3.4
+        uses: actions/upload-artifact@v4.3.5
         with:
           name: ixbrlviewer.js
           if-no-files-found: error
           path: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
       - name: Upload npm artifact
-        uses: actions/upload-artifact@v4.3.4
+        uses: actions/upload-artifact@v4.3.5
         with:
           name: npm package
           if-no-files-found: error

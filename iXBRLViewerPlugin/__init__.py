@@ -21,7 +21,7 @@ from .constants import CONFIG_COPY_SCRIPT, CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_
     CONFIG_SCRIPT_URL, DEFAULT_COPY_SCRIPT, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
     DEFAULT_JS_FILENAME, DEFAULT_VIEWER_PATH, ERROR_MESSAGE_CODE, \
     EXCEPTION_MESSAGE_CODE, FEATURE_CONFIGS
-from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError
+from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError, isInlineDoc
 from .plugin import IXBRLViewerPluginData
 
 PLUGIN_NAME = 'ixbrl-viewer'
@@ -116,7 +116,8 @@ def resetPluginData(cntlr: Cntlr):
 
 def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl):
     try:
-        pluginData(cntlr).builder.processModel(modelXbrl)
+        if isInlineDoc(modelXbrl.modelDocument):
+            pluginData(cntlr).builder.processModel(modelXbrl)
     except IXBRLViewerBuilderError as ex:
         print(ex)
     except Exception as ex:

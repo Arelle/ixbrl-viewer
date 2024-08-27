@@ -15,7 +15,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from arelle import XbrlConst
-from arelle.ModelDocument import Type
+from arelle.ModelDocument import ModelDocument, Type
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import QName, INVALIDixVALUE
 from arelle.ModelXbrl import ModelXbrl
@@ -78,6 +78,9 @@ class NamespaceMap:
 
 class IXBRLViewerBuilderError(Exception):
     pass
+
+def isInlineDoc(doc: ModelDocument | None) -> bool:
+    return doc is not None and doc.type in {Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET}
 
 class IXBRLViewerBuilder:
 
@@ -402,10 +405,9 @@ class IXBRLViewerBuilder:
         self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
         softwareCredits = set()
         for document in report.urlDocs.values():
-            if document.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-                continue
-            matches = document.creationSoftwareMatches(document.creationSoftwareComment)
-            softwareCredits.update(matches)
+            if isInlineDoc(document):
+                matches = document.creationSoftwareMatches(document.creationSoftwareComment)
+                softwareCredits.update(matches)
         if softwareCredits:
             self.currentTargetReport["softwareCredits"] = list(softwareCredits)
         for f in report.facts:

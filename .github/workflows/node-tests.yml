@@ -21,7 +21,7 @@ jobs:
         node-version:
           - '18'
           - '20'
-          - '21'
+          - '22'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4.1.7

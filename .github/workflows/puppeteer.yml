@@ -14,13 +14,13 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-12
-          - ubuntu-22.04
+          - macos-14
+          - ubuntu-24.04
           - windows-2022
         node-version:
           - '18'
           - '20'
-          - '21'
+          - '22'
         python-version:
           - '3.12'
     runs-on: ${{ matrix.os }}
@@ -42,6 +42,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install Dependencies
         run: npm ci
+      - name: Setup Chromium Sandbox
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          cd ~/.cache/puppeteer/chrome/linux-*/chrome-linux64
+          sudo chown root:root chrome_sandbox
+          sudo chmod 4755 chrome_sandbox
+          sudo cp -p chrome_sandbox /usr/local/sbin/chrome-devel-sandbox
+          echo "CHROME_DEVEL_SANDBOX=/usr/local/sbin/chrome-devel-sandbox" >> $GITHUB_ENV
       - name: Install Arelle
         run: pip install .[arelle]
       - name: Build viewer js

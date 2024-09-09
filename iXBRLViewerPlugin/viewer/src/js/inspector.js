@@ -1021,8 +1021,9 @@ export class Inspector {
                     .text(fact.periodString());
                 if (fact.isNumeric()) {
                     $('tr.period td', factHTML).append(
-                        $("<span></span>") 
-                            .addClass("analyse")
+                        $("<button></button>") 
+                            .addClass(["analyse", "inline-button"])
+                            .attr("title", "Show analysis chart")
                             .text("")
                             .on('click', () => this.analyseDimension(fact, ["p"]))
                     );

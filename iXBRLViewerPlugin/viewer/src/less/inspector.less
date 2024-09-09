@@ -518,16 +518,19 @@
           .icon-tag();
 
           font-size: 10rem;
+          line-height: normal;
         }
 
         .no-outline-overlay-icon::before {
           .icon-outline();
 
           font-size: 10rem;
+          line-height: normal;
         }
 
         .title {
           font-size: x-large;
+          line-height: normal;
         }
       }
 
@@ -615,7 +618,6 @@
         color: @primary;
         content: "\2022";
         position: absolute;
-        top: -5px;
         left: -20px;
         font-size: x-large;
       }
@@ -663,10 +665,16 @@
       }
     }
 
-    .analyse {
+    .inline-button {
+      display: inline;
       cursor: pointer;
-      padding-left: 0.7rem;
       color: @primary;
+      padding: 0.3rem;
+      border: none;
+    }
+
+    .analyse {
+      margin-left: 0.4rem;
     }
 
     .analyse::before {
@@ -706,12 +714,6 @@
         color: @text-title;
       }
 
-      th,
-      td {
-        padding-top: 2px;
-        padding-bottom: 2px;
-      }
-
       tr.value {
         .show-all {
           color: @primary;
@@ -733,7 +735,8 @@
       }
 
       td {
-        overflow: hidden;
+        overflow-x: clip;
+        overflow-y: visible;
         text-overflow: ellipsis;
         color: @text-form-value;
       }

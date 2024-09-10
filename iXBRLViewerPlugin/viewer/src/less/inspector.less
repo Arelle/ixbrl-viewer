@@ -304,7 +304,7 @@
           .square-button-bare();
 
           top: 0;
-          left: 0;
+          left: 0.9rem;
           position: absolute;
 
           &::before {
@@ -556,6 +556,7 @@
           .search-overlay-icon {
             text-align: center;
             font-size: 10rem;
+            line-height: normal;
 
             &::before {
               .icon-search();
@@ -565,9 +566,11 @@
           .search-overlay-text {
             text-align: center;
             font-size: medium;
+            line-height: normal;
 
             .title {
               font-size: x-large;
+              line-height: normal;
             }
           }
         }
@@ -735,8 +738,7 @@
       }
 
       td {
-        overflow-x: clip;
-        overflow-y: visible;
+        overflow: clip visible;
         text-overflow: ellipsis;
         color: @text-form-value;
       }
@@ -1149,6 +1151,7 @@
           color: @text;
         }
       }
+
     }
   }
 

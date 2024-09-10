@@ -290,7 +290,7 @@ export class Inspector {
     }
 
     factListRow(f) {
-        const row = $('<div class="fact-list-item"></div>')
+        const row = $('<button class="fact-list-item"></button>')
             .on("click", () => this.selectItem(f.vuid))
             .on("dblclick", () => $('#inspector').removeClass("search-mode"))
             .on("mousedown", (e) => { 
@@ -378,7 +378,7 @@ export class Inspector {
     setupSearchControls(viewer) {
         const inspector = this;
         $('.search-controls input, .search-controls select').on("change", () => this.search());
-        $(".search-controls div.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
+        $(".search-controls button.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
         $(".search-controls .search-filters .reset").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
             $(this).siblings().children('select option:selected').prop('selected', false);
@@ -467,7 +467,7 @@ export class Inspector {
             return;
         }
         const container = $('#inspector .search-results .results');
-        $('div', container).remove();
+        $(".fact-list-item", container).remove();
         this._viewer.clearRelatedHighlighting();
         const overlay = $('#inspector .search-results .search-overlay');
         if (results.length > 0) {
@@ -637,7 +637,7 @@ export class Inspector {
             $('.outline .no-outline-overlay').hide();
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
             for (const group of this.outline.sortedSections()) {
-                $('<div class="fact-list-item"></div>')
+                $('<button class="fact-list-item"></button>')
                     .text(group.report.getRoleLabel(group.elr))
                     .on("click", () => this.selectItem(group.fact.vuid))
                     .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
@@ -655,7 +655,7 @@ export class Inspector {
     updateOutline(cf) {
         $('.fact-groups').empty();
         for (const group of this.outline.groupsForFact(cf)) {
-            $('<div class="fact-list-item"></div>')
+            $('<button class="fact-list-item"></button>')
                 .text(cf.report.getRoleLabel(group.elr))
                 .on("click", () => this.selectItem(group.fact.vuid))
                 .appendTo($('.fact-groups'));

@@ -843,16 +843,25 @@
         user-select: none;
         white-space: nowrap;
 
-        &::before {
-          .icon-chevron-right();
+        & > button {
+            .text-md();
+            border: none;
+            color: @text-title;
+            text-align: left;
+            position: relative;
+            padding: 0.4rem 0.9rem 0.4rem 2.3rem;
 
-          font-size: 1.8rem;
-          position: relative;
-          top: 0.4rem;
-          left: -0.3rem;
-          transform: rotate(90deg);
-          transition: all 0.25s ease;
-          display: inline-block;
+            &::before {
+              .icon-chevron-right();
+
+              font-size: 1.8rem;
+              position: absolute;
+              top: 0.4rem;
+              left: 0rem;
+              transform: rotate(90deg);
+              transition: all 0.25s ease;
+              display: inline-block;
+            }
         }
 
         .collapsible-subheader {
@@ -865,7 +874,7 @@
       }
 
       &.collapsed {
-        .collapsible-header::before {
+        .collapsible-header button::before {
           transform: rotate(0);
           top: 0.3rem;
           left: -0.2rem;

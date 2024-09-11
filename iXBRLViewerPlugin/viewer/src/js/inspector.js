@@ -1118,8 +1118,8 @@ export class Inspector {
                     }
                 }
                 $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().on("click", () => this.selectItem(duplicates[(n+ndup-1) % ndup].vuid));
-                $('.duplicates .next').off().on("click", () => this.selectItem(duplicates[(n+1) % ndup].vuid));
+                $('.duplicates .prev').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.duplicates .prev').get(0).focus(); });
+                $('.duplicates .next').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.duplicates .next').get(0).focus(); });
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {

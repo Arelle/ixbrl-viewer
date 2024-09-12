@@ -17,9 +17,9 @@ all: dev
 samples: Arelle
 	$(MAKE) -C $@
 
-dev: iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js
+dev: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.dev.js
 
-prod: iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js
+prod: iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js
 
 font: iXBRLViewerPlugin/viewer/src/less/generated/icons.less
 
@@ -28,10 +28,10 @@ FONT_FILES := iXBRLViewerPlugin/viewer/src/icons/*.svg iXBRLViewerPlugin/viewer/
 iXBRLViewerPlugin/viewer/src/less/generated/icons.less:	$(FONT_FILES)
 	npm run font
 
-iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.dev.js:	iXBRLViewerPlugin/viewer/src/*/* iXBRLViewerPlugin/viewer/src/less/generated/icons.less
+iXBRLViewerPlugin/viewer/dist/ixbrlviewer.dev.js:	iXBRLViewerPlugin/viewer/src/*/* iXBRLViewerPlugin/viewer/src/less/generated/icons.less
 	npm run dev
 
-iXBRLViewerPlugin/viewer/dist/ixbrl_viewer.js:	iXBRLViewerPlugin/viewer/src/*/* iXBRLViewerPlugin/viewer/src/less/generated/icons.less
+iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js:	iXBRLViewerPlugin/viewer/src/*/* iXBRLViewerPlugin/viewer/src/less/generated/icons.less
 	npm run prod
 
 test: testplugin testviewer
@@ -53,5 +53,5 @@ dist: prod
 	mkdir -p $(DIST)
 	cp -r iXBRLViewerPlugin js/dist/ixbrlviewer.js $(DIST)
 	zip -r $(DIST).zip $(DIST) -x \*/__pycache__/\* \*/.\*
-	
+
 .PHONY: samples

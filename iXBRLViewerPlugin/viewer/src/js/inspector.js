@@ -787,7 +787,7 @@ export class Inspector {
                 .append(calcStatusIcon)
                 .append($("<span></span>").text(label));
             const calcStatusText = $("<span></span>");
-            const calcDetailsLink = $("<span></span>")
+            const calcDetailsLink = $("<button></button>")
                     .addClass("calculation-details-link")
                     .attr("title", i18next.t('factDetails.viewCalculationDetails'))
                     .text("details")

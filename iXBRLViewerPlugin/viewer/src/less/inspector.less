@@ -845,6 +845,7 @@
 
         & > button {
             .text-md();
+
             border: none;
             color: @text-title;
             text-align: left;
@@ -857,7 +858,7 @@
               font-size: 1.8rem;
               position: absolute;
               top: 0.4rem;
-              left: 0rem;
+              left: 0;
               transform: rotate(90deg);
               transition: all 0.25s ease;
               display: inline-block;
@@ -967,8 +968,7 @@
         }
 
         .calculation-details-link {
-          color: @primary;
-          cursor: pointer;
+          .inline-button();
         }
       }
     }

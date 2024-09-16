@@ -179,7 +179,7 @@ export class CalculationInspector extends Dialog {
             messageCell.addClass("consistent").find(".message").text(i18next.t('factDetails.calculationIsConsistent'));
         }
         else {
-            messageCell.addClass("inconsistent").find(".message").text(i18next.t('factDetails.calculationIsConsistent'));
+            messageCell.addClass("inconsistent").find(".message").text(i18next.t('factDetails.calculationIsInconsistent'));
         }
     }
 }

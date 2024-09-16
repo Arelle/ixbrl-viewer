@@ -769,7 +769,7 @@ export class Inspector {
                     itemHTML.addClass("calc-fact-link");
                     itemHTML.addClass("calc-fact-link");
                     itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
-                    itemHTML.on("click", () => this.selectItem(r.facts.items[0].vuid));
+                    itemHTML.on("click", () => this.selectItem(r.facts.items()[0].vuid));
                     itemHTML.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
                     itemHTML.on("mouseleave", () => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
                     r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));

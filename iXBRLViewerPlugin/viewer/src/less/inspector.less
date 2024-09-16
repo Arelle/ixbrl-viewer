@@ -934,8 +934,12 @@
 
           tr.item {
             td {
-              padding: 5px 0;
+              padding: 0.2rem 0;
               line-height: 1.8rem;
+
+              &.weight {
+                text-align: center;
+              }
 
               &.value {
                 text-align: right;
@@ -946,12 +950,27 @@
               color: #777;
             }
 
+            &:not(.calc-fact-link) {
+              td {
+                .text-md();
+
+                &.concept-name {
+                  // Compensate for padding that gets added by button on clickable rows.
+                  padding: 0.3rem;
+                }
+              }
+            }
+
             &.calc-fact-link {
               cursor: pointer;
 
               .concept-name,
               .value {
                 color: @primary;
+
+                button {
+                  .text-md();
+                }
               }
             }
 

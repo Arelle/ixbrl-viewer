@@ -760,14 +760,14 @@ export class Inspector {
             for (const r of rCalc.rows) {
                 const itemHTML = $("<tr></tr>")
                     .addClass("item")
-                    .append($("<td></td>").addClass("weight").text(r.weightSign + " "))
+                    .append($("<td></td>").addClass("weight").text(r.weightSign))
                     .append($("<td></td>").addClass("concept-name").text(r.concept.label()))
                     .append($("<td></td>").addClass("value"))
                     .appendTo(calcTable);
 
                 if (!r.facts.isEmpty()) {
                     itemHTML.addClass("calc-fact-link");
-                    itemHTML.addClass("calc-fact-link");
+                    itemHTML.find(".concept-name").contents().wrap($("<button></button>").addClass("inline-button"));
                     itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
                     itemHTML.on("click", () => this.selectItem(r.facts.items()[0].vuid));
                     itemHTML.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));

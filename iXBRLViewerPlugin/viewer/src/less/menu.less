@@ -37,14 +37,14 @@
 
       .content {
         line-height: initial;
-        background: #fff;
-        border: solid 1px var(--border-grey-color);
+        background: var(--colour-bg);
+        border: solid 1px var(--colour-border-grey);
         max-height: 100%;
         overflow-y: auto;
 
         .group {
-          border-bottom: solid 1px var(--border-grey-color);
-          border-top: solid 1px var(--border-grey-color);
+          border-bottom: solid 1px var(--colour-border-grey);
+          border-top: solid 1px var(--colour-border-grey);
         }
 
         .item {
@@ -54,7 +54,7 @@
           text-align: left;
 
           &:hover {
-            background: var(--border-grey-color);
+            background: var(--colour-row-hover);
           }
 
           &:focus-within {
@@ -89,7 +89,7 @@
 
         a.item {
           display: block;
-          color: var(--text-color);
+          color: var(--colour-text);
 
           &:hover {
             text-decoration: none;

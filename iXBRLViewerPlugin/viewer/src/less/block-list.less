@@ -3,10 +3,10 @@
 .block-list-item {
   margin: 0.5rem 0;
   padding: 0.3rem 0.9rem;
-  background-color: var(--button-bg-color);
+  background-color: var(--colour-button-bg);
   cursor: pointer;
   position: relative;
-  border-left: solid 0.4rem var(--button-bg-color);
+  border-left: solid 0.4rem var(--colour-button-bg);
   border-right: none;
   border-top: none;
   border-bottom: none;
@@ -24,12 +24,12 @@
   }
 
   &:hover {
-    background-color: var(--background-selected-color);
+    background-color: var(--colour-bg-selected);
   }
 
   &.selected {
-    border-left: solid 0.4rem #0085e6;
-    background-color: var(--background-selected-color);
+    border-left: solid 0.4rem var(--colour-primary);
+    background-color: var(--colour-bg-selected);
   }
 
   &.linked-highlight {

@@ -21,6 +21,32 @@
 
 @top-bar-height: 3.5rem;
 
+:root {
+  --background-color: @background;
+  --background-selected-color: @background-selected;
+  --background-tag-color: @background-tag;
+  --border-grey-color: @border-grey;
+  --button-background-color: @button-background;
+  --button-primary-bg-color: @button-primary-bg;
+  --button-primary-border-color: @button-primary-border;
+  --foreground-color: @foreground;
+  --highlight-1-color: @highlight-1;
+  --highlight-2-color: @highlight-2;
+  --highlight-default-color: @highlight-default;
+  --icon-grey-color: @icon-grey;
+  --linked-fact-color: @linked-fact;
+  --primary-color: @primary;
+  --primary-focus-color: @primary-focus;
+  --related-fact-color: @related-fact;
+  --text-color: @text;
+  --text-form-value-color: @text-form-value;
+  --text-light-color: @text-light;
+  --text-title-color: @text-title;
+  --top-bar-height: @top-bar-height;
+  --warning-orange-color: @warning-orange;
+  --workiva-green-color: @workiva-green;
+}
+
 #ixv {
   /* Specify these here, not on body in case the iXBRL document has its own
    * style attribute */
@@ -46,7 +72,7 @@
     box-sizing: border-box;
     position: fixed;
     left: 0;
-    top: @top-bar-height;
+    top: var(--top-bar-height);
     bottom: 0;
     z-index: 0;
     display: flex;
@@ -134,12 +160,12 @@
     .default-font();
     .text-md();
 
-    color: @text;
+    color: var(--text-color);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: @top-bar-height;
+    height: var(--top-bar-height);
     border-bottom: solid 1px #ccc;
     z-index: 5;
 
@@ -159,7 +185,7 @@
       padding-right: 1.6rem;
       padding-top: 1.3rem;
       border-right: solid 0.1rem #ccc;
-      height: @top-bar-height;
+      height: var(--top-bar-height);
       overflow: hidden;
     }
 
@@ -167,7 +193,7 @@
       position: absolute;
       right: 1.8rem;
       top: 0;
-      line-height: @top-bar-height;
+      line-height: var(--top-bar-height);
 
       * {
         vertical-align: middle;
@@ -197,7 +223,7 @@
           top: 3.2rem;
           left: -2rem;
           background: #fff;
-          border: solid 1px @text;
+          border: solid 1px var(--text-color);
           border-radius: 0.3rem;
           line-height: 1.6rem;
 
@@ -207,8 +233,8 @@
             left: 1.1rem;
             width: 1.5rem;
             height: 1.5rem;
-            border-top: solid 0.1rem @text;
-            border-left: solid 0.1rem @text;
+            border-top: solid 0.1rem var(--text-color);
+            border-left: solid 0.1rem var(--text-color);
             transform: translate(50%, -50%) rotate(45deg);
             background: #fff;
           }
@@ -226,15 +252,15 @@
             }
 
             .sample-0 {
-              background: @highlight-default;
+              background: var(--highlight-default-color);
             }
 
             .sample-1 {
-              background: @highlight-1;
+              background: var(--highlight-1-color);
             }
 
             .sample-2 {
-              background: @highlight-2;
+              background: var(--highlight-2-color);
             }
           }
         }
@@ -261,11 +287,11 @@
     h2,
     h3 {
       font-weight: normal;
-      border-bottom: solid 1px @border-grey;
+      border-bottom: solid 1px var(--border-grey-color);
       width: 100%;
       box-sizing: border-box;
       padding-bottom: 5px;
-      color: @text-title;
+      color: var(--text-title-color);
     }
 
     h2 {
@@ -278,19 +304,19 @@
 
     h4 {
       font-weight: bold;
-      color: @text-title;
+      color: var(--text-title-color);
       margin-bottom: 1.4em;
     }
 
     #inspector-head {
       padding: 0;
       position: relative;
-      border-bottom: solid 1px @border-grey;
+      border-bottom: solid 1px var(--border-grey-color);
 
       .title {
         text-align: center;
         position: relative;
-        border-bottom: @simple-border;
+        border-bottom: solid 0.1rem var(--border-grey-color);
 
         h1 {
           margin: 0.8rem 0;
@@ -415,7 +441,7 @@
         }
 
         &.show-filters .filter-toggle {
-          color: @primary;
+          color: var(--primary-color);
         }
 
         .search-filters {
@@ -512,7 +538,7 @@
         transform: translate(-50%, -50%);
         width: 80%;
         text-align: center;
-        color: @text-light;
+        color: var(--text-light-color);
 
         .no-fact-overlay-icon::before {
           .icon-tag();
@@ -550,7 +576,7 @@
           position: absolute;
           top: 50%;
           left: 50%;
-          color: @text-light;
+          color: var(--text-light-color);
           width: 85%;
 
           .search-overlay-icon {
@@ -618,7 +644,7 @@
       position: relative;
 
       &::before {
-        color: @primary;
+        color: var(--primary-color);
         content: "\2022";
         position: absolute;
         left: -20px;
@@ -644,7 +670,7 @@
         &::before {
           .icon-dimension();
 
-          color: @primary;
+          color: var(--primary-color);
           position: absolute;
           top: 0;
           left: -2.3rem;
@@ -660,7 +686,7 @@
           .icon-dimension-member();
 
           position: absolute;
-          color: @primary;
+          color: var(--primary-color);
           top: 0;
           left: -2.3rem;
           font-size: 120%;
@@ -671,7 +697,7 @@
     .inline-button {
       display: inline;
       cursor: pointer;
-      color: @primary;
+      color: var(--primary-color);
       padding: 0.3rem;
       border: none;
     }
@@ -714,12 +740,12 @@
         width: 75px;
         text-align: right;
         padding-right: 20px;
-        color: @text-title;
+        color: var(--text-title-color);
       }
 
       tr.value {
         .show-all {
-          color: @primary;
+          color: var(--primary-color);
           cursor: pointer;
         }
 
@@ -728,7 +754,7 @@
         }
 
         &.text-block .expand-text-block {
-          color: @primary;
+          color: var(--primary-color);
           cursor: pointer;
 
           &::before {
@@ -740,7 +766,7 @@
       td {
         overflow: clip visible;
         text-overflow: ellipsis;
-        color: @text-form-value;
+        color: var(--text-form-value-color);
       }
 
       tr.uri > td {
@@ -810,16 +836,16 @@
 
     width: 25%;
     position: absolute;
-    top: @top-bar-height;
+    top: var(--top-bar-height);
     right: 0;
     bottom: 0;
     box-sizing: border-box;
     overflow: hidden;
-    border-left: @simple-border;
+    border-left: solid 0.1rem var(--border-grey-color);
 
     a {
       text-decoration: none;
-      color: @primary;
+      color: var(--primary-color);
 
       &:hover {
         text-decoration: underline;
@@ -870,7 +896,7 @@
           font-weight: normal;
           font-style: italic;
           font-size: 1.3rem;
-          color: @text-form-value;
+          color: var(--text-form-value-color);
         }
       }
 
@@ -882,7 +908,7 @@
         }
 
         .collapsible-subheader {
-          color: @primary;
+          color: var(--primary-color);
         }
       }
 
@@ -898,7 +924,7 @@
             padding-right: 0.75rem;
             position: relative;
             top: 0.2rem;
-            color: @warning-orange;
+            color: var(--warning-orange-color);
 
             &::before {
               .icon-circle-cross();
@@ -909,7 +935,7 @@
             padding-right: 0.75rem;
             position: relative;
             top: 0.2rem;
-            color: @workiva-green;
+            color: var(--workiva-green-color);
 
             &::before {
               .icon-circle-tick();
@@ -966,7 +992,7 @@
 
               .concept-name,
               .value {
-                color: @primary;
+                color: var(--primary-color);
 
                 button {
                   .text-md();
@@ -980,7 +1006,7 @@
             }
 
             &.total td {
-              border-top: solid 1px @border-grey;
+              border-top: solid 1px var(--border-grey-color);
               padding-bottom: 1.2rem;
             }
           }
@@ -1075,7 +1101,7 @@
       height: 3rem;
       margin: 0;
       box-sizing: border-box;
-      border-top: @simple-border;
+      border-top: solid 0.1rem var(--border-grey-color);
       position: relative;
 
       img {
@@ -1151,10 +1177,10 @@
 
   .fact-link {
     cursor: pointer;
-    color: @primary;
+    color: var(--primary-color);
 
     &:hover {
-      outline: solid 0.125em @linked-fact;
+      outline: solid 0.125em var(--linked-fact-color);
       outline-offset: 0.0625em;
     }
   }
@@ -1164,12 +1190,12 @@
       .block-list-item();
 
       .title {
-        color: @text-title;
+        color: var(--text-title-color);
         font-weight: bold;
       }
 
       .dimension {
-        color: @text;
+        color: var(--text-color);
         margin: 0.6rem 0;
       }
 
@@ -1183,7 +1209,7 @@
         }
 
         .dimension {
-          color: @text;
+          color: var(--text-color);
         }
       }
 
@@ -1203,11 +1229,11 @@
   }
 
   .copy-icon {
-    color: @primary;
+    color: var(--primary-color);
     border-radius: 0.3rem;
 
     &:active {
-      background-color: @primary;
+      background-color: var(--primary-color);
       color: #fff;
     }
 

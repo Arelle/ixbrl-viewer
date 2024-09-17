@@ -7,7 +7,7 @@
     position: absolute;
     right: 0.8rem;
     top: 0;
-    line-height: @top-bar-height;
+    line-height: var(--top-bar-height);
     cursor: pointer;
 
     .menu-title {
@@ -29,7 +29,7 @@
       // remaining page space, but this means we need to calculate the top
       // position manually.
       position: fixed;
-      top: (@top-bar-height + 3.2rem + 2 * 0.8rem);
+      top: calc(var(--top-bar-height) + 3.2rem + 2 * 0.8rem);
       right: 0;
       bottom: 0;
       display: none;
@@ -38,13 +38,13 @@
       .content {
         line-height: initial;
         background: #fff;
-        border: solid 1px @border-grey;
+        border: solid 1px var(--border-grey-color);
         max-height: 100%;
         overflow-y: auto;
 
         .group {
-          border-bottom: solid 1px @border-grey;
-          border-top: solid 1px @border-grey;
+          border-bottom: solid 1px var(--border-grey-color);
+          border-top: solid 1px var(--border-grey-color);
         }
 
         .item {
@@ -54,7 +54,7 @@
           text-align: left;
 
           &:hover {
-            background: @border-grey;
+            background: var(--border-grey-color);
           }
 
           &:focus-within {
@@ -89,7 +89,7 @@
 
         a.item {
           display: block;
-          color: @text;
+          color: var(--text-color);
 
           &:hover {
             text-decoration: none;

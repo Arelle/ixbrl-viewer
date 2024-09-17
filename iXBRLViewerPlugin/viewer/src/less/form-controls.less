@@ -4,9 +4,9 @@ input[type="text"],
 select,
 button {
   padding: 7px 5px;
-  border: solid 1px @border-grey;
+  border: solid 1px var(--border-grey-color);
   border-radius: 5px;
-  color: @text;
+  color: var(--text-color);
   background-color: unset;
   box-sizing: border-box;
 }
@@ -15,7 +15,7 @@ button {
   width: 3.2rem;
   height: 3.2rem;
   text-align: center;
-  color: @icon-grey;
+  color: var(--icon-grey-color);
   box-sizing: border-box;
   cursor: pointer;
   padding: 0;
@@ -30,8 +30,8 @@ button {
 
   padding: 0;
   border-radius: 3px;
-  border: solid 0.1rem @border-grey;
-  background-color: @button-background;
+  border: solid 0.1rem var(--border-grey-color);
+  background-color: var(--button-bg-color);
   line-height: 3rem;
   margin: 0 0.5rem;
 
@@ -46,8 +46,8 @@ button {
 
 .square-button.primary {
   color: #fff;
-  border-color: @button-primary-border;
-  background-color: @button-primary-bg;
+  border-color: var(--button-primary-border-color);
+  background-color: var(--button-primary-bg-color);
 }
 
 .wk-checkbox,
@@ -79,7 +79,7 @@ label.checkbox {
     width: 1.6rem;
     height: 1.6rem;
     border-radius: 0.4rem;
-    border: solid 0.1rem @border-grey;
+    border: solid 0.1rem var(--border-grey-color);
   }
 
   input:checked ~ .checkmark::before {
@@ -89,7 +89,7 @@ label.checkbox {
     left: 0.4rem;
     width: 0.4rem;
     height: 1.1rem;
-    border: solid @primary;
+    border: solid var(--primary-color);
     border-width: 0 0.2rem 0.2rem 0;
     transform: rotate(45deg);
   }

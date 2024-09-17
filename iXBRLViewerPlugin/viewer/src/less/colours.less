@@ -1,5 +1,8 @@
 // See COPYRIGHT.md for copyright information
 
+@background: #ffffff;
+@foreground: #000000;
+
 @primary: #026dce;
 @primary-focus: #0094ff;
 
@@ -12,7 +15,6 @@
 @text-form-value: #7d7d7d;
 
 @border-grey: #cbcbcb;
-@simple-border: solid 0.1rem @border-grey;
 
 @highlight-default: hsl(90 69% 85% / 1);
 @highlight-1: #eaa8ff;
@@ -20,7 +22,7 @@
 
 @icon-grey: @text;
 
-@button-primary-bg: @primary-focus;
+@button-primary-bg: var(--primary-focus-color);
 @button-primary-border: #0085e6;
 
 @button-background: #f8f8f8;

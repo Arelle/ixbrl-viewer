@@ -7,37 +7,37 @@
 .ixbrl-highlight:not(.ixbrl-no-highlight) {
   // To ensure highlighting takes place, !important is used to override inline styles.
   // For example: overrides highlighting applied inline to alternate table rows.
-  background-color: @highlight-default !important; // Override inline styles
+  background-color: var(--highlight-default-color) !important; // Override inline styles
 
   &.ixbrl-highlight-1 {
-    background-color: @highlight-1 !important; // Override inline styles
+    background-color: var(--highlight-1-color) !important; // Override inline styles
   }
 
   &.ixbrl-highlight-2 {
-    background-color: @highlight-2 !important; // Override inline styles
+    background-color: var(--highlight-2-color) !important; // Override inline styles
   }
 }
 
 .review.review-highlight-untagged-numbers .review-untagged-number {
-  background-color: @highlight-1;
+  background-color: var(--highlight-1-color);
 }
 
 .review.review-highlight-untagged-dates .review-untagged-date {
-  background-color: @highlight-2;
+  background-color: var(--highlight-2-color);
 }
 
 .review .ixbrl-highlight:not(.ixbrl-no-highlight) {
   // Review mode disables namespace-specific highlighting in favor of all tagged
   // elements sharing the same default highlight color, other colors are used for
   // untagged highlighting defined above.
-  background-color: @highlight-default !important; // Override inline styles
+  background-color: var(--highlight-default-color) !important; // Override inline styles
 
   &.ixbrl-highlight-1 {
-    background-color: @highlight-default !important; // Override inline styles
+    background-color: var(--highlight-default-color) !important; // Override inline styles
   }
 
   &.ixbrl-highlight-2 {
-    background-color: @highlight-default !important; // Override inline styles
+    background-color: var(--highlight-default-color) !important; // Override inline styles
   }
 }
 
@@ -45,14 +45,14 @@ div,
 span {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 0.125em @primary-focus;
+      outline: solid 0.125em var(--primary-focus-color);
       outline-offset: 0.0625em;
     }
 
     &.ixbrl-element,
     &.ixbrl-sub-element {
       &:hover:not(.ixbrl-selected) {
-        outline: dashed 0.125em @primary-focus;
+        outline: dashed 0.125em var(--primary-focus-color);
         outline-offset: 0.0625em;
       }
     }
@@ -65,7 +65,7 @@ span {
     cursor: pointer;
 
     &.ixbrl-related {
-      outline: dashed 0.125em @related-fact;
+      outline: dashed 0.125em var(--related-fact-color);
 
       &:not(td, th) {
         outline-offset: 0.0625em;
@@ -78,13 +78,13 @@ td,
 th {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 0.125em @primary-focus !important;
+      outline: solid 0.125em var(--primary-focus-color) !important;
       outline-offset: -0.0625em !important;
     }
 
     &.ixbrl-element:hover:not(.ixbrl-selected),
     &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
-      outline: dashed 0.125em @primary-focus !important;
+      outline: dashed 0.125em var(--primary-focus-color) !important;
       outline-offset: -0.0625em !important;
     }
   }
@@ -115,7 +115,7 @@ div.ixbrl-table-handle {
   width: 0;
   height: 0;
   border: @export-handle-size solid transparent;
-  border-bottom-color: @workiva-green;
+  border-bottom-color: var(--workiva-green-color);
   top: -2 * @export-handle-size;
 
   &::after {
@@ -126,7 +126,7 @@ div.ixbrl-table-handle {
     width: 0;
     height: 0;
     border: @export-handle-size solid transparent;
-    border-top-color: @workiva-green;
+    border-top-color: var(--workiva-green-color);
   }
 
   & > span {
@@ -161,7 +161,7 @@ div.ixbrl-table-handle {
       font-family: sans-serif;
       display: block;
       padding: 0.7rem 1.5rem 0.7rem 2.5rem;
-      background-color: @workiva-green;
+      background-color: var(--workiva-green-color);
     }
   }
 }

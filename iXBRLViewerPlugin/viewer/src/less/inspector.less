@@ -3,6 +3,7 @@
 @import url("core.less");
 @import url("fonts.less");
 @import url("colours.less");
+@import url("colours-dark-mode.less");
 @import url("common.less");
 @import (reference) "components.less";
 @import url("form-controls.less");
@@ -46,6 +47,32 @@
   --colour-text-title: @colour-text-title;
   --colour-text: @colour-text;
   --top-bar-height: @top-bar-height;
+}
+
+:root[data-theme="theme-dark"] {
+  --colour-bg-selected: @colour-bg-selected-d;
+  --colour-bg-tag: @colour-bg-tag-d;
+  --colour-bg: @colour-bg-d;
+  --colour-bg-fade: @colour-bg-fade-d;
+  --colour-border-grey: @colour-border-grey-d;
+  --colour-button-bg: @colour-button-bg-d;
+  --colour-button-primary-bg: @colour-button-primary-bg-d;
+  --colour-button-primary-border: @colour-button-primary-border-d;
+  --colour-foreground: @colour-foreground-d;
+  --colour-highlight-1: @colour-highlight-1-d;
+  --colour-highlight-2: @colour-highlight-2-d;
+  --colour-highlight-default: @colour-highlight-default-d;
+  --colour-icon-grey: @colour-icon-grey-d;
+  --colour-linked-fact: @colour-linked-fact-d;
+  --colour-primary-focus: @colour-primary-focus-d;
+  --colour-primary: @colour-primary-d;
+  --colour-related-fact: @colour-related-fact-d;
+  --colour-row-odd: @colour-row-odd-d;
+  --colour-row-hover: @colour-row-hover-d;
+  --colour-text-form-value: @colour-text-form-value-d;
+  --colour-text-light: @colour-text-light-d;
+  --colour-text-title: @colour-text-title-d;
+  --colour-text: @colour-text-d;
   --top-bar-height: @top-bar-height;
 }
 

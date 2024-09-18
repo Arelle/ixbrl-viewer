@@ -26,6 +26,7 @@ from lxml import etree
 from .constants import DEFAULT_JS_FILENAME, DEFAULT_OUTPUT_NAME, ERROR_MESSAGE_CODE, FEATURE_CONFIGS, INFO_MESSAGE_CODE
 from .xhtmlserialize import XHTMLSerializer
 
+REPORT_TYPE_EXTENSIONS = ('.xbrl', '.xhtml', '.html', '.htm', '.json')
 UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = 'unrecognizedLinkbase'
 LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
     XbrlConst.qnLinkCalculationLink: 'calcLinkbase',
@@ -89,6 +90,7 @@ class IXBRLViewerBuilder:
             basenameSuffix: str = '',
             useStubViewer: bool = False,
                  ):
+        self.reportZip = None
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.taxonomyData = {
@@ -116,6 +118,7 @@ class IXBRLViewerBuilder:
 
         self.fromSingleZIP = None
         self.reportCount = 0
+        self.assets = []
 
     def enableFeature(self, featureName: str):
         if featureName in self.taxonomyData["features"]:
@@ -439,7 +442,6 @@ class IXBRLViewerBuilder:
             docSetFiles = [ srcFilename ]
             filename = srcFilename
             self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
-
         docSetKey = frozenset(docSetFiles)
         sourceReport = self.sourceReportsByFiles.get(docSetKey)
         if sourceReport is None:
@@ -479,6 +481,14 @@ class IXBRLViewerBuilder:
                 self.filingDocZipPath = os.path.dirname(report.modelDocument.filepath)
         else:
             self.fromSingleZIP = False
+        if report.fileSource.isArchive:
+            filelist = report.fileSource.fs.filelist
+            for file in filelist:
+                directory, asset = os.path.split(file.filename)
+                if "reports" in directory and asset != '' and not asset.lower().endswith(REPORT_TYPE_EXTENSIONS):
+                    self.assets.append(file.filename)
+            if self.assets:
+                self.reportZip = report.fileSource.fs.filename
 
     def createViewer(
             self,
@@ -495,7 +505,6 @@ class IXBRLViewerBuilder:
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
-
         if showValidations:
             self.taxonomyData["validation"] = self.validationErrors()
 
@@ -513,7 +522,10 @@ class IXBRLViewerBuilder:
             # If there is only a single report, call the output file "xbrlviewer.html"
             # We should probably preserve the source file extension here.
             self.iv.files[0].filename = 'xbrlviewer.html'
-
+        if self.assets:
+            self.iv.addReportAssets(self.assets)
+        if self.reportZip:
+            self.iv.reportZip = self.reportZip
         return self.iv
 
 
@@ -534,10 +546,15 @@ class iXBRLViewerFile:
 class iXBRLViewer:
 
     def __init__(self, cntlr: Cntlr):
+        self.reportZip = None
         self.files = []
         self.filingDocuments = None
         self.cntlr = cntlr
         self.filenames = set()
+        self.assets = []
+
+    def addReportAssets(self, assets):
+        self.assets.extend(assets)
 
     def addFile(self, ivf):
         if ivf.filename in self.filenames:
@@ -606,6 +623,15 @@ class iXBRLViewer:
                 filename = os.path.basename(self.filingDocuments)
                 self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
+            if self.assets:
+                with zipfile.ZipFile(self.reportZip) as z:
+                    for asset in self.assets:
+                        fileName = os.path.basename(asset)
+                        path = os.path.join(destination, fileName)
+                        self.cntlr.addToLog("Writing %s" % asset, messageCode=INFO_MESSAGE_CODE)
+                        with z.open(asset) as zf, open(path, 'wb') as f:
+                            shutil.copyfileobj(zf, f)
+
             if copyScriptPath is not None:
                 self._copyScript(Path(destination), copyScriptPath)
         else:

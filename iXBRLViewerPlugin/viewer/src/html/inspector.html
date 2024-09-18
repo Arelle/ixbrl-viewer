@@ -53,7 +53,7 @@ See COPYRIGHT.md for copyright information
           <button class="filter-toggle"></button>
         </div>
         <div class="search-filters">
-          <div class="reset" data-i18n="inspector.reset">Reset</div>
+          <button class="reset" data-i18n="inspector.reset">Reset</button >
           <h3 data-i18n="inspector.filter">Filter</h3>
           <div class="filter-group">
             <div class="control-label" data-i18n="inspector.conceptType">
@@ -94,11 +94,11 @@ See COPYRIGHT.md for copyright information
 
           <div id="search-filter-period" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.period">Period</span>
+              <button data-i18n="inspector.period">Period</button>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body" style="display: none;">
-              <span class="reset-multiselect"></span>
+            <div class="collapsible-body resetable-multiselect" style="display: none;">
+              <button class="reset-multiselect"></button>
               <select multiple>
               </select>
             </div>
@@ -106,11 +106,11 @@ See COPYRIGHT.md for copyright information
 
           <div id="search-filter-namespaces" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.namespaces">Namespaces</span>
+              <button data-i18n="inspector.namespaces">Namespaces</button>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body namespaces" style="display: none;">
-              <span class="reset-multiselect"></span>
+            <div class="collapsible-body namespaces resetable-multiselect" style="display: none;">
+              <button class="reset-multiselect"></button>
               <select multiple>
               </select>
             </div>
@@ -118,11 +118,11 @@ See COPYRIGHT.md for copyright information
 
           <div id="search-filter-target-document" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.targetDocument">Target Document</span>
+              <button data-i18n="inspector.targetDocument">Target Document</button>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body target-document" style="display: none;">
-              <span class="reset-multiselect"></span>
+            <div class="collapsible-body target-document resetable-multiselect" style="display: none;">
+              <button class="reset-multiselect"></button>
               <select multiple>
               </select>
             </div>
@@ -130,11 +130,11 @@ See COPYRIGHT.md for copyright information
 
           <div id="search-filter-units" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.units">Units</span>
+              <button data-i18n="inspector.units">Units</button>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body units" style="display: none;">
-              <span class="reset-multiselect"></span>
+            <div class="collapsible-body units resetable-multiselect" style="display: none;">
+              <button class="reset-multiselect"></button>
               <select multiple>
               </select>
             </div>
@@ -142,11 +142,11 @@ See COPYRIGHT.md for copyright information
 
           <div id="search-filter-scales" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.scales">Scales</span>
+              <button data-i18n="inspector.scales">Scales</button>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body scales" style="display: none;">
-              <span class="reset-multiselect"></span>
+            <div class="collapsible-body scales resetable-multiselect" style="display: none;">
+              <button class="reset-multiselect"></button>
               <select multiple>
               </select>
             </div>
@@ -154,11 +154,11 @@ See COPYRIGHT.md for copyright information
 
           <div id="search-filter-dimension-type" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.dimensions">Dimension Type</span>
+              <button data-i18n="inspector.dimensions">Dimension Type</button>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body dimensions" style="display: none;">
-              <span class="reset-multiselect"></span>
+            <div class="collapsible-body dimensions resetable-multiselect" style="display: none;">
+              <button class="reset-multiselect"></button>
               <select multiple size="2">
                 <option value="explicit" data-i18n="inspector.explicitDimension">Explicit Dimensions</option>
                 <option value="typed" data-i18n="inspector.typedDimensions">Typed Dimensions</option>
@@ -168,11 +168,11 @@ See COPYRIGHT.md for copyright information
 
           <div id="search-filter-calculations" class="collapsible-section collapsible-only collapsed">
             <h3 class="collapsible-header">
-              <span data-i18n="inspector.calculations">Calculations</span>
+              <button data-i18n="inspector.calculations">Calculations</button>
               <span class="collapsible-subheader"></span>
             </h3>
-            <div class="collapsible-body calculations" style="display: none;">
-              <span class="reset-multiselect"></span>
+            <div class="collapsible-body calculations resetable-multiselect" style="display: none;">
+              <button class="reset-multiselect"></button>
               <select multiple size="2">
                 <option value="summation" data-i18n="inspector.summation">Summation</option>
                 <option value="contributor" data-i18n="inspector.contributor">Contributor</option>

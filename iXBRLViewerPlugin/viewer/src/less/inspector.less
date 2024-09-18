@@ -390,11 +390,11 @@
       }
 
       .search-controls {
-        margin: 0.8rem 0.9rem;
+        margin: 0.8rem 0;
 
         .search-input {
           display: flex;
-          padding: 0;
+          padding: 0 0.9rem;
 
           input#ixbrl-search {
             flex-grow: 1;
@@ -423,19 +423,25 @@
           // Ensure the filter pane never grows too large to hide the results pane
           max-height: 60vh;
           overflow-y: auto;
+          padding: 0 0.9rem;
 
           .reset {
-            .clickable();
+            .bare-button();
+            .text-md();
 
             position: absolute;
-            right: 0;
-            top: 0;
+            right: 0.5rem;
+            top: 0.5rem;
           }
 
           h3 {
             border: none;
             font-weight: bold;
             padding-bottom: 0;
+
+            button {
+              font-weight: inherit;
+            }
           }
 
           .filter-group {
@@ -987,15 +993,21 @@
       }
     }
 
-    .reset-multiselect {
-      float: right;
-      line-height: 0;
+    .resetable-multiselect {
       position: relative;
-      bottom: 1rem;
-      cursor: pointer;
 
-      &::after {
-        .icon-close();
+      .reset-multiselect {
+        position: absolute;
+        top: -2.5rem;
+        right: -0.5rem;
+        cursor: pointer;
+        border: none;
+        padding: 0.3rem;
+
+
+        &::after {
+          .icon-close();
+        }
       }
     }
 

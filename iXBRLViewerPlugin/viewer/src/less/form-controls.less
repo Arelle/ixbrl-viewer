@@ -58,6 +58,11 @@ label.checkbox {
   user-select: none;
   line-height: 1.6rem;
 
+  &:focus-within {
+    outline: solid 0.2rem #000;
+    outline-offset: 0.3rem;
+  }
+
   input {
     position: absolute;
     opacity: 0;
@@ -95,6 +100,14 @@ input:disabled {
 }
 
 .inline-button {
+  display: inline;
+  cursor: pointer;
+  color: @primary;
+  padding: 0.3rem;
+  border: none;
+}
+
+.bare-button {
   display: inline;
   cursor: pointer;
   color: @primary;

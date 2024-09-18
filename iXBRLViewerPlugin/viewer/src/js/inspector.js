@@ -838,7 +838,7 @@ export class Inspector {
         const html = $("<div></div>").addClass("fact-list");
         for (const fn of fact.footnotes()) {
             if (fn instanceof Footnote) {
-                $("<div></div>")
+                $("<button></button>")
                     .addClass("block-list-item")
                     .text(truncateLabel(fn.textContent(), 120))
                     .on("mouseenter", () => this._viewer.linkedHighlightFact(fn))

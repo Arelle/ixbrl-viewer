@@ -5,14 +5,15 @@
 #ixv #inspector {
   .menu {
     position: absolute;
-    right: 0;
+    right: 0.8rem;
     top: 0;
     line-height: @top-bar-height;
     cursor: pointer;
 
     .menu-title {
-      padding-right: 3.2rem;
+      padding: 0.3rem 2.4rem 0.3rem 0.3rem;
       position: relative;
+      border: none;
     }
 
     .menu-title::after {
@@ -20,7 +21,7 @@
 
       font-size: 1.8rem;
       position: absolute;
-      right: 1rem;
+      right: 0.2rem;
     }
 
     .content-container {
@@ -54,6 +55,11 @@
 
           &:hover {
             background: @border-grey;
+          }
+
+          &:focus-within {
+            outline: solid 2px #000;
+            outline-offset: -2px;
           }
 
           &.menu-checkbox {

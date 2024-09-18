@@ -5,6 +5,7 @@ import $ from 'jquery'
 import { ReportSet } from "./reportset.js";
 import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
+import { initializeTheme } from './theme.js';
 
 export class iXBRLViewer {
 
@@ -202,6 +203,8 @@ export class iXBRLViewer {
         const inspector = this.inspector;
 
         setTimeout(function () {
+            initializeTheme();
+
             const stubViewer = $('body').hasClass('ixv-stub-viewer');
 
             // If viewer is disabled, but not in stub viewer mode, just abort

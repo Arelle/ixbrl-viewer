@@ -47,6 +47,10 @@
   --colour-text-title: @colour-text-title;
   --colour-text: @colour-text;
   --top-bar-height: @top-bar-height;
+
+  .only-dark {
+    display: none;
+  }
 }
 
 :root[data-theme="theme-dark"] {
@@ -74,6 +78,14 @@
   --colour-text-title: @colour-text-title-d;
   --colour-text: @colour-text-d;
   --top-bar-height: @top-bar-height;
+
+  .only-dark {
+    display: initial;
+  }
+
+  .only-light {
+    display: none;
+  }
 }
 
 #ixv {

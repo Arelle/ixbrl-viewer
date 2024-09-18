@@ -4,6 +4,11 @@ function getHtmlElement() {
     return document.querySelector('html');
 }
 
+export function getVariable(name) {
+    const html = getHtmlElement();
+    return getComputedStyle(html).getPropertyValue(name);s
+}
+
 function setTheme(theme) {
     const html = getHtmlElement();
     html.dataset.theme = `theme-${theme}`;

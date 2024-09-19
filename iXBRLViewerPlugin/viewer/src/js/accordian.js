@@ -15,7 +15,8 @@ export class Accordian {
     addCard(title, body, selected, data) {
         const a = this;
         const card = $('<div class="card"></div>')
-            .append($('<div class="title"></div>')
+            .append($('<button class="title"></button>')
+                .attr("aria-label", "Expand section")
                 .append(title)
                 .on("click", function () {
                     var thisCard = $(this).closest(".card");

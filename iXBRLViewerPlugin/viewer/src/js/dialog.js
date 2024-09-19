@@ -34,6 +34,7 @@ export class Dialog {
     show() {
         $('.dialog-mask').show(); 
         this.node.show();
+        this.node.find('.buttons button').get(0)?.focus();
     }
 }
 

@@ -290,7 +290,7 @@ export class Inspector {
     }
 
     factListRow(f) {
-        const row = $('<div class="fact-list-item"></div>')
+        const row = $('<button class="fact-list-item"></button>')
             .on("click", () => this.selectItem(f.vuid))
             .on("dblclick", () => $('#inspector').removeClass("search-mode"))
             .on("mousedown", (e) => { 
@@ -378,7 +378,7 @@ export class Inspector {
     setupSearchControls(viewer) {
         const inspector = this;
         $('.search-controls input, .search-controls select').on("change", () => this.search());
-        $(".search-controls div.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
+        $(".search-controls button.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
         $(".search-controls .search-filters .reset").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
             $(this).siblings().children('select option:selected').prop('selected', false);
@@ -467,7 +467,7 @@ export class Inspector {
             return;
         }
         const container = $('#inspector .search-results .results');
-        $('div', container).remove();
+        $(".fact-list-item", container).remove();
         this._viewer.clearRelatedHighlighting();
         const overlay = $('#inspector .search-results .search-overlay');
         if (results.length > 0) {
@@ -637,7 +637,7 @@ export class Inspector {
             $('.outline .no-outline-overlay').hide();
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
             for (const group of this.outline.sortedSections()) {
-                $('<div class="fact-list-item"></div>')
+                $('<button class="fact-list-item"></button>')
                     .text(group.report.getRoleLabel(group.elr))
                     .on("click", () => this.selectItem(group.fact.vuid))
                     .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
@@ -655,7 +655,7 @@ export class Inspector {
     updateOutline(cf) {
         $('.fact-groups').empty();
         for (const group of this.outline.groupsForFact(cf)) {
-            $('<div class="fact-list-item"></div>')
+            $('<button class="fact-list-item"></button>')
                 .text(cf.report.getRoleLabel(group.elr))
                 .on("click", () => this.selectItem(group.fact.vuid))
                 .appendTo($('.fact-groups'));
@@ -760,16 +760,16 @@ export class Inspector {
             for (const r of rCalc.rows) {
                 const itemHTML = $("<tr></tr>")
                     .addClass("item")
-                    .append($("<td></td>").addClass("weight").text(r.weightSign + " "))
+                    .append($("<td></td>").addClass("weight").text(r.weightSign))
                     .append($("<td></td>").addClass("concept-name").text(r.concept.label()))
                     .append($("<td></td>").addClass("value"))
                     .appendTo(calcTable);
 
                 if (!r.facts.isEmpty()) {
                     itemHTML.addClass("calc-fact-link");
-                    itemHTML.addClass("calc-fact-link");
+                    itemHTML.find(".concept-name").contents().wrap($("<button></button>").addClass("inline-button"));
                     itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
-                    itemHTML.on("click", () => this.selectItem(r.facts.items[0].vuid));
+                    itemHTML.on("click", () => this.selectItem(r.facts.items()[0].vuid));
                     itemHTML.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
                     itemHTML.on("mouseleave", () => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
                     r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
@@ -787,7 +787,7 @@ export class Inspector {
                 .append(calcStatusIcon)
                 .append($("<span></span>").text(label));
             const calcStatusText = $("<span></span>");
-            const calcDetailsLink = $("<span></span>")
+            const calcDetailsLink = $("<button></button>")
                     .addClass("calculation-details-link")
                     .attr("title", i18next.t('factDetails.viewCalculationDetails'))
                     .text("details")
@@ -838,7 +838,7 @@ export class Inspector {
         const html = $("<div></div>").addClass("fact-list");
         for (const fn of fact.footnotes()) {
             if (fn instanceof Footnote) {
-                $("<div></div>")
+                $("<button></button>")
                     .addClass("block-list-item")
                     .text(truncateLabel(fn.textContent(), 120))
                     .on("mouseenter", () => this._viewer.linkedHighlightFact(fn))
@@ -1021,8 +1021,9 @@ export class Inspector {
                     .text(fact.periodString());
                 if (fact.isNumeric()) {
                     $('tr.period td', factHTML).append(
-                        $("<span></span>") 
-                            .addClass("analyse")
+                        $("<button></button>") 
+                            .addClass(["analyse", "inline-button"])
+                            .attr("title", "Show analysis chart")
                             .text("")
                             .on('click', () => this.analyseDimension(fact, ["p"]))
                     );
@@ -1117,8 +1118,8 @@ export class Inspector {
                     }
                 }
                 $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().on("click", () => this.selectItem(duplicates[(n+ndup-1) % ndup].vuid));
-                $('.duplicates .next').off().on("click", () => this.selectItem(duplicates[(n+1) % ndup].vuid));
+                $('.duplicates .prev').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.duplicates .prev').get(0).focus(); });
+                $('.duplicates .next').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.duplicates .next').get(0).focus(); });
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {

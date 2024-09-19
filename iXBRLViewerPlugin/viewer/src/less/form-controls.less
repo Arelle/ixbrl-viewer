@@ -7,7 +7,7 @@ button {
   border: solid 1px @border-grey;
   border-radius: 5px;
   color: @text;
-  background-color: #fff;
+  background-color: unset;
   box-sizing: border-box;
 }
 
@@ -22,6 +22,7 @@ button {
   font-size: 2.2rem;
   line-height: 3.2rem;
   user-select: none;
+  border: none;
 }
 
 .square-button {
@@ -57,6 +58,11 @@ label.checkbox {
   user-select: none;
   line-height: 1.6rem;
 
+  &:focus-within {
+    outline: solid 0.2rem #000;
+    outline-offset: 0.3rem;
+  }
+
   input {
     position: absolute;
     opacity: 0;
@@ -91,4 +97,20 @@ label.checkbox {
 
 input:disabled {
   background-color: #eee;
+}
+
+.inline-button {
+  display: inline;
+  cursor: pointer;
+  color: @primary;
+  padding: 0.3rem;
+  border: none;
+}
+
+.bare-button {
+  display: inline;
+  cursor: pointer;
+  color: @primary;
+  padding: 0.3rem;
+  border: none;
 }

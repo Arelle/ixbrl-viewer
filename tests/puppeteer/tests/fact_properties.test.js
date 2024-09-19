@@ -45,10 +45,10 @@ describe('ixbrl-viewer',() => {
 
                 // Assert Calculations
                 await detailsPanel.assertCalculation('1001002 - Statement - Statement', {
-                        'Gain (Loss) on Investments': '+ ',
-                        'Other Income': '+ ',
-                        'Net Investment Income': '+ ',
-                        'Premiums Earned, Net': '+ ',
+                        'Gain (Loss) on Investments': '+',
+                        'Other Income': '+',
+                        'Net Investment Income': '+',
+                        'Premiums Earned, Net': '+',
                         'Revenues': ''
                 });
 

@@ -4,6 +4,18 @@
 @import url("colours.less");
 @import url("common.less");
 
+:root {
+  --colour-bg: @colour-bg;
+  --colour-highlight-1: @colour-highlight-1;
+  --colour-highlight-2: @colour-highlight-2;
+  --colour-highlight-default: @colour-highlight-default;
+  --colour-linked-fact: @colour-linked-fact;
+  --colour-primary-focus: @colour-primary-focus;
+  --colour-primary: @colour-primary;
+  --colour-secondary: @colour-secondary;
+  --colour-related-fact: @colour-related-fact;
+}
+
 .ixbrl-highlight:not(.ixbrl-no-highlight) {
   // To ensure highlighting takes place, !important is used to override inline styles.
   // For example: overrides highlighting applied inline to alternate table rows.
@@ -115,7 +127,7 @@ div.ixbrl-table-handle {
   width: 0;
   height: 0;
   border: @export-handle-size solid transparent;
-  border-bottom-color: var(--colour-primary);
+  border-bottom-color: var(--colour-secondary);
   top: -2 * @export-handle-size;
 
   &::after {
@@ -126,7 +138,7 @@ div.ixbrl-table-handle {
     width: 0;
     height: 0;
     border: @export-handle-size solid transparent;
-    border-top-color: var(--colour-primary);
+    border-top-color: var(--colour-secondary);
   }
 
   & > span {
@@ -161,7 +173,7 @@ div.ixbrl-table-handle {
       font-family: sans-serif;
       display: block;
       padding: 0.7rem 1.5rem 0.7rem 2.5rem;
-      background-color: var(--colour-primary);
+      background-color: var(--colour-secondary);
     }
   }
 }

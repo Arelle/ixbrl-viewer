@@ -296,6 +296,22 @@ class TestIXBRLViewer:
             format='format'
         )
 
+        file_1 = Mock(
+            filename='something/reports/001.jpg'
+        )
+
+        file_2 = Mock(
+            filename='something/reports/002.jpg'
+        )
+
+        fs = Mock(
+            filelist = [file_1, file_2]
+        )
+
+        file_source = Mock(
+            fs = fs
+        )
+
         def creationSoftwareMatches_effect(text):
             return ["Example Software Name"]
 
@@ -381,6 +397,7 @@ class TestIXBRLViewer:
             baseSets=baseSets,
             roleTypes=roleTypes,
             facts=[fact_1, fact_with_typed_dimension, fact_with_missing_member_on_dimension],
+            fileSource=file_source,
             info=info_effect,
             modelDocument=self.modelDocument,
             ixdsTarget=None,
@@ -411,6 +428,7 @@ class TestIXBRLViewer:
             baseSets=baseSets,
             roleTypes=roleTypes,
             facts=[fact_2, fact_3],
+            fileSource=file_source,
             info=info_effect,
             modelDocument=self.modelDocument,
             ixdsTarget=None,
@@ -422,6 +440,7 @@ class TestIXBRLViewer:
             baseSets=baseSets,
             roleTypes=roleTypes,
             facts=[fact_1, fact_with_typed_dimension, fact_with_missing_member_on_dimension],
+            fileSource=file_source,
             info=info_effect,
             modelDocument=self.modelDocumentInlineSet,
             ixdsTarget=None,

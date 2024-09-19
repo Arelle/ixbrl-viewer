@@ -140,7 +140,7 @@ export class iXBRLViewer {
     _reparentDocument() {
         const iframeContainer = $('#ixv #iframe-container');
 
-        const iframe = $('<iframe title="iXBRL document view"/>')
+        const iframe = $('<iframe title="iXBRL document view" tabindex="0"/>')
             .data("report-index", 0)
             .appendTo(iframeContainer)[0];
 
@@ -239,7 +239,7 @@ export class iXBRLViewer {
             const ds = reportSet.reportFiles();
             let hasExternalIframe = false;
             for (let i = stubViewer ? 0 : 1; i < ds.length; i++) {
-                const iframe = $("<iframe />").attr("src", ds[i].file).data("report-index", ds[i].index).appendTo("#ixv #iframe-container");
+                const iframe = $('<iframe tabindex="0" />').attr("src", ds[i].file).data("report-index", ds[i].index).appendTo("#ixv #iframe-container");
                 iframes = iframes.add(iframe);
                 hasExternalIframe = true;
             }

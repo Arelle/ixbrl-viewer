@@ -320,9 +320,13 @@
         }
       }
 
-      #toggle-dark-mode::before {
-        .icon-dark-mode();
-        cursor: pointer;
+      #toggle-dark-mode {
+        border: none;
+
+        &::before {
+          .icon-dark-mode();
+          cursor: pointer;
+        }
       }
     }
   }

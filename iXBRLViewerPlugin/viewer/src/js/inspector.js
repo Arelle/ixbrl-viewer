@@ -145,6 +145,7 @@ export class Inspector {
         $('.ixbrl-prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
         $('#toggle-dark-mode')
                 .attr('title', i18next.t('toolbar.toggleDarkMode'))
+                .attr('aria-label', i18next.t('toolbar.toggleDarkMode'))
                 .on('click', toggleTheme);
     }
 

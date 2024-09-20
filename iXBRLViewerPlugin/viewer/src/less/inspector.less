@@ -3,6 +3,7 @@
 @import url("core.less");
 @import url("fonts.less");
 @import url("colours.less");
+@import url("colours-dark-mode.less");
 @import url("common.less");
 @import (reference) "components.less";
 @import url("form-controls.less");
@@ -21,6 +22,72 @@
 
 @top-bar-height: 3.5rem;
 
+:root {
+  --colour-bg-selected: @colour-bg-selected;
+  --colour-bg-tag: @colour-bg-tag;
+  --colour-bg: @colour-bg;
+  --colour-bg-fade: @colour-bg-fade;
+  --colour-border-grey: @colour-border-grey;
+  --colour-button-bg: @colour-button-bg;
+  --colour-button-primary-bg: @colour-button-primary-bg;
+  --colour-button-primary-border: @colour-button-primary-border;
+  --colour-foreground: @colour-foreground;
+  --colour-highlight-1: @colour-highlight-1;
+  --colour-highlight-2: @colour-highlight-2;
+  --colour-highlight-default: @colour-highlight-default;
+  --colour-icon-grey: @colour-icon-grey;
+  --colour-linked-fact: @colour-linked-fact;
+  --colour-primary-focus: @colour-primary-focus;
+  --colour-primary: @colour-primary;
+  --colour-related-fact: @colour-related-fact;
+  --colour-row-odd: @colour-row-odd;
+  --colour-row-hover: @colour-row-hover;
+  --colour-text-form-value: @colour-text-form-value;
+  --colour-text-light: @colour-text-light;
+  --colour-text-title: @colour-text-title;
+  --colour-text: @colour-text;
+  --top-bar-height: @top-bar-height;
+
+  .only-dark {
+    display: none;
+  }
+}
+
+:root[data-theme="theme-dark"] {
+  --colour-bg-selected: @colour-bg-selected-d;
+  --colour-bg-tag: @colour-bg-tag-d;
+  --colour-bg: @colour-bg-d;
+  --colour-bg-fade: @colour-bg-fade-d;
+  --colour-border-grey: @colour-border-grey-d;
+  --colour-button-bg: @colour-button-bg-d;
+  --colour-button-primary-bg: @colour-button-primary-bg-d;
+  --colour-button-primary-border: @colour-button-primary-border-d;
+  --colour-foreground: @colour-foreground-d;
+  --colour-highlight-1: @colour-highlight-1-d;
+  --colour-highlight-2: @colour-highlight-2-d;
+  --colour-highlight-default: @colour-highlight-default-d;
+  --colour-icon-grey: @colour-icon-grey-d;
+  --colour-linked-fact: @colour-linked-fact-d;
+  --colour-primary-focus: @colour-primary-focus-d;
+  --colour-primary: @colour-primary-d;
+  --colour-related-fact: @colour-related-fact-d;
+  --colour-row-odd: @colour-row-odd-d;
+  --colour-row-hover: @colour-row-hover-d;
+  --colour-text-form-value: @colour-text-form-value-d;
+  --colour-text-light: @colour-text-light-d;
+  --colour-text-title: @colour-text-title-d;
+  --colour-text: @colour-text-d;
+  --top-bar-height: @top-bar-height;
+
+  .only-dark {
+    display: initial;
+  }
+
+  .only-light {
+    display: none;
+  }
+}
+
 #ixv {
   /* Specify these here, not on body in case the iXBRL document has its own
    * style attribute */
@@ -36,7 +103,7 @@
     left: 20px;
     width: 500px;
     height: 200px;
-    background-color: #fff;
+    background-color: var(--colour-bg);
     border: solid #000 1px;
     text-align: center;
   }
@@ -46,7 +113,7 @@
     box-sizing: border-box;
     position: fixed;
     left: 0;
-    top: @top-bar-height;
+    top: var(--top-bar-height);
     bottom: 0;
     z-index: 0;
     display: flex;
@@ -58,6 +125,8 @@
     }
 
     #iframe-container {
+      background-color:white;
+      color:black;
       position: relative;
       flex: 1 1 auto;
 
@@ -134,12 +203,12 @@
     .default-font();
     .text-md();
 
-    color: @text;
+    color: var(--colour-text);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: @top-bar-height;
+    height: var(--top-bar-height);
     border-bottom: solid 1px #ccc;
     z-index: 5;
 
@@ -159,7 +228,7 @@
       padding-right: 1.6rem;
       padding-top: 1.3rem;
       border-right: solid 0.1rem #ccc;
-      height: @top-bar-height;
+      height: var(--top-bar-height);
       overflow: hidden;
     }
 
@@ -167,14 +236,14 @@
       position: absolute;
       right: 1.8rem;
       top: 0;
-      line-height: @top-bar-height;
+      line-height: var(--top-bar-height);
 
       * {
         vertical-align: middle;
       }
 
       .content {
-        input {
+        * {
           position: relative;
           top: -0.1rem;
           margin-right: 0.6rem;
@@ -196,8 +265,8 @@
           position: absolute;
           top: 3.2rem;
           left: -2rem;
-          background: #fff;
-          border: solid 1px @text;
+          background: var(--colour-bg);
+          border: solid 1px var(--colour-text);
           border-radius: 0.3rem;
           line-height: 1.6rem;
 
@@ -207,10 +276,10 @@
             left: 1.1rem;
             width: 1.5rem;
             height: 1.5rem;
-            border-top: solid 0.1rem @text;
-            border-left: solid 0.1rem @text;
+            border-top: solid 0.1rem var(--colour-text);
+            border-left: solid 0.1rem var(--colour-text);
             transform: translate(50%, -50%) rotate(45deg);
-            background: #fff;
+            background: var(--colour-bg);
           }
 
           .item {
@@ -226,15 +295,15 @@
             }
 
             .sample-0 {
-              background: @highlight-default;
+              background: var(--colour-highlight-default);
             }
 
             .sample-1 {
-              background: @highlight-1;
+              background: var(--colour-highlight-1);
             }
 
             .sample-2 {
-              background: @highlight-2;
+              background: var(--colour-highlight-2);
             }
           }
         }
@@ -250,6 +319,16 @@
           .icon-warning();
         }
       }
+
+      #toggle-dark-mode {
+        border: none;
+
+        &::before {
+          .icon-dark-mode();
+
+          cursor: pointer;
+        }
+      }
     }
   }
 
@@ -261,11 +340,11 @@
     h2,
     h3 {
       font-weight: normal;
-      border-bottom: solid 1px @border-grey;
+      border-bottom: solid 1px var(--colour-border-grey);
       width: 100%;
       box-sizing: border-box;
       padding-bottom: 5px;
-      color: @text-title;
+      color: var(--colour-text-title);
     }
 
     h2 {
@@ -278,19 +357,19 @@
 
     h4 {
       font-weight: bold;
-      color: @text-title;
+      color: var(--colour-text-title);
       margin-bottom: 1.4em;
     }
 
     #inspector-head {
       padding: 0;
       position: relative;
-      border-bottom: solid 1px @border-grey;
+      border-bottom: solid 1px var(--colour-border-grey);
 
       .title {
         text-align: center;
         position: relative;
-        border-bottom: @simple-border;
+        border-bottom: solid 0.1rem var(--colour-border-grey);
 
         h1 {
           margin: 0.8rem 0;
@@ -415,7 +494,7 @@
         }
 
         &.show-filters .filter-toggle {
-          color: @primary;
+          color: var(--colour-primary);
         }
 
         .search-filters {
@@ -512,7 +591,7 @@
         transform: translate(-50%, -50%);
         width: 80%;
         text-align: center;
-        color: @text-light;
+        color: var(--colour-text-light);
 
         .no-fact-overlay-icon::before {
           .icon-tag();
@@ -550,7 +629,7 @@
           position: absolute;
           top: 50%;
           left: 50%;
-          color: @text-light;
+          color: var(--colour-text-light);
           width: 85%;
 
           .search-overlay-icon {
@@ -618,7 +697,7 @@
       position: relative;
 
       &::before {
-        color: @primary;
+        color: var(--colour-primary);
         content: "\2022";
         position: absolute;
         left: -20px;
@@ -644,7 +723,7 @@
         &::before {
           .icon-dimension();
 
-          color: @primary;
+          color: var(--colour-primary);
           position: absolute;
           top: 0;
           left: -2.3rem;
@@ -660,7 +739,7 @@
           .icon-dimension-member();
 
           position: absolute;
-          color: @primary;
+          color: var(--colour-primary);
           top: 0;
           left: -2.3rem;
           font-size: 120%;
@@ -671,7 +750,7 @@
     .inline-button {
       display: inline;
       cursor: pointer;
-      color: @primary;
+      color: var(--colour-primary);
       padding: 0.3rem;
       border: none;
     }
@@ -714,12 +793,12 @@
         width: 75px;
         text-align: right;
         padding-right: 20px;
-        color: @text-title;
+        color: var(--colour-text-title);
       }
 
       tr.value {
         .show-all {
-          color: @primary;
+          color: var(--colour-primary);
           cursor: pointer;
         }
 
@@ -728,7 +807,7 @@
         }
 
         &.text-block .expand-text-block {
-          color: @primary;
+          color: var(--colour-primary);
           cursor: pointer;
 
           &::before {
@@ -740,7 +819,7 @@
       td {
         overflow: clip visible;
         text-overflow: ellipsis;
-        color: @text-form-value;
+        color: var(--colour-text-form-value);
       }
 
       tr.uri > td {
@@ -810,16 +889,16 @@
 
     width: 25%;
     position: absolute;
-    top: @top-bar-height;
+    top: var(--top-bar-height);
     right: 0;
     bottom: 0;
     box-sizing: border-box;
     overflow: hidden;
-    border-left: @simple-border;
+    border-left: solid 0.1rem var(--colour-border-grey);
 
     a {
       text-decoration: none;
-      color: @primary;
+      color: var(--colour-primary);
 
       &:hover {
         text-decoration: underline;
@@ -847,7 +926,7 @@
             .text-md();
 
             border: none;
-            color: @text-title;
+            color: var(--colour-text-title);
             text-align: left;
             position: relative;
             padding: 0.4rem 0.9rem 0.4rem 2.3rem;
@@ -870,7 +949,7 @@
           font-weight: normal;
           font-style: italic;
           font-size: 1.3rem;
-          color: @text-form-value;
+          color: var(--colour-text-form-value);
         }
       }
 
@@ -882,7 +961,7 @@
         }
 
         .collapsible-subheader {
-          color: @primary;
+          color: var(--colour-primary);
         }
       }
 
@@ -898,7 +977,7 @@
             padding-right: 0.75rem;
             position: relative;
             top: 0.2rem;
-            color: @warning-orange;
+            color: var(--colour-warning);
 
             &::before {
               .icon-circle-cross();
@@ -909,7 +988,7 @@
             padding-right: 0.75rem;
             position: relative;
             top: 0.2rem;
-            color: @workiva-green;
+            color: var(--colour-primary);
 
             &::before {
               .icon-circle-tick();
@@ -966,7 +1045,7 @@
 
               .concept-name,
               .value {
-                color: @primary;
+                color: var(--colour-primary);
 
                 button {
                   .text-md();
@@ -980,7 +1059,7 @@
             }
 
             &.total td {
-              border-top: solid 1px @border-grey;
+              border-top: solid 1px var(--colour-border-grey);
               padding-bottom: 1.2rem;
             }
           }
@@ -1070,12 +1149,12 @@
 
       text-align: center;
       flex-shrink: 0;
-      background: #fff;
+      background: var(--colour-bg);
       width: 100%;
       height: 3rem;
       margin: 0;
       box-sizing: border-box;
-      border-top: @simple-border;
+      border-top: solid 0.1rem var(--colour-border-grey);
       position: relative;
 
       img {
@@ -1126,7 +1205,7 @@
 
     &.failed-to-load .failed-to-load-mask {
       display: block;
-      background-color: rgb(0 0 0 / 50%);
+      background-color: var(--colour-bg-fade);
       position: absolute;
       width: 100%;
       height: 100%;
@@ -1151,10 +1230,10 @@
 
   .fact-link {
     cursor: pointer;
-    color: @primary;
+    color: var(--colour-primary);
 
     &:hover {
-      outline: solid 0.125em @linked-fact;
+      outline: solid 0.125em var(--colour-linked-fact);
       outline-offset: 0.0625em;
     }
   }
@@ -1164,12 +1243,12 @@
       .block-list-item();
 
       .title {
-        color: @text-title;
+        color: var(--colour-text-title);
         font-weight: bold;
       }
 
       .dimension {
-        color: @text;
+        color: var(--colour-text);
         margin: 0.6rem 0;
       }
 
@@ -1183,7 +1262,7 @@
         }
 
         .dimension {
-          color: @text;
+          color: var(--colour-text);
         }
       }
 
@@ -1191,7 +1270,7 @@
   }
 
   .dialog-mask {
-    background-color: rgb(0 0 0 / 60%);
+    background-color: var(--colour-bg-fade);
     position: fixed;
     inset: 0;
     z-index: 10;
@@ -1203,12 +1282,12 @@
   }
 
   .copy-icon {
-    color: @primary;
+    color: var(--colour-primary);
     border-radius: 0.3rem;
 
     &:active {
-      background-color: @primary;
-      color: #fff;
+      background-color: var(--colour-primary);
+      color: var(--colour-bg);
     }
 
     &::before {

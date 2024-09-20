@@ -1,33 +1,39 @@
 // See COPYRIGHT.md for copyright information
 
-@primary: #026dce;
-@primary-focus: #0094ff;
+@colour-bg: #ffffff;
+@colour-foreground: #000000;
 
-@linked-fact: @primary;
-@related-fact: #0eb30e;
+@colour-primary: #026dce;
+@colour-secondary: #66cc00;
+@colour-tertiary: #aa108e;
+@colour-warning: #d8ae15;
 
-@text-title: #444444;
-@text: #595959;
-@text-light: #b2b2b2;
-@text-form-value: #7d7d7d;
+@colour-bg-fade: fadeout(@colour-foreground, 50%);
+@colour-primary-focus: lighten(saturate(spin(@colour-primary, -3.3529), 1.9231), 9.2157); // #0094ff
 
-@border-grey: #cbcbcb;
-@simple-border: solid 0.1rem @border-grey;
+@colour-linked-fact: @colour-primary;
+@colour-related-fact: darken(desaturate(spin(@colour-secondary, 30.0000), 14.5078), 2.1569); // #0eb30e;
 
-@highlight-default: hsl(90 69% 85% / 1);
-@highlight-1: #eaa8ff;
-@highlight-2: hsl(48 100% 85% / 1);
+@colour-text-title: lighten(@colour-foreground, 26.6667); // #444444;
+@colour-text: lighten(@colour-foreground, 34.9020); // #595959;
+@colour-text-light: lighten(@colour-foreground, 69.8039); // #b2b2b2;
+@colour-text-form-value: lighten(@colour-foreground, 49.0196); // #7d7d7d;
 
-@icon-grey: @text;
+@colour-border-grey: lighten(@colour-foreground, 79.6078);
 
-@button-primary-bg: @primary-focus;
-@button-primary-border: #0085e6;
+@colour-highlight-default: lighten(desaturate(spin(@colour-secondary, -0.5660), 31.1688), 44.9020); // #d9f3be
+@colour-highlight-1: lighten(saturate(spin(@colour-tertiary, -25.3918), 17.2043), 46.4706); // #eaa8ff
+@colour-highlight-2: lighten(saturate(spin(@colour-warning, 1.0810), 17.7215), 38.6275); // #fff0b3
 
-@button-background: #f8f8f8;
-@background-selected: #f3f3f3;
+@colour-icon-grey: @colour-text;
 
-@background-tag: #8a8a8a;
+@colour-button-primary-bg: @colour-primary-focus;
+@colour-button-primary-border: lighten(saturate(spin(@colour-primary, -3.2251), 1.9231), 4.3137); // #0085e6;
 
-@workiva-green: #66ca00;
+@colour-button-bg: darken(@colour-bg, 2.7451); // #f8f8f8;
+@colour-bg-selected: darken(@colour-bg, 4.7059); // #f3f3f3;
 
-@warning-orange: #d8ae15;
+@colour-bg-tag: darken(@colour-bg, 45.8824); // #8a8a8a;
+
+@colour-row-hover: darken(@colour-bg, 9.8039); // #e6e6e6
+@colour-row-odd: @colour-button-bg;

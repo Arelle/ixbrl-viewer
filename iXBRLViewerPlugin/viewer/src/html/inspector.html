@@ -7,13 +7,15 @@ See COPYRIGHT.md for copyright information
      <span class="text" data-i18n="inspector.loadingViewer">Loading iXBRL Viewer</span>
   </div>
   <div id="top-bar">
-    <img class="header" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
+    <img class="header only-light" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
+    <img class="header only-dark" alt="Inline Viewer logo" src="../img/inline-viewer-dark.svg" />
     <div class="document-title"></div>
     <div class="top-bar-controls" id="toolbar-highlight-menu">
         <b data-i18n="inspector.highlight">Highlight:</b><span class="highlight-key popup-trigger"><div class="popup-content" >
                 <div class="arrow"></div>
                 <div class="items"></div>
         </div></span><span class="content"></span>
+        <button id="toggle-dark-mode"></button>
         <button class="inline-button validation-warning" title="Report has validation errors"></button>
     </div>
   </div>
@@ -357,7 +359,10 @@ See COPYRIGHT.md for copyright information
 
     </div>
     <div class="inspector-foot powered-by">
-        <a href="https://arelle.org" target="_blank" aria-label="Link to Arelle website"><img alt="Arelle logo" src="../img/arelle.svg" /></a>
+        <a href="https://arelle.org" target="_blank" aria-label="Link to Arelle website">
+          <img alt="Arelle logo" class="only-light" src="../img/arelle.svg" />
+          <img alt="Arelle logo" class="only-dark" src="../img/arelle-dark.svg" />
+        </a>
         <div class="version"></div>
     </div>
     <div class="failed-to-load-mask"></div>

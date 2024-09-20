@@ -20,6 +20,7 @@ import { Calculation } from "./calculation.js";
 import { CalculationInspector } from './calculationInspector.js';
 import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
+import { toggleTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
 
@@ -142,6 +143,10 @@ export class Inspector {
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
         $('.ixbrl-next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
         $('.ixbrl-prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
+        $('#toggle-dark-mode')
+                .attr('title', i18next.t('toolbar.toggleDarkMode'))
+                .attr('aria-label', i18next.t('toolbar.toggleDarkMode'))
+                .on('click', toggleTheme);
     }
 
     postLoadAsync() {

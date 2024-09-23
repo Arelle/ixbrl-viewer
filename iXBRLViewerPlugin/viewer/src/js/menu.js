@@ -102,4 +102,11 @@ export class Menu {
             }
         }
     }
+
+    addLabel(name) {
+        const item = $('<div></div>')
+                .addClass("label")
+                .text(name)
+        this._add(item);
+    }
 }

@@ -123,6 +123,12 @@
     "visibleFacts": "Hechos visibles",
     "widerAnchor": "Anclaje amplio"
   },
+  "menu": {
+    "actions": "Comportamientos",
+    "documentLanguage": "Idioma del Documento",
+    "options": "Opciones",
+    "applicationLanguage": "Idioma de Aplicación"
+  },
   "scale": {
     "-3": "mil\u00E9simos",
     "-2": "cent\u00E9simos",

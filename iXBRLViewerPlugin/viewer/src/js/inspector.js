@@ -35,6 +35,7 @@ export class Inspector {
     i18nInit() {
         return i18next.init({
             lng: this.preferredLanguages()[0],
+            reloadOnLanguageChange: true,
             // Do not apply translations that are present but with an empty string
             returnEmptyString: false,
             fallbackLng: 'en',
@@ -212,21 +213,44 @@ export class Inspector {
     buildDisplayOptionsMenu() {
         this._optionsMenu.reset();
         if (this._reportSet) {
-            const dl = this.selectDefaultLanguage();
-            const langs = this._reportSet.availableLanguages();
-            const langNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+            // Doc language
+            const defaultDocLang = this.selectDefaultLanguage();
+            const docLangs = this._reportSet.availableLanguages();
+            const docLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
 
+            this._optionsMenu.addLabel(i18next.t("menu.documentLanguage"));
             this._optionsMenu.addCheckboxGroup(
-                langs,
-                Object.fromEntries(langs.map((l) => [l, langNames.of(l)])),
-                dl,
+                docLangs,
+                Object.fromEntries(docLangs.map((l) => [l, docLangNames.of(l)])),
+                defaultDocLang,
                 (lang) => { this.setLanguage(lang); this.update() },
                 "select-language"
             );
-            this.setLanguage(dl);
+            this.setLanguage(defaultDocLang);
+
+            // Application language
+            const defaultAppLang = i18next.language.substring(0, 2);
+            const dataByLang = i18next.options.resources;
+            const appLangs = Object.keys(dataByLang);
+            const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+
+            this._optionsMenu.addLabel(i18next.t("menu.applicationLanguage"));
+            this._optionsMenu.addCheckboxGroup(
+                    appLangs,
+                    Object.fromEntries(appLangs.map((l) => [l, appLangNames.of(l)])),
+                    defaultAppLang,
+                    (lang) => { this.changeLanguage(lang); },
+                    "select-user-language"
+            );
+
+            // Actions
             if (this._reportSet.filingDocuments()) {
+                this._optionsMenu.addLabel(i18next.t("menu.actions"));
                 this._optionsMenu.addDownloadButton("Download filing documents", this._reportSet.filingDocuments())
             }
+
+            // Options
+            this._optionsMenu.addLabel(i18next.t("menu.options"));
             this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         }
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
@@ -281,6 +305,14 @@ export class Inspector {
                 .append($("<span></span>").text(name))
                 .appendTo($(".highlight-key .items"));
         }
+    }
+
+    changeLanguage(lang) {
+        i18next.changeLanguage(lang);
+        $("#ixv").localize();
+        this.buildDisplayOptionsMenu();
+        this.buildToolbarHighlightMenu();
+        this.update()
     }
 
     setCalculationMode(useCalc11) {

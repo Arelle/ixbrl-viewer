@@ -124,6 +124,12 @@
     "visibleFacts": "Visible Facts",
     "widerAnchor": "Wider anchor"
   },
+  "menu": {
+    "actions": "Actions",
+    "documentLanguage": "Document Language",
+    "options": "Options",
+    "applicationLanguage": "Application Language"
+  },
   "scale": {
     "-3": "thousandths",
     "-2": "hundredths",

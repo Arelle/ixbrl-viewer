@@ -1,0 +1,8 @@
+{
+    "stringItemType": "String",
+    "monetaryItemType": "Monetary",
+    "decimalItemType": "Decimal",
+    "pureItemType": "Pure",
+    "sharesItemType": "Shares"
+}
+

@@ -190,8 +190,11 @@ class IXBRLViewerBuilder:
             if concept.isEnumeration:
                 conceptData["e"] = True
 
-            if concept.type is not None and concept.type.isTextBlock:
+            if concept.isTextBlock:
                 conceptData['t'] = True
+
+            if concept.type is not None:
+                conceptData['dt'] = self.nsmap.qname(concept.type.qname)
 
             if concept.isTypedDimension:
                 typedDomainElement = concept.typedDomainElement

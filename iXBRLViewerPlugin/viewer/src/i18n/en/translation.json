@@ -29,6 +29,7 @@
     "changePercentageDecrease": "{{decrease}}% decrease on ",
     "changePercentageIncrease": "{{increase}}% increase on ",
     "concept": "Concept",
+    "datatype": "Type",
     "date": "Date",
     "dimensions": "Dimensions",
     "duplicatesCount": "{{current}} of {{total}}",
@@ -149,7 +150,7 @@
     "tryAgainDifferentKeywords": "Try again with different keywords"
   },
   "toolbar": {
-    "xbrlElements": "XBRL Elements",
-    "toggleDarkMode": "Toggle dark mode"
+    "toggleDarkMode": "Toggle dark mode",
+    "xbrlElements": "XBRL Elements"
   }
 }

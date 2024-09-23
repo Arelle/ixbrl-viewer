@@ -1,5 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
+import { DataType } from "./datatype.js";
+
 export class Concept {
     constructor(report, name) {
         this._c = report.concepts()[name] || {};
@@ -60,6 +62,12 @@ export class Concept {
     }
 
     typedDomainElement() {
-        return this._c.td
+        return this._c.td;
+    }
+
+    dataType() {
+        if (this._c.dt !== undefined) {
+            return new DataType(this.report, this._c.dt);
+        }
     }
 }

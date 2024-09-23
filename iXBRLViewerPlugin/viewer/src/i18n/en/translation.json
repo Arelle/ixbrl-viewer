@@ -6,7 +6,7 @@
     "does-not-bind": "Calculation does not bind",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
     "maximum": "Maximum",
-    "mininum": "Minimum",
+    "minimum": "Minimum",
     "reported-total": "Reported",
     "reported-value": "Reported value",
     "useCalculations11": "Use Calculations v1.1"

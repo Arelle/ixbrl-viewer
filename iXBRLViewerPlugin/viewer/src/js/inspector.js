@@ -127,9 +127,7 @@ export class Inspector {
                 inspector.createOutline();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
-                    inspector.buildDisplayOptionsMenu();
-                    inspector.buildToolbarHighlightMenu();
-                    inspector.buildHighlightKey();
+                    inspector.rebuildViewer();
                     inspector.setupValidationReportIcon();
                     inspector.initializeViewer();
                     resolve();
@@ -309,10 +307,15 @@ export class Inspector {
 
     changeApplicationLanguage(lang) {
         i18next.changeLanguage(lang);
+        this.rebuildViewer();
+    }
+
+    rebuildViewer() {
         $("#ixv").localize();
         this.buildDisplayOptionsMenu();
         this.buildToolbarHighlightMenu();
-        this.update()
+        this.buildHighlightKey();
+        this.update();
     }
 
     setCalculationMode(useCalc11) {

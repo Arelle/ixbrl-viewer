@@ -223,10 +223,10 @@ export class Inspector {
                 docLangs,
                 Object.fromEntries(docLangs.map((l) => [l, docLangNames.of(l)])),
                 defaultDocLang,
-                (lang) => { this.setLanguage(lang); this.update() },
+                (lang) => { this.setDocumentLanguage(lang); this.update() },
                 "select-language"
             );
-            this.setLanguage(defaultDocLang);
+            this.setDocumentLanguage(defaultDocLang);
 
             // Application language
             const defaultAppLang = i18next.language.substring(0, 2);
@@ -239,7 +239,7 @@ export class Inspector {
                     appLangs,
                     Object.fromEntries(appLangs.map((l) => [l, appLangNames.of(l)])),
                     defaultAppLang,
-                    (lang) => { this.changeLanguage(lang); },
+                    (lang) => { this.changeApplicationLanguage(lang); },
                     "select-user-language"
             );
 
@@ -307,7 +307,7 @@ export class Inspector {
         }
     }
 
-    changeLanguage(lang) {
+    changeApplicationLanguage(lang) {
         i18next.changeLanguage(lang);
         $("#ixv").localize();
         this.buildDisplayOptionsMenu();
@@ -1255,7 +1255,7 @@ export class Inspector {
         return this._reportSet.availableLanguages()[0];
     }
 
-    setLanguage(lang) {
+    setDocumentLanguage(lang) {
         this._viewerOptions.language = lang;
     }
 

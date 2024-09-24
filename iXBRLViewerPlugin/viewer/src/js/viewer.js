@@ -803,7 +803,10 @@ export class Viewer {
     }
 
     _setTitle(docIndex) {
-        $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
+        const title = $('head title', this._iframes.eq(docIndex).contents()).text();
+        $('#top-bar .document-title')
+            .text(title)
+            .attr("aria-label", "Inline Viewer: " + title);
     }
 
     showDocumentForItemId(vuid) {

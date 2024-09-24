@@ -228,10 +228,13 @@
       left: 160px;
       top: 0;
       padding-right: 1.6rem;
-      padding-top: 1.3rem;
+      line-height: var(--top-bar-height);
       border-right: solid 0.1rem #ccc;
       height: var(--top-bar-height);
       overflow: hidden;
+      font-size: inherit;
+      font-weight: inherit;
+      margin: 0;
     }
 
     .top-bar-controls {
@@ -239,6 +242,9 @@
       right: 1.8rem;
       top: 0;
       line-height: var(--top-bar-height);
+      height: var(--top-bar-height);
+      background: var(--colour-bg);
+      padding-left: 1.8rem;
 
       * {
         vertical-align: middle;

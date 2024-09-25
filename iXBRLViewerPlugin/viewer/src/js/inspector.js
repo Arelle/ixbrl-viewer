@@ -44,12 +44,14 @@ export class Inspector {
                 en: { 
                     translation: require('../i18n/en/translation.json'),
                     referenceParts: require('../i18n/en/referenceparts.json'),
-                    currencies: require('../i18n/en/currencies.json')
+                    currencies: require('../i18n/en/currencies.json'),
+                    dataTypes: require('../i18n/en/datatypes.json')
                 },
                 es: { 
                     translation: require('../i18n/es/translation.json'),
                     referenceParts: require('../i18n/es/referenceparts.json'),
-                    currencies: require('../i18n/es/currencies.json')
+                    currencies: require('../i18n/es/currencies.json'),
+                    dataTypes: require('../i18n/es/datatypes.json')
                 }
             }
         }).then((t) => {
@@ -1013,6 +1015,16 @@ export class Inspector {
         tbd.show();
     }
 
+    _updateDataType(fact, context) {
+        const dt = fact.concept()?.dataType();
+        if (dt !== undefined) {
+            $('tr.datatype td', context).text(dt.label());
+        }
+        else {
+            $('tr.datatype', context).hide();
+        }
+    }
+
     _updateEntityIdentifier(fact, context) {
         $('tr.entity-identifier td', context)
             .empty()
@@ -1068,6 +1080,7 @@ export class Inspector {
                             .on('click', () => this.analyseDimension(fact, ["p"]))
                     );
                 }
+                this._updateDataType(fact, factHTML);
                 this._updateEntityIdentifier(fact, factHTML);
                 this._updateValue(fact, false, factHTML);
 

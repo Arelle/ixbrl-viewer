@@ -8,6 +8,7 @@ import i18next from "i18next";
 export const SHOW_FACT = 'SHOW_FACT';
 
 export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217';
+export const NAMESPACE_XBRLI = 'http://www.xbrl.org/2003/instance';
 
 export const CALC_ARCROLE = "calc";
 export const CALC11_ARCROLE = "calc11";

@@ -91,7 +91,6 @@ export class Menu {
                         .attr({ "name": name, "value": v})
                         .on("change", function () {
                             callback($(this).val())
-                            menu.close(); 
                         })
                 )
                 .append($("<span></span>").addClass("checkmark"))
@@ -101,5 +100,12 @@ export class Menu {
                 item.find("input").prop("checked", true);
             }
         }
+    }
+
+    addLabel(name) {
+        const item = $('<div></div>')
+                .addClass("label")
+                .text(name)
+        this._add(item);
     }
 }

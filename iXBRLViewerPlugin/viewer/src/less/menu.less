@@ -6,9 +6,8 @@
   .menu {
     position: absolute;
     right: 0.8rem;
-    top: 0;
+    top: 0.4rem;
     line-height: var(--top-bar-height);
-    cursor: pointer;
 
     .menu-title {
       padding: 0.3rem 2.4rem 0.3rem 0.3rem;
@@ -19,9 +18,14 @@
     .menu-title::after {
       .icon-chevron-down();
 
+      cursor: pointer;
       font-size: 1.8rem;
       position: absolute;
       right: 0.2rem;
+    }
+
+    .menu-title::before {
+      cursor: pointer;
     }
 
     .content-container {
@@ -43,8 +47,7 @@
         overflow-y: auto;
 
         .group {
-          border-bottom: solid 1px var(--colour-border-grey);
-          border-top: solid 1px var(--colour-border-grey);
+          margin-bottom: 1rem;
         }
 
         .item {
@@ -94,6 +97,17 @@
           &:hover {
             text-decoration: none;
           }
+        }
+
+        .label {
+          text-transform: uppercase;
+          font-weight: bold;
+          font-size: 1.2rem;
+          text-align: left;
+          padding-top: 1rem;
+          color: var(--colour-border-grey);
+          border-bottom: solid 1px var(--colour-border-grey);
+          padding-left:1rem;
         }
       }
     }

@@ -6,7 +6,7 @@
     "does-not-bind": "Calculation does not bind",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
     "maximum": "Maximum",
-    "mininum": "Minimum",
+    "minimum": "Minimum",
     "reported-total": "Reported",
     "reported-value": "Reported value",
     "useCalculations11": "Use Calculations v1.1"
@@ -123,6 +123,12 @@
     "validationSeverity": "Severity",
     "visibleFacts": "Visible Facts",
     "widerAnchor": "Wider anchor"
+  },
+  "menu": {
+    "actions": "Actions",
+    "documentLanguage": "Document Language",
+    "options": "Options",
+    "applicationLanguage": "Application Language"
   },
   "scale": {
     "-3": "thousandths",

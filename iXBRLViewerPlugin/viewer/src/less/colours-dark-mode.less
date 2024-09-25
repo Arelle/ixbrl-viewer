@@ -11,6 +11,7 @@
 @colour-bg-fade-d: fadeout(@colour-foreground-d, 50%);
 @colour-primary-focus-d: darken(spin(@colour-primary-d, -3.4), 7.0);
 
+@colour-loader-d: @colour-foreground-d;
 @colour-linked-fact-d: @colour-primary-d;
 @colour-related-fact-d: lighten(desaturate(spin(@colour-secondary-d, 30.0), 14.5), 6.5);
 
@@ -21,9 +22,9 @@
 
 @colour-border-grey-d: darken(@colour-foreground-d, 59.7);
 
-@colour-highlight-default-d: darken(desaturate(@colour-secondary-d, 31.2), 33.7);
-@colour-highlight-1-d: darken(saturate(spin(@colour-tertiary-d, -25.4), 17.2), 34.8);
-@colour-highlight-2-d: darken(saturate(@colour-warning-d, 17.7), 29.0);
+@colour-highlight-default-d: lighten(desaturate(spin(@colour-secondary-d, -0.5660), 31.1688), 44.9020); // #d9f3be
+@colour-highlight-1-d: lighten(saturate(spin(@colour-tertiary-d, -25.3918), 17.2043), 46.4706); // #eaa8ff
+@colour-highlight-2-d: lighten(saturate(spin(@colour-warning-d, 1.0810), 17.7215), 38.6275); // #fff0b3
 
 @colour-icon-grey-d: @colour-text-d;
 

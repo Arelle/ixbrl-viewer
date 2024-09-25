@@ -6,7 +6,7 @@
     "does-not-bind": "",
     "inconsistent-duplicate-facts-present": "",
     "maximum": "",
-    "mininum": "",
+    "minimum": "",
     "reported-total": "",
     "reported-value": "",
     "useCalculations11": ""
@@ -122,6 +122,12 @@
     "validationSeverity": "",
     "visibleFacts": "Hechos visibles",
     "widerAnchor": "Anclaje amplio"
+  },
+  "menu": {
+    "actions": "Comportamientos",
+    "documentLanguage": "Idioma del Documento",
+    "options": "Opciones",
+    "applicationLanguage": "Idioma de Aplicación"
   },
   "scale": {
     "-3": "mil\u00E9simos",

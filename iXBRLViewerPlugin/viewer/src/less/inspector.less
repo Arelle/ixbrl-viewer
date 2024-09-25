@@ -37,6 +37,7 @@
   --colour-highlight-default: @colour-highlight-default;
   --colour-icon-grey: @colour-icon-grey;
   --colour-linked-fact: @colour-linked-fact;
+  --colour-loader: @colour-loader;
   --colour-primary-focus: @colour-primary-focus;
   --colour-primary: @colour-primary;
   --colour-related-fact: @colour-related-fact;
@@ -68,6 +69,7 @@
   --colour-highlight-default: @colour-highlight-default-d;
   --colour-icon-grey: @colour-icon-grey-d;
   --colour-linked-fact: @colour-linked-fact-d;
+  --colour-loader: @colour-loader-d;
   --colour-primary-focus: @colour-primary-focus-d;
   --colour-primary: @colour-primary-d;
   --colour-related-fact: @colour-related-fact-d;
@@ -265,8 +267,9 @@
           position: absolute;
           top: 3.2rem;
           left: -2rem;
-          background: var(--colour-bg);
-          border: solid 1px var(--colour-text);
+          background: white;
+          color: black;
+          border: solid 1px black;
           border-radius: 0.3rem;
           line-height: 1.6rem;
 
@@ -276,10 +279,10 @@
             left: 1.1rem;
             width: 1.5rem;
             height: 1.5rem;
-            border-top: solid 0.1rem var(--colour-text);
-            border-left: solid 0.1rem var(--colour-text);
+            border-top: solid 0.1rem black;
+            border-left: solid 0.1rem black;
             transform: translate(50%, -50%) rotate(45deg);
-            background: var(--colour-bg);
+            background: white;
           }
 
           .item {

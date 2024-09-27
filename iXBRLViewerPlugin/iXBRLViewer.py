@@ -106,7 +106,7 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.standardLabel, "std")
         self.roleMap.getPrefix(XbrlConst.documentationLabel, "doc")
         self.roleMap.getPrefix(XbrlConst.summationItem, "calc")
-        self.roleMap.getPrefix(XbrlConst.summationItem, "calc11")
+        self.roleMap.getPrefix(XbrlConst.summationItem11, "calc11")
         self.roleMap.getPrefix(XbrlConst.parentChild, "pres")
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")

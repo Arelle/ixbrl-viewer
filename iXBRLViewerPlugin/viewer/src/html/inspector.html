@@ -10,13 +10,21 @@ See COPYRIGHT.md for copyright information
     <img class="header only-light" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
     <img class="header only-dark" alt="Inline Viewer logo" src="../img/inline-viewer-dark.svg" />
     <h1 class="document-title"></h1>
-    <div class="top-bar-controls" id="toolbar-highlight-menu">
+    <div class="top-bar-controls">
+      <div id="toolbar-highlight-menu" class="horizontal-menu">
         <b data-i18n="inspector.highlight">Highlight:</b><span class="highlight-key popup-trigger"><div class="popup-content" >
                 <div class="arrow"></div>
                 <div class="items"></div>
         </div></span><span class="content"></span>
-        <button id="toggle-dark-mode"></button>
-        <button class="inline-button validation-warning" title="Report has validation errors"></button>
+      </div>
+      <button id="toggle-dark-mode"></button>
+      <button class="inline-button validation-warning" title="Report has validation errors"></button>
+      <div class="menu" id='display-options-menu'>
+        <button class="menu-title"></button>
+        <div class="content-container">
+          <div class="content"></div>
+        </div>
+      </div>
     </div>
   </div>
   <div id="viewer-pane" >
@@ -31,22 +39,6 @@ See COPYRIGHT.md for copyright information
   </div>
   <div id="inspector" class="no-fact-selected">
     <div id="inspector-head">
-      <div class="title">
-        <h2 class="footnote-mode-off" data-i18n="inspector.factProperties">Fact Properties</h2>
-        <h2 class="footnote-mode-only" data-i18n="inspector.footnoteProperties">Footnote Properties</h2>
-        <button class="back search-mode-only" title="Back">
-        </button>
-        <button class="back summary-mode-only" title="Back">
-        </button>
-        <button class="back outline-mode-only" title="Back">
-        </button>
-        <div class="menu" id='display-options-menu'>
-          <button class="menu-title"></button>
-          <div class="content-container">
-            <div class="content"></div>
-          </div>
-        </div>
-      </div>
       <div class="controls">
         <button class="summary-button" data-i18n="[title]inspector.documentSummary" title="Document summary">
         </button>
@@ -54,11 +46,86 @@ See COPYRIGHT.md for copyright information
         </button>
         <button class="search-button" data-i18n="[title]inspector.searchTitle" title="Search">
         </button>
-        <div class="next-prev">
-            <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag"></button><button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag"></button>
+        <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag"></button>
+        <button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag"></button>
+      </div>
+    </div>
+
+    <div class="inspector-container fact-mode-only">
+      <div class="inspector-title">
+         <h2 class="footnote-mode-off" data-i18n="inspector.factProperties">Fact Properties</h2>
+         <h2 class="footnote-mode-only" data-i18n="inspector.footnoteProperties">Footnote Properties</h2>
+      </div>
+      <div class="inspector-body">
+        <div class="no-fact-overlay">
+          <div class="no-fact-overlay-icon"></div>
+          <p class="title" data-i18n="inspector.noFactSelected">No Fact Selected</p>
+        </div>
+        <div class="fact-selected-only">
+          <div class="tags">
+            <div class="target-document-tag"></div>
+            <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>
+            <div class="html-hidden-fact-tag" data-i18n="inspector.concealedFact">Concealed Fact</div>
+          </div>
+          <div class="collapsible-section">
+            <div class="fact-inspector collapsible-body">
+            </div>
+          </div>
+          <div class="footnote-mode-off">
+            <div class="collapsible-section anchoring">
+              <h3 class="collapsible-header"><button data-i18n="inspector.anchoring">Anchoring</button></h3>
+              <div class="collapsible-body">
+                 <h4 data-i18n="inspector.widerAnchor">Wider anchor</h4>
+                 <div class="anchors-wider">
+                 </div>
+                 <h4 data-i18n="inspector.narrowerAnchor">Narrower anchors</h4>
+                 <div class="anchors-narrower">
+                 </div>
+               </div>
+            </div>
+            <div class="collapsible-section">
+              <h3 class="collapsible-header"><button data-i18n="inspector.references">References</button></h3>
+              <div class="collapsible-body references">
+              </div>
+            </div>
+            <div class="collapsible-section">
+              <h3 class="collapsible-header"><button data-i18n="inspector.calculations">Calculations</button></h3>
+              <div class="collapsible-body calculations">
+                <div class="tree"></div>
+              </div>
+            </div>
+            <div class="collapsible-section">
+              <h3 class="collapsible-header"><button data-i18n="inspector.footnotes">Footnotes</button></h3>
+              <div class="collapsible-body footnotes fact-list">
+              </div>
+            </div>
+            <div class="collapsible-section footnote-facts-section">
+              <h3 class="collapsible-header"><button data-i18n="inspector.associatedFacts">Associated Facts</button></h3>
+              <div class="collapsible-body footnote-facts fact-list">
+              </div>
+            </div>
+            <div class="collapsible-section">
+              <h3 class="collapsible-header"><button data-i18n="inspector.fact-groups">Sections</button></h3>
+              <div class="collapsible-body fact-groups fact-list">
+              </div>
+            </div>
+          </div>
+          <div class="footnote-details footnote-mode-only">
+            <div class="collapsible-section">
+              <h3 class="collapsible-header"><button data-i18n="inspector.associatedFacts">Associated facts</button></h3>
+              <div class="collapsible-body footnote-facts fact-list">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
+    </div>
+    <div class="inspector-container search-mode-only">
+      <div class="inspector-title">
+         <button class="back" title="Back">
+         </button>
+         <h2 data-i18n="inspector.search">Search</h2>
+      </div>
       <div class="search-controls search-mode-only">
         <div class="search-input">
           <input id="ixbrl-search" type="text" aria-label="Search iXBRL report" disabled="disabled" />
@@ -197,94 +264,28 @@ See COPYRIGHT.md for copyright information
             <span data-i18n="inspector.matchingFacts"> matching facts(s)</span>
           </div>
         </div>
-      </div>
-    </div> <!-- inspector-head -->
+      </div> <!-- search controls -->
 
-    <div class="inspector-body">
-      <div class="fact-mode-only inspector-body-fact">
-        <div class="no-fact-overlay">
-          <div class="no-fact-overlay-icon"></div>
-          <p class="title" data-i18n="inspector.noFactSelected">No Fact Selected</p>
-        </div>
-        <div class="fact-selected-only">
-          <div class="tags">
-            <div class="target-document-tag"></div>
-            <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>
-            <div class="html-hidden-fact-tag" data-i18n="inspector.concealedFact">Concealed Fact</div>
+      <div class="inspector-body">
+
+        <div class="search-results search-mode-only">
+          <div class="results fact-list">
           </div>
-          <div class="collapsible-section">
-            <div class="fact-inspector collapsible-body">
-            </div>
-          </div>
-          <div class="footnote-mode-off">
-            <div class="collapsible-section anchoring">
-              <h3 class="collapsible-header"><button data-i18n="inspector.anchoring">Anchoring</button></h3>
-              <div class="collapsible-body">
-                 <h4 data-i18n="inspector.widerAnchor">Wider anchor</h4>
-                 <div class="anchors-wider">
-                 </div>
-                 <h4 data-i18n="inspector.narrowerAnchor">Narrower anchors</h4>
-                 <div class="anchors-narrower">
-                 </div>
-               </div>
-            </div>
-            <div class="collapsible-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.references">References</button></h3>
-              <div class="collapsible-body references">
-              </div>
-            </div>
-            <div class="collapsible-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.calculations">Calculations</button></h3>
-              <div class="collapsible-body calculations">
-                <div class="tree"></div>
-              </div>
-            </div>
-            <div class="collapsible-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.footnotes">Footnotes</button></h3>
-              <div class="collapsible-body footnotes fact-list">
-              </div>
-            </div>
-            <div class="collapsible-section footnote-facts-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.associatedFacts">Associated Facts</button></h3>
-              <div class="collapsible-body footnote-facts fact-list">
-              </div>
-            </div>
-            <div class="collapsible-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.fact-groups">Sections</button></h3>
-              <div class="collapsible-body fact-groups fact-list">
-              </div>
-            </div>
-          </div>
-          <div class="footnote-details footnote-mode-only">
-            <div class="collapsible-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.associatedFacts">Associated facts</button></h3>
-              <div class="collapsible-body footnote-facts fact-list">
-              </div>
-            </div>
+          <div class="search-overlay">
+            <div class="search-overlay-icon"></div>
+            <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
+            <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
           </div>
         </div>
-      </div>
+      </div> 
+    </div>
 
-      <div class="search-results search-mode-only">
-        <div class="results fact-list">
-        </div>
-        <div class="search-overlay">
-          <div class="search-overlay-icon"></div>
-          <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
-          <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
-        </div>
+    <div class="inspector-container summary-mode-only summary">
+      <div class="inspector-title">
+        <button class="back" title="Back"></button>
+        <h2 data-i18n="inspector.documentSummary">Document Summary</h2>
       </div>
-
-      <div class="outline outline-mode-only">
-        <div class="no-outline-overlay">
-          <div class="no-outline-overlay-icon"></div>
-          <p class="title" data-i18n="inspector.outlineUnavailable">Outline Unavailable</p>
-        </div>
-        <div class="body">
-        </div>
-      </div>
-
-      <div class="summary summary-mode-only">
+      <div class="inspector-body">
         <div class="body">
           <div class="collapsible-section fact-summary">
             <h3 class="collapsible-header" data-i18n="inspector.summary.fact.header">Fact Summary</h3>
@@ -365,9 +366,24 @@ See COPYRIGHT.md for copyright information
             </div>
           </div>
         </div>
-      </div>
+      </div> <!-- inspector-body -->
+    </div> <!-- summary -->
 
+    <div class="inspector-container outline-mode-only outline">
+      <div class="inspector-title">
+        <button class="back" title="Back"></button>
+        <h2 data-i18n="inspector.documentOutline">Document Outline</h2>
+      </div>
+      <div class="inspector-body">
+        <div class="no-outline-overlay">
+          <div class="no-outline-overlay-icon"></div>
+          <p class="title" data-i18n="inspector.outlineUnavailable">Outline Unavailable</p>
+        </div>
+        <div class="body">
+        </div>
+      </div>
     </div>
+
     <div class="inspector-foot powered-by">
         <a href="https://arelle.org" target="_blank" aria-label="Link to Arelle website">
           <img alt="Arelle logo" class="only-light" src="../img/arelle.svg" />

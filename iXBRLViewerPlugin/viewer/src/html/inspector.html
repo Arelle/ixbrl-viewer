@@ -6,7 +6,7 @@ See COPYRIGHT.md for copyright information
   <div class="loader loading">
      <span class="text" data-i18n="inspector.loadingViewer">Loading iXBRL Viewer</span>
   </div>
-  <div id="top-bar">
+  <header id="top-bar">
     <img class="header only-light" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
     <img class="header only-dark" alt="Inline Viewer logo" src="../img/inline-viewer-dark.svg" />
     <h1 class="document-title"></h1>
@@ -26,7 +26,7 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-  </div>
+  </header>
   <div id="viewer-pane" >
     <div class="ixds-tabs"><div class="tab-area"></div></div>
     <div id="iframe-container">
@@ -397,14 +397,13 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-
-    <div class="inspector-foot powered-by">
-        <a href="https://arelle.org" target="_blank" aria-label="Link to Arelle website">
-          <img alt="Arelle logo" class="only-light" src="../img/arelle.svg" />
-          <img alt="Arelle logo" class="only-dark" src="../img/arelle-dark.svg" />
-        </a>
-        <div class="version"></div>
-    </div>
+    <footer class="inspector-foot powered-by">
+      <a href="https://arelle.org" target="_blank" aria-label="Link to Arelle website">
+        <img alt="Arelle logo" class="only-light" src="../img/arelle.svg" />
+        <img alt="Arelle logo" class="only-dark" src="../img/arelle-dark.svg" />
+      </a>
+      <div class="version"></div>
+    </footer>
     <div class="failed-to-load-mask"></div>
   </div>
   <div class="dialog-mask">

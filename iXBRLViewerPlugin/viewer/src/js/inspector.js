@@ -367,7 +367,7 @@ export class Inspector {
                     .appendTo(row);
             }
         }
-        const tags = $("<div></div>").addClass("tags").appendTo(row);
+        const tags = $("<div></div>").addClass("block-list-item-tags").appendTo(row);
         if (f.targetDocument() !== null) {
             $('<div class="hidden"></div>')
                 .text(f.targetDocument())

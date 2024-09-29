@@ -18,8 +18,8 @@ See COPYRIGHT.md for copyright information
         </div></span><span class="content"></span>
       </div>
       <button id="toggle-dark-mode"></button>
-      <button class="inline-button validation-warning" title="Report has validation errors"></button>
-      <div class="menu" id='display-options-menu'>
+      <button class="inline-button validation-warning" data-i18n="[aria-label]inspector.validationResults" aria-label="Validation Results" title="Report has validation errors"></button>
+      <div class="menu" id='display-options-menu' data-i18n="[title]inspector.settingsMenu" title="Settings menu">
         <button class="menu-title"></button>
         <div class="content-container">
           <div class="content"></div>
@@ -37,9 +37,9 @@ See COPYRIGHT.md for copyright information
     <div class="resize"></div>
     <div class="resize-spacer"></div>
   </div>
-  <div id="inspector" class="no-fact-selected">
+  <section id="inspector" class="no-fact-selected" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
     <div id="inspector-head">
-      <div class="controls">
+      <nav class="controls">
         <button class="summary-button" data-i18n="[title]inspector.documentSummary" title="Document summary">
         </button>
         <button class="outline-button" data-i18n="[title]inspector.documentOutline" title="Document outline">
@@ -48,7 +48,7 @@ See COPYRIGHT.md for copyright information
         </button>
         <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag"></button>
         <button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag"></button>
-      </div>
+      </nav>
     </div>
 
     <div class="inspector-container fact-mode-only">
@@ -120,7 +120,7 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-    <div class="inspector-container search-mode-only">
+    <div class="inspector-container search-mode-only" role="search">
       <div class="inspector-title">
          <button class="back" title="Back">
          </button>
@@ -128,7 +128,7 @@ See COPYRIGHT.md for copyright information
       </div>
       <div class="search-controls search-mode-only">
         <div class="search-input">
-          <input id="ixbrl-search" type="text" aria-label="Search iXBRL report" disabled="disabled" />
+          <input id="ixbrl-search" type="text" data-i18n="[aria-label]inspector.searchReport" aria-label="Search iXBRL report" disabled="disabled" />
           <button class="filter-toggle" data-i18n="[title]search.toggleFilterControls" title="Toggle filter controls"></button>
         </div>
         <div class="search-filters">
@@ -282,7 +282,7 @@ See COPYRIGHT.md for copyright information
 
       <div class="inspector-body">
 
-        <div class="search-results search-mode-only">
+        <section class="search-results search-mode-only" data-i18n="[aria-label]inspector.searchResults" aria-label="Search results">
           <div class="results fact-list">
           </div>
           <div class="search-overlay">
@@ -290,7 +290,7 @@ See COPYRIGHT.md for copyright information
             <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
             <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
           </div>
-        </div>
+        </section>
       </div> 
     </div>
 
@@ -405,7 +405,7 @@ See COPYRIGHT.md for copyright information
       <div class="version"></div>
     </footer>
     <div class="failed-to-load-mask"></div>
-  </div>
+  </section>
   <div class="dialog-mask">
   </div>
   <div id="dialog-container"></div>

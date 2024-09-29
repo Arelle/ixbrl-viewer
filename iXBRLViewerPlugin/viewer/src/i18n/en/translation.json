@@ -67,6 +67,7 @@
     "hiddenFacts": "Hidden Facts",
     "highlight": "Highlight",
     "initializing": "Initializing",
+    "ixbrlInspector": "iXBRL Inspector",
     "loadingViewer": "Loading iXBRL Viewer",
     "matchingFacts": " matching facts(s)",
     "namespaces": "Namespaces",
@@ -87,6 +88,7 @@
     "searchReport": "Search iXBRL Report",
     "searchResults": "Search Results",
     "searchTitle": "Search",
+    "settingsMenu": "Settings Menu",
     "showTextOnly": "Show text only",
     "summary": {
       "fact": {
@@ -163,5 +165,8 @@
   "toolbar": {
     "toggleDarkMode": "Toggle dark mode",
     "xbrlElements": "XBRL Elements"
+  },
+  "viewer": {
+    "ixbrlDocumentView": "iXBRL Document View"
   }
 }

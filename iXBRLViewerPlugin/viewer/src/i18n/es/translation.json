@@ -67,6 +67,7 @@
     "hiddenFacts": "Hechos ocultos",
     "highlight": "Destacar",
     "initializing": "",
+    "ixbrlInspector": "",
     "loadingViewer": "Preparando el visor iXBRL",
     "matchingFacts": "",
     "namespaces": "",
@@ -87,6 +88,7 @@
     "searchReport": "",
     "searchResults": "",
     "searchTitle": "Búsqueda de hechos",
+    "settingsMenu": "",
     "showTextOnly": "",
     "summary": {
       "fact": {
@@ -162,6 +164,9 @@
   },
   "toolbar": {
     "xbrlElements": "Elementos XBRL",
-    "darkMode": "Alternar modo oscuro"
+    "toggleDarkMode": "Alternar modo oscuro"
+  },
+  "viewer": {
+    "ixbrlDocumentView": ""
   }
 }

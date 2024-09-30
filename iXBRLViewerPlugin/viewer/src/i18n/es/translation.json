@@ -11,6 +11,9 @@
     "reported-value": "",
     "useCalculations11": ""
   },
+  "chart": {
+    "dimensionalAnalysisChart": ""
+  },
   "common": {
     "accuracyInfinite": "Precisió infinita",
     "none": "Ninguno",

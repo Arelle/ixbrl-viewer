@@ -101,7 +101,7 @@ export class Inspector {
                 $("#inspector .controls .outline-button").on("click", function () {
                     $(this).closest("#inspector").removeClass(["summary-mode", "search-mode"]).toggleClass("outline-mode");
                 });
-                $("#inspector-head .back").on("click", function () {
+                $("#inspector .back").on("click", function () {
                     $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode", "search-mode"]);
                 });
                 $(".popup-trigger").on("mouseenter", function () {
@@ -367,7 +367,7 @@ export class Inspector {
                     .appendTo(row);
             }
         }
-        const tags = $("<div></div>").addClass("tags").appendTo(row);
+        const tags = $("<div></div>").addClass("block-list-item-tags").appendTo(row);
         if (f.targetDocument() !== null) {
             $('<div class="hidden"></div>')
                 .text(f.targetDocument())

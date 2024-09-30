@@ -105,6 +105,30 @@ class TestIXBRLViewer:
             namespaceURI='http://www.xbrl.org/2003/iso4217'
         )
 
+        self.monetary_type = Mock(
+            qname = Mock(
+                localName="monetaryItemType",
+                prefix="xbrli",
+                namespaceURI="http://www.xbrl.org/2003/instance"
+            )
+        )
+
+        self.string_type = Mock(
+            qname = Mock(
+                localName="stringItemType",
+                prefix="xbrli",
+                namespaceURI="http://www.xbrl.org/2003/instance"
+            )
+        )
+
+        self.integer_simple_type = Mock(
+            qname = Mock(
+                localName="integer",
+                prefix="xs",
+                namespaceURI="http://www.w3.org/2001/XMLSchema"
+            )
+        )
+
         self.usd_unit = Mock(
             measures = ([self.usd_qname],[])
         )
@@ -120,6 +144,7 @@ class TestIXBRLViewer:
                 namespaceURI='http://viewer.com'
             ),
             isTypedDimension=False,
+            type=self.monetary_type,
         )
 
         to_concept = Mock(
@@ -129,6 +154,7 @@ class TestIXBRLViewer:
                 namespaceURI='http://viewer.com'
             ),
             isTypedDimension=False,
+            type=self.monetary_type,
         )
         from_concept = Mock(
             qname=Mock(
@@ -137,6 +163,7 @@ class TestIXBRLViewer:
                 namespaceURI='http://viewer.com'
             ),
             isTypedDimension=False,
+            type=self.monetary_type,
         )
 
         dimension_concept = Mock(
@@ -146,6 +173,7 @@ class TestIXBRLViewer:
                 namespaceURI='http://viewer.com'
             ),
             isTypedDimension=False,
+            type=self.string_type,
         )
 
         typed_dimension_domain_concept = Mock(
@@ -155,6 +183,7 @@ class TestIXBRLViewer:
                 namespaceURI='http://viewer.com'
             ),
             isTypedDimension=False,
+            type=self.string_type,
         )
 
         typed_dimension_concept = Mock(
@@ -165,6 +194,7 @@ class TestIXBRLViewer:
             ),
             isTypedDimension=True,
             typedDomainElement=typed_dimension_domain_concept,
+            type=self.integer_simple_type,
         )
 
         member_concept = Mock(
@@ -174,6 +204,7 @@ class TestIXBRLViewer:
                 namespaceURI='http://viewer.com'
             ),
             isTypedDimension=False,
+            type=self.string_type,
         )
 
         rel = Mock(
@@ -551,13 +582,13 @@ class TestIXBRLViewer:
         reportData = jsdata["sourceReports"][0]["targetReports"][0]
         assert set(reportData["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
         assert reportData["concepts"] == {
-            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:dimension': {'d': 'e', 'e': True, 't': True, 'labels': {}},
-            'us-gaap:member': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain'},
+            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:dimension': {'d': 'e', 'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
+            'us-gaap:member': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
+            'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
+            'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain', 'dt': 'xs:integer'},
         }
         assert reportData["localDocs"] == {
             'local-inline.htm': ['inline'],
@@ -597,13 +628,13 @@ class TestIXBRLViewer:
         reportData = jsdata["sourceReports"][0]["targetReports"][0]
         assert set(reportData["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
         assert reportData["concepts"] == {
-            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:dimension': {'d': 'e', 'e': True, 't': True, 'labels': {}},
-            'us-gaap:member': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}},
-            'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain'},
+            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:dimension': {'d': 'e', 'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
+            'us-gaap:member': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
+            'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
+            'us-gaap:typed_dimension': {'d': 't', 'e': True, 't': True, 'labels': {}, 'td': 'us-gaap:typed_dimension_domain', 'dt': 'xs:integer'},
         }
         assert reportData["localDocs"] == {
             'local-inline.htm': ['inline'],

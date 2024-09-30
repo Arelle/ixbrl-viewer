@@ -2,15 +2,13 @@
 
 @import url("form-controls.less");
 
-#ixv #inspector {
+#ixv {
   .menu {
-    position: absolute;
-    right: 0.8rem;
-    top: 0.4rem;
     line-height: var(--top-bar-height);
 
     .menu-title {
-      padding: 0.3rem 2.4rem 0.3rem 0.3rem;
+      line-height: var(--top-bar-height);
+      padding: 0 2.4rem 0 0.3rem;
       position: relative;
       border: none;
     }
@@ -33,7 +31,7 @@
       // remaining page space, but this means we need to calculate the top
       // position manually.
       position: fixed;
-      top: calc(var(--top-bar-height) + 3.2rem + 2 * 0.8rem);
+      top: calc(var(--top-bar-height));
       right: 0;
       bottom: 0;
       display: none;

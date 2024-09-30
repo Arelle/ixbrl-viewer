@@ -410,17 +410,17 @@ See COPYRIGHT.md for copyright information
   </div>
   <div id="dialog-container"></div>
   <div id="dialog-templates">
-    <div class="dialog full-screen chart">
+    <div class="dialog full-screen chart" role="dialog" data-i18n="[aria-label]chart.comparisonChart" aria-label="Comparison chart">
       <div class="close"></div>
       <div class="contents">
         <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
         <div class="other-aspects"></div>
       </div>
     </div>
-    <div class="dialog validation-report">
+    <div class="dialog validation-report" role="dialog" aria-labelledby="validation-results-title">
       <div class="close"></div>
       <div class="contents">
-          <h2 data-i18n="inspector.validationResults">Validation results</h2>
+          <h2 id="validation-results-title" data-i18n="inspector.validationResults">Validation results</h2>
           <table>
               <thead>
                   <th data-i18n="inspector.validationSeverity">Severity</th>
@@ -435,10 +435,10 @@ See COPYRIGHT.md for copyright information
           </div>
       </div>
     </div>
-    <div class="dialog calculation-inspector">
+    <div class="dialog calculation-inspector" role="dialog" aria-labelledby="calculation-inspector-title">
       <div class="close"></div>
       <div class="contents">
-        <h2 data-i18n="inspector.calculationDetails">Calculation details</h2>
+        <h2 id="calculation-inspector-title" data-i18n="inspector.calculationDetails">Calculation details</h2>
         <table class="calculation-trace">
           <thead>
             <tr>
@@ -462,10 +462,10 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-    <div class="dialog text-block-viewer">
+    <div class="dialog text-block-viewer" role="dialog" aria-labelledby="text-block-viewer-title">
       <div class="close"></div>
       <div class="contents">
-        <h2 class="title"></h2>
+        <h2 id="text-block-viewer-title" class="title"></h2>
         <iframe id="text-block-viewer-iframe"></iframe>
         <div class="controls">
           <label class="checkbox">
@@ -477,10 +477,10 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-    <div class="dialog message-box">
+    <div class="dialog message-box" role="dialog" aria-labelledby="message-box-title">
       <div class="close"></div>
       <div class="contents">
-        <h2 class="title"></h2>
+        <h2 id="message-box-title" class="title"></h2>
         <div class="message">
         </div>
         <div class="buttons">

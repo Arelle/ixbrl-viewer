@@ -61,7 +61,6 @@
     "factProperties": "Propiedades del hecho",
     "factSearch": "Búsqueda de hechos",
     "factValue": "",
-    "filter": "Filtro",
     "footnoteProperties": "Propiedades de la nota al pie de página",
     "footnotes": "Notas al pie de página",
     "hiddenFact": "Hecho oculto",
@@ -150,10 +149,13 @@
   "search": {
     "concealedFact": "",
     "default": "",
+    "filter": "Filtro",
     "hiddenFact": "Hecho oculto",
     "noMatchFound": "No se encontró ninguna coincidencia",
+    "reset": "",
     "selected": "seleccionados",
     "showMoreResults": "Mostrar más resultados",
+    "toggleFilterControls": "",
     "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },
   "toolbar": {

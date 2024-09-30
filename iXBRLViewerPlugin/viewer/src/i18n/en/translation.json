@@ -61,7 +61,6 @@
     "factProperties": "Fact Properties",
     "factSearch": "Fact Search",
     "factValue": "Fact Value",
-    "filter": "Filter",
     "footnoteProperties": "Footnote Properties",
     "footnotes": "Footnotes",
     "hiddenFact": "Hidden Fact",
@@ -150,10 +149,13 @@
   "search": {
     "concealedFact": "Concealed fact",
     "default": "default",
+    "filter": "Filter",
     "hiddenFact": "Hidden fact",
     "noMatchFound": "No match found",
+    "reset": "Reset",
     "selected": "selected",
     "showMoreResults": "Show more results",
+    "toggleFilterControls": "Toggler filter controls",
     "tryAgainDifferentKeywords": "Try again with different keywords"
   },
   "toolbar": {

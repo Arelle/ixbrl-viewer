@@ -142,7 +142,7 @@ export class IXBRLChart extends Dialog {
         for (const av of fact.aspects()) {
             /* Don't show concept in list of additional aspects */
             if (av.name() != 'c') {
-                const a = $("<div>")
+                const a = $("<button>")
                     .addClass("other-aspect")
                     .appendTo($(".other-aspects",c));
                 if (dims.includes(av.name())) {
@@ -207,6 +207,7 @@ export class IXBRLChart extends Dialog {
             this.setChartSize();
             chart.resize();
         });
+        $(".other-aspect", c).get(0)?.focus();
     }
 
     setChartSize() {

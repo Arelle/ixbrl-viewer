@@ -361,8 +361,7 @@ export class Inspector {
 
         for (const aspect of f.aspects()) {
             if (aspect.isTaxonomyDefined() && !aspect.isNil()) {
-                $('<div class="dimension"></div>')
-                    .text(aspect.valueLabel())
+                this._setLabelWithLang($('<div class="dimension"></div>'), aspect.valueLabelAndLang())
                     .appendTo(row);
             }
         }
@@ -1114,8 +1113,7 @@ export class Inspector {
                     $('#dimensions-label', factHTML).hide();
                 }
                 for (const aspect of taxonomyDefinedAspects) {
-                    const h = $('<div class="dimension"></div>')
-                        .text(aspect.label() || aspect.name())
+                    const h = this._setLabelWithLang($('<div class="dimension"></div>'), aspect.labelOrNameAndLang())
                         .appendTo($('#dimensions', factHTML));
                     if (fact.isNumeric()) {
                         h.append(
@@ -1125,8 +1123,7 @@ export class Inspector {
                                 .on("click", () => this.analyseDimension(fact, [aspect.name()]))
                         )
                     }
-                    const s = $('<div class="dimension-value"></div>')
-                        .text(aspect.valueLabel())
+                    const s = this._setLabelWithLang($('<div class="dimension-value"></div>'), aspect.valueLabelAndLang())
                         .appendTo(h);
                     if (aspect.isNil()) {
                         s.wrapInner("<i></i>");

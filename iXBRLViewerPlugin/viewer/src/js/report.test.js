@@ -103,23 +103,33 @@ describe("Concept labels", () => {
     test("Label fallback", () => {
         vo.language = 'fr';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept trois");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std').label).toBe("Concept trois");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std').lang).toBe("fr");
         expect(testReport.getLabelOrName('eg:Concept3', 'std')).toBe("Concept trois");
         vo.language = 'es';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept cuatro");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std').label).toBe("Concept cuatro");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std').lang).toBe("es");
         expect(testReport.getLabelOrName('eg:Concept3', 'std')).toBe("Concept cuatro");
         // No English label, so fall back on German (de is first alphabetically)
         vo.language = 'en';
         expect(testReport.getLabel('eg:Concept3', 'std')).toBe("Concept vier");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std').label).toBe("Concept vier");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std').lang).toBe("de");
         expect(testReport.getLabelOrName('eg:Concept3', 'std')).toBe("Concept vier");
 
         // Attempt to get an undefined label type 
         expect(testReport.getLabel('eg:Concept3', 'doc')).toBeUndefined();
+        expect(testReport.getLabelAndLang('eg:Concept3', 'doc').label).toBeUndefined();
+        expect(testReport.getLabelAndLang('eg:Concept3', 'doc').lang).toBeUndefined();
         expect(testReport.getLabelOrName('eg:Concept3', 'doc')).toBe('eg:Concept3');
     });
 
     test("With prefix", () => {
         vo.language = 'fr';
         expect(testReport.getLabel('eg:Concept3', 'std', true)).toBe("(eg) Concept trois");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std', true).label).toBe("(eg) Concept trois");
+        expect(testReport.getLabelAndLang('eg:Concept3', 'std', true).lang).toBe("fr");
         expect(testReport.getLabelOrName('eg:Concept3', 'std', true)).toBe("(eg) Concept trois");
 
         expect(testReport.getLabel('eg:Concept3', 'doc', true)).toBeUndefined();

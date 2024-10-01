@@ -27,8 +27,16 @@ export class Fact {
         return this.report.getLabel(this.f.a.c, rolePrefix, withPrefix);
     }
 
+    getLabelAndLang(rolePrefix, withPrefix) {
+        return this.report.getLabelAndLang(this.f.a.c, rolePrefix, withPrefix);
+    }
+
     getLabelOrName(rolePrefix, withPrefix) {
         return this.report.getLabelOrName(this.f.a.c, rolePrefix, withPrefix);
+    }
+
+    getLabelOrNameAndLang(rolePrefix, withPrefix) {
+        return this.report.getLabelOrNameAndLang(this.f.a.c, rolePrefix, withPrefix);
     }
 
     conceptName() {

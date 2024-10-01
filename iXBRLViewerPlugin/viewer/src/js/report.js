@@ -199,35 +199,47 @@ export class XBRLReport {
     }
 
     getLabel(c, rolePrefix, showPrefix) {
+        return this.getLabelAndLang(c, rolePrefix, showPrefix).label;
+    }
+
+    getLabelAndLang(c, rolePrefix, showPrefix) {
         rolePrefix = rolePrefix || 'std';
         const lang = this.reportSet.viewerOptions.language;
         const concept = this._reportData.concepts[c];
         if (concept === undefined) {
             console.log("Attempt to get label for undefined concept: " + c);
-            return "<no label>";
+            return { label: "<no label>" };
         }
         const labels = concept.labels[rolePrefix]
         if (labels === undefined || Object.keys(labels).length == 0) {
-            return undefined;
+            return { label: undefined };
         }
         else {
             let label;
+            let actualLang;
             if (lang && labels[lang]) {
                 label = labels[lang];
+                actualLang = lang;
             }
             else {
                 // Fall back on English, then any label deterministically.
-                label = labels["en"] || labels["en-us"] || labels[Object.keys(labels).sort()[0]];
+                for (const l of ["en", "en-us", Object.keys(labels).sort()[0]]) {
+                    if (labels[l] !== undefined) {
+                        label = labels[l];
+                        actualLang = l;
+                        break;
+                    }
+                }
             }
             if (label === undefined) {
-                return undefined;
+                return {label: undefined};
             }
             let s = '';
             if (showPrefix && this.reportSet.viewerOptions.showPrefixes) {
                 s = "(" + this.qname(c).prefix + ") ";
             }
             s += label;
-            return s;
+            return { label: s, lang: actualLang };
         }
     }
 
@@ -237,6 +249,14 @@ export class XBRLReport {
             return c;
         }
         return label;
+    }
+
+    getLabelOrNameAndLang(c, rolePrefix, showPrefix) {
+        const labelLang = this.getLabelAndLang(c, rolePrefix, showPrefix);
+        if (labelLang.label === undefined) {
+            return { label: c };
+        }
+        return labelLang;
     }
 
     isCalculationContributor(c) {

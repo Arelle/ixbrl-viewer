@@ -45,13 +45,15 @@ export class Inspector {
                     translation: require('../i18n/en/translation.json'),
                     referenceParts: require('../i18n/en/referenceparts.json'),
                     currencies: require('../i18n/en/currencies.json'),
-                    dataTypes: require('../i18n/en/datatypes.json')
+                    dataTypes: require('../i18n/en/datatypes.json'),
+                    balanceTypes: require('../i18n/en/balancetypes.json')
                 },
                 es: { 
                     translation: require('../i18n/es/translation.json'),
                     referenceParts: require('../i18n/es/referenceparts.json'),
                     currencies: require('../i18n/es/currencies.json'),
-                    dataTypes: require('../i18n/es/datatypes.json')
+                    dataTypes: require('../i18n/es/datatypes.json'),
+                    balanceTypes: require('../i18n/es/balancetypes.json')
                 }
             }
         }).then((t) => {
@@ -1024,6 +1026,16 @@ export class Inspector {
         }
     }
 
+    _updateBalance(fact, context) {
+        const b = fact.concept()?.balance();
+        if (b !== undefined) {
+            $('tr.balance td', context).text(i18next.t(`balanceTypes:${b}`, {defaultValue: b}));
+        }
+        else {
+            $('tr.balance', context).hide();
+        }
+    }
+
     _updateEntityIdentifier(fact, context) {
         $('tr.entity-identifier td', context)
             .empty()
@@ -1094,6 +1106,7 @@ export class Inspector {
                     );
                 }
                 this._updateDataType(fact, factHTML);
+                this._updateBalance(fact, factHTML);
                 this._updateEntityIdentifier(fact, factHTML);
                 this._updateValue(fact, false, factHTML);
 

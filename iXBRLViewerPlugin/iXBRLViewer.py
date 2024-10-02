@@ -193,6 +193,9 @@ class IXBRLViewerBuilder:
             if concept.isTextBlock:
                 conceptData['t'] = True
 
+            if concept.balance is not None:
+                conceptData['b'] = concept.balance
+
             if concept.type is not None:
                 conceptData['dt'] = self.nsmap.qname(concept.type.qname)
 

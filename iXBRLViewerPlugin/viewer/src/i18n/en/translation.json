@@ -20,6 +20,7 @@
   },
   "factDetails": {
     "accuracy": "Accuracy",
+    "balance": "Balance",
     "calculationIsConsistent": "Calculation is consistent",
     "calculationIsInconsistent": "Calculation is inconsistent",
     "calculationUnchecked": "Calculation not checked due to presence of duplicate facts",

@@ -70,4 +70,8 @@ export class Concept {
             return new DataType(this.report, this._c.dt);
         }
     }
+
+    balance() {
+        return this._c.b;
+    }
 }

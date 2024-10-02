@@ -1,6 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import { DataType } from "./datatype.js";
+import { Balance } from "./balance.js";
 
 export class Concept {
     constructor(report, name) {
@@ -72,6 +73,8 @@ export class Concept {
     }
 
     balance() {
-        return this._c.b;
+        if (this._c.b !== undefined) {
+            return new Balance(this._c.b);
+        }
     }
 }

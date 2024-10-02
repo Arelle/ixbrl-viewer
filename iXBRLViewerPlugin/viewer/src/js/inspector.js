@@ -1029,7 +1029,7 @@ export class Inspector {
     _updateBalance(fact, context) {
         const b = fact.concept()?.balance();
         if (b !== undefined) {
-            $('tr.balance td', context).text(i18next.t(`balanceTypes:${b}`, {defaultValue: b}));
+            $('tr.balance td', context).text(b.label());
         }
         else {
             $('tr.balance', context).hide();

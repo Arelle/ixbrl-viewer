@@ -11,6 +11,9 @@
     "reported-value": "Reported value",
     "useCalculations11": "Use Calculations v1.1"
   },
+  "chart": {
+    "dimensionalAnalysisChart": "Dimensional analysis chart"
+  },
   "common": {
     "accuracyInfinite": "Infinite precision",
     "none": "None",

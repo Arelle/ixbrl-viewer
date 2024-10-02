@@ -353,8 +353,7 @@ export class Inspector {
                 $('#inspector').removeClass("search-mode");
             })
             .appendTo(row)
-        $('<div class="title"></div>')
-            .text(f.getLabelOrName("std"))
+        this._setLabelWithLang($('<div class="title"></div>'), f.getLabelOrNameAndLang("std"))
             .appendTo(row);
         $('<div class="dimension"></div>')
             .text(f.period().toString())
@@ -362,8 +361,7 @@ export class Inspector {
 
         for (const aspect of f.aspects()) {
             if (aspect.isTaxonomyDefined() && !aspect.isNil()) {
-                $('<div class="dimension"></div>')
-                    .text(aspect.valueLabel())
+                this._setLabelWithLang($('<div class="dimension"></div>'), aspect.valueLabelAndLang())
                     .appendTo(row);
             }
         }
@@ -728,11 +726,11 @@ export class Inspector {
         if (anchors.length > 0) {
             for (const c of anchors) {
                 const otherFacts = fact.report.getAlignedFacts(fact, { "c": c });
-                const label = fact.report.getLabel(c, "std", true);
+                const labelLang = fact.report.getLabelAndLang(c, "std", true);
 
                 $("<li></li>")
                     .appendTo(html)
-                    .append(this.factLinkHTML(label, otherFacts));
+                    .append(this.factLinkHTML(labelLang, otherFacts));
             }
         }
         else {
@@ -926,8 +924,9 @@ export class Inspector {
         }
     }
 
-    factLinkHTML(label, factList) {
-        const html = $("<span></span>").text(label);
+    factLinkHTML(labelLang, factList) {
+        const html = $("<span></span>");
+        this._setLabelWithLang(html, labelLang);
         if (factList.length > 0) {
             html
             .addClass("fact-link")
@@ -954,7 +953,7 @@ export class Inspector {
                 const allMostRecent = fact.report.getAlignedFacts(mostRecent);
                 s = $("<span></span>")
                         .text(this.describeChange(mostRecent, fact))
-                        .append(this.factLinkHTML(mostRecent.periodString(), allMostRecent));
+                        .append(this.factLinkHTML({label: mostRecent.periodString()}, allMostRecent));
 
             }
             else {
@@ -1039,6 +1038,20 @@ export class Inspector {
         return html;
     }
 
+    _setLabelWithLang(elt, labelLang) {
+        elt.removeAttr("lang");
+        if (labelLang.label !== undefined) {
+            elt.text(labelLang.label);
+            if (labelLang.lang !== undefined) {
+                elt.attr("lang", labelLang.lang);
+            }
+        }
+        else {
+            elt.text("");
+        }
+        return elt;
+    }
+
     /* 
      * Build an accordian containing a summary of all nested facts/footnotes
      * corresponding to the current viewer selection.
@@ -1059,8 +1072,8 @@ export class Inspector {
             const title = fs.minimallyUniqueLabel(fact);
             if (fact instanceof Fact) {
                 factHTML = $(require('../html/fact-details.html')); 
-                $('.std-label', factHTML).text(fact.getLabelOrName("std", true));
-                $('.documentation', factHTML).text(fact.getLabel("doc") || "");
+                this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
+                this._setLabelWithLang($('.documentation', factHTML), fact.getLabelAndLang("doc"));
                 $('tr.concept td', factHTML)
                     .find('.text')
                         .text(fact.conceptName())
@@ -1100,8 +1113,7 @@ export class Inspector {
                     $('#dimensions-label', factHTML).hide();
                 }
                 for (const aspect of taxonomyDefinedAspects) {
-                    const h = $('<div class="dimension"></div>')
-                        .text(aspect.label() || aspect.name())
+                    const h = this._setLabelWithLang($('<div class="dimension"></div>'), aspect.labelOrNameAndLang())
                         .appendTo($('#dimensions', factHTML));
                     if (fact.isNumeric()) {
                         h.append(
@@ -1111,8 +1123,7 @@ export class Inspector {
                                 .on("click", () => this.analyseDimension(fact, [aspect.name()]))
                         )
                     }
-                    const s = $('<div class="dimension-value"></div>')
-                        .text(aspect.valueLabel())
+                    const s = this._setLabelWithLang($('<div class="dimension-value"></div>'), aspect.valueLabelAndLang())
                         .appendTo(h);
                     if (aspect.isNil()) {
                         s.wrapInner("<i></i>");

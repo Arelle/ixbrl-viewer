@@ -12,7 +12,6 @@ export class DataType {
 
     label() {
         if (this.qname.namespace == NAMESPACE_XBRLI) {
-            console.log(this.qname.qname);
             return i18next.t(`dataTypes:${this.qname.localname}`, {defaultValue: this.qname.qname});
         }
         return this.qname.qname;

@@ -6,7 +6,7 @@ See COPYRIGHT.md for copyright information
   <div class="loader loading">
      <span class="text" data-i18n="inspector.loadingViewer">Loading iXBRL Viewer</span>
   </div>
-  <div id="top-bar">
+  <header id="top-bar">
     <img class="header only-light" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
     <img class="header only-dark" alt="Inline Viewer logo" src="../img/inline-viewer-dark.svg" />
     <h1 class="document-title"></h1>
@@ -17,17 +17,17 @@ See COPYRIGHT.md for copyright information
                 <div class="items"></div>
         </div></span><span class="content"></span>
       </div>
-      <button id="toggle-dark-mode"></button>
-      <button class="inline-button validation-warning" title="Report has validation errors"></button>
-      <div class="menu" id='display-options-menu'>
+      <button id="toggle-dark-mode" data-i18n="[title]toolbar.toggleDarkMode" title="Toggle dark mode"></button>
+      <button class="inline-button validation-warning" data-i18n="[aria-label]inspector.validationResults" aria-label="Validation Results" title="Report has validation errors"></button>
+      <div class="menu" id='display-options-menu' data-i18n="[title]inspector.settingsMenu" title="Settings menu">
         <button class="menu-title"></button>
         <div class="content-container">
           <div class="content"></div>
         </div>
       </div>
     </div>
-  </div>
-  <div id="viewer-pane" >
+  </header>
+  <section id="viewer-pane" data-i18n="[aria-label]viewer.ixbrlDocumentView" aria-label="iXBRL Document View">
     <div class="ixds-tabs"><div class="tab-area"></div></div>
     <div id="iframe-container">
       <div class="zoom-in">+</div>
@@ -36,10 +36,10 @@ See COPYRIGHT.md for copyright information
     </div>
     <div class="resize"></div>
     <div class="resize-spacer"></div>
-  </div>
-  <div id="inspector" class="no-fact-selected">
+  </section>
+  <section id="inspector" class="no-fact-selected" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
     <div id="inspector-head">
-      <div class="controls">
+      <nav class="controls">
         <button class="summary-button" data-i18n="[title]inspector.documentSummary" title="Document summary">
         </button>
         <button class="outline-button" data-i18n="[title]inspector.documentOutline" title="Document outline">
@@ -48,7 +48,7 @@ See COPYRIGHT.md for copyright information
         </button>
         <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag"></button>
         <button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag"></button>
-      </div>
+      </nav>
     </div>
 
     <div class="inspector-container fact-mode-only">
@@ -120,7 +120,7 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-    <div class="inspector-container search-mode-only">
+    <div class="inspector-container search-mode-only" role="search">
       <div class="inspector-title">
          <button class="back" title="Back">
          </button>
@@ -128,7 +128,7 @@ See COPYRIGHT.md for copyright information
       </div>
       <div class="search-controls search-mode-only">
         <div class="search-input">
-          <input id="ixbrl-search" type="text" aria-label="Search iXBRL report" disabled="disabled" />
+          <input id="ixbrl-search" type="text" data-i18n="[aria-label]inspector.searchReport" aria-label="Search iXBRL report" disabled="disabled" />
           <button class="filter-toggle" data-i18n="[title]search.toggleFilterControls" title="Toggle filter controls"></button>
         </div>
         <div class="search-filters">
@@ -282,7 +282,7 @@ See COPYRIGHT.md for copyright information
 
       <div class="inspector-body">
 
-        <div class="search-results search-mode-only">
+        <section class="search-results search-mode-only" data-i18n="[aria-label]inspector.searchResults" aria-label="Search results">
           <div class="results fact-list">
           </div>
           <div class="search-overlay">
@@ -290,7 +290,7 @@ See COPYRIGHT.md for copyright information
             <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
             <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
           </div>
-        </div>
+        </section>
       </div> 
     </div>
 
@@ -397,31 +397,30 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-
-    <div class="inspector-foot powered-by">
-        <a href="https://arelle.org" target="_blank" aria-label="Link to Arelle website">
-          <img alt="Arelle logo" class="only-light" src="../img/arelle.svg" />
-          <img alt="Arelle logo" class="only-dark" src="../img/arelle-dark.svg" />
-        </a>
-        <div class="version"></div>
-    </div>
+    <footer class="inspector-foot powered-by">
+      <a href="https://arelle.org" target="_blank" aria-label="Link to Arelle website">
+        <img alt="Arelle logo" class="only-light" src="../img/arelle.svg" />
+        <img alt="Arelle logo" class="only-dark" src="../img/arelle-dark.svg" />
+      </a>
+      <div class="version"></div>
+    </footer>
     <div class="failed-to-load-mask"></div>
-  </div>
+  </section>
   <div class="dialog-mask">
   </div>
   <div id="dialog-container"></div>
   <div id="dialog-templates">
-    <div class="dialog full-screen chart">
+    <div class="dialog full-screen chart" role="dialog" data-i18n="[aria-label]chart.comparisonChart" aria-label="Comparison chart">
       <div class="close"></div>
       <div class="contents">
         <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
         <div class="other-aspects"></div>
       </div>
     </div>
-    <div class="dialog validation-report">
+    <div class="dialog validation-report" role="dialog" aria-labelledby="validation-results-title">
       <div class="close"></div>
       <div class="contents">
-          <h2 data-i18n="inspector.validationResults">Validation results</h2>
+          <h2 id="validation-results-title" data-i18n="inspector.validationResults">Validation results</h2>
           <table>
               <thead>
                   <th data-i18n="inspector.validationSeverity">Severity</th>
@@ -436,10 +435,10 @@ See COPYRIGHT.md for copyright information
           </div>
       </div>
     </div>
-    <div class="dialog calculation-inspector">
+    <div class="dialog calculation-inspector" role="dialog" aria-labelledby="calculation-inspector-title">
       <div class="close"></div>
       <div class="contents">
-        <h2 data-i18n="inspector.calculationDetails">Calculation details</h2>
+        <h2 id="calculation-inspector-title" data-i18n="inspector.calculationDetails">Calculation details</h2>
         <table class="calculation-trace">
           <thead>
             <tr>
@@ -463,10 +462,10 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-    <div class="dialog text-block-viewer">
+    <div class="dialog text-block-viewer" role="dialog" aria-labelledby="text-block-viewer-title">
       <div class="close"></div>
       <div class="contents">
-        <h2 class="title"></h2>
+        <h2 id="text-block-viewer-title" class="title"></h2>
         <iframe id="text-block-viewer-iframe"></iframe>
         <div class="controls">
           <label class="checkbox">
@@ -478,10 +477,10 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-    <div class="dialog message-box">
+    <div class="dialog message-box" role="dialog" aria-labelledby="message-box-title">
       <div class="close"></div>
       <div class="contents">
-        <h2 class="title"></h2>
+        <h2 id="message-box-title" class="title"></h2>
         <div class="message">
         </div>
         <div class="buttons">

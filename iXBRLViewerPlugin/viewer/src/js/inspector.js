@@ -41,6 +41,12 @@ export class Inspector {
             fallbackLng: 'en',
             debug: false,
             resources: {
+                cy: {
+                    translation: require('../i18n/cy/translation.json'),
+                    referenceParts: require('../i18n/cy/referenceparts.json'),
+                    currencies: require('../i18n/cy/currencies.json'),
+                    dataTypes: require('../i18n/cy/datatypes.json')
+                },
                 en: { 
                     translation: require('../i18n/en/translation.json'),
                     referenceParts: require('../i18n/en/referenceparts.json'),
@@ -232,8 +238,7 @@ export class Inspector {
 
             // Application language
             const defaultAppLang = i18next.language.substring(0, 2);
-            const dataByLang = i18next.options.resources;
-            const appLangs = Object.keys(dataByLang);
+            const appLangs = Object.keys(i18next.options.resources);
             const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
 
             this._optionsMenu.addLabel(i18next.t("menu.applicationLanguage"));

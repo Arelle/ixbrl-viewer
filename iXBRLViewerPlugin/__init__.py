@@ -133,6 +133,7 @@ def generateViewer(
         features: list[str] | None = None,
         packageDownloadURL: str | None = None,
         copyScript: bool = True,
+        stubFileOnly: bool = False,
 ) -> None:
     """
     Generate and save an iXBRL viewer at the given destination (file, directory, or in-memory file) with the given viewer script URL.
@@ -146,6 +147,7 @@ def generateViewer(
     :param features: Optional list of features to enable.
     :param packageDownloadURL: Optional URL to use as the report package download URL.
     :param copyScript: Controls if the script referenced by viewerURL is copied into the output directory, or directly set as the 'src' value of the script tag in the HTML iXBRL Viewer.
+    :param stubFileOnly: Controls if the output zip is to only contain the stub file.
     """
     # extend XBRL-loaded run processing for this option
     abortGenerationMsg = "Skipping iXBRL Viewer generation."
@@ -190,7 +192,7 @@ def generateViewer(
                 bldr.enableFeature(feature)
         iv = bldr.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, packageDownloadURL=packageDownloadURL)
         if iv is not None:
-            iv.save(saveViewerDest, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
+            iv.save(saveViewerDest, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath, stubFileOnly=stubFileOnly)
     except IXBRLViewerBuilderError as ex:
         print(ex)
     except Exception as ex:

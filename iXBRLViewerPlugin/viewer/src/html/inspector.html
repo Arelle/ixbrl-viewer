@@ -410,14 +410,14 @@ See COPYRIGHT.md for copyright information
   </div>
   <div id="dialog-container"></div>
   <div id="dialog-templates">
-    <div class="dialog full-screen chart" role="dialog" data-i18n="[aria-label]chart.comparisonChart" aria-label="Comparison chart">
+    <dialog class="dialog full-screen chart" role="dialog" data-i18n="[aria-label]chart.comparisonChart" aria-label="Comparison chart">
       <button class="close"></button>
       <div class="contents" role="figure" data-i18n="[aria-label]chart.dimensionalAnalysisChart" aria-label="Dimensional analysis chart">
         <div class="chart-container" ><canvas id='chart-canvas'></canvas></div>
         <div class="other-aspects"></div>
       </div>
-    </div>
-    <div class="dialog validation-report" role="dialog" aria-labelledby="validation-results-title">
+    </dialog>
+    <dialog class="dialog validation-report" role="dialog" aria-labelledby="validation-results-title">
       <button class="close"></button>
       <div class="contents">
           <h2 id="validation-results-title" data-i18n="inspector.validationResults">Validation results</h2>
@@ -434,8 +434,8 @@ See COPYRIGHT.md for copyright information
           <div class="buttons">
           </div>
       </div>
-    </div>
-    <div class="dialog calculation-inspector" role="dialog" aria-labelledby="calculation-inspector-title">
+    </dialog>
+    <dialog class="dialog calculation-inspector" role="dialog" aria-labelledby="calculation-inspector-title">
       <button class="close"></button>
       <div class="contents">
         <h2 id="calculation-inspector-title" data-i18n="inspector.calculationDetails">Calculation details</h2>
@@ -461,8 +461,8 @@ See COPYRIGHT.md for copyright information
         <div class="buttons">
         </div>
       </div>
-    </div>
-    <div class="dialog text-block-viewer" role="dialog" aria-labelledby="text-block-viewer-title">
+    </dialog>
+    <dialog class="dialog text-block-viewer" role="dialog" aria-labelledby="text-block-viewer-title">
       <button class="close"></button>
       <div class="contents">
         <h2 id="text-block-viewer-title" class="title"></h2>
@@ -476,8 +476,8 @@ See COPYRIGHT.md for copyright information
         <div class="buttons">
         </div>
       </div>
-    </div>
-    <div class="dialog message-box" role="dialog" aria-labelledby="message-box-title">
+    </dialog>
+    <dialog class="dialog message-box" role="dialog" aria-labelledby="message-box-title">
       <button class="close"></button>
       <div class="contents">
         <h2 id="message-box-title" class="title"></h2>
@@ -487,5 +487,5 @@ See COPYRIGHT.md for copyright information
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 </div>

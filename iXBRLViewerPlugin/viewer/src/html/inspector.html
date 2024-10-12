@@ -19,8 +19,8 @@ See COPYRIGHT.md for copyright information
       </div>
       <button id="toggle-dark-mode" data-i18n="[title]toolbar.toggleDarkMode" title="Toggle dark mode"></button>
       <button class="inline-button validation-warning" data-i18n="[aria-label]inspector.validationResults" aria-label="Validation Results" title="Report has validation errors"></button>
-      <div class="menu" id='display-options-menu' data-i18n="[title]inspector.settingsMenu" title="Settings menu">
-        <button class="menu-title"></button>
+      <div class="menu" id='display-options-menu'>
+        <button data-i18n="[title]inspector.settingsMenu" title="Settings menu" class="menu-title"></button>
         <div class="content-container">
           <div class="content"></div>
         </div>
@@ -56,7 +56,7 @@ See COPYRIGHT.md for copyright information
          <h2 class="footnote-mode-off" data-i18n="inspector.factProperties">Fact Properties</h2>
          <h2 class="footnote-mode-only" data-i18n="inspector.footnoteProperties">Footnote Properties</h2>
       </div>
-      <div class="inspector-body">
+      <div class="inspector-body" tabindex="1">
         <div class="no-fact-overlay">
           <div class="no-fact-overlay-icon"></div>
           <p class="title" data-i18n="inspector.noFactSelected">No Fact Selected</p>

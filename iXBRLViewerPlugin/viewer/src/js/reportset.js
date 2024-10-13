@@ -117,6 +117,20 @@ export class ReportSet {
         return this._usedPrefixes;
     }
 
+    getUsedConceptDataTypes() {
+        if (this._usedDataTypes === undefined) {
+            const map = new Map()
+            for (const dt of Object.values(this._items)
+                    .filter(f => f instanceof Fact)
+                    .map(f => f.concept().dataType())
+                    .filter(t => t !== undefined)) {
+                map.set(dt.name, dt);
+            }
+            this._usedDataTypes = map.values();
+        }
+        return this._usedDataTypes;
+    }
+
     /**
      * @return {Array[String]} Sorted list of unique software credit text values
      */

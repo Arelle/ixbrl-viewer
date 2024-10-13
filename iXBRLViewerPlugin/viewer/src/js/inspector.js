@@ -411,6 +411,7 @@ export class Inspector {
         spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
         spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
         spec.namespacesFilter = $('#search-filter-namespaces select').val();
+        spec.dataTypesFilter = $('#search-filter-datatypes select').val();
         spec.unitsFilter = $('#search-filter-units select').val();
         spec.scalesFilter = $('#search-filter-scales select').val();
         spec.periodFilter = $('#search-filter-period select').val();
@@ -442,6 +443,12 @@ export class Inspector {
                 .attr("value", prefix)
                 .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)
                 .appendTo('#search-filter-namespaces select');
+        }
+        for (const dataType of this._reportSet.getUsedConceptDataTypes()) {
+            $("<option>")
+                .attr("value", dataType.name)
+                .text(dataType.label())
+                .appendTo('#search-filter-datatypes select');
         }
         const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
         if (targetDocuments.length == 1 && targetDocuments[0] == null) {
@@ -534,6 +541,7 @@ export class Inspector {
         this.updateMultiSelectSubheader('search-filter-scales');
         this.updateMultiSelectSubheader('search-filter-units');
         this.updateMultiSelectSubheader('search-filter-namespaces');
+        this.updateMultiSelectSubheader('search-filter-datatypes');
         this.updateMultiSelectSubheader('search-filter-target-document');
         this.updateMultiSelectSubheader('search-filter-dimension-type');
         this.updateMultiSelectSubheader('search-filter-calculations');

@@ -444,11 +444,16 @@ export class Inspector {
                 .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)
                 .appendTo('#search-filter-namespaces select');
         }
-        for (const dataType of this._reportSet.getUsedConceptDataTypes()) {
-            $("<option>")
-                .attr("value", dataType.name)
-                .text(dataType.label())
-                .appendTo('#search-filter-datatypes select');
+        if (this._reportSet.getUsedConceptDataTypes().length > 0) {
+            for (const dataType of this._reportSet.getUsedConceptDataTypes()) {
+                $("<option>")
+                    .attr("value", dataType.name)
+                    .text(dataType.label())
+                    .appendTo('#search-filter-datatypes select');
+            }
+        }
+        else {
+            $('#search-filter-datatypes').hide();
         }
         const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
         if (targetDocuments.length == 1 && targetDocuments[0] == null) {

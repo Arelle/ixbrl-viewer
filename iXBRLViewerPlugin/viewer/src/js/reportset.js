@@ -126,7 +126,7 @@ export class ReportSet {
                     .filter(t => t !== undefined)) {
                 map.set(dt.name, dt);
             }
-            this._usedDataTypes = map.values();
+            this._usedDataTypes = map.values().toArray();
         }
         return this._usedDataTypes;
     }

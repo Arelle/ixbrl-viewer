@@ -47,6 +47,7 @@
   --colour-text-light: @colour-text-light;
   --colour-text-title: @colour-text-title;
   --colour-text: @colour-text;
+  --colour-warning: @colour-warning;
   --top-bar-height: @top-bar-height;
 
   .only-dark {
@@ -79,6 +80,7 @@
   --colour-text-light: @colour-text-light-d;
   --colour-text-title: @colour-text-title-d;
   --colour-text: @colour-text-d;
+  --colour-warning: @colour-warning-d;
   --top-bar-height: @top-bar-height;
 
   .only-dark {
@@ -580,6 +582,12 @@
             text-align: center;
             font-style: italic;
             font-size: 1.1rem;
+          }
+
+          .datatype-conflict-warning {
+            margin: 1rem 0;
+            color: var(--colour-warning);
+            display: none;
           }
         }
       }

@@ -156,6 +156,7 @@
   },
   "search": {
     "concealedFact": "",
+    "dataTypeConflictWarning": "",
     "default": "",
     "filter": "Filtro",
     "hiddenFact": "Hecho oculto",

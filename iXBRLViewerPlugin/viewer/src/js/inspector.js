@@ -411,11 +411,20 @@ export class Inspector {
         spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
         spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
         spec.namespacesFilter = $('#search-filter-namespaces select').val();
+        spec.conceptTypeFilter = $('#search-filter-concept-type').val();
         spec.dataTypesFilter = $('#search-filter-datatypes select').val();
+        const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter.includes(d.dataType.name));
+        if (
+            (spec.conceptTypeFilter == 'numeric' && selectedDataTypes.some(dt => !dt.isNumeric)) ||
+            (spec.conceptTypeFilter == 'text' && selectedDataTypes.some(dt => dt.isNumeric))) {
+            $("#search-filter-datatypes .datatype-conflict-warning").show();
+        }
+        else {
+            $("#search-filter-datatypes .datatype-conflict-warning").hide();
+        }
         spec.unitsFilter = $('#search-filter-units select').val();
         spec.scalesFilter = $('#search-filter-scales select').val();
         spec.periodFilter = $('#search-filter-period select').val();
-        spec.conceptTypeFilter = $('#search-filter-concept-type').val();
         spec.factValueFilter = $('#search-filter-fact-value').val();
         spec.calculationsFilter = $('#search-filter-calculations select').val();
         spec.dimensionTypeFilter = $('#search-filter-dimension-type select').val();
@@ -447,8 +456,8 @@ export class Inspector {
         if (this._reportSet.getUsedConceptDataTypes().length > 0) {
             for (const dataType of this._reportSet.getUsedConceptDataTypes()) {
                 $("<option>")
-                    .attr("value", dataType.name)
-                    .text(dataType.label())
+                    .attr("value", dataType.dataType.name)
+                    .text(dataType.dataType.label())
                     .appendTo('#search-filter-datatypes select');
             }
         }

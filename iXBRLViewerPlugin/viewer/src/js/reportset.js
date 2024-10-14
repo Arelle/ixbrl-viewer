@@ -122,9 +122,9 @@ export class ReportSet {
             const map = new Map()
             for (const dt of Object.values(this._items)
                     .filter(f => f instanceof Fact)
-                    .map(f => f.concept().dataType())
-                    .filter(t => t !== undefined)) {
-                map.set(dt.name, dt);
+                    .map(f => ({ dataType: f.concept().dataType(), isNumeric: f.isNumeric() }))
+                    .filter(t => t.dataType !== undefined)) {
+                map.set(dt.dataType.name, dt);
             }
             this._usedDataTypes = map.values().toArray();
         }

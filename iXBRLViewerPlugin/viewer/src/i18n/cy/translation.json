@@ -149,6 +149,7 @@
   },
   "search": {
     "concealedFact": "Ffaith guddiedig",
+    "dataTypeConflictWarning": "",
     "default": "rhagosodedig",
     "hiddenFact": "Ffaith gudd",
     "noMatchFound": "Heb ganfod cyfatebiaeth",

@@ -25,6 +25,18 @@ export class Concept {
         }
     }
 
+    labels() {
+        if (!this._c.labels) {
+            return {};
+        }
+        const lang = this.report.reportSet.viewerOptions.language;
+        return Object.fromEntries(
+            Object.entries(this._c.labels)
+                .map(([role, labels]) => [role, labels[lang]])
+                .filter(([role, label]) => label !== undefined)
+        )
+    }
+
     references() {
         if (!this._c.r) {
             return [];

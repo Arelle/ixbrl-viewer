@@ -766,6 +766,20 @@ export class Inspector {
 
     }
 
+    updateLabels(fact) {
+        const container = $("div.labels").empty();  
+        const dl = $("<dl></dl>").appendTo(container);
+        for (const [role, label] of Object.entries(fact.concept().labels())) {
+            $("<dt></dt>")
+                .text(this._reportSet.roleLabel(role))
+                .appendTo(dl);
+            $("<dd></dd>")
+                .text(label)
+                .appendTo(dl);
+        }
+        return dl;
+    }
+
     _referencesHTML(fact) {
         const a = new Accordian();
         for (const [i, r] of fact.concept().references().entries()) {
@@ -1188,6 +1202,7 @@ export class Inspector {
                 this.updateFootnotes(cf);
                 this.updateAnchoring(cf);
                 $('div.references').empty().append(this._referencesHTML(cf));
+                this.updateLabels(cf);
                 $('#inspector .search-results .fact-list-item').removeClass('selected');
                 $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
 

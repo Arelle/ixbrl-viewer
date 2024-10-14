@@ -152,7 +152,7 @@ class IXBRLViewerBuilder:
         """
         return s.replace("<","\\u003C").replace(">","\\u003E").replace("&","\\u0026")
 
-    def addELR(self, report: ModelXbrl, elr):
+    def addRoleDefinition(self, report: ModelXbrl, elr):
         prefix = self.roleMap.getPrefix(elr)
         if self.currentTargetReport.setdefault("roleDefs",{}).get(prefix, None) is None:
             rts = report.roleTypes.get(elr, [])
@@ -173,6 +173,7 @@ class IXBRLViewerBuilder:
             for lr in labels:
                 l = lr.toModelObject
                 conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+                self.addRoleDefinition(report, l.role)
 
             refData = []
             for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
@@ -219,7 +220,7 @@ class IXBRLViewerBuilder:
         for baseSetKey, baseSetModelLinks  in report.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
             if arcrole in (XbrlConst.summationItem, XbrlConst.summationItem11, WIDER_NARROWER_ARCROLE, XbrlConst.parentChild, XbrlConst.dimensionDefault) and ELR is not None:
-                self.addELR(report, ELR)
+                self.addRoleDefinition(report, ELR)
                 rr = dict()
                 relSet = report.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:

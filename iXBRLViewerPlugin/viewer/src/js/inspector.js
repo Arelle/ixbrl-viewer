@@ -362,6 +362,12 @@ export class Inspector {
             .appendTo(row)
         this._setLabelWithLang($('<div class="title"></div>'), f.getLabelOrNameAndLang("std"))
             .appendTo(row);
+        const dt = f.concept().dataType();
+        if (dt !== undefined) {
+           $('<div class="datatype">')
+            .text(dt.label())
+            .appendTo(row);
+        }
         $('<div class="dimension"></div>')
             .text(f.period().toString())
             .appendTo(row);

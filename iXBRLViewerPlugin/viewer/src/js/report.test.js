@@ -143,16 +143,16 @@ describe("ELR labels", () => {
     testReportSet._initialize();
     const testReport = testReportSet.reports[0];
     test("Present", () => {
-        expect(testReport.getRoleLabel("role1")).toBe("Role 1 Label");
+        expect(testReport.getRoleLabelOrURI("role1")).toBe("Role 1 Label");
     });
     test("Null", () => {
-        expect(testReport.getRoleLabel("role2")).toBe("https://www.example.com/role2");
+        expect(testReport.getRoleLabelOrURI("role2")).toBe("https://www.example.com/role2");
     });
     test("No label", () => {
-        expect(testReport.getRoleLabel("role3")).toBe("https://www.example.com/role3");
+        expect(testReport.getRoleLabelOrURI("role3")).toBe("https://www.example.com/role3");
     });
     test("Not present in roleDef", () => {
-        expect(testReport.getRoleLabel("role4")).toBe("https://www.example.com/role4");
+        expect(testReport.getRoleLabelOrURI("role4")).toBe("https://www.example.com/role4");
     });
 
 });

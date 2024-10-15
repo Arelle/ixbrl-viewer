@@ -189,19 +189,6 @@ export class ReportSet {
         return this._data.roles;
     }
 
-    roleLabel(role) {
-        const roleURI = this.roleMap()[role];
-        if (roleURI === undefined) {
-            return undefined;
-        }
-
-        const suffix = roleURI.split("/").pop();
-        return suffix
-            .replace(/[A-Z][a-z]+/, ' $1')
-            .trim()
-            .replace(/^./, s => s.toUpperCase());
-    }
-
     qname(v) {
         return new QName(this.prefixMap(), v);
     }

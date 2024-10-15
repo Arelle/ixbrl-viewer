@@ -45,21 +45,24 @@ export class Inspector {
                     translation: require('../i18n/cy/translation.json'),
                     referenceParts: require('../i18n/cy/referenceparts.json'),
                     currencies: require('../i18n/cy/currencies.json'),
-                    dataTypes: require('../i18n/cy/datatypes.json')
+                    dataTypes: require('../i18n/cy/datatypes.json'),
+                    labelRoles: require('../i18n/cy/labelroles.json')
                 },
                 en: { 
                     translation: require('../i18n/en/translation.json'),
                     referenceParts: require('../i18n/en/referenceparts.json'),
                     currencies: require('../i18n/en/currencies.json'),
                     dataTypes: require('../i18n/en/datatypes.json'),
-                    balanceTypes: require('../i18n/en/balancetypes.json')
+                    balanceTypes: require('../i18n/en/balancetypes.json'),
+                    labelRoles: require('../i18n/en/labelroles.json')
                 },
                 es: { 
                     translation: require('../i18n/es/translation.json'),
                     referenceParts: require('../i18n/es/referenceparts.json'),
                     currencies: require('../i18n/es/currencies.json'),
                     dataTypes: require('../i18n/es/datatypes.json'),
-                    balanceTypes: require('../i18n/es/balancetypes.json')
+                    balanceTypes: require('../i18n/es/balancetypes.json'),
+                    labelRoles: require('../i18n/es/labelroles.json'),
                 }
             }
         }).then((t) => {
@@ -685,7 +688,7 @@ export class Inspector {
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
             for (const group of this.outline.sortedSections()) {
                 $('<button class="fact-list-item"></button>')
-                    .text(group.report.getRoleLabel(group.elr))
+                    .text(group.report.getRoleLabelOrURI(group.elr))
                     .on("click", () => this.selectItem(group.fact.vuid))
                     .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
                     .on("mousedown", (e) => {
@@ -703,7 +706,7 @@ export class Inspector {
         $('.fact-groups').empty();
         for (const group of this.outline.groupsForFact(cf)) {
             $('<button class="fact-list-item"></button>')
-                .text(cf.report.getRoleLabel(group.elr))
+                .text(cf.report.getRoleLabelOrURI(group.elr))
                 .on("click", () => this.selectItem(group.fact.vuid))
                 .appendTo($('.fact-groups'));
         }
@@ -766,12 +769,29 @@ export class Inspector {
 
     }
 
+    labelRoleSort([role1, roleLabel1, label1], [role2, roleLabel2, label2]) {
+        // Sort built-ins before others. Reverse so that -1 (not found) sorts
+        // after the last built-in.
+        const builtIn = ['std', 'doc'].reverse();
+        const p1 = builtIn.indexOf(role1);
+        const p2 = builtIn.indexOf(role2);
+
+        if (p1 != p2) {
+            return p2 - p1;
+        }
+    
+        return roleLabel1.localeCompare(roleLabel2);
+    }
+
     updateLabels(fact) {
         const container = $("div.labels").empty();  
         const dl = $("<dl></dl>").appendTo(container);
-        for (const [role, label] of Object.entries(fact.concept().labels())) {
+        for (const [role, roleLabel, label] of 
+            Object.entries(fact.concept().labels())
+            .map(([role, label]) => [role, fact.report.getLabelRoleLabel(role), label])
+            .sort(this.labelRoleSort)) {
             $("<dt></dt>")
-                .text(this._reportSet.roleLabel(role))
+                .text(roleLabel)
                 .appendTo(dl);
             $("<dd></dd>")
                 .text(label)
@@ -812,7 +832,7 @@ export class Inspector {
         const a = new Accordian();
 
         for (const rCalc of calc.resolvedCalculations()) {
-            const label = report.getRoleLabel(rCalc.elr);
+            const label = report.getRoleLabelOrURI(rCalc.elr);
             const calcBody = $('<div></div>');
             const calcTable = $('<table></table>')
                 .addClass("calculation-table")

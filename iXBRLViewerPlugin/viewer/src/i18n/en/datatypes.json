@@ -1,4 +1,6 @@
 {
+    "booleanItemType": "Boolean",
+    "dateItemType": "Date",
     "stringItemType": "String",
     "monetaryItemType": "Monetary",
     "decimalItemType": "Decimal",

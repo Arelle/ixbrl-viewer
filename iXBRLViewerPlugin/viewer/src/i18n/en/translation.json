@@ -57,6 +57,7 @@
     "concealedFact": "Concealed fact",
     "conceptType": "Concept Type",
     "contributor": "Contributor",
+    "datatypes": "Types",
     "dimensions": "Dimension Type",
     "documentOutline": "Document outline",
     "documentSummary": "Document summary",
@@ -156,6 +157,7 @@
   },
   "search": {
     "concealedFact": "Concealed fact",
+    "dataTypeConflictWarning": "Warning: selection conflicts with Concept Type filter",
     "default": "default",
     "filter": "Filter",
     "hiddenFact": "Hidden fact",

@@ -138,6 +138,13 @@ export class ReportSearch {
         );
     }
 
+    dataTypesFilter(s, item) {
+        return (
+            s.dataTypesFilter.length === 0 ||
+            s.dataTypesFilter.some(p => item.concept().dataType()?.name === p)
+        );
+    }
+
     unitsFilter(s, item) {
         return (
                 s.unitsFilter.length === 0 ||
@@ -175,6 +182,7 @@ export class ReportSearch {
             this.factValueFilter,
             this.calculationsFilter,
             this.namespacesFilter,
+            this.dataTypesFilter,
             this.unitsFilter,
             this.scalesFilter,
             this.targetDocumentFilter

@@ -12,7 +12,7 @@
     "useCalculations11": ""
   },
   "chart": {
-    "dimensionalAnalysisChart": ""
+    "comparisonChart": ""
   },
   "common": {
     "accuracyInfinite": "Precisió infinita",
@@ -23,6 +23,7 @@
   },
   "factDetails": {
     "accuracy": "Precisión",
+    "balance": "",
     "calculationIsConsistent": "",
     "calculationIsInconsistent": "",
     "calculationUnchecked": "",
@@ -71,6 +72,7 @@
     "highlight": "Destacar",
     "initializing": "",
     "ixbrlInspector": "",
+    "labels": "",
     "loadingViewer": "Preparando el visor iXBRL",
     "matchingFacts": "",
     "namespaces": "",
@@ -107,9 +109,9 @@
         "other": "",
         "presentation": "",
         "references": "",
-        "schemas": "",
-        "reportCreation": ""
+        "schemas": ""
       },
+      "reportCreation": "",
       "tag": {
         "colDimensions": "",
         "colMembers": "",
@@ -166,8 +168,8 @@
     "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },
   "toolbar": {
-    "xbrlElements": "Elementos XBRL",
-    "toggleDarkMode": "Alternar modo oscuro"
+    "toggleDarkMode": "Alternar modo oscuro",
+    "xbrlElements": "Elementos XBRL"
   },
   "viewer": {
     "ixbrlDocumentView": ""

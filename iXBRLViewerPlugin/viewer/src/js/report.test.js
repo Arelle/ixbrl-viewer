@@ -2,6 +2,7 @@
 
 import { ReportSet } from "./reportset.js";
 import { ViewerOptions } from "./viewerOptions.js";
+import { TestInspector } from "./test-utils.js";
 import { NAMESPACE_ISO4217 } from "./util";
 
 var testReportData = {
@@ -17,7 +18,11 @@ var testReportData = {
         "role1": "https://www.example.com/role1",
         "role2": "https://www.example.com/role2",
         "role3": "https://www.example.com/role3",
-        "role4": "https://www.example.com/role4"
+        "role4": "https://www.example.com/role4MoreWords",
+        "std": "http://www.xbrl.org/2003/role/label",
+        "doc": "http://www.xbrl.org/2003/role/documentation",
+        "verbose": "http://www.xbrl.org/2003/role/verboseLabel",
+        "total": "http://www.xbrl.org/2003/role/totalLabel",
     },
     "roleDefs": {
         "role1": { "en": "Role 1 Label" },
@@ -67,6 +72,10 @@ var testReportData = {
     "softwareCredits": ["Example credit text A", "Example credit text B"],
 };
 
+var insp = new TestInspector();
+beforeAll(() => {
+    return insp.i18nInit();
+});
 
 describe("Language options", () => {
     const testReportSet = new ReportSet(testReportData);
@@ -152,7 +161,34 @@ describe("ELR labels", () => {
         expect(testReport.getRoleLabelOrURI("role3")).toBe("https://www.example.com/role3");
     });
     test("Not present in roleDef", () => {
-        expect(testReport.getRoleLabelOrURI("role4")).toBe("https://www.example.com/role4");
+        expect(testReport.getRoleLabelOrURI("role4")).toBe("https://www.example.com/role4MoreWords");
+    });
+});
+
+describe("Label role labels", () => {
+    const testReportSet = new ReportSet(testReportData);
+    testReportSet._initialize();
+    const testReport = testReportSet.reports[0];
+    test("Built-in (via i18n)", () => {
+        expect(testReport.getLabelRoleLabel("std")).toBe("Standard Label");
+    });
+    test("Built-in (via i18n)", () => {
+        expect(testReport.getLabelRoleLabel("doc")).toBe("Documentation Label");
+    });
+    test("Built-in (via de-camelcase)", () => {
+        expect(testReport.getLabelRoleLabel("verbose")).toBe("Verbose Label");
+    });
+    test("Present", () => {
+        expect(testReport.getLabelRoleLabel("role1")).toBe("Role 1 Label");
+    });
+    test("Null", () => {
+        expect(testReport.getLabelRoleLabel("role2")).toBe("Role2");
+    });
+    test("No label", () => {
+        expect(testReport.getLabelRoleLabel("role3")).toBe("Role3");
+    });
+    test("Not present in roleDef", () => {
+        expect(testReport.getLabelRoleLabel("role4")).toBe("Role4 More Words");
     });
 
 });

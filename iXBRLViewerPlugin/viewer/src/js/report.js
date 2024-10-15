@@ -195,7 +195,7 @@ export class XBRLReport {
 
         // Fall back on de-camel-casing the last part of the URI
         return suffix
-            .replace(/([A-Z][a-z]+)/, ' $1')
+            .replaceAll(/([A-Z][a-z]+)/g, ' $1')
             .trim()
             .replace(/^./, s => s.toUpperCase());
     }

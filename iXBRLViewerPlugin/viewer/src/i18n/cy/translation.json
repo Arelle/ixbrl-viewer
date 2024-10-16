@@ -11,6 +11,9 @@
     "reported-value": "Gwerth a adroddwyd",
     "useCalculations11": "Defnyddiwch Gyfrifiadau v1.1"
   },
+  "chart": {
+    "comparisonChart": ""
+  },
   "common": {
     "accuracyInfinite": "Anfeidrol drachywiredd",
     "none": "Dim",
@@ -20,6 +23,7 @@
   },
   "factDetails": {
     "accuracy": "Cywirdeb",
+    "balance": "",
     "calculationIsConsistent": "Mae'r cyfrifiad yn gyson",
     "calculationIsInconsistent": "Mae'r cyfrifiad yn anghyson",
     "calculationUnchecked": "Nid yw'r cyfrifiad wedi'i wirio oherwydd presenoldeb ffeithiau dyblyg",
@@ -62,13 +66,14 @@
     "factProperties": "Priodweddau Ffaith",
     "factSearch": "Chwiliad Ffeithiau",
     "factValue": "Gwerth Ffaith",
-    "filter": "Hidlo",
     "footnoteProperties": "Priodweddau Troednodyn",
     "footnotes": "Troednodiadau",
     "hiddenFact": "Ffaith Gudd",
     "hiddenFacts": "Ffeithiau Cudd",
     "highlight": "Uchafbwynt",
     "initializing": "Cychwyn",
+    "ixbrlInspector": "",
+    "labels": "",
     "loadingViewer": "Wrthi'n llwytho Gwyliwr iXBRL",
     "matchingFacts": " cyfateb ffaith(au)",
     "namespaces": "Gofodau Enw",
@@ -85,7 +90,11 @@
     "references": "Cyfeiriadau",
     "reset": "Ailosod",
     "scales": "Graddfeydd",
+    "search": "",
+    "searchReport": "",
+    "searchResults": "",
     "searchTitle": "Chwiliwch",
+    "settingsMenu": "",
     "showTextOnly": "Dangos testun yn unig",
     "summary": {
       "fact": {
@@ -101,9 +110,9 @@
         "other": "Cronfeydd Cyswllt Eraill",
         "presentation": "Basau Cyswllt Cyflwyniad",
         "references": "Basau Cyswllt Cyfeiriad",
-        "schemas": "Sgemâu",
-        "reportCreation": "Creu Adroddiad"
+        "schemas": "Sgemâu"
       },
+      "reportCreation": "Creu Adroddiad",
       "tag": {
         "colDimensions": "Dimensiynau",
         "colMembers": "Aelodau",
@@ -151,14 +160,20 @@
     "concealedFact": "Ffaith guddiedig",
     "dataTypeConflictWarning": "",
     "default": "rhagosodedig",
+    "filter": "Hidlo",
     "hiddenFact": "Ffaith gudd",
     "noMatchFound": "Heb ganfod cyfatebiaeth",
+    "reset": "",
     "selected": "dethol",
     "showMoreResults": "Dangos mwy o ganlyniadau",
+    "toggleFilterControls": "",
     "tryAgainDifferentKeywords": "Ceisiwch eto gyda geiriau allweddol gwahanol"
   },
   "toolbar": {
     "toggleDarkMode": "Toggle modd tywyll",
     "xbrlElements": "Elfennau XBRL"
+  },
+  "viewer": {
+    "ixbrlDocumentView": ""
   }
 }

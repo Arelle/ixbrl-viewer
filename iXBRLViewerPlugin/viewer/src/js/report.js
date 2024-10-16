@@ -165,7 +165,39 @@ export class XBRLReport {
                 return label;
             }
         }
-        return this.reportSet.roleMap()[rolePrefix];
+        return undefined;
+    }
+
+    getRoleLabelOrURI(rolePrefix) {
+        return this.getRoleLabel(rolePrefix) ?? this.reportSet.roleMap()[rolePrefix];
+    }
+
+    getLabelRoleLabel(rolePrefix) {
+        const roleURI = this.reportSet.roleMap()[rolePrefix];
+        if (roleURI === undefined) {
+            return undefined;
+        }
+
+        // Built-in label roles don't have a definition in the taxonomy. Do an
+        // i18n look-up on the last part of the URI. For "en" the camel-case
+        // splitter will do what we want for everything except standard label
+        // and documentation label 
+        const suffix = roleURI.split("/").pop();
+        if (roleURI.startsWith("http://www.xbrl.org/2003/role/") && i18next.exists(`labelRoles:${suffix}`)) {
+            return i18next.t(`labelRoles:${suffix}`);
+        }
+
+        // Attempt to get a label from the role definition
+        const label = this.getRoleLabel(rolePrefix);
+        if (label !== undefined) {
+            return label;
+        }
+
+        // Fall back on de-camel-casing the last part of the URI
+        return suffix
+            .replaceAll(/([A-Z][a-z]+)/g, ' $1')
+            .trim()
+            .replace(/^./, s => s.toUpperCase());
     }
 
     localDocuments() {

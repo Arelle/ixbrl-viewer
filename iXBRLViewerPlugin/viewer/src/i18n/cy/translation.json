@@ -137,24 +137,9 @@
   },
   "menu": {
     "actions": "Gweithredoedd",
+    "applicationLanguage": "Iaith Cais",
     "documentLanguage": "Iaith Dogfen",
-    "options": "Opsiynau",
-    "applicationLanguage": "Iaith Cais"
-  },
-  "scale": {
-    "0": "rhai",
-    "1": "degau",
-    "2": "cannoedd",
-    "3": "miloedd",
-    "4": "deg mil",
-    "5": "can miloedd",
-    "6": "miliynau",
-    "7": "deg miliwn",
-    "8": "can miliynau",
-    "9": "biliynau",
-    "-3": "miloedd",
-    "-2": "canfedau",
-    "-1": "degfedau"
+    "options": "Opsiynau"
   },
   "search": {
     "concealedFact": "Ffaith guddiedig",

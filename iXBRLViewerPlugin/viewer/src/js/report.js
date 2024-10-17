@@ -212,7 +212,7 @@ export class XBRLReport {
     }
 
     getScaleLabel(scale, unit) {
-        let label = i18next.t(`scale.${scale}`, {defaultValue:"noName"});
+        let label = i18next.t(`scale:${scale}`, {defaultValue:"noName"});
         if (unit && unit.isMonetary() && scale === -2) {
             let measure = unit.value() ?? '';
             if (measure) {

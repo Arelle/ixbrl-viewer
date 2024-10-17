@@ -21,6 +21,9 @@
     "unscaled": "Unscaled",
     "unspecified": "Unspecified"
   },
+  "dialog": {
+    "close": "close"
+  },
   "factDetails": {
     "accuracy": "Accuracy",
     "balance": "Balance",

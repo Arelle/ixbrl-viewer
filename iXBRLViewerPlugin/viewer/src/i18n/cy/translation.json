@@ -21,6 +21,9 @@
     "unscaled": "Heb raddfa",
     "unspecified": "Amhenodol"
   },
+  "dialog": {
+    "close": ""
+  },
   "factDetails": {
     "accuracy": "Cywirdeb",
     "balance": "",

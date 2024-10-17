@@ -21,6 +21,9 @@
     "unscaled": "Sin escala",
     "unspecified": "Sin especificar"
   },
+  "dialog": {
+    "close": ""
+  },
   "factDetails": {
     "accuracy": "Precisión",
     "balance": "",

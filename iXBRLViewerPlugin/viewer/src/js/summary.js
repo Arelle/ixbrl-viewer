@@ -125,6 +125,13 @@ export class DocumentSummary {
         return this._totalFacts;
     }
 
+    hiddenFacts() {
+        if (this._hiddenFacts === undefined) {
+            this._hiddenFacts = this._reportSet.facts().filter(f => f.isHidden()).length;
+        }
+        return this._hiddenFacts;
+    }
+
     tagCounts() {
         if (this._tagCounts === undefined) {
             this._buildTagCounts();

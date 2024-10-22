@@ -103,18 +103,10 @@ export class Inspector {
                         }
                     }
                 });
-                $("#inspector .controls .search-button").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode"]).toggleClass("search-mode");
-                });
-                $("#inspector .controls .summary-button").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["outline-mode", "search-mode"]).toggleClass("summary-mode");
-                });
-                $("#inspector .controls .outline-button").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["summary-mode", "search-mode"]).toggleClass("outline-mode");
-                });
-                $("#inspector .back").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode", "search-mode"]);
-                });
+                $("#inspector .controls .search-button").on("click", () => inspector.inspectorMode("search-mode", true));
+                $("#inspector .controls .summary-button").on("click", () => inspector.inspectorMode("summary-mode", true));
+                $("#inspector .controls .outline-button").on("click", () => inspector.inspectorMode("outline-mode", true));
+                $("#inspector .back").on("click", () => inspector.popInspectorMode());
                 $(".popup-trigger").on("mouseenter", function () {
                     $(this).find(".popup-content").show()
                 }).on("mouseleave", function () {
@@ -330,6 +322,35 @@ export class Inspector {
         this.update();
     }
 
+    inspectorMode(mode, toggle) {
+        const allModes = ["summary-mode", "outline-mode", "search-mode"];
+        const i = $("#inspector").removeClass(allModes.filter(m => m !== mode));
+        if (mode === undefined) {
+            return;
+        }
+        if (toggle) {
+            i.toggleClass(mode);
+        }
+        else {
+            i.addClass(mode);
+        }
+    }
+
+    /* 
+     * Controls where the "back" button takes you. We only set this when you
+     * follow a link that switches between modes, otherwise back just takes you
+     * back to the main inspector mode.
+     */
+    pushInspectorMode(newMode, oldMode) {
+        this._prevInspectorMode = oldMode;
+        this.inspectorMode(newMode);
+    }
+
+    popInspectorMode() {
+        this.inspectorMode(this._prevInspectorMode);
+        this._prevInspectorMode = undefined;
+    }
+
     setCalculationMode(useCalc11) {
         this._useCalc11 = useCalc11;
         if (this._currentItem instanceof Fact) {
@@ -515,14 +536,15 @@ export class Inspector {
         return scalesOptions;
     }
 
-    resetSearchFilters() {
+    resetSearchFilters(defaults) {
+        defaults = defaults ?? {};
         $("#search-filter-period select option:selected").prop("selected", false);
         $("#search-filter-concept-type").val("*");
         $("#search-filter-fact-value").val("*");
         $("#search-filter-calculations select option:selected").prop("selected", false);
         $("#search-filter-dimension-type select option:selected").prop("selected", false);
-        $("#search-hidden-fact-filter").prop("checked", true);
-        $("#search-visible-fact-filter").prop("checked", true);
+        $("#search-hidden-fact-filter").prop("checked", defaults.hiddenFacts ?? true);
+        $("#search-visible-fact-filter").prop("checked", defaults.visibleFacts ?? true);
         $("#search-filter-namespaces select option:selected").prop("selected", false);
         $("#search-filter-target-document select option:selected").prop("selected", false);
         $("#search-filter-units select option:selected").prop("selected", false);
@@ -599,9 +621,20 @@ export class Inspector {
 
     _populateFactSummary(summaryDom) {
         const totalFacts = this.summary.totalFacts();
-        $("<span></span>")
-                .text(totalFacts)
-                .appendTo(summaryDom.find(".total-facts-value"));
+        $(".total-facts-value", summaryDom)
+            .text(totalFacts)
+            .on("click", () => {
+                this.resetSearchFilters();
+                this.pushInspectorMode("search-mode", "summary-mode");
+            });
+
+        const hiddenFacts = this.summary.hiddenFacts();
+        $(".hidden-facts-value", summaryDom)
+            .text(hiddenFacts)
+            .on("click", () => {
+                this.resetSearchFilters({visibleFacts: false});
+                this.pushInspectorMode("search-mode", "summary-mode");
+            });
     }
 
     _populateTagSummary(summaryDom) {

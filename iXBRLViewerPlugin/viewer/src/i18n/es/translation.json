@@ -78,7 +78,6 @@
     "ixbrlInspector": "",
     "labels": "",
     "loadingViewer": "Preparando el visor iXBRL",
-    "matchingFacts": "",
     "namespaces": "",
     "narrowerAnchor": "Anclaje angosto",
     "negative": "",
@@ -114,6 +113,9 @@
         "presentation": "",
         "references": "",
         "schemas": ""
+      },
+      "hiddenFacts": {
+        "title": ""
       },
       "reportCreation": "",
       "tag": {
@@ -165,6 +167,7 @@
     "default": "",
     "filter": "Filtro",
     "hiddenFact": "Hecho oculto",
+    "matchingFactsSummary": "",
     "noMatchFound": "No se encontró ninguna coincidencia",
     "reset": "",
     "selected": "seleccionados",

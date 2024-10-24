@@ -78,7 +78,6 @@
     "ixbrlInspector": "iXBRL Inspector",
     "labels": "",
     "loadingViewer": "Loading iXBRL Viewer",
-    "matchingFacts": " matching facts(s)",
     "namespaces": "Namespaces",
     "narrowerAnchor": "Narrower anchors",
     "negative": "Negative",
@@ -114,6 +113,9 @@
         "presentation": "Presentation Linkbases",
         "references": "Reference Linkbases",
         "schemas": "Schemas"
+      },
+      "hiddenFacts": {
+        "title": ""
       },
       "reportCreation": "Report creation",
       "tag": {
@@ -165,6 +167,7 @@
     "default": "default",
     "filter": "Filter",
     "hiddenFact": "Hidden fact",
+    "matchingFactsSummary": "Showing {{nMatches}} of {{nTotal}} facts",
     "noMatchFound": "No match found",
     "reset": "Reset",
     "selected": "selected",

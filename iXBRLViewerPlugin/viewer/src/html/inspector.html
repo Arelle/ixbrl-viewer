@@ -136,8 +136,11 @@ See COPYRIGHT.md for copyright information
           <input id="ixbrl-search" type="text" data-i18n="[aria-label]inspector.searchReport" aria-label="Search iXBRL report" disabled="disabled" />
           <button class="filter-toggle" data-i18n="[title]search.toggleFilterControls" title="Toggle filter controls"></button>
         </div>
+        <div class="filter-info">
+          <span id="matching-facts-summary"></span>
+          <button class="reset" data-i18n="inspector.reset">Reset</button>
+        </div>
         <div class="search-filters">
-          <button class="reset" data-i18n="inspector.reset">Reset</button >
           <h3 data-i18n="search.filter">Filter</h3>
           <div class="filter-group">
             <label class="control-label" data-i18n="inspector.conceptType" for="search-filter-concept-type">
@@ -293,10 +296,6 @@ See COPYRIGHT.md for copyright information
             </div>
           </div>
 
-          <div class="filter-info">
-            <span id="matching-facts-count">?</span>
-            <span data-i18n="inspector.matchingFacts"> matching facts(s)</span>
-          </div>
         </div>
       </div> <!-- search controls -->
 

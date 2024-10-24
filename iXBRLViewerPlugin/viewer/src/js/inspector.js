@@ -23,6 +23,16 @@ import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_
 import { toggleTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
+const SEARCH_FILTER_MULTISELECTS = {
+  periodFilter: "search-filter-period",
+  dimensionTypeFilter: "search-filter-dimension-type",
+  namespacesFilter: "search-filter-namespaces",
+  targetDocumentFilter: "search-filter-target-document",
+  scalesFilter:"search-filter-scales",
+  unitsFilter: "search-filter-units",
+  calculationsFilter: "search-filter-calculations",
+  dataTypesFilter: "search-filter-datatypes",
+};
 
 export class Inspector {
     constructor(iv) {
@@ -440,9 +450,11 @@ export class Inspector {
         spec.searchString = $('#ixbrl-search').val();
         spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
         spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
-        spec.namespacesFilter = $('#search-filter-namespaces select').val();
         spec.conceptTypeFilter = $('#search-filter-concept-type').val();
-        spec.dataTypesFilter = $('#search-filter-datatypes select').val();
+        for (const [key, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
+          spec[key] = $(`#${name} select`).val();
+        }
+
         const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter.includes(d.dataType.name));
         if (
             (spec.conceptTypeFilter == 'numeric' && selectedDataTypes.some(dt => !dt.isNumeric)) ||
@@ -452,21 +464,23 @@ export class Inspector {
         else {
             $("#search-filter-datatypes .datatype-conflict-warning").hide();
         }
-        spec.unitsFilter = $('#search-filter-units select').val();
-        spec.scalesFilter = $('#search-filter-scales select').val();
-        spec.periodFilter = $('#search-filter-period select').val();
         spec.factValueFilter = $('#search-filter-fact-value').val();
-        spec.calculationsFilter = $('#search-filter-calculations select').val();
-        spec.dimensionTypeFilter = $('#search-filter-dimension-type select').val();
-        spec.targetDocumentFilter = $('#search-filter-target-document select').val();
         return spec;
+    }
+
+    hasActiveSearchFilters(searchSpec) {
+      return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0) ||
+        !searchSpec.showVisibleFacts ||
+        !searchSpec.showHiddenFacts ||
+        searchSpec.conceptTypeFilter != "*" ||
+        searchSpec.factValueFilter != "*" ;
     }
 
     setupSearchControls(viewer) {
         const inspector = this;
         $('.search-controls input, .search-controls select').on("change", () => this.search());
         $(".search-controls button.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
-        $(".search-controls .search-filters .reset").on("click", () => this.resetSearchFilters());
+        $(".search-controls .reset").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
             $(this).siblings().children('select option:selected').prop('selected', false);
             inspector.search();
@@ -541,14 +555,11 @@ export class Inspector {
         $("#search-filter-period select option:selected").prop("selected", false);
         $("#search-filter-concept-type").val("*");
         $("#search-filter-fact-value").val("*");
-        $("#search-filter-calculations select option:selected").prop("selected", false);
-        $("#search-filter-dimension-type select option:selected").prop("selected", false);
         $("#search-hidden-fact-filter").prop("checked", defaults.hiddenFacts ?? true);
         $("#search-visible-fact-filter").prop("checked", defaults.visibleFacts ?? true);
-        $("#search-filter-namespaces select option:selected").prop("selected", false);
-        $("#search-filter-target-document select option:selected").prop("selected", false);
-        $("#search-filter-units select option:selected").prop("selected", false);
-        $("#search-filter-scales select option:selected").prop("selected", false);
+        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
+          $(`#${name} select option:selected`).prop("selected", false);
+        }
         this.search();
     }
 
@@ -559,8 +570,14 @@ export class Inspector {
         this.search();
     }
 
-    search () {
+    search() {
         const spec = this.searchSpec();
+        if (this.hasActiveSearchFilters(spec)) {
+            $("#inspector .search-controls").addClass("active-filters");
+        }
+        else {
+            $("#inspector .search-controls").removeClass("active-filters");
+        }
         const results = this._search.search(spec);
         if (results === undefined) {
             return;
@@ -578,19 +595,14 @@ export class Inspector {
             $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
             overlay.show();
         }
-        $("#matching-facts-count").text(results.length);
+        $("#matching-facts-summary").text(i18next.t("search.matchingFactsSummary", {nMatches: results.length, nTotal: this._reportSet.facts().length}));
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));
         }
-        this.updateMultiSelectSubheader('search-filter-scales');
-        this.updateMultiSelectSubheader('search-filter-units');
-        this.updateMultiSelectSubheader('search-filter-namespaces');
-        this.updateMultiSelectSubheader('search-filter-datatypes');
-        this.updateMultiSelectSubheader('search-filter-target-document');
-        this.updateMultiSelectSubheader('search-filter-dimension-type');
-        this.updateMultiSelectSubheader('search-filter-calculations');
-        this.updateMultiSelectSubheader('search-filter-period');
+        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
+          this.updateMultiSelectSubheader(name);
+        }
     }
 
     updateMultiSelectSubheader(id) {

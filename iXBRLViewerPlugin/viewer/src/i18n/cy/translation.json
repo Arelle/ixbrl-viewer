@@ -78,7 +78,6 @@
     "ixbrlInspector": "",
     "labels": "",
     "loadingViewer": "Wrthi'n llwytho Gwyliwr iXBRL",
-    "matchingFacts": " cyfateb ffaith(au)",
     "namespaces": "Gofodau Enw",
     "narrowerAnchor": "Angorau culach",
     "negative": "Negyddol",
@@ -114,6 +113,9 @@
         "presentation": "Basau Cyswllt Cyflwyniad",
         "references": "Basau Cyswllt Cyfeiriad",
         "schemas": "Sgemâu"
+      },
+      "hiddenFacts": {
+        "title": ""
       },
       "reportCreation": "Creu Adroddiad",
       "tag": {
@@ -165,6 +167,7 @@
     "default": "rhagosodedig",
     "filter": "Hidlo",
     "hiddenFact": "Ffaith gudd",
+    "matchingFactsSummary": "",
     "noMatchFound": "Heb ganfod cyfatebiaeth",
     "reset": "",
     "selected": "dethol",

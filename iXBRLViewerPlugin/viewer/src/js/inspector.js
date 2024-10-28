@@ -23,6 +23,16 @@ import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_
 import { toggleTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
+const SEARCH_FILTER_MULTISELECTS = {
+  periodFilter: "search-filter-period",
+  dimensionTypeFilter: "search-filter-dimension-type",
+  namespacesFilter: "search-filter-namespaces",
+  targetDocumentFilter: "search-filter-target-document",
+  scalesFilter:"search-filter-scales",
+  unitsFilter: "search-filter-units",
+  calculationsFilter: "search-filter-calculations",
+  dataTypesFilter: "search-filter-datatypes",
+};
 
 export class Inspector {
     constructor(iv) {
@@ -103,18 +113,10 @@ export class Inspector {
                         }
                     }
                 });
-                $("#inspector .controls .search-button").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode"]).toggleClass("search-mode");
-                });
-                $("#inspector .controls .summary-button").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["outline-mode", "search-mode"]).toggleClass("summary-mode");
-                });
-                $("#inspector .controls .outline-button").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["summary-mode", "search-mode"]).toggleClass("outline-mode");
-                });
-                $("#inspector .back").on("click", function () {
-                    $(this).closest("#inspector").removeClass(["summary-mode", "outline-mode", "search-mode"]);
-                });
+                $("#inspector .controls .search-button").on("click", () => inspector.inspectorMode("search-mode", true));
+                $("#inspector .controls .summary-button").on("click", () => inspector.inspectorMode("summary-mode", true));
+                $("#inspector .controls .outline-button").on("click", () => inspector.inspectorMode("outline-mode", true));
+                $("#inspector .back").on("click", () => inspector.popInspectorMode());
                 $(".popup-trigger").on("mouseenter", function () {
                     $(this).find(".popup-content").show()
                 }).on("mouseleave", function () {
@@ -330,6 +332,35 @@ export class Inspector {
         this.update();
     }
 
+    inspectorMode(mode, toggle) {
+        const allModes = ["summary-mode", "outline-mode", "search-mode"];
+        const i = $("#inspector").removeClass(allModes.filter(m => m !== mode));
+        if (mode === undefined) {
+            return;
+        }
+        if (toggle) {
+            i.toggleClass(mode);
+        }
+        else {
+            i.addClass(mode);
+        }
+    }
+
+    /* 
+     * Controls where the "back" button takes you. We only set this when you
+     * follow a link that switches between modes, otherwise back just takes you
+     * back to the main inspector mode.
+     */
+    pushInspectorMode(newMode, oldMode) {
+        this._prevInspectorMode = oldMode;
+        this.inspectorMode(newMode);
+    }
+
+    popInspectorMode() {
+        this.inspectorMode(this._prevInspectorMode);
+        this._prevInspectorMode = undefined;
+    }
+
     setCalculationMode(useCalc11) {
         this._useCalc11 = useCalc11;
         if (this._currentItem instanceof Fact) {
@@ -419,9 +450,11 @@ export class Inspector {
         spec.searchString = $('#ixbrl-search').val();
         spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
         spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
-        spec.namespacesFilter = $('#search-filter-namespaces select').val();
         spec.conceptTypeFilter = $('#search-filter-concept-type').val();
-        spec.dataTypesFilter = $('#search-filter-datatypes select').val();
+        for (const [key, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
+          spec[key] = $(`#${name} select`).val();
+        }
+
         const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter.includes(d.dataType.name));
         if (
             (spec.conceptTypeFilter == 'numeric' && selectedDataTypes.some(dt => !dt.isNumeric)) ||
@@ -431,21 +464,23 @@ export class Inspector {
         else {
             $("#search-filter-datatypes .datatype-conflict-warning").hide();
         }
-        spec.unitsFilter = $('#search-filter-units select').val();
-        spec.scalesFilter = $('#search-filter-scales select').val();
-        spec.periodFilter = $('#search-filter-period select').val();
         spec.factValueFilter = $('#search-filter-fact-value').val();
-        spec.calculationsFilter = $('#search-filter-calculations select').val();
-        spec.dimensionTypeFilter = $('#search-filter-dimension-type select').val();
-        spec.targetDocumentFilter = $('#search-filter-target-document select').val();
         return spec;
+    }
+
+    hasActiveSearchFilters(searchSpec) {
+      return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0) ||
+        !searchSpec.showVisibleFacts ||
+        !searchSpec.showHiddenFacts ||
+        searchSpec.conceptTypeFilter != "*" ||
+        searchSpec.factValueFilter != "*" ;
     }
 
     setupSearchControls(viewer) {
         const inspector = this;
         $('.search-controls input, .search-controls select').on("change", () => this.search());
         $(".search-controls button.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
-        $(".search-controls .search-filters .reset").on("click", () => this.resetSearchFilters());
+        $(".search-controls .reset").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
             $(this).siblings().children('select option:selected').prop('selected', false);
             inspector.search();
@@ -515,18 +550,16 @@ export class Inspector {
         return scalesOptions;
     }
 
-    resetSearchFilters() {
+    resetSearchFilters(defaults) {
+        defaults = defaults ?? {};
         $("#search-filter-period select option:selected").prop("selected", false);
         $("#search-filter-concept-type").val("*");
         $("#search-filter-fact-value").val("*");
-        $("#search-filter-calculations select option:selected").prop("selected", false);
-        $("#search-filter-dimension-type select option:selected").prop("selected", false);
-        $("#search-hidden-fact-filter").prop("checked", true);
-        $("#search-visible-fact-filter").prop("checked", true);
-        $("#search-filter-namespaces select option:selected").prop("selected", false);
-        $("#search-filter-target-document select option:selected").prop("selected", false);
-        $("#search-filter-units select option:selected").prop("selected", false);
-        $("#search-filter-scales select option:selected").prop("selected", false);
+        $("#search-hidden-fact-filter").prop("checked", defaults.hiddenFacts ?? true);
+        $("#search-visible-fact-filter").prop("checked", defaults.visibleFacts ?? true);
+        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
+          $(`#${name} select option:selected`).prop("selected", false);
+        }
         this.search();
     }
 
@@ -537,8 +570,14 @@ export class Inspector {
         this.search();
     }
 
-    search () {
+    search() {
         const spec = this.searchSpec();
+        if (this.hasActiveSearchFilters(spec)) {
+            $("#inspector .search-controls").addClass("active-filters");
+        }
+        else {
+            $("#inspector .search-controls").removeClass("active-filters");
+        }
         const results = this._search.search(spec);
         if (results === undefined) {
             return;
@@ -556,19 +595,14 @@ export class Inspector {
             $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
             overlay.show();
         }
-        $("#matching-facts-count").text(results.length);
+        $("#matching-facts-summary").text(i18next.t("search.matchingFactsSummary", {nMatches: results.length, nTotal: this._reportSet.facts().length}));
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));
         }
-        this.updateMultiSelectSubheader('search-filter-scales');
-        this.updateMultiSelectSubheader('search-filter-units');
-        this.updateMultiSelectSubheader('search-filter-namespaces');
-        this.updateMultiSelectSubheader('search-filter-datatypes');
-        this.updateMultiSelectSubheader('search-filter-target-document');
-        this.updateMultiSelectSubheader('search-filter-dimension-type');
-        this.updateMultiSelectSubheader('search-filter-calculations');
-        this.updateMultiSelectSubheader('search-filter-period');
+        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
+          this.updateMultiSelectSubheader(name);
+        }
     }
 
     updateMultiSelectSubheader(id) {
@@ -599,9 +633,20 @@ export class Inspector {
 
     _populateFactSummary(summaryDom) {
         const totalFacts = this.summary.totalFacts();
-        $("<span></span>")
-                .text(totalFacts)
-                .appendTo(summaryDom.find(".total-facts-value"));
+        $(".total-facts-value", summaryDom)
+            .text(totalFacts)
+            .on("click", () => {
+                this.resetSearchFilters();
+                this.pushInspectorMode("search-mode", "summary-mode");
+            });
+
+        const hiddenFacts = this.summary.hiddenFacts();
+        $(".hidden-facts-value", summaryDom)
+            .text(hiddenFacts)
+            .on("click", () => {
+                this.resetSearchFilters({visibleFacts: false});
+                this.pushInspectorMode("search-mode", "summary-mode");
+            });
     }
 
     _populateTagSummary(summaryDom) {

@@ -501,12 +501,32 @@
           }
         }
 
+        .filter-info {
+          text-align: center;
+          font-style: italic;
+          margin-top: 0.8rem;
+          position: relative;
+
+          .reset {
+            .bare-button();
+            .text-md();
+
+            position: absolute;
+            right: 0.8rem;
+            top: -0.3rem;
+          }
+        }
+
         &:not(.show-filters) .search-filters {
           display: none;
         }
 
-        &.show-filters .filter-toggle {
+        &.active-filters .filter-toggle {
           color: var(--colour-primary);
+        }
+
+        &:not(.active-filters) .reset {
+          display: none;
         }
 
         .search-filters {
@@ -516,14 +536,6 @@
           overflow-y: auto;
           padding: 0 0.9rem;
 
-          .reset {
-            .bare-button();
-            .text-md();
-
-            position: absolute;
-            right: 0.5rem;
-            top: 0.5rem;
-          }
 
           h3 {
             border: none;
@@ -579,11 +591,6 @@
             }
           }
 
-          .filter-info {
-            text-align: center;
-            font-style: italic;
-            font-size: 1.1rem;
-          }
 
           .datatype-conflict-warning {
             margin: 1rem 0;

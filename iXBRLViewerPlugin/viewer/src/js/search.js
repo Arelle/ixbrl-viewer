@@ -140,6 +140,7 @@ export class ReportSearch {
 
     dataTypesFilter(s, item) {
         return (
+            s.dataTypesFilter == null ||
             s.dataTypesFilter.length === 0 ||
             s.dataTypesFilter.some(p => item.concept().dataType()?.name === p)
         );

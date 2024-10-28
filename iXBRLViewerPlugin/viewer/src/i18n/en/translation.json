@@ -144,7 +144,10 @@
     "actions": "Actions",
     "applicationLanguage": "Application Language",
     "documentLanguage": "Document Language",
-    "options": "Options"
+    "help": "Help",
+    "options": "Options",
+    "reportAnIssue": "Report an Issue",
+    "support": "Support"
   },
   "search": {
     "concealedFact": "Concealed fact",

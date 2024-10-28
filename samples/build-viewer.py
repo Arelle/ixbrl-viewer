@@ -40,7 +40,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
                 self.addToLog("Failed to load package", messageCode="error", file=p)
         PackageManager.rebuildRemappings(self)
     
-    def createViewer(self, f, scriptUrl=None, outPath=None, useStubViewer=False, features=None):
+    def createViewer(self, f, scriptUrl=None, outPath=None, useStubViewer=False):
         if os.path.isdir(f):
             files = glob.glob(os.path.join(f, "*.xhtml")) + glob.glob(os.path.join(f, "*.html")) + glob.glob(os.path.join(f, "*.htm"))
             files.sort()
@@ -56,7 +56,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         self.modelManager.validate()
 
         try:
-            generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer, features=features, copyScript=False)
+            generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer, copyScript=False)
         except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
             print(e)
             sys.exit(1)
@@ -100,5 +100,4 @@ for f in args.files:
         f,
         outPath=args.out,
         scriptUrl=args.viewer_url,
-        useStubViewer=args.use_stub_viewer,
-        features=getFeaturesFromOptions(args))
+        useStubViewer=args.use_stub_viewer)

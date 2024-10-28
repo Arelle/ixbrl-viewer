@@ -13,6 +13,7 @@ import zipfile
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 from arelle import XbrlConst
 from arelle.ModelDocument import ModelDocument, Type
@@ -88,12 +89,19 @@ class IXBRLViewerBuilder:
             cntlr: Cntlr,
             basenameSuffix: str = '',
             useStubViewer: bool = False,
+            features: dict[str, Any] | None = None,
                  ):
+        if features is None:
+            features = {}
+        featureNames = {c.key for c in FEATURE_CONFIGS}
+        for featureName in features:
+            assert featureName in featureNames, \
+                f'Given feature name `{featureName}` does not match any defined features: {featureNames}'
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.taxonomyData = {
             "sourceReports": [],
-            "features": [],
+            "features": features,
         }
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None
@@ -116,14 +124,6 @@ class IXBRLViewerBuilder:
 
         self.fromSingleZIP = None
         self.reportCount = 0
-
-    def enableFeature(self, featureName: str):
-        if featureName in self.taxonomyData["features"]:
-            return
-        featureNames = [c.key for c in FEATURE_CONFIGS]
-        assert featureName in featureNames, \
-            f'Given feature name `{featureName}` does not match any defined features: {featureNames}'
-        self.taxonomyData["features"].append(featureName)
 
     def outputFilename(self, filename):
         (base, ext) = os.path.splitext(filename)

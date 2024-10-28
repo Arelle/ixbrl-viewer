@@ -487,7 +487,7 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.conceptLabel', 'http://www.xbrl.org/2003/arcrole/concept-label')
     @patch('arelle.XbrlConst.conceptReference', 'http://www.xbrl.org/2003/arcrole/concept-reference')
     def test_addConcept_simple_case(self):
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
+        builder = IXBRLViewerBuilder(Mock())
         builder.currentTargetReport = builder.newTargetReport(None)
         builder.addSourceReport()["targetReports"].append(builder.currentTargetReport)
         builder.addConcept(self.modelXbrl_1, self.cash_concept)
@@ -497,14 +497,14 @@ class TestIXBRLViewer:
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_simple_case(self):
         modelXbrl = Mock(baseSets=defaultdict(list), relationshipSets={})
-        builder = IXBRLViewerBuilder([modelXbrl])
+        builder = IXBRLViewerBuilder(Mock())
         result = builder.getRelationships(modelXbrl)
         assert result == {}
 
     @patch('arelle.XbrlConst.parentChild', 'http://www.xbrl.org/2003/arcrole/parent-child')
     @patch('arelle.XbrlConst.summationItem', 'http://www.xbrl.org/2003/arcrole/summation-item')
     def test_getRelationships_returns_a_rel(self):
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
+        builder = IXBRLViewerBuilder(Mock())
         builder.currentTargetReport = builder.newTargetReport(None)
         result = builder.getRelationships(self.modelXbrl_1)
         roleMap = builder.roleMap
@@ -516,7 +516,7 @@ class TestIXBRLViewer:
         Adding an ELR with no definition should result in no entry in the roleDefs map
         """
         elr = "http://example.com/unknownELR"
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
+        builder = IXBRLViewerBuilder(Mock())
         builder.currentTargetReport = builder.newTargetReport(None)
         builder.addRoleDefinition(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
@@ -527,7 +527,7 @@ class TestIXBRLViewer:
         Adding an ELR with a definition should result in an "en" label with the definition as its value.
         """
         elr = "ELR"
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
+        builder = IXBRLViewerBuilder(Mock())
         builder.currentTargetReport = builder.newTargetReport(None)
         builder.addRoleDefinition(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
@@ -719,17 +719,15 @@ class TestIXBRLViewer:
         """
         Enable a defined feature
         """
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
-        builder.enableFeature('review')
-        assert builder.taxonomyData["features"] == ['review']
+        builder = IXBRLViewerBuilder(Mock(), features={'review': True})
+        assert builder.taxonomyData["features"] == {'review': True}
 
     def test_enableFeature_invalid(self):
         """
         Attempt to enable an undefined feature
         """
-        builder = IXBRLViewerBuilder([self.modelXbrl_1])
         with pytest.raises(AssertionError, match=rf'^Given feature name `unknown` does not match any defined features'):
-            builder.enableFeature('unknown')
+            IXBRLViewerBuilder(Mock(), features={'unknown': True})
 
     def test_xhtmlNamespaceHandling(self):
         # Check the prefix used for our inserted script tags

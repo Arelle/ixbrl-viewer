@@ -27,6 +27,8 @@ FEATURE_CONFIGS = [
         key='review',
         label='Review Mode',
         description='Enables highlighting of untagged numbers and dates.',
+        cliAction='store_true',
+        cliDefault=False,
         guiVisible=True,
         guiDefault=False
     )

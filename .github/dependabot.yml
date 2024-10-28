@@ -30,7 +30,7 @@ updates:
     ignore:
       - dependency-name: "puppeteer-screen-recorder"
         versions:
-          - "3.0.5"
+          - "3.0.6"
   - package-ecosystem: pip
     directory: "/"
     insecure-external-code-execution: allow

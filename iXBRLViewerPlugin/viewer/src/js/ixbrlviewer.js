@@ -115,15 +115,19 @@ export class iXBRLViewer {
         return !featureFalsyValues.has(this.getFeatureValue(featureName));
     }
 
+    isStaticFeatureEnabled(featureName) {
+        return !featureFalsyValues.has(this.getStaticFeatureValue(featureName));
+    }
+
     isReviewModeEnabled() {
         return this.isFeatureEnabled('review');
     }
 
     getSupportLinkUrl() {
-        if (!this.isFeatureEnabled('support-link')) {
+        if (!this.isStaticFeatureEnabled('support-link')) {
             return null;
         }
-        return this.getFeatureValue('support-link');
+        return this.getStaticFeatureValue('support-link');
     }
 
     isViewerEnabled() {

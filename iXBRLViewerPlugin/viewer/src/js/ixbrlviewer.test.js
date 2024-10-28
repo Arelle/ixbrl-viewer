@@ -133,11 +133,11 @@ describe("Support link enablement", () => {
 
     test("Support link enabled by query", () => {
         viewer.setFeatures({}, 'support-link=/help')
-        expect(viewer.getSupportLinkUrl()).toEqual('/help');
+        expect(viewer.getSupportLinkUrl()).toEqual(null);
     });
 
     test("Support link disabled by query", () => {
         viewer.setFeatures({'support-link': '/help'}, 'support-link=false')
-        expect(viewer.getSupportLinkUrl()).toEqual(null);
+        expect(viewer.getSupportLinkUrl()).toEqual('/help');
     });
 });

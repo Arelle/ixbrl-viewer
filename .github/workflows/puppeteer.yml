@@ -25,16 +25,16 @@ jobs:
           - '3.12'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.2.1
+      - uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
-      - uses: actions/setup-node@v4.0.4
+      - uses: actions/setup-node@v4.1.0
         with:
           cache: 'npm'
           check-latest: true
           node-version: ${{ matrix.node-version }}
       - name: Install Python 3
-        uses: actions/setup-python@v5.2.0
+        uses: actions/setup-python@v5.3.0
         with:
           cache: 'pip'
           cache-dependency-path: '**/pyproject.toml'

@@ -144,7 +144,10 @@
     "actions": "Comportamientos",
     "applicationLanguage": "Idioma de Aplicación",
     "documentLanguage": "Idioma del Documento",
-    "options": "Opciones"
+    "help": "Ayuda",
+    "options": "Opciones",
+    "reportAnIssue": "Informar un problema",
+    "support": "Apoyo"
   },
   "search": {
     "concealedFact": "",

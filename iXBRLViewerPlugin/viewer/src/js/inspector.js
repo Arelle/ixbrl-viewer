@@ -268,6 +268,17 @@ export class Inspector {
             this._optionsMenu.addLabel(i18next.t("menu.options"));
             this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         }
+        let helpLinks = {}
+        let supportLinkUrl = this._iv.getSupportLinkUrl();
+        if (supportLinkUrl) {
+            helpLinks["menu.reportAnIssue"] = supportLinkUrl;
+        }
+        if (Object.entries(helpLinks).length > 0) {
+            this._optionsMenu.addLabel(i18next.t("menu.help"));
+            for (const [key, value] of Object.entries(helpLinks)) {
+                this._optionsMenu.addLink(i18next.t(key), value);
+            }
+        }
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
     }
 

@@ -119,3 +119,25 @@ describe("Review mode enablement", () => {
         expect(viewer.isReviewModeEnabled()).toBeFalsy();
     });
 });
+
+describe("Support link enablement", () => {
+    var viewer = null;
+    beforeAll(() => {
+        viewer = new iXBRLViewer({})
+    });
+
+    test("Support link enabled by JSON", () => {
+        viewer.setFeatures({'support-link': '/help'}, '')
+        expect(viewer.getSupportLinkUrl()).toEqual('/help');
+    });
+
+    test("Support link enabled by query", () => {
+        viewer.setFeatures({}, 'support-link=/help')
+        expect(viewer.getSupportLinkUrl()).toEqual('/help');
+    });
+
+    test("Support link disabled by query", () => {
+        viewer.setFeatures({'support-link': '/help'}, 'support-link=false')
+        expect(viewer.getSupportLinkUrl()).toEqual(null);
+    });
+});

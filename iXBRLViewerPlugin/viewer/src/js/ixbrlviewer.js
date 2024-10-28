@@ -119,6 +119,13 @@ export class iXBRLViewer {
         return this.isFeatureEnabled('review');
     }
 
+    getSupportLinkUrl() {
+        if (!this.isFeatureEnabled('support-link')) {
+            return null;
+        }
+        return this.getFeatureValue('support-link');
+    }
+
     isViewerEnabled() {
         const urlParams = new URLSearchParams(window.location.search);
         return (urlParams.get('disable-viewer') ?? 'false') === 'false';

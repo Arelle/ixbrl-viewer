@@ -144,7 +144,10 @@
     "actions": "Gweithredoedd",
     "applicationLanguage": "Iaith Cais",
     "documentLanguage": "Iaith Dogfen",
-    "options": "Opsiynau"
+    "help": "Cymorth",
+    "options": "Opsiynau",
+    "reportAnIssue": "Rhoi gwybod am fater",
+    "support": "Cefnogaeth"
   },
   "search": {
     "concealedFact": "Ffaith guddiedig",

@@ -24,6 +24,15 @@ DEFAULT_VIEWER_PATH = os.path.join(os.path.dirname(__file__), "viewer", "dist", 
 
 FEATURE_CONFIGS = [
     FeatureConfig(
+        key='support-link',
+        label='Support Link',
+        description='Adds a "Support" link that directs to the specified URL.',
+        cliAction='store',
+        cliDefault=None,
+        guiVisible=False,
+        guiDefault=None,
+    ),
+    FeatureConfig(
         key='review',
         label='Review Mode',
         description='Enables highlighting of untagged numbers and dates.',
@@ -31,7 +40,7 @@ FEATURE_CONFIGS = [
         cliDefault=False,
         guiVisible=True,
         guiDefault=False
-    )
+    ),
 ]
 
 GUI_FEATURE_CONFIGS = [c for c in FEATURE_CONFIGS if c.guiVisible]

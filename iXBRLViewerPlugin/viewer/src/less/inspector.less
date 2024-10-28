@@ -102,6 +102,15 @@
     .text-md();
   }
 
+  a {
+    text-decoration: none;
+    color: var(--colour-primary);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
   #ixv-progress {
     position: fixed;
     top: 20px;
@@ -931,15 +940,6 @@
     box-sizing: border-box;
     overflow: hidden;
     border-left: solid 0.1rem var(--colour-border-grey);
-
-    a {
-      text-decoration: none;
-      color: var(--colour-primary);
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
 
     .inspector-section {
       padding-left: 0.9rem;

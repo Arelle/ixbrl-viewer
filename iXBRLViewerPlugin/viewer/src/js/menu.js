@@ -1,6 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
+import i18next from "i18next";
 
 export class Menu {
     constructor(elt, attr) {
@@ -106,6 +107,17 @@ export class Menu {
         const item = $('<div></div>')
                 .addClass("label")
                 .text(name)
+        this._add(item);
+    }
+
+    addLink(label, href) {
+        const item = $("<a></a>")
+                .attr("href", href)
+                .attr("target", "_blank")
+                .attr("title", label)
+                .attr("aria-label", label)
+                .addClass("item")
+                .text(label);
         this._add(item);
     }
 }

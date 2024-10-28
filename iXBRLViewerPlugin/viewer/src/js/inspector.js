@@ -56,7 +56,8 @@ export class Inspector {
                     referenceParts: require('../i18n/cy/referenceparts.json'),
                     currencies: require('../i18n/cy/currencies.json'),
                     dataTypes: require('../i18n/cy/datatypes.json'),
-                    labelRoles: require('../i18n/cy/labelroles.json')
+                    labelRoles: require('../i18n/cy/labelroles.json'),
+                    scale: require('../i18n/cy/scale.json')
                 },
                 en: { 
                     translation: require('../i18n/en/translation.json'),
@@ -64,7 +65,8 @@ export class Inspector {
                     currencies: require('../i18n/en/currencies.json'),
                     dataTypes: require('../i18n/en/datatypes.json'),
                     balanceTypes: require('../i18n/en/balancetypes.json'),
-                    labelRoles: require('../i18n/en/labelroles.json')
+                    labelRoles: require('../i18n/en/labelroles.json'),
+                    scale: require('../i18n/en/scale.json')
                 },
                 es: { 
                     translation: require('../i18n/es/translation.json'),
@@ -73,6 +75,7 @@ export class Inspector {
                     dataTypes: require('../i18n/es/datatypes.json'),
                     balanceTypes: require('../i18n/es/balancetypes.json'),
                     labelRoles: require('../i18n/es/labelroles.json'),
+                    scale: require('../i18n/es/scale.json')
                 }
             }
         }).then((t) => {

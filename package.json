@@ -58,7 +58,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "puppeteer": "23.6.0",
-    "puppeteer-screen-recorder": "3.0.3",
+    "puppeteer-screen-recorder": "3.0.6",
     "stylelint": "^16.4.0",
     "stylelint-config-standard": "^36.0.0",
     "webfont": "^11.2.26",

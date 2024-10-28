@@ -586,7 +586,7 @@ export class Inspector {
             return;
         }
         const container = $('#inspector .search-results .results');
-        $(".fact-list-item", container).remove();
+        container.empty();
         this._viewer.clearRelatedHighlighting();
         const overlay = $('#inspector .search-results .search-overlay');
         if (results.length > 0) {

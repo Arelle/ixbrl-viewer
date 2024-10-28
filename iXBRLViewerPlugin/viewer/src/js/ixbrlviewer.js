@@ -7,10 +7,13 @@ import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 import { initializeTheme } from './theme.js';
 
+const featureFalsyValues = new Set([undefined, null, '', 'false', false]);
+
 export class iXBRLViewer {
 
     constructor(options) {
-        this._features = new Set();
+        this._staticFeatures = {};
+        this._dynamicFeatures = {};
         this._plugins = [];
         this.inspector = new Inspector(this);
         this.viewer = null;
@@ -77,36 +80,39 @@ export class iXBRLViewer {
         });
     }
 
-    setFeatures(featureNames, queryString) {
-        const featureMap = {}
-        // Enable given features initially
-        featureNames.forEach(f => {
-            featureMap[f] = true;
-        });
+    setFeatures(features, queryString) {
+        this._staticFeatures = {}
+        for (const [key, value] of Object.entries(features)) {
+            this._staticFeatures[key] = value;
+        }
 
-        // Enable/disable features based on query string
         const urlParams = new URLSearchParams(queryString);
+        this._dynamicFeatures = {}
         urlParams.forEach((value, key) => {
-            // Do nothing if feature has already been disabled by query
-            if (featureMap[key] !== false) {
-                // Disable feature if value is exactly 'false', anything else enables the feature
-                featureMap[key] = value !== 'false';
+            if (value === '') {
+                if (this._dynamicFeatures[key] === undefined) {
+                    value = 'true'
+                } else {
+                    return;
+                }
             }
+            this._dynamicFeatures[key] = value;
         });
+    }
 
-        // Gather results in _features set
-        if (this._features.size > 0) {
-            this._features = new Set();
+    getStaticFeatureValue(featureName) {
+        return this._staticFeatures[featureName];
+    }
+
+    getFeatureValue(featureName) {
+        if (this._dynamicFeatures[featureName]) {
+            return this._dynamicFeatures[featureName];
         }
-        for (const [feature, enabled] of Object.entries(featureMap)) {
-            if (enabled) {
-                this._features.add(feature);
-            }
-        }
+        return this.getStaticFeatureValue(featureName);
     }
 
     isFeatureEnabled(featureName) {
-        return this._features.has(featureName);
+        return !featureFalsyValues.has(this.getFeatureValue(featureName));
     }
 
     isReviewModeEnabled() {
@@ -220,7 +226,19 @@ export class iXBRLViewer {
             // We need to parse JSON first so that we can determine feature enablement before loading begins.
             const taxonomyData = iv._getTaxonomyData();
             const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
-            iv.setFeatures((parsedTaxonomyData && parsedTaxonomyData["features"]) || [], window.location.search);
+            let features = parsedTaxonomyData && parsedTaxonomyData["features"];
+            if (!features) {
+                features = {};
+            }
+            // `features` was previously an array of flag values
+            // Support this for backwards compatability
+            else if (Array.isArray(features)) {
+                features = features.reduce((obj, val) => {
+                    obj[val] = true;
+                    return obj;
+                }, {});
+            }
+            iv.setFeatures(features, window.location.search);
 
             const reportSet = new ReportSet(parsedTaxonomyData);
 

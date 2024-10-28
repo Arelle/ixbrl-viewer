@@ -103,6 +103,7 @@ function testSearchSpec(searchString='') {
     spec.scalesFilter = [];
     spec.periodFilter = [];
     spec.conceptTypeFilter = '*';
+    spec.dataTypesFilter = [];
     spec.dimensionTypeFilter = [];
     spec.factValueFilter = '*';
     spec.calculationsFilter = [];

@@ -143,6 +143,7 @@ class TestIXBRLViewer:
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
             ),
+            balance="debit",
             isTypedDimension=False,
             type=self.monetary_type,
         )
@@ -153,6 +154,7 @@ class TestIXBRLViewer:
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
             ),
+            balance="credit",
             isTypedDimension=False,
             type=self.monetary_type,
         )
@@ -162,6 +164,7 @@ class TestIXBRLViewer:
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
             ),
+            balance=None,
             isTypedDimension=False,
             type=self.monetary_type,
         )
@@ -172,6 +175,7 @@ class TestIXBRLViewer:
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
             ),
+            balance=None,
             isTypedDimension=False,
             type=self.string_type,
         )
@@ -182,6 +186,7 @@ class TestIXBRLViewer:
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
             ),
+            balance=None,
             isTypedDimension=False,
             type=self.string_type,
         )
@@ -192,6 +197,7 @@ class TestIXBRLViewer:
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
             ),
+            balance=None,
             isTypedDimension=True,
             typedDomainElement=typed_dimension_domain_concept,
             type=self.integer_simple_type,
@@ -203,6 +209,7 @@ class TestIXBRLViewer:
                 prefix='us-gaap',
                 namespaceURI='http://viewer.com'
             ),
+            balance=None,
             isTypedDimension=False,
             type=self.string_type,
         )
@@ -504,25 +511,25 @@ class TestIXBRLViewer:
         siPrefix = roleMap.getPrefix('http://www.xbrl.org/2003/arcrole/summation-item')
         assert result.get(siPrefix).get(roleMap.getPrefix('ELR')).get('us-gaap:from_concept')
 
-    def test_addELR_no_definition(self):
+    def test_addRoleDefinition_no_definition(self):
         """
         Adding an ELR with no definition should result in no entry in the roleDefs map
         """
         elr = "http://example.com/unknownELR"
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
         builder.currentTargetReport = builder.newTargetReport(None)
-        builder.addELR(self.modelXbrl_1, elr)
+        builder.addRoleDefinition(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
         assert builder.currentTargetReport.get('roleDefs').get(elrPrefix) is None
 
-    def test_addELR_with_definition(self):
+    def test_addRoleDefinition_with_definition(self):
         """
         Adding an ELR with a definition should result in an "en" label with the definition as its value.
         """
         elr = "ELR"
         builder = IXBRLViewerBuilder([self.modelXbrl_1])
         builder.currentTargetReport = builder.newTargetReport(None)
-        builder.addELR(self.modelXbrl_1, elr)
+        builder.addRoleDefinition(self.modelXbrl_1, elr)
         elrPrefix = builder.roleMap.getPrefix(elr)
         assert builder.currentTargetReport.get('roleDefs').get(elrPrefix).get("en") == "ELR Label"
 
@@ -582,9 +589,9 @@ class TestIXBRLViewer:
         reportData = jsdata["sourceReports"][0]["targetReports"][0]
         assert set(reportData["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
         assert reportData["concepts"] == {
-            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType', 'b': 'debit'},
             'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
-            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType', 'b': 'credit'},
             'us-gaap:dimension': {'d': 'e', 'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
             'us-gaap:member': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
             'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
@@ -628,9 +635,9 @@ class TestIXBRLViewer:
         reportData = jsdata["sourceReports"][0]["targetReports"][0]
         assert set(reportData["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
         assert reportData["concepts"] == {
-            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:Cash': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType', 'b': 'debit'},
             'us-gaap:from_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
-            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType'},
+            'us-gaap:to_concept': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:monetaryItemType', 'b': 'credit'},
             'us-gaap:dimension': {'d': 'e', 'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
             'us-gaap:member': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},
             'us-gaap:typed_dimension_domain': {'e': True, 't': True, 'labels': {}, 'dt': 'xbrli:stringItemType'},

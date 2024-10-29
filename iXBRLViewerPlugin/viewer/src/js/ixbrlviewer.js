@@ -127,19 +127,28 @@ export class iXBRLViewer {
         if (!this.isStaticFeatureEnabled('support-link')) {
             return null;
         }
-        return this.getStaticFeatureValue('support-link');
+        return this.resolveRelativeUrl(this.getStaticFeatureValue('support-link'));
     }
 
     getSurveyLinkUrl() {
         if (!this.isStaticFeatureEnabled('survey-link')) {
             return null;
         }
-        return this.getStaticFeatureValue('survey-link');
+        return this.resolveRelativeUrl(this.getStaticFeatureValue('survey-link'));
     }
 
     isViewerEnabled() {
         const urlParams = new URLSearchParams(window.location.search);
         return (urlParams.get('disable-viewer') ?? 'false') === 'false';
+    }
+
+    // Resolves URL relative to the config file
+    resolveRelativeUrl(url) {
+        if (this.options.configUrl === undefined) {
+            return url;
+        }
+        const resolvedUrl = new URL(url, this.options.configUrl.href);
+        return resolvedUrl.href;
     }
 
     _loadInspectorHTML() {

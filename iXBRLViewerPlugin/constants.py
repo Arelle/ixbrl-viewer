@@ -51,6 +51,15 @@ FEATURE_CONFIGS = [
         guiDefault=None,
     ),
     FeatureConfig(
+        key='survey-link',
+        label='Survey Link',
+        description='Adds a "Survey" link that directs to the specified URL.',
+        cliAction='store',
+        cliDefault=None,
+        guiVisible=False,
+        guiDefault=None,
+    ),
+    FeatureConfig(
         key='review',
         label='Review Mode',
         description='Enables highlighting of untagged numbers and dates.',

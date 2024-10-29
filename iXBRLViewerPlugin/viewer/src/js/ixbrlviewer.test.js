@@ -141,3 +141,25 @@ describe("Support link enablement", () => {
         expect(viewer.getSupportLinkUrl()).toEqual('/help');
     });
 });
+
+describe("Survey link enablement", () => {
+    var viewer = null;
+    beforeAll(() => {
+        viewer = new iXBRLViewer({})
+    });
+
+    test("Survey link enabled by JSON", () => {
+        viewer.setFeatures({'survey-link': '/survey'}, '')
+        expect(viewer.getSurveyLinkUrl()).toEqual('/survey');
+    });
+
+    test("Survey link enabled by query", () => {
+        viewer.setFeatures({}, 'survey-link=/survey')
+        expect(viewer.getSurveyLinkUrl()).toEqual(null);
+    });
+
+    test("Survey link disabled by query", () => {
+        viewer.setFeatures({'survey-link': '/survey'}, 'survey-link=false')
+        expect(viewer.getSurveyLinkUrl()).toEqual('/survey');
+    });
+});

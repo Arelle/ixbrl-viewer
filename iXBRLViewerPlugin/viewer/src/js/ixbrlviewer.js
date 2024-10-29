@@ -130,6 +130,13 @@ export class iXBRLViewer {
         return this.getStaticFeatureValue('support-link');
     }
 
+    getSurveyLinkUrl() {
+        if (!this.isStaticFeatureEnabled('survey-link')) {
+            return null;
+        }
+        return this.getStaticFeatureValue('survey-link');
+    }
+
     isViewerEnabled() {
         const urlParams = new URLSearchParams(window.location.search);
         return (urlParams.get('disable-viewer') ?? 'false') === 'false';

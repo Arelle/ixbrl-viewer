@@ -304,6 +304,10 @@ export class Inspector {
         if (supportLinkUrl) {
             helpLinks[i18next.t("menu.reportAnIssue")] = supportLinkUrl;
         }
+        let surveyLinkUrl = this._iv.getSurveyLinkUrl();
+        if (surveyLinkUrl) {
+            helpLinks[i18next.t("menu.survey")] = surveyLinkUrl;
+        }
         if (Object.entries(helpLinks).length > 0) {
             this._optionsMenu.addLabel(i18next.t("menu.help"));
             for (const [label, value] of Object.entries(helpLinks)) {

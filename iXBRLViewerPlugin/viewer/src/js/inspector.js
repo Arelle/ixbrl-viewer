@@ -273,12 +273,12 @@ export class Inspector {
         let helpLinks = {}
         let supportLinkUrl = this._iv.getSupportLinkUrl();
         if (supportLinkUrl) {
-            helpLinks["menu.reportAnIssue"] = supportLinkUrl;
+            helpLinks[i18next.t("menu.reportAnIssue")] = supportLinkUrl;
         }
         if (Object.entries(helpLinks).length > 0) {
             this._optionsMenu.addLabel(i18next.t("menu.help"));
-            for (const [key, value] of Object.entries(helpLinks)) {
-                this._optionsMenu.addLink(i18next.t(key), value);
+            for (const [label, value] of Object.entries(helpLinks)) {
+                this._optionsMenu.addLink(label, value);
             }
         }
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);

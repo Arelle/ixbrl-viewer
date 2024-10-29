@@ -1287,8 +1287,9 @@ export class Inspector {
                         .appendTo($('#dimensions', factHTML));
                     if (fact.isNumeric()) {
                         h.append(
-                            $("<span></span>") 
-                                .addClass("analyse")
+                            $("<button></button>") 
+                                .addClass(["analyse", "inline-button"])
+                                .attr("title", "Show analysis chart")
                                 .text("")
                                 .on("click", () => this.analyseDimension(fact, [aspect.name()]))
                         )

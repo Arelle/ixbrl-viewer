@@ -134,6 +134,8 @@ export class Inspector {
                 inspector._optionsMenu = new Menu($("#display-options-menu"));
                 inspector.buildDisplayOptionsMenu();
 
+                inspector.buildHomeLink()
+
                 $("#ixv").localize();
 
                 // Listen to messages posted to this window
@@ -282,6 +284,27 @@ export class Inspector {
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
     }
 
+    buildHomeLink() {
+        $('#top-bar #home-link').remove();
+        if (!this._iv.isFeatureEnabled("home-link-url")) {
+            return;
+        }
+        const homeLinkUrl = this._iv.getFeatureValue("home-link-url");
+        let homeLinkText;
+        if (this._iv.isFeatureEnabled("home-link-label")) {
+            homeLinkText = this._iv.getFeatureValue("home-link-label");
+            console.log("home-link-label enabled", homeLinkText);
+        } else {
+            console.log("home-link-label disabled");
+            homeLinkText = i18next.t("toolbar.homePage");
+        }
+        const homeLink = $('<a></a>')
+                .attr('href', homeLinkUrl)
+                .attr('id', 'home-link')
+                .text(homeLinkText);
+        $('#top-bar').prepend(homeLink);
+    }
+
     buildToolbarHighlightMenu() {
         const iv = this._iv;
         this._toolbarMenu.reset();
@@ -341,6 +364,7 @@ export class Inspector {
     rebuildViewer() {
         $("#ixv").localize();
         this.buildDisplayOptionsMenu();
+        this.buildHomeLink()
         this.buildToolbarHighlightMenu();
         this.buildHighlightKey();
         this.update();

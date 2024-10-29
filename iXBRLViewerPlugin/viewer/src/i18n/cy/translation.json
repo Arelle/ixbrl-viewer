@@ -164,6 +164,7 @@
     "tryAgainDifferentKeywords": "Ceisiwch eto gyda geiriau allweddol gwahanol"
   },
   "toolbar": {
+    "homePage": "Hafan",
     "toggleDarkMode": "Toggle modd tywyll",
     "xbrlElements": "Elfennau XBRL"
   },

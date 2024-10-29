@@ -24,6 +24,24 @@ DEFAULT_VIEWER_PATH = os.path.join(os.path.dirname(__file__), "viewer", "dist", 
 
 FEATURE_CONFIGS = [
     FeatureConfig(
+        key='home-link-label',
+        label='Home Link (Label)',
+        description='Customizes the label of the "Home" link enabled by "home-link-url".',
+        cliAction='store',
+        cliDefault=None,
+        guiVisible=False,
+        guiDefault=None,
+    ),
+    FeatureConfig(
+        key='home-link-url',
+        label='Home Link (URL)',
+        description='Adds a "Home" link that directs to the specified URL. Label can be customized with "home-link-label".',
+        cliAction='store',
+        cliDefault=None,
+        guiVisible=False,
+        guiDefault=None,
+    ),
+    FeatureConfig(
         key='support-link',
         label='Support Link',
         description='Adds a "Support" link that directs to the specified URL.',

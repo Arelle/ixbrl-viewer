@@ -101,7 +101,8 @@
     "summary": {
       "fact": {
         "header": "",
-        "title": ""
+        "hidden": "",
+        "total": ""
       },
       "file": {
         "calculations": "",
@@ -113,9 +114,6 @@
         "presentation": "",
         "references": "",
         "schemas": ""
-      },
-      "hiddenFacts": {
-        "title": ""
       },
       "reportCreation": "",
       "tag": {

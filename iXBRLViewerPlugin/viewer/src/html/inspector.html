@@ -89,12 +89,12 @@ See COPYRIGHT.md for copyright information
               </div>
             </div>
             <div class="collapsible-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.references">References</button></h3>
+              <h3 class="collapsible-header has-tooltip"><button data-i18n="inspector.references">References</button> <button class="tooltip-icon" data-tooltip-name="references" data-tooltip-glossary-link="true"></button></h3>
               <div class="collapsible-body references">
               </div>
             </div>
             <div class="collapsible-section">
-              <h3 class="collapsible-header"><button data-i18n="inspector.calculations">Calculations</button></h3>
+              <h3 class="collapsible-header has-tooltip"><button data-i18n="inspector.calculations">Calculations</button> <button class="tooltip-icon" data-tooltip-name="calculations" data-tooltip-glossary-link="true"></button></h3>
               <div class="collapsible-body calculations">
                 <div class="tree"></div>
               </div>
@@ -321,29 +321,59 @@ See COPYRIGHT.md for copyright information
       <div class="inspector-body">
         <div class="body">
           <div class="collapsible-section fact-summary">
-            <h3 class="collapsible-header" data-i18n="inspector.summary.fact.header">Fact Summary</h3>
+            <h3 class="collapsible-header"><button data-i18n="inspector.summary.fact.header">Fact Summary</button></h3>
             <div class="collapsible-body">
-              <div class="total-facts">
-                <span class="total-facts-title" data-i18n="inspector.summary.fact.title">Total Facts:</span>
-                <button class="total-facts-value"></button>
-              </div>
-              <div class="hidden-facts">
-                <span class="hidden-facts-title" data-i18n="inspector.summary.hiddenFacts.title">Hidden Facts:</span>
-                <button class="hidden-facts-value"></button>
-              </div>
+              <table class="property-table numeric">
+                <tr class="hidden-facts">
+                  <th class="has-tooltip">
+                    <span data-i18n="inspector.summary.fact.hidden">Hidden facts</span>
+                    <button class="tooltip-icon" data-tooltip-name="hiddenFacts"></button>
+                  </th>
+                  <td>
+                    <button class="hidden-facts-value"></button>
+                  </td>
+                </tr>
+                <tr class="total-facts">
+                  <th >
+                    <span data-i18n="inspector.summary.fact.total">Total facts</span>
+                  </th>
+                  <td>
+                    <button class="total-facts-value"></button>
+                  </td>
+                </tr>
+              </table>
+
             </div>
           </div>
           <div class="collapsible-section tag-summary">
-            <h3 class="collapsible-header" data-i18n="inspector.summary.tag.header">Tag Summary</h3>
+            <h3 class="collapsible-header"><button data-i18n="inspector.summary.tag.header">Tag Summary</button></h3>
             <div class="collapsible-body">
               <div class="tag-summary-body">
                 <table>
                   <thead>
                     <tr>
-                      <th scope="col" class="namespace"><div data-i18n="inspector.summary.tag.colNamespace">Namespace</div></th>
-                      <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colPrimaryItems">Primary Items</div></th>
-                      <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colDimensions">Dimensions</div></th>
-                      <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colMembers">Members</div></th>
+                      <th scope="col" class="namespace has-tooltip">
+                          <span data-i18n="inspector.summary.tag.colNamespace">Namespace</span>
+                          <button class="tooltip-icon" data-tooltip-name="namespace"></button>
+                      </th>
+                      <th scope="col" class="figure">
+                          <div class="has-tooltip">
+                              <span data-i18n="inspector.summary.tag.colPrimaryItems">Primary Items</span>
+                              <button class="tooltip-icon" data-tooltip-name="primaryItemsCount"></button>
+                          </div>
+                      </th>
+                      <th scope="col" class="figure">
+                          <div class="has-tooltip">
+                             <span data-i18n="inspector.summary.tag.colDimensions">Dimensions</span>
+                             <button class="tooltip-icon" data-tooltip-name="dimensionsCount"></button>
+                          </div>
+                      </th>
+                      <th scope="col" class="figure">
+                          <div class="has-tooltip">
+                             <span data-i18n="inspector.summary.tag.colMembers">Members</span>
+                             <button class="tooltip-icon" data-tooltip-name="membersCount"></button>
+                          </div>
+                      </th>
                       <th scope="col" class="figure"><div data-i18n="inspector.summary.tag.colTotal">Total</div></th>
                     </tr>
                   </thead>
@@ -359,7 +389,7 @@ See COPYRIGHT.md for copyright information
             </div>
           </div>
           <div class="collapsible-section files-summary">
-            <h3 class="collapsible-header" data-i18n="inspector.summary.file.header">File Summary</h3>
+            <h3 class="collapsible-header"><button data-i18n="inspector.summary.file.header">File Summary</button></h3>
             <div class="collapsible-body">
               <div class="file-summary-container">
                 <div class="files inline-docs">
@@ -430,6 +460,12 @@ See COPYRIGHT.md for copyright information
     </footer>
     <div class="failed-to-load-mask"></div>
   </section>
+  <div id="tooltip" class="tooltip">
+    <span class="tooltip-text"></span> 
+    <div class="glossary-link">
+      <a target="_blank" href="https://xbrl.org/glossary">XBRL Glossary (opens in new tab)</a>
+    </div>
+  </div>
   <div class="dialog-mask">
   </div>
   <div id="dialog-container"></div>

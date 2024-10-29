@@ -43,6 +43,17 @@ export class Inspector {
     }
 
     i18nInit() {
+        const langs = ["en", "cy", "es"];
+        const bundles = [
+          "translation",
+          "referenceParts",
+          "currencies",
+          "dataTypes",
+          "labelRoles",
+          "scale",
+          "balanceTypes",
+          "tooltips"
+        ];
         return i18next.init({
             lng: this.preferredLanguages()[0],
             reloadOnLanguageChange: true,
@@ -50,34 +61,12 @@ export class Inspector {
             returnEmptyString: false,
             fallbackLng: 'en',
             debug: false,
-            resources: {
-                cy: {
-                    translation: require('../i18n/cy/translation.json'),
-                    referenceParts: require('../i18n/cy/referenceparts.json'),
-                    currencies: require('../i18n/cy/currencies.json'),
-                    dataTypes: require('../i18n/cy/datatypes.json'),
-                    labelRoles: require('../i18n/cy/labelroles.json'),
-                    scale: require('../i18n/cy/scale.json')
-                },
-                en: { 
-                    translation: require('../i18n/en/translation.json'),
-                    referenceParts: require('../i18n/en/referenceparts.json'),
-                    currencies: require('../i18n/en/currencies.json'),
-                    dataTypes: require('../i18n/en/datatypes.json'),
-                    balanceTypes: require('../i18n/en/balancetypes.json'),
-                    labelRoles: require('../i18n/en/labelroles.json'),
-                    scale: require('../i18n/en/scale.json')
-                },
-                es: { 
-                    translation: require('../i18n/es/translation.json'),
-                    referenceParts: require('../i18n/es/referenceparts.json'),
-                    currencies: require('../i18n/es/currencies.json'),
-                    dataTypes: require('../i18n/es/datatypes.json'),
-                    balanceTypes: require('../i18n/es/balancetypes.json'),
-                    labelRoles: require('../i18n/es/labelroles.json'),
-                    scale: require('../i18n/es/scale.json')
-                }
-            }
+            resources: 
+                Object.fromEntries(
+                  langs.map(l => [l, Object.fromEntries(
+                    bundles.map(n => [n, require(`../i18n/${l}/${n.toLowerCase()}.json`)]))
+                  ])
+                )
         }).then((t) => {
             jqueryI18next.init(i18next, $, {
                 tName: 't', // --> appends $.t = i18next.t
@@ -99,7 +88,7 @@ export class Inspector {
             inspector._reportSet = reportSet;
             inspector.i18nInit().then((t) => {
                 
-                $(".collapsible-header").on("click", function () { 
+                $(".collapsible-header button:first-of-type").on("click", function () { 
                     const d = $(this).closest(".collapsible-section");
                     d.toggleClass("collapsed"); 
                     if (d.hasClass("collapsed")) {
@@ -128,6 +117,9 @@ export class Inspector {
                 $("#inspector").on("click", ".clipboard-copy", function () {
                     navigator.clipboard.writeText($(this).data("cb-text"));
                 });
+
+                inspector.initializeTooltips();
+
                 inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
                 inspector.buildToolbarHighlightMenu();
 
@@ -153,6 +145,43 @@ export class Inspector {
                     resolve();
                 });
             });
+        });
+    }
+
+    initializeTooltips() {
+        $("html").on("click", e => 
+            this.hideTooltip()
+        );
+        $("#inspector .inspector-body").on("scroll", e => 
+            this.hideTooltip()
+        );
+        $(document).on("keyup", (e) => {
+            if (e.keyCode == 27) { 
+                this.hideTooltip();
+            }
+        });
+        $("#ixv").on("click", ".tooltip-icon", (e) => {
+            this.toggleTooltip($(e.currentTarget));
+            e.stopPropagation();
+        });
+
+        let tooltipHoverCount = 0;
+        $("#ixv").on("mouseenter", ".tooltip-icon", e => {
+            tooltipHoverCount++;
+            setTimeout(t => {
+                if (tooltipHoverCount > 0) {
+                    this.showTooltip($(e.currentTarget), true);
+                }
+            }, 250);
+        });
+        $("#ixv").on("mouseenter", "#tooltip", e => tooltipHoverCount++);
+        $("#ixv").on("mouseleave", "#tooltip, .tooltip-icon", e => {
+            tooltipHoverCount--;
+            setTimeout(e => {
+                if (tooltipHoverCount == 0) {
+                    this.hideTooltip(true);
+                }
+            }, 500);
         });
     }
 
@@ -1317,6 +1346,56 @@ export class Inspector {
     analyseDimension(fact, dimensions) {
         const chart = new IXBRLChart();
         chart.analyseDimension(fact, dimensions);
+    }
+
+    toggleTooltip(icon) {
+        if ($("#tooltip").hasClass("show")) {
+            this.hideTooltip();
+        }
+        else {
+            this.showTooltip(icon);
+        }
+    }
+
+    showTooltip(icon, hoverShow) {
+        icon.closest(".has-tooltip").attr("aria-describedby", "tooltip");
+        $("#tooltip .tooltip-text").text(i18next.t(`tooltips:${icon.data("tooltip-name")}`));
+        $("#tooltip").addClass(hoverShow ? "hover-show" : "show");
+        if (icon.data("tooltip-glossary-link")) {
+            $("#tooltip").addClass("with-glossary-link");
+        }
+        else {
+            $("#tooltip").removeClass("with-glossary-link");
+        }
+        this.positionTooltip(icon);
+    }
+
+    hideTooltip(hoverShow) {
+        const t = $("#tooltip");
+        t.removeClass(hoverShow ? "hover-show" : "show");
+        if (!t.hasClass("hover-show") && !t.hasClass("show")) {
+            $(".has-tooltip").removeAttr("aria-describedby");
+        }
+    }
+
+
+    positionTooltip(e) {
+        const iconPos = e.offset();
+        const tooltipWidth = 300;
+        const clientWidth = document.documentElement.clientWidth;
+        const right = clientWidth - Math.min(clientWidth - 30, iconPos.left + tooltipWidth);
+        const left = Math.min(clientWidth - tooltipWidth, iconPos.left);
+
+        $("#tooltip")
+            .css("inset","")
+            .css("position", "fixed")
+            .css("left",  left)
+            .css("right",  right)
+            .css("top", iconPos.top + 30);
+
+        if ($("#tooltip").get(0).getBoundingClientRect().bottom > document.documentElement.clientHeight) {
+          $("#tooltip").css("top","").css("bottom", 30);
+        }
     }
 
     update() {

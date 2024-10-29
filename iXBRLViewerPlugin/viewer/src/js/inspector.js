@@ -289,12 +289,21 @@ export class Inspector {
         if (!this._iv.isStaticFeatureEnabled("home-link-url")) {
             return;
         }
-        const homeLinkUrl = this._iv.getStaticFeatureValue("home-link-url");
+        let homeLinkUrl = this._iv.getStaticFeatureValue("home-link-url");
         let homeLinkText;
         if (this._iv.isStaticFeatureEnabled("home-link-label")) {
             homeLinkText = this._iv.getStaticFeatureValue("home-link-label");
         } else {
             homeLinkText = i18next.t("toolbar.homePage");
+        }
+        const query = sessionStorage.getItem("ixbrl-viewer-home-link-query");
+        if (query) {
+            if (!homeLinkUrl.includes("?")) {
+                homeLinkUrl += "?";
+            } else {
+                homeLinkUrl += "&";
+            }
+            homeLinkUrl += query;
         }
         const homeLink = $('<a></a>')
                 .attr('href', homeLinkUrl)

@@ -101,7 +101,8 @@
     "summary": {
       "fact": {
         "header": "Fact Summary",
-        "title": "Total Facts:"
+        "hidden": "Hidden facts",
+        "total": "Total facts"
       },
       "file": {
         "calculations": "Calculation Linkbases",
@@ -113,9 +114,6 @@
         "presentation": "Presentation Linkbases",
         "references": "Reference Linkbases",
         "schemas": "Schemas"
-      },
-      "hiddenFacts": {
-        "title": ""
       },
       "reportCreation": "Report creation",
       "tag": {

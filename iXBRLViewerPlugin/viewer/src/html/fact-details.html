@@ -9,15 +9,21 @@ See COPYRIGHT.md for copyright information
       <div class="std-label"></div>
       <div class="documentation"></div>
     </dd>
-    <dt id="dimensions-label" data-i18n="factDetails.dimensions">Dimensions</dt>
+    <dt id="dimensions-label" class="has-tooltip">
+      <span data-i18n="factDetails.dimensions">Dimensions</span>
+      <button class="tooltip-icon" data-tooltip-name="dimension" data-tooltip-glossary-link="true"></button>
+    </dt>
     <dd>
       <div id="dimensions"></div>
     </dd>
     <dt data-i18n="factDetails.properties">Properties</dt>
     <dd>
-      <table class="fact-properties">
+      <table class="property-table">
         <tr class="period">
-          <th data-i18n="factDetails.date">Date</th>
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.date">Date</span>
+            <button class="tooltip-icon" data-tooltip-name="period"></button>
+          </th>
           <td></td>
         </tr>
         <tr class="value">
@@ -25,11 +31,17 @@ See COPYRIGHT.md for copyright information
           <td><span class="value"></span> <button class="show-all inline-button" aria-label="Show full text">[...]</button> <span class="expand-text-block"></td>
         </tr>
         <tr class="accuracy">
-          <th data-i18n="factDetails.accuracy">Accuracy</th>
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.accuracy">Accuracy</span>
+            <button class="tooltip-icon" data-tooltip-name="accuracy"></button>
+          </th>
           <td></td>
         </tr>
         <tr class="scale">
-          <th data-i18n="factDetails.scale">Scale</th>
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.scale">Scale</span>
+            <button class="tooltip-icon" data-tooltip-name="scale"></button>
+          </th>
           <td></td>
         </tr>
         <tr class="change">
@@ -41,7 +53,10 @@ See COPYRIGHT.md for copyright information
           <td></td>
         </tr>
         <tr class="concept">
-          <th data-i18n="factDetails.concept">Concept</th>
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.concept">Concept</span>
+            <button class="tooltip-icon" data-tooltip-name="concept" data-tooltip-glossary-link="true"></button>
+          </th>
           <td><div><span class="text"></span><span class="filler"></span><button class="clipboard-copy copy-icon inline-button" title="Copy concept to clipboard"></button></div></td>
         </tr>
         <tr class="datatype">

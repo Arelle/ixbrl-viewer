@@ -101,7 +101,8 @@
     "summary": {
       "fact": {
         "header": "Crynodeb o Ffeithiau",
-        "title": "Cyfanswm y Ffeithiau:"
+        "hidden": "",
+        "total": "Cyfanswm y Ffeithiau"
       },
       "file": {
         "calculations": "Cronfeydd Cyswllt Cyfrifo",
@@ -113,9 +114,6 @@
         "presentation": "Basau Cyswllt Cyflwyniad",
         "references": "Basau Cyswllt Cyfeiriad",
         "schemas": "Sgemâu"
-      },
-      "hiddenFacts": {
-        "title": ""
       },
       "reportCreation": "Creu Adroddiad",
       "tag": {

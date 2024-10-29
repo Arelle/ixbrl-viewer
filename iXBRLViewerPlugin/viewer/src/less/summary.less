@@ -2,12 +2,6 @@
 
 #inspector .summary {
   .body {
-    .total-facts-title,
-    .hidden-facts-title,
-    .files-summary-title {
-      font-weight: bold;
-    }
-
     .total-facts-value,
     .hidden-facts-value {
       .inline-button();
@@ -40,7 +34,7 @@
           text-align: left;
         }
 
-        thead {
+        thead tr {
           th {
             white-space: nowrap;
             position: relative;
@@ -61,10 +55,16 @@
                 width: 200px;
                 right: 0;
                 bottom: 0;
+
+                &.has-tooltip {
+                  bottom: -0.8rem;
+                }
               }
             }
+
           }
         }
+
 
         tbody th {
           font-weight: normal;

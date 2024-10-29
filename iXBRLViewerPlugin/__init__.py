@@ -206,9 +206,7 @@ def getFeaturesFromOptions(options: argparse.Namespace | OptionParser) -> dict[s
     for featureConfig in FEATURE_CONFIGS:
         key = featureConfig.key
         option = f'viewer_feature_{key}'
-        print(f'Checking feature option: {option}')
         value = getattr(options, option, None)
-        print(f'Checking feature value: {value}')
         if value is not None:
             features[key] = value
     return features

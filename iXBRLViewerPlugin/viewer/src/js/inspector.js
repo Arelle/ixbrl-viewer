@@ -48,7 +48,7 @@ export class Inspector {
           "translation",
           "referenceParts",
           "currencies",
-          "datatypes",
+          "dataTypes",
           "labelRoles",
           "scale",
           "balanceTypes",

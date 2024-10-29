@@ -164,6 +164,7 @@
     "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },
   "toolbar": {
+    "homePage": "Inicio",
     "toggleDarkMode": "Alternar modo oscuro",
     "xbrlElements": "Elementos XBRL"
   },

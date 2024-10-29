@@ -217,6 +217,8 @@
     .default-font();
     .text-md();
 
+    display: flex;
+    align-items: center;
     color: var(--colour-text);
     position: fixed;
     top: 0;
@@ -226,19 +228,18 @@
     border-bottom: solid 1px #ccc;
     z-index: 5;
 
+    #home-link {
+      font-size: 2.2rem;
+      font-weight: bold;
+      margin-left: 1rem;
+    }
+
     .header {
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
       height: 100%;
     }
 
     .document-title {
-      position: absolute;
       box-sizing: border-box;
-      left: 160px;
-      top: 0;
       padding-right: 1.6rem;
       line-height: var(--top-bar-height);
       border-right: solid 0.1rem #ccc;

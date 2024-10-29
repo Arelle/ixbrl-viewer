@@ -164,6 +164,7 @@
     "tryAgainDifferentKeywords": "Try again with different keywords"
   },
   "toolbar": {
+    "homePage": "Home",
     "toggleDarkMode": "Toggle dark mode",
     "xbrlElements": "XBRL Elements"
   },

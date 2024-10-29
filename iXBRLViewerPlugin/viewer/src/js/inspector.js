@@ -134,6 +134,8 @@ export class Inspector {
                 inspector._optionsMenu = new Menu($("#display-options-menu"));
                 inspector.buildDisplayOptionsMenu();
 
+                inspector.buildHomeLink()
+
                 $("#ixv").localize();
 
                 // Listen to messages posted to this window
@@ -282,6 +284,34 @@ export class Inspector {
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
     }
 
+    buildHomeLink() {
+        $('#top-bar #home-link').remove();
+        if (!this._iv.isStaticFeatureEnabled("home-link-url")) {
+            return;
+        }
+        let homeLinkUrl = this._iv.getStaticFeatureValue("home-link-url");
+        let homeLinkText;
+        if (this._iv.isStaticFeatureEnabled("home-link-label")) {
+            homeLinkText = this._iv.getStaticFeatureValue("home-link-label");
+        } else {
+            homeLinkText = i18next.t("toolbar.homePage");
+        }
+        const query = sessionStorage.getItem("ixbrl-viewer-home-link-query");
+        if (query) {
+            if (!homeLinkUrl.includes("?")) {
+                homeLinkUrl += "?";
+            } else {
+                homeLinkUrl += "&";
+            }
+            homeLinkUrl += query;
+        }
+        const homeLink = $('<a></a>')
+                .attr('href', homeLinkUrl)
+                .attr('id', 'home-link')
+                .text(homeLinkText);
+        $('#top-bar').prepend(homeLink);
+    }
+
     buildToolbarHighlightMenu() {
         const iv = this._iv;
         this._toolbarMenu.reset();
@@ -341,6 +371,7 @@ export class Inspector {
     rebuildViewer() {
         $("#ixv").localize();
         this.buildDisplayOptionsMenu();
+        this.buildHomeLink()
         this.buildToolbarHighlightMenu();
         this.buildHighlightKey();
         this.update();

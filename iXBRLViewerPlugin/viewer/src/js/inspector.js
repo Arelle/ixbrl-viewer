@@ -1257,7 +1257,7 @@ export class Inspector {
                     $('tr.period td', factHTML).append(
                         $("<button></button>") 
                             .addClass(["analyse", "inline-button"])
-                            .attr("title", "Show analysis chart")
+                            .attr("title", i18next.t("inspector.showAnalysisChart"))
                             .text("")
                             .on('click', () => this.analyseDimension(fact, ["p"]))
                     );
@@ -1289,7 +1289,7 @@ export class Inspector {
                         h.append(
                             $("<button></button>") 
                                 .addClass(["analyse", "inline-button"])
-                                .attr("title", "Show analysis chart")
+                                .attr("title", i18next.t("inspector.showAnalysisChart"))
                                 .text("")
                                 .on("click", () => this.analyseDimension(fact, [aspect.name()]))
                         )

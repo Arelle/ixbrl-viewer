@@ -159,6 +159,12 @@ export class iXBRLViewer {
             .prop("type", "text/css")
             .text(inspector_css)
             .appendTo('head');
+        if (this.runtimeConfig.skin?.stylesheetUrl !== undefined) {
+            const url = new URL(this.runtimeConfig.skin.stylesheetUrl, this.options.configUrl?.href);
+            $('<link rel="stylesheet" id="ixv-style-skin" />')
+                .attr("href", url.href)
+                .appendTo('head');
+        }
         $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
             .attr('href', require('../img/favicon.ico'))
             .appendTo('head');
@@ -194,7 +200,8 @@ export class iXBRLViewer {
             $('html').attr("lang", "en-US");
         }
 
-        $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
+        $('head')
+            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon").appendTo($(iframe).contents().find('head'));
 
         $('<title>').text(docTitle).appendTo($('head'));
 

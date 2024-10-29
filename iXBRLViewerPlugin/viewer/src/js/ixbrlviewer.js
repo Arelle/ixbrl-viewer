@@ -160,13 +160,13 @@ export class iXBRLViewer {
             .text(inspector_css)
             .appendTo('head');
         if (this.runtimeConfig.skin?.stylesheetUrl !== undefined) {
-            const url = new URL(this.runtimeConfig.skin.stylesheetUrl, this.options.configUrl?.href);
             $('<link rel="stylesheet" id="ixv-style-skin" />')
-                .attr("href", url.href)
+                .attr("href", this.resolveRelativeUrl(this.runtimeConfig.skin.stylesheetUrl))
                 .appendTo('head');
         }
+        const favIconUrl = this.runtimeConfig.skin?.faviconUrl !== undefined ? this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl) : require("../img/favicon.ico");
         $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-            .attr('href', require('../img/favicon.ico'))
+            .attr('href', favIconUrl)
             .appendTo('head');
 
         try {

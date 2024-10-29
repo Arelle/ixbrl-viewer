@@ -286,16 +286,14 @@ export class Inspector {
 
     buildHomeLink() {
         $('#top-bar #home-link').remove();
-        if (!this._iv.isFeatureEnabled("home-link-url")) {
+        if (!this._iv.isStaticFeatureEnabled("home-link-url")) {
             return;
         }
-        const homeLinkUrl = this._iv.getFeatureValue("home-link-url");
+        const homeLinkUrl = this._iv.getStaticFeatureValue("home-link-url");
         let homeLinkText;
-        if (this._iv.isFeatureEnabled("home-link-label")) {
-            homeLinkText = this._iv.getFeatureValue("home-link-label");
-            console.log("home-link-label enabled", homeLinkText);
+        if (this._iv.isStaticFeatureEnabled("home-link-label")) {
+            homeLinkText = this._iv.getStaticFeatureValue("home-link-label");
         } else {
-            console.log("home-link-label disabled");
             homeLinkText = i18next.t("toolbar.homePage");
         }
         const homeLink = $('<a></a>')

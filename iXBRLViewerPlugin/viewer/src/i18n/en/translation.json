@@ -118,10 +118,10 @@
       },
       "reportCreation": "Report creation",
       "tag": {
+        "colConcepts": "Concepts",
         "colDimensions": "Dimensions",
         "colMembers": "Members",
         "colNamespace": "Namespace",
-        "colPrimaryItems": "Primary Items",
         "colTotal": "Total",
         "header": "Tag Summary",
         "rowTotal": "Total"

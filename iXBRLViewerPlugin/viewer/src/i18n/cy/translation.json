@@ -118,10 +118,10 @@
       },
       "reportCreation": "Creu Adroddiad",
       "tag": {
+        "colConcepts": "",
         "colDimensions": "Dimensiynau",
         "colMembers": "Aelodau",
         "colNamespace": "Gofod Enw",
-        "colPrimaryItems": "Eitemau Cynradd",
         "colTotal": "Cyfanswm",
         "header": "Crynodeb Tag",
         "rowTotal": "Cyfanswm"

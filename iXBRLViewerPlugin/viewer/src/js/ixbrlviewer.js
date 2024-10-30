@@ -127,19 +127,28 @@ export class iXBRLViewer {
         if (!this.isStaticFeatureEnabled('support-link')) {
             return null;
         }
-        return this.getStaticFeatureValue('support-link');
+        return this.resolveRelativeUrl(this.getStaticFeatureValue('support-link'));
     }
 
     getSurveyLinkUrl() {
         if (!this.isStaticFeatureEnabled('survey-link')) {
             return null;
         }
-        return this.getStaticFeatureValue('survey-link');
+        return this.resolveRelativeUrl(this.getStaticFeatureValue('survey-link'));
     }
 
     isViewerEnabled() {
         const urlParams = new URLSearchParams(window.location.search);
         return (urlParams.get('disable-viewer') ?? 'false') === 'false';
+    }
+
+    // Resolves URL relative to the config file
+    resolveRelativeUrl(url) {
+        if (this.options.configUrl === undefined) {
+            return url;
+        }
+        const resolvedUrl = new URL(url, this.options.configUrl.href);
+        return resolvedUrl.href;
     }
 
     _loadInspectorHTML() {
@@ -222,11 +231,40 @@ export class iXBRLViewer {
         }
     }
 
+    _loadRuntimeConfig() {
+        return new Promise((resolve, reject) => {
+            if (this.options.configUrl === undefined) {
+                resolve({});
+            }
+            else {
+                fetch(this.options.configUrl)
+                    .then((resp) => {
+                        if (resp.status == 404) {
+                            return Promise.resolve({});
+                        }
+                        else if (resp.status != 200) {
+                            return Promise.reject("Fetch failed: " + resp.status);
+                        }
+                        return resp.json();
+                    })
+                    .then((data) => {
+                        resolve(data);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        resolve({});
+                    });
+            }
+        });
+    }
+
     load() {
         const iv = this;
         const inspector = this.inspector;
-
-        setTimeout(function () {
+    
+        this._loadRuntimeConfig().then((runtimeConfig) => {
+            this.runtimeConfig = runtimeConfig;
+            console.log(runtimeConfig);
             initializeTheme();
 
             const stubViewer = $('body').hasClass('ixv-stub-viewer');
@@ -255,6 +293,9 @@ export class iXBRLViewer {
                     obj[val] = true;
                     return obj;
                 }, {});
+            }
+            if (this.runtimeConfig.features !== undefined) {
+                features = {...this.runtimeConfig.features, features};
             }
             iv.setFeatures(features, window.location.search);
 

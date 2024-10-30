@@ -1223,6 +1223,63 @@
         background-color: rgb(0 0 0 / 50%);
       }
     }
+
+    table.property-table {
+      &:not(.numeric) {
+        table-layout: fixed;
+        width: 100%;
+      }
+
+      td, th {
+        padding: 0;
+        line-height: 2.6rem;
+      }
+
+      th {
+        width: 90px;
+        text-align: right;
+        padding-right: 30px;
+        color: var(--colour-text-title);
+
+        &.has-tooltip {
+          padding-right: 10px;
+        }
+      }
+
+      tr.value {
+        .show-all {
+          color: var(--colour-primary);
+          cursor: pointer;
+        }
+
+        &:not(.truncated) .show-all {
+          display: none;
+        }
+
+        &.text-block .expand-text-block {
+          color: var(--colour-primary);
+          cursor: pointer;
+
+          &::before {
+            .icon-text-block();
+          }
+        }
+      }
+
+      td {
+        overflow: clip visible;
+        text-overflow: ellipsis;
+        color: var(--colour-text-form-value);
+      }
+
+      tr.uri > td {
+        white-space: nowrap;
+      }
+
+      &.numeric td {
+        text-align: right;
+      }
+    }
   }
 
   .fact-link {
@@ -1272,62 +1329,6 @@
     }
   }
 
-  table.property-table {
-    &:not(.numeric) {
-      table-layout: fixed;
-      width: 100%;
-    }
-
-    td, th {
-      padding: 0;
-      line-height: 2.6rem;
-    }
-
-    th {
-      width: 90px;
-      text-align: right;
-      padding-right: 30px;
-      color: var(--colour-text-title);
-
-      &.has-tooltip {
-        padding-right: 10px;
-      }
-    }
-
-    tr.value {
-      .show-all {
-        color: var(--colour-primary);
-        cursor: pointer;
-      }
-
-      &:not(.truncated) .show-all {
-        display: none;
-      }
-
-      &.text-block .expand-text-block {
-        color: var(--colour-primary);
-        cursor: pointer;
-
-        &::before {
-          .icon-text-block();
-        }
-      }
-    }
-
-    td {
-      overflow: clip visible;
-      text-overflow: ellipsis;
-      color: var(--colour-text-form-value);
-    }
-
-    tr.uri > td {
-      white-space: nowrap;
-    }
-
-    &.numeric td {
-      text-align: right;
-    }
-  }
 
   .dialog-mask {
     background-color: var(--colour-bg-fade);

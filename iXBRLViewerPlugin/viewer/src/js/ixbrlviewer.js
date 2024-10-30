@@ -153,14 +153,23 @@ export class iXBRLViewer {
 
     _loadInspectorHTML() {
         /* Insert HTML and CSS styles into body */
-        $(require('../html/inspector.html')).prependTo('body');
+        const footerLogoHtml = this.runtimeConfig.skin?.footerLogoHtml ?? require("../html/footer-logo.html");
+        $(require('../html/inspector.html'))
+            .prependTo('body')
+            .find("#footer-logo").html(footerLogoHtml);
         const inspector_css = require('../less/inspector.less').toString(); 
         $('<style id="ixv-style"></style>')
             .prop("type", "text/css")
             .text(inspector_css)
             .appendTo('head');
+        if (this.runtimeConfig.skin?.stylesheetUrl !== undefined) {
+            $('<link rel="stylesheet" id="ixv-style-skin" />')
+                .attr("href", this.resolveRelativeUrl(this.runtimeConfig.skin.stylesheetUrl))
+                .appendTo('head');
+        }
+        const favIconUrl = this.runtimeConfig.skin?.faviconUrl !== undefined ? this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl) : require("../img/favicon.ico");
         $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-            .attr('href', require('../img/favicon.ico'))
+            .attr('href', favIconUrl)
             .appendTo('head');
 
         try {
@@ -194,7 +203,8 @@ export class iXBRLViewer {
             $('html').attr("lang", "en-US");
         }
 
-        $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
+        $('head')
+            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon").appendTo($(iframe).contents().find('head'));
 
         $('<title>').text(docTitle).appendTo($('head'));
 

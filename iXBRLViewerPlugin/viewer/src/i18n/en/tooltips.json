@@ -1,4 +1,5 @@
 {
+  "anchoring": "Anchoring relationships provide links between company-specific extension concepts and standard concepts defined in the base taxonomy.",
   "dimension": "A dimension is a qualifying characteristic that is used to uniquely define a data point.",
   "conceptsCount": "The number of unique concepts used in this report.",
   "dimensionsCount": "The number of unique dimensions used in this report.",

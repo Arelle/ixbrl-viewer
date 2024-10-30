@@ -153,7 +153,10 @@ export class iXBRLViewer {
 
     _loadInspectorHTML() {
         /* Insert HTML and CSS styles into body */
-        $(require('../html/inspector.html')).prependTo('body');
+        const footerLogoHtml = this.runtimeConfig.skin?.footerLogoHtml ?? require("../html/footer-logo.html");
+        $(require('../html/inspector.html'))
+            .prependTo('body')
+            .find("#footer-logo").html(footerLogoHtml);
         const inspector_css = require('../less/inspector.less').toString(); 
         $('<style id="ixv-style"></style>')
             .prop("type", "text/css")

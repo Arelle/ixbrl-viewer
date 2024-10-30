@@ -137,7 +137,8 @@
     "validationResults": "Validation results",
     "validationSeverity": "Severity",
     "visibleFacts": "Visible Facts",
-    "widerAnchor": "Wider anchor"
+    "widerAnchor": "Wider anchor",
+    "xbrlGlossaryOpensInNewTab": "XBRL Glossary (opens in new tab)"
   },
   "menu": {
     "actions": "Actions",

@@ -137,7 +137,8 @@
     "validationResults": "Canlyniadau dilysu",
     "validationSeverity": "Difrifoldeb",
     "visibleFacts": "Ffeithiau Gweladwy",
-    "widerAnchor": "Angor ehangach"
+    "widerAnchor": "Angor ehangach",
+    "xbrlGlossaryOpensInNewTab": ""
   },
   "menu": {
     "actions": "Gweithredoedd",

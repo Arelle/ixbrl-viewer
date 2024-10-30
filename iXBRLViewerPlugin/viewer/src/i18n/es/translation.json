@@ -137,7 +137,8 @@
     "validationResults": "",
     "validationSeverity": "",
     "visibleFacts": "Hechos visibles",
-    "widerAnchor": "Anclaje amplio"
+    "widerAnchor": "Anclaje amplio",
+    "xbrlGlossaryOpensInNewTab": ""
   },
   "menu": {
     "actions": "Comportamientos",

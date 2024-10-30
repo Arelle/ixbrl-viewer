@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -1366,10 +1366,13 @@ export class Inspector {
         icon.closest(".has-tooltip").attr("aria-describedby", "tooltip");
         $("#tooltip .tooltip-text").text(i18next.t(`tooltips:${icon.data("tooltip-name")}`));
         $("#tooltip").addClass(hoverShow ? "hover-show" : "show");
-        if (icon.data("tooltip-glossary-link")) {
+        const glossaryLink = icon.data("tooltip-glossary-link");
+        if (glossaryLink) {
             $("#tooltip").addClass("with-glossary-link");
-            const url = new URL($("#tooltip .glossary-link a").attr("href"));
-            url.hash = icon.data("tooltip-glossary-link");
+            const url = new URL(GLOSSARY_URL);
+            if (typeof glossaryLink === 'string' && glossaryLink.startsWith("#")) {
+                url.hash = glossaryLink;
+            }
             $("#tooltip .glossary-link a").attr("href", url.href);
         }
         else {

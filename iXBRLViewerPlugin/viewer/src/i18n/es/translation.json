@@ -160,7 +160,8 @@
     "selected": "seleccionados",
     "showMoreResults": "Mostrar más resultados",
     "toggleFilterControls": "",
-    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
+    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
+    "viewFact": ""
   },
   "toolbar": {
     "homePage": "Inicio",

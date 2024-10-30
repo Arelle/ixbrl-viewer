@@ -160,7 +160,8 @@
     "selected": "dethol",
     "showMoreResults": "Dangos mwy o ganlyniadau",
     "toggleFilterControls": "",
-    "tryAgainDifferentKeywords": "Ceisiwch eto gyda geiriau allweddol gwahanol"
+    "tryAgainDifferentKeywords": "Ceisiwch eto gyda geiriau allweddol gwahanol",
+    "viewFact": ""
   },
   "toolbar": {
     "homePage": "Hafan",

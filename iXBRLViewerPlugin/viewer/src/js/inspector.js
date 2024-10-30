@@ -466,7 +466,8 @@ export class Inspector {
             .on("mouseenter", () => this._viewer.linkedHighlightFact(f))
             .on("mouseleave", () => this._viewer.clearLinkedHighlightFact(f))
             .data('ivid', f.vuid);
-        $('<div class="select-icon"></div>')
+        $('<button class="select-icon"></button>')
+            .attr("title", i18next.t("search.viewFact"))
             .on("click", () => {
                 this.selectItem(f.vuid);
                 $('#inspector').removeClass("search-mode");

@@ -161,7 +161,8 @@
     "selected": "selected",
     "showMoreResults": "Show more results",
     "toggleFilterControls": "Toggler filter controls",
-    "tryAgainDifferentKeywords": "Try again with different keywords"
+    "tryAgainDifferentKeywords": "Try again with different keywords",
+    "viewFact": "View fact"
   },
   "toolbar": {
     "homePage": "Home",

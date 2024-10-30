@@ -1368,6 +1368,9 @@ export class Inspector {
         $("#tooltip").addClass(hoverShow ? "hover-show" : "show");
         if (icon.data("tooltip-glossary-link")) {
             $("#tooltip").addClass("with-glossary-link");
+            const url = new URL($("#tooltip .glossary-link a").attr("href"));
+            url.hash = icon.data("tooltip-glossary-link");
+            $("#tooltip .glossary-link a").attr("href", url.href);
         }
         else {
             $("#tooltip").removeClass("with-glossary-link");

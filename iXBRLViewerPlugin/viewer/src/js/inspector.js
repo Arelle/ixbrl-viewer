@@ -414,6 +414,7 @@ export class Inspector {
         const allModes = ["summary-mode", "outline-mode", "search-mode"];
         const i = $("#inspector").removeClass(allModes.filter(m => m !== mode));
         if (mode === undefined) {
+            this._prevInspectorMode = undefined;
             return;
         }
         if (toggle) {
@@ -452,8 +453,9 @@ export class Inspector {
 
     factListRow(f) {
         const row = $('<button class="fact-list-item"></button>')
-            .on("click", () => this.selectItem(f.vuid))
-            .on("dblclick", () => $('#inspector').removeClass("search-mode"))
+            // soft focus - highlight the fact, but don't close the search results
+            .on("click", () => this.selectItem(f.vuid, undefined, undefined, true))
+            .on("dblclick", () => this.selectItem(f.vuid))
             .on("mousedown", (e) => { 
                 /* Prevents text selection via double click without
                  * disabling click+drag text selection (which user-select:
@@ -470,7 +472,6 @@ export class Inspector {
             .attr("title", i18next.t("search.viewFact"))
             .on("click", () => {
                 this.selectItem(f.vuid);
-                $('#inspector').removeClass("search-mode");
             })
             .appendTo(row)
         this._setLabelWithLang($('<div class="title"></div>'), f.getLabelOrNameAndLang("std"))
@@ -1483,8 +1484,11 @@ export class Inspector {
      *
      * If itemIdList is omitted, the currently selected item list is reset to just
      * the primary item.
+     *
+     * noInspectorReset selects the fact, but doesn't close
+     * search/summary/outline mode in the inspector.
      */
-    selectItem(vuid, itemIdList, noScroll) {
+    selectItem(vuid, itemIdList, noScroll, noInspectorReset) {
         if (itemIdList === undefined) {
             this._currentItemList = [ this._reportSet.getItemById(vuid) ];
         }
@@ -1495,6 +1499,9 @@ export class Inspector {
             }
         }
         this.switchItem(vuid, noScroll);
+        if (!noInspectorReset) {
+            this.inspectorMode(undefined);
+        }
     }
 
     /*

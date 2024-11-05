@@ -139,6 +139,7 @@ export class Inspector {
                 inspector.createOutline();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
+                    inspector.handleFactDeepLink();
                     inspector.rebuildViewer();
                     inspector.setupValidationReportIcon();
                     inspector.initializeViewer();

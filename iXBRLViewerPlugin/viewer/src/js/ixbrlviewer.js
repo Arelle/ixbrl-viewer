@@ -382,7 +382,6 @@ export class iXBRLViewer {
                                 $('#ixv .loader').remove();
 
                                 /* Focus on fact specified in URL fragment, if any */
-                                inspector.handleFactDeepLink();
                                 if (iv.options.showValidationWarningOnStart) {
                                     inspector.showValidationWarning();
                                 }

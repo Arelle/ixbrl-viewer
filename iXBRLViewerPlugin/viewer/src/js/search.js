@@ -167,6 +167,13 @@ export class ReportSearch {
         );
     }
 
+    mandatoryFactFilter(s, item) {
+        if(!s.showMandatoryFacts) {
+            return true;
+        }
+        return item.isMandatory();
+    }
+
     search(s) {
         if (!this.ready) {
             return;
@@ -186,7 +193,8 @@ export class ReportSearch {
             this.dataTypesFilter,
             this.unitsFilter,
             this.scalesFilter,
-            this.targetDocumentFilter
+            this.targetDocumentFilter,
+            this.mandatoryFactFilter
         ];
 
         rr.forEach((r,_) => {

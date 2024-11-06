@@ -101,7 +101,7 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
     for featureConfig in FEATURE_CONFIGS:
-        arg = f'--viewer-feature-{featureConfig.key}'
+        arg = f'--viewer-feature-{featureConfig.key}'.replace('_', '-')
         featureGroup.add_option(
             arg,
             arg.lower(),

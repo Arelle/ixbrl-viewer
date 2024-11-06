@@ -529,6 +529,7 @@ export class Inspector {
         spec.searchString = $('#ixbrl-search').val();
         spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
         spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
+        spec.showMandatoryFacts = $('#search-mandatory-fact-filter').prop('checked');
         spec.conceptTypeFilter = $('#search-filter-concept-type').val();
         for (const [key, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
           spec[key] = $(`#${name} select`).val();
@@ -551,6 +552,7 @@ export class Inspector {
       return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0) ||
         !searchSpec.showVisibleFacts ||
         !searchSpec.showHiddenFacts ||
+        searchSpec.showMandatoryFacts ||
         searchSpec.conceptTypeFilter != "*" ||
         searchSpec.factValueFilter != "*" ;
     }
@@ -636,6 +638,7 @@ export class Inspector {
         $("#search-filter-fact-value").val("*");
         $("#search-hidden-fact-filter").prop("checked", defaults.hiddenFacts ?? true);
         $("#search-visible-fact-filter").prop("checked", defaults.visibleFacts ?? true);
+        $("#search-mandatory-fact-filter").prop("checked", defaults.mandatoryFacts ?? false);
         for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
           $(`#${name} select option:selected`).prop("selected", false);
         }
@@ -726,6 +729,21 @@ export class Inspector {
                 this.resetSearchFilters({visibleFacts: false});
                 this.pushInspectorMode("search-mode", "summary-mode");
             });
+
+        const mandatoryFacts = this.summary.mandatoryFacts();
+        if (!mandatoryFacts) {
+            $('#mandatory-facts-row').hide();
+            $('#mandatory-fact-filter-checkbox').hide();
+        } else {
+            $('#mandatory-facts-row').show();
+            $('#mandatory-fact-filter-checkbox').show();
+            $(".mandatory-facts-value", summaryDom)
+                    .text(mandatoryFacts)
+                    .on("click", () => {
+                        this.resetSearchFilters({mandatoryFacts: true});
+                        this.pushInspectorMode("search-mode", "summary-mode");
+                    });
+        }
     }
 
     _populateTagSummary(summaryDom) {

@@ -13,6 +13,7 @@ import zipfile
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
+from pyexpat import features
 from typing import Any
 
 from arelle import XbrlConst
@@ -24,7 +25,7 @@ from arelle.UrlUtil import isHttpUrl
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
-from .constants import DEFAULT_JS_FILENAME, DEFAULT_OUTPUT_NAME, ERROR_MESSAGE_CODE, FEATURE_CONFIGS, INFO_MESSAGE_CODE
+from .constants import DEFAULT_JS_FILENAME, DEFAULT_OUTPUT_NAME, ERROR_MESSAGE_CODE, FEATURE_CONFIGS, INFO_MESSAGE_CODE, MANDATORY_FACTS
 from .xhtmlserialize import XHTMLSerializer
 
 UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = 'unrecognizedLinkbase'
@@ -102,6 +103,7 @@ class IXBRLViewerBuilder:
         self.taxonomyData = {
             "sourceReports": [],
             "features": features,
+            "mandatoryFacts": [],
         }
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None
@@ -260,11 +262,14 @@ class IXBRLViewerBuilder:
 
         self.idGen += 1
         conceptName = self.nsmap.qname(f.qname)
+        factList = MANDATORY_FACTS.get(self.taxonomyData["features"].get("mandatory_facts"), [])
+        isMandatory = f.qname.localName in factList
         scheme, ident = f.context.entityIdentifier
 
         aspects = {
             "c": conceptName,
             "e": self.nsmap.qname(QName(self.nsmap.getPrefix(scheme,"e"), scheme, ident)),
+            "m": isMandatory
         }
 
         factData = {

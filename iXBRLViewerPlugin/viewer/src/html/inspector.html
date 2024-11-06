@@ -177,6 +177,12 @@ See COPYRIGHT.md for copyright information
                 <span class="checkmark"></span>
               </label>
             </div>
+            <div id="mandatory-fact-filter-checkbox">
+              <label class="checkbox">
+                <input id="search-mandatory-fact-filter" type="checkbox" checked="checked" style="display: none;"/> <span data-i18n="inspector.mandatoryFacts">Only Mandatory Facts</span>
+                <span class="checkmark"></span>
+              </label>
+            </div>
           </div>
 
           <div id="search-filter-period" class="collapsible-section collapsible-only collapsed">
@@ -333,8 +339,16 @@ See COPYRIGHT.md for copyright information
                     <button class="hidden-facts-value"></button>
                   </td>
                 </tr>
+                <tr class="mandatory-facts" id="mandatory-facts-row"  style="display: none;">
+                  <th class="has-tooltip">
+                    <span data-i18n="inspector.summary.mandatoryFacts.title">Mandatory Facts:</span>
+                    <button class="tooltip-icon" data-tooltip-name="mandatoryFacts"></button>
+                  <td>
+                    <button class="mandatory-facts-value"></button>
+                  </td>
+                </tr>
                 <tr class="total-facts">
-                  <th >
+                  <th>
                     <span data-i18n="inspector.summary.fact.total">Total facts</span>
                   </th>
                   <td>
@@ -342,7 +356,6 @@ See COPYRIGHT.md for copyright information
                   </td>
                 </tr>
               </table>
-
             </div>
           </div>
           <div class="collapsible-section tag-summary">

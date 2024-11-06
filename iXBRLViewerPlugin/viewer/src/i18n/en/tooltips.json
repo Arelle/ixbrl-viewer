@@ -11,5 +11,6 @@
   "references": "Information about the authoritative definition of a concept. References typically refer to an accounting standard.",
   "calculations": "Calculation relationships between numeric facts in a report. Calculation relationships can be used to trace how figures in a report roll-up, and can also be used to check the consistency of the reported numbers.",
   "hiddenFacts": "The number of hidden facts in this report.  Hidden facts are facts that are reported as XBRL data, but are not shown in the presented report.",
+  "mandatoryFacts": "The number of mandatory facts in this report. Mandatory facts are facts that are required to be reported by the filing jurisdiction.",
   "namespace": "Namespaces are used to partition concept, dimension and member definitions. If a report uses any company-specific concepts, dimensions or members, these will be defined in a separate namespace. Namespaces can also be used to partition large taxonomies."
 }

@@ -23,6 +23,10 @@ export class Fact {
         return localId(this.vuid);
     }
 
+    isMandatory() {
+        return this.f.a.m
+    }
+
     getLabel(rolePrefix, withPrefix) {
         return this.report.getLabel(this.f.a.c, rolePrefix, withPrefix);
     }

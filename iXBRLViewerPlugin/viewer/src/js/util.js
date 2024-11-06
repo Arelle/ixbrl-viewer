@@ -205,7 +205,7 @@ export function localId(viewerUniqueId) {
 
 export function getIXHiddenLinkStyle(domNode) {
     if (domNode.hasAttribute('style')) {
-        const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const re = /(?:^|\s|;)(?:-sec|-esef)?-ix-hidden:\s*([^\s;]+)/;
         const m = domNode.getAttribute('style').match(re);
         if (m) {
             return m[1];

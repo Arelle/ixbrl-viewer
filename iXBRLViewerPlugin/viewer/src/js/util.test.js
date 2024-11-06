@@ -147,6 +147,7 @@ describe("Regex escape", () => {
 
 describe("Get IX Hidden Link Style", () => {
     it.each([
+        ["-ix-hidden:123", "123"],
         ["-sec-ix-hidden:123", "123"],
         ["-esef-ix-hidden:123", "123"],
         ["-xxx-ix-hidden:123", null],

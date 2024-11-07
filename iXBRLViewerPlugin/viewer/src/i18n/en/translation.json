@@ -78,6 +78,7 @@
     "ixbrlInspector": "iXBRL Inspector",
     "labels": "",
     "loadingViewer": "Loading iXBRL Viewer",
+    "mandatoryFacts": "Only Mandatory Facts",
     "namespaces": "Namespaces",
     "narrowerAnchor": "Narrower anchors",
     "negative": "Negative",

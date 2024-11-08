@@ -154,21 +154,31 @@ Inspector.prototype.handleFactDeepLink = function () {
 }
 
 Inspector.prototype.handleMessage = function (event) {
-    var jsonString = event.originalEvent.data;
-    var data = JSON.parse(jsonString);
-
-    if (data.task == 'SHOW_FACT') {
+    if (typeof event.originalEvent.data !== 'string') 
+        return;
+    const jsonString = event.originalEvent.data;
+    let data;
+    try {
+        data = JSON.parse(jsonString);
+    }
+    catch (e) {
+        // Silently ignore any non-JSON messages as write-excel-file sends
+        // messages to itself when exporting files.
+        return;
+    }
+    const task = data["task"];
+    if (task == 'SHOW_FACT') {
         this.selectItem(data.factId, undefined, true);
-    } else if (data.task == 'TABLE_HIGHLIGHT') {
+    } else if (task == 'TABLE_HIGHLIGHT') {
         this._viewer.highlightTables(data.on);
-    } else if (data.task == "CUSTOMIZE") {
+    } else if (task == "CUSTOMIZE") {
         for (const selector in data.styles) {
             this._viewer.customize(selector, data.styles[selector]);
         }
     }
     else {
         console.log("Not handling unsupported task message: " + jsonString);
-    }
+    }    
 }
 
 Inspector.prototype.updateURLFragment = function () {

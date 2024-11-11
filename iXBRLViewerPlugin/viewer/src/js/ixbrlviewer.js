@@ -7,7 +7,7 @@ import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 import { initializeTheme } from './theme.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
-import {FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK} from "./util";
+import {FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK} from "./util";
 
 const featureFalsyValues = new Set([undefined, null, '', 'false', false]);
 
@@ -123,6 +123,13 @@ export class iXBRLViewer {
 
     isReviewModeEnabled() {
         return this.isFeatureEnabled(FEATURE_REVIEW);
+    }
+
+    getGuideLinkUrl() {
+        if (!this.isStaticFeatureEnabled(FEATURE_GUIDE_LINK)) {
+            return null;
+        }
+        return this.resolveRelativeUrl(this.getStaticFeatureValue(FEATURE_GUIDE_LINK));
     }
 
     getSupportLinkUrl() {

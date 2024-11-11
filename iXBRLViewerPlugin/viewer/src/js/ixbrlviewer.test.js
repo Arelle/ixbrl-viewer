@@ -2,6 +2,7 @@
 
 import {iXBRLViewer} from "./ixbrlviewer";
 import {
+    FEATURE_GUIDE_LINK,
     FEATURE_REVIEW,
     FEATURE_SUPPORT_LINK,
     FEATURE_SURVEY_LINK
@@ -166,5 +167,27 @@ describe("Survey link enablement", () => {
     test("Survey link disabled by query", () => {
         viewer.setFeatures({[FEATURE_SURVEY_LINK]: '/survey'}, FEATURE_SURVEY_LINK + '=false')
         expect(viewer.getSurveyLinkUrl()).toEqual('/survey');
+    });
+});
+
+describe("Guide link enablement", () => {
+    var viewer = null;
+    beforeAll(() => {
+        viewer = new iXBRLViewer({})
+    });
+
+    test("Guide link enabled by JSON", () => {
+        viewer.setFeatures({[FEATURE_GUIDE_LINK]: '/guide'}, '')
+        expect(viewer.getGuideLinkUrl()).toEqual('/guide');
+    });
+
+    test("Guide link enabled by query", () => {
+        viewer.setFeatures({}, FEATURE_GUIDE_LINK + '=/guide')
+        expect(viewer.getGuideLinkUrl()).toEqual(null);
+    });
+
+    test("Guide link disabled by query", () => {
+        viewer.setFeatures({[FEATURE_GUIDE_LINK]: '/guide'}, FEATURE_GUIDE_LINK + '=false')
+        expect(viewer.getGuideLinkUrl()).toEqual('/guide');
     });
 });

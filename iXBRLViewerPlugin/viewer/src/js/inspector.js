@@ -301,6 +301,10 @@ export class Inspector {
             this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         }
         let helpLinks = {}
+        let guideLinkUrl = this._iv.getGuideLinkUrl();
+        if (guideLinkUrl) {
+            helpLinks[i18next.t("menu.userGuide")] = guideLinkUrl;
+        }
         let supportLinkUrl = this._iv.getSupportLinkUrl();
         if (supportLinkUrl) {
             helpLinks[i18next.t("menu.reportAnIssue")] = supportLinkUrl;

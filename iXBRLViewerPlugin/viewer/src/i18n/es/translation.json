@@ -147,8 +147,9 @@
     "documentLanguage": "Idioma del Documento",
     "help": "Ayuda",
     "options": "Opciones",
-    "reportAnIssue": "Informar un problema",
-    "survey": "Encuesta"
+    "reportAnIssue": "Informar un Problema",
+    "survey": "Encuesta",
+    "userGuide": "Guía del Usuario"
   },
   "search": {
     "concealedFact": "",

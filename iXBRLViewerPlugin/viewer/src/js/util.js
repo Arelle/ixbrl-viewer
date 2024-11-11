@@ -17,6 +17,7 @@ export const GLOSSARY_URL = "https://xbrl.org/glossary/";
 export const HIGHLIGHT_COLORS = 3;
 
 // Feature names
+export const FEATURE_GUIDE_LINK = 'guide_link';
 export const FEATURE_HOME_LINK_LABEL = 'home_link_label';
 export const FEATURE_HOME_LINK_URL = 'home_link_url';
 export const FEATURE_REVIEW = 'review';

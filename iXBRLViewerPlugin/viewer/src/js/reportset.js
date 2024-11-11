@@ -7,6 +7,7 @@ import { Unit } from "./unit";
 import { titleCase, viewerUniqueId } from "./util.js";
 import { QName } from "./qname.js";
 import { ViewerOptions } from './viewerOptions.js';
+import { TaxonomyNamer } from './taxonomynamer.js';
 
 
 // Class represents the set of XBRL "target" reports shown in the viewer.
@@ -18,6 +19,7 @@ export class ReportSet {
         this._data = data;
         this._ixNodeMap = {};
         this.viewerOptions = new ViewerOptions()
+        this.taxonomyNamer = new TaxonomyNamer(new Map());
     }
 
     /*
@@ -96,6 +98,10 @@ export class ReportSet {
 
     prefixMap() {
         return this._data.prefixes;
+    }
+
+    preferredPrefix(prefix) {
+        return this.taxonomyNamer.getName(prefix, this._data.prefixes[prefix]).prefix;
     }
 
     namespaceGroups() {

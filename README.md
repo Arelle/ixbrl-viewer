@@ -273,6 +273,14 @@ parameters, as defined above.
     * `faviconUrl` - a URL to an icon file to be used as the favicon for the viewer.
     * `footerLogoHtml` - a fragment of HTML that will be included in place of the standard footer logo.
 
+* `taxonomyNames` - a JSON object where:
+
+    * Keys are strings that will be treated as a regular expression to match
+      against a namespace.
+    * Values are an array of (prefix, name) where "prefix" is the preferred
+      namespace prefix for the namespace, and "name" is a short descriptive
+      name for the taxonomy.
+
 Relative URLs defined in the config file are resolved relative to the config file.
 
 # Disable viewer loading

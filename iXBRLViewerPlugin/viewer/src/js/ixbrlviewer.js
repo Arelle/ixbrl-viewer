@@ -6,6 +6,7 @@ import { ReportSet } from "./reportset.js";
 import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 import { initializeTheme } from './theme.js';
+import { TaxonomyNamer } from './taxonomynamer.js';
 
 const featureFalsyValues = new Set([undefined, null, '', 'false', false]);
 
@@ -310,6 +311,7 @@ export class iXBRLViewer {
             iv.setFeatures(features, window.location.search);
 
             const reportSet = new ReportSet(parsedTaxonomyData);
+            reportSet.taxonomyNamer = new TaxonomyNamer(new Map(Object.entries(this.runtimeConfig.taxonomyNames ?? {})));
 
             // Viewer disabled in stub viewer mode => redirect to first iXBRL document
             if (!iv.isViewerEnabled()) {

@@ -47,6 +47,10 @@ export class Fact {
         return this.f.a.c;
     }
 
+    conceptDisplayName() {
+        return this.report.reportSet.taxonomyNamer.convertQName(this.conceptQName());
+    }
+
     concept() {
         return this.report.getConcept(this.f.a.c); 
     }

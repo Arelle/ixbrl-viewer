@@ -19,12 +19,14 @@ function qname(s) {
 describe("readableName", () => {
     const namer = new TaxonomyNamer(preferredPrefixMap);
     test("Taxonomy name match", () => {
-        expect(namer.getName(qname("e:1234")).prefix).toBe("prefix1");
-        expect(namer.getName(qname("e:1234")).name).toBe("My Example");
+        expect(namer.fromQName(qname("e:1234")).prefix).toBe("prefix1");
+        expect(namer.fromQName(qname("e:1234")).name).toBe("My Example");
+        expect(namer.convertQName(qname("e:1234"))).toBe("prefix1:1234");
     });
     test("Unknown taxonomy", () => {
-        expect(namer.getName(qname("g:1234")).prefix).toBe("g");
-        expect(namer.getName(qname("g:1234")).name).toBe("g");
+        expect(namer.fromQName(qname("g:1234")).prefix).toBe("g");
+        expect(namer.fromQName(qname("g:1234")).name).toBe("g");
+        expect(namer.convertQName(qname("g:1234"))).toBe("g:1234");
     });
 });
 

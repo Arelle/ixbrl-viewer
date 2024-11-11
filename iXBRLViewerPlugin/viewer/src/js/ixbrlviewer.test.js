@@ -1,6 +1,11 @@
 // See COPYRIGHT.md for copyright information
 
 import {iXBRLViewer} from "./ixbrlviewer";
+import {
+    FEATURE_REVIEW,
+    FEATURE_SUPPORT_LINK,
+    FEATURE_SURVEY_LINK
+} from "./util";
 describe("Feature enablement", () => {
     var viewer = null;
     beforeAll(() => {
@@ -110,7 +115,7 @@ describe("Review mode enablement", () => {
     });
 
     test("Review mode enabled", () => {
-        viewer.setFeatures({'review': true}, '')
+        viewer.setFeatures({[FEATURE_REVIEW]: true}, '')
         expect(viewer.isReviewModeEnabled()).toBeTruthy();
     });
 
@@ -127,17 +132,17 @@ describe("Support link enablement", () => {
     });
 
     test("Support link enabled by JSON", () => {
-        viewer.setFeatures({'support-link': '/help'}, '')
+        viewer.setFeatures({[FEATURE_SUPPORT_LINK]: '/help'}, '')
         expect(viewer.getSupportLinkUrl()).toEqual('/help');
     });
 
     test("Support link enabled by query", () => {
-        viewer.setFeatures({}, 'support-link=/help')
+        viewer.setFeatures({}, FEATURE_SUPPORT_LINK + '=/help')
         expect(viewer.getSupportLinkUrl()).toEqual(null);
     });
 
     test("Support link disabled by query", () => {
-        viewer.setFeatures({'support-link': '/help'}, 'support-link=false')
+        viewer.setFeatures({[FEATURE_SUPPORT_LINK]: '/help'}, FEATURE_SUPPORT_LINK + '=false')
         expect(viewer.getSupportLinkUrl()).toEqual('/help');
     });
 });
@@ -149,17 +154,17 @@ describe("Survey link enablement", () => {
     });
 
     test("Survey link enabled by JSON", () => {
-        viewer.setFeatures({'survey-link': '/survey'}, '')
+        viewer.setFeatures({[FEATURE_SURVEY_LINK]: '/survey'}, '')
         expect(viewer.getSurveyLinkUrl()).toEqual('/survey');
     });
 
     test("Survey link enabled by query", () => {
-        viewer.setFeatures({}, 'survey-link=/survey')
+        viewer.setFeatures({}, FEATURE_SURVEY_LINK + '=/survey')
         expect(viewer.getSurveyLinkUrl()).toEqual(null);
     });
 
     test("Survey link disabled by query", () => {
-        viewer.setFeatures({'survey-link': '/survey'}, 'survey-link=false')
+        viewer.setFeatures({[FEATURE_SURVEY_LINK]: '/survey'}, FEATURE_SURVEY_LINK + '=false')
         expect(viewer.getSurveyLinkUrl()).toEqual('/survey');
     });
 });

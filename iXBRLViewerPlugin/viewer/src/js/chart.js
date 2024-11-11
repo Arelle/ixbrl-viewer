@@ -1,19 +1,7 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import $ from 'jquery';
-import Chart from 'chart.js';
+import { BarController, BarElement, CategoryScale, Chart, LinearScale } from 'chart.js';
 import { AspectSet } from './aspect.js';
 import { wrapLabel } from "./util.js";
 import { Dialog } from './dialog.js';
@@ -88,7 +76,7 @@ export class IXBRLChart extends Dialog {
             covered[dims[1]] = null;
         }
 
-        const facts = fact.report().deduplicate(fact.report().getAlignedFacts(fact, covered));
+        const facts = fact.report.deduplicate(fact.report.getAlignedFacts(fact, covered));
 
         /* Get the unique aspect values along each dimension.  This is to ensure
          * that we assign facts to datasets consistently (we have one dataset per value
@@ -109,7 +97,7 @@ export class IXBRLChart extends Dialog {
         const uv2 = set2av.uniqueValues();
 
         const scale = this._chooseMultiplier(facts);
-        const yLabel = fact.unit().valueLabel() + " " + this._multiplierDescription(scale);
+        const yLabel = fact.unitLabel() + " " + this._multiplierDescription(scale);
         const labels = [];
         
         const dataSets = [];
@@ -135,7 +123,7 @@ export class IXBRLChart extends Dialog {
                 if (dims[1]) {
                     covered[dims[1]] = uv2[j].value();
                 }
-                const dp = fact.report().getAlignedFacts(fact, covered);
+                const dp = fact.report.getAlignedFacts(fact, covered);
                 if (dp.length > 0) {
                     dataSets[j].data[i] = dp[0].value()/(10**scale);
                 }
@@ -157,7 +145,7 @@ export class IXBRLChart extends Dialog {
                 if (dims.includes(av.name())) {
                     a.addClass("selected")
                         .text(av.label() + ": *")
-                        .click(() => this.removeAspect(av.name()));
+                        .on("click", () => this.removeAspect(av.name()));
                 }
                 else {
                     if (av.name() != 'u') {
@@ -166,7 +154,7 @@ export class IXBRLChart extends Dialog {
                     a.text(av.label() + ": " + av.valueLabel());
                     if (dims.length < 2) {
                         a.addClass("addable")
-                            .click(() => this.addAspect(av.name()));
+                            .on("click", () => this.addAspect(av.name()));
                     }
                 }
             }
@@ -185,6 +173,7 @@ export class IXBRLChart extends Dialog {
         this.setChartSize();
 
         const ctx = $("canvas", c);
+        Chart.register(BarController, BarElement, CategoryScale, LinearScale);
         const chart = new Chart(ctx, {
             type: "bar",
             data: {
@@ -195,26 +184,23 @@ export class IXBRLChart extends Dialog {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true
-                        },
-                        scaleLabel: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
                             display: true,
-                            labelString:  yLabel,
-                        }
-
-                    }],
-                    xAxes: [{
+                            text: yLabel,
+                        },
+                    },
+                    x: {
                         ticks: {
                             autoSkip: false
                         }
-                    }]
+                    }
                 }
                 
             }
         });
-        $(window).resize(() => {  
+        $(window).on("resize", () => {  
             this.setChartSize();
             chart.resize();
         });

@@ -1,44 +1,32 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import FileSaver from 'file-saver'
-import * as Excel from 'exceljs/dist/exceljs.min.js';
+import writeXlsxFile from 'write-excel-file'
 import { Fact } from './fact.js';
 
+
 export class TableExport {
-    constructor(table, report) {
+    constructor(table, reportSet) {
         this._table = table;
-        this._report = report;
+        this._reportSet = reportSet;
     } 
 
-    static addHandles(iframe, report) {
+    static addHandles(iframe, reportSet) {
         $('table', iframe).each(function () {
             const table = $(this);
             if (table.find(".ixbrl-element").length > 0) {
                 table.css("position", "relative");
-                const exporter = new TableExport(table, report);
+                const exporter = new TableExport(table, reportSet);
                 $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
                     .appendTo(table)
-                    .click(() => exporter.exportTable());
+                    .on("click", () => exporter.exportTable());
             }
         });
     }
 
     _getRawTable() {
         const table = this._table;
-        const report = this._report;
+        const reportSet = this._reportSet;
         let maxRowLength = 0;
         const rows = [];
         table.find("tr").each(function () {
@@ -54,8 +42,8 @@ export class TableExport {
                 const facts = $(this).find(".ixbrl-element").addBack(".ixbrl-element");
                 let fact = null;
                 if (facts.length > 0) {
-                    const id = facts.first().data('ivid');
-                    fact = report.getItemById(id);
+                    const id = facts.first().data('ivids');
+                    fact = reportSet.getItemById(id);
                 }
                 if (fact instanceof Fact) {
                     const cell = { type: "fact", fact: fact};
@@ -134,18 +122,20 @@ export class TableExport {
     }
 
     _writeTable(data) {
-        const wb = new Excel.Workbook();
-        const ws = wb.addWorksheet('Table');
-        
+        const excelRows = [];
+        const columns = [];
+
         let s = '';
         for (const [i, row] of data.entries()) {
+            const excelRow = [];
             for (const [j, cell] of row.entries()) {
-                const cc = ws.getRow(i+1).getCell(j+1);
+                const cc = {};
 
                 if (cell.type === 'fact') {
+                    columns[j] = { width: 18 };
                     cc.value = Number(cell.fact.value());
-                    cc.numFmt = '#,##0';
-                    ws.getColumn(j+1).width = 18;
+                    cc.type = Number;
+                    cc.format = '#,##0';
                     /* Make this an option - apply presentation signs */
                     if (cell.negative) {
                         cc.value = Math.abs(cc.value) * -1;
@@ -153,24 +143,30 @@ export class TableExport {
                     else {
                         cc.value = Math.abs(cc.value);
                     }
-                    cc.border = {};
                     if (cell.topBorder) {
-                        cc.border.top = {style: "medium", color: { argb: 'FF000000' }};
+                        cc.topBorderStyle = 'medium';
+                        cc.topBorderColor = '#000000';
                     }
                     if (cell.bottomBorder) {
-                        cc.border.bottom = {style: "medium", color: { argb: 'FF000000' }};
+                        cc.bottomBorderStyle = 'medium';
+                        cc.bottomBorderColor = '#000000';
                     }
                 }
                 else if (cell.type === 'aspectLabel') {
                     cc.value = cell.value;
+                    cc.type = String;
+
                 }
                 else {
                     cc.value = cell.value;
-                    cc.font = { color : { argb: 'FF707070' } };
+                    cc.type = String;
+                    cc.color = '#707070';
                 }
+                excelRow.push(cc);
             }
+            excelRows.push(excelRow);
         }
-        return wb;
+        return { columns: columns, data: excelRows };
     }
 
     exportTable() {
@@ -255,10 +251,10 @@ export class TableExport {
         }
 
 
-        const wb = this._writeTable(data);
-        wb.xlsx.writeBuffer().then( data => {
-          const blob = new Blob( [data], {type: "application/octet-stream"} );
-          FileSaver.saveAs( blob, 'table.xlsx');
+        const excelData = this._writeTable(data);
+        writeXlsxFile(excelData.data, {
+            columns: excelData.columns,
+            fileName: 'table.xlsx'
         });
     }
 }

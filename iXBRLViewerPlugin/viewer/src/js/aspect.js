@@ -1,22 +1,14 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
-import $ from 'jquery';
-import i18next from 'i18next';
-import { QName } from './qname.js';
 import { Period } from './period.js';
 import { Identifiers } from './identifiers.js';
+
+const aspectLabelMap = {
+    'c': 'Concept',
+    'e': 'Entity',
+    'p': 'Period',
+    'u': 'Unit',
+}
 
 export class Aspect {
     constructor(a, v, report) {
@@ -30,21 +22,7 @@ export class Aspect {
     }
 
     label() {
-        if (this._aspect === 'c') {
-            return "Concept";
-        }
-        else if (this._aspect === 'p') {
-            return "Period";
-        }
-        else if (this._aspect === 'u') {
-            return "Unit";
-        }
-        else if (this._aspect === 'e') {
-            return "Entity";
-        }
-        else {
-            return this._report.getLabel(this._aspect);
-        }
+        return aspectLabelMap[this._aspect] ?? this._report.getLabel(this._aspect);
     }
 
     value() {
@@ -75,14 +53,7 @@ export class Aspect {
             return this._report.getLabel(this._value, rolePrefix) || this._value;
         }
         else if (this._aspect === 'u') {
-            if (this._value === null) {
-                return i18next.t("factDetails.noUnit");
-            }
-            const qname = this._report.qname(this._value);
-            if (qname.namespace === "http://www.xbrl.org/2003/iso4217") {
-                return i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname + ' '});
-            }
-            return this._value;
+            return this._report.reportSet.getUnit(this._value).label();
         }
         else if (this._aspect === 'p') {
             const p = new Period(this._value);

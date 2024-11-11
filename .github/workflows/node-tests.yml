@@ -1,8 +1,13 @@
 name: Run Node Unit Tests
+
 on:
   pull_request:
     branches:
       - master
+  workflow_call:
+  workflow_dispatch:
+
+permissions: {}
 
 jobs:
   tests:
@@ -10,22 +15,24 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-12
-          - ubuntu-22.04
+          - macos-14
+          - ubuntu-24.04
           - windows-2022
         node-version:
-          - '14'
-          - '16'
           - '18'
-          - '19'
+          - '20'
+          - '22'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3.3.0
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.1.0
         with:
+          cache: 'npm'
+          check-latest: true
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
-        run: |
-          npm install
+        run: npm ci
+      - name: Lint with npm
+        run: npm run stylelint
       - name: Test with npm
         run: npm run test

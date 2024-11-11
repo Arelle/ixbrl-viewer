@@ -1,34 +1,23 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
-@import "core.less";
-@import "fonts.less";
-@import "colours.less";
-@import "common.less";
+@import url("core.less");
+@import url("fonts.less");
+@import url("colours.less");
+@import url("common.less");
 @import (reference) "components.less";
-@import "form-controls.less";
-@import (reference) "icons.less";
-@import "chart.less";
-@import "dialog.less";
-@import "menu.less";
-@import "accordian.less";
-@import "loader.less";
-@import "tabs.less";
+@import url("form-controls.less");
+@import url("chart.less");
+@import url("dialog.less");
+@import url("menu.less");
+@import url("accordian.less");
+@import url("loader.less");
+@import url("tabs.less");
 @import (reference) "text-mixins.less";
-@import "block-list.less";
-@import "validation-report.less";
-@import "text-block-viewer.less";
+@import url("block-list.less");
+@import url("validation-report.less");
+@import url("calculation-inspector.less");
+@import url("text-block-viewer.less");
+@import url("summary.less");
 
 @top-bar-height: 3.5rem;
 
@@ -341,7 +330,7 @@
 
           position: absolute;
           top: 0;
-          left: 3.6rem;
+          left: 7.7rem;
 
           &::before {
             .icon-search();
@@ -364,7 +353,7 @@
           }
         }
 
-        .outline-button {
+        .summary-button {
           .square-button();
 
           position: absolute;
@@ -372,7 +361,7 @@
           left: 0;
 
           &::before {
-            .icon-outline();
+            .icon-summary();
 
             position: relative;
           }
@@ -432,6 +421,9 @@
 
         .search-filters {
           position: relative;
+          // Ensure the filter pane never grows too large to hide the results pane
+          max-height: 60vh;
+          overflow-y: auto;
 
           .reset {
             .clickable();
@@ -447,6 +439,26 @@
             padding-bottom: 0;
           }
 
+          .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 0.4em;
+
+            .control-label {
+              white-space: nowrap;
+              margin-right: 2em;
+              width: 6em;
+            }
+
+            input,
+            select,
+            textarea {
+              flex-basis: 12em;
+              flex-grow: 2;
+            }
+          }
+
           .control-label {
             font-weight: bold;
             margin-bottom: 0.6em;
@@ -459,6 +471,7 @@
 
           .checkboxes {
             display: flex;
+            flex-wrap: wrap;
 
             & > div {
               margin: 1.2rem 0;
@@ -468,6 +481,12 @@
                 vertical-align: middle;
               }
             }
+          }
+
+          .filter-info {
+            text-align: center;
+            font-style: italic;
+            font-size: 1.1rem;
           }
         }
       }
@@ -572,6 +591,11 @@
         height: 100%;
       }
 
+      .summary {
+        overflow-y: auto;
+        height: 100%;
+      }
+
       .body {
         .panel-indent();
       }
@@ -647,13 +671,19 @@
       top: 1px;
     }
 
-    .hidden-fact-tag,
-    .html-hidden-fact-tag {
-      .tag();
-
+    .inspector-body-fact .tags {
       position: absolute;
       top: 1.5rem;
       right: 0.9rem;
+    }
+
+    .target-document-tag {
+      .tag();
+    }
+
+    .hidden-fact-tag,
+    .html-hidden-fact-tag {
+      .tag();
 
       &.html-hidden-fact-tag {
         background-color: #c63018;
@@ -665,7 +695,7 @@
       width: 100%;
 
       th {
-        width: 100px;
+        width: 75px;
         text-align: right;
         padding-right: 20px;
         color: @text-title;
@@ -673,8 +703,8 @@
 
       th,
       td {
-        padding-top: 7px;
-        padding-bottom: 7px;
+        padding-top: 2px;
+        padding-bottom: 2px;
       }
 
       tr.value {
@@ -738,7 +768,7 @@
         .icon-chevron-right();
       }
     }
-    
+
     .concept td > div {
       display: flex;
 
@@ -818,6 +848,7 @@
         padding-left: 12px;
         cursor: pointer;
         user-select: none;
+        white-space: nowrap;
 
         &::before {
           .icon-chevron-right();
@@ -830,6 +861,14 @@
           transition: all 0.25s ease;
           display: inline-block;
         }
+
+        .collapsible-subheader {
+          user-select: none;
+          font-weight: normal;
+          font-style: italic;
+          font-size: 1.3rem;
+          color: @text-form-value;
+        }
       }
 
       &.collapsed {
@@ -837,6 +876,10 @@
           transform: rotate(0);
           top: 0.3rem;
           left: -0.2rem;
+        }
+
+        .collapsible-subheader {
+          color: @primary;
         }
       }
 
@@ -893,43 +936,98 @@
       }
 
       .calculations {
-        .item {
-          padding: 5px 0;
+        .card .title {
           position: relative;
-          line-height: 1.8rem;
 
-          &:not(.calc-fact-link, .total) .concept-name {
-            color: #777;
-          }
+          .inconsistent-flag {
+            padding-right: 0.75rem;
+            position: relative;
+            top: 0.2rem;
+            color: @warning-orange;
 
-          .concept-name {
-            display: block;
-            margin-left: 15px;
-          }
-
-          &.calc-fact-link {
-            cursor: pointer;
-
-            .concept-name {
-              color: @primary;
+            &::before {
+              .icon-circle-cross();
             }
           }
 
-          .weight {
-            display: block;
-            position: absolute;
+          .consistent-flag {
+            padding-right: 0.75rem;
+            position: relative;
+            top: 0.2rem;
+            color: @workiva-green;
+
+            &::before {
+              .icon-circle-tick();
+            }
           }
 
-          &.linked-highlight,
-          &.calc-fact-link:hover {
-            .linked-highlight-text();
+          .unchecked-flag {
+            padding-right: 0.5rem;
+            position: relative;
+            top: 0.2rem;
+
+            &::before {
+              .icon-question();
+            }
           }
 
-          &.total {
-            border-top: solid 1px @border-grey;
-            padding-bottom: 1.2rem;
+        }
+
+        table.calculation-table {
+          width: 100%;
+          border-collapse: collapse;
+
+          tr.item {
+            td {
+              padding: 5px 0;
+              line-height: 1.8rem;
+
+              &.value {
+                text-align: right;
+              }
+            }
+
+            &:not(.calc-fact-link, .total) .concept-name {
+              color: #777;
+            }
+
+            &.calc-fact-link {
+              cursor: pointer;
+
+              .concept-name,
+              .value {
+                color: @primary;
+              }
+            }
+
+            &.linked-highlight,
+            &.calc-fact-link:hover {
+              .linked-highlight-text();
+            }
+
+            &.total td {
+              border-top: solid 1px @border-grey;
+              padding-bottom: 1.2rem;
+            }
           }
         }
+
+        .calculation-details-link {
+          color: @primary;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .reset-multiselect {
+      float: right;
+      line-height: 0;
+      position: relative;
+      bottom: 1rem;
+      cursor: pointer;
+
+      &::after {
+        .icon-close();
       }
     }
 
@@ -977,6 +1075,16 @@
       }
     }
 
+    &.summary-mode {
+      #inspector-head {
+        .controls {
+          .summary-button {
+            .square-button.primary();
+          }
+        }
+      }
+    }
+
     .powered-by {
       .text-sm();
 
@@ -1014,7 +1122,12 @@
       display: none;
     }
 
+    &:not(.summary-mode) .summary-mode-only {
+      display: none;
+    }
+
     &.search-mode .fact-mode-only,
+    &.summary-mode .fact-mode-only,
     &.outline-mode .fact-mode-only {
       display: none;
     }
@@ -1061,8 +1174,8 @@
     color: @primary;
 
     &:hover {
-      outline: solid 2px @linked-fact;
-      outline-offset: 1px;
+      outline: solid 0.125em @linked-fact;
+      outline-offset: 0.0625em;
     }
   }
 
@@ -1097,12 +1210,9 @@
   }
 
   .dialog-mask {
-    background-color: rgba(0, 0, 0, 60%);
+    background-color: rgb(0 0 0 / 60%);
     position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    inset: 0;
     z-index: 10;
     display: none;
   }

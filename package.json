@@ -1,6 +1,6 @@
 {
   "name": "ixbrl-viewer",
-  "version": "1.9.10",
+  "version": "1.10.8",
   "description": "iXBRL Viewer",
   "main": "iXBRLViewerPlugin/viewer/src/js/ixbrlviewer.js",
   "directories": {
@@ -11,7 +11,8 @@
     "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
     "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
-    "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js"
+    "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js",
+    "font": "node iXBRLViewerPlugin/viewer/tools/build-font.js"
   },
   "repository": {
     "type": "git",
@@ -29,9 +30,6 @@
   "author": "",
   "dependencies": {
     "bootstrap": "^4.3.1",
-    "bootstrap-less-port": "^2.2.1",
-    "less": "^3.11.1",
-    "less-loader": "^6.0.0",
     "chart.js": "^4.4.2",
     "core-js": "^3.37.0",
     "css-loader": "^7.1.1",
@@ -41,6 +39,8 @@
     "interactjs": "^1.10.27",
     "jquery": "^3.7.1",
     "jquery-i18next": "^1.2.1",
+    "less": "^4.2.0",
+    "less-loader": "^12.2.0",
     "lunr": "^2.3.9",
     "moment": "^2.30.1",
     "postcss-less": "^6.0.0",
@@ -58,6 +58,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "puppeteer": "23.6.0",
     "puppeteer-screen-recorder": "3.0.3",
+    "style-loader": "^4.0.0",
     "stylelint": "^16.4.0",
     "stylelint-config-standard": "^36.0.0",
     "webfont": "^11.2.26",

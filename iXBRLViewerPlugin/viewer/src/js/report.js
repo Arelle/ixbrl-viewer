@@ -1,169 +1,46 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
-import { Fact } from "./fact.js"
-import { Footnote } from "./footnote.js"
-import { QName } from "./qname.js"
 import { Concept } from "./concept.js";
-import { ViewerOptions } from "./viewerOptions.js";
 import { setDefault } from "./util.js";
-import $ from 'jquery'
+import i18next from "i18next";
 
-export class iXBRLReport {
-    constructor(data) {
-        this.data = data;
+// Class to represent the XBRL data from a single target document in a single
+// Inline XBRL Document or Document Set.
+
+export class XBRLReport {
+
+    constructor(reportSet, reportData) {
+        this.reportSet = reportSet;
+        this._reportData = reportData;
         // A map of IDs to Fact and Footnote objects
-        this._items = {};
-        this._ixNodeMap = {};
-        this._viewerOptions = new ViewerOptions();
         this._reverseRelationshipCache = {};
     }
 
-    /*
-    * Set additional information about facts obtained from parsing the iXBRL.
-    */
-    setIXNodeMap (ixData) {
-        this._ixNodeMap = ixData;
-        this._initialize();
-    }
-
-    _initialize () {
-
-        // Build an array of footnotes IDs in document order so that we can assign
-        // numbers to foonotes
-        var fnorder = Object.keys(this._ixNodeMap).filter((id) => this._ixNodeMap[id].footnote);
-        fnorder.sort((a,b) => this._ixNodeMap[a].docOrderindex - this._ixNodeMap[b].docOrderindex);
-
-        // Create Fact objects for all facts.  
-        for (const id in this.data.facts) {
-            this._items[id] = new Fact(this, id);
-        }
-
-        // Now resolve footnote references, creating footnote objects for "normal"
-        // footnotes, and finding Fact objects for fact->fact footnotes.  
-        //
-        // Associate source facts with target footnote/facts to allow two way
-        // navigation.
-        for (const id in this.data.facts) {
-            const f = this._items[id];
-            const fns = this.data.facts[id].fn || [];
-            fns.forEach((fnid) => {
-                var fn = this._items[fnid];
-                if (fn === undefined) {
-                    fn = new Footnote(this, fnid, "Footnote " + (fnorder.indexOf(fnid) + 1));
-                    this._items[fnid] = fn;
-                }
-                // Associate fact with footnote
-                fn.addLinkedFact(f);
-            });
-        }
-    }
-
-    getLabel (c, rolePrefix, showPrefix) {
-        rolePrefix = rolePrefix || 'std';
-        var lang = this._viewerOptions.language;
-        const concept = this.data.concepts[c];
-        if (concept === undefined) {
-            console.log("Attempt to get label for undefined concept: " + c);
-            return "<no label>";
-        }
-        const labels = concept.labels[rolePrefix]
-        if (labels === undefined || Object.keys(labels).length == 0) {
-            return undefined;
-        }
-        else {
-            var label;
-            if (lang && labels[lang]) {
-                label = labels[lang];
-            }
-            else {
-                // Fall back on English, then any label deterministically.
-                label = labels["en"] || labels["en-us"] || labels[Object.keys(labels).sort()[0]];
-            }
-            if (Object.keys(labels).length == 1) { 
-                label = labels[Object.keys(labels)];
-            }
-            if (label === undefined) {
-                return undefined;
-            }
-            var s = '';
-            if (showPrefix && this._viewerOptions.showPrefixes) {
-                s = "(" + this.qname(c).prefix + ") ";
-            }
-            s += label;
-            return s;
-        }
-    }
-
-    getLabelOrName (c, rolePrefix, showPrefix) {
-        const label = this.getLabel(c, rolePrefix, showPrefix);
-        if (label === undefined) {
-            return c;
-        }
-        return label;
-    }
-
-    availableLanguages () {
+    availableLanguages() {
         if (!this._availableLanguages) {
-            var map = {};
-            $.each(this.data.concepts, function (k,v) {
-                $.each(v.labels, function (rolePrefx, ll) {
-                    $.each(ll, function (lang, v) {
-                        map[lang] = 1;
-                    });
-                });
-            });
-            this._availableLanguages = Object.keys(map);
-
+            this._availableLanguages = new Set()
+            for (const c of Object.values(this._reportData.concepts)) {
+                for (const ll of Object.values(c.labels)) {
+                    for (const lang of Object.keys(ll)) {
+                        this._availableLanguages.add(lang);
+                    }
+                }
+            }
         }
         return this._availableLanguages;
     }
 
-    languageNames () {
-        return this.data.languages;
+    facts() {
+        return this.reportSet.factsForReport(this);
     }
 
-    getItemById (id) {
-        return this._items[id];
+    targetDocument() {
+        return this._reportData.target ?? null;
     }
 
-
-    getIXNodeForItemId (id) {
-        return this._ixNodeMap[id] || {};
-    }
-
-    facts () {
-        var allItems = [];
-        $.each(this.data.facts, (id, f) => allItems.push(this.getItemById(id)));
-        return allItems;
-    }
-
-    prefixMap () {
-        return this.data.prefixes;
-    }
-
-    roleMap () {
-        return this.data.roles;
-    }
-
-    qname (v) {
-        return new QName(this.prefixMap(), v);
-    }
-
-    getChildRelationships (conceptName, arcrole) {
-        var rels = {}
-        const elrs = this.data.rels[arcrole] || {};
+    getChildRelationships(conceptName, arcrole) {
+        const rels = {}
+        const elrs = this._reportData.rels[arcrole] || {};
         for (const elr in elrs) {
             if (conceptName in elrs[elr]) {
                 rels[elr] = elrs[elr][conceptName];
@@ -172,39 +49,18 @@ export class iXBRLReport {
         return rels;
     }
 
-    getAnchors (concept) {
-        var res = [];
-        var report = this;
-        if (this.usesAnchoring()) {
-            $.each(this.data.rels["w-n"], function (elr, rr) {
-                $.each(rr, function(c, r) {
-                    if (concept.name == c) {
-                        $.each(r, function(i, v) { 
-                            res.push({concept: report.getConcept(v.t), wide: 0});
-                        });
-                    } else 
-                        $.each(r, function(i, v) {
-                            if (v.t == concept.name)
-                                res.push({concept: report.getConcept(c), wide: 1});
-                        });
-                });
-            });
-        }
-        return res;
-    }
-
     /* 
-    * Build and cache an inverse map of relationships for a given arcrole for
-    * efficient lookup of parents concept from a child.
-    *
-    * Map is arcrole => elr => target => [ rel, ... ]
-    *
-    * "rel" is modified to have a "src" property with the source concept.
-    */
-    _reverseRelationships (arcrole) {
+     * Build and cache an inverse map of relationships for a given arcrole for
+     * efficient lookup of parents concept from a child.
+     *
+     * Map is arcrole => elr => target => [ rel, ... ]
+     *
+     * "rel" is modified to have a "src" property with the source concept.
+     */
+    _reverseRelationships(arcrole) {
         if (!(arcrole in this._reverseRelationshipCache)) {
             const rrc = {};
-            const elrs = this.data.rels[arcrole] || {};
+            const elrs = this._reportData.rels[arcrole] || {};
             for (const [elr, relSet] of Object.entries(elrs)) {
                 for (const [src, rels] of Object.entries(relSet)) {
                     for (const r of rels) {
@@ -218,8 +74,8 @@ export class iXBRLReport {
         return this._reverseRelationshipCache[arcrole];
     }
 
-    getParentRelationships (conceptName, arcrole) {
-        var rels = {}
+    getParentRelationships(conceptName, arcrole) {
+        const rels = {}
         for (const [elr, relSet] of Object.entries(this._reverseRelationships(arcrole))) {
             if (conceptName in relSet) {
                 rels[elr] = relSet[conceptName];
@@ -228,16 +84,15 @@ export class iXBRLReport {
         return rels;
     }
 
-    getParentRelationshipsInGroup (conceptName, arcrole, elr) {
-        var rels = {}
+    getParentRelationshipsInGroup(conceptName, arcrole, elr) {
         const relSet = this._reverseRelationships(arcrole)[elr] || {};
         return relSet[conceptName] || [];
     }
 
-    dimensionDefault (dimensionName) {
+    dimensionDefault(dimensionName) {
         // ELR is irrelevant for dimension-default relationships, so check all of
         // them, and return the first (illegal for there to be more than one
-        for (const rel of Object.values(this.data.rels["d-d"] || {})) {
+        for (const rel of Object.values(this._reportData.rels["d-d"] || {})) {
             if (dimensionName in rel) {
                 return rel[dimensionName][0].t;
             }
@@ -245,13 +100,13 @@ export class iXBRLReport {
         return undefined;
     }
 
-    relationshipGroups (arcrole) {
-        return Object.keys(this.data.rels[arcrole] || {});
+    relationshipGroups(arcrole) {
+        return Object.keys(this._reportData.rels[arcrole] || {});
     }
 
-    relationshipGroupRoots (arcrole, elr) {
-        var roots = [];
-        for (const conceptName in this.data.rels[arcrole][elr]) {
+    relationshipGroupRoots(arcrole, elr) {
+        const roots = [];
+        for (const conceptName in this._reportData.rels[arcrole][elr]) {
             if (!(elr in this.getParentRelationships(conceptName, arcrole))) {
                 roots.push(conceptName);
             }
@@ -259,63 +114,49 @@ export class iXBRLReport {
         return roots;
     }
 
-    getAlignedFacts (f, coveredAspects) {
-        var all = this.facts();
-        var aligned = [];
+    getAlignedFacts(f, coveredAspects) {
+        // XXX should filter to current report facts?
+        const all = this.reportSet.facts();
+        const aligned = [];
         if (!coveredAspects) {
             coveredAspects = {};
         }
-        $.each(all, function (i, ff) {
+        for (const ff of all) {
             if (ff.isAligned(f, coveredAspects)) {
                 aligned.push(ff);
             }
-        });
+        }
         return aligned; 
     }
 
-    deduplicate (facts) {
-        var ff = [];
-        $.each(facts, function (i, f) {
-            var dupe = false;
-            $.each(ff, function (j, of) {
-                if (of.isAligned(f,{})) {
+    deduplicate(facts) {
+        const ff = [];
+        for (const f of facts) {
+            let dupe = false;
+            for (const other of ff) {
+                if (other.isAligned(f,{})) {
                     dupe = true;
                 }
-            });
-            if (!dupe){
+            }
+            if (!dupe) {
                 ff.push(f);
             }
-        });
+        }
         return ff;
     }
 
-    setViewerOptions (vo) {
-        this._viewerOptions = vo;
-    }
-
-    namespaceGroups () {
-        var counts = {};
-        $.each(this.facts(), function (i, f) {
-            counts[f.conceptQName().prefix] = counts[f.conceptQName().prefix] || 0;
-            counts[f.conceptQName().prefix]++;
-        });
-        var prefixes = Object.keys(counts);
-        prefixes.sort(function (a, b) { return counts[b] - counts[a] });
-        return prefixes;
-    }
-
-    getConcept (name) {
+    getConcept(name) {
         return new Concept(this, name);
     }
 
-    getRoleLabel (rolePrefix, viewerOptions) {
+    getRoleLabel(rolePrefix) {
         /* This is currently hard-coded to "en" as the generator does not yet
-        * support generic labels, and instead provides the (non-localisable) role
-        * definition as a single "en" label.
-        *
-        * Returns the ELR URI if there is no label
-        */
-        const labels = this.data.roleDefs[rolePrefix];
+         * support generic labels, and instead provides the (non-localisable) role
+         * definition as a single "en" label.
+         *
+         * Returns the ELR URI if there is no label
+         */
+        const labels = this._reportData.roleDefs[rolePrefix];
         if (labels !== undefined) {
             const label = labels["en"];
             // Earlier versions of the generator added a "null" label if no labels
@@ -324,25 +165,119 @@ export class iXBRLReport {
                 return label;
             }
         }
-        return this.roleMap()[rolePrefix];
+        return this.reportSet.roleMap()[rolePrefix];
     }
 
-    documentSetFiles () {
-        if (this.data.docSetFiles === undefined) {
-            return []
+    localDocuments() {
+        if (this._reportData.localDocs === undefined) {
+            return {}
         }
-        return this.data.docSetFiles;
+        return this._reportData.localDocs;
     }
 
-    isDocumentSet () {
-        return this.documentSetFiles().length > 1;
+    qname(v) {
+        return this.reportSet.qname(v);
     }
 
-    usesAnchoring () {
-        return this.data.rels["w-n"] !== undefined;
+    getScaleLabel(scale, unit) {
+        let label = i18next.t(`scale.${scale}`, {defaultValue:"noName"});
+        if (unit && unit.isMonetary() && scale === -2) {
+            let measure = unit.value() ?? '';
+            if (measure) {
+                measure = this.qname(measure).localname;
+            }
+            label = i18next.t(`currencies:cents${measure}`, {defaultValue: label});
+        }
+        if (label === "noName") {
+            return null;
+        }
+        return label;
     }
 
+    concepts() {
+        return this._reportData.concepts;
+    }
+
+    getLabel(c, rolePrefix, showPrefix) {
+        rolePrefix = rolePrefix || 'std';
+        const lang = this.reportSet.viewerOptions.language;
+        const concept = this._reportData.concepts[c];
+        if (concept === undefined) {
+            console.log("Attempt to get label for undefined concept: " + c);
+            return "<no label>";
+        }
+        const labels = concept.labels[rolePrefix]
+        if (labels === undefined || Object.keys(labels).length == 0) {
+            return undefined;
+        }
+        else {
+            let label;
+            if (lang && labels[lang]) {
+                label = labels[lang];
+            }
+            else {
+                // Fall back on English, then any label deterministically.
+                label = labels["en"] || labels["en-us"] || labels[Object.keys(labels).sort()[0]];
+            }
+            if (label === undefined) {
+                return undefined;
+            }
+            let s = '';
+            if (showPrefix && this.reportSet.viewerOptions.showPrefixes) {
+                s = "(" + this.qname(c).prefix + ") ";
+            }
+            s += label;
+            return s;
+        }
+    }
+
+    getLabelOrName(c, rolePrefix, showPrefix) {
+        const label = this.getLabel(c, rolePrefix, showPrefix);
+        if (label === undefined) {
+            return c;
+        }
+        return label;
+    }
+
+    isCalculationContributor(c) {
+        if (this._calculationContributors === undefined) {
+            if (this._reportData.rels?.calc) {
+                this._calculationContributors = new Set(Object.values(this._reportData.rels.calc).flatMap(calculations => {
+                    return Object.values(calculations).flatMap(contributors => {
+                        return contributors.map(c => c.t);
+                    });
+                }));
+            } else {
+                this._calculationContributors = new Set();
+            }
+        }
+        return this._calculationContributors.has(c);
+    }
+
+    isCalculationSummation(c) {
+        if (this._calculationSummations === undefined) {
+            if (this._reportData.rels?.calc) {
+                this._calculationSummations = new Set(Object.values(this._reportData.rels.calc).flatMap(calculations => {
+                    return Object.keys(calculations);
+                }));
+            } else {
+                this._calculationSummations = new Set();
+            }
+        }
+        return this._calculationSummations.has(c);
+    }    
+
+    /**
+     * @return {Array[String]} Software credit text labels provided with this report for display purposes.
+     */
+    softwareCredits() {
+        return this._reportData.softwareCredits ?? [];
+    }
+    
+    /**
+     * AMANA extension
+     */
     hasValidationErrors () {
         return this.data.validation !== undefined && this.data.validation.length > 0;
-    }
+    }    
 }

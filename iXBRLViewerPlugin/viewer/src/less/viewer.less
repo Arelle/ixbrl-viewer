@@ -1,37 +1,28 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+// See COPYRIGHT.md for copyright information
 @import "fonts.less";
 @import "colours.less";
 @import "common.less";
 @import "bootstrap.less";
-@import (reference) "icons.less";
 @import "contextmenu.less";
 
-.tooltip { font-size: 10px !important; }
+.tooltip {
+    font-size: 10px !important;
+}
 
-.ixbrl-highlight:not(.ixbrl-no-highlight,.-ixh-highlight-region) {
-  background-color: @highlight-default !important;
+.ixbrl-highlight:not(.ixbrl-no-highlight) {
+  // To ensure highlighting takes place, !important is used to override inline styles.
+  // For example: overrides highlighting applied inline to alternate table rows.
+  background-color: @highlight-default !important; // Override inline styles
 
   &.ixbrl-highlight-1 {
-    background-color: @highlight-1 !important;
+    background-color: @highlight-1 !important; // Override inline styles
   }
 
   &.ixbrl-highlight-2 {
-    background-color: @highlight-2 !important;
+    background-color: @highlight-2 !important; // Override inline styles
   }
 
+  // {{ AMANA extension
   &.ixbrl-highlight-missing {
     background-color: rebeccapurple !important;
   }
@@ -43,8 +34,33 @@
   &.inline-fact-with-message:not(:hover) {
     outline: dashed 1px @inline-fact-with-message;    
   }
+  // }}
 }
 
+.review.review-highlight-untagged-numbers .review-untagged-number {
+  background-color: @highlight-1;
+}
+
+.review.review-highlight-untagged-dates .review-untagged-date {
+  background-color: @highlight-2;
+}
+
+.review .ixbrl-highlight:not(.ixbrl-no-highlight) {
+  // Review mode disables namespace-specific highlighting in favor of all tagged
+  // elements sharing the same default highlight color, other colors are used for
+  // untagged highlighting defined above.
+  background-color: @highlight-default !important; // Override inline styles
+
+  &.ixbrl-highlight-1 {
+    background-color: @highlight-default !important; // Override inline styles
+  }
+
+  &.ixbrl-highlight-2 {
+    background-color: @highlight-default !important; // Override inline styles
+  }
+}
+
+// {{ AMANA extension
 .ixbrl-highlight.-ixh-highlight-region:not(.ixbrl-no-highlight) {
   background-color: @highlight-block-default !important;
 
@@ -60,20 +76,21 @@
 .ixbrl-blur-highlight:not(.ixbrl-no-highlight) {
   background-color: @highlight-blur !important;
 }
+// }}
 
 div,
 span {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 2px @primary-focus;
-      outline-offset: 1px;
+      outline: solid 0.125em @primary-focus;
+      outline-offset: 0.0625em;
     }
 
     &.ixbrl-element,
     &.ixbrl-sub-element {
       &:hover:not(.ixbrl-selected) {
-        outline: dashed 2px @primary-focus;
-        outline-offset: 1px;
+        outline: dashed 0.125em @primary-focus;
+        outline-offset: 0.0625em;
       }
     }
   }
@@ -85,10 +102,10 @@ span {
     cursor: pointer;
 
     &.ixbrl-related {
-      outline: dashed 2px @related-fact;
+      outline: dashed 0.125em @related-fact;
 
       &:not(td, th) {
-        outline-offset: 1px;
+        outline-offset: 0.0625em;
       }
     }
   }
@@ -98,19 +115,19 @@ td,
 th {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 2px @primary-focus !important;
-      outline-offset: -1px !important;
+      outline: solid 0.125em @primary-focus !important;
+      outline-offset: -0.0625em !important;
     }
 
     &.ixbrl-element:hover:not(.ixbrl-selected),
     &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
-      outline: dashed 2px @primary-focus !important;
-      outline-offset: -1px !important;
+      outline: dashed 0.125em @primary-focus !important;
+      outline-offset: -0.0625em !important;
     }
   }
 
   &.ixbrl-related {
-    outline-offset: -1px;
+    outline-offset: -0.0625em !important;
   }
 }
 
@@ -123,11 +140,7 @@ td.ixbrl-related.ixbrl-linked-highlight:not(.ixbrl-no-highlight),
 td.ixbrl-linked-highlight:not(.ixbrl-no-highlight) {
   .linked-highlight-cell();
 
-  outline-offset: -1px;
-}
-
-.ixbrl-sub-element.ixbrl-highlight:not(.ixbrl-no-highlight) {
-   mix-blend-mode: multiply;
+  outline-offset: -0.0625em;
 }
 
 div.ixbrl-table-handle {

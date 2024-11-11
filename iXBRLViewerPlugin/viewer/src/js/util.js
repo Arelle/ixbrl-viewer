@@ -1,20 +1,19 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
-import dateFormat from "dateformat"
 import moment from "moment";
 import Decimal from "decimal.js";
+import i18next from "i18next";
+
+
+export const SHOW_FACT = 'SHOW_FACT';
+
+export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217';
+
+export const CALC_ARCROLE = "calc";
+export const CALC11_ARCROLE = "calc11";
+
+// The number of distinct highlight colors defined in inspector.less
+export const HIGHLIGHT_COLORS = 3;
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
@@ -141,7 +140,7 @@ export function escapeHtml(unsafe) {
  }
 
  // popper.js code fragment
- // Copyright © 2016 Federico Zivolo and contributors (The MIT License)
+ // Copyright � 2016 Federico Zivolo and contributors (The MIT License)
  function getParentNode(element) {
     if (element.nodeName === 'HTML' || element.nodeName === 'html') {
       return element;
@@ -198,6 +197,90 @@ export function runGenerator(generator) {
         return;
     }
     setTimeout(resume, 0);
+}
+
+/**
+ * Word-by-word title-casing that preserves existing uppercase characters
+ * @param  {String} text  Text to title-case
+ * @return {String} Title-cased string
+ */
+export function titleCase(text) {
+    if (!text) return text;
+    return text.split(' ').map(word => {
+        return Array.from(word)
+                .map((c, i) => (i === 0) ? c.toUpperCase() : c)
+                .join('');
+    }).join(' ');
+}
+
+/**
+ * Extract the alpha value from an rgba(r,g,b,a) string and returns true if
+ * transparent (a < 10%).  Returns false on rgb(r,g,b) strings.
+ * @param  {String}  rgba   color string to parse
+ * @return {Boolean} whether the value is transparent
+ */
+export function isTransparent(rgba) {
+    const val = parseFloat(rgba.split(",")[3]);
+    return !isNaN(val) && val < 0.1;
+}
+
+/**
+ * Prefix an item ID with the index of the report document that it appears in,
+ * in order to generate an ID that is guaranteed to be unique within the
+ * viewer. This is already within an iXBRL Document Set, but not across
+ * separate iXBRL documents or document sets.
+ * @param  {Number}  sourceReportIndex - index of the report document containing the fact
+ * @param  {String}  localId - local ID of the fact
+ * @return {String}   a viewer unique ID
+ */
+
+export function viewerUniqueId(sourceReportIndex, localId) {
+    if (localId === null || localId === undefined) {
+        return null;
+    }
+    return sourceReportIndex.toString() + "-" + localId;
+}
+
+export function localId(viewerUniqueId) {
+    return viewerUniqueId.replace(/^\d+-/,"");
+}
+
+/**
+ * Parses fact IDs from -sec-ix-hidden and -esef-ix-hidden style 
+ * attributes on a DOM node.  
+ * Any returned ID should be the ID of a fact in ix:hidden corresponding
+ * to the content contained in the DOM node.
+ * 
+ * @param  {Node}     domNode - DOM node to parse
+ * @return {String}   A fact ID, or null if the element does not have 
+ * a style attribute containing a custom CSS property in the required 
+ * format.
+ */
+
+export function getIXHiddenLinkStyle(domNode) {
+    if (domNode.hasAttribute('style')) {
+        const re = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const m = domNode.getAttribute('style').match(re);
+        if (m) {
+            return m[1];
+        }
+    }
+    return null;
+}
+
+/**
+ * Transforms measure qname into title case label (or currency symbol, if applicable).
+ * @return {String} Measure Label
+ */
+
+export function measureLabel(report, measure) {
+    const qname = report.qname(measure);
+    if (qname.namespace === NAMESPACE_ISO4217) {
+        measure = i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
+    } else if (measure.includes(':')) {
+        measure = measure.split(':')[1];
+    }
+    return measure;
 }
 
 export function zoom(container, scrollParent, scale) {

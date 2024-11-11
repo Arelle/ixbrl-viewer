@@ -4,6 +4,7 @@ export class ContextMenu {
       this.menuItems = menuItems;
       this.mode = mode;
       this.isOpened = false;
+      this._handler = (e) => this._handleContextMenu(e);
     }
     
     getMenuItemsNode(target) {
@@ -19,14 +20,16 @@ export class ContextMenu {
         menuItems = menuItems.apply(null, [target]);
       }
 
-      menuItems.forEach((data, index) => {
-        const item = this.createItemMarkup(data);
-        item.firstChild.setAttribute(
-          "style",
-          `animation-delay: ${index * 0.08}s`
-        );
-        nodes.push(item);
-      });
+      if (menuItems.length > 0) {
+        menuItems.forEach((data, index) => {
+            const item = this.createItemMarkup(data);
+            item.firstChild.setAttribute(
+              "style",
+              `animation-delay: ${index * 0.08}s`
+            );
+            nodes.push(item);
+        });
+      }
   
       return nodes;
     }
@@ -70,54 +73,66 @@ export class ContextMenu {
         this._contextMenu = null;
       }
     }
+
+    _handleContextMenu(e) {
+      const self = this;
+      self.closeMenu();
+
+      const document = e.srcElement.ownerDocument;                  
+      const { clientX, clientY } = e;
+      const target = document.elementFromPoint(clientX, clientY);
+      if (target == null) return;
+      const menuItemsNode = self.getMenuItemsNode(target);
+      if (menuItemsNode.length == 0) return;
+      
+      e.preventDefault();
+      const contextMenu = self.renderMenu(menuItemsNode);
+      self.isOpened = true;
+      self._contextMenu = contextMenu;
+
+      var interval;
+      contextMenu.addEventListener('pointerleave', () => {
+        interval = setTimeout(() => {
+          self.closeMenu();
+        }, 250);
+      });
+      contextMenu.addEventListener('pointerenter', () => {
+        clearTimeout(interval);
+      });          
+
+      const body = document.body;
+      body.appendChild(contextMenu);
+
+      const positionY =
+        clientY + contextMenu.scrollHeight >= window.innerHeight
+          ? window.innerHeight - contextMenu.scrollHeight - 20
+          : clientY - 10;
+      const positionX =
+        clientX + contextMenu.scrollWidth >= window.innerWidth
+          ? window.innerWidth - contextMenu.scrollWidth - 20
+          : clientX - 10;
+
+      contextMenu.setAttribute(
+        "style",
+        `--width: ${contextMenu.scrollWidth}px;
+        --height: ${contextMenu.scrollHeight}px;
+        --top: ${positionY}px;
+        --left: ${positionX}px;`
+      );
+    }
   
     init() {
       const self = this;  
-
-      this.target.each( function () {
-        this.addEventListener("contextmenu", (e) => {
-          self.closeMenu();
-
-          const menuItemsNode = self.getMenuItemsNode(this);
-          if (menuItemsNode.length == 0) return;
-          
-          e.preventDefault();
-          const contextMenu = self.renderMenu(menuItemsNode);
-          self.isOpened = true;
-          self._contextMenu = contextMenu;
-
-          var interval;
-          contextMenu.addEventListener('pointerleave', () => {
-            interval = setTimeout(() => {
-              self.closeMenu();
-            }, 250);
-          });
-          contextMenu.addEventListener('pointerenter', () => {
-            clearTimeout(interval);
-          });          
-
-          const { clientX, clientY } = e;
-          const body = this.ownerDocument.body;
-          body.appendChild(contextMenu);
-  
-          const positionY =
-            clientY + contextMenu.scrollHeight >= window.innerHeight
-              ? window.innerHeight - contextMenu.scrollHeight - 20
-              : clientY - 10;
-          const positionX =
-            clientX + contextMenu.scrollWidth >= window.innerWidth
-              ? window.innerWidth - contextMenu.scrollWidth - 20
-              : clientX - 10;
-  
-          contextMenu.setAttribute(
-            "style",
-            `--width: ${contextMenu.scrollWidth}px;
-            --height: ${contextMenu.scrollHeight}px;
-            --top: ${positionY}px;
-            --left: ${positionX}px;`
-          );
-        });
+      self.target.each( function () {
+          this.addEventListener("contextmenu", self._handler);
       });
     }
+
+    destroy() {
+      const self = this;  
+      this.target.each( function () {
+          this.removeEventListener("contextmenu", self._handler);
+      });
+    } 
   } 
   

@@ -1,46 +1,34 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
 import i18next from "i18next";
-import { isodateToHuman } from "./util.js"
-import { QName } from "./qname.js"
 import { Aspect } from "./aspect.js";
 import { Period } from './period.js';
-import { formatNumber } from "./util.js";
-import { Footnote } from "./footnote.js";
+import { formatNumber, localId } from "./util.js";
+import Decimal from "decimal.js";
+import { Interval } from './interval.js';
 
 export class Fact {
     
-    constructor(report, factId) {
-        this.f = report.data.facts[factId];
-        this.ixNode = report.getIXNodeForItemId(factId);
-        this._report = report;
-        this.id = factId;
+    constructor(report, factId, factData) {
+        this.f = factData;
+        this.ixNode = report.reportSet.getIXNodeForItemId(factId);
+        this.report = report;
+        this.vuid = factId;
         this.linkedFacts = [];
+        this._footnotes = [];
     }
 
-    report() {
-        return this._report;
+    localId() {
+        return localId(this.vuid);
     }
 
     getLabel(rolePrefix, withPrefix) {
-        return this._report.getLabel(this.f.a.c, rolePrefix, withPrefix);
+        return this.report.getLabel(this.f.a.c, rolePrefix, withPrefix);
     }
 
     getLabelOrName(rolePrefix, withPrefix) {
-        return this._report.getLabelOrName(this.f.a.c, rolePrefix, withPrefix);
+        return this.report.getLabelOrName(this.f.a.c, rolePrefix, withPrefix);
     }
 
     conceptName() {
@@ -48,14 +36,14 @@ export class Fact {
     }
 
     concept() {
-        return this._report.getConcept(this.f.a.c); 
+        return this.report.getConcept(this.f.a.c); 
     }
 
     conceptQName() {
-        return this._report.qname(this.f.a.c);
+        return this.report.qname(this.f.a.c);
     }
 
-    period(){
+    period() {
         return new Period(this.f.a.p);
     }
 
@@ -108,16 +96,16 @@ export class Fact {
                 formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
-                v = this.unit().valueLabel() + " " + formattedNumber;
+                v = this.unitLabel() + " " + formattedNumber;
             }
             else {
-                v = formattedNumber + " " + this.unit().valueLabel();
+                v = formattedNumber + " " + this.unitLabel();
             }
         }
         else if (this.isNil()) {
             v = "nil";
         }
-        else if (this.escaped()) {
+        else if (this.isTextBlock()) {
             const html = $("<div>").append($($.parseHTML(v, null, false)));
             /* Insert an extra space at the beginning and end of block elements to
              * preserve separation of sections of text. */
@@ -131,20 +119,52 @@ export class Fact {
         else if (this.isEnumeration()) {
             const labels = [];
             for (const qn of v.split(' ')) {
-                labels.push(this._report.getLabelOrName(qn, 'std'));
+                labels.push(this.report.getLabelOrName(qn, 'std'));
             }
             v = labels.join(', ');
         }
         return v;
     }
 
+    /**
+     * Returns details about this fact's unit
+     * @return {Unit} Unit instance
+     */
     unit() {
-        if (this.isNumeric()) {
-            return this.aspect("u");
+        if (this._unit === undefined) {
+            const unitKey = this.aspect('u')?.value();
+            if (!unitKey) {
+                return undefined;
+            }
+            this._unit = this.report.reportSet.getUnit(unitKey);
         }
-        else {
-            return undefined;
+        return this._unit;
+    }
+
+    /**
+     * Returns a readable label representing the fact's unit
+     * @return {String} Label representing unit
+     */
+    unitLabel() {
+        return this.unit()?.label() ?? i18next.t("factDetails.noUnit");
+    }
+
+    getConceptPrefix() {
+        return this.conceptName().split(':')[0];
+    }
+
+    isCalculationContributor() {
+        if (this._isCalculationContributor === undefined) {
+            this._isCalculationContributor = this.report.isCalculationContributor(this.f.a.c);
         }
+        return this._isCalculationContributor;
+    }
+
+    isCalculationSummation() {
+        if (this._isCalculationSummation === undefined) {
+            this._isCalculationSummation = this.report.isCalculationSummation(this.f.a.c);
+        }
+        return this._isCalculationSummation;
     }
 
     isNumeric() {
@@ -161,13 +181,16 @@ export class Fact {
         return dims;
     }
 
+    hasExplicitDimension() {
+        return Object.keys(this.dimensions()).some(d => !this.report.getConcept(d).isTypedDimension());
+    }
+
+    hasTypedDimension() {
+        return Object.keys(this.dimensions()).some(d => this.report.getConcept(d).isTypedDimension());
+    }
+
     isMonetaryValue() {
-        const unit = this.unit();
-        if (!unit || unit.value() === null) {
-            return false;
-        }
-        const q = this.report().qname(unit.value());
-        return q.namespace == "http://www.xbrl.org/2003/iso4217";
+        return this.unit()?.isMonetary() ?? false;
     }
 
     isTextBlock() {
@@ -179,10 +202,15 @@ export class Fact {
     }
 
     aspect(a) {
-        if (this.f.a[a] !== undefined) {
-            return new Aspect(a, this.f.a[a], this._report);
+        if (this._aspects === undefined) {
+            this._aspects = {}
         }
-        return undefined;
+        if (this._aspects[a] === undefined) {
+            if (this.f.a[a] !== undefined) {
+                this._aspects[a] = new Aspect(a, this.f.a[a], this.report);
+            }
+        }
+        return this._aspects[a];
     }
 
     isAligned(of, coveredAspects) {
@@ -220,47 +248,79 @@ export class Fact {
         return this.f.d;
     }
 
+    scale() {
+        return this.ixNode.scale;
+    }
+
     duplicates() {
-        return this._report.getAlignedFacts(this);
+        return this.report.getAlignedFacts(this);
     }
 
     isNil() {
         return this.f.v === null;
     }
 
+    isNegative() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isNegative() && !this.isZero();
+    }
+
+    isPositive() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isPositive() && !this.isZero();
+    }
+
+    isZero() {
+        return this.isNumeric() && !this.isNil() && this.value() !== undefined && new Decimal(this.value()).isZero();
+    }
+
     isInvalidIXValue() {
         return this.f.err == 'INVALID_IX_VALUE';
+    }
+
+    getScaleLabel(value, isAccuracy=false) {
+        return this.report.getScaleLabel(
+                // We use the same table of labels for scale and accuracy,
+                // but decimals means "accurate to 10^-N" whereas scale means 10^N,
+                // so invert N for accuracy.
+                isAccuracy ? -value : value,
+                this.unit()
+        );
     }
 
     readableAccuracy() {
         if (!this.isNumeric() || this.isNil()) {
             return i18next.t("common.notApplicable");
         }
-        let d = this.decimals();
+        const d = this.decimals();
         if (d === undefined) {
             return i18next.t("common.accuracyInfinite")
         }
         else if (d === null) {
             return i18next.t("common.unspecified");
         }
-        var name = i18next.t(`currencies:accuracy${d}`, {defaultValue:"noName"});
-        if (this.isMonetaryValue()) {
-            var currency = this.report().qname(this.unit().value()).localname;
-            if (d == 2) {
-                var name = i18next.t(`currencies:cents${currency}`, {defaultValue: name});
-            }
+        const label = this.getScaleLabel(d, true);
+        if (label != null) {
+            return label;
         }
-        if (name !== "noName") {
-            d += " ("+name+")";
+        return d.toString();
+    }
+
+    readableScale() {
+        if (!this.isNumeric() || this.isNil()) {
+            return i18next.t("common.notApplicable");
         }
-        else {
-            d += "";
+        const scale = this.scale();
+        if (scale === undefined || scale === null) {
+            return i18next.t("common.unscaled");
         }
-        return d;
+        const label = this.getScaleLabel(scale);
+        if (label != null) {
+            return label;
+        }
+        return scale.toString();
     }
 
     identifier() {
-        return this._report.qname(this.f.a.e);
+        return this.report.qname(this.f.a.e);
     }
 
     escaped() {
@@ -271,14 +331,12 @@ export class Fact {
         return this.concept().isEnumeration();
     }
 
-    scale() {
-        var scale = this._ixNode.wrapperNode.find('[scale]').attr('scale');
-        if (scale)
-            return parseInt(scale); 
+    addFootnote(fn) {
+        this._footnotes.push(fn);
     }
 
     footnotes() {
-        return (this.f.fn || []).map((fn, i) => this._report.getItemById(fn));
+        return this._footnotes;
     }
 
     isHidden() {
@@ -291,7 +349,7 @@ export class Fact {
 
     widerConcepts() {
         const concepts = [];
-        const parentsByELR = this._report.getParentRelationships(this.conceptName(), "w-n");
+        const parentsByELR = this.report.getParentRelationships(this.conceptName(), "w-n");
         for (const elr in parentsByELR) {
             concepts.push(...$.map(parentsByELR[elr], (rel) => rel.src));
         }
@@ -300,16 +358,69 @@ export class Fact {
 
     narrowerConcepts() {
         const concepts = [];
-        const childrenByELR = this._report.getChildRelationships(this.conceptName(), "w-n");
+        const childrenByELR = this.report.getChildRelationships(this.conceptName(), "w-n");
         for (const elr in childrenByELR) {
             concepts.push(...$.map(childrenByELR[elr], (rel) => rel.t));
         }
         return concepts;
     }
 
-    // Facts that are the source of relationships to this fact.
+    /*
+     * Facts that are the source of relationships to this fact.
+     */
     addLinkedFact(f) {
         this.linkedFacts.push(f);
     }
-}
 
+    /*
+     * Returns the fact's value, rounded according to the value of its decimals
+     * property.  This is an odd thing to do, as it implies that more figures
+     * were reported than the decimals property suggest are accurate, but this
+     * is required for Calc 1.0 validation.
+     *
+     * valueInterval() is a more meaningful.
+     */
+    roundedValue() {
+        Decimal.rounding = Decimal.ROUND_HALF_UP;
+        const v = new Decimal(this.value());
+        const d = this.decimals();
+        if (d === undefined) {
+            return v;
+        }
+        return v.mul(10 ** d).round().mul(10 ** (0-d));
+    }
+
+    isCompleteDuplicate(other) {
+        return this.value() === other.value() && this.decimals() === other.decimals();
+    }
+
+    /*
+     * Facts that are the source of relationships to this fact.
+     */
+    addLinkedFact(f) {
+        this.linkedFacts.push(f);
+    }
+
+    /*
+     * Returns an Interval for the fact's value, as implied by its decimals
+     * property.
+     */
+    valueInterval() {
+        return Interval.fromFact(this);
+    }
+
+    isMorePrecise(of) {
+        // decimals of "undefined" indicates infinite precision
+        if (of.decimals() === undefined) {
+            return false;
+        }
+        if (this.decimals() === undefined) {
+            return true;
+        }
+        return this.decimals() > of.decimals();
+    }
+
+    targetDocument() {
+        return this.report.targetDocument();
+    }
+}

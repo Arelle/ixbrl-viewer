@@ -1,18 +1,6 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
-import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel } from "./util.js"
+import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel, getIXHiddenLinkStyle } from "./util.js"
 import moment from 'moment';
 import "./moment-jest.js";
 
@@ -155,4 +143,35 @@ describe("Regex escape", () => {
     test("Regex escape", () => {
         expect(escapeRegex("a.b*{}")).toBe("a\\.b\\*\\{\\}")
     });
+});
+
+describe("Get IX Hidden Link Style", () => {
+    it.each([
+        ["-sec-ix-hidden:123", "123"],
+        ["-esef-ix-hidden:123", "123"],
+        ["-xxx-ix-hidden:123", null],
+        ["-sec-ix-hidden: 123", "123"],
+        ["-sec-ix-hidden:123 ", "123"],
+        ["-sec-ix-hidden:123;", "123"],
+        ["-sec-ix-hidden:123 abc", "123"],
+        ["xxx-sec-ix-hidden:123", null],
+        ["xxx;-sec-ix-hidden:123", "123"],
+        [" -sec-ix-hidden:123", "123"],
+        [";-sec-ix-hidden:123", "123"],
+        ["-sec-ix-Hidden:123", null],
+        ["-sec-ix-hidden:123;-sec-ix-hidden:abc", "123"],
+        ["", null],
+        [null, null],
+    ])("Style value %p returns %p", (style, result) => {
+        const domNode = document.createElement('div');
+        domNode.setAttribute("style", style);
+        const id = getIXHiddenLinkStyle(domNode);
+        expect(id).toEqual(result);
+    });
+
+    test("No style attribute returns null", () => {
+        const domNode = document.createElement('div');
+        const id = getIXHiddenLinkStyle(domNode);
+        expect(id).toEqual(null);
+    })
 });

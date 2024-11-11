@@ -1,8 +1,13 @@
 name: Run Python Unit Tests
+
 on:
   pull_request:
     branches:
       - master
+  workflow_call:
+  workflow_dispatch:
+
+permissions: {}
 
 jobs:
   tests:
@@ -10,26 +15,28 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-12
-          - ubuntu-22.04
+          - macos-14
+          - ubuntu-24.04
           - windows-2022
         python-version:
-          - '3.7'
-          - '3.8'
           - '3.9'
           - '3.10'
           - '3.11'
+          - '3.12'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v4.2.2
       - name: Install Python 3
-        uses: actions/setup-python@v4.4.0
+        uses: actions/setup-python@v5.3.0
         with:
           cache: 'pip'
+          cache-dependency-path: '**/pyproject.toml'
           check-latest: true
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install -r requirements-dev.txt
-      - name: Test with nose2
-        run: nose2
+          python -m pip install --upgrade pip setuptools wheel
+          pip install .[arelle,dev]
+          pip install tox tox-gh-actions
+      - name: Test with tox
+        run: tox

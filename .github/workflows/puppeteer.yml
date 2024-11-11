@@ -1,0 +1,70 @@
+name: Run Puppeteer Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-14
+          - ubuntu-24.04
+          - windows-2022
+        node-version:
+          - '18'
+          - '20'
+          - '22'
+        python-version:
+          - '3.12'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
+      - uses: actions/setup-node@v4.1.0
+        with:
+          cache: 'npm'
+          check-latest: true
+          node-version: ${{ matrix.node-version }}
+      - name: Install Python 3
+        uses: actions/setup-python@v5.3.0
+        with:
+          cache: 'pip'
+          cache-dependency-path: '**/pyproject.toml'
+          check-latest: true
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Setup Chromium Sandbox
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          cd ~/.cache/puppeteer/chrome/linux-*/chrome-linux64
+          sudo chown root:root chrome_sandbox
+          sudo chmod 4755 chrome_sandbox
+          sudo cp -p chrome_sandbox /usr/local/sbin/chrome-devel-sandbox
+          echo "CHROME_DEVEL_SANDBOX=/usr/local/sbin/chrome-devel-sandbox" >> $GITHUB_ENV
+      - name: Install Arelle
+        run: pip install .[arelle]
+      - name: Build viewer js
+        run: make prod
+      - name: Generate test viewers
+        shell: bash
+        run: ./tests/puppeteer/tools/generate.sh
+      - name: Serve the generated files
+        shell: bash
+        run: npx http-server . &> tests/puppeteer/artifacts/http_server.log &
+      - name: Run puppeteer tests
+        run: npm run test:puppeteer
+      - uses: actions/upload-artifact@v4.4.3
+        if: failure()
+        with:
+          name: ${{ github.run_id }}.${{ github.run_attempt }}_${{ matrix.os }}_${{ matrix.node-version }}_${{ matrix.python-version }}_artifacts
+          path: tests/puppeteer/artifacts/

@@ -1,5 +1,6 @@
-from unittest.mock import Mock, patch
 import sys
+from unittest.mock import Mock
+
 
 def qname_effect(prefix, namespaceURI, localName):
     return Mock(
@@ -29,7 +30,11 @@ def mock_arelle():
         sys.modules['arelle.ModelValue'] = Mock(
             QName=qname_effect
         )
+        sys.modules['arelle.ModelXbrl'] = Mock()
         sys.modules['arelle.PythonUtil'] = Mock()
+        sys.modules['arelle.UrlUtil'] = Mock(
+            isHttpUrl=lambda path: path.startswith('http')
+        )
         sys.modules['arelle.ValidateXbrlCalcs'] = Mock(
             inferredDecimals=inferredDecimals_effect
         )

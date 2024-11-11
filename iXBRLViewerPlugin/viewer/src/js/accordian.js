@@ -1,16 +1,4 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
 
@@ -29,7 +17,7 @@ export class Accordian {
         const card = $('<div class="card"></div>')
             .append($('<div class="title"></div>')
                 .append(title)
-                .click(function () {
+                .on("click", function () {
                     var thisCard = $(this).closest(".card");
                     if (thisCard.hasClass("active")) {
                         if (!a.options.alwaysOpen) {
@@ -43,7 +31,7 @@ export class Accordian {
                     }
                 })
             )
-            .append($('<div class="body"></div>').append(body))
+            .append($('<div class="card-body"></div>').append(body))
             .appendTo(this._contents);
 
         if (data !== null) {
@@ -60,7 +48,7 @@ export class Accordian {
             this._contents.find(".card").first().addClass("active");
         }
         if (this.options.dissolveSingle && this._contents.children().length == 1) {
-            return this._contents.children().first().find(".body");
+            return this._contents.children().first().find(".card-body");
         }
         return this._contents;
     }

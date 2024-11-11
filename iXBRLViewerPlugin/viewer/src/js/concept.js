@@ -1,24 +1,10 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-import $ from 'jquery'
+// See COPYRIGHT.md for copyright information
 
 export class Concept {
     constructor(report, name) {
-        this.name = name;  
-        this._report = report;
-        this._c = report.data.concepts[name] || {};
+        this._c = report.concepts()[name] || {};
+        this.name = name;
+        this.report = report;
     }
 
     /*
@@ -50,11 +36,11 @@ export class Concept {
     }
 
     isTypedDimension() {
-        return this._c.d == "t";
+        return this._c.d === "t";
     }
 
     isExplicitDimension() {
-        return this._c.d == "e";
+        return this._c.d === "e";
     }
 
     isDimension() {
@@ -62,18 +48,23 @@ export class Concept {
     }
 
     isEnumeration() {
-        return Boolean(this._c.en);
+        return Boolean(this._c && this._c.en);
+    }
+
+    label() {
+        return this.report.getLabelOrName(this.name);
     }
 
     isTextBlock() {
         return Boolean(this._c.t);
     }
 
+    typedDomainElement() {
+        return this._c.td
+    }
+
     isTaxonomyExtension() {
         return this._c && this._c.hasOwnProperty('e') && this._c.e === 1;
     }
-    
-    getLabel(rolePrefix, withPrefix) {
-        return this._report.getLabel(this.name, rolePrefix, withPrefix);
-    }
+        
 }

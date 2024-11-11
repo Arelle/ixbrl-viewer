@@ -1,31 +1,32 @@
-// Copyright 2019 Workiva Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// See COPYRIGHT.md for copyright information
 
 import { Fact } from "./fact.js";
 import { Footnote } from "./footnote.js";
+import { Interval } from './interval.js';
 
 export class FactSet {
-    constructor(items) {
-        this._items = items;
+
+    constructor (items) {
+        this.itemMap = new Map();
+        for (const item of items ?? []) {
+            this.add(item)
+        }
+    }
+
+    add(item) {
+        this.itemMap.set(item.vuid, item);
+    }
+
+    items() {
+        return Array.from(this.itemMap.values());
     }
 
     /* Returns the union of dimensions present on facts in the set */
     _allDimensions() {
-        var dims = {};
-        var facts = this._items.filter((item) => item instanceof Fact);
-        for (var i = 0; i < facts.length; i++) {
-            var dd = Object.keys(facts[i].dimensions());
+        const dims = {};
+        const facts = this.items().filter((item) => item instanceof Fact);
+        for (const fact of facts) {
+            const dd = Object.keys(fact.dimensions());
             for (var j = 0; j < dd.length; j++) {
                 dims[dd[j]] = true;
             }
@@ -42,17 +43,17 @@ export class FactSet {
      */
     minimallyUniqueLabel(fact) {
         if (!this._minimallyUniqueLabels) {
-            var facts = this._items.filter((item) => item instanceof Fact);
+            var facts = this.items().filter((item) => item instanceof Fact);
             var allLabels = {};
             var allAspects = ["c", "p"].concat(this._allDimensions());
             /* Assemble a map of arrays of all aspect labels for all facts, in a
              * consistent order */
             for (var i = 0; i < facts.length; i++) {
                 var f = facts[i];
-                allLabels[f.id] = [];
+                allLabels[f.vuid] = [];
                 for (var j = 0; j < allAspects.length; j++) {
                     var dd = f.aspect(allAspects[j]);
-                    allLabels[f.id].push(dd ? dd.valueLabel() : null);
+                    allLabels[f.vuid].push(dd ? dd.valueLabel() : null);
                 }
             }
             /* Iterate each aspect label and compare that label across all facts in
@@ -61,7 +62,7 @@ export class FactSet {
             for (var j = 0; j < allAspects.length; j++) {
                 var labelMap = {};
                 for (var i = 0; i < facts.length; i++) {
-                    labelMap[allLabels[facts[i].id][j]] = true;
+                    labelMap[allLabels[facts[i].vuid][j]] = true;
                 }
 
                 var uniqueLabelsByLabel = {};
@@ -69,7 +70,7 @@ export class FactSet {
                     /* We have at least two different labels, so include this
                      * aspect in the label for all facts in the set */
                     for (var i = 0; i < facts.length; i++) {
-                        var fid = facts[i].id;
+                        var fid = facts[i].vuid;
                         var l = allLabels[fid][j];
                         var ul = uniqueLabels[fid] || [];
                         if (l !== null) {
@@ -91,19 +92,55 @@ export class FactSet {
              * of them */
             if (Object.keys(uniqueLabels).length < facts.length) {
                 for (var i = 0; i < facts.length; i++) {
-                    var fid = facts[i].id;
+                    var fid = facts[i].vuid;
                     var ul = uniqueLabels[fid] || [];
                     ul.unshift(allLabels[fid][0]);
                     uniqueLabels[fid] = ul;
                 }
             }
 
-            this._items.filter((item) => item instanceof Footnote).forEach((fn) => {
-                uniqueLabels[fn.id] = [fn.title];
+            this.items().filter((item) => item instanceof Footnote).forEach((fn) => {
+                uniqueLabels[fn.vuid] = [fn.title];
             });
 
             this._minimallyUniqueLabels = uniqueLabels;
         }
-        return this._minimallyUniqueLabels[fact.id].join(", ");
+        return this._minimallyUniqueLabels[fact.vuid].join(", ");
+    }
+
+    isEmpty() {
+        return this.itemMap.size == 0;
+    }
+
+    /*
+     * Returns an Interval for the intersection of all values in the set, or
+     * undefined if there is no intersection (inconsistent duplicates)
+     */
+    valueIntersection() {
+        const duplicates = this.items().map(fact => Interval.fromFact(fact));
+        return Interval.intersection(...duplicates);
+    }
+
+    completeDuplicates() {
+        return this.items().every(f => f.isCompleteDuplicate(this.items()[0]));
+    }
+
+    isConsistent() {
+        if (this.itemMap.size == 0) {
+            return true;
+        }
+        const duplicates = this.items().map(fact => Interval.fromFact(fact));
+        return Interval.intersection(...duplicates) !== undefined;
+    }
+
+    size() {
+        return this.itemMap.size;
+    }
+
+    /*
+     * Return the most precise (highest decimals) value within the set.
+     */
+    mostPrecise() {
+        return this.items().reduce((a, b) => b.isMorePrecise(a) ? b : a);
     }
 }

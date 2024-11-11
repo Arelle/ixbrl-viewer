@@ -6,7 +6,7 @@ import { NAMESPACE_XBRLI } from "./util.js";
 export class DataType {
     constructor(report, name) {
         this.name = name;
-        this.report = name;
+        this.report = report;
         this.qname = report.qname(name);
     }
 
@@ -14,7 +14,7 @@ export class DataType {
         if (this.qname.namespace == NAMESPACE_XBRLI) {
             return i18next.t(`dataTypes:${this.qname.localname}`, {defaultValue: this.qname.qname});
         }
-        return this.qname.qname;
+        return this.report.reportSet.taxonomyNamer.convertQName(this.qname);
     }
 
 }

@@ -100,6 +100,10 @@ export class ReportSet {
         return this._data.prefixes;
     }
 
+    preferredPrefix(prefix) {
+        return this.taxonomyNamer.getName(prefix, this._data.prefixes[prefix]).prefix;
+    }
+
     namespaceGroups() {
         const counts = {};
         for (const f of this.facts()) {

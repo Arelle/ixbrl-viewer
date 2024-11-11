@@ -268,7 +268,7 @@ export class XBRLReport {
             }
             let s = '';
             if (showPrefix && this.reportSet.viewerOptions.showPrefixes) {
-                s = "(" + this.reportSet.taxonomyNamer.getName(this.qname(c)).prefix + ") ";
+                s = "(" + this.reportSet.taxonomyNamer.fromQName(this.qname(c)).prefix + ") ";
             }
             s += label;
             return { label: s, lang: actualLang };

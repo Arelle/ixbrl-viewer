@@ -384,7 +384,7 @@ export class Inspector {
                 "Untagged Dates",
             ]
         } else {
-            key = this._reportSet.namespaceGroups();
+            key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
         }
         this._iv.callPluginMethod("extendHighlightKey", key);
 
@@ -577,7 +577,7 @@ export class Inspector {
         for (const prefix of this._reportSet.getUsedConceptPrefixes()) {
             $("<option>")
                 .attr("value", prefix)
-                .text(`${prefix} (${this._reportSet.prefixMap()[prefix]})`)
+                .text(`${this._reportSet.preferredPrefix(prefix)} (${this._reportSet.prefixMap()[prefix]})`)
                 .appendTo('#search-filter-namespaces select');
         }
         if (this._reportSet.getUsedConceptDataTypes().length > 0) {
@@ -1247,6 +1247,18 @@ export class Inspector {
         }
     }
 
+    _updateConcept(fact, context) {
+        $('tr.concept td', context)
+            .find('.text')
+                .text(fact.conceptDisplayName())
+                .attr("title", fact.conceptDisplayName())
+            .end()
+            .find('.clipboard-copy')
+                .data('cb-text', fact.conceptDisplayName())
+            .end();
+
+    }
+
     _updateEntityIdentifier(fact, context) {
         $('tr.entity-identifier td', context)
             .empty()
@@ -1297,14 +1309,7 @@ export class Inspector {
                 factHTML = $(require('../html/fact-details.html')); 
                 this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
                 this._setLabelWithLang($('.documentation', factHTML), fact.getLabelAndLang("doc"));
-                $('tr.concept td', factHTML)
-                    .find('.text')
-                        .text(fact.conceptName())
-                        .attr("title", fact.conceptName())
-                    .end()
-                    .find('.clipboard-copy')
-                        .data('cb-text', fact.conceptName())
-                    .end();
+                this._updateConcept(fact, factHTML);
                 $('tr.period td', factHTML)
                     .text(fact.periodString());
                 if (fact.isNumeric()) {

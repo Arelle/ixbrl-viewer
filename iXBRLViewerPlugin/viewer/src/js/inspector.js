@@ -533,8 +533,7 @@ export class Inspector {
     searchSpec() {
         const spec = {};
         spec.searchString = $('#ixbrl-search').val();
-        spec.showVisibleFacts = $('#search-visible-fact-filter').prop('checked');
-        spec.showHiddenFacts = $('#search-hidden-fact-filter').prop('checked');
+        spec.visibilityFilter = $('#search-filter-visibility').val();
         spec.showMandatoryFacts = $('#search-mandatory-fact-filter').prop('checked');
         spec.conceptTypeFilter = $('#search-filter-concept-type').val();
         for (const [key, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
@@ -556,11 +555,10 @@ export class Inspector {
 
     hasActiveSearchFilters(searchSpec) {
       return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0) ||
-        !searchSpec.showVisibleFacts ||
-        !searchSpec.showHiddenFacts ||
+        searchSpec.visibilityFilter !== '*' ||
         searchSpec.showMandatoryFacts ||
-        searchSpec.conceptTypeFilter != "*" ||
-        searchSpec.factValueFilter != "*" ;
+        searchSpec.conceptTypeFilter !== "*" ||
+        searchSpec.factValueFilter !== "*" ;
     }
 
     setupSearchControls(viewer) {
@@ -640,10 +638,9 @@ export class Inspector {
     resetSearchFilters(defaults) {
         defaults = defaults ?? {};
         $("#search-filter-period select option:selected").prop("selected", false);
+        $("#search-filter-visibility").val(defaults.visibility ?? "*");
         $("#search-filter-concept-type").val("*");
         $("#search-filter-fact-value").val("*");
-        $("#search-hidden-fact-filter").prop("checked", defaults.hiddenFacts ?? true);
-        $("#search-visible-fact-filter").prop("checked", defaults.visibleFacts ?? true);
         $("#search-mandatory-fact-filter").prop("checked", defaults.mandatoryFacts ?? false);
         for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
           $(`#${name} select option:selected`).prop("selected", false);
@@ -732,7 +729,7 @@ export class Inspector {
         $(".hidden-facts-value", summaryDom)
             .text(hiddenFacts)
             .on("click", () => {
-                this.resetSearchFilters({visibleFacts: false});
+                this.resetSearchFilters({visibility: 'hidden'});
                 this.pushInspectorMode("search-mode", "summary-mode");
             });
 

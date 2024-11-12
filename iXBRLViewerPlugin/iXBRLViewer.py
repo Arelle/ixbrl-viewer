@@ -103,7 +103,6 @@ class IXBRLViewerBuilder:
         self.taxonomyData = {
             "sourceReports": [],
             "features": features,
-            "mandatoryFacts": [],
         }
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None

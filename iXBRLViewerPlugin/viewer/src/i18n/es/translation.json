@@ -102,9 +102,10 @@
     "showTextOnly": "",
     "summary": {
       "fact": {
-        "header": "",
-        "hidden": "",
-        "total": ""
+        "header": "Resumen de los hechos",
+        "hidden": "Hechos ocultos",
+        "mandatory": "Hechos obligatorios",
+        "total": "Hechos totales"
       },
       "file": {
         "calculations": "",

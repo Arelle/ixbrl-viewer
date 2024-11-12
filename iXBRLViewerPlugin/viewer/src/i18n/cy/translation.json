@@ -103,7 +103,8 @@
     "summary": {
       "fact": {
         "header": "Crynodeb o Ffeithiau",
-        "hidden": "",
+        "hidden": "Ffeithiau cudd",
+        "mandatory": "Ffeithiau Gorfodol",
         "total": "Cyfanswm y Ffeithiau"
       },
       "file": {

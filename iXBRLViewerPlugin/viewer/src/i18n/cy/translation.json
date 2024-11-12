@@ -147,8 +147,9 @@
     "documentLanguage": "Iaith Dogfen",
     "help": "Cymorth",
     "options": "Opsiynau",
-    "reportAnIssue": "Rhoi gwybod am fater",
-    "survey": "Arolwg"
+    "reportAnIssue": "Rhoi Gwybod am Fater",
+    "survey": "Arolwg",
+    "userGuide": "Canllaw Defnyddiwr"
   },
   "search": {
     "concealedFact": "Ffaith guddiedig",

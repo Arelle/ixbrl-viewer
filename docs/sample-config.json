@@ -4,8 +4,8 @@
         "footerLogoHtml": "<b>Footer override</b>"
     },
     "features": {
-        "support-link": "https://www.example.com/getSupport",
-        "survey-link": "http://www.example.com/survey"
+        "support_link": "https://www.example.com/getSupport",
+        "survey_link": "http://www.example.com/survey"
     },
     "taxonomyNames": {
         "http://xbrl\\.frc\\.org\\.uk/cd/(\\d{4})-\\d{2}-\\d{2}/business": ["uk-bus", "UK Business"],

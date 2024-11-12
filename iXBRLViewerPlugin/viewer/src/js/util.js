@@ -16,6 +16,14 @@ export const GLOSSARY_URL = "https://xbrl.org/glossary/";
 // The number of distinct highlight colors defined in inspector.less
 export const HIGHLIGHT_COLORS = 3;
 
+// Feature names
+export const FEATURE_GUIDE_LINK = 'guide_link';
+export const FEATURE_HOME_LINK_LABEL = 'home_link_label';
+export const FEATURE_HOME_LINK_URL = 'home_link_url';
+export const FEATURE_REVIEW = 'review';
+export const FEATURE_SUPPORT_LINK = 'support_link';
+export const FEATURE_SURVEY_LINK = 'survey_link';
+
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a

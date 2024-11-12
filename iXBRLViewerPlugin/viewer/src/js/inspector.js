@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL } from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -301,6 +301,10 @@ export class Inspector {
             this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
         }
         let helpLinks = {}
+        let guideLinkUrl = this._iv.getGuideLinkUrl();
+        if (guideLinkUrl) {
+            helpLinks[i18next.t("menu.userGuide")] = guideLinkUrl;
+        }
         let supportLinkUrl = this._iv.getSupportLinkUrl();
         if (supportLinkUrl) {
             helpLinks[i18next.t("menu.reportAnIssue")] = supportLinkUrl;
@@ -320,13 +324,13 @@ export class Inspector {
 
     buildHomeLink() {
         $('#top-bar #home-link').remove();
-        if (!this._iv.isStaticFeatureEnabled("home-link-url")) {
+        if (!this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_URL)) {
             return;
         }
-        let homeLinkUrl = this._iv.getStaticFeatureValue("home-link-url");
+        let homeLinkUrl = this._iv.getStaticFeatureValue(FEATURE_HOME_LINK_URL);
         let homeLinkText;
-        if (this._iv.isStaticFeatureEnabled("home-link-label")) {
-            homeLinkText = this._iv.getStaticFeatureValue("home-link-label");
+        if (this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_LABEL)) {
+            homeLinkText = this._iv.getStaticFeatureValue(FEATURE_HOME_LINK_LABEL);
         } else {
             homeLinkText = i18next.t("toolbar.homePage");
         }

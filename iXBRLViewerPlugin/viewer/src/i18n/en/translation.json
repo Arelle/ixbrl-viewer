@@ -104,6 +104,7 @@
       "fact": {
         "header": "Fact Summary",
         "hidden": "Hidden facts",
+        "mandatory": "Mandatory facts",
         "total": "Total facts"
       },
       "file": {

@@ -86,7 +86,11 @@ export class ReportSearch {
     }
 
     visibilityFilter(s, item) {
-        return item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts;
+        return (
+                s.visibilityFilter === '*' ||
+                s.visibilityFilter === 'visible' && !item.isHidden() ||
+                s.visibilityFilter === 'hidden' && item.isHidden()
+        )
     }
 
     periodFilter(s, item) {

@@ -143,6 +143,16 @@ See COPYRIGHT.md for copyright information
         <div class="search-filters">
           <h3 data-i18n="search.filter">Filter</h3>
           <div class="filter-group">
+            <label class="control-label" data-i18n="inspector.visibility" for="search-filter-visibility">
+              Visibility
+            </label>
+            <select id="search-filter-visibility">
+              <option value="*">-</option>
+              <option value="visible" data-i18n="inspector.visible">Visible</option>
+              <option value="hidden" data-i18n="inspector.hidden">Hidden</option>
+            </select>
+          </div>
+          <div class="filter-group">
             <label class="control-label" data-i18n="inspector.conceptType" for="search-filter-concept-type">
               Concept Type
             </label>
@@ -162,27 +172,6 @@ See COPYRIGHT.md for copyright information
                 <option value="negative" data-i18n="inspector.negative">Negative</option>
                 <option value="positive" data-i18n="inspector.positive">Positive</option>
             </select>
-          </div>
-
-          <div class="checkboxes">
-            <div>
-              <label class="checkbox">
-                <input id="search-hidden-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.hiddenFacts">Hidden Facts</span>
-                <span class="checkmark"></span>
-              </label>
-            </div>
-            <div>
-              <label class="checkbox">
-                <input id="search-visible-fact-filter" type="checkbox" checked="checked"/> <span data-i18n="inspector.visibleFacts">Visible Facts</span>
-                <span class="checkmark"></span>
-              </label>
-            </div>
-            <div id="mandatory-fact-filter-checkbox">
-              <label class="checkbox">
-                <input id="search-mandatory-fact-filter" type="checkbox" style="display: none;"/> <span data-i18n="inspector.mandatoryFacts">Only Mandatory Facts</span>
-                <span class="checkmark"></span>
-              </label>
-            </div>
           </div>
 
           <div id="search-filter-period" class="collapsible-section collapsible-only collapsed">
@@ -299,6 +288,15 @@ See COPYRIGHT.md for copyright information
                 <option value="summation" data-i18n="inspector.summation">Summation</option>
                 <option value="contributor" data-i18n="inspector.contributor">Contributor</option>
               </select>
+            </div>
+          </div>
+
+          <div class="checkboxes">
+            <div id="mandatory-fact-filter-checkbox">
+              <label class="checkbox">
+                <input id="search-mandatory-fact-filter" type="checkbox" style="display: none;"/> <span data-i18n="inspector.mandatoryFacts">Only Mandatory Facts</span>
+                <span class="checkmark"></span>
+              </label>
             </div>
           </div>
 

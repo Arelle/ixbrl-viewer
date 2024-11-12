@@ -96,8 +96,7 @@ function testReportSet(reports) {
 function testSearchSpec(searchString='') {
     const spec = {};
     spec.searchString = searchString;
-    spec.showVisibleFacts = true;
-    spec.showHiddenFacts = true;
+    spec.visibilityFilter = '*';
     spec.namespacesFilter = [];
     spec.unitsFilter = [];
     spec.scalesFilter = [];

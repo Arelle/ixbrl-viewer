@@ -3,6 +3,7 @@
   "dimension": "Una dimensión es una característica calificativa que se utiliza para definir de forma única un punto de datos.",
   "conceptsCount": "TEl número de conceptos únicos utilizados en este informe.",
   "dimensionsCount": "El número de dimensiones únicas utilizadas en este informe.",
+  "fileSummary": "Una lista de los archivos que se encuentran en el archivo.",
   "membersCount": "El número de miembros de dimensión únicos utilizados en este informe.",
   "scale": "Para hechos numéricos, la cantidad por la cual se escala el valor presentado.",
   "accuracy": "La precisión con la que se informa un hecho numérico.",

@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP} from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -341,7 +341,7 @@ export class Inspector {
         } else {
             homeLinkText = i18next.t("toolbar.homePage");
         }
-        const query = sessionStorage.getItem("ixbrl-viewer-home-link-query");
+        const query = sessionStorage.getItem(STORAGE_HOME_LINK_QUERY);
         if (query) {
             if (!homeLinkUrl.includes("?")) {
                 homeLinkUrl += "?";
@@ -357,10 +357,19 @@ export class Inspector {
         $('#top-bar').prepend(homeLink);
     }
 
+
+    highlightTagsOnStartup() {
+        const pref = window.localStorage.getItem(STORAGE_HIGHLIGHT_FACTS);
+        if (pref !== null) {
+            return JSON.parse(pref);
+        }
+        return this._iv.isFeatureEnabled(FEATURE_HIGHLIGHT_FACTS_ON_STARTUP);
+    }
+
     buildToolbarHighlightMenu() {
         const iv = this._iv;
         this._toolbarMenu.reset();
-        this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.isFeatureEnabled(FEATURE_HIGHLIGHT_FACTS_ON_STARTUP));
+        this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked, explicitClick) => this.highlightAllTags(checked, explicitClick), "highlight-tags", null, this.highlightTagsOnStartup())
         if (iv.isReviewModeEnabled()) {
             this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");
@@ -459,7 +468,10 @@ export class Inspector {
         }
     }
 
-    highlightAllTags(checked) {
+    highlightAllTags(checked, explicitClick) {
+        if (explicitClick) {
+            window.localStorage.setItem(STORAGE_HIGHLIGHT_FACTS, JSON.stringify(checked));
+        }
         this._viewer.highlightAllTags(checked, this._reportSet.namespaceGroups());
     }
 

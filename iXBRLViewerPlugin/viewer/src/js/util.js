@@ -26,6 +26,9 @@ export const FEATURE_SURVEY_LINK = 'survey_link';
 export const FEATURE_SEARCH_ON_STARTUP = 'search_on_startup';
 export const FEATURE_HIGHLIGHT_FACTS_ON_STARTUP = 'highlight_facts_on_startup';
 
+export const STORAGE_HIGHLIGHT_FACTS = "ixbrl-viewer-highlight-all-facts";
+export const STORAGE_HOME_LINK_QUERY = "ixbrl-viewer-home-link-query";
+
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a

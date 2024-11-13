@@ -749,11 +749,14 @@ export class Viewer {
                     // highlight color for an element that is double tagged in a
                     // table cell.
                     const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
-                    if (ixn != undefined) {
-                        const elements = viewer.elementsForItemIds(ixn.chainIXIds());
-                        const i = groups[reportSet.getItemById(ixn.id).conceptQName().prefix];
-                        if (i !== undefined) {
-                            elements.addClass("ixbrl-highlight-" + i);
+                    if (ixn !== undefined ) {
+                        const item = reportSet.getItemById(ixn.id);
+                        if (item !== undefined) {
+                            const elements = viewer.elementsForItemIds(ixn.chainIXIds());
+                            const i = groups[item.conceptQName().prefix];
+                            if (i !== undefined) {
+                                elements.addClass("ixbrl-highlight-" + i);
+                            }
                         }
                     }
             });

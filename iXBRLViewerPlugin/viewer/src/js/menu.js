@@ -66,14 +66,14 @@ export class Menu {
                 $('<input type="checkbox"></input>')
                     .prop("checked", onByDefault)
                     .change(function () {
-                        callback($(this).prop("checked"));
+                        callback($(this).prop("checked"), true);
                         menu.close(); 
                     })
             )
             .append($("<span></span>").addClass("checkmark"));
         this._add(item, after);
         if (onByDefault) {
-            callback(true);
+            callback(true, false);
         }
     }
 

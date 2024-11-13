@@ -3,6 +3,7 @@
   "dimension": "A dimension is a qualifying characteristic that is used to uniquely define a data point.",
   "conceptsCount": "The number of unique concepts used in this report.",
   "dimensionsCount": "The number of unique dimensions used in this report.",
+  "fileSummary": "A list of the files that are in the filing.",
   "membersCount": "The number of unique dimension members used in this report.",
   "scale": "For numeric facts, the amount by which the presented value is scaled.",
   "accuracy": "The accuracy to which a numeric fact is reported.",

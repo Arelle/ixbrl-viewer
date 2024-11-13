@@ -3,6 +3,7 @@
   "dimension": "Mae dimensiwn yn nodwedd gymhwyso a ddefnyddir i ddiffinio pwynt data yn unigryw.",
   "conceptsCount": "Nifer y cysyniadau unigryw a ddefnyddiwyd yn yr adroddiad hwn.",
   "dimensionsCount": "Nifer y dimensiynau unigryw a ddefnyddir yn yr adroddiad hwn.",
+  "fileSummary": "Rhestr o'r ffeiliau sydd yn y ffeilio.",
   "membersCount": "Nifer yr aelodau dimensiwn unigryw a ddefnyddiwyd yn yr adroddiad hwn.",
   "scale": "Ar gyfer ffeithiau rhifol, y swm a ddefnyddir i raddio'r gwerth a gyflwynir.",
   "accuracy": "Y cywirdeb yr adroddir ffaith rifol iddo.",

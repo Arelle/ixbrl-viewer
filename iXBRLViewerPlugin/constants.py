@@ -98,5 +98,5 @@ MANDATORY_FACTS = {
             "CharityRegistrationNumberEnglandWales",
             "CharityRegistrationNumberScotland",
             "CharityRegistrationNumberNorthernIreland"
-        ]
+    ]
 }

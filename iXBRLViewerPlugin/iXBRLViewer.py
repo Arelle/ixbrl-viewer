@@ -13,7 +13,6 @@ import zipfile
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from pyexpat import features
 from typing import Any
 
 from arelle import XbrlConst

@@ -76,6 +76,24 @@ FEATURE_CONFIGS = [
         cliDefault=None,
         guiVisible=False,
         guiDefault=None
+    ),
+    FeatureConfig(
+        key='search_on_startup',
+        label='Search on startup',
+        description='Show the search pane by default on startup',
+        cliAction='store_true',
+        cliDefault=None,
+        guiVisible=False,
+        guiDefault=None
+    ),
+    FeatureConfig(
+        key='highlight_facts_on_startup',
+        label='Highlight facts on startup',
+        description='Default "Highlight all facts" to on',
+        cliAction='store_true',
+        cliDefault=None,
+        guiVisible=False,
+        guiDefault=None
     )
 ]
 GUI_FEATURE_CONFIGS = [c for c in FEATURE_CONFIGS if c.guiVisible]

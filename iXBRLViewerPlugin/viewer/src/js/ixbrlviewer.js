@@ -283,7 +283,6 @@ export class iXBRLViewer {
     
         this._loadRuntimeConfig().then((runtimeConfig) => {
             this.runtimeConfig = runtimeConfig;
-            console.log(runtimeConfig);
             initializeTheme();
 
             const stubViewer = $('body').hasClass('ixv-stub-viewer');

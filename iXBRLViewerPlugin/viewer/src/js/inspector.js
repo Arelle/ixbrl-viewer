@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL} from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -143,6 +143,7 @@ export class Inspector {
                     inspector.rebuildViewer();
                     inspector.setupValidationReportIcon();
                     inspector.initializeViewer();
+                    inspector.doInitialSelection();
                     resolve();
                 });
             });
@@ -219,6 +220,12 @@ export class Inspector {
             if (this._reportSet.getItemById(id) !== undefined) {
                 this.selectItem(id);
             }
+        }
+    }
+
+    doInitialSelection() {
+        if (!this._currentItem && this._iv.isFeatureEnabled(FEATURE_SEARCH_ON_STARTUP)) {
+            this.inspectorMode("search-mode");
         }
     }
 
@@ -353,7 +360,7 @@ export class Inspector {
     buildToolbarHighlightMenu() {
         const iv = this._iv;
         this._toolbarMenu.reset();
-        this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.options.highlightTagsOnStartup);
+        this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked) => this.highlightAllTags(checked), "highlight-tags", null, this._iv.isFeatureEnabled(FEATURE_HIGHLIGHT_FACTS_ON_STARTUP));
         if (iv.isReviewModeEnabled()) {
             this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
                 const body = iv.viewer.contents().find("body");

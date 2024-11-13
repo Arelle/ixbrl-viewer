@@ -23,6 +23,8 @@ export const FEATURE_HOME_LINK_URL = 'home_link_url';
 export const FEATURE_REVIEW = 'review';
 export const FEATURE_SUPPORT_LINK = 'support_link';
 export const FEATURE_SURVEY_LINK = 'survey_link';
+export const FEATURE_SEARCH_ON_STARTUP = 'search_on_startup';
+export const FEATURE_HIGHLIGHT_FACTS_ON_STARTUP = 'highlight_facts_on_startup';
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date

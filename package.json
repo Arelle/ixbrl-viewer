@@ -29,7 +29,6 @@
   },
   "author": "",
   "dependencies": {
-    "bootstrap": "^4.3.1",
     "chart.js": "^4.4.2",
     "core-js": "^3.37.0",
     "css-loader": "^7.1.1",

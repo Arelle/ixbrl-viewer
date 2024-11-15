@@ -405,14 +405,13 @@ export class iXBRLViewer {
                                     restrictSize: {
                                         min: { width: 100 }
                                     },
-                                }).on('resizestart', function (event) {
+                                    }).on('resizestart', function (event) {
                                         $('#ixv').css({ "pointer-events": "none", "-moz-user-select": "none" });
                                     })
                                     .on('resizemove', function (event) {
-                                        const target = event.target;
-                                        const w = 100 * event.rect.width / $(target).parent().width();
-                                        target.style.width = w + '%';
-                                        $('#inspector').css('width', (100 - w) + '%');
+                                        event.target.style.width = `${event.rect.width}px`;
+                                        iv._width = window.innerWidth-event.rect.width;
+                                        $('#inspector').css('width', `${iv._width}px`);
                                     })
                                     .on('resizeend', function (event) {
                                         $('#ixv').css({ "pointer-events": "auto", "-moz-user-select": "all" });

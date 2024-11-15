@@ -3,7 +3,8 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId } from "./util.js";
+import { formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, 
+    viewerUniqueId, localId, escapeHtml } from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -182,8 +183,9 @@ export class Inspector {
             return;
         }
         const task = data["task"];
-        if (task == 'SHOW_FACT') {
-            this.selectItem(data.factId, undefined, true);
+        if (task == SHOW_FACT) {
+            const id = viewerUniqueId(reportId, data.factId);
+            this.selectItem(id, undefined, true);
         } else if (task == 'TABLE_HIGHLIGHT') {
             this._viewer.highlightTables(data.on);
         } else if (task == "CUSTOMIZE") {
@@ -666,29 +668,51 @@ export class Inspector {
 
     }
 
+    _updateValidationResult (p, text, showAll) {
+        let v = text;
+        if (!showAll) {
+            const vv = wrapLabel(text, 120);
+            if (vv.length > 1) {
+                p.addClass("truncated");
+                p.find('.show-all')
+                    .off('click')
+                    .on('click', () => this._updateValidationResult(p, text, true));
+            }
+            else {
+                p.removeClass('truncated');
+            }
+            v = vv[0];
+        }
+        else {
+            p.removeClass('truncated');
+        }
+        p.find('.fab-text').empty().text(v);
+    }
+
     updateValidationResults (fact) {
+        const self = this;
         $('#inspector .fact-validation-results').empty();
         if (fact.hasValidationResults()) {
-            var a = new Accordian({            
+            const a = new Accordian({            
                 alwaysOpen: true,
             });
-            // $.each(fact.getValidationResults(), function(i,r) {
-            //     var title = $('<span></span>').text(r.ruleId);
-            //     var messageBody = $('<div class="validation-result"></div>').text(r.message);
-            //     a.addCard(title, messageBody);
-            // });
-            let content = "";
+            const title = $('<span></span>').text('Results');
+            const messageBody = $('<div class="validation-result"></div>');
             $.each(fact.getValidationResults(), function(i,r) {
                 let fabClass = "";
                 switch (r.severity) {
-                    case 0: fabClass = "green"; break;
-                    case 1: fabClass = "yellow"; break;
-                    case 2: fabClass = "red"; break;
+                    case 0: fabClass = "green"; 
+                        break;
+                    case 1: fabClass = "yellow"; 
+                        break;
+                    case 2: fabClass = "red"; 
+                        break;
                 }
-                content += `<p class='fab-container'><div class='fab ${fabClass}'></div><span class='fab-text'>${escapeHtml(r.message.trim())}</span></p>\n`;
+                const p = $('<p></p>').addClass('fab-container')
+                    .html(`<div class='fab ${fabClass}'></div><span class='fab-text'></span><span class="show-all">[...]</span>`);
+                self._updateValidationResult(p, r.message, false);
+                messageBody.append(p);
             });
-            var title = $('<span></span>').text('Results');
-            var messageBody = $('<div class="validation-result"></div>').html(content);
             a.addCard(title, messageBody);
             a.contents().appendTo('#inspector .fact-validation-results');
         } else {
@@ -1240,7 +1264,8 @@ export class Inspector {
     */
     notifySelectItem(vuid) {
         if (typeof boundEvent !== "undefined") { 
-            boundEvent.updateSelection(vuid);
+            const factid = localId(vuid);
+            boundEvent.updateSelection(factid);
         }
     }
 

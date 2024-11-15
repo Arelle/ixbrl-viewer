@@ -898,8 +898,8 @@
       }
 
       .validation-result {
-        width: 100%;
-        padding-bottom: 50px;
+        font-size: 1.4rem;
+        overflow-x: hidden;
       }  
 
       .inspector-body.no-fact-selected {
@@ -1238,13 +1238,15 @@
   }
 }
 
+
 /* https://codepen.io/iraycd/pen/dHrxv */
 /* FAB */
 .fab {
   position: relative;
   display: inline-block;
   vertical-align: middle;
-  margin-right: 8px;
+  margin-right: 6px;
+  margin-bottom: 3px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -1274,14 +1276,20 @@
 .fab-container {
   padding: 2px 0;
   text-align: left;
+
+  .show-all {
+    color: @primary;
+    cursor: pointer;
+  }
+
+  &:not(.truncated) .show-all {
+    display: none;
+  }
 }
 
-.fab-container:before {
-  content: "\a0";
-  display: block;
-  padding: 2px 0;
-  line-height: 1px;
-  border-top: 0.25px solid rgba(255, 255, 255, 0.8);
+.fab-text {
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
 .contents.preview {

@@ -95,7 +95,7 @@ jobs:
           TWINE_REPOSITORY: ${{ github.repository == 'Arelle/ixbrl-viewer' && 'pypi' || 'testpypi' }}
         run: pipx run twine upload ./*
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2.0.9
+        uses: softprops/action-gh-release@v2.1.0
         with:
           fail_on_unmatched_files: true
           files: './*'

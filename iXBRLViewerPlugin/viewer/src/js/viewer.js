@@ -123,12 +123,17 @@ export class Viewer {
     // display: block, a div is used, otherwise a span.  Returns the wrapper node
     // as a jQuery node
     _wrapNode(n) {
-        var wrapper = "<span>";
-        const nn = n.getElementsByTagName("*");
-        for (var i = 0; i < nn.length; i++) {
-            if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
-                wrapper = '<div>';
-                break;
+        let wrapper = "<span>";
+        if (getComputedStyle(n).getPropertyValue("display") === "block") {
+            wrapper = '<div>';
+        }
+        else {
+            const nn = n.getElementsByTagName("*");
+            for (var i = 0; i < nn.length; i++) {
+                if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
+                    wrapper = '<div>';
+                    break;
+                }
             }
         }
         $(n).wrap(wrapper);
@@ -268,7 +273,7 @@ export class Viewer {
                 nodes.push(tableNode)
             } 
         }
-        /* Otherwise, insert a <span> as wrapper */
+        /* Otherwise, insert a <span> or <div> as wrapper */
         if (nodes.length == 0) {
             nodes.push(this._wrapNode(domNode));
         }
@@ -440,7 +445,7 @@ export class Viewer {
                 // Handle SEC/ESEF links-to-hidden
                 const vuid = viewerUniqueId(reportIndex, getIXHiddenLinkStyle(n));
                 if (vuid !== null) {
-                    let nodes = $(n);
+                    let nodes = this._findOrCreateWrapperNode(n, inHidden);
                     nodes.addClass("ixbrl-element").data('ivids', [vuid]);
                     this._docOrderItemIndex.addItem(vuid, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden

@@ -283,6 +283,7 @@ class TestIXBRLViewer:
             qname=self.cash_concept.qname,
             value=100,
             isNumeric=False,
+            isTuple=False,
             context=context_1,
             concept=self.cash_concept,
             format='format'
@@ -294,6 +295,7 @@ class TestIXBRLViewer:
             concept=self.cash_concept,
             context=context_2,
             isNumeric=True,
+            isTuple=False,
             unit=self.usd_unit,
             value=None,
             decimals=None,
@@ -307,6 +309,7 @@ class TestIXBRLViewer:
             concept=self.cash_concept,
             context=context_2,
             isNumeric=True,
+            isTuple=False,
             unit=self.null_units,
             value=None,
             decimals=None,
@@ -319,6 +322,7 @@ class TestIXBRLViewer:
             qname=self.cash_concept.qname,
             value=10,
             isNumeric=False,
+            isTuple=False,
             context=context_with_typed_dimension,
             concept=self.cash_concept,
             format='format'
@@ -329,6 +333,7 @@ class TestIXBRLViewer:
             qname=self.cash_concept.qname,
             value=1000,
             isNumeric=False,
+            isTuple=False,
             context=context_with_missing_member_on_dimension,
             concept=self.cash_concept,
             format='format'

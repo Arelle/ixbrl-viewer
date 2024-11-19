@@ -421,7 +421,11 @@ class IXBRLViewerBuilder:
         if softwareCredits:
             self.currentTargetReport["softwareCredits"] = list(softwareCredits)
         for f in report.facts:
-            self.addFact(report, f)
+            if f.isTuple:
+                for nestedTupleFact in f.ixIter():
+                    self.addFact(report, nestedTupleFact)
+            else:
+                self.addFact(report, f)
         self.currentTargetReport["rels"] = self.getRelationships(report)
 
         docSetFiles = None

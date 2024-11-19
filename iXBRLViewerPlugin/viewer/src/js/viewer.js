@@ -308,9 +308,14 @@ export class Viewer {
             }
         }    
 
-        /* Otherwise, insert a <span> as wrapper */
+        /* Otherwise, insert a <span> as wrapper */     
+        let checkDescendants = !this._iv.isPDF;   
         if (nodes.length == 0) {
-            nodes.push(this._wrapNode(domNode));        
+            nodes.push(this._wrapNode(domNode));
+            checkDescendants = true;    
+        }    
+
+        if (checkDescendants) {
             // Create a list of the wrapper node, and all absolutely positioned descendants.
             for (const e of nodes[0].querySelectorAll("*")) { 
                 if (getComputedStyle(e).getPropertyValue('position') === "absolute") { 
@@ -517,12 +522,19 @@ export class Viewer {
     }
 
     _postProcessXBRL(container) {
-        var viewer = this;
+        const viewer = this;
         $(container).find('.ixbrl-element').each(function (_, node) { 
             var id = $(node).data('ivids')[0];
             var fact = viewer._reportSet.getItemById(id);
-            if (fact) { 
-                viewer._postProcessXBRLNode(container, node, fact);
+            if (fact && fact.constructor.name !== 'Footnote') { 
+                if ($(node).hasClass('ixbrl-contains-absolute')) {
+                    $(node).find('.ixbrl-sub-element').each(function (_, subNode) {
+                        viewer._postProcessXBRLNode(container, subNode, fact);
+                    });
+                }
+                else {
+                    viewer._postProcessXBRLNode(container, node, fact);
+                }
             }
         });
     }
@@ -918,7 +930,7 @@ export class Viewer {
 
     elementsForItemIds(vuids) {
         return $(vuids.map(vuid => this.elementsForItemId(vuid).get()).flat());
-    }
+    }    
 
     /*
      * Add or remove a class to an item (fact or footnote) and any continuation elements
@@ -1008,26 +1020,24 @@ export class Viewer {
         items.addClass("ixbrl-blur-highlight").removeClass("ixbrl-highlight");
     }
 
-    // The firefox browser does not support CSS zoom style,
-    //      instead of is we should use -moz-transform and -moz-transform-origin styles
     _zoom () {
         var self = this;    
         $('html', this._contents).each(function () {
             var container, scrollParent;
-            if (self._iv.isPDF) {
-                if (!self._mzInit) {
+            if (!self._mzInit) {
+                if (self._iv.isPDF) {
                     let pagecontainer = $('#page-container', $(this));
-                    pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');
-                    self._mzInit = true;
-                }
-                container = $('#zoom-container', $(this));
-                scrollParent = $(getScrollParent(container[0]));
-            } else {            
-                container = $(this.ownerDocument.body);
-                scrollParent = $(this);
+                    pagecontainer.contents().wrapAll('<div id="zoom-container"></div>');                
+                } else {                            
+                    container = $(this.ownerDocument.body);
+                    container.contents().wrapAll('<div id="zoom-container"></div>');
+                } 
+                self._mzInit = true;
             }
+            container = $('#zoom-container', $(this));
+            scrollParent = $(getScrollParent(container[0]));
             zoom(container, scrollParent, self.scale);
-        });    
+        });  
     }
 
     zoomIn () {

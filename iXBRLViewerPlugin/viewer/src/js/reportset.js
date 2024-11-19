@@ -5,7 +5,7 @@ import { XBRLReport } from './report.js';
 import { Fact } from "./fact.js"
 import { Footnote } from "./footnote.js"
 import { Unit } from "./unit";
-import { titleCase, viewerUniqueId } from "./util.js";
+import { titleCase, viewerUniqueId, localId } from "./util.js";
 import { QName } from "./qname.js";
 import { ViewerOptions } from './viewerOptions.js';
 
@@ -85,6 +85,16 @@ export class ReportSet {
 
     getIXNodeForItemId(vuid) {
         return this._ixNodeMap[vuid] || {};
+    }
+
+    getItemsByLocalId(id) {
+        let ret = [];
+        for (const [_, item] of Object.entries(this._items)) {
+            if (localId(item.vuid) === id) {
+                ret.push(item);
+            }
+        }
+        return ret;
     }
 
     facts() {

@@ -169,6 +169,7 @@ export class Inspector {
         }
     }
 
+
     handleMessage (event) {
         if (typeof event.originalEvent.data !== 'string') 
             return;
@@ -184,8 +185,10 @@ export class Inspector {
         }
         const task = data["task"];
         if (task == SHOW_FACT) {
-            const id = viewerUniqueId(reportId, data.factId);
-            this.selectItem(id, undefined, true);
+            const items = this._reportSet.getItemsByLocalId(data.factId);
+            if (items.length > 0) {
+                this.selectItem(items[0].vuid, undefined, false);
+            }
         } else if (task == 'TABLE_HIGHLIGHT') {
             this._viewer.highlightTables(data.on);
         } else if (task == "CUSTOMIZE") {
@@ -1263,7 +1266,7 @@ export class Inspector {
     * AMANA extension: notify external host about selecting the new item
     */
     notifySelectItem(vuid) {
-        if (typeof boundEvent !== "undefined") { 
+        if (typeof boundEvent !== "undefined" && vuid) { 
             const factid = localId(vuid);
             boundEvent.updateSelection(factid);
         }

@@ -48,7 +48,7 @@ export class Highlight {
     static darkBlue = 'rgb(2, 109, 206)';
     static green = 'rgb(217, 243, 190)';
     static lightBlue = 'rgb(0, 148, 255)';
-    static yellow = 'rgb(255, 240, 179)';
+    static yellow = 'rgb(255, 183, 70)';
     static purple = 'rgb(234, 168, 255)';
     static propBgColor = 'background-color';
     static propOutline = 'outline';

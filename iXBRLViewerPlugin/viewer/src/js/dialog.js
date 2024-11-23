@@ -28,11 +28,13 @@ export class Dialog {
 
     close() {
         $('.dialog-mask').hide(); 
-        this.node.remove() ;
+        this.node.get(0).close();
+        this.node.remove();
     }
 
     show() {
         $('.dialog-mask').show(); 
+        this.node.get(0).showModal();
         this.node.show();
     }
 }

@@ -4,10 +4,10 @@ input[type="text"],
 select,
 button {
   padding: 7px 5px;
-  border: solid 1px @border-grey;
+  border: solid 1px var(--colour-border-grey);
   border-radius: 5px;
-  color: @text;
-  background-color: #fff;
+  color: var(--colour-text);
+  background-color: unset;
   box-sizing: border-box;
 }
 
@@ -15,13 +15,14 @@ button {
   width: 3.2rem;
   height: 3.2rem;
   text-align: center;
-  color: @icon-grey;
+  color: var(--colour-icon-grey);
   box-sizing: border-box;
   cursor: pointer;
   padding: 0;
   font-size: 2.2rem;
   line-height: 3.2rem;
   user-select: none;
+  border: none;
 }
 
 .square-button {
@@ -29,8 +30,8 @@ button {
 
   padding: 0;
   border-radius: 3px;
-  border: solid 0.1rem @border-grey;
-  background-color: @button-background;
+  border: solid 0.1rem var(--colour-border-grey);
+  background-color: var(--colour-button-bg);
   line-height: 3rem;
   margin: 0 0.5rem;
 
@@ -44,9 +45,9 @@ button {
 }
 
 .square-button.primary {
-  color: #fff;
-  border-color: @button-primary-border;
-  background-color: @button-primary-bg;
+  color: var(--colour-bg);
+  border-color: var(--colour-button-primary-border);
+  background-color: var(--colour-button-primary-bg);
 }
 
 .wk-checkbox,
@@ -56,6 +57,11 @@ label.checkbox {
   cursor: pointer;
   user-select: none;
   line-height: 1.6rem;
+
+  &:focus-within {
+    outline: solid 0.2rem #000;
+    outline-offset: 0.3rem;
+  }
 
   input {
     position: absolute;
@@ -73,7 +79,7 @@ label.checkbox {
     width: 1.6rem;
     height: 1.6rem;
     border-radius: 0.4rem;
-    border: solid 0.1rem @border-grey;
+    border: solid 0.1rem var(--colour-border-grey);
   }
 
   input:checked ~ .checkmark::before {
@@ -83,7 +89,7 @@ label.checkbox {
     left: 0.4rem;
     width: 0.4rem;
     height: 1.1rem;
-    border: solid @primary;
+    border: solid var(--colour-primary);
     border-width: 0 0.2rem 0.2rem 0;
     transform: rotate(45deg);
   }
@@ -91,4 +97,20 @@ label.checkbox {
 
 input:disabled {
   background-color: #eee;
+}
+
+.inline-button {
+  display: inline;
+  cursor: pointer;
+  color: var(--colour-primary);
+  padding: 0.3rem;
+  border: none;
+}
+
+.bare-button {
+  display: inline;
+  cursor: pointer;
+  color: var(--colour-primary);
+  padding: 0.3rem;
+  border: none;
 }

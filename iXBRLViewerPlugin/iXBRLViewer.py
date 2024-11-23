@@ -13,6 +13,7 @@ import zipfile
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 from arelle import XbrlConst
 from arelle.ModelDocument import ModelDocument, Type
@@ -23,7 +24,7 @@ from arelle.UrlUtil import isHttpUrl
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
-from .constants import DEFAULT_JS_FILENAME, DEFAULT_OUTPUT_NAME, ERROR_MESSAGE_CODE, FEATURE_CONFIGS, INFO_MESSAGE_CODE
+from .constants import DEFAULT_JS_FILENAME, DEFAULT_OUTPUT_NAME, ERROR_MESSAGE_CODE, FEATURE_CONFIGS, INFO_MESSAGE_CODE, MANDATORY_FACTS
 from .xhtmlserialize import XHTMLSerializer
 
 REPORT_TYPE_EXTENSIONS = ('.xbrl', '.xhtml', '.html', '.htm', '.json')
@@ -89,13 +90,20 @@ class IXBRLViewerBuilder:
             cntlr: Cntlr,
             basenameSuffix: str = '',
             useStubViewer: bool = False,
+            features: dict[str, Any] | None = None,
                  ):
+        if features is None:
+            features = {}
+        featureNames = {c.key for c in FEATURE_CONFIGS}
+        for featureName in features:
+            assert featureName in featureNames, \
+                f'Given feature name `{featureName}` does not match any defined features: {featureNames}'
         self.reportZip = None
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.taxonomyData = {
             "sourceReports": [],
-            "features": [],
+            "features": features,
         }
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None
@@ -119,14 +127,6 @@ class IXBRLViewerBuilder:
         self.fromSingleZIP = None
         self.reportCount = 0
         self.assets = []
-
-    def enableFeature(self, featureName: str):
-        if featureName in self.taxonomyData["features"]:
-            return
-        featureNames = [c.key for c in FEATURE_CONFIGS]
-        assert featureName in featureNames, \
-            f'Given feature name `{featureName}` does not match any defined features: {featureNames}'
-        self.taxonomyData["features"].append(featureName)
 
     def outputFilename(self, filename):
         (base, ext) = os.path.splitext(filename)
@@ -155,7 +155,7 @@ class IXBRLViewerBuilder:
         """
         return s.replace("<","\\u003C").replace(">","\\u003E").replace("&","\\u0026")
 
-    def addELR(self, report: ModelXbrl, elr):
+    def addRoleDefinition(self, report: ModelXbrl, elr):
         prefix = self.roleMap.getPrefix(elr)
         if self.currentTargetReport.setdefault("roleDefs",{}).get(prefix, None) is None:
             rts = report.roleTypes.get(elr, [])
@@ -176,6 +176,7 @@ class IXBRLViewerBuilder:
             for lr in labels:
                 l = lr.toModelObject
                 conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
+                self.addRoleDefinition(report, l.role)
 
             refData = []
             for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
@@ -193,8 +194,14 @@ class IXBRLViewerBuilder:
             if concept.isEnumeration:
                 conceptData["e"] = True
 
-            if concept.type is not None and concept.type.isTextBlock:
+            if concept.isTextBlock:
                 conceptData['t'] = True
+
+            if concept.balance is not None:
+                conceptData['b'] = concept.balance
+
+            if concept.type is not None:
+                conceptData['dt'] = self.nsmap.qname(concept.type.qname)
 
             if concept.isTypedDimension:
                 typedDomainElement = concept.typedDomainElement
@@ -216,7 +223,7 @@ class IXBRLViewerBuilder:
         for baseSetKey, baseSetModelLinks  in report.baseSets.items():
             arcrole, ELR, linkqname, arcqname = baseSetKey
             if arcrole in (XbrlConst.summationItem, XbrlConst.summationItem11, WIDER_NARROWER_ARCROLE, XbrlConst.parentChild, XbrlConst.dimensionDefault) and ELR is not None:
-                self.addELR(report, ELR)
+                self.addRoleDefinition(report, ELR)
                 rr = dict()
                 relSet = report.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
@@ -256,11 +263,14 @@ class IXBRLViewerBuilder:
 
         self.idGen += 1
         conceptName = self.nsmap.qname(f.qname)
+        factList = MANDATORY_FACTS.get(self.taxonomyData["features"].get("mandatory_facts"), [])
+        isMandatory = f.qname.localName in factList
         scheme, ident = f.context.entityIdentifier
 
         aspects = {
             "c": conceptName,
             "e": self.nsmap.qname(QName(self.nsmap.getPrefix(scheme,"e"), scheme, ident)),
+            "m": isMandatory
         }
 
         factData = {
@@ -414,7 +424,11 @@ class IXBRLViewerBuilder:
         if softwareCredits:
             self.currentTargetReport["softwareCredits"] = list(softwareCredits)
         for f in report.facts:
-            self.addFact(report, f)
+            if f.isTuple:
+                for nestedTupleFact in f.ixIter():
+                    self.addFact(report, nestedTupleFact)
+            else:
+                self.addFact(report, f)
         self.currentTargetReport["rels"] = self.getRelationships(report)
 
         docSetFiles = None

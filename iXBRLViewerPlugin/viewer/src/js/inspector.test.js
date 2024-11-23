@@ -159,7 +159,7 @@ describe("Scales filter options", () => {
     })
 
     test("Scales filter options with only monetary facts", () => {
-        var insp = new TestInspector();
+        const insp = new TestInspector();
         const reportSet = testReport({
             ...monetaryFactData,
         }, ixData);

@@ -2,25 +2,28 @@
 
 @import url("form-controls.less");
 
-#ixv #inspector {
+#ixv {
   .menu {
-    position: absolute;
-    right: 0;
-    top: 0;
-    line-height: @top-bar-height;
-    cursor: pointer;
+    line-height: var(--top-bar-height);
 
     .menu-title {
-      padding-right: 3.2rem;
+      line-height: var(--top-bar-height);
+      padding: 0 2.4rem 0 0.3rem;
       position: relative;
+      border: none;
     }
 
     .menu-title::after {
       .icon-chevron-down();
 
+      cursor: pointer;
       font-size: 1.8rem;
       position: absolute;
-      right: 1rem;
+      right: 0.2rem;
+    }
+
+    .menu-title::before {
+      cursor: pointer;
     }
 
     .content-container {
@@ -28,7 +31,7 @@
       // remaining page space, but this means we need to calculate the top
       // position manually.
       position: fixed;
-      top: (@top-bar-height + 3.2rem + 2 * 0.8rem);
+      top: calc(var(--top-bar-height));
       right: 0;
       bottom: 0;
       display: none;
@@ -36,14 +39,13 @@
 
       .content {
         line-height: initial;
-        background: #fff;
-        border: solid 1px @border-grey;
+        background: var(--colour-bg);
+        border: solid 1px var(--colour-border-grey);
         max-height: 100%;
         overflow-y: auto;
 
         .group {
-          border-bottom: solid 1px @border-grey;
-          border-top: solid 1px @border-grey;
+          margin-bottom: 1rem;
         }
 
         .item {
@@ -53,7 +55,12 @@
           text-align: left;
 
           &:hover {
-            background: @border-grey;
+            background: var(--colour-row-hover);
+          }
+
+          &:focus-within {
+            outline: solid 2px var(--colour-foreground);
+            outline-offset: -2px;
           }
 
           &.menu-checkbox {
@@ -83,11 +90,22 @@
 
         a.item {
           display: block;
-          color: @text;
+          color: var(--colour-text);
 
           &:hover {
             text-decoration: none;
           }
+        }
+
+        .label {
+          text-transform: uppercase;
+          font-weight: bold;
+          font-size: 1.2rem;
+          text-align: left;
+          padding-top: 1rem;
+          color: var(--colour-border-grey);
+          border-bottom: solid 1px var(--colour-border-grey);
+          padding-left:1rem;
         }
       }
     }

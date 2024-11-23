@@ -8,7 +8,7 @@
   background-color: #e3e3e3;
   width: 100%;
   box-sizing: border-box;
-  border-bottom: @simple-border;
+  border-bottom: solid 0.1rem var(--colour-border-grey);
   display: flex;
 
   .tab {
@@ -17,19 +17,19 @@
     cursor: pointer;
     color: #444;
     border: solid 0.1rem #cbcbcb;
-    border-top-left-radius: 0.6rem;
-    border-top-right-radius: 0.6rem;
+    border-radius: 0.6rem 0.6rem 0 0;
     margin-bottom: -0.1rem;
     flex-shrink: 1;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
     width: 20em;
+    text-align: left;
 
     &.active {
       padding: 1.2rem;
-      border-bottom-color: #fff;
-      background-color: #fff;
+      border-bottom-color: var(--colour-bg);
+      background-color: var(--colour-bg);
       border-top: solid 0.4rem #0085e6;
     }
 

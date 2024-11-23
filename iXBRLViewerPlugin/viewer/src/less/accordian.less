@@ -2,7 +2,7 @@
 
 .accordian .card {
   margin-top: 0.4rem;
-  background-color: @button-background;
+  background-color: var(--colour-button-bg);
 
   .card-body {
     display: none;
@@ -16,17 +16,21 @@
   }
 
   .title {
+    .text-md();
+
     padding: 1.2rem 1.6rem;
+    border: none;
+    width: 100%;
+    text-align: left;
     cursor: pointer;
-    line-height: 1.8rem;
 
     &:hover {
-      background-color: #f3f3f3;
+      background-color: var(--colour-bg-selected);
     }
   }
 
   &.active {
-    background-color: #f3f3f3;
+    background-color: var(--colour-bg-selected);
 
     .title {
       font-weight: bold;

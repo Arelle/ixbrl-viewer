@@ -1,0 +1,17 @@
+{
+  "anchoring": "Anchoring relationships provide links between company-specific extension concepts and standard concepts defined in the base taxonomy.",
+  "dimension": "A dimension is a qualifying characteristic that is used to uniquely define a data point.",
+  "conceptsCount": "The number of unique concepts used in this report.",
+  "dimensionsCount": "The number of unique dimensions used in this report.",
+  "fileSummary": "A list of the files that are in the filing.",
+  "membersCount": "The number of unique dimension members used in this report.",
+  "scale": "For numeric facts, the amount by which the presented value is scaled.",
+  "accuracy": "The accuracy to which a numeric fact is reported.",
+  "concept": "A concept is an element that defines the meaning of a fact.",
+  "period": "The period against which this fact is reported. This can be either an instant or a duration, depending on the nature of the concept.",
+  "references": "Information about the authoritative definition of a concept. References typically refer to an accounting standard.",
+  "calculations": "Calculation relationships between numeric facts in a report. Calculation relationships can be used to trace how figures in a report roll-up, and can also be used to check the consistency of the reported numbers.",
+  "hiddenFacts": "The number of hidden facts in this report.  Hidden facts are facts that are reported as XBRL data, but are not shown in the presented report.",
+  "mandatoryFacts": "The number of mandatory facts in this report. Mandatory facts are facts that are required to be reported by the filing jurisdiction.",
+  "namespace": "Namespaces are used to partition concept, dimension and member definitions. If a report uses any company-specific concepts, dimensions or members, these will be defined in a separate namespace. Namespaces can also be used to partition large taxonomies."
+}

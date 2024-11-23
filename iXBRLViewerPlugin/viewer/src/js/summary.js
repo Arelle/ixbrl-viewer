@@ -125,6 +125,20 @@ export class DocumentSummary {
         return this._totalFacts;
     }
 
+    hiddenFacts() {
+        if (this._hiddenFacts === undefined) {
+            this._hiddenFacts = this._reportSet.facts().filter(f => f.isHidden()).length;
+        }
+        return this._hiddenFacts;
+    }
+
+    mandatoryFacts() {
+        if (this._mandatoryFacts === undefined) {
+            this._mandatoryFacts = this._reportSet.facts().filter(f => f.isMandatory()).length;
+        }
+        return this._mandatoryFacts;
+    }
+
     tagCounts() {
         if (this._tagCounts === undefined) {
             this._buildTagCounts();

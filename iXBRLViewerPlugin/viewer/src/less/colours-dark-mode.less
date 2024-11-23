@@ -1,0 +1,40 @@
+// See COPYRIGHT.md for copyright information
+
+@colour-bg-d: #000000;
+@colour-foreground-d: #ffffff;
+
+@colour-primary-d: #72bafd;
+@colour-secondary-d: #66cc00;
+@colour-tertiary-d: #aa108e;
+@colour-warning-d: #d8ae15;
+
+@colour-bg-fade-d: fadeout(@colour-foreground-d, 50%);
+@colour-primary-focus-d: darken(spin(@colour-primary-d, -3.4), 7.0);
+
+@colour-loader-d: @colour-foreground-d;
+@colour-linked-fact-d: @colour-primary-d;
+@colour-related-fact-d: lighten(desaturate(spin(@colour-secondary-d, 30.0), 14.5), 6.5);
+
+@colour-text-title-d: darken(@colour-foreground-d, 26.2);
+@colour-text-d: darken(@colour-foreground-d, 26.2);
+@colour-text-light-d: darken(@colour-foreground-d, 52.4);
+@colour-text-form-value-d: darken(@colour-foreground-d, 36.8);
+
+@colour-border-grey-d: darken(@colour-foreground-d, 59.7);
+
+@colour-highlight-default-d: lighten(desaturate(spin(@colour-secondary-d, -0.5660), 31.1688), 44.9020); // #d9f3be
+@colour-highlight-1-d: lighten(saturate(spin(@colour-tertiary-d, -25.3918), 17.2043), 46.4706); // #eaa8ff
+@colour-highlight-2-d: lighten(saturate(spin(@colour-warning-d, 1.0810), 17.7215), 38.6275); // #fff0b3
+
+@colour-icon-grey-d: @colour-text-d;
+
+@colour-button-primary-bg-d: @colour-primary-focus-d;
+@colour-button-primary-border-d: darken(spin(@colour-primary-d, -3.2), 3.2);
+
+@colour-button-bg-d: lighten(@colour-bg-d, 8.2);
+@colour-bg-selected-d: lighten(@colour-bg-d, 14.1);
+
+@colour-bg-tag-d: lighten(@colour-bg-d, 137.0);
+
+@colour-row-hover-d: lighten(@colour-bg-d, 29.4);
+@colour-row-odd-d: @colour-button-bg-d;

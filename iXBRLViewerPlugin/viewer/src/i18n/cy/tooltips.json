@@ -1,0 +1,17 @@
+{
+  "anchoring": "Mae perthnasoedd angori yn darparu cysylltiadau rhwng cysyniadau ymestyn cwmni-benodol a chysyniadau safonol a ddiffinnir yn y tacsonomeg sylfaenol.",
+  "dimension": "Mae dimensiwn yn nodwedd gymhwyso a ddefnyddir i ddiffinio pwynt data yn unigryw.",
+  "conceptsCount": "Nifer y cysyniadau unigryw a ddefnyddiwyd yn yr adroddiad hwn.",
+  "dimensionsCount": "Nifer y dimensiynau unigryw a ddefnyddir yn yr adroddiad hwn.",
+  "fileSummary": "Rhestr o'r ffeiliau sydd yn y ffeilio.",
+  "membersCount": "Nifer yr aelodau dimensiwn unigryw a ddefnyddiwyd yn yr adroddiad hwn.",
+  "scale": "Ar gyfer ffeithiau rhifol, y swm a ddefnyddir i raddio'r gwerth a gyflwynir.",
+  "accuracy": "Y cywirdeb yr adroddir ffaith rifol iddo.",
+  "concept": "Elfen sy'n diffinio ystyr ffaith yw cysyniad.",
+  "period": "Y cyfnod yr adroddir y ffaith hon yn ei erbyn. Gall hyn fod yn amrantiad neu'n hyd, yn dibynnu ar natur y cysyniad.",
+  "references": "Gwybodaeth am y diffiniad awdurdodol o gysyniad. Mae cyfeiriadau fel arfer yn cyfeirio at safon gyfrifyddu.",
+  "calculations": "Perthnasoedd cyfrifo rhwng ffeithiau rhifol mewn adroddiad. Gellir defnyddio cydberthnasau cyfrifo i olrhain sut mae ffigurau mewn adroddiad treigl, a gellir eu defnyddio hefyd i wirio cysondeb y niferoedd a adroddir.",
+  "hiddenFacts": "Nifer y ffeithiau cudd yn yr adroddiad hwn. Mae ffeithiau cudd yn ffeithiau a adroddir fel data XBRL, ond nad ydynt yn cael eu dangos yn yr adroddiad a gyflwynir.",
+  "mandatoryFacts": "Nifer y ffeithiau gorfodol yn yr adroddiad hwn. Mae ffeithiau gorfodol yn ffeithiau y mae'n ofynnol i'r awdurdodaeth ffeilio adrodd arnynt.",
+  "namespace": "Defnyddir bylchau enw i rannu cysyniad, dimensiwn a diffiniadau aelodau. Os bydd adroddiad yn defnyddio unrhyw gysyniadau, dimensiynau neu aelodau sy'n benodol i gwmni, caiff y rhain eu diffinio mewn gofod enw ar wahân. Gellir defnyddio bylchau enw hefyd i rannu tacsonomegau mawr."
+}

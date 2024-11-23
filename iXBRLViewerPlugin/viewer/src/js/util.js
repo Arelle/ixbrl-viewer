@@ -2,18 +2,32 @@
 
 import moment from "moment";
 import Decimal from "decimal.js";
-import i18next from "i18next";
-
 
 export const SHOW_FACT = 'SHOW_FACT';
 
 export const NAMESPACE_ISO4217 = 'http://www.xbrl.org/2003/iso4217';
+export const NAMESPACE_XBRLI = 'http://www.xbrl.org/2003/instance';
 
 export const CALC_ARCROLE = "calc";
 export const CALC11_ARCROLE = "calc11";
 
+export const GLOSSARY_URL = "https://xbrl.org/glossary/";
+
 // The number of distinct highlight colors defined in inspector.less
 export const HIGHLIGHT_COLORS = 3;
+
+// Feature names
+export const FEATURE_GUIDE_LINK = 'guide_link';
+export const FEATURE_HOME_LINK_LABEL = 'home_link_label';
+export const FEATURE_HOME_LINK_URL = 'home_link_url';
+export const FEATURE_REVIEW = 'review';
+export const FEATURE_SUPPORT_LINK = 'support_link';
+export const FEATURE_SURVEY_LINK = 'survey_link';
+export const FEATURE_SEARCH_ON_STARTUP = 'search_on_startup';
+export const FEATURE_HIGHLIGHT_FACTS_ON_STARTUP = 'highlight_facts_on_startup';
+
+export const STORAGE_HIGHLIGHT_FACTS = "ixbrl-viewer-highlight-all-facts";
+export const STORAGE_HOME_LINK_QUERY = "ixbrl-viewer-home-link-query";
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
@@ -217,17 +231,3 @@ export function getIXHiddenLinkStyle(domNode) {
     return null;
 }
 
-/**
- * Transforms measure qname into title case label (or currency symbol, if applicable).
- * @return {String} Measure Label
- */
-
-export function measureLabel(report, measure) {
-    const qname = report.qname(measure);
-    if (qname.namespace === NAMESPACE_ISO4217) {
-        measure = i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
-    } else if (measure.includes(':')) {
-        measure = measure.split(':')[1];
-    }
-    return measure;
-}

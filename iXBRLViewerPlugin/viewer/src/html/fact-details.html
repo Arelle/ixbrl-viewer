@@ -3,45 +3,76 @@ See COPYRIGHT.md for copyright information
 -->
 
 <div class="fact-details">
-  <h4 data-i18n="factDetails.concept">Concept</h4>
-  <div class="std-label"></div>
-  <div class="documentation"></div>
-  <h4 id="dimensions-label" data-i18n="factDetails.dimensions">Dimensions</h4>
-  <div id="dimensions"></div>
-  <h4 data-i18n="factDetails.properties">Properties</h4>
-  <table class="fact-properties">
-    <tr class="period">
-      <th data-i18n="factDetails.date">Date</th>
-      <td></td>
-    </tr>
-    <tr class="value">
-      <th data-i18n="factDetails.factValue">Fact Value</th>
-      <td><span class="value"></span> <span class="show-all">[...]</span> <span class="expand-text-block"></td>
-    </tr>
-    <tr class="accuracy">
-      <th data-i18n="factDetails.accuracy">Accuracy</th>
-      <td></td>
-    </tr>
-    <tr class="scale">
-      <th data-i18n="factDetails.scale">Scale</th>
-      <td></td>
-    </tr>
-    <tr class="change">
-      <th data-i18n="factDetails.change">Change</th>
-      <td></td>
-    </tr>
-    <tr class="entity-identifier">
-      <th data-i18n="factDetails.entity">Entity</th>
-      <td></td>
-    </tr>
-    <tr class="concept">
-      <th data-i18n="factDetails.concept">Concept</th>
-      <td><div><span class="text"></span><span class="filler"></span><span class="clipboard-copy copy-icon"></span></div></td>
-    </tr>
-  </table>
+  <dl>
+    <dt data-i18n="factDetails.concept">Concept</dt>
+    <dd>
+      <div class="std-label"></div>
+      <div class="documentation"></div>
+    </dd>
+    <dt id="dimensions-label" class="has-tooltip">
+      <span data-i18n="factDetails.dimensions">Dimensions</span>
+      <button class="tooltip-icon" data-tooltip-name="dimension" data-tooltip-glossary-link="true"></button>
+    </dt>
+    <dd>
+      <div id="dimensions"></div>
+    </dd>
+    <dt data-i18n="factDetails.properties">Properties</dt>
+    <dd>
+      <table class="property-table fact-properties">
+        <tr class="period">
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.date">Date</span>
+            <button class="tooltip-icon" data-tooltip-name="period"></button>
+          </th>
+          <td></td>
+        </tr>
+        <tr class="value">
+          <th data-i18n="factDetails.factValue">Fact Value</th>
+          <td><span class="value"></span> <button class="show-all inline-button" aria-label="Show full text">[...]</button> <span class="expand-text-block"></td>
+        </tr>
+        <tr class="accuracy">
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.accuracy">Accuracy</span>
+            <button class="tooltip-icon" data-tooltip-name="accuracy"></button>
+          </th>
+          <td></td>
+        </tr>
+        <tr class="scale">
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.scale">Scale</span>
+            <button class="tooltip-icon" data-tooltip-name="scale"></button>
+          </th>
+          <td></td>
+        </tr>
+        <tr class="change">
+          <th data-i18n="factDetails.change">Change</th>
+          <td></td>
+        </tr>
+        <tr class="entity-identifier">
+          <th data-i18n="factDetails.entity">Entity</th>
+          <td></td>
+        </tr>
+        <tr class="concept">
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.concept">Concept</span>
+            <button class="tooltip-icon" data-tooltip-name="concept" data-tooltip-glossary-link="#concept"></button>
+          </th>
+          <td><div><span class="text"></span><span class="filler"></span><button class="clipboard-copy copy-icon inline-button" title="Copy concept to clipboard"></button></div></td>
+        </tr>
+        <tr class="datatype">
+          <th data-i18n="factDetails.datatype">Type</th>
+          <td></td>
+        </tr>
+        <tr class="balance">
+          <th data-i18n="factDetails.balance">Balance</th>
+          <td></td>
+        </tr>
+      </table>
+    </dd>
+  </dl>
   <div class="duplicates">
-    <span class="prev"></span> 
+    <button class="prev" title="Show previous duplicate"></button> 
     <span class="text"></span> 
-    <span class="next"></span>
+    <button class="next" title="Show next duplicate"></button>
   </div>
 </div>

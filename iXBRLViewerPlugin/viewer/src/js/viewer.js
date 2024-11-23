@@ -108,7 +108,7 @@ export class Viewer {
         if (this._reportSet.isMultiDocumentViewer()) {
             $('#ixv .ixds-tabs').show();
             for (const [i, doc] of this._reportSet.reportFiles().entries()) {
-                $('<div class="tab"></div>')
+                $('<button class="tab"></button>')
                     .text(doc.file)
                     .prop('title', doc.file)
                     .data('ix-doc-id', i)
@@ -754,11 +754,14 @@ export class Viewer {
                     // highlight color for an element that is double tagged in a
                     // table cell.
                     const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
-                    if (ixn != undefined) {
-                        const elements = viewer.elementsForItemIds(ixn.chainIXIds());
-                        const i = groups[reportSet.getItemById(ixn.id).conceptQName().prefix];
-                        if (i !== undefined) {
-                            elements.addClass("ixbrl-highlight-" + i);
+                    if (ixn !== undefined ) {
+                        const item = reportSet.getItemById(ixn.id);
+                        if (item !== undefined) {
+                            const elements = viewer.elementsForItemIds(ixn.chainIXIds());
+                            const i = groups[item.conceptQName().prefix];
+                            if (i !== undefined) {
+                                elements.addClass("ixbrl-highlight-" + i);
+                            }
                         }
                     }
             });
@@ -808,7 +811,10 @@ export class Viewer {
     }
 
     _setTitle(docIndex) {
-        $('#top-bar .document-title').text($('head title', this._iframes.eq(docIndex).contents()).text());
+        const title = $('head title', this._iframes.eq(docIndex).contents()).text();
+        $('#top-bar .document-title')
+            .text(title)
+            .attr("aria-label", "Inline Viewer: " + title);
     }
 
     showDocumentForItemId(vuid) {

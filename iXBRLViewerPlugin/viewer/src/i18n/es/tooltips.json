@@ -1,0 +1,17 @@
+{
+  "anchoring": "Las relaciones de anclaje proporcionan vínculos entre los conceptos de extensión específicos de la empresa y los conceptos estándar definidos en la taxonomía base.",
+  "dimension": "Una dimensión es una característica calificativa que se utiliza para definir de forma única un punto de datos.",
+  "conceptsCount": "TEl número de conceptos únicos utilizados en este informe.",
+  "dimensionsCount": "El número de dimensiones únicas utilizadas en este informe.",
+  "fileSummary": "Una lista de los archivos que se encuentran en el archivo.",
+  "membersCount": "El número de miembros de dimensión únicos utilizados en este informe.",
+  "scale": "Para hechos numéricos, la cantidad por la cual se escala el valor presentado.",
+  "accuracy": "La precisión con la que se informa un hecho numérico.",
+  "concept": "Un concepto es un elemento que define el significado de un hecho.",
+  "period": "El período en el que se informa sobre este hecho. Puede ser un instante o una duración, según la naturaleza del concepto.",
+  "references": "Información sobre la definición autorizada de un concepto. Las referencias suelen hacer referencia a una norma contable.",
+  "calculations": "Relaciones de cálculo entre hechos numéricos en un informe. Las relaciones de cálculo se pueden utilizar para rastrear cómo se acumulan las cifras en un informe y también se pueden utilizar para verificar la coherencia de los números informados.",
+  "hiddenFacts": "La cantidad de datos ocultos en este informe. Los datos ocultos son aquellos que se informan como datos XBRL, pero que no se muestran en el informe presentado.",
+  "mandatoryFacts": "Número de hechos obligatorios en este informe. Los hechos obligatorios son hechos que la jurisdicción que presenta la solicitud debe informar.",
+  "namespace": "Los espacios de nombres se utilizan para dividir definiciones de conceptos, dimensiones y miembros. Si un informe utiliza conceptos, dimensiones o miembros específicos de la empresa, estos se definirán en un espacio de nombres independiente. Los espacios de nombres también se pueden utilizar para dividir taxonomías grandes."
+}

@@ -1,0 +1,23 @@
+{
+    "skin": {
+        "stylesheetUrl": "./myskin.css",
+        "footerLogoHtml": "<b>Footer override</b>"
+    },
+    "features": {
+        "support_link": "https://www.example.com/getSupport",
+        "survey_link": "http://www.example.com/survey"
+    },
+    "taxonomyNames": {
+        "http://xbrl\\.frc\\.org\\.uk/cd/(\\d{4})-\\d{2}-\\d{2}/business": ["uk-bus", "UK Business"],
+        "http://xbrl\\.frc\\.org\\.uk/fr/(\\d{4})-\\d{2}-\\d{2}/core": ["uk-core", "UK Core"],
+        "http://xbrl\\.frc\\.org\\.uk/general/(\\d{4})-\\d{2}-\\d{2}/types": ["uk-types", "UK Types"],
+        "http://xbrl\\.frc\\.org\\.uk/reports/(\\d{4})-\\d{2}-\\d{2}/direp": ["uk-direp", "UK Directors' Report"],
+        "http://xbrl\\.frc\\.org\\.uk/reports/(\\d{4})-\\d{2}-\\d{2}/accrep": ["uk-accrep", "UK Accountant's Report"],
+        "http://xbrl\\.frc\\.org\\.uk/reports/(\\d{4})-\\d{2}-\\d{2}/aurep": ["uk-aurep", "UK Auditor's Report"],
+        "http://xbrl\\.frc\\.org\\.uk/cd/(\\d{4})-\\d{2}-\\d{2}/countries": ["uk-countries", "UK Countries"],
+        "http://xbrl\\.frc\\.org\\.uk/cd/(\\d{4})-\\d{2}-\\d{2}/currencies": ["uk-curr", "UK Currencies"],
+        "http://xbrl\\.frc\\.org\\.uk/cd/(\\d{4})-\\d{2}-\\d{2}/languages": ["uk-lang", "UK Languages"],
+        "http://xbrl\\.frc\\.org\\.uk/dpl/(\\d{4})-\\d{2}-\\d{2}": ["uk-dpl", "UK Detailed Profit & Loss"],
+        "http://xbrl\\.frc\\.org\\.uk/general/(\\d{4})-\\d{2}-\\d{2}/common": ["uk-common", "UK Common"]
+    }
+}

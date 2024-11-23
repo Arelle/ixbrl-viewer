@@ -1,9 +1,24 @@
 // See COPYRIGHT.md for copyright information
 
-import { measureLabel, NAMESPACE_ISO4217 } from "./util";
+import { NAMESPACE_ISO4217 } from "./util";
+import i18next from "i18next";
+
+/**
+ * Transforms measure qname into title case label (or currency symbol, if applicable).
+ * @return {String} Measure Label
+ */
+
+function measureLabel(reportSet, measure) {
+    const qname = reportSet.qname(measure);
+    if (qname.namespace === NAMESPACE_ISO4217) {
+        measure = i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
+    } else if (measure.includes(':')) {
+        measure = measure.split(':')[1];
+    }
+    return measure;
+}
 
 export class Unit {
-    
     constructor(reportSet, unitKey) {
         this._reportSet = reportSet;
         this._value = unitKey;

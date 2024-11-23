@@ -240,8 +240,8 @@ describe("Multi report - ELR labels", () => {
 
     test("Present", () => {
         // Role 1 only has a label in report 1
-        expect(testReportSet.reports[0].getRoleLabel("role1")).toBe("Role 1 Label");
-        expect(testReportSet.reports[1].getRoleLabel("role1")).toBe("https://www.example.com/role1");
+        expect(testReportSet.reports[0].getRoleLabelOrURI("role1")).toBe("Role 1 Label");
+        expect(testReportSet.reports[1].getRoleLabelOrURI("role1")).toBe("https://www.example.com/role1");
     });
 });
 
@@ -333,7 +333,7 @@ describe("ELR labels", () => {
     testReportSet._initialize();
 
     test("Present", () => {
-        expect(testReportSet.reports[0].getRoleLabel("role1")).toBe("Role 1 Label");
+        expect(testReportSet.reports[0].getRoleLabelOrURI("role1")).toBe("Role 1 Label");
     });
 });
 

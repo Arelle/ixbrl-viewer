@@ -165,7 +165,39 @@ export class XBRLReport {
                 return label;
             }
         }
-        return this.reportSet.roleMap()[rolePrefix];
+        return undefined;
+    }
+
+    getRoleLabelOrURI(rolePrefix) {
+        return this.getRoleLabel(rolePrefix) ?? this.reportSet.roleMap()[rolePrefix];
+    }
+
+    getLabelRoleLabel(rolePrefix) {
+        const roleURI = this.reportSet.roleMap()[rolePrefix];
+        if (roleURI === undefined) {
+            return undefined;
+        }
+
+        // Built-in label roles don't have a definition in the taxonomy. Do an
+        // i18n look-up on the last part of the URI. For "en" the camel-case
+        // splitter will do what we want for everything except standard label
+        // and documentation label 
+        const suffix = roleURI.split("/").pop();
+        if (roleURI.startsWith("http://www.xbrl.org/2003/role/") && i18next.exists(`labelRoles:${suffix}`)) {
+            return i18next.t(`labelRoles:${suffix}`);
+        }
+
+        // Attempt to get a label from the role definition
+        const label = this.getRoleLabel(rolePrefix);
+        if (label !== undefined) {
+            return label;
+        }
+
+        // Fall back on de-camel-casing the last part of the URI
+        return suffix
+            .replaceAll(/([A-Z][a-z]+)/g, ' $1')
+            .trim()
+            .replace(/^./, s => s.toUpperCase());
     }
 
     localDocuments() {
@@ -180,7 +212,7 @@ export class XBRLReport {
     }
 
     getScaleLabel(scale, unit) {
-        let label = i18next.t(`scale.${scale}`, {defaultValue:"noName"});
+        let label = i18next.t(`scale:${scale}`, {defaultValue:"noName"});
         if (unit && unit.isMonetary() && scale === -2) {
             let measure = unit.value() ?? '';
             if (measure) {
@@ -199,35 +231,47 @@ export class XBRLReport {
     }
 
     getLabel(c, rolePrefix, showPrefix) {
+        return this.getLabelAndLang(c, rolePrefix, showPrefix).label;
+    }
+
+    getLabelAndLang(c, rolePrefix, showPrefix) {
         rolePrefix = rolePrefix || 'std';
         const lang = this.reportSet.viewerOptions.language;
         const concept = this._reportData.concepts[c];
         if (concept === undefined) {
             console.log("Attempt to get label for undefined concept: " + c);
-            return "<no label>";
+            return { label: "<no label>" };
         }
         const labels = concept.labels[rolePrefix]
         if (labels === undefined || Object.keys(labels).length == 0) {
-            return undefined;
+            return { label: undefined };
         }
         else {
             let label;
+            let actualLang;
             if (lang && labels[lang]) {
                 label = labels[lang];
+                actualLang = lang;
             }
             else {
                 // Fall back on English, then any label deterministically.
-                label = labels["en"] || labels["en-us"] || labels[Object.keys(labels).sort()[0]];
+                for (const l of ["en", "en-us", Object.keys(labels).sort()[0]]) {
+                    if (labels[l] !== undefined) {
+                        label = labels[l];
+                        actualLang = l;
+                        break;
+                    }
+                }
             }
             if (label === undefined) {
-                return undefined;
+                return {label: undefined};
             }
             let s = '';
             if (showPrefix && this.reportSet.viewerOptions.showPrefixes) {
-                s = "(" + this.qname(c).prefix + ") ";
+                s = "(" + this.reportSet.taxonomyNamer.fromQName(this.qname(c)).prefix + ") ";
             }
             s += label;
-            return s;
+            return { label: s, lang: actualLang };
         }
     }
 
@@ -237,6 +281,14 @@ export class XBRLReport {
             return c;
         }
         return label;
+    }
+
+    getLabelOrNameAndLang(c, rolePrefix, showPrefix) {
+        const labelLang = this.getLabelAndLang(c, rolePrefix, showPrefix);
+        if (labelLang.label === undefined) {
+            return { label: c };
+        }
+        return labelLang;
     }
 
     isCalculationContributor(c) {

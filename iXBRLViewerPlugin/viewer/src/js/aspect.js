@@ -25,6 +25,13 @@ export class Aspect {
         return aspectLabelMap[this._aspect] ?? this._report.getLabel(this._aspect);
     }
 
+    labelOrNameAndLang() {
+        if (this._aspect in aspectLabelMap) {
+            return {label: aspectLabelMap};
+        }
+        return this._report.getLabelOrNameAndLang(this._aspect);
+    }
+
     value() {
         return this._value;
     }
@@ -43,27 +50,31 @@ export class Aspect {
     }
 
     valueLabel(rolePrefix) {
+        return this.valueLabelAndLang(rolePrefix).label;
+    }
+
+    valueLabelAndLang(rolePrefix) {
         if (this._aspect === 'c') {
-            return this._report.getLabel(this._value, rolePrefix) || this._value;
+            return this._report.getLabelOrNameAndLang(this._value, rolePrefix);
         }
         if (this.isTaxonomyDefined()) {
             if (this._report.getConcept(this._aspect).isTypedDimension()) {
-                return this._value === null ? "nil" : this._value;
+                return {label: (this._value === null ? "nil" : this._value)};
             }
-            return this._report.getLabel(this._value, rolePrefix) || this._value;
+            return this._report.getLabelOrNameAndLang(this._value, rolePrefix);
         }
         else if (this._aspect === 'u') {
-            return this._report.reportSet.getUnit(this._value).label();
+            return {label: this._report.reportSet.getUnit(this._value).label()};
         }
         else if (this._aspect === 'p') {
             const p = new Period(this._value);
-            return p.toString();
+            return {label: p.toString()};
         }
         else if (this._aspect === 'e') {
-            return Identifiers.readableName(this._report.qname(this._value));
+            return {label: Identifiers.readableName(this._report.qname(this._value))};
         }
         else {
-            return this._value;
+            return {label: this._value};
         }
     }
 }

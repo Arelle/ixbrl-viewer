@@ -86,7 +86,11 @@ export class ReportSearch {
     }
 
     visibilityFilter(s, item) {
-        return item.isHidden() ? s.showHiddenFacts : s.showVisibleFacts;
+        return (
+                s.visibilityFilter === '*' ||
+                s.visibilityFilter === 'visible' && !item.isHidden() ||
+                s.visibilityFilter === 'hidden' && item.isHidden()
+        )
     }
 
     periodFilter(s, item) {
@@ -138,6 +142,14 @@ export class ReportSearch {
         );
     }
 
+    dataTypesFilter(s, item) {
+        return (
+            s.dataTypesFilter == null ||
+            s.dataTypesFilter.length === 0 ||
+            s.dataTypesFilter.some(p => item.concept().dataType()?.name === p)
+        );
+    }
+
     unitsFilter(s, item) {
         return (
                 s.unitsFilter.length === 0 ||
@@ -159,6 +171,13 @@ export class ReportSearch {
         );
     }
 
+    mandatoryFactFilter(s, item) {
+        if(!s.showMandatoryFacts) {
+            return true;
+        }
+        return item.isMandatory();
+    }
+
     search(s) {
         if (!this.ready) {
             return;
@@ -175,9 +194,11 @@ export class ReportSearch {
             this.factValueFilter,
             this.calculationsFilter,
             this.namespacesFilter,
+            this.dataTypesFilter,
             this.unitsFilter,
             this.scalesFilter,
-            this.targetDocumentFilter
+            this.targetDocumentFilter,
+            this.mandatoryFactFilter
         ];
 
         rr.forEach((r,_) => {

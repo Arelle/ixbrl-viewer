@@ -5,10 +5,17 @@ import { BarController, BarElement, CategoryScale, Chart, LinearScale } from 'ch
 import { AspectSet } from './aspect.js';
 import { wrapLabel } from "./util.js";
 import { Dialog } from './dialog.js';
+import { getVariable } from './theme.js';
+
 
 export class IXBRLChart extends Dialog {
     constructor() {
         super(".dialog.chart");
+        this.dataSetColours = [
+            getVariable('--colour-primary'),
+            getVariable('--colour-secondary'),
+            getVariable('--colour-warning'),
+        ]
     }
 
     _multiplierDescription(m) {
@@ -32,11 +39,7 @@ export class IXBRLChart extends Dialog {
     }
 
     dataSetColour(i) {
-        return [
-            '#66cc00',
-            '#0094ff',
-            '#fbad17'
-        ][i];
+        return this.dataSetColours[i];
     }
 
     addAspect(a) {
@@ -139,7 +142,7 @@ export class IXBRLChart extends Dialog {
         for (const av of fact.aspects()) {
             /* Don't show concept in list of additional aspects */
             if (av.name() != 'c') {
-                const a = $("<div>")
+                const a = $("<button>")
                     .addClass("other-aspect")
                     .appendTo($(".other-aspects",c));
                 if (dims.includes(av.name())) {
@@ -204,6 +207,7 @@ export class IXBRLChart extends Dialog {
             this.setChartSize();
             chart.resize();
         });
+        $(".other-aspect", c).get(0)?.focus();
     }
 
     setChartSize() {

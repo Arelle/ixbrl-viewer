@@ -12,6 +12,9 @@
     width: 100%;
     position: absolute;
     bottom: 0;
+    left: 0;
+    padding: 1rem;
+    box-sizing: border-box;
 
     .other-aspect {
       display: inline-block;
@@ -24,21 +27,21 @@
       }
 
       &.addable {
-        color: @primary;
+        color: var(--colour-primary);
 
         &:hover {
-          color: @primary-focus;
+          color: var(--colour-primary)-focus;
           text-decoration: underline;
         }
       }
 
       &.selected {
-        background-color: @button-primary-bg;
+        background-color: var(--colour-button-primary-bg);
         border-radius: 0.4rem;
-        border: 0.1rem solid @button-primary-border;
+        border: 0.1rem solid var(--colour-button-primary-border);
 
         /* border: solid 1px #399; */
-        color: #fff;
+        color: var(--colour-bg);
       }
     }
   }

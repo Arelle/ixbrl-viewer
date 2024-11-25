@@ -7,8 +7,10 @@
   left: 50%;
   transform: translate(-50%, -50%);
   border: solid 1px #000;
-  background-color: #fff;
+  background-color: var(--colour-bg);
   display: none;
+  padding: 0;
+  margin: 0;
 
   &.full-screen {
     width: calc(100vw - 5em);
@@ -37,15 +39,16 @@
   }
 
   .close {
+    border: none;
     position: absolute;
-    top: 0;
-    right: 0;
-    padding: 1.8rem 2rem 0;
+    top: 1rem;
+    right: 1.4rem;
+    padding: 0.3rem;
     font-size: 2.6rem;
     z-index: 20;
     cursor: pointer;
     line-height: 2.2rem;
-    opacity: 0.2;
+    color: var(--colour-border-grey);
 
     &::before {
       content: "\00d7";
@@ -61,14 +64,14 @@
       border-radius: 0;
       min-width: 10rem;
       margin-right: 1.5rem;
-      border: solid 0.1rem @border-grey;
-      color: @text;
-      background-color: @button-background;
+      border: solid 0.1rem var(--colour-border-grey);
+      color: var(--colour-text);
+      background-color: var(--colour-button-bg);
       cursor: pointer;
 
       &.dialog-button-primary {
-        color: #fff;
-        background-color: @workiva-green;
+        color: var(--colour-bg);
+        background-color: var(--colour-primary);
         border: none;
       }
     }

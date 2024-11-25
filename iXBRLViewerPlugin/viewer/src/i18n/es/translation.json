@@ -6,10 +6,13 @@
     "does-not-bind": "",
     "inconsistent-duplicate-facts-present": "",
     "maximum": "",
-    "mininum": "",
+    "minimum": "",
     "reported-total": "",
     "reported-value": "",
     "useCalculations11": ""
+  },
+  "chart": {
+    "comparisonChart": ""
   },
   "common": {
     "accuracyInfinite": "Precisió infinita",
@@ -18,16 +21,22 @@
     "unscaled": "Sin escala",
     "unspecified": "Sin especificar"
   },
+  "dialog": {
+    "close": ""
+  },
   "factDetails": {
     "accuracy": "Precisión",
+    "balance": "",
     "calculationIsConsistent": "",
     "calculationIsInconsistent": "",
     "calculationUnchecked": "",
+    "calculationUncheckedIncorrectVersion": "",
     "change": "Cambio",
     "changeFromIn": "Anteriormente {{from}} en ",
     "changePercentageDecrease": "{{decrease}}% menos que en ",
     "changePercentageIncrease": "{{increase}}% más que en ",
     "concept": "Concepto",
+    "datatype": "",
     "date": "Fecha",
     "dimensions": "Dimensiones",
     "duplicatesCount": "{{current}} de {{total}}",
@@ -51,64 +60,73 @@
     "concealedFact": "",
     "conceptType": "Tipo de concepto",
     "contributor": "",
-    "dimensions": "",
-    "documentOutline": "",
-    "documentSummary": "",
+    "datatypes": "Tipos de datos",
+    "dimensions": "Tipo de dimensión",
+    "documentOutline": "Esquema del documento",
+    "documentSummary": "Resumen del documento",
     "explicitDimension": "",
     "fact-groups": "",
     "factProperties": "Propiedades del hecho",
     "factSearch": "Búsqueda de hechos",
     "factValue": "",
-    "filter": "Filtro",
     "footnoteProperties": "Propiedades de la nota al pie de página",
     "footnotes": "Notas al pie de página",
+    "hidden": "Oculto",
     "hiddenFact": "Hecho oculto",
-    "hiddenFacts": "Hechos ocultos",
     "highlight": "Destacar",
     "initializing": "",
+    "ixbrlInspector": "",
+    "labels": "",
     "loadingViewer": "Preparando el visor iXBRL",
-    "matchingFacts": "",
-    "namespaces": "",
+    "mandatoryFacts": "Sólo hechos obligatorios",
+    "namespaces": "Espacios de nombres",
     "narrowerAnchor": "Anclaje angosto",
-    "negative": "",
+    "negative": "Negativo",
     "nextTag": "",
     "noFactSelected": "Ningún hecho seleccionado",
     "numericOption": "Numérico",
     "outlineUnavailable": "",
     "period": "Periodo",
-    "positive": "",
+    "positive": "Positivo",
     "previousTag": "",
     "printDocument": "",
     "references": "Referencias",
     "reset": "Limpiar",
     "scales": "Escalas",
+    "search": "Buscar",
+    "searchReport": "",
+    "searchResults": "",
     "searchTitle": "Búsqueda de hechos",
+    "settingsMenu": "",
+    "showAnalysisChart": "",
     "showTextOnly": "",
     "summary": {
       "fact": {
-        "header": "",
-        "title": ""
+        "header": "Resumen de los hechos",
+        "hidden": "Hechos ocultos",
+        "mandatory": "Hechos obligatorios",
+        "total": "Hechos totales"
       },
       "file": {
         "calculations": "",
         "definitions": "",
-        "header": "",
-        "inline": "",
+        "header": "Resumen del archivo",
+        "inline": "Documentos en línea",
         "labels": "",
         "other": "",
         "presentation": "",
         "references": "",
-        "schemas": "",
-        "reportCreation": ""
+        "schemas": ""
       },
+      "reportCreation": "",
       "tag": {
-        "colDimensions": "",
-        "colMembers": "",
-        "colNamespace": "",
-        "colPrimaryItems": "",
-        "colTotal": "",
-        "header": "",
-        "rowTotal": ""
+        "colConcepts": "Conceptos",
+        "colDimensions": "Dimensiones",
+        "colMembers": "Miembros",
+        "colNamespace": "Espacio de nombres",
+        "colTotal": "Total",
+        "header": "Resumen de la etiqueta",
+        "rowTotal": "Total"
       }
     },
     "summation": "",
@@ -120,34 +138,42 @@
     "validationMessage": "",
     "validationResults": "",
     "validationSeverity": "",
-    "visibleFacts": "Hechos visibles",
-    "widerAnchor": "Anclaje amplio"
+    "visibility": "Visibilidad",
+    "visible": "Visible",
+    "widerAnchor": "Anclaje amplio",
+    "xbrlGlossaryOpensInNewTab": ""
   },
-  "scale": {
-    "-3": "mil\u00E9simos",
-    "-2": "cent\u00E9simos",
-    "-1": "d\u00E9cimas",
-    "0": "unidades",
-    "1": "d\u00E9cimos",
-    "2": "cientos",
-    "3": "miles",
-    "4": "diez miles",
-    "5": "cien miles",
-    "6": "millones",
-    "7": "diez millones",
-    "8": "cien millones",
-    "9": "billones"
+  "menu": {
+    "actions": "Comportamientos",
+    "applicationLanguage": "Idioma de Aplicación",
+    "documentLanguage": "Idioma del Documento",
+    "help": "Ayuda",
+    "options": "Opciones",
+    "reportAnIssue": "Informar un Problema",
+    "survey": "Encuesta",
+    "userGuide": "Guía del Usuario"
   },
   "search": {
     "concealedFact": "",
+    "dataTypeConflictWarning": "",
     "default": "",
+    "filter": "Filtro",
     "hiddenFact": "Hecho oculto",
+    "matchingFactsSummary": "",
     "noMatchFound": "No se encontró ninguna coincidencia",
+    "reset": "",
     "selected": "seleccionados",
     "showMoreResults": "Mostrar más resultados",
-    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
+    "toggleFilterControls": "",
+    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
+    "viewFact": ""
   },
   "toolbar": {
+    "homePage": "Inicio",
+    "toggleDarkMode": "Alternar modo oscuro",
     "xbrlElements": "Elementos XBRL"
+  },
+  "viewer": {
+    "ixbrlDocumentView": ""
   }
 }

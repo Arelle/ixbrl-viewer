@@ -7,6 +7,7 @@ import { Unit } from "./unit";
 import { titleCase, viewerUniqueId } from "./util.js";
 import { QName } from "./qname.js";
 import { ViewerOptions } from './viewerOptions.js';
+import { TaxonomyNamer } from './taxonomynamer.js';
 
 
 // Class represents the set of XBRL "target" reports shown in the viewer.
@@ -18,6 +19,7 @@ export class ReportSet {
         this._data = data;
         this._ixNodeMap = {};
         this.viewerOptions = new ViewerOptions()
+        this.taxonomyNamer = new TaxonomyNamer(new Map());
     }
 
     /*
@@ -98,6 +100,10 @@ export class ReportSet {
         return this._data.prefixes;
     }
 
+    preferredPrefix(prefix) {
+        return this.taxonomyNamer.getName(prefix, this._data.prefixes[prefix]).prefix;
+    }
+
     namespaceGroups() {
         const counts = {};
         for (const f of this.facts()) {
@@ -115,6 +121,20 @@ export class ReportSet {
                     .map(f => f.getConceptPrefix()));
         }
         return this._usedPrefixes;
+    }
+
+    getUsedConceptDataTypes() {
+        if (this._usedDataTypes === undefined) {
+            const map = new Map()
+            for (const dt of Object.values(this._items)
+                    .filter(f => f instanceof Fact)
+                    .map(f => ({ dataType: f.concept().dataType(), isNumeric: f.isNumeric() }))
+                    .filter(t => t.dataType !== undefined)) {
+                map.set(dt.dataType.name, dt);
+            }
+            this._usedDataTypes = map.values().toArray();
+        }
+        return this._usedDataTypes;
     }
 
     /**

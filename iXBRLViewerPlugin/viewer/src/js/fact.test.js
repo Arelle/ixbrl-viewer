@@ -690,10 +690,13 @@ describe("Get Label", () => {
 
     test("Get standard label", () => {
         expect(f.getLabel("std")).toEqual("English label")
+        expect(f.getLabelAndLang("std").label).toEqual("English label")
+        expect(f.getLabelAndLang("std").lang).toEqual("en")
     });
 
     test("Get non-existent label", () => {
         expect(f.getLabel("doc")).toBeUndefined();
+        expect(f.getLabelAndLang("doc").label).toBeUndefined();
     });
 
 });

@@ -255,6 +255,34 @@ This mode replaces the namespace-based highlighting with optional highlighting b
 |---------------------------|----------------|
 | `--viewer-feature-review` | `?review=true` |
 
+# Runtime config
+
+When launched, the viewer will check for the existence of
+`ixbrlviewer.config.json` in the same directory as `ixbrlviewer.js`.  If found,
+this will be loaded and used to configure the viewer.
+
+The file supports the following keys:
+
+* `features` - a JSON object containing defaults for features. These will be
+overridden by features defined at generation time, and then by query
+parameters, as defined above.
+
+* `skin` - a JSON object supporting the following keys:
+
+    * `stylesheetUrl` - a URL to additional CSS definitions.
+    * `faviconUrl` - a URL to an icon file to be used as the favicon for the viewer.
+    * `footerLogoHtml` - a fragment of HTML that will be included in place of the standard footer logo.
+
+* `taxonomyNames` - a JSON object where:
+
+    * Keys are strings that will be treated as a regular expression to match
+      against a namespace.
+    * Values are an array of (prefix, name) where "prefix" is the preferred
+      namespace prefix for the namespace, and "name" is a short descriptive
+      name for the taxonomy.
+
+Relative URLs defined in the config file are resolved relative to the config file.
+
 # Disable viewer loading
 
 Loading of the viewer can be disabled by specifying `?disable-viewer` as a
@@ -262,9 +290,9 @@ query parameter.  This will leave the iXBRL document loaded in the browser, but
 without any viewer functionality.  In the case of an iXBRL document set, or
 multi-document viewer, the first document will be shown.
 
-## Running tests
+# Running tests
 
-### Running unit tests
+## Running unit tests
 
 In order to run the javascript unit tests make sure that you have installed all of the npm requirements.
 
@@ -274,7 +302,7 @@ In order to run the python unit tests make sure that you have pip installed requ
 
 Run the following command to run python unit tests: `pytest tests/unit_tests`
 
-### Running Puppeteer tests
+## Running Puppeteer tests
 
 All commands should be run from repository root
 

@@ -4,40 +4,52 @@
 @import url("colours.less");
 @import url("common.less");
 
+:root {
+  --colour-bg: @colour-bg;
+  --colour-highlight-1: @colour-highlight-1;
+  --colour-highlight-2: @colour-highlight-2;
+  --colour-highlight-default: @colour-highlight-default;
+  --colour-linked-fact: @colour-linked-fact;
+  --colour-primary-focus: @colour-primary-focus;
+  --colour-primary: @colour-primary;
+  --colour-secondary: @colour-secondary;
+  --colour-related-fact: @colour-related-fact;
+}
+
 .ixbrl-highlight:not(.ixbrl-no-highlight) {
   // To ensure highlighting takes place, !important is used to override inline styles.
   // For example: overrides highlighting applied inline to alternate table rows.
-  background-color: @highlight-default !important; // Override inline styles
+  background-color: var(--colour-highlight-default) !important; // Override inline styles
 
   &.ixbrl-highlight-1 {
-    background-color: @highlight-1 !important; // Override inline styles
+    background-color: var(--colour-highlight-1) !important; // Override inline styles
   }
 
   &.ixbrl-highlight-2 {
-    background-color: @highlight-2 !important; // Override inline styles
+    background-color: var(--colour-highlight-2) !important; // Override inline styles
   }
 }
 
 .review.review-highlight-untagged-numbers .review-untagged-number {
-  background-color: @highlight-1;
+  background-color: var(--colour-highlight-1);
 }
 
 .review.review-highlight-untagged-dates .review-untagged-date {
-  background-color: @highlight-2;
+  background-color: var(--colour-highlight-2);
 }
 
 .review .ixbrl-highlight:not(.ixbrl-no-highlight) {
   // Review mode disables namespace-specific highlighting in favor of all tagged
   // elements sharing the same default highlight color, other colors are used for
   // untagged highlighting defined above.
-  background-color: @highlight-default !important; // Override inline styles
+  background-color: var(--colour-highlight-default) !important; // Override inline styles
 
   &.ixbrl-highlight-1 {
-    background-color: @highlight-default !important; // Override inline styles
+    background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 
   &.ixbrl-highlight-2 {
-    background-color: @highlight-default !important; // Override inline styles
+    background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 }
 
@@ -45,14 +57,14 @@ div,
 span {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 0.125em @primary-focus;
+      outline: solid 0.125em var(--colour-primary-focus);
       outline-offset: 0.0625em;
     }
 
     &.ixbrl-element,
     &.ixbrl-sub-element {
       &:hover:not(.ixbrl-selected) {
-        outline: dashed 0.125em @primary-focus;
+        outline: dashed 0.125em var(--colour-primary-focus);
         outline-offset: 0.0625em;
       }
     }
@@ -65,7 +77,7 @@ span {
     cursor: pointer;
 
     &.ixbrl-related {
-      outline: dashed 0.125em @related-fact;
+      outline: dashed 0.125em var(--colour-related-fact);
 
       &:not(td, th) {
         outline-offset: 0.0625em;
@@ -78,13 +90,13 @@ td,
 th {
   &:not(.ixbrl-no-highlight) {
     &.ixbrl-selected {
-      outline: solid 0.125em @primary-focus !important;
+      outline: solid 0.125em var(--colour-primary-focus) !important;
       outline-offset: -0.0625em !important;
     }
 
     &.ixbrl-element:hover:not(.ixbrl-selected),
     &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
-      outline: dashed 0.125em @primary-focus !important;
+      outline: dashed 0.125em var(--colour-primary-focus) !important;
       outline-offset: -0.0625em !important;
     }
   }
@@ -115,7 +127,7 @@ div.ixbrl-table-handle {
   width: 0;
   height: 0;
   border: @export-handle-size solid transparent;
-  border-bottom-color: @workiva-green;
+  border-bottom-color: var(--colour-secondary);
   top: -2 * @export-handle-size;
 
   &::after {
@@ -126,7 +138,7 @@ div.ixbrl-table-handle {
     width: 0;
     height: 0;
     border: @export-handle-size solid transparent;
-    border-top-color: @workiva-green;
+    border-top-color: var(--colour-secondary);
   }
 
   & > span {
@@ -140,7 +152,7 @@ div.ixbrl-table-handle {
     }
 
     border: none;
-    color: #fff;
+    color: var(--colour-bg);
     transition: width 0.3s;
     width: 9rem;
     height: initial;
@@ -157,11 +169,11 @@ div.ixbrl-table-handle {
         font-size: 1.2rem;
       }
 
-      border: solid 0.1rem #fff;
+      border: solid 0.1rem var(--colour-bg);
       font-family: sans-serif;
       display: block;
       padding: 0.7rem 1.5rem 0.7rem 2.5rem;
-      background-color: @workiva-green;
+      background-color: var(--colour-secondary);
     }
   }
 }

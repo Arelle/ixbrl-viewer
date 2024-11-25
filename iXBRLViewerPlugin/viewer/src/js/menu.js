@@ -1,6 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
+import i18next from "i18next";
 
 export class Menu {
     constructor(elt, attr) {
@@ -65,14 +66,14 @@ export class Menu {
                 $('<input type="checkbox"></input>')
                     .prop("checked", onByDefault)
                     .change(function () {
-                        callback($(this).prop("checked"));
+                        callback($(this).prop("checked"), true);
                         menu.close(); 
                     })
             )
             .append($("<span></span>").addClass("checkmark"));
         this._add(item, after);
         if (onByDefault) {
-            callback(true);
+            callback(true, false);
         }
     }
 
@@ -91,7 +92,6 @@ export class Menu {
                         .attr({ "name": name, "value": v})
                         .on("change", function () {
                             callback($(this).val())
-                            menu.close(); 
                         })
                 )
                 .append($("<span></span>").addClass("checkmark"))
@@ -101,5 +101,23 @@ export class Menu {
                 item.find("input").prop("checked", true);
             }
         }
+    }
+
+    addLabel(name) {
+        const item = $('<div></div>')
+                .addClass("label")
+                .text(name)
+        this._add(item);
+    }
+
+    addLink(label, href) {
+        const item = $("<a></a>")
+                .attr("href", href)
+                .attr("target", "_blank")
+                .attr("title", label)
+                .attr("aria-label", label)
+                .addClass("item")
+                .text(label);
+        this._add(item);
     }
 }

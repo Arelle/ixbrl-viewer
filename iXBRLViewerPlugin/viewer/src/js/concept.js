@@ -1,5 +1,8 @@
 // See COPYRIGHT.md for copyright information
 
+import { DataType } from "./datatype.js";
+import { Balance } from "./balance.js";
+
 export class Concept {
     constructor(report, name) {
         this._c = report.concepts()[name] || {};
@@ -20,6 +23,18 @@ export class Concept {
                 r => r.map(p => p[1])
             ).join(" ");
         }
+    }
+
+    labels() {
+        if (!this._c.labels) {
+            return {};
+        }
+        const lang = this.report.reportSet.viewerOptions.language;
+        return Object.fromEntries(
+            Object.entries(this._c.labels)
+                .map(([role, labels]) => [role, labels[lang]])
+                .filter(([role, label]) => label !== undefined)
+        )
     }
 
     references() {
@@ -60,6 +75,18 @@ export class Concept {
     }
 
     typedDomainElement() {
-        return this._c.td
+        return this._c.td;
+    }
+
+    dataType() {
+        if (this._c.dt !== undefined) {
+            return new DataType(this.report, this._c.dt);
+        }
+    }
+
+    balance() {
+        if (this._c.b !== undefined) {
+            return new Balance(this._c.b);
+        }
     }
 }

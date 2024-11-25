@@ -5,11 +5,17 @@ import $ from 'jquery'
 import { ReportSet } from "./reportset.js";
 import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
+import { initializeTheme } from './theme.js';
+import { TaxonomyNamer } from './taxonomynamer.js';
+import {FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK} from "./util";
+
+const featureFalsyValues = new Set([undefined, null, '', 'false', false]);
 
 export class iXBRLViewer {
 
     constructor(options) {
-        this._features = new Set();
+        this._staticFeatures = {};
+        this._dynamicFeatures = {};
         this._plugins = [];
         this.inspector = new Inspector(this);
         this.viewer = null;
@@ -76,40 +82,68 @@ export class iXBRLViewer {
         });
     }
 
-    setFeatures(featureNames, queryString) {
-        const featureMap = {}
-        // Enable given features initially
-        featureNames.forEach(f => {
-            featureMap[f] = true;
-        });
+    setFeatures(features, queryString) {
+        this._staticFeatures = {}
+        for (const [key, value] of Object.entries(features)) {
+            this._staticFeatures[key] = value;
+        }
 
-        // Enable/disable features based on query string
         const urlParams = new URLSearchParams(queryString);
+        this._dynamicFeatures = {}
         urlParams.forEach((value, key) => {
-            // Do nothing if feature has already been disabled by query
-            if (featureMap[key] !== false) {
-                // Disable feature if value is exactly 'false', anything else enables the feature
-                featureMap[key] = value !== 'false';
+            if (value === '') {
+                if (this._dynamicFeatures[key] === undefined) {
+                    value = 'true'
+                } else {
+                    return;
+                }
             }
+            this._dynamicFeatures[key] = value;
         });
+    }
 
-        // Gather results in _features set
-        if (this._features.size > 0) {
-            this._features = new Set();
+    getStaticFeatureValue(featureName) {
+        return this._staticFeatures[featureName];
+    }
+
+    getFeatureValue(featureName) {
+        if (this._dynamicFeatures[featureName]) {
+            return this._dynamicFeatures[featureName];
         }
-        for (const [feature, enabled] of Object.entries(featureMap)) {
-            if (enabled) {
-                this._features.add(feature);
-            }
-        }
+        return this.getStaticFeatureValue(featureName);
     }
 
     isFeatureEnabled(featureName) {
-        return this._features.has(featureName);
+        return !featureFalsyValues.has(this.getFeatureValue(featureName));
+    }
+
+    isStaticFeatureEnabled(featureName) {
+        return !featureFalsyValues.has(this.getStaticFeatureValue(featureName));
     }
 
     isReviewModeEnabled() {
-        return this.isFeatureEnabled('review');
+        return this.isFeatureEnabled(FEATURE_REVIEW);
+    }
+
+    getGuideLinkUrl() {
+        if (!this.isStaticFeatureEnabled(FEATURE_GUIDE_LINK)) {
+            return null;
+        }
+        return this.resolveRelativeUrl(this.getStaticFeatureValue(FEATURE_GUIDE_LINK));
+    }
+
+    getSupportLinkUrl() {
+        if (!this.isStaticFeatureEnabled(FEATURE_SUPPORT_LINK)) {
+            return null;
+        }
+        return this.resolveRelativeUrl(this.getStaticFeatureValue(FEATURE_SUPPORT_LINK));
+    }
+
+    getSurveyLinkUrl() {
+        if (!this.isStaticFeatureEnabled(FEATURE_SURVEY_LINK)) {
+            return null;
+        }
+        return this.resolveRelativeUrl(this.getStaticFeatureValue(FEATURE_SURVEY_LINK));
     }
 
     isViewerEnabled() {
@@ -117,16 +151,34 @@ export class iXBRLViewer {
         return (urlParams.get('disable-viewer') ?? 'false') === 'false';
     }
 
+    // Resolves URL relative to the config file
+    resolveRelativeUrl(url) {
+        if (this.options.configUrl === undefined) {
+            return url;
+        }
+        const resolvedUrl = new URL(url, this.options.configUrl.href);
+        return resolvedUrl.href;
+    }
+
     _loadInspectorHTML() {
         /* Insert HTML and CSS styles into body */
-        $(require('../html/inspector.html')).prependTo('body');
+        const footerLogoHtml = this.runtimeConfig.skin?.footerLogoHtml ?? require("../html/footer-logo.html");
+        $(require('../html/inspector.html'))
+            .prependTo('body')
+            .find("#footer-logo").html(footerLogoHtml);
         const inspector_css = require('../less/inspector.less').toString(); 
         $('<style id="ixv-style"></style>')
             .prop("type", "text/css")
             .text(inspector_css)
             .appendTo('head');
+        if (this.runtimeConfig.skin?.stylesheetUrl !== undefined) {
+            $('<link rel="stylesheet" id="ixv-style-skin" />')
+                .attr("href", this.resolveRelativeUrl(this.runtimeConfig.skin.stylesheetUrl))
+                .appendTo('head');
+        }
+        const favIconUrl = this.runtimeConfig.skin?.faviconUrl !== undefined ? this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl) : require("../img/favicon.ico");
         $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-            .attr('href', require('../img/favicon.ico'))
+            .attr('href', favIconUrl)
             .appendTo('head');
 
         try {
@@ -140,7 +192,7 @@ export class iXBRLViewer {
     _reparentDocument() {
         const iframeContainer = $('#ixv #iframe-container');
 
-        const iframe = $('<iframe title="iXBRL document view"/>')
+        const iframe = $('<iframe title="iXBRL document view" tabindex="0"/>')
             .data("report-index", 0)
             .appendTo(iframeContainer)[0];
 
@@ -160,7 +212,8 @@ export class iXBRLViewer {
             $('html').attr("lang", "en-US");
         }
 
-        $('head').children().not("script").not("style#ixv-style").not("link#ixv-favicon").appendTo($(iframe).contents().find('head'));
+        $('head')
+            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon").appendTo($(iframe).contents().find('head'));
 
         $('<title>').text(docTitle).appendTo($('head'));
 
@@ -197,11 +250,41 @@ export class iXBRLViewer {
         }
     }
 
+    _loadRuntimeConfig() {
+        return new Promise((resolve, reject) => {
+            if (this.options.configUrl === undefined) {
+                resolve({});
+            }
+            else {
+                fetch(this.options.configUrl)
+                    .then((resp) => {
+                        if (resp.status == 404) {
+                            return Promise.resolve({});
+                        }
+                        else if (resp.status != 200) {
+                            return Promise.reject("Fetch failed: " + resp.status);
+                        }
+                        return resp.json();
+                    })
+                    .then((data) => {
+                        resolve(data);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        resolve({});
+                    });
+            }
+        });
+    }
+
     load() {
         const iv = this;
         const inspector = this.inspector;
+    
+        this._loadRuntimeConfig().then((runtimeConfig) => {
+            this.runtimeConfig = runtimeConfig;
+            initializeTheme();
 
-        setTimeout(function () {
             const stubViewer = $('body').hasClass('ixv-stub-viewer');
 
             // If viewer is disabled, but not in stub viewer mode, just abort
@@ -217,9 +300,25 @@ export class iXBRLViewer {
             // We need to parse JSON first so that we can determine feature enablement before loading begins.
             const taxonomyData = iv._getTaxonomyData();
             const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
-            iv.setFeatures((parsedTaxonomyData && parsedTaxonomyData["features"]) || [], window.location.search);
+            let features = parsedTaxonomyData && parsedTaxonomyData["features"];
+            if (!features) {
+                features = {};
+            }
+            // `features` was previously an array of flag values
+            // Support this for backwards compatability
+            else if (Array.isArray(features)) {
+                features = features.reduce((obj, val) => {
+                    obj[val] = true;
+                    return obj;
+                }, {});
+            }
+            if (this.runtimeConfig.features !== undefined) {
+                features = {...this.runtimeConfig.features, features};
+            }
+            iv.setFeatures(features, window.location.search);
 
             const reportSet = new ReportSet(parsedTaxonomyData);
+            reportSet.taxonomyNamer = new TaxonomyNamer(new Map(Object.entries(this.runtimeConfig.taxonomyNames ?? {})));
 
             // Viewer disabled in stub viewer mode => redirect to first iXBRL document
             if (!iv.isViewerEnabled()) {
@@ -239,7 +338,7 @@ export class iXBRLViewer {
             const ds = reportSet.reportFiles();
             let hasExternalIframe = false;
             for (let i = stubViewer ? 0 : 1; i < ds.length; i++) {
-                const iframe = $("<iframe />").attr("src", ds[i].file).data("report-index", ds[i].index).appendTo("#ixv #iframe-container");
+                const iframe = $('<iframe tabindex="0" />').attr("src", ds[i].file).data("report-index", ds[i].index).appendTo("#ixv #iframe-container");
                 iframes = iframes.add(iframe);
                 hasExternalIframe = true;
             }
@@ -292,7 +391,6 @@ export class iXBRLViewer {
                                 $('#ixv .loader').remove();
 
                                 /* Focus on fact specified in URL fragment, if any */
-                                inspector.handleFactDeepLink();
                                 if (iv.options.showValidationWarningOnStart) {
                                     inspector.showValidationWarning();
                                 }

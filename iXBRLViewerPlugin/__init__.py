@@ -10,6 +10,7 @@ import tempfile
 import traceback
 from optparse import OptionGroup, OptionParser
 from pathlib import Path
+from typing import Any
 
 from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
@@ -100,8 +101,14 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
     for featureConfig in FEATURE_CONFIGS:
-        arg = f'--viewer-feature-{featureConfig.key}'
-        featureGroup.add_option(arg, arg.lower(), action="store_true", default=False, help=featureConfig.description)
+        arg = f'--viewer-feature-{featureConfig.key}'.replace('_', '-')
+        featureGroup.add_option(
+            arg,
+            arg.lower(),
+            action=featureConfig.cliAction,
+            default=featureConfig.cliDefault,
+            help=featureConfig.description
+        )
     parser.add_option_group(featureGroup)
 
 def pluginData(cntlr: Cntlr):
@@ -130,7 +137,6 @@ def generateViewer(
         viewerURL: str | None = None,
         showValidationMessages: bool = False,
         zipViewerOutput: bool = False,
-        features: list[str] | None = None,
         packageDownloadURL: str | None = None,
         copyScript: bool = True,
 ) -> None:
@@ -143,7 +149,6 @@ def generateViewer(
     :param showValidationMessages: True if validation messages should be shown in the viewer.
     :param useStubViewer: True if the stub viewer should be used.
     :param zipViewerOutput: True if the destination is a zip archive.
-    :param features: Optional list of features to enable.
     :param packageDownloadURL: Optional URL to use as the report package download URL.
     :param copyScript: Controls if the script referenced by viewerURL is copied into the output directory, or directly set as the 'src' value of the script tag in the HTML iXBRL Viewer.
     """
@@ -185,9 +190,6 @@ def generateViewer(
             return
 
     try:
-        if features:
-            for feature in features:
-                bldr.enableFeature(feature)
         iv = bldr.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, packageDownloadURL=packageDownloadURL)
         if iv is not None:
             iv.save(saveViewerDest, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
@@ -199,17 +201,21 @@ def generateViewer(
     resetPluginData(cntlr)
 
 
-def getFeaturesFromOptions(options: argparse.Namespace | OptionParser):
-    return [
-        featureConfig.key
-        for featureConfig in FEATURE_CONFIGS
-        if getattr(options, f'viewer_feature_{featureConfig.key}') or getattr(options, f'viewer_feature_{featureConfig.key.lower()}')
-    ]
+def getFeaturesFromOptions(options: argparse.Namespace | OptionParser) -> dict[str, Any]:
+    features = {}
+    for featureConfig in FEATURE_CONFIGS:
+        key = featureConfig.key
+        option = f'viewer_feature_{key}'
+        value = getattr(options, option, None)
+        if value is not None:
+            features[key] = value
+    return features
+
 
 def iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs):
     pd = pluginData(cntlr)
     if pd.builder is None:
-        pd.builder = IXBRLViewerBuilder(cntlr, useStubViewer = options.useStubViewer)
+        pd.builder = IXBRLViewerBuilder(cntlr, useStubViewer = options.useStubViewer, features=getFeaturesFromOptions(options))
     processModel(cntlr, modelXbrl)
 
 def iXBRLViewerCommandLineFilingEnd(cntlr, options, *args, **kwargs):
@@ -220,7 +226,6 @@ def iXBRLViewerCommandLineFilingEnd(cntlr, options, *args, **kwargs):
         copyScript=not options.viewerNoCopyScript,
         showValidationMessages=options.validationMessages,
         zipViewerOutput=options.zipViewerOutput,
-        features=getFeaturesFromOptions(options),
         packageDownloadURL=options.packageDownloadURL,
     )
 
@@ -315,19 +320,17 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
         viewer_file_name = DEFAULT_OUTPUT_NAME
-        features = [
-            c.key
-            for c in FEATURE_CONFIGS
-            if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{c.key}', False)
-        ]
-        pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer = True)
+        features = {}
+        for featureConfig in FEATURE_CONFIGS:
+            if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', False):
+                features[featureConfig.key] = True
+        pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer=True, features=features)
         processModel(cntlr, modelXbrl)
         generateViewer(
             cntlr=cntlr,
             saveViewerDest=tempViewer.name,
             viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL),
             copyScript=cntlr.config.get(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT),
-            features=features,
         )
         if Path(tempViewer.name, viewer_file_name).exists():
             localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))

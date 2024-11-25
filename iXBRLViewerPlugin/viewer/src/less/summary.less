@@ -2,9 +2,13 @@
 
 #inspector .summary {
   .body {
-    .total-facts-title,
-    .files-summary-title {
-      font-weight: bold;
+    .total-facts-value,
+    .mandatory-facts-value {
+      .inline-button();
+    }
+
+    .hidden-facts-value {
+      .inline-button();
     }
 
     .file-summary-container {
@@ -34,7 +38,7 @@
           text-align: left;
         }
 
-        thead {
+        thead tr {
           th {
             white-space: nowrap;
             position: relative;
@@ -55,10 +59,16 @@
                 width: 200px;
                 right: 0;
                 bottom: 0;
+
+                &.has-tooltip {
+                  bottom: -0.8rem;
+                }
               }
             }
+
           }
         }
+
 
         tbody th {
           font-weight: normal;
@@ -70,11 +80,11 @@
             transition: background-color 0.25s ease;
 
             &:nth-child(odd) {
-              background-color: rgb(248 248 248);
+              background-color: var(--colour-row-odd);
             }
 
             &:hover {
-              background-color: rgb(230 230 230);
+              background-color: var(--colour-row-hover);
             }
 
             td.figure {

@@ -171,9 +171,9 @@ export class DocumentOutline {
     sortedSections() {
         const sections = Object.keys(this.sections);
         const re = /\(parenthetical\)\s*$/i;
-        const filteredSections = sections.filter(s => !re.test(this.report.getRoleLabel(s)));
+        const filteredSections = sections.filter(s => !re.test(this.report.getRoleLabelOrURI(s)));
         return filteredSections
-            .sort((a, b) => this.report.getRoleLabel(a).localeCompare(this.report.getRoleLabel(b)))
+            .sort((a, b) => this.report.getRoleLabelOrURI(a).localeCompare(this.report.getRoleLabelOrURI(b)))
             .map(elr => ({ report: this.report, fact: this.sections[elr], elr: elr }));
     }
 }

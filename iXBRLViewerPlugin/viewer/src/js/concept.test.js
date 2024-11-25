@@ -2,6 +2,12 @@
 
 import { ReportSet } from "./reportset.js";
 import { NAMESPACE_ISO4217 } from "./util";
+import { TestInspector } from "./test-utils.js";
+
+const insp = new TestInspector();
+beforeAll(() => {
+    insp.i18nInit();
+});
 
 const testReportData = {
     "prefixes": {
@@ -15,14 +21,16 @@ const testReportData = {
                 "std": {
                     "en": "English label"
                 }
-            }
+            },
+            "b": "debit"
         },
         "eg:Concept2": {
             "labels": {
                 "std": {
                     "en": "English label for concept two"
                 }
-            }
+            },
+            "b": "credit"
         },
         "eg:Concept3": {
             "labels": {
@@ -84,5 +92,18 @@ describe("Concept references", () => {
                     { part: "Part4", value: "Value4" }
                 ]
             ]);
+    });
+});
+
+describe("Balance types", () => {
+    test("Debit/Credit", () => {
+        const rs = new ReportSet(testReportData);
+        rs._initialize();
+        const r = rs.reports[0];
+        expect(r.getConcept("eg:Concept1").balance().balance).toBe("debit");
+        expect(r.getConcept("eg:Concept1").balance().label()).toBe("Debit");
+        expect(r.getConcept("eg:Concept2").balance().balance).toBe("credit");
+        expect(r.getConcept("eg:Concept2").balance().label()).toBe("Credit");
+        expect(r.getConcept("eg:Concept3").balance()).toBeUndefined();
     });
 });

@@ -14,7 +14,8 @@ export class TableExport {
     static addHandles(iframe, reportSet) {
         $('table', iframe).each(function () {
             const table = $(this);
-            if (table.find(".ixbrl-element").length > 0) {
+            // Require at least two facts on different rows.
+            if (table.find("tr").filter((i, row) => $(row).find(".ixbrl-element").length > 0).length > 1) {
                 table.css("position", "relative");
                 const exporter = new TableExport(table, reportSet);
                 $('<div class="ixbrl-table-handle"><span>Export table</span></div>')

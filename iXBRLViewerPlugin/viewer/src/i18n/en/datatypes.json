@@ -1,0 +1,10 @@
+{
+    "booleanItemType": "Boolean",
+    "dateItemType": "Date",
+    "stringItemType": "String",
+    "monetaryItemType": "Monetary",
+    "decimalItemType": "Decimal",
+    "pureItemType": "Pure",
+    "sharesItemType": "Shares"
+}
+

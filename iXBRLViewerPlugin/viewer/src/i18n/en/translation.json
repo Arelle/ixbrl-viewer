@@ -6,10 +6,13 @@
     "does-not-bind": "Calculation does not bind",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
     "maximum": "Maximum",
-    "mininum": "Minimum",
+    "minimum": "Minimum",
     "reported-total": "Reported",
     "reported-value": "Reported value",
     "useCalculations11": "Use Calculations v1.1"
+  },
+  "chart": {
+    "comparisonChart": "Comparison chart"
   },
   "common": {
     "accuracyInfinite": "Infinite precision",
@@ -18,8 +21,12 @@
     "unscaled": "Unscaled",
     "unspecified": "Unspecified"
   },
+  "dialog": {
+    "close": "close"
+  },
   "factDetails": {
     "accuracy": "Accuracy",
+    "balance": "Balance",
     "calculationIsConsistent": "Calculation is consistent",
     "calculationIsInconsistent": "Calculation is inconsistent",
     "calculationUnchecked": "Calculation not checked due to presence of duplicate facts",
@@ -29,6 +36,7 @@
     "changePercentageDecrease": "{{decrease}}% decrease on ",
     "changePercentageIncrease": "{{increase}}% increase on ",
     "concept": "Concept",
+    "datatype": "Type",
     "date": "Date",
     "dimensions": "Dimensions",
     "duplicatesCount": "{{current}} of {{total}}",
@@ -52,6 +60,7 @@
     "concealedFact": "Concealed fact",
     "conceptType": "Concept Type",
     "contributor": "Contributor",
+    "datatypes": "Types",
     "dimensions": "Dimension Type",
     "documentOutline": "Document outline",
     "documentSummary": "Document summary",
@@ -60,15 +69,16 @@
     "factProperties": "Fact Properties",
     "factSearch": "Fact Search",
     "factValue": "Fact Value",
-    "filter": "Filter",
     "footnoteProperties": "Footnote Properties",
     "footnotes": "Footnotes",
+    "hidden": "Hidden",
     "hiddenFact": "Hidden Fact",
-    "hiddenFacts": "Hidden Facts",
     "highlight": "Highlight",
     "initializing": "Initializing",
+    "ixbrlInspector": "iXBRL Inspector",
+    "labels": "",
     "loadingViewer": "Loading iXBRL Viewer",
-    "matchingFacts": " matching facts(s)",
+    "mandatoryFacts": "Only Mandatory Facts",
     "namespaces": "Namespaces",
     "narrowerAnchor": "Narrower anchors",
     "negative": "Negative",
@@ -83,12 +93,19 @@
     "references": "References",
     "reset": "Reset",
     "scales": "Scales",
+    "search": "Search",
+    "searchReport": "Search iXBRL Report",
+    "searchResults": "Search Results",
     "searchTitle": "Search",
+    "settingsMenu": "Settings Menu",
+    "showAnalysisChart": "Show analysis chart",
     "showTextOnly": "Show text only",
     "summary": {
       "fact": {
         "header": "Fact Summary",
-        "title": "Total Facts:"
+        "hidden": "Hidden facts",
+        "mandatory": "Mandatory facts",
+        "total": "Total facts"
       },
       "file": {
         "calculations": "Calculation Linkbases",
@@ -99,14 +116,14 @@
         "other": "Other Linkbases",
         "presentation": "Presentation Linkbases",
         "references": "Reference Linkbases",
-        "schemas": "Schemas",
-        "reportCreation": "Report Creation"
+        "schemas": "Schemas"
       },
+      "reportCreation": "Report creation",
       "tag": {
+        "colConcepts": "Concepts",
         "colDimensions": "Dimensions",
         "colMembers": "Members",
         "colNamespace": "Namespace",
-        "colPrimaryItems": "Primary Items",
         "colTotal": "Total",
         "header": "Tag Summary",
         "rowTotal": "Total"
@@ -121,34 +138,42 @@
     "validationMessage": "Message",
     "validationResults": "Validation results",
     "validationSeverity": "Severity",
-    "visibleFacts": "Visible Facts",
-    "widerAnchor": "Wider anchor"
+    "visibility": "Visibility",
+    "visible": "Visible",
+    "widerAnchor": "Wider anchor",
+    "xbrlGlossaryOpensInNewTab": "XBRL Glossary (opens in new tab)"
   },
-  "scale": {
-    "-3": "thousandths",
-    "-2": "hundredths",
-    "-1": "tenths",
-    "0": "ones",
-    "1": "tens",
-    "2": "hundreds",
-    "3": "thousands",
-    "4": "ten thousands",
-    "5": "hundred thousands",
-    "6": "millions",
-    "7": "ten millions",
-    "8": "hundred millions",
-    "9": "billions"
+  "menu": {
+    "actions": "Actions",
+    "applicationLanguage": "Application Language",
+    "documentLanguage": "Document Language",
+    "help": "Help",
+    "options": "Options",
+    "reportAnIssue": "Report an Issue",
+    "survey": "Survey",
+    "userGuide": "User Guide"
   },
   "search": {
     "concealedFact": "Concealed fact",
+    "dataTypeConflictWarning": "Warning: selection conflicts with Concept Type filter",
     "default": "default",
+    "filter": "Filter",
     "hiddenFact": "Hidden fact",
+    "matchingFactsSummary": "Showing {{nMatches}} of {{nTotal}} facts",
     "noMatchFound": "No match found",
+    "reset": "Reset",
     "selected": "selected",
     "showMoreResults": "Show more results",
-    "tryAgainDifferentKeywords": "Try again with different keywords"
+    "toggleFilterControls": "Toggler filter controls",
+    "tryAgainDifferentKeywords": "Try again with different keywords",
+    "viewFact": "View fact"
   },
   "toolbar": {
+    "homePage": "Home",
+    "toggleDarkMode": "Toggle dark mode",
     "xbrlElements": "XBRL Elements"
+  },
+  "viewer": {
+    "ixbrlDocumentView": "iXBRL Document View"
   }
 }

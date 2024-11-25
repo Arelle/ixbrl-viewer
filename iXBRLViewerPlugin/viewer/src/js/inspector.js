@@ -804,7 +804,7 @@ export class Inspector {
         const sortedPrefixCounts = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
         for (const [prefix, counts] of sortedPrefixCounts) {
             const countRow = $("<tr></tr>").appendTo(summaryTagsTableBody);
-            countRow.append($("<th></th>").attr("scope", "row").text(prefix));
+            countRow.append($("<th></th>").attr("scope", "row").text(this._reportSet.preferredPrefix(prefix)));
             insertTagCount(countRow, counts[PRIMARY_ITEMS_KEY], totalPrimaryItemTags);
             insertTagCount(countRow, counts[DIMENSIONS_KEY], totalDimensionTags);
             insertTagCount(countRow, counts[MEMBERS_KEY], totalMemberTags);

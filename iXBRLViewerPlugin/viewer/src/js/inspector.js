@@ -314,7 +314,7 @@ export class Inspector {
         }
         let supportLinkUrl = this._iv.getSupportLinkUrl();
         if (supportLinkUrl) {
-            helpLinks[i18next.t("menu.reportAnIssue")] = supportLinkUrl;
+            helpLinks[i18next.t("menu.contactUs")] = supportLinkUrl;
         }
         let surveyLinkUrl = this._iv.getSurveyLinkUrl();
         if (surveyLinkUrl) {

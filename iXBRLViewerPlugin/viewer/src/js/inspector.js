@@ -334,6 +334,7 @@ export class Inspector {
         if (!this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_URL)) {
             return;
         }
+        $("#top-bar img.header").remove();
         let homeLinkUrl = this._iv.getStaticFeatureValue(FEATURE_HOME_LINK_URL);
         let homeLinkText;
         if (this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_LABEL)) {

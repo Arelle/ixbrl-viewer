@@ -46,10 +46,10 @@ export class DocFrame {
 export class Highlight {
 
     static darkBlue = 'rgb(2, 109, 206)';
-    static green = 'rgb(217, 243, 190)';
+    static green = 'rgb(190, 234, 143)';
     static lightBlue = 'rgb(0, 148, 255)';
-    static yellow = 'rgb(255, 183, 70)';
-    static purple = 'rgb(234, 168, 255)';
+    static yellow = 'rgb(255, 172, 41)';
+    static purple = 'rgb(221, 115, 255)';
     static propBgColor = 'background-color';
     static propOutline = 'outline';
     static transparent = 'rgba(0, 0, 0, 0)';

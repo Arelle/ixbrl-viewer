@@ -241,6 +241,12 @@ def iXBRLViewerSaveCommand(cntlr):
         return
     dialog = SaveViewerDialog(cntlr)
     dialog.render()
+    features = {
+        feature: True
+        for feature in dialog.features()
+    }
+    pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, features=features)
+    processModel(cntlr, modelXbrl)
     if dialog.accepted and dialog.filename():
         generateViewer(
             cntlr=cntlr,
@@ -248,7 +254,6 @@ def iXBRLViewerSaveCommand(cntlr):
             viewerURL=dialog.scriptUrl(),
             copyScript=dialog.copyScript(),
             zipViewerOutput=dialog.zipViewerOutput(),
-            features=dialog.features(),
         )
 
 

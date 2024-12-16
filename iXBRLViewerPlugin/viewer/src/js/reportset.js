@@ -246,6 +246,10 @@ export class ReportSet {
         return this.reportsData().some(r => r.rels?.["w-n"] !== undefined);
     }
 
+    usesCalculations() {
+        return this.reportsData().some(r => Object.keys(r.rels?.calc ?? {}).length > 0);
+    }
+
     hasValidationErrors() {
         return this._data.validation !== undefined && this._data.validation.length > 0;
     }

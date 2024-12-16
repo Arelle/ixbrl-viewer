@@ -305,7 +305,10 @@ export class Inspector {
 
             // Options
             this._optionsMenu.addLabel(i18next.t("menu.options"));
-            this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
+
+            if (this._reportSet.usesCalculations()) {
+                this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
+            }
         }
         let helpLinks = {}
         let guideLinkUrl = this._iv.getGuideLinkUrl();

@@ -503,7 +503,7 @@ export class Inspector {
             .appendTo(row);
         const dt = f.concept().dataType();
         if (dt !== undefined) {
-           $('<div class="datatype">')
+           $('<div class="datatype"></div>')
             .text(dt.label())
             .appendTo(row);
         }

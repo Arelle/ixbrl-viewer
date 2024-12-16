@@ -65,7 +65,7 @@ export class Viewer {
                     viewer._iframes.each(function (docIndex) { 
                         $(this).data("selected", docIndex == viewer._currentDocumentIndex);
                         const reportIndex = $(this).data("report-index");
-                        viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex);
+                        viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex, false);
                     });
 
                     /* Call plugin promise for each document in turn */

@@ -55,7 +55,7 @@ function createDimensionalizedFact(id, concept, options=null, dimensions= {}) {
 
 // Returns a report set with a single report
 function testReport(testData, sourceIXData) {
-    return testReportSet([ {data: testData, ixData: sourceIXData ?? {} } ])
+    return testReportSet([ {data: testData, ixData: sourceIXData ?? { } } ])
 }
 
 function mergeDicts(a, b) {
@@ -71,7 +71,7 @@ function testReportSet(reports) {
     };
 
     const ixData = {};
-    for (const [n, report] of reports.entries()) {
+    for (const report of reports.values()) {
         const targetReport = {};
         for (const key of ["languages", "prefixes", "roles"]) {
             reportSetData[key] = mergeDicts(reportSetData[key], report.data[key]);
@@ -83,12 +83,15 @@ function testReportSet(reports) {
 
         for (const id of Object.keys(targetReport.facts)) {
             if (!(id in ixData)) {
-                ixData[viewerUniqueId(n,id)] = report.ixData?.[id] ?? {};
+                ixData[viewerUniqueId(0, id)] = report.ixData?.[id] ?? {};
             }
         } 
         targetReports.push(targetReport);
     }
     const reportSet = new ReportSet(reportSetData);
+    for (const [id, data] of Object.entries(ixData)) {
+        ixData[id].isHidden ??= false;
+    }
     reportSet.setIXNodeMap(ixData);
     return reportSet;
 }

@@ -8,14 +8,30 @@ import i18next from "i18next";
  * @return {String} Measure Label
  */
 
-function measureLabel(reportSet, measure) {
-    const qname = reportSet.qname(measure);
+function measureLabel(report, measure) {
+    const qname = report.qname(measure);
     if (qname.namespace === NAMESPACE_ISO4217) {
-        measure = i18next.t(`currencies:unitFormat${qname.localname}`, {defaultValue: qname.localname});
-    } else if (measure.includes(':')) {
-        measure = measure.split(':')[1];
+        // Prefer a name from our own i18n resources
+        const keyi18n = `currencies:unitFormat${qname.localname}`;
+        if (i18next.exists(keyi18n)) {
+            return i18next.t(keyi18n);
+        }
+        // Fall back on symbol from UTR ...
+        const utrEntry = report.utrEntry(measure);
+        if (utrEntry !== undefined) {
+            // ... but disambiguate "$" symbol
+            return utrEntry.symbol == '$' ? `${qname.localname} $` : utrEntry.symbol;
+        }
+    }
+    if (measure.includes(':')) {
+        return measure.split(':')[1];
     }
     return measure;
+}
+
+export function measureName(report, measure) {
+    const utrEntry = report.utrEntry(measure);
+    return utrEntry?.name;
 }
 
 export class Unit {

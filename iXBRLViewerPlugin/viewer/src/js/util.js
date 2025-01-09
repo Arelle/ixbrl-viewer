@@ -231,34 +231,3 @@ export function getIXHiddenLinkStyle(domNode) {
     }
     return null;
 }
-
-/**
- * Transforms measure qname into title case label (or currency symbol, if applicable).
- * @return {String} Measure Label
- */
-
-export function measureLabel(report, measure) {
-    const qname = report.qname(measure);
-    if (qname.namespace === NAMESPACE_ISO4217) {
-        // Prefer a name from our own i18n resources
-        const keyi18n = `currencies:unitFormat${qname.localname}`;
-        if (i18next.exists(keyi18n)) {
-            return i18next.t(keyi18n);
-        }
-        // Fall back on symbol from UTR ...
-        const utrEntry = report.utrEntry(measure);
-        if (utrEntry !== undefined) {
-            // ... but disambiguate "$" symbol
-            return utrEntry.symbol == '$' ? `${qname.localname} $` : utrEntry.symbol;
-        }
-    }
-    if (measure.includes(':')) {
-        return measure.split(':')[1];
-    }
-    return measure;
-}
-
-export function measureName(report, measure) {
-    const utrEntry = report.utrEntry(measure);
-    return utrEntry?.name;
-}

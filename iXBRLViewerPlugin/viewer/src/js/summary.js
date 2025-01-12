@@ -94,13 +94,17 @@ export class DocumentSummary {
                 counter.addDimension(dimension);
 
                 const dimensionConcept = fact.report.getConcept(dimension);
-                if (dimensionConcept.isTypedDimension()) {
+                if (!dimensionConcept.hasDefinition) {
+                    console.log("Missing definition for dimension: " + dimension);
+                }
+                else if (dimensionConcept.isTypedDimension()) {
                     const typedDomainElement = dimensionConcept.typedDomainElement();
                     if (typedDomainElement) {
                         counter = this._getTagCounter(tagCounts, typedDomainElement);
                         counter.addMember(typedDomainElement);
                     }
-                } else {
+                } 
+                else {
                     counter = this._getTagCounter(tagCounts, member);
                     counter.addMember(member);
                 }

@@ -5,7 +5,9 @@ import { Balance } from "./balance.js";
 
 export class Concept {
     constructor(report, name) {
-        this._c = report.concepts()[name] || {};
+        const c = report.concepts()[name];
+        this.hasDefinition = (c !== undefined);
+        this._c = c ?? {};
         this.name = name;
         this.report = report;
     }

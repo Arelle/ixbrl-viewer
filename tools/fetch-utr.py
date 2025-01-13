@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+#
+# Fetches the latest live utr.xml, extracts name and symbol, and writes it to
+# src/data/utr.json for inclusion in the viewer. 
+#
+
 import requests
 import json
 from lxml import etree

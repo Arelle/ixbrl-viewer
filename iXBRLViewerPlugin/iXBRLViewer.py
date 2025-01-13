@@ -310,10 +310,6 @@ class IXBRLViewerBuilder:
         if f.isNumeric:
             if f.unit is not None and len(f.unit.measures[0]):
                 aspects['u'] = self.oimUnitString(f.unit)
-                for measures in f.unit.measures:
-                    for measure in measures:
-                        if measure in report.qnameUtrUnits:
-                            self.addUTRDefinition(report.qnameUtrUnits[measure])
             else:
                 # The presence of the unit aspect is used by the viewer to
                 # identify numeric facts.  If the fact has no unit (invalid

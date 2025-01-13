@@ -12,20 +12,6 @@ var testReportData = {
         "e": "http://example.com/entity",
     },
     "facts": {},
-    "units": {
-        "iso4217:USD": {
-            "s": "$",
-            "n": "US Dollar"
-        },
-        "iso4217:THB": {
-            "s": "฿",
-            "n": "Thai baht"
-        },
-        "iso4217:SGD": {
-            "s": "$",
-            "n": "Singapore dollar"
-        }
-    }
 };
 
 function testReport() {
@@ -86,8 +72,8 @@ describe("Unit label", () => {
     });
 
     test("Unit label - unknown", () => {
-        var unit = new Unit(testReport(), 'iso4217:ZAR');
-        expect(unit.label()).toEqual('ZAR');
+        var unit = new Unit(testReport(), 'iso4217:ZZZZ');
+        expect(unit.label()).toEqual('ZZZZ');
     });
 });
 

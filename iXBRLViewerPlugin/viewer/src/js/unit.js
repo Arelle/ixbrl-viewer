@@ -2,6 +2,7 @@
 
 import { NAMESPACE_ISO4217 } from "./util";
 import i18next from "i18next";
+import { utr } from "./utr";
 
 /**
  * Transforms measure qname into title case label (or currency symbol, if applicable).
@@ -17,7 +18,7 @@ function measureLabel(report, measure) {
             return i18next.t(keyi18n);
         }
         // Fall back on symbol from UTR ...
-        const utrEntry = report.utrEntry(measure);
+        const utrEntry = utr.get(qname);
         if (utrEntry !== undefined) {
             // ... but disambiguate "$" symbol
             return utrEntry.symbol == '$' ? `${qname.localname} $` : utrEntry.symbol;
@@ -30,7 +31,8 @@ function measureLabel(report, measure) {
 }
 
 export function measureName(report, measure) {
-    const utrEntry = report.utrEntry(measure);
+    const qname = report.qname(measure);
+    const utrEntry = utr.get(qname);
     return utrEntry?.name;
 }
 

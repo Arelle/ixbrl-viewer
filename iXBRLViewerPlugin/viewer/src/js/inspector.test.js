@@ -39,7 +39,6 @@ const testReportData = {
     "roles": {},
     "roleDefs": {},
     "rels": {},
-    "units": {},
 };
 
 function testReport(facts, ixData) {

@@ -104,9 +104,7 @@ class IXBRLViewerBuilder:
         self.taxonomyData = {
             "sourceReports": [],
             "features": features,
-            "units": {},
         }
-        self.utrMap = {}
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport = None
         self.useStubViewer = useStubViewer
@@ -164,13 +162,6 @@ class IXBRLViewerBuilder:
             label = next((rt.definition for rt in rts if rt.definition is not None), None)
             if label is not None:
                 self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = label
-
-    def addUTRDefinition(self, utrEntry):
-        name = self.nsmap.qname(QName(self.nsmap.getPrefix(utrEntry.nsUnit), utrEntry.nsUnit, utrEntry.unitId))
-        self.taxonomyData["units"].setdefault(name, {
-            "s": utrEntry.symbol,
-            "n": getattr(utrEntry, "unitName", utrEntry.unitId),
-        })
 
     def addConcept(self, report: ModelXbrl, concept, dimensionType = None):
         if concept is None:
@@ -528,7 +519,6 @@ class IXBRLViewerBuilder:
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
-
         if showValidations:
             self.taxonomyData["validation"] = self.validationErrors()
 

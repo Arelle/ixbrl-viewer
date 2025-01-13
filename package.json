@@ -24,6 +24,8 @@
     "customSyntax": "postcss-less",
     "extends": "stylelint-config-standard",
     "rules": {
+      "at-rule-prelude-no-invalid": null,
+      "declaration-property-value-no-unknown": null,
       "font-family-no-missing-generic-family-keyword": null,
       "no-descending-specificity": null,
       "property-no-vendor-prefix": null
@@ -60,7 +62,7 @@
     "puppeteer": "23.6.0",
     "puppeteer-screen-recorder": "3.0.3",
     "stylelint": "^16.4.0",
-    "stylelint-config-standard": "^36.0.0",
+    "stylelint-config-standard": "^37.0.0",
     "webfont": "^11.2.26",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",

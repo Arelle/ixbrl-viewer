@@ -81,4 +81,32 @@ export class FactDetailsPanel {
         const footnotes = await Promise.all(conceptElems.map(async (e) => await getTextContent(e)));
         expect(footnotes).toEqual(expectedFootnotes);
     }
+
+    // Returns the width of the fact details panel
+    async getPanelWidth() {
+        const inspectorPanel = await this.#viewerPage.page.waitForSelector('#inspector');
+        const boundingBox = await inspectorPanel.boundingBox();
+        return boundingBox.width;
+    }
+
+    // Resizes the panels based on the provided horizontalMovement value.
+    // positive values will move the panel to the right, negative values will
+    // move left
+    async resizePanel(horizontalMovement) {
+        this.#viewerPage.log('Resizing fact details panel by ' + horizontalMovement + ' pixels');
+        const resizer = await this.#viewerPage.page
+            .waitForSelector('#viewer-resize-handle', { visible: true });
+        const box = await resizer.boundingBox();
+
+        // Start the drag action
+        const startX = box.x + box.width / 2;
+        const startY = box.y + box.height / 2;
+        await this.#viewerPage.page.mouse.move(startX, startY);
+        await this.#viewerPage.page.mouse.down();
+
+        // Drag horizontally
+        await this.#viewerPage.page.mouse.move(startX + horizontalMovement, startY, { steps: 10 });
+        await this.#viewerPage.page.mouse.up();
+    }
+
 }

@@ -74,5 +74,11 @@ describe('ixbrl-viewer',() => {
                 const newFactText = await getTextContent(newFact);
                 expect(newFactText).toEqual(documentType);
                 expect(newFactBox).not.toEqual(oldFactBox);
+
+                // Test panel resizing
+                const startingWidth = await detailsPanel.getPanelWidth();
+                await detailsPanel.resizePanel(-100);
+                const endWidth = await detailsPanel.getPanelWidth();
+                expect(endWidth).toBeGreaterThan(startingWidth);
         });
 });

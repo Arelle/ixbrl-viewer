@@ -29,6 +29,7 @@
             {{ header }}
         </div>
 {{ namespace eg = "https://example.com/taxonomy" }}
+{{ namespace utr = "http://www.xbrl.org/2009/utr" }}
 {{ period cur "2018-01-01" "2018-12-31" }}
 {{ period prev "2017-01-01" "2017-12-31" }}
 {{ period prev2 "2016-01-01" "2016-12-31" }}
@@ -112,6 +113,27 @@ Profit Loss double tagged: {{ monetary eg:ProfitLoss[] }}{{ monetary eg:ProfitLo
             {{ row "" [period=prev5] "2013" "5,336" }}
         </table>
 
+        <h3>Currencies</h3>
+
+        <table class="time-series">
+            {{ default period-type=duration }}
+            {{ column-aspects static [] }}
+            {{ column-styles "" "" }}
+            {{ row "" eg:CostOfSales[period=cur, monetary-units=SGD] "SGD" "9,000" }}
+            {{ row "" eg:CostOfSales[period=prev, monetary-units=THB] "THB" "10,000" }}
+            <tr>
+                <td>tCO2e</td>
+                <td>{{ num eg:GHGEmissions[period=cur, units=utr:tCO2e] }}123{{end}}</td>
+            </tr>
+            <tr>
+                <td>MWh</td>
+                <td>{{ num eg:Energy[period=cur, units=utr:MWh] }}147{{end}}</td>
+            </tr>
+            <tr>
+                <td>MWh/$</td>
+                <td>{{ num eg:EmissionsIntensity[period=cur, units=utr:tCO2e/iso4217:USD] }}1,234{{end}}</td>
+            </tr>
+        </table>
 
         <h3>Table export test</h3>
 

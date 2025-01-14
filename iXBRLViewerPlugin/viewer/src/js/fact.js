@@ -81,9 +81,16 @@ export class Fact {
     }
 
     readableValue(val) {
+        return this.readableValueHTML(val).textContent;
+    }
+
+    readableValueHTML(val) {
         let v = val === undefined ? this.f.v : val;
+        const span = document.createElement("span");
+        span.classList.add("fact-value");
         if (this.isInvalidIXValue()) {
-            v = "Invalid value";
+            span.classList.add("fact-value-invalid");
+            span.append(document.createTextNode("Invalid value"));
         }
         else if (this.isNumeric()) {
             const d = this.decimals();
@@ -95,14 +102,17 @@ export class Fact {
                 formattedNumber = formatNumber(v, d);
             }
             if (this.isMonetaryValue()) {
-                v = this.unitLabel() + " " + formattedNumber;
+                span.append(this.unitLabelHTML());
+                span.append(document.createTextNode(" " + formattedNumber));
             }
             else {
-                v = formattedNumber + " " + this.unitLabel();
+                span.append(document.createTextNode(formattedNumber + " "));
+                span.append(this.unitLabelHTML());
             }
         }
         else if (this.isNil()) {
-            v = "nil";
+            span.classList.add("fact-value-nil");
+            span.append(document.createTextNode("nil"));
         }
         else if (this.isTextBlock()) {
             const html = $("<div>").append($($.parseHTML(v, null, false)));
@@ -114,6 +124,7 @@ export class Fact {
                 .prepend(document.createTextNode(' '));
             /* Replace runs of whitespace (including nbsp) with a single space */
             v = html.text().replace(/[\u00a0\s]+/g, " ").trim();
+            span.append(document.createTextNode(v));
         }
         else if (this.isEnumeration()) {
             const labels = [];
@@ -121,8 +132,12 @@ export class Fact {
                 labels.push(this.report.getLabelOrName(qn, 'std'));
             }
             v = labels.join(', ');
+            span.append(document.createTextNode(v));
         }
-        return v;
+        else {
+            span.append(document.createTextNode(v));
+        }
+        return span;
     }
 
     /**
@@ -146,6 +161,10 @@ export class Fact {
      */
     unitLabel() {
         return this.unit()?.label() ?? i18next.t("factDetails.noUnit");
+    }
+
+    unitLabelHTML() {
+        return this.unit()?.html() ?? document.createTextNode(i18next.t("factDetails.noUnit"));
     }
 
     getConceptPrefix() {

@@ -231,4 +231,3 @@ export function getIXHiddenLinkStyle(domNode) {
     }
     return null;
 }
-

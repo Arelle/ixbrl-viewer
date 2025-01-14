@@ -11,7 +11,7 @@ var testReportData = {
         "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
-    "facts": {}
+    "facts": {},
 };
 
 function testReport() {
@@ -57,12 +57,23 @@ describe("Unit label", () => {
 
     test("Unit label - known currency", () => {
         var unit = new Unit(testReport(), 'iso4217:USD');
+        // Note "US $" from i18n takes precedence over "USD $" generated from UTR
         expect(unit.label()).toEqual('US $');
     });
 
+    test("Unit label - UTR currency", () => {
+        var unit = new Unit(testReport(), 'iso4217:THB');
+        expect(unit.label()).toEqual('฿');
+    });
+
+    test("Unit label - UTR currency with '$' symbol", () => {
+        var unit = new Unit(testReport(), 'iso4217:SGD');
+        expect(unit.label()).toEqual('SGD $');
+    });
+
     test("Unit label - unknown", () => {
-        var unit = new Unit(testReport(), 'iso4217:ZAR');
-        expect(unit.label()).toEqual('ZAR');
+        var unit = new Unit(testReport(), 'iso4217:ZZZZ');
+        expect(unit.label()).toEqual('ZZZZ');
     });
 });
 

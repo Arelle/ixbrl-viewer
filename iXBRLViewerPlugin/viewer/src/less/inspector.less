@@ -1416,4 +1416,20 @@
       display: none;
     }
   }
+
+  .fact-value {
+    &.fact-value-invalid {
+      font-style: italic;
+      color: #f00;
+    }
+
+    &.fact-value-nil {
+      font-style: italic;
+    }
+
+    .measure {
+      border-bottom: 1px dotted @colour-text-form-value;
+      cursor: help;
+    }
+  }
 }

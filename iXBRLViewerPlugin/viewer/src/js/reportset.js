@@ -9,7 +9,6 @@ import { QName } from "./qname.js";
 import { ViewerOptions } from './viewerOptions.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
 
-
 // Class represents the set of XBRL "target" reports shown in the viewer.
 // Each contained report represents the data from a single target document in a
 // single iXBRL Document or iXBRL Document Set
@@ -261,5 +260,5 @@ export class ReportSet {
     factsForReport(report) {
         return Object.values(this._items).filter(i => i instanceof Fact && i.report == report);
     }
-    
+
 }

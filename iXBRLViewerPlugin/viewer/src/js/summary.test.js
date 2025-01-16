@@ -7,7 +7,7 @@ function testConcept(typedDomainElement) {
     return {
         isTypedDimension: () => typedDomainElement !== undefined,
         typedDomainElement: () => typedDomainElement,
-        hasDefinition: () => true,
+        hasDefinition: true,
     }
 }
 

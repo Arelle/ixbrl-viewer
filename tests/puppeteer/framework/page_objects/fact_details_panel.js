@@ -29,7 +29,7 @@ export class FactDetailsPanel {
                 'Duplicate Count');
         this.factValue = new Text(
                 this.#viewerPage,
-                '//*[@data-i18n="factDetails.factValue"]//ancestor::tr//*[contains(@class, "value")]',
+                '//*[@data-i18n="factDetails.factValue"]//ancestor::tr//*[contains(concat(" ",@class," "), " value ")]',
                 'Fact Value');
         this.entity = new Text(
                 this.#viewerPage,

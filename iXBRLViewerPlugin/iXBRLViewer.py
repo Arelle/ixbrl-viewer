@@ -561,20 +561,22 @@ class iXBRLViewer:
 
     def __init__(self, cntlr: Cntlr):
         self.reportZip = None
-        self.files = []
+        self.filesByFilename = dict()
         self.filingDocuments = None
         self.cntlr = cntlr
-        self.filenames = set()
         self.assets = []
 
     def addReportAssets(self, assets):
         self.assets.extend(assets)
 
     def addFile(self, ivf):
-        if ivf.filename in self.filenames:
-            return
-        self.files.append(ivf)
-        self.filenames.add(ivf.filename)
+        # Overwrite previous occurrences of the same document, because it may
+        # have had more IDs added to it by subsequent target documents.
+        self.filesByFilename[ivf.filename] = ivf
+
+    @property
+    def files(self):
+        return list(self.filesByFilename.values())
 
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments

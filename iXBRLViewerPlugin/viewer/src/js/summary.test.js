@@ -6,7 +6,8 @@ import { DocumentSummary } from "./summary.js";
 function testConcept(typedDomainElement) {
     return {
         isTypedDimension: () => typedDomainElement !== undefined,
-        typedDomainElement: () => typedDomainElement
+        typedDomainElement: () => typedDomainElement,
+        hasDefinition: true,
     }
 }
 

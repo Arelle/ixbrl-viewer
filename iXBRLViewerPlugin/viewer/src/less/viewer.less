@@ -44,21 +44,13 @@
   background-color: var(--colour-highlight-2);
 }
 
-.review .ixbrl-highlight:not(.ixbrl-no-highlight) {
-  // Review mode disables namespace-specific highlighting in favor of all tagged
-  // elements sharing the same default highlight color, other colors are used for
-  // untagged highlighting defined above.
-  &, 
-  & .ixbrl-sub-element {
-      background-color: var(--colour-highlight-default) !important; // Override inline styles
-  }
-
-  &.ixbrl-highlight-1,
+.review .ixbrl-highlight {
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-1, 
   &.ixbrl-highlight-1 .ixbrl-sub-element {
     background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 
-  &.ixbrl-highlight-2,
+  &:not(.ixbrl-no-highlight) .ixbrl-highlight-2,
   &.ixbrl-highlight-2 .ixbrl-sub-element {
     background-color: var(--colour-highlight-default) !important; // Override inline styles
   }

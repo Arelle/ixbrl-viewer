@@ -1208,7 +1208,7 @@ export class Inspector {
         const valueHTML = item.readableValueHTML();
         const tr = $('tr.value', context);
         const valueSpan = tr.find('td .value').empty();
-        if (!item.isNumeric() && !showAll) {
+        if (!(item instanceof Fact && item.isNumeric()) && !showAll) {
             const vv = wrapLabel(valueHTML.textContent, 120);
             if (vv.length > 1) {
                 tr.addClass("truncated");
@@ -1463,6 +1463,7 @@ export class Inspector {
         } 
         else { 
             $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("html-hidden-fact");
+            $('#inspector .tags').show();
 
             $('#inspector .fact-inspector')
                 .empty()
@@ -1512,6 +1513,7 @@ export class Inspector {
             else if (cf instanceof Footnote) {
                 $('#inspector').addClass('footnote-mode');
                 $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML(cf));
+                $('#inspector .tags').hide();
             }
             $('.fact-details').localize();
         }

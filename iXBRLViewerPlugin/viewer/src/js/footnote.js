@@ -21,6 +21,12 @@ export class Footnote {
         return this.textContent();
     }
 
+    readableValueHTML() {
+        const span = document.createElement("span");
+        span.append(document.createTextNode(this.textContent()));
+        return span;
+    }
+
     isTextBlock() {
         return false;
     }

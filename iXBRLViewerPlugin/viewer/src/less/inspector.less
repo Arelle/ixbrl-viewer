@@ -689,19 +689,6 @@
             }
           }
 
-          .select-icon {
-            float: right;
-            .square-button();
-            .clickable();
-
-            &:first-of-type {
-              margin-left: 0.5rem;
-            }
-
-            &::before {
-              .icon-select();
-            }
-          }
 
           .more-results {
             .clickable();
@@ -1296,6 +1283,20 @@
   .fact-list {
     .fact-list-item {
       .block-list-item();
+
+      .select-icon {
+        float: right;
+        .square-button();
+        .clickable();
+
+        &:first-of-type {
+          margin-left: 0.5rem;
+        }
+
+        &::before {
+          .icon-select();
+        }
+      }
 
       .title {
         color: var(--colour-text-title);

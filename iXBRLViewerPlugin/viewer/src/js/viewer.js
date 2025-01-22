@@ -765,10 +765,9 @@ export class Viewer {
                         }
                     }
             });
-            $(".ixbrl-sub-element", this._contents).addClass("ixbrl-highlight");
         }
         else {
-            $(".ixbrl-element, .ixbrl-sub-element", this._contents).removeClass(
+            $(".ixbrl-element", this._contents).removeClass(
                 (i, className) => (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ')
             );
         }

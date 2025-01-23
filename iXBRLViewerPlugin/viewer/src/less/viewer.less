@@ -21,17 +21,17 @@
 
 .ixbrl-highlight {
   &:not(.ixbrl-no-highlight),
-  & .ixbrl-sub-element {
+  & .ixbrl-sub-element:not(.ixbrl-no-highlight) {
       background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 
   &:not(.ixbrl-no-highlight).ixbrl-highlight-1, 
-  &.ixbrl-highlight-1 .ixbrl-sub-element {
+  &.ixbrl-highlight-1 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     background-color: var(--colour-highlight-1) !important; // Override inline styles
   }
 
   &:not(.ixbrl-no-highlight) .ixbrl-highlight-2,
-  &.ixbrl-highlight-2 .ixbrl-sub-element {
+  &.ixbrl-highlight-2 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     background-color: var(--colour-highlight-2) !important; // Override inline styles
   }
 }
@@ -46,79 +46,73 @@
 
 .review .ixbrl-highlight {
   &:not(.ixbrl-no-highlight).ixbrl-highlight-1, 
-  &.ixbrl-highlight-1 .ixbrl-sub-element {
+  &.ixbrl-highlight-1 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 
   &:not(.ixbrl-no-highlight) .ixbrl-highlight-2,
-  &.ixbrl-highlight-2 .ixbrl-sub-element {
+  &.ixbrl-highlight-2 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 }
 
-div,
-span {
-  &:not(.ixbrl-no-highlight) {
-    &.ixbrl-selected {
-      outline: solid 0.125em var(--colour-primary-focus);
-      outline-offset: 0.0625em;
-    }
+// Apply related fact highlighting (used for calc contributors)
+&.ixbrl-related {
+  &:not(.ixbrl-no-highlight),
+  .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+    outline: solid 0.125em var(--colour-related-fact);
+    outline-offset: 0.0625em;
 
-    &.ixbrl-element,
-    &.ixbrl-sub-element {
-      &:hover:not(.ixbrl-selected) {
-        outline: dashed 0.125em var(--colour-primary-focus);
-        outline-offset: 0.0625em;
-      }
+    td&, th& {
+      outline-offset: -0.0625em;
     }
   }
 }
 
-:not(.ixbrl-no-highlight) {
-  &.ixbrl-element,
-  &.ixbrl-sub-element {
+// Apply linked fact highlighting (used when hovering on facts in inspector)
+&.ixbrl-linked-highlight {
+  &:not(.ixbrl-no-highlight),
+  .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+    outline: dashed 0.125em var(--colour-linked-fact);
+    outline-offset: 0.0625em;
+
+    td&, th& {
+      outline-offset: -0.0625em;
+    }
+  }
+}
+
+// Apply dashed outline to iXBRL elements on hover
+// Should override previous rule
+.ixbrl-element:not(.ixbrl-no-highlight),
+.ixbrl-sub-element:not(.ixbrl-no-highlight) {
+  &:hover {
+    outline: dashed 0.125em var(--colour-primary-focus);
+    outline-offset: 0.0625em;
     cursor: pointer;
 
-    &.ixbrl-related {
-      outline: dashed 0.125em var(--colour-related-fact);
+    td&, th& {
+      outline-offset: -0.0625em;
+    }
+  }
+}
 
-      &:not(td, th) {
-        outline-offset: 0.0625em;
+// Apply solid outline to selected elements
+&.ixbrl-selected {
+  &:not(.ixbrl-no-highlight),
+  .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+    // This rule needs to override the previous one so that already selected
+    // elements don't get a dashed line on hover
+    &,
+    &:hover {
+      outline: solid 0.125em var(--colour-primary-focus);
+      outline-offset: 0.0625em;
+
+      td&, th& {
+        outline-offset: -0.0625em;
       }
     }
   }
-}
-
-td,
-th {
-  &:not(.ixbrl-no-highlight) {
-    &.ixbrl-selected {
-      outline: solid 0.125em var(--colour-primary-focus) !important;
-      outline-offset: -0.0625em !important;
-    }
-
-    &.ixbrl-element:hover:not(.ixbrl-selected),
-    &.ixbrl-sub-element:hover:not(.ixbrl-selected) {
-      outline: dashed 0.125em var(--colour-primary-focus) !important;
-      outline-offset: -0.0625em !important;
-    }
-  }
-
-  &.ixbrl-related {
-    outline-offset: -0.0625em !important;
-  }
-}
-
-.ixbrl-related.ixbrl-linked-highlight:not(.ixbrl-no-highlight),
-.ixbrl-linked-highlight:not(.ixbrl-no-highlight) {
-  .linked-highlight-text();
-}
-
-td.ixbrl-related.ixbrl-linked-highlight:not(.ixbrl-no-highlight),
-td.ixbrl-linked-highlight:not(.ixbrl-no-highlight) {
-  .linked-highlight-cell();
-
-  outline-offset: -0.0625em;
 }
 
 div.ixbrl-table-handle {

@@ -605,7 +605,7 @@ export class Viewer {
     }
 
     clearHighlighting() {
-        $("body", this._iframes.contents()).find(".ixbrl-element, .ixbrl-sub-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
+        $("body", this._iframes.contents()).find(".ixbrl-element").removeClass("ixbrl-selected").removeClass("ixbrl-related").removeClass("ixbrl-linked-highlight");
     }
 
     _ixIdsForElement(e) {
@@ -702,15 +702,17 @@ export class Viewer {
         return this._ixNodeMap[vuid].wrapperNodes;
     }
 
-    elementsForItemIds(vuids) {
-        return $(vuids.map(vuid => this.elementsForItemId(vuid).get()).flat());
+    // Returns a jQuery node list containing the primary wrapper node for each
+    // vuid provided
+    primaryElementsForItemIds(vuids) {
+        return $(vuids.map(vuid => this.elementsForItemId(vuid).first().get(0)));
     }
 
     /*
      * Add or remove a class to an item (fact or footnote) and any continuation elements
      */
     changeItemClass(vuid, highlightClass, removeClass) {
-        const elements = this.elementsForItemIds([vuid].concat(this.itemContinuationMap[vuid]))
+        const elements = this.primaryElementsForItemIds([vuid].concat(this.itemContinuationMap[vuid]))
         if (removeClass) {
             elements.removeClass(highlightClass);
         }
@@ -757,7 +759,7 @@ export class Viewer {
                     if (ixn !== undefined ) {
                         const item = reportSet.getItemById(ixn.id);
                         if (item !== undefined) {
-                            const elements = viewer.elementsForItemIds(ixn.chainIXIds());
+                            const elements = viewer.primaryElementsForItemIds(ixn.chainIXIds());
                             const i = groups[item.conceptQName().prefix];
                             if (i !== undefined) {
                                 elements.addClass("ixbrl-highlight-" + i);

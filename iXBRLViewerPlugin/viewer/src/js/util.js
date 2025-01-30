@@ -26,6 +26,7 @@ export const FEATURE_SURVEY_LINK = 'survey_link';
 export const FEATURE_SEARCH_ON_STARTUP = 'search_on_startup';
 export const FEATURE_HIGHLIGHT_FACTS_ON_STARTUP = 'highlight_facts_on_startup';
 
+export const STORAGE_APP_LANGUAGE = "ixbrl-viewer-app-language";
 export const STORAGE_THEME = "ixbrl-viewer-theme";
 export const STORAGE_HIGHLIGHT_FACTS = "ixbrl-viewer-highlight-all-facts";
 export const STORAGE_HOME_LINK_QUERY = "ixbrl-viewer-home-link-query";

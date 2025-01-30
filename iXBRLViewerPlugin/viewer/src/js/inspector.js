@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY} from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -422,6 +422,7 @@ export class Inspector {
     }
 
     changeApplicationLanguage(lang) {
+        localStorage.setItem(STORAGE_APP_LANGUAGE, lang);
         i18next.changeLanguage(lang);
         this.rebuildViewer();
     }
@@ -1577,6 +1578,10 @@ export class Inspector {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has("lang")) {
             return [ urlParams.get("lang") ];
+        }
+        const localStorageAppLang = localStorage.getItem(STORAGE_APP_LANGUAGE);
+        if (localStorageAppLang) {
+            return [ localStorageAppLang ];
         }
         const langs = window.navigator.languages || [ window.navigator.language || window.navigator.userLanguage ] ;
         if (langs.length == 0 || !langs[0]) {

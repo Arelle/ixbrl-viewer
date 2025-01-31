@@ -132,6 +132,7 @@ def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl):
         cntlr.addToLog(
             f"Exception {ex} \nTraceback {tb}",
             messageCode=EXCEPTION_MESSAGE_CODE,
+            level=logging.ERROR,
         )
 
 def generateViewer(

@@ -133,6 +133,9 @@ def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl):
             f"Exception {ex} \nTraceback {tb}",
             messageCode=EXCEPTION_MESSAGE_CODE,
             level=logging.ERROR,
+            messageArgs={
+                'traceback': tb,
+            },
         )
 
 def generateViewer(

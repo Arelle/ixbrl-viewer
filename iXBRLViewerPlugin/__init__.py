@@ -129,7 +129,15 @@ def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl):
         print(ex)
     except Exception as ex:
         tb = traceback.format_tb(sys.exc_info()[2])
-        cntlr.addToLog(f"Exception {ex} \nTraceback {tb}", messageCode=EXCEPTION_MESSAGE_CODE)
+        cntlr.addToLog(
+            "Exception %(ex)s\nTraceback %(traceback)s",
+            messageCode=EXCEPTION_MESSAGE_CODE,
+            level=logging.ERROR,
+            messageArgs={
+                'ex': ex,
+                'traceback': tb,
+            },
+        )
 
 def generateViewer(
         cntlr: Cntlr,

@@ -17,7 +17,7 @@ export function getVariable(name) {
 
 function setTheme(theme) {
     const html = getHtmlElement();
-    html.dataset[APP_THEME_DATASET_NAME] = `theme-${theme}`;
+    html.dataset[APP_THEME_DATASET_NAME] = theme;
 }
 
 function getStoredTheme() {
@@ -30,7 +30,7 @@ function storeTheme(theme) {
 
 export function getTheme() {
     const html = getHtmlElement();
-    return html.dataset[APP_THEME_DATASET_NAME].replace('theme-','');
+    return html.dataset[APP_THEME_DATASET_NAME];
 }
 
 export function initializeTheme() {

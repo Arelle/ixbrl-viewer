@@ -202,8 +202,8 @@ export class iXBRLViewer {
         doc.close();
 
         let docTitle = $('title').text();
-        if (docTitle != "") {
-            docTitle = "Inline Viewer - " + docTitle;
+        if (docTitle !== "") {
+            docTitle = `Inline Viewer - ${docTitle}`;
         }
         else {
             docTitle = "Inline Viewer";
@@ -237,7 +237,7 @@ export class iXBRLViewer {
     _getTaxonomyData() {
         for (let i = document.body.children.length - 1; i >= 0; i--) {
             const elt = document.body.children[i];
-            if (elt.tagName.toUpperCase() == 'SCRIPT' && elt.getAttribute("type") == 'application/x.ixbrl-viewer+json') {
+            if (elt.tagName.toUpperCase() === 'SCRIPT' && elt.getAttribute("type") === 'application/x.ixbrl-viewer+json') {
                 return elt.innerHTML;
             }
         }
@@ -245,7 +245,7 @@ export class iXBRLViewer {
     }
 
     _checkDocumentSetBrowserSupport() {
-        if (document.location.protocol == 'file:') {
+        if (document.location.protocol === 'file:') {
             alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
         }
     }
@@ -258,11 +258,11 @@ export class iXBRLViewer {
             else {
                 fetch(this.options.configUrl)
                     .then((resp) => {
-                        if (resp.status == 404) {
+                        if (resp.status === 404) {
                             return Promise.resolve({});
                         }
-                        else if (resp.status != 200) {
-                            return Promise.reject("Fetch failed: " + resp.status);
+                        if (resp.status !== 200) {
+                            return Promise.reject(`Fetch failed: ${resp.status}`);
                         }
                         return resp.json();
                     })
@@ -300,7 +300,7 @@ export class iXBRLViewer {
             // We need to parse JSON first so that we can determine feature enablement before loading begins.
             const taxonomyData = iv._getTaxonomyData();
             const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
-            let features = parsedTaxonomyData && parsedTaxonomyData["features"];
+            let features = parsedTaxonomyData?.features;
             if (!features) {
                 features = {};
             }
@@ -349,19 +349,19 @@ export class iXBRLViewer {
             const progress = stubViewer ? 'Loading iXBRL Report' : 'Loading iXBRL Viewer';
             iv.setProgress(progress).then(() => {
                 /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
-                let timer = setInterval(function () {
+                const timer = setInterval(() => {
                     let complete = true;
-                    iframes.each(function (n) {
-                        const iframe = this;
+                    iframes.each((n, iframe) => {
                         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
+                        if ((iframeDoc.readyState !== 'complete' && iframeDoc.readyState !== 'interactive') || $(iframe).contents().find("body").children().length === 0) {
                             complete = false;
                         }
                     });
                     if (complete) {
                         clearInterval(timer);
 
-                        const viewer = iv.viewer = new Viewer(iv, iframes, reportSet);
+                        const viewer = new Viewer(iv, iframes, reportSet);
+                        iv.viewer = viewer
 
                         viewer.initialize()
                             .then(() => inspector.initialize(reportSet, viewer))
@@ -382,8 +382,8 @@ export class iXBRLViewer {
                                 .on('resizemove', (event) => {
                                     const target = event.target;
                                     const w = 100 * event.rect.width / $(target).parent().width();
-                                    target.style.width = w + '%';
-                                    $('#inspector').css('width', (100 - w) + '%');
+                                    target.style.width = `${w}%`;
+                                    $('#inspector').css('width', `${100 - w}%`);
                                 })
                                 .on('resizeend', (event) =>
                                     $('#ixv').css("pointer-events", "auto")
@@ -421,7 +421,7 @@ export class iXBRLViewer {
              * message up before the ensuing thread-blocking work
              * https://bugs.chromium.org/p/chromium/issues/detail?id=675795 
              */
-            window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(() => {
                 console.log(`%c [Progress] ${msg} `, 'background: #77d1c8; color: black;');
                 $('#ixv .loader .text').text(msg);
                 window.requestAnimationFrame(() => resolve());

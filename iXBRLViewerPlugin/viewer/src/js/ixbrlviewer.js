@@ -360,6 +360,19 @@ export class iXBRLViewer {
                     if (complete) {
                         clearInterval(timer);
 
+                        iframes.each((n, iframe) => {
+                            const htmlNode = $(iframe).contents().find('html');
+                            // A schema valid report should not have a lang attribute on the html element.
+                            // However, if the report is not schema valid, we shouldn't override it.
+                            if (htmlNode.attr('lang') === undefined) {
+                                // If the report has an XML lang attribute, use it as the HTML lang for screen readers.
+                                // If the language of the report can't be detected, set it to an empty string to avoid
+                                // inheriting the lang of the application HTML node (which is set to the UI language).
+                                const docLang = htmlNode.attr('xml:lang') || '';
+                                htmlNode.attr('lang', docLang);
+                            }
+                        });
+
                         const viewer = new Viewer(iv, iframes, reportSet);
                         iv.viewer = viewer
 

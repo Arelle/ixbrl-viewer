@@ -1,9 +1,10 @@
 // See COPYRIGHT.md for copyright information
 
-import { STORAGE_THEME } from "./util";
+import { IXBRL_VIEWER_DATASET_PREFIX, STORAGE_THEME } from "./util";
 
 const DARK_THEME = 'dark';
 const LIGHT_THEME = 'light';
+const APP_THEME_DATASET_NAME = `${IXBRL_VIEWER_DATASET_PREFIX}Theme`;
 
 function getHtmlElement() {
     return document.querySelector('html');
@@ -16,7 +17,7 @@ export function getVariable(name) {
 
 function setTheme(theme) {
     const html = getHtmlElement();
-    html.dataset.theme = `theme-${theme}`;
+    html.dataset[APP_THEME_DATASET_NAME] = `theme-${theme}`;
 }
 
 function getStoredTheme() {
@@ -29,7 +30,7 @@ function storeTheme(theme) {
 
 export function getTheme() {
     const html = getHtmlElement();
-    return html.dataset.theme.replace('theme-','');
+    return html.dataset[APP_THEME_DATASET_NAME].replace('theme-','');
 }
 
 export function initializeTheme() {

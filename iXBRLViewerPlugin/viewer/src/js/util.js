@@ -234,3 +234,21 @@ export function getIXHiddenLinkStyle(domNode) {
     }
     return null;
 }
+
+/**
+ * Moves all attributes from one element to another, excluding data attributes created by the viewer application.
+ */
+export function moveNonAppAttributes(fromElement, toElement) {
+    for (const attr of [...fromElement.attributes]) {
+        if (!attr.name.startsWith("data-")) {
+            toElement.setAttribute(attr.name, attr.value); 
+            fromElement.removeAttribute(attr.name);
+        }
+    }
+    for (const [key, value] of Object.entries(fromElement.dataset)) {
+        if (!key.startsWith(IXBRL_VIEWER_DATASET_PREFIX)) {
+            toElement.dataset[key] = value;
+            delete fromElement.dataset[key];
+        }
+    }
+}

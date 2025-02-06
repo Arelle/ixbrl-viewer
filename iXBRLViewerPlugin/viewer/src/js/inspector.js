@@ -429,6 +429,7 @@ export class Inspector {
 
     rebuildViewer() {
         $("#ixv").localize();
+        $('html').attr('lang', i18next.resolvedLanguage);
         this.buildDisplayOptionsMenu();
         this.buildHomeLink()
         this.buildToolbarHighlightMenu();

@@ -26,6 +26,8 @@ export const FEATURE_SURVEY_LINK = 'survey_link';
 export const FEATURE_SEARCH_ON_STARTUP = 'search_on_startup';
 export const FEATURE_HIGHLIGHT_FACTS_ON_STARTUP = 'highlight_facts_on_startup';
 
+export const IXBRL_VIEWER_DATASET_PREFIX = 'ixbrlViewer';
+
 export const STORAGE_APP_LANGUAGE = "ixbrl-viewer-app-language";
 export const STORAGE_THEME = "ixbrl-viewer-theme";
 export const STORAGE_HIGHLIGHT_FACTS = "ixbrl-viewer-highlight-all-facts";
@@ -231,4 +233,22 @@ export function getIXHiddenLinkStyle(domNode) {
         }
     }
     return null;
+}
+
+/**
+ * Moves all attributes from one element to another, excluding data attributes created by the viewer application.
+ */
+export function moveNonAppAttributes(fromElement, toElement) {
+    for (const attr of [...fromElement.attributes]) {
+        if (!attr.name.startsWith("data-")) {
+            toElement.setAttribute(attr.name, attr.value); 
+            fromElement.removeAttribute(attr.name);
+        }
+    }
+    for (const [key, value] of Object.entries(fromElement.dataset)) {
+        if (!key.startsWith(IXBRL_VIEWER_DATASET_PREFIX)) {
+            toElement.dataset[key] = value;
+            delete fromElement.dataset[key];
+        }
+    }
 }

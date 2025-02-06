@@ -146,10 +146,10 @@
   "menu": {
     "actions": "Comportamientos",
     "applicationLanguage": "Idioma de Aplicación",
+    "contactUs": "Contacta con nosotros",
     "documentLanguage": "Idioma del Documento",
     "help": "Ayuda",
     "options": "Opciones",
-    "contactUs": "Contacta con nosotros",
     "survey": "Encuesta",
     "userGuide": "Guía del Usuario"
   },

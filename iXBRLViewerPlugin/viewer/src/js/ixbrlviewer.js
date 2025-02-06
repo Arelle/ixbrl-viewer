@@ -7,7 +7,7 @@ import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 import { initializeTheme } from './theme.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
-import {FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK} from "./util";
+import { FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK, moveNonAppAttributes } from "./util";
 
 const featureFalsyValues = new Set([undefined, null, '', 'false', false]);
 
@@ -202,15 +202,13 @@ export class iXBRLViewer {
         doc.close();
 
         let docTitle = $('title').text();
-        if (docTitle != "") {
-            docTitle = "Inline Viewer - " + docTitle;
+        if (docTitle !== "") {
+            docTitle = `Inline Viewer - ${docTitle}`;
         }
         else {
             docTitle = "Inline Viewer";
         }
-        if ($('html').attr("lang") === undefined) {
-            $('html').attr("lang", "en-US");
-        }
+
 
         $('head')
             .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon").appendTo($(iframe).contents().find('head'));
@@ -220,24 +218,26 @@ export class iXBRLViewer {
         /* Due to self-closing tags, our script tags may not be a direct child of
          * the body tag in an HTML DOM, so move them so that they are */
         $('body script').appendTo($('body'));
-        const iframeBody = $(iframe).contents().find('body');
-        $('body').children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
 
-        /* Move all attributes on the body tag to the new body */
-        for (const bodyAttr of [...$('body').prop("attributes")]) {
-            iframeBody.attr(bodyAttr.name, bodyAttr.value); 
-            $('body').removeAttr(bodyAttr.name);
-        }
+        const html = $('html');
+        const body = $('body');
+        const iframeHtml = $(iframe).contents().find('html');
+        const iframeBody = $(iframe).contents().find('body');
+        moveNonAppAttributes(html.get(0), iframeHtml.get(0));
+        moveNonAppAttributes(body.get(0), iframeBody.get(0));
+        html.attr('xmlns', 'http://www.w3.org/1999/xhtml');
+
+        body.children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
 
         /* Avoid any inline styles on the old body interfering with the inspector */
-        $('body').removeAttr('style');
+        body.removeAttr('style');
         return iframe;
     }
 
     _getTaxonomyData() {
         for (let i = document.body.children.length - 1; i >= 0; i--) {
             const elt = document.body.children[i];
-            if (elt.tagName.toUpperCase() == 'SCRIPT' && elt.getAttribute("type") == 'application/x.ixbrl-viewer+json') {
+            if (elt.tagName.toUpperCase() === 'SCRIPT' && elt.getAttribute("type") === 'application/x.ixbrl-viewer+json') {
                 return elt.innerHTML;
             }
         }
@@ -245,7 +245,7 @@ export class iXBRLViewer {
     }
 
     _checkDocumentSetBrowserSupport() {
-        if (document.location.protocol == 'file:') {
+        if (document.location.protocol === 'file:') {
             alert("Displaying iXBRL document sets from local files is not supported.  Please view the viewer files using a web server.");
         }
     }
@@ -258,11 +258,11 @@ export class iXBRLViewer {
             else {
                 fetch(this.options.configUrl)
                     .then((resp) => {
-                        if (resp.status == 404) {
+                        if (resp.status === 404) {
                             return Promise.resolve({});
                         }
-                        else if (resp.status != 200) {
-                            return Promise.reject("Fetch failed: " + resp.status);
+                        if (resp.status !== 200) {
+                            return Promise.reject(`Fetch failed: ${resp.status}`);
                         }
                         return resp.json();
                     })
@@ -300,7 +300,7 @@ export class iXBRLViewer {
             // We need to parse JSON first so that we can determine feature enablement before loading begins.
             const taxonomyData = iv._getTaxonomyData();
             const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
-            let features = parsedTaxonomyData && parsedTaxonomyData["features"];
+            let features = parsedTaxonomyData?.features;
             if (!features) {
                 features = {};
             }
@@ -349,19 +349,32 @@ export class iXBRLViewer {
             const progress = stubViewer ? 'Loading iXBRL Report' : 'Loading iXBRL Viewer';
             iv.setProgress(progress).then(() => {
                 /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
-                let timer = setInterval(function () {
+                const timer = setInterval(() => {
                     let complete = true;
-                    iframes.each(function (n) {
-                        const iframe = this;
+                    iframes.each((n, iframe) => {
                         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if ((iframeDoc.readyState != 'complete' && iframeDoc.readyState != 'interactive') || $(iframe).contents().find("body").children().length == 0) {
+                        if ((iframeDoc.readyState !== 'complete' && iframeDoc.readyState !== 'interactive') || $(iframe).contents().find("body").children().length === 0) {
                             complete = false;
                         }
                     });
                     if (complete) {
                         clearInterval(timer);
 
-                        const viewer = iv.viewer = new Viewer(iv, iframes, reportSet);
+                        iframes.each((n, iframe) => {
+                            const htmlNode = $(iframe).contents().find('html');
+                            // A schema valid report should not have a lang attribute on the html element.
+                            // However, if the report is not schema valid, we shouldn't override it.
+                            if (htmlNode.attr('lang') === undefined) {
+                                // If the report has an XML lang attribute, use it as the HTML lang for screen readers.
+                                // If the language of the report can't be detected, set it to an empty string to avoid
+                                // inheriting the lang of the application HTML node (which is set to the UI language).
+                                const docLang = htmlNode.attr('xml:lang') || '';
+                                htmlNode.attr('lang', docLang);
+                            }
+                        });
+
+                        const viewer = new Viewer(iv, iframes, reportSet);
+                        iv.viewer = viewer
 
                         viewer.initialize()
                             .then(() => inspector.initialize(reportSet, viewer))
@@ -382,8 +395,8 @@ export class iXBRLViewer {
                                 .on('resizemove', (event) => {
                                     const target = event.target;
                                     const w = 100 * event.rect.width / $(target).parent().width();
-                                    target.style.width = w + '%';
-                                    $('#inspector').css('width', (100 - w) + '%');
+                                    target.style.width = `${w}%`;
+                                    $('#inspector').css('width', `${100 - w}%`);
                                 })
                                 .on('resizeend', (event) =>
                                     $('#ixv').css("pointer-events", "auto")
@@ -421,7 +434,7 @@ export class iXBRLViewer {
              * message up before the ensuing thread-blocking work
              * https://bugs.chromium.org/p/chromium/issues/detail?id=675795 
              */
-            window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(() => {
                 console.log(`%c [Progress] ${msg} `, 'background: #77d1c8; color: black;');
                 $('#ixv .loader .text').text(msg);
                 window.requestAnimationFrame(() => resolve());

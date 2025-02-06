@@ -146,10 +146,10 @@
   "menu": {
     "actions": "Actions",
     "applicationLanguage": "Application Language",
+    "contactUs": "Contact Us",
     "documentLanguage": "Document Language",
     "help": "Help",
     "options": "Options",
-    "contactUs": "Contact Us",
     "survey": "Survey",
     "userGuide": "User Guide"
   },

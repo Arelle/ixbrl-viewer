@@ -8,6 +8,9 @@
   --colour-bg: @colour-bg;
   --colour-highlight-1: @colour-highlight-1;
   --colour-highlight-2: @colour-highlight-2;
+  --colour-highlight-3: @colour-highlight-3;
+  --colour-highlight-4: @colour-highlight-4;
+  --colour-highlight-5: @colour-highlight-5;
   --colour-highlight-default: @colour-highlight-default;
   --colour-linked-fact: @colour-linked-fact;
   --colour-primary-focus: @colour-primary-focus;
@@ -30,9 +33,24 @@
     background-color: var(--colour-highlight-1) !important; // Override inline styles
   }
 
-  &:not(.ixbrl-no-highlight) .ixbrl-highlight-2,
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-2,
   &.ixbrl-highlight-2 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     background-color: var(--colour-highlight-2) !important; // Override inline styles
+  }
+
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-3,
+  &.ixbrl-highlight-3 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+    background-color: var(--colour-highlight-3) !important; // Override inline styles
+  }
+
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-4,
+  &.ixbrl-highlight-4 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+    background-color: var(--colour-highlight-4) !important; // Override inline styles
+  }
+
+  &:not(.ixbrl-no-highlight) .ixbrl-highlight-5,
+  &.ixbrl-highlight-5 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+    background-color: var(--colour-highlight-5) !important; // Override inline styles
   }
 }
 
@@ -46,14 +64,18 @@
 
 .review .ixbrl-highlight {
   &:not(.ixbrl-no-highlight).ixbrl-highlight-1, 
-  &.ixbrl-highlight-1 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-2, 
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-3, 
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-4, 
+  &:not(.ixbrl-no-highlight).ixbrl-highlight-5, 
+  &.ixbrl-highlight-1 .ixbrl-sub-element:not(.ixbrl-no-highlight),
+  &.ixbrl-highlight-2 .ixbrl-sub-element:not(.ixbrl-no-highlight),
+  &.ixbrl-highlight-3 .ixbrl-sub-element:not(.ixbrl-no-highlight),
+  &.ixbrl-highlight-4 .ixbrl-sub-element:not(.ixbrl-no-highlight),
+  &.ixbrl-highlight-5 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 
-  &:not(.ixbrl-no-highlight) .ixbrl-highlight-2,
-  &.ixbrl-highlight-2 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
-    background-color: var(--colour-highlight-default) !important; // Override inline styles
-  }
 }
 
 // Apply related fact highlighting (used for calc contributors)

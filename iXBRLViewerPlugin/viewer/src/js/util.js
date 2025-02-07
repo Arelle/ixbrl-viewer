@@ -14,7 +14,7 @@ export const CALC11_ARCROLE = "calc11";
 export const GLOSSARY_URL = "https://xbrl.org/glossary/";
 
 // The number of distinct highlight colors defined in inspector.less
-export const HIGHLIGHT_COLORS = 3;
+export const HIGHLIGHT_COLORS = 6;
 
 // Feature names
 export const FEATURE_GUIDE_LINK = 'guide_link';

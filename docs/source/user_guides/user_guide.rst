@@ -32,10 +32,8 @@ The Inline XBRL Viewer consists of the following components:
 
 The viewer pane allows you to browse information in the report that has
 been tagged as XBRL by clicking on it to see tag details in the XBRL
-inspector. The “Highlight XBRL Elements” checkbox on the toolbar can be
-used to highlight all tagged information in the document. The viewer
-pane has controls for zooming and printing the Inline XBRL document, and
-also for exporting the data in individual tables.
+inspector. The viewer pane has controls for zooming and printing the
+Inline XBRL document, andalso for exporting the data in individual tables.
 
 You can also navigate between facts in the document using the left and
 right arrows at the top of the XBRL inspector. Moving between facts will
@@ -47,6 +45,15 @@ inspector when selected. No information will be highlighted in the
 viewer pane when a hidden fact is selected.
 
 .. image:: ../_images/user_guides/viewing_the_report.png
+
+Highlighting Facts
+^^^^^^^^^^^^^^^^^^
+
+The “Highlight XBRL Elements” checkbox on the toolbar can be
+used to highlight all tagged information in the document. Different colors
+represent different namespaces, which can be seen by hovering over the (?) icon.
+Note that not all of the namespaces used by the document may be visible if,
+for example, a given namespace is only used in dimensions.
 
 Fact Properties
 ~~~~~~~~~~~~~~~
@@ -139,9 +146,10 @@ facts and files included in the filing. The summary also includes the
 number of distinct concepts, dimensions and members in the report. You
 can click on the fact count to enter Search mode.
 
-Note that the number of concepts will be less than the total number of
-facts, as concepts will often be reported for different periods and with
-different dimensions.
+.. note::
+	The number of concepts will be less than the total number of
+	facts, as concepts will often be reported for different periods and with
+	different dimensions.
 
 .. image:: ../_images/user_guides/document_summary.png
 

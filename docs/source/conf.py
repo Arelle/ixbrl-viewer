@@ -13,7 +13,21 @@ author = "support@arelle.org"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+extensions = [
+    "autodoc2",
+    "myst_parser",
+    "sphinx_copybutton",
+]
+
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+autodoc2_packages = [
+    {
+        "path": "../../iXBRLViewerPlugin",
+        "exclude_dirs": ["dist"],
+    }
+]
+autodoc2_render_plugin = "myst"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -32,6 +46,12 @@ html_theme_options = {
 html_title = "Arelle iXBRL Viewer <release>"
 html_favicon = "_images/favicon.ico"
 html_logo = "_images/arelle.png"
+
+myst_enable_extensions = [
+    "colon_fence",
+    "fieldlist",
+]
+myst_heading_anchors = 6
 
 pygments_style = "xcode"
 pygments_dark_style = "monokai"

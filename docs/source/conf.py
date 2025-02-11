@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Arelle iXBRL Viewer"
-copyright = "2011-present Workiva, Inc."
+copyright = "2019-present Workiva, Inc."
 author = "support@arelle.org"
 
 # -- General configuration ---------------------------------------------------
@@ -45,7 +45,7 @@ html_theme_options = {
 }
 html_title = "Arelle iXBRL Viewer <release>"
 html_favicon = "_images/favicon.ico"
-html_logo = "_images/arelle.png"
+html_logo = "_images/arelle-rtd.png"
 
 myst_enable_extensions = [
     "colon_fence",

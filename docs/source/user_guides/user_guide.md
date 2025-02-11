@@ -1,5 +1,8 @@
 # User Guide
 
+:::{index} User Guide
+:::
+
 ## Overview
 
 The Arelle Inline XBRL (iXBRL) Viewer allows you to access, view and

@@ -7,6 +7,10 @@ on:
 permissions: {}
 
 jobs:
+  publish-documentation:
+    uses: ./.github/workflows/publish-documentation.yml
+    secrets: inherit
+
   node-tests:
     uses: ./.github/workflows/node-tests.yml
   npm-package:

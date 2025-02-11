@@ -35,6 +35,7 @@
     - [Running unit tests](#running-unit-tests)
     - [Running Puppeteer tests](#running-puppeteer-tests)
   - [👥 Contributors](#-contributors)
+  - [License](#license)
 
 ## Description
 
@@ -385,3 +386,9 @@ All commands should be run from repository root
   </a>
   <p>Join our community and become a contributor today! 🚀 </p>
 </div>
+
+## License
+
+[Apache License 2.0][license]
+
+[license]: https://arelle-ixbrl-viewer.readthedocs.io/en/latest/license.html

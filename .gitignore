@@ -6,6 +6,8 @@
 build
 node_modules/
 dist/
+docs/_build
+docs/source/apidocs
 __pycache__
 /tests/puppeteer/artifacts/
 iXBRLViewerPlugin/viewer/src/fonts/

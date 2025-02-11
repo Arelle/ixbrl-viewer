@@ -7,6 +7,36 @@
 
 ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
 
+## Table of Contents
+
+- [Arelle iXBRL Viewer](#arelle-ixbrl-viewer)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Documentation](#documentation)
+  - [Installation](#installation)
+  - [Accessing the JavaScript viewer application](#accessing-the-javascript-viewer-application)
+    - [Accessing via the CDN](#accessing-via-the-cdn)
+    - [Accessing via Github](#accessing-via-github)
+    - [Building the JavaScript locally](#building-the-javascript-locally)
+  - [JavaScript Versioning](#javascript-versioning)
+  - [Producing an ixbrl-viewer via the Arelle GUI](#producing-an-ixbrl-viewer-via-the-arelle-gui)
+    - [Preparing an iXBRL file via the GUI](#preparing-an-ixbrl-file-via-the-gui)
+    - [Preparing an iXBRL document set using the Arelle GUI](#preparing-an-ixbrl-document-set-using-the-arelle-gui)
+  - [Producing an ixbrl-viewer via the Arelle command line](#producing-an-ixbrl-viewer-via-the-arelle-command-line)
+    - [Preparing an iXBRL file via the command line](#preparing-an-ixbrl-file-via-the-command-line)
+    - [Preparing an iXBRL document set](#preparing-an-ixbrl-document-set)
+    - [Using build-viewer.py](#using-build-viewerpy)
+  - [Stub viewer mode](#stub-viewer-mode)
+  - [Optional Features](#optional-features)
+    - [Feature: Review Mode](#feature-review-mode)
+  - [Runtime config](#runtime-config)
+  - [Disable viewer loading](#disable-viewer-loading)
+  - [Running tests](#running-tests)
+    - [Running unit tests](#running-unit-tests)
+    - [Running Puppeteer tests](#running-puppeteer-tests)
+
+## Description
+
 The [Arelle](https://arelle.org/) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be
 viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL
 report.  Key features include:
@@ -233,7 +263,7 @@ The downside of this mode is that due to browser security restrictions, the
 viewer cannot be loaded directly from files (using `file:` URLs); they must be
 served by a web server.
 
-# Optional Features
+## Optional Features
 
 Some features are disabled by default but can be enabled at generation time or with query parameters.
 
@@ -266,7 +296,7 @@ This mode replaces the namespace-based highlighting with optional highlighting b
 |---------------------------|----------------|
 | `--viewer-feature-review` | `?review=true` |
 
-# Runtime config
+## Runtime config
 
 When launched, the viewer will check for the existence of
 `ixbrlviewer.config.json` in the same directory as `ixbrlviewer.js`.  If found,
@@ -294,16 +324,16 @@ parameters, as defined above.
 
 Relative URLs defined in the config file are resolved relative to the config file.
 
-# Disable viewer loading
+## Disable viewer loading
 
 Loading of the viewer can be disabled by specifying `?disable-viewer` as a
 query parameter.  This will leave the iXBRL document loaded in the browser, but
 without any viewer functionality.  In the case of an iXBRL document set, or
 multi-document viewer, the first document will be shown.
 
-# Running tests
+## Running tests
 
-## Running unit tests
+### Running unit tests
 
 In order to run the javascript unit tests make sure that you have installed all of the npm requirements.
 
@@ -313,7 +343,7 @@ In order to run the python unit tests make sure that you have pip installed requ
 
 Run the following command to run python unit tests: `pytest tests/unit_tests`
 
-## Running Puppeteer tests
+### Running Puppeteer tests
 
 All commands should be run from repository root
 

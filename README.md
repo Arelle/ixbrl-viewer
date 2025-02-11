@@ -1,5 +1,10 @@
 # Arelle iXBRL Viewer
 
+[![PyPI](https://img.shields.io/pypi/v/ixbrl-viewer)](https://pypi.org/project/ixbrl-viewer/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ixbrl-viewer)](https://pypi.org/project/ixbrl-viewer/)
+[![NPM Version](https://img.shields.io/npm/v/ixbrl-viewer)](https://www.npmjs.com/package/ixbrl-viewer)
+[![Read the Docs](https://img.shields.io/readthedocs/arelle-ixbrl-viewer)](https://arelle-ixbrl-viewer.readthedocs.io/)
+
 ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
 
 The [Arelle](https://arelle.org/) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be

@@ -41,6 +41,12 @@ in a separate file.  See Stub Viewer Mode below.
 The JavaScript viewer application is a single JavaScript file called ixbrlviewer.js. It
 contains all of the JavaScript that runs the viewer functionality.
 
+## Documentation
+
+Need help with the Arelle iXBRL Viewer? Go check out [our documentation][read-the-docs].
+
+[read-the-docs]: https://arelle-ixbrl-viewer.readthedocs.io/
+
 ## Installation
 
 The Python portion of this repo is developed using Python 3.12.

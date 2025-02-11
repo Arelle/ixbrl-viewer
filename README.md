@@ -34,6 +34,7 @@
   - [Running tests](#running-tests)
     - [Running unit tests](#running-unit-tests)
     - [Running Puppeteer tests](#running-puppeteer-tests)
+  - [👥 Contributors](#-contributors)
 
 ## Description
 
@@ -375,3 +376,12 @@ All commands should be run from repository root
       - Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
       ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
       - Debug runs with breakpoints are also typically supported.
+
+## 👥 Contributors
+
+<div align="center">
+  <a href="https://github.com/Arelle/ixbrl-viewer/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Arelle/ixbrl-viewer&max=100&columns=10" style="margin: 5px;" />
+  </a>
+  <p>Join our community and become a contributor today! 🚀 </p>
+</div>

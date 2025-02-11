@@ -68,6 +68,8 @@ export class Viewer {
                         viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex, false);
                     });
 
+                    viewer._setContinuationMaps();
+
                     /* Call plugin promise for each document in turn */
                     (async function () {
                         for (const [docIndex, iframe] of viewer._iframes.toArray().entries()) {
@@ -343,6 +345,12 @@ export class Viewer {
             }
         }
         this.itemContinuationMap = itemContinuationMap;
+    }
+
+    _setContinuationMaps() {
+        for (const [itemId, itemContinuations] of Object.entries(this.itemContinuationMap)) {
+            this._ixNodeMap[itemId].continuations = itemContinuations.map(id => this._ixNodeMap[id]);
+        }
     }
 
     _getOrCreateIXNode(vuid, nodes, docIndex, isHidden) {

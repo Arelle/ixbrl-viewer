@@ -1,23 +1,60 @@
 # Arelle iXBRL Viewer
 
+[![PyPI](https://img.shields.io/pypi/v/ixbrl-viewer)](https://pypi.org/project/ixbrl-viewer/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ixbrl-viewer)](https://pypi.org/project/ixbrl-viewer/)
+[![NPM Version](https://img.shields.io/npm/v/ixbrl-viewer)](https://www.npmjs.com/package/ixbrl-viewer)
+[![Read the Docs](https://img.shields.io/readthedocs/arelle-ixbrl-viewer)](https://arelle-ixbrl-viewer.readthedocs.io/)
+
 ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/ixbrl-viewer-demo.gif)
+
+## Table of Contents
+
+- [Arelle iXBRL Viewer](#arelle-ixbrl-viewer)
+  - [Table of Contents](#table-of-contents)
+  - [Description](#description)
+  - [Documentation](#documentation)
+  - [Installation](#installation)
+  - [Accessing the JavaScript viewer application](#accessing-the-javascript-viewer-application)
+    - [Accessing via the CDN](#accessing-via-the-cdn)
+    - [Accessing via Github](#accessing-via-github)
+    - [Building the JavaScript locally](#building-the-javascript-locally)
+  - [JavaScript Versioning](#javascript-versioning)
+  - [Producing an ixbrl-viewer via the Arelle GUI](#producing-an-ixbrl-viewer-via-the-arelle-gui)
+    - [Preparing an iXBRL file via the GUI](#preparing-an-ixbrl-file-via-the-gui)
+    - [Preparing an iXBRL document set using the Arelle GUI](#preparing-an-ixbrl-document-set-using-the-arelle-gui)
+  - [Producing an ixbrl-viewer via the Arelle command line](#producing-an-ixbrl-viewer-via-the-arelle-command-line)
+    - [Preparing an iXBRL file via the command line](#preparing-an-ixbrl-file-via-the-command-line)
+    - [Preparing an iXBRL document set](#preparing-an-ixbrl-document-set)
+    - [Using build-viewer.py](#using-build-viewerpy)
+  - [Stub viewer mode](#stub-viewer-mode)
+  - [Optional Features](#optional-features)
+    - [Feature: Review Mode](#feature-review-mode)
+  - [Runtime config](#runtime-config)
+  - [Disable viewer loading](#disable-viewer-loading)
+  - [Running tests](#running-tests)
+    - [Running unit tests](#running-unit-tests)
+    - [Running Puppeteer tests](#running-puppeteer-tests)
+  - [👥 Contributors](#-contributors)
+  - [License](#license)
+
+## Description
 
 The [Arelle](https://arelle.org/) iXBRL Viewer allows [Inline XBRL](https://www.xbrl.org/ixbrl) (or iXBRL) reports to be
 viewed interactively in a web browser.  The viewer allows users to access the tagged XBRL data embedded in an iXBRL
 report.  Key features include:
 
-* Full text search on taxonomy labels and references
-* View full details of tagged facts
-* Export tables to Excel
-* Visualize and navigate calculation relationships
-* Produce on-the-fly graphs using XBRL data
+- Full text search on taxonomy labels and references
+- View full details of tagged facts
+- Export tables to Excel
+- Visualize and navigate calculation relationships
+- Produce on-the-fly graphs using XBRL data
 
 A sample viewer is provided in the [examples](https://github.com/Arelle/ixbrl-viewer/blob/master/examples/README.md) for those interested.
 
 The viewer project consists of two components:
 
-* A plugin for the [Arelle](https://www.arelle.org) XBRL tool
-* The Javascript viewer application
+- A plugin for the [Arelle](https://www.arelle.org) XBRL tool
+- The Javascript viewer application
 
 In order to view an iXBRL report in the viewer, it must first be prepared using
 the Arelle plugin.  The preparation process updates the iXBRL file to include:
@@ -35,6 +72,12 @@ in a separate file.  See Stub Viewer Mode below.
 
 The JavaScript viewer application is a single JavaScript file called ixbrlviewer.js. It
 contains all of the JavaScript that runs the viewer functionality.
+
+## Documentation
+
+Need help with the Arelle iXBRL Viewer? Go check out [our documentation][read-the-docs].
+
+[read-the-docs]: https://arelle-ixbrl-viewer.readthedocs.io/
 
 ## Installation
 
@@ -132,9 +175,9 @@ python3 Arelle/arelleCmdLine.py --plugins=<path to iXBRLViewerPlugin> -f ixbrl-r
 
 Notes:
 
-* "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
-* The plugin path needs to an absolute file path to the ixbrl-viewer plugin
-* The viewer url can be one of the following:
+- "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
+- The plugin path needs to an absolute file path to the ixbrl-viewer plugin
+- The viewer url can be one of the following:
 
   1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
@@ -164,18 +207,18 @@ python3 Arelle/arelleCmdLine.py --plugins '/path/to/iXBRLViewerPlugin|inlineXbrl
 
 Notes:
 
-* The first file specified is the "primary" file, and should be opened in a
+- The first file specified is the "primary" file, and should be opened in a
   browser to use the viewer.  The other files will be loaded in separate tabs
   within the viewer.
-* "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
-* The plugin path needs to an absolute file path to the ixbrl-viewer plugin
-* The viewer url can be one of the following:
+- "Arelle/arelleCmdLine.py" should be the path to your installation of Arelle
+- The plugin path needs to an absolute file path to the ixbrl-viewer plugin
+- The viewer url can be one of the following:
 
   1. `https://cdn.jsdelivr.net/npm/ixbrl-viewer@<version>/iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js`
   2. A relative url to the downloaded ixviewer.js from github
   3. A relative url to the locally built ixviewer.js
 
-* Due to browser security restrictions, the resulting viewer cannot be loaded
+- Due to browser security restrictions, the resulting viewer cannot be loaded
   directly from `file:` URLs; it must be served by a web server.
 
 ### Using build-viewer.py
@@ -222,11 +265,12 @@ The downside of this mode is that due to browser security restrictions, the
 viewer cannot be loaded directly from files (using `file:` URLs); they must be
 served by a web server.
 
-# Optional Features
+## Optional Features
 
 Some features are disabled by default but can be enabled at generation time or with query parameters.
 
 To enable features:
+
 - Via CLI: `--viewer-feature-{feature name}`
 - Via query parameter:`?{feature name}=true`
 
@@ -245,7 +289,8 @@ This table uses the 'review' feature as an example to demonstrate how these opti
 | `review` | `true`      | `enabled`  |
 | `review` | `false`     | `disabled` |
 
-## Feature: Review Mode
+### Feature: Review Mode
+
 ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/examples/review-mode.png)
 
 A review mode is available that is intended to assist in reviewing partially tagged or incomplete documents.
@@ -255,7 +300,7 @@ This mode replaces the namespace-based highlighting with optional highlighting b
 |---------------------------|----------------|
 | `--viewer-feature-review` | `?review=true` |
 
-# Runtime config
+## Runtime config
 
 When launched, the viewer will check for the existence of
 `ixbrlviewer.config.json` in the same directory as `ixbrlviewer.js`.  If found,
@@ -263,36 +308,36 @@ this will be loaded and used to configure the viewer.
 
 The file supports the following keys:
 
-* `features` - a JSON object containing defaults for features. These will be
+- `features` - a JSON object containing defaults for features. These will be
 overridden by features defined at generation time, and then by query
 parameters, as defined above.
 
-* `skin` - a JSON object supporting the following keys:
+- `skin` - a JSON object supporting the following keys:
 
-    * `stylesheetUrl` - a URL to additional CSS definitions.
-    * `faviconUrl` - a URL to an icon file to be used as the favicon for the viewer.
-    * `footerLogoHtml` - a fragment of HTML that will be included in place of the standard footer logo.
+  - `stylesheetUrl` - a URL to additional CSS definitions.
+  - `faviconUrl` - a URL to an icon file to be used as the favicon for the viewer.
+  - `footerLogoHtml` - a fragment of HTML that will be included in place of the standard footer logo.
 
-* `taxonomyNames` - a JSON object where:
+- `taxonomyNames` - a JSON object where:
 
-    * Keys are strings that will be treated as a regular expression to match
+  - Keys are strings that will be treated as a regular expression to match
       against a namespace.
-    * Values are an array of (prefix, name) where "prefix" is the preferred
+  - Values are an array of (prefix, name) where "prefix" is the preferred
       namespace prefix for the namespace, and "name" is a short descriptive
       name for the taxonomy.
 
 Relative URLs defined in the config file are resolved relative to the config file.
 
-# Disable viewer loading
+## Disable viewer loading
 
 Loading of the viewer can be disabled by specifying `?disable-viewer` as a
 query parameter.  This will leave the iXBRL document loaded in the browser, but
 without any viewer functionality.  In the case of an iXBRL document set, or
 multi-document viewer, the first document will be shown.
 
-# Running tests
+## Running tests
 
-## Running unit tests
+### Running unit tests
 
 In order to run the javascript unit tests make sure that you have installed all of the npm requirements.
 
@@ -302,7 +347,7 @@ In order to run the python unit tests make sure that you have pip installed requ
 
 Run the following command to run python unit tests: `pytest tests/unit_tests`
 
-## Running Puppeteer tests
+### Running Puppeteer tests
 
 All commands should be run from repository root
 
@@ -319,16 +364,31 @@ All commands should be run from repository root
     npm run puppeteerServe 
     ```
 
-    * This command generates the `ixbrlviewer.js`, uses Arelle to generate several test files, then serves the files via a nodejs http-server.
-    * Currently changes to application code require restarting this step to take effect.
+    - This command generates the `ixbrlviewer.js`, uses Arelle to generate several test files, then serves the files via a nodejs http-server.
+    - Currently changes to application code require restarting this step to take effect.
 4. Start the puppeteer tests
-    * [Terminal 2]:
+    - [Terminal 2]:
 
        ```shell
        npm run test:puppeteer
        ```
 
-    * IDE:
-      * Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
+    - IDE:
+      - Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
       ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
-      * Debug runs with breakpoints are also typically supported.
+      - Debug runs with breakpoints are also typically supported.
+
+## 👥 Contributors
+
+<div align="center">
+  <a href="https://github.com/Arelle/ixbrl-viewer/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Arelle/ixbrl-viewer&max=100&columns=10" style="margin: 5px;" />
+  </a>
+  <p>Join our community and become a contributor today! 🚀 </p>
+</div>
+
+## License
+
+[Apache License 2.0][license]
+
+[license]: https://arelle-ixbrl-viewer.readthedocs.io/en/latest/license.html

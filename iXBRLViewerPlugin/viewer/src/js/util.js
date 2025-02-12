@@ -32,6 +32,7 @@ export const STORAGE_APP_LANGUAGE = "ixbrl-viewer-app-language";
 export const STORAGE_THEME = "ixbrl-viewer-theme";
 export const STORAGE_HIGHLIGHT_FACTS = "ixbrl-viewer-highlight-all-facts";
 export const STORAGE_HOME_LINK_QUERY = "ixbrl-viewer-home-link-query";
+export const USER_GUIDE_URL = "https://arelle-ixbrl-viewer.readthedocs.io/";
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date

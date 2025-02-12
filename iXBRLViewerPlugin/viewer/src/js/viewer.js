@@ -261,11 +261,12 @@ export class Viewer {
         }
 
         /* Is the element the only significant content within a <td> or <th> ? If
-         * so, use that as the wrapper element. */
+         * so, use that as the wrapper element.
+         * Check for 'display: table-cell' to avoid using hidden cells */
         const tableNode = domNode.closest("td,th");
         const nodes = [];
         const innerText = $(domNode).text();
-        if (tableNode !== null && innerText.length > 0) {
+        if (tableNode !== null && getComputedStyle(tableNode).display === 'table-cell' && innerText.length > 0) {
             // Use indexOf rather than a single regex because innerText may
             // be too long for the regex engine 
             const outerText = $(tableNode).text();

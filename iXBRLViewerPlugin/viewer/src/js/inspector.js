@@ -421,6 +421,17 @@ export class Inspector {
         }
     }
 
+    buildUserGuideLink() {
+        $('.top-bar-controls #user-guide-link').remove();
+        const userGuideUrl = this._iv.getGuideLinkUrl();
+        const userGuideLink = $('<a></a>')
+                .attr('href', userGuideUrl)
+                .attr('id', 'user-guide-link')
+                .attr('target', '_blank')
+                .text(i18next.t("menu.userGuide"));
+        userGuideLink.insertBefore('#toggle-dark-mode');
+    }
+
     changeApplicationLanguage(lang) {
         localStorage.setItem(STORAGE_APP_LANGUAGE, lang);
         i18next.changeLanguage(lang);
@@ -434,6 +445,7 @@ export class Inspector {
         this.buildHomeLink()
         this.buildToolbarHighlightMenu();
         this.buildHighlightKey();
+        this.buildUserGuideLink();
         this.update();
     }
 

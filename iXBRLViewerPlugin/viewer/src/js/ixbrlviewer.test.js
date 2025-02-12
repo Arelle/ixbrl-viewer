@@ -5,7 +5,8 @@ import {
     FEATURE_GUIDE_LINK,
     FEATURE_REVIEW,
     FEATURE_SUPPORT_LINK,
-    FEATURE_SURVEY_LINK
+    FEATURE_SURVEY_LINK,
+    USER_GUIDE_URL,
 } from "./util";
 describe("Feature enablement", () => {
     var viewer = null;
@@ -183,7 +184,7 @@ describe("Guide link enablement", () => {
 
     test("Guide link enabled by query", () => {
         viewer.setFeatures({}, FEATURE_GUIDE_LINK + '=/guide')
-        expect(viewer.getGuideLinkUrl()).toEqual(null);
+        expect(viewer.getGuideLinkUrl()).toEqual(USER_GUIDE_URL);
     });
 
     test("Guide link disabled by query", () => {

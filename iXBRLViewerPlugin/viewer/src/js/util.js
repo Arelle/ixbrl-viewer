@@ -25,6 +25,7 @@ export const FEATURE_SUPPORT_LINK = 'support_link';
 export const FEATURE_SURVEY_LINK = 'survey_link';
 export const FEATURE_SEARCH_ON_STARTUP = 'search_on_startup';
 export const FEATURE_HIGHLIGHT_FACTS_ON_STARTUP = 'highlight_facts_on_startup';
+export const FEATURE_HIDE_CALCULATION_MODE_OPTION = 'hide_calculation_mode_option';
 
 export const IXBRL_VIEWER_DATASET_PREFIX = 'ixbrlViewer';
 

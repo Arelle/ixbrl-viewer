@@ -30,7 +30,6 @@ else:
     utr_url = UTR_URL
 print(f"Using {utr_url}")
 
-parser = etree.XMLParser(remove_comments=True)
 if os.path.isfile(utr_url):
     with open(utr_url, "rb") as f:
         bytes = f.read()
@@ -39,7 +38,7 @@ else:
     res.raise_for_status()
     bytes = res.content
 
-root = etree.fromstring(bytes, parser)
+root = etree.fromstring(bytes, etree.XMLParser(remove_comments=True))
 
 n = 0
 units = {

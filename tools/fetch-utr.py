@@ -5,10 +5,12 @@
 # src/data/utr.json for inclusion in the viewer.
 #
 
-import requests
 import json
-from lxml import etree
 import os
+import sys
+
+import requests
+from lxml import etree
 
 UTR_URL = "https://www.xbrl.org/utr/utr.xml"
 OUT_PATH = "../iXBRLViewerPlugin/viewer/src/data/utr.json"
@@ -19,11 +21,20 @@ def elt_name(e):
     return "{%s}%s" % (UTR_NS, e)
 
 
-print("Fetching " + UTR_URL)
-res = requests.get(UTR_URL)
-res.raise_for_status()
+if len(sys.argv) > 1:
+    utr_url = sys.argv[1]
+else:
+    utr_url = UTR_URL
 
-root = etree.fromstring(res.content, etree.XMLParser(remove_comments=True))
+parser = etree.XMLParser(remove_comments=True)
+if os.path.isfile(utr_url):
+    print(f"Using file {utr_url}")
+    root = etree.parse(utr_url, parser).getroot()
+else:
+    print(f"Fetching {utr_url}")
+    res = requests.get(utr_url)
+    res.raise_for_status()
+    root = etree.fromstring(res.content, parser)
 
 n = 0
 units = {}

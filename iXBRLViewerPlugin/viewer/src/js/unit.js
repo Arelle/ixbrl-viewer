@@ -20,11 +20,15 @@ function measureLabel(report, measure) {
     }
     // Pick symbol from UTR ...
     const utrEntry = utr.get(qname);
-    if (utrEntry !== undefined && utrEntry.symbol !== undefined) {
-        // ... but disambiguate "$" symbol
-        return utrEntry.symbol == '$' ? `${qname.localname} $` : utrEntry.symbol;
+    if (utrEntry !== undefined) {
+        if (utrEntry.symbol !== undefined) {
+            // ... but disambiguate "$" symbol
+            return utrEntry.symbol == '$' ? `${qname.localname} $` : utrEntry.symbol;
+        }
+        // Fall back to name
+        return utrEntry.name;
     }
-    // Otherwise fallback to unitId 
+    // Otherwise the measure is not in the UTR so fallback to unitId 
     if (measure.includes(':')) {
         return measure.split(':')[1];
     }

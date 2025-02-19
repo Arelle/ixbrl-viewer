@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 #
-# Fetches the latest live utr.xml, extracts name and symbol, and writes it to
-# src/data/utr.json for inclusion in the viewer.
+# Fetches the latest live utr.xml (or, optionally, the file specified on the
+# command line), extracts name and symbol, and writes it to src/data/utr.json
+# for inclusion in the viewer.
 #
 
+import datetime
+import hashlib
 import json
 import os
 import sys
@@ -25,19 +28,34 @@ if len(sys.argv) > 1:
     utr_url = sys.argv[1]
 else:
     utr_url = UTR_URL
+print(f"Using {utr_url}")
 
 parser = etree.XMLParser(remove_comments=True)
 if os.path.isfile(utr_url):
-    print(f"Using file {utr_url}")
-    root = etree.parse(utr_url, parser).getroot()
+    with open(utr_url, "rb") as f:
+        bytes = f.read()
 else:
-    print(f"Fetching {utr_url}")
     res = requests.get(utr_url)
     res.raise_for_status()
-    root = etree.fromstring(res.content, parser)
+    bytes = res.content
+
+root = etree.fromstring(bytes, parser)
 
 n = 0
-units = {}
+units = {
+    "_source": {
+        "url": utr_url,
+        "sha256": hashlib.sha256(bytes).hexdigest(),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc)
+        .replace(microsecond=0)
+        .isoformat(),
+    }
+}
+print(
+    "Source metadata:",
+    *(f"{key:10s}: {value}" for key, value in sorted(units["_source"].items())),
+    sep="\n",
+)
 
 for e in root[0]:
     if e.find(elt_name("numeratorItemType")) is not None:

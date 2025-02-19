@@ -24,11 +24,14 @@ def elt_name(e):
     return "{%s}%s" % (UTR_NS, e)
 
 
-if len(sys.argv) > 1:
-    utr_url = sys.argv[1]
-else:
-    utr_url = UTR_URL
-print(f"Using {utr_url}")
+match len(sys.argv):
+    case 1:
+        utr_url = UTR_URL
+    case 2:
+        utr_url = sys.argv[1]
+    case _:
+        raise SystemExit("Error: specifying more than one UTR source is unsupported.")
+print(f"Fetching source: {utr_url}")
 
 if os.path.isfile(utr_url):
     with open(utr_url, "rb") as f:

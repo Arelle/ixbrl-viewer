@@ -2,7 +2,7 @@
 
 #
 # Fetches the latest live utr.xml, extracts name and symbol, and writes it to
-# src/data/utr.json for inclusion in the viewer. 
+# src/data/utr.json for inclusion in the viewer.
 #
 
 import requests
@@ -10,12 +10,14 @@ import json
 from lxml import etree
 import os
 
-UTR_URL = 'https://www.xbrl.org/utr/utr.xml'
-OUT_PATH = '../iXBRLViewerPlugin/viewer/src/data/utr.json'
-UTR_NS = 'http://www.xbrl.org/2009/utr'
+UTR_URL = "https://www.xbrl.org/utr/utr.xml"
+OUT_PATH = "../iXBRLViewerPlugin/viewer/src/data/utr.json"
+UTR_NS = "http://www.xbrl.org/2009/utr"
+
 
 def elt_name(e):
     return "{%s}%s" % (UTR_NS, e)
+
 
 print("Fetching " + UTR_URL)
 res = requests.get(UTR_URL)

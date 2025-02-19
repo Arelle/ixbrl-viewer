@@ -10,6 +10,7 @@ var testReportData = {
         "eg": "http://www.example.com",
         "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
+        "utr": "http://www.xbrl.org/2009/utr",
     },
     "facts": {},
 };
@@ -74,6 +75,18 @@ describe("Unit label", () => {
     test("Unit label - unknown", () => {
         var unit = new Unit(testReport(), 'iso4217:ZZZZ');
         expect(unit.label()).toEqual('ZZZZ');
+    });
+    test("Unit label - UTR non-currency symbol used", () => {
+        var unit = new Unit(testReport(), 'utr:m3');
+        expect(unit.label()).toEqual('m³');
+    });
+    test("Unit label - UTR non-currency symbol used", () => {
+        var unit = new Unit(testReport(), 'utr:sqkm');
+        expect(unit.label()).toEqual('km²');
+    });
+    test("Unit label - UTR non-currency symbol used", () => {
+        var unit = new Unit(testReport(), 'utr:F');
+        expect(unit.label()).toEqual('°F');
     });
 });
 

@@ -18,6 +18,7 @@ from lxml import etree
 UTR_URL = "https://www.xbrl.org/utr/utr.xml"
 OUT_PATH = "../iXBRLViewerPlugin/viewer/src/data/utr.json"
 UTR_NS = "http://www.xbrl.org/2009/utr"
+SUPPORTED_URL_PROTOCOLS = ("http:", "https:")
 
 
 def elt_name(e):
@@ -36,10 +37,14 @@ print(f"Fetching source: {utr_url}")
 if os.path.isfile(utr_url):
     with open(utr_url, "rb") as f:
         bytes = f.read()
-else:
+elif utr_url.startswith(SUPPORTED_URL_PROTOCOLS):
     res = requests.get(utr_url)
     res.raise_for_status()
     bytes = res.content
+else:
+    raise SystemExit(
+        f"Error: {utr_url} is neither a local file or a URL with a supported protocol ({', '.join(SUPPORTED_URL_PROTOCOLS)})."
+    )
 
 root = etree.fromstring(bytes, etree.XMLParser(remove_comments=True))
 
@@ -76,6 +81,7 @@ for e in root[0]:
 path = os.path.join(os.path.dirname(__file__), OUT_PATH)
 
 with open(path, "w") as fout:
-    json.dump(units, fout)
+    json.dump(units, fout, indent=2, sort_keys=True)
+    fout.write("\n")
 
 print("Wrote %d entries written to %s" % (n, path))

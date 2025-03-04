@@ -43,9 +43,8 @@ html_theme_options = {
         "color-brand-content": "#6ecacb",
     },
 }
-html_title = "Arelle iXBRL Viewer <release>"
-html_favicon = "_images/favicon.ico"
-html_logo = "_images/arelle-rtd.png"
+html_title = "iXBRL Viewer <release>"
+html_favicon = "_images/favicon.svg"
 
 myst_enable_extensions = [
     "colon_fence",

@@ -20,7 +20,7 @@ class UTR {
         if (u === undefined) {
             return undefined;
         }
-        return new UTREntry(u.s ?? u.n, u.n)
+        return new UTREntry(u.s, u.n)
     }
 }
 

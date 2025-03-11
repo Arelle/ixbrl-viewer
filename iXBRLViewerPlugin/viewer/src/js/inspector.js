@@ -310,10 +310,6 @@ export class Inspector {
             }
         }
         let helpLinks = {}
-        let guideLinkUrl = this._iv.getGuideLinkUrl();
-        if (guideLinkUrl) {
-            helpLinks[i18next.t("menu.userGuide")] = guideLinkUrl;
-        }
         let supportLinkUrl = this._iv.getSupportLinkUrl();
         if (supportLinkUrl) {
             helpLinks[i18next.t("menu.contactUs")] = supportLinkUrl;

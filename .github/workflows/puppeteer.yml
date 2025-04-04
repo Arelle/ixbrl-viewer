@@ -22,7 +22,7 @@ jobs:
           - '20'
           - '22'
         python-version:
-          - '3.12'
+          - '3.13'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4.2.2

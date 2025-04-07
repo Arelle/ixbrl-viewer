@@ -40,7 +40,7 @@ dev = [
     'lxml-stubs==0.5.1',
     'mypy==1.15.0',
     'pytest==8.3.5',
-    'typing-extensions==4.12.2',
+    'typing-extensions==4.13.1',
 ]
 
 # https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins

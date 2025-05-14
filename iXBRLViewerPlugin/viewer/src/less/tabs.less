@@ -5,7 +5,7 @@
 .tab-area {
   .clearfix();
 
-  background-color: #e3e3e3;
+  background-color: var(--colour-bg-selected);
   width: 100%;
   box-sizing: border-box;
   border-bottom: solid 0.1rem var(--colour-border-grey);
@@ -15,8 +15,8 @@
     float: left;
     padding: 1.2rem;
     cursor: pointer;
-    color: #444;
-    border: solid 0.1rem #cbcbcb;
+    color: var(--colour-text-title);
+    border: solid 0.1rem var(--colour-border-grey);
     border-radius: 0.6rem 0.6rem 0 0;
     margin-bottom: -0.1rem;
     flex-shrink: 1;
@@ -30,7 +30,7 @@
       padding: 1.2rem;
       border-bottom-color: var(--colour-bg);
       background-color: var(--colour-bg);
-      border-top: solid 0.4rem #0085e6;
+      border-top: solid 0.4rem var(--colour-primary);
     }
 
     &:not(.active) {

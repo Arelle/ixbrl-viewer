@@ -18,9 +18,9 @@ jobs:
           - ubuntu-24.04
           - windows-2022
         node-version:
-          - '18'
           - '20'
           - '22'
+          - '24'
         python-version:
           - '3.13'
     runs-on: ${{ matrix.os }}

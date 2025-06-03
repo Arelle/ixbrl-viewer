@@ -43,7 +43,7 @@ export class Inspector {
     }
 
     i18nInit() {
-        const langs = ["en", "cy", "es"];
+        const langs = ["en", "cy", "es", "uk"];
         const bundles = [
           "translation",
           "referenceParts",

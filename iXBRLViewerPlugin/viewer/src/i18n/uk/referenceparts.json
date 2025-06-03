@@ -1,0 +1,10 @@
+{
+  "Name": "Ім'я",
+  "Number": "Номер",
+  "IssueDate": "Дата видачі",
+  "Paragraph": "Пункт",
+  "Subparagraph": "Підпункт",
+  "URI": "URI",
+  "URIDate": "Дата URI",
+  "Note": "Примітка"
+}

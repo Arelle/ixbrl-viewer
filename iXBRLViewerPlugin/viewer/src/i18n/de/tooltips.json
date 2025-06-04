@@ -1,0 +1,17 @@
+{
+  "anchoring": "Verankerungsbeziehungen stellen Verbindungen zwischen unternehmensspezifischen Erweiterungskonzepten und standardisierten Konzepten dar, die in der Basistaxonomie definiert sind.",
+  "dimension": "Eine Dimension ist ein qualifizierendes Merkmal, das verwendet wird, um einen Datenpunkt eindeutig zu definieren.",
+  "conceptsCount": "Die Anzahl der eindeutigen Konzepte, die in diesem Bericht verwendet werden.",
+  "dimensionsCount": "Die Anzahl der eindeutigen Dimensionen, die in diesem Bericht verwendet werden.",
+  "fileSummary": "Eine Liste der Dateien, die in der Einreichung enthalten sind.",
+  "membersCount": "Die Anzahl der eindeutigen Dimensionsmitglieder, die in diesem Bericht verwendet werden.",
+  "scale": "Bei numerischen Fakten der Faktor, um den der dargestellte Wert skaliert ist.",
+  "accuracy": "Die Genauigkeit, mit der ein numerischer Fakt berichtet wird.",
+  "concept": "Ein Konzept ist ein Element, das die Bedeutung eines Fakts definiert.",
+  "period": "Der Zeitraum, auf den sich dieser Fakt bezieht. Dies kann entweder ein Zeitpunkt oder eine Dauer sein, abhängig von der Natur des Konzepts.",
+  "references": "Informationen zur autoritativen Definition eines Konzepts. Referenzen beziehen sich typischerweise auf einen Rechnungslegungsstandard.",
+  "calculations": "Berechnungsbeziehungen zwischen numerischen Fakten in einem Bericht. Berechnungsbeziehungen können verwendet werden, um nachzuvollziehen, wie Zahlen in einem Bericht zusammengefasst werden, und auch zur Überprüfung der Konsistenz der berichteten Zahlen.",
+  "hiddenFacts": "Die Anzahl der versteckten Fakten in diesem Bericht. Versteckte Fakten sind Fakten, die als XBRL-Daten gemeldet, aber im präsentierten Bericht nicht angezeigt werden.",
+  "mandatoryFacts": "Die Anzahl der Pflichtfakten in diesem Bericht. Pflichtfakten sind Fakten, die von der einreichenden Behörde gemeldet werden müssen.",
+  "namespace": "Namespaces werden verwendet, um Konzept-, Dimensions- und Mitgliedsdefinitionen zu partitionieren. Wenn ein Bericht unternehmensspezifische Konzepte, Dimensionen oder Mitglieder verwendet, werden diese in einem separaten Namespace definiert. Namespaces können auch verwendet werden, um große Taxonomien zu partitionieren."
+}

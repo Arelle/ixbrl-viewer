@@ -1,0 +1,15 @@
+{
+  "-3": "Tausendstel",
+  "-2": "Hundertstel",
+  "-1": "Zehntel",
+  "0": "Einer",
+  "1": "Zehner",
+  "2": "Hunderter",
+  "3": "Tausender",
+  "4": "Zehntausender",
+  "5": "Hunderttausender",
+  "6": "Millionen",
+  "7": "Zehn Millionen",
+  "8": "Hundert Millionen",
+  "9": "Milliarden"
+}

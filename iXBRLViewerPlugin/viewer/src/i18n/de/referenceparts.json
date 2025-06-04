@@ -1,0 +1,10 @@
+{
+  "Name": "Name",
+  "Number": "Nummer",
+  "IssueDate": "Ausgabedatum",
+  "Paragraph": "Absatz",
+  "Subparagraph": "Unterabsatz",
+  "URI": "URI",
+  "URIDate": "URI-Datum",
+  "Note": "Hinweis"
+}

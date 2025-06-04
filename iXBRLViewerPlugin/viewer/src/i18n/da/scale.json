@@ -1,0 +1,15 @@
+{
+  "-3": "tusindedel",
+  "-2": "hundrededel",
+  "-1": "tiendedel",
+  "0": "enere",
+  "1": "tiere",
+  "2": "hundrede",
+  "3": "tusinder",
+  "4": "ti tusinder",
+  "5": "hundrede tusinder",
+  "6": "millioner",
+  "7": "ti millioner",
+  "8": "hundrede millioner",
+  "9": "milliarder"
+}

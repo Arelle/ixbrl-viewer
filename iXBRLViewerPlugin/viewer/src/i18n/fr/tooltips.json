@@ -1,0 +1,17 @@
+{
+  "anchoring": "Les relations d'ancrage fournissent des liens entre les concepts d'extension spécifiques à l'entreprise et les concepts standards définis dans la taxonomie de base.",
+  "dimension": "Une dimension est une caractéristique qualificative utilisée pour définir de manière unique un point de données.",
+  "conceptsCount": "Le nombre de concepts uniques utilisés dans ce rapport.",
+  "dimensionsCount": "Le nombre de dimensions uniques utilisées dans ce rapport.",
+  "fileSummary": "Une liste des fichiers contenus dans le dépôt.",
+  "membersCount": "Le nombre de membres de dimension uniques utilisés dans ce rapport.",
+  "scale": "Pour les faits numériques, le facteur par lequel la valeur présentée est mise à l'échelle.",
+  "accuracy": "La précision avec laquelle un fait numérique est rapporté.",
+  "concept": "Un concept est un élément qui définit la signification d'un fait.",
+  "period": "La période à laquelle ce fait est rattaché. Cela peut être un instant ou une durée, selon la nature du concept.",
+  "references": "Informations sur la définition autoritative d'un concept. Les références renvoient généralement à une norme comptable.",
+  "calculations": "Relations de calcul entre les faits numériques dans un rapport. Ces relations peuvent être utilisées pour retracer la façon dont les chiffres du rapport sont agrégés, et aussi pour vérifier la cohérence des chiffres rapportés.",
+  "hiddenFacts": "Le nombre de faits cachés dans ce rapport. Les faits cachés sont des faits rapportés comme données XBRL, mais non affichés dans le rapport présenté.",
+  "mandatoryFacts": "Le nombre de faits obligatoires dans ce rapport. Les faits obligatoires sont ceux qui doivent être rapportés selon la juridiction de dépôt.",
+  "namespace": "Les espaces de noms sont utilisés pour partitionner les définitions de concepts, dimensions et membres. Si un rapport utilise des concepts, dimensions ou membres spécifiques à l'entreprise, ceux-ci seront définis dans un espace de noms séparé. Les espaces de noms peuvent aussi être utilisés pour partitionner de grandes taxonomies."
+}

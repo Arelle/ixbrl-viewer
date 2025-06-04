@@ -1,0 +1,9 @@
+{
+  "booleanItemType": "Booléen",
+  "dateItemType": "Date",
+  "stringItemType": "Chaîne",
+  "monetaryItemType": "Monétaire",
+  "decimalItemType": "Décimal",
+  "pureItemType": "Pur",
+  "sharesItemType": "Actions"
+}

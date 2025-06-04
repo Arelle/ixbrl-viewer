@@ -1,0 +1,15 @@
+{
+  "-3": "millièmes",
+  "-2": "centièmes",
+  "-1": "dixièmes",
+  "0": "unités",
+  "1": "dizaines",
+  "2": "centaines",
+  "3": "milliers",
+  "4": "dizaines de milliers",
+  "5": "centaines de milliers",
+  "6": "millions",
+  "7": "dizaines de millions",
+  "8": "centaines de millions",
+  "9": "milliards"
+}

@@ -1,0 +1,9 @@
+{
+  "booleanItemType": "Boolesch",
+  "dateItemType": "Datum",
+  "stringItemType": "Zeichenkette",
+  "monetaryItemType": "Monetär",
+  "decimalItemType": "Dezimal",
+  "pureItemType": "Rein",
+  "sharesItemType": "Aktien"
+}

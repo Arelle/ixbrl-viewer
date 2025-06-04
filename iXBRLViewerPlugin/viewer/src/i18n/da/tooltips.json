@@ -1,0 +1,17 @@
+{
+  "anchoring": "Forankringsforhold giver forbindelser mellem virksomhedsspecifikke udvidelseskoncepter og standardkoncepter defineret i basissystematikken.",
+  "dimension": "En dimension er en kvalificerende egenskab, der bruges til entydigt at definere et datapunkt.",
+  "conceptsCount": "Antallet af unikke koncepter, der anvendes i denne rapport.",
+  "dimensionsCount": "Antallet af unikke dimensioner, der anvendes i denne rapport.",
+  "fileSummary": "En liste over filer, der indgår i indberetningen.",
+  "membersCount": "Antallet af unikke dimensionmedlemmer, der anvendes i denne rapport.",
+  "scale": "For numeriske fakta er dette størrelsen, som den viste værdi er skaleret med.",
+  "accuracy": "Nøjagtigheden, hvormed et numerisk faktum rapporteres.",
+  "concept": "Et koncept er et element, der definerer betydningen af et faktum.",
+  "period": "Den periode, som dette faktum rapporteres for. Dette kan enten være et øjebliksbillede eller en periode, afhængigt af konceptets art.",
+  "references": "Information om den autoritative definition af et koncept. Referencer henviser typisk til en regnskabsstandard.",
+  "calculations": "Beregningsforhold mellem numeriske fakta i en rapport. Beregningsforhold kan bruges til at spore, hvordan tal i en rapport summeres, og kan også bruges til at kontrollere konsistensen af de rapporterede tal.",
+  "hiddenFacts": "Antallet af skjulte fakta i denne rapport. Skjulte fakta er fakta, der rapporteres som XBRL-data, men som ikke vises i den præsenterede rapport.",
+  "mandatoryFacts": "Antallet af obligatoriske fakta i denne rapport. Obligatoriske fakta er fakta, som det pågældende indberetningsområde kræver at blive rapporteret.",
+  "namespace": "Navnerum bruges til at opdele definitioner af koncepter, dimensioner og medlemmer. Hvis en rapport bruger virksomhedsspecifikke koncepter, dimensioner eller medlemmer, vil disse blive defineret i et separat navnerum. Navnerum kan også bruges til at opdele store taksonomier."
+}

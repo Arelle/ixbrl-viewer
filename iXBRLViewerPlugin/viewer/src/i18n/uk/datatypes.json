@@ -1,0 +1,9 @@
+{
+  "booleanItemType": "Логічний",
+  "dateItemType": "Дата",
+  "stringItemType": "Рядок",
+  "monetaryItemType": "Грошовий",
+  "decimalItemType": "Грошовий",
+  "pureItemType": "Чистий",
+  "sharesItemType": "акції"
+}

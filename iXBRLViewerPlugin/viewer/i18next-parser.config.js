@@ -6,6 +6,6 @@ module.exports = {
         "src/html/*.html"
     ],
     output: "iXBRLViewerPlugin/viewer/src/i18n/$LOCALE/$NAMESPACE.json",
-    locales: [ "cy", "en", "es", "uk" ],
+    locales: [ "cy", "da", "de", "en", "es", "fr", "nl", "uk" ],
     sort: true
 };

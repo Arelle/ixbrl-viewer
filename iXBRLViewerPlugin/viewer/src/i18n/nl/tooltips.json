@@ -1,0 +1,17 @@
+{
+  "anchoring": "Verankeringsrelaties bieden koppelingen tussen bedrijfsspecifieke uitbreidingsconcepten en standaardconcepten die zijn gedefinieerd in de basistaxonomie.",
+  "dimension": "Een dimensie is een kwalificerend kenmerk dat wordt gebruikt om een datapunt uniek te definiëren.",
+  "conceptsCount": "Het aantal unieke concepten dat in dit rapport wordt gebruikt.",
+  "dimensionsCount": "Het aantal unieke dimensies dat in dit rapport wordt gebruikt.",
+  "fileSummary": "Een lijst van de bestanden die bij de indiening horen.",
+  "membersCount": "Het aantal unieke dimensieleden dat in dit rapport wordt gebruikt.",
+  "scale": "Voor numerieke feiten, de hoeveelheid waarmee de gepresenteerde waarde wordt geschaald.",
+  "accuracy": "De nauwkeurigheid waarmee een numeriek feit wordt gerapporteerd.",
+  "concept": "Een concept is een element dat de betekenis van een feit definieert.",
+  "period": "De periode waartegen dit feit wordt gerapporteerd. Dit kan een momentopname of een duur zijn, afhankelijk van de aard van het concept.",
+  "references": "Informatie over de gezaghebbende definitie van een concept. Referenties verwijzen meestal naar een boekhoudstandaard.",
+  "calculations": "Berekeningsrelaties tussen numerieke feiten in een rapport. Berekeningsrelaties kunnen worden gebruikt om te volgen hoe cijfers in een rapport worden opgeteld, en kunnen ook worden gebruikt om de consistentie van de gerapporteerde cijfers te controleren.",
+  "hiddenFacts": "Het aantal verborgen feiten in dit rapport. Verborgen feiten zijn feiten die als XBRL-gegevens worden gerapporteerd, maar niet worden weergegeven in het gepresenteerde rapport.",
+  "mandatoryFacts": "Het aantal verplichte feiten in dit rapport. Verplichte feiten zijn feiten die door de indienende jurisdictie gerapporteerd moeten worden.",
+  "namespace": "Namespaces worden gebruikt om concept-, dimensie- en ledendefinities te partitioneren. Als een rapport bedrijfsspecifieke concepten, dimensies of leden gebruikt, worden deze gedefinieerd in een aparte namespace. Namespaces kunnen ook worden gebruikt om grote taxonomieën te partitioneren."
+}

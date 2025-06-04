@@ -1,0 +1,13 @@
+{
+  "unitFormatGBP": "\u00A3",
+  "unitFormatUSD": "US \u0024",
+  "unitFormatEUR": "\u20AC",
+  "unitFormatMXN": "MXN \u0024",
+  "unitFormatUAH": "\u20B4",
+  "centsUSD": "cents",
+  "centsEUR": "cents",
+  "centsAUD": "cents",
+  "centsZAR": "cents",
+  "centsMXN": "cents",
+  "centsGBP": "pence"
+}

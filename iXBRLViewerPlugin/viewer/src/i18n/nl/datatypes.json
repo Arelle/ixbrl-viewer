@@ -1,0 +1,9 @@
+{
+  "booleanItemType": "Booleaans",
+  "dateItemType": "Datum",
+  "stringItemType": "Tekst",
+  "monetaryItemType": "Monetair",
+  "decimalItemType": "Decimaal",
+  "pureItemType": "Puur",
+  "sharesItemType": "Aandelen"
+}

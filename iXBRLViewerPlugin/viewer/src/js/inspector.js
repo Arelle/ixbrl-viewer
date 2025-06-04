@@ -442,6 +442,7 @@ export class Inspector {
         this.buildHighlightKey();
         this.buildUserGuideLink();
         this.update();
+        this.search();
     }
 
     inspectorMode(mode, toggle) {

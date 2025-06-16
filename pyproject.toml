@@ -39,8 +39,8 @@ dev = [
     'flake8==7.2.0',
     'lxml-stubs==0.5.1',
     'mypy==1.16.0',
-    'pytest==8.3.5',
-    'typing-extensions==4.13.2',
+    'pytest==8.4.0',
+    'typing-extensions==4.14.0',
 ]
 
 # https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins

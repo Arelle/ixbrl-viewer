@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools>=69,<81", "wheel~=0.42", "setuptools_scm[toml]~=8.0"]
+requires = ["setuptools>=73,<81", "wheel~=0.45", "setuptools_scm[toml]~=8.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "ixbrl-viewer"
 dynamic = ['version']
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 description = "The Arelle iXBRL Viewer allows iXBRL reports to be viewed interactively in a web browser."
 authors = [
     {name = "arelle.org", email = "support@arelle.org"}
@@ -16,7 +16,6 @@ classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: End Users/Desktop',
     'Intended Audience :: Developers',
-    'License :: OSI Approved :: Apache Software License',
     'Natural Language :: English',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.9',
@@ -60,7 +59,7 @@ ixbrl-viewer = "iXBRLViewerPlugin:load_plugin_url"
 platforms = ["any"]
 
 [tool.setuptools.packages.find]
-namespaces = false
+include = ["iXBRLViewerPlugin*"]
 
 [tool.setuptools_scm]
 tag_regex = "^(?:[\\w-]+-?)?(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"

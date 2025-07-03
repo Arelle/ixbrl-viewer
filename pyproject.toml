@@ -59,6 +59,7 @@ ixbrl-viewer = "iXBRLViewerPlugin:load_plugin_url"
 platforms = ["any"]
 
 [tool.setuptools.packages.find]
+include = ["iXBRLViewerPlugin*"]
 namespaces = false
 
 [tool.setuptools_scm]

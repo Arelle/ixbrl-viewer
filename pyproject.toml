@@ -60,7 +60,6 @@ platforms = ["any"]
 
 [tool.setuptools.packages.find]
 include = ["iXBRLViewerPlugin*"]
-namespaces = false
 
 [tool.setuptools_scm]
 tag_regex = "^(?:[\\w-]+-?)?(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"

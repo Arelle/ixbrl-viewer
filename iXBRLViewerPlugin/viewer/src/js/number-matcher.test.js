@@ -112,12 +112,16 @@ describe("Number match replace", () => {
         var numbers = [
             [ 'Sept 20th, 2019', '[[Sept 20th, 2019]]' ],
             [ 'abcd 37 abcd', 'abcd [[37]] abcd' ],
+            [ '2010-01-01', '[[2010-01-01]]' ],
             // Test "do not want" filtering
             [ 'abcd topic 37 abcd', 'abcd topic 37 abcd' ],
             [ 'abcd topic 37 93 abcd', 'abcd topic 37 [[93]] abcd' ],
             [ 'section 123(a)', 'section 123(a)' ],
             [ 'section 123a', 'section 123a' ],
             [ 'section 123', 'section 123' ],
+            [ 'securities exchange act of 1934', 'securities exchange act of 1934' ],
+            [ '10-K', '10-K' ],
+            [ '274-3125', '274-3125' ],
             // Doesn't match due to end guard
             [ '401(k)', '401(k)' ],
             [ 'N RM100', 'N [[RM100]]' ],

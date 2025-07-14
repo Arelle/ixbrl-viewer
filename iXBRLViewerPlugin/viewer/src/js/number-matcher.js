@@ -90,6 +90,10 @@ const note = 'note' + ws + '\\d{1,3}';
 const level = 'level' + ws + '\\d{1,3}';
 const page = 'page' + ws + '\\d{1,3}';
 const tier = 'tier' + ws + '\\d{1,3}';
+const act = 'act' + ws + 'of' + ws + year; // e.g. 'SECURITIES EXCHANGE ACT OF 1934'
+// Note that this is a superset of "isoDate" but "dateMatch" appears before "do_not_want" so it won't exclude ISO dates.
+const phone_number = '\\d+-\\d+[-\\d]*'    // e.g. 275-3125. Also covers employer number (e.g. 47-2509828). 
+const form_name = '(?:10|8)-(?:k|q)'       // e.g. '10-K'
 
 const months_ended = r_or([number_word, '\\d+']) + ws + 'months ended';
 
@@ -98,7 +102,7 @@ const month_day_year = month_num + '/' + day_with_0 + '/' + year;
 const month_year = month_num + '/\\d\\d';
 
 const do_not_want = r_or([section, topic, form, asc, item, rule, note, level, page,
-                    tier, months_ended, month_day_year, month_year]);
+                    tier, act, phone_number, form_name, months_ended, month_day_year, month_year]);
 
 const number_separator = r_or([r_maybe(ws + hyphen + ws), ws]);
 const number_word_string = number_word + r_zero_or_more(number_separator + number_word);

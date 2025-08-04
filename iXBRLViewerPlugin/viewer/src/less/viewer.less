@@ -79,7 +79,7 @@
 }
 
 // Apply related fact highlighting (used for calc contributors)
-&.ixbrl-related {
+.ixbrl-related {
   &:not(.ixbrl-no-highlight),
   .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     outline: solid 0.125em var(--colour-related-fact);
@@ -92,7 +92,7 @@
 }
 
 // Apply linked fact highlighting (used when hovering on facts in inspector)
-&.ixbrl-linked-highlight {
+.ixbrl-linked-highlight {
   &:not(.ixbrl-no-highlight),
   .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     outline: dashed 0.125em var(--colour-linked-fact);
@@ -120,7 +120,7 @@
 }
 
 // Apply solid outline to selected elements
-&.ixbrl-selected {
+.ixbrl-selected {
   &:not(.ixbrl-no-highlight),
   .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     // This rule needs to override the previous one so that already selected

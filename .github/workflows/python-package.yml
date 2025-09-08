@@ -37,7 +37,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v5.0.0
         with:
           cache: 'npm'
           check-latest: true
@@ -47,7 +47,7 @@ jobs:
       - name: Build ixbrlviewer.js
         run: make prod
       - name: Install Python
-        uses: actions/setup-python@v5.6.0
+        uses: actions/setup-python@v6.0.0
         with:
           cache: 'pip'
           cache-dependency-path: '**/pyproject.toml'
@@ -95,7 +95,7 @@ jobs:
           TWINE_REPOSITORY: ${{ github.repository == 'Arelle/ixbrl-viewer' && 'pypi' || 'testpypi' }}
         run: pipx run twine upload ./*
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2.3.2
+        uses: softprops/action-gh-release@v2.3.3
         with:
           fail_on_unmatched_files: true
           files: './*'

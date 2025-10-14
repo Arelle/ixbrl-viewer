@@ -216,10 +216,7 @@ export class Fact {
     }
 
     /**
-     * Get all defined Aspects.
-     *
-     * Taxonomy-defined aspects will be sorted using {@link Aspect#compareTo}, which orders by prefix and suffix.
-     * Non-taxonomy aspects are treated as unordered and retain their relative position.
+     * Get all defined Aspects (sorted by aspect name).
      *
      * @returns {Aspect[]} An array of instantiated Aspect objects.
      */

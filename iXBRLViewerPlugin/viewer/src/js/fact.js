@@ -215,10 +215,26 @@ export class Fact {
         return this.concept().isTextBlock();
     }
 
+    /**
+     * Get all defined Aspects.
+     *
+     * Taxonomy-defined aspects will be sorted using {@link Aspect#compareTo}, which orders by prefix and suffix.
+     * Non-taxonomy aspects are treated as unordered and retain their relative position.
+     *
+     * @returns {Aspect[]} An array of instantiated Aspect objects.
+     */
     aspects() {
-        return Object.keys(this.f.a).map(k => this.aspect(k));
+        return Object.keys(this.f.a)
+            .map(k => this.aspect(k))
+            .sort((a, b) => a.compareTo(b));
     }
 
+    /**
+     * Retrieves or lazily creates an Aspect instance for the given aspect key.
+     *
+     * @param {string} a - The aspect key to retrieve or create.
+     * @returns {Aspect|undefined} The Aspect instance associated with the key, or undefined if not defined in `this.f.a`.
+     */
     aspect(a) {
         if (this._aspects === undefined) {
             this._aspects = {}

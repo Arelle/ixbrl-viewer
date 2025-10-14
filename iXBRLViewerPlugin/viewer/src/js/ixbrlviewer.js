@@ -258,13 +258,14 @@ export class iXBRLViewer {
             else {
                 fetch(this.options.configUrl)
                     .then((resp) => {
-                        if (resp.status === 404) {
-                            return Promise.resolve({});
-                        }
-                        if (resp.status !== 200) {
-                            return Promise.reject(`Fetch failed: ${resp.status}`);
-                        }
-                        return resp.json();
+                        switch (resp.status) {
+                            case 200:
+                                return resp.json();
+                            case 404:
+                                return Promise.resolve({});
+                            default:
+                                return Promise.reject(`Fetch of ${this.options.configUrl} failed: ${resp.status}`);
+                        };
                     })
                     .then((data) => {
                         resolve(data);

@@ -8,6 +8,8 @@ import { NAMESPACE_ISO4217 } from "./util";
 var testReportData = {
     "prefixes": {
         "eg": "http://www.example.com",
+        "aa": "http://www.example.com/aa",
+        "zz": "http://www.example.com/zz",
         "iso4217": NAMESPACE_ISO4217,
         "e": "http://example.com/entity",
     },
@@ -57,6 +59,30 @@ var testReportData = {
             },
             "d": "e"
         },
+        "eg:Dimension2": {
+            "labels": {
+                "std": {
+                    "en": "Dimension Two"
+                }
+            },
+            "d": "e"
+        },
+        "zz:Axis1": {
+            "labels": {
+                "std": {
+                    "en": "Axis One"
+                }
+            },
+            "d": "e"
+        },
+        "aa:Dimension3": {
+            "labels": {
+                "std": {
+                    "en": "Dimension Three"
+                }
+            },
+            "d": "e"
+        },
         "eg:Member1": {
             "labels": {
                 "std": {
@@ -68,6 +94,20 @@ var testReportData = {
             "labels": {
                 "std": {
                     "en": "Member Two"
+                }
+            }
+        },
+        "eg:Member3": {
+            "labels": {
+                "std": {
+                    "en": "Member Three"
+                }
+            }
+        },
+        "eg:Member4": {
+            "labels": {
+                "std": {
+                    "en": "Member Four"
                 }
             }
         },
@@ -719,6 +759,68 @@ describe("Aspect methods", () => {
         expect(f.aspect("eg:Dimension1").value()).toEqual("eg:Member1");
     });
 });
+
+describe("Aspect sorting", () => {
+    var f = testFact({
+            "d": -3,
+            "v": 1000,
+            "a": {
+                "c": "eg:Concept1",
+                "u": "iso4217:USD",
+                "p": "2018-01-01/2019-01-01",
+                "eg:Dimension2": "eg:Member1",
+                "aa:Dimension3": "eg:Member2",
+                "zz:Axis1":      "eg:Member3",
+                "eg:Dimension1": "eg:Member4"
+            }});
+    test("Fact.aspects() is sorted", () => {
+        expect(f.aspects().length).toEqual(7);
+        expect(f.aspects().filter(a => a.isTaxonomyDefined()).length).toEqual(4);
+
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].name()).toEqual("aa:Dimension3");
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].label()).toEqual("Dimension Three");
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].value()).toEqual("eg:Member2");
+        expect(f.aspects().filter(a => a.isTaxonomyDefined())[0].valueLabel()).toEqual("Member Two");
+
+        expect(f.aspects().filter(a => a.isTaxonomyDefined()).at(-1).label()).toEqual("Axis One");
+        expect(f.aspects().filter(a => a.isTaxonomyDefined()).at(-1).valueLabel()).toEqual("Member Three");
+
+        expect(f.aspects().filter(a => a.isTaxonomyDefined()).map(k => k.name())).toEqual(["aa:Dimension3", "eg:Dimension1", "eg:Dimension2", "zz:Axis1"]);
+        expect(f.aspects().filter(a => !a.isTaxonomyDefined()).map(k => k.name())).toEqual(["c", "p", "u"]);
+    });
+});
+
+describe("Aspect sorting consistent between facts", () => {
+    var fact1 = testFact({
+            "d": -3,
+            "v": 1000,
+            "a": {
+                "c": "eg:Concept1",
+                "u": "iso4217:USD",
+                "p": "2018-01-01/2019-01-01",
+                "eg:Dimension2": "eg:Member1",
+                "aa:Dimension3": "eg:Member2",
+                "zz:Axis1":      "eg:Member3",
+                "eg:Dimension1": "eg:Member4"
+            }});
+    var fact2 = testFact({
+            "d": -3,
+            "v": 1001,
+            "a": {
+                "c": "eg:Concept2",
+                "u": "iso4217:USD",
+                "p": "2018-01-01/2019-01-01",
+                "zz:Axis1":      "eg:Member1",
+                "eg:Dimension2": "eg:Member2",
+                "aa:Dimension3": "eg:Member3",
+                "eg:Dimension1": "eg:Member4"
+            }});
+    test("fact1 dims are sorted as expected and in exactly the same order as fact2 dims", () => {
+        expect(fact1.aspects().filter(a => a.isTaxonomyDefined()).map(k => k.name())).toEqual(["aa:Dimension3", "eg:Dimension1", "eg:Dimension2", "zz:Axis1"]);
+        expect(fact1.aspects().filter(a => a.isTaxonomyDefined()).map(k => k.name())).toEqual(fact2.aspects().filter(a => a.isTaxonomyDefined()).map(k => k.name()));
+    });
+});
+
 
 describe("Fact errors", () => {
     test("iXBRL Invalid", () => {

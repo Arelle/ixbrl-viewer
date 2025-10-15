@@ -40,6 +40,17 @@ export class Aspect {
         return a !== undefined && this._aspect === a._aspect && this._value === a._value;
     }
 
+    /**
+     * Compares this Aspect to another
+     *
+     *
+     * @param {Aspect} b - The Aspect instance to compare against.
+     * @returns {number} - Negative if this < b, positive if this > b, zero if
+     * equal.
+     */
+    compareTo(b) {
+        return this._aspect.localeCompare(b._aspect);
+    }
 
     isTaxonomyDefined() {
         return this._aspect.includes(":");

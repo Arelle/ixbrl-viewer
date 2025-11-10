@@ -16,6 +16,7 @@ jobs:
   npm-package:
     permissions:
       contents: write
+      id-token: write
     needs: node-tests
     uses: ./.github/workflows/npm-package.yml
     secrets: inherit

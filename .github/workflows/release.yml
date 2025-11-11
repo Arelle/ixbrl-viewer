@@ -16,9 +16,42 @@ jobs:
   npm-package:
     permissions:
       contents: write
-    needs: node-tests
     uses: ./.github/workflows/npm-package.yml
     secrets: inherit
+  publish-npm-package:
+    # publish job is inline here because npm doesn't support trusted publishers from GitHub reusable workflows.
+    needs:
+      - node-tests
+      - npm-package
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install Node.js
+        uses: actions/setup-node@v6.0.0
+        with:
+          check-latest: true
+          node-version: latest
+          registry-url: 'https://registry.npmjs.org'
+      - name: Download ixbrlviewer.js artifact
+        uses: actions/download-artifact@v6.0.0
+        with:
+          name: ixbrlviewer.js
+      - name: Download npm artifact
+        uses: actions/download-artifact@v6.0.0
+        with:
+          name: npm package
+      - name: Publish with npm
+        env:
+          NPM_CONFIG_DRY_RUN: ${{ github.repository != 'Arelle/ixbrl-viewer' }}
+        run: npm publish ixbrl-viewer-*.tgz --access public
+      - name: Upload release artifacts
+        uses: softprops/action-gh-release@v2.4.2
+        with:
+          fail_on_unmatched_files: true
+          files: './*'
 
   python-tests:
     uses: ./.github/workflows/python-tests.yml

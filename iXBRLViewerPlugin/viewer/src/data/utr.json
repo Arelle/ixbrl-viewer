@@ -1,7 +1,7 @@
 {
   "_source": {
-    "sha256": "5b6695b7f9f84371e962a46dcd8254f3c7c05e523494fb46643c5b1b69048690",
-    "timestamp": "2025-02-24T22:28:06+00:00",
+    "sha256": "0236426fa29a1c1bca4b6088f65dc75d01df7c3fa716e5c5ae3f0702d0ba9002",
+    "timestamp": "2025-11-12T20:05:25+00:00",
     "url": "https://www.xbrl.org/utr/utr.xml"
   },
   "http://www.xbrl.org/2003/instance": {
@@ -937,6 +937,18 @@
       "n": "Thousand Cubic Foot Equivalent",
       "s": "Mcfe"
     },
+    "Mhl": {
+      "n": "Millions of hectolitres",
+      "s": "Mhl"
+    },
+    "Ml": {
+      "n": "Megalitre",
+      "s": "Ml"
+    },
+    "Mm3": {
+      "n": "Thousand cubic metres",
+      "s": "Mm\u00b3"
+    },
     "Mt": {
       "n": "Megatonne",
       "s": "Mt"
@@ -979,6 +991,10 @@
     "TB": {
       "n": "Terabyte",
       "s": "TB"
+    },
+    "TEU": {
+      "n": "Twenty-foot equivalent unit",
+      "s": "TEU"
     },
     "TJ": {
       "n": "Terajoule",
@@ -1076,6 +1092,10 @@
       "n": "Gram",
       "s": "g"
     },
+    "gCO2e": {
+      "n": "Grams of CO2 equivalent",
+      "s": "gCO2e"
+    },
     "gal": {
       "n": "Gallon",
       "s": "gal"
@@ -1083,6 +1103,10 @@
     "ha": {
       "n": "Hectare",
       "s": "ha"
+    },
+    "hl": {
+      "n": "Hectolitre",
+      "s": "hl"
     },
     "hp": {
       "n": "Horsepower",

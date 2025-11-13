@@ -6,6 +6,9 @@
   "directories": {
     "test": "tests"
   },
+  "files": [
+    "iXBRLViewerPlugin/viewer/"
+  ],
   "scripts": {
     "test": "jest --roots=iXBRLViewerPlugin",
     "test:puppeteer": "jest --roots=tests/puppeteer --env=node",

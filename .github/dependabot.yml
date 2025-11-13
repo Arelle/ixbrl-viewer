@@ -8,10 +8,6 @@ updates:
       github-action-dependencies:
         patterns:
           - "*"
-    ignore:
-      - dependency-name: "softprops/action-gh-release"
-        versions:
-          - "2.2.0"
   - package-ecosystem: npm
     directory: "/"
     schedule:

@@ -62,7 +62,7 @@
     "i18next-parser": "^9.0.0",
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
-    "puppeteer": "24.30.0",
+    "puppeteer": "24.31.0",
     "puppeteer-screen-recorder": "3.0.3",
     "stylelint": "^16.4.0",
     "stylelint-config-standard": "^39.0.0",

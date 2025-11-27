@@ -102,10 +102,10 @@
     "showTextOnly": "Show text only",
     "summary": {
       "fact": {
-        "header": "Fact Summary",
-        "hidden": "Hidden facts",
+        "header": "XBRL facts summary",
+        "hidden": "Hidden",
         "mandatory": "Mandatory facts",
-        "total": "Total facts"
+        "total": "Total"
       },
       "file": {
         "calculations": "Calculation Linkbases",
@@ -127,6 +127,11 @@
         "colTotal": "Total",
         "header": "Tag Summary",
         "rowTotal": "Total"
+      },
+      "about": {
+        "name": "Name",
+        "entity": "Entity",
+        "seeMoreReferenceData": "See more {{type}} reference data"
       }
     },
     "summation": "Summation",

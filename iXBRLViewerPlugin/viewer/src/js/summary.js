@@ -1,4 +1,6 @@
 // See COPYRIGHT.md for copyright information
+//
+import { ENTITY_CONCEPT_LOCALNAMES } from "./util.js";
 
 export const DIMENSIONS_KEY = "dimensions";
 export const MEMBERS_KEY = "members";
@@ -86,6 +88,7 @@ export class DocumentSummary {
 
     _buildTagCounts() {
         const tagCounts = new Map();
+        const identifierCounts = new Map();
         for (const fact of this._reportSet.facts()) {
             let counter = this._getTagCounter(tagCounts, fact.conceptName());
             counter.addPrimaryItem(fact.conceptName());
@@ -109,10 +112,13 @@ export class DocumentSummary {
                     counter.addMember(member);
                 }
             }
+            const identifier = fact.identifier().qname;
+            identifierCounts.set(identifier, (identifierCounts.get(identifier) ?? 0) + 1);
         }
         this._tagCounts = new Map(
             [...tagCounts].map(([k, v]) => [k, v.getCounts()])
         );
+        this._identifiers = [...identifierCounts.entries()].sort((a, b) => b[1] - a[1]).map(x => x[0]);
     }
 
     _buildLocalFileSummary() {
@@ -120,6 +126,10 @@ export class DocumentSummary {
         for (const [document, documentTypes] of this._reportSet.reports.flatMap(r => Object.entries(r.localDocuments()))) {
             this._localFileSummary.addDocument(document, documentTypes);
         }
+    }
+
+    _getEntityNames() {
+        return this._reportSet.facts().filter(f => ENTITY_CONCEPT_LOCALNAMES.includes(f.conceptQName().localname));
     }
 
     totalFacts() {
@@ -148,6 +158,20 @@ export class DocumentSummary {
             this._buildTagCounts();
         }
         return this._tagCounts;
+    }
+
+    identifiers() {
+        if (this._identifiers === undefined) {
+            this._buildTagCounts();
+        }
+        return this._identifiers;
+    }
+
+    entityNames() {
+        if (this._entityNames === undefined) {
+            this._entityNames = this._getEntityNames();
+        }
+        return this._entityNames;
     }
 
     getLocalDocuments() {

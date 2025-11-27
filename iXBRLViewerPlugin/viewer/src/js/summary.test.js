@@ -1,7 +1,16 @@
 // See COPYRIGHT.md for copyright information
 
 import { DocumentSummary } from "./summary.js";
+import { QName } from './qname.js';
 
+function testQName(prefix, localpart, uri) {
+    return {
+        localname: localpart,
+        prefix: prefix,
+        namespace: uri,
+        qname: prefix + ":" + localpart
+    }
+}
 
 function testConcept(typedDomainElement) {
     return {
@@ -11,10 +20,11 @@ function testConcept(typedDomainElement) {
     }
 }
 
-function testFact(conceptName, dimensions) {
+function testFact(conceptName, dimensions, identifier) {
     return {
         conceptName: () => conceptName,
-        dimensions: () => dimensions
+        dimensions: () => dimensions,
+        identifier: () => identifier
     }
 }
 
@@ -44,8 +54,9 @@ describe("Facts summary", () => {
 
     test("multiple facts", () => {
         const facts = [];
+        const identifier = testQName('lei', '123', 'http://example.com');
         for (let i = 0; i < 10; i++) {
-            facts.push(testFact("eg:Concept1", {}, []));
+            facts.push(testFact("eg:Concept1", {}, [], identifier));
         }
         const reportSet = testReportSet({}, facts, {}, []);
         const summary = new DocumentSummary(reportSet);
@@ -55,8 +66,9 @@ describe("Facts summary", () => {
 
     test("duplicate facts", () => {
         const conceptName = "eg:Concept1";
-        const fact1 = testFact(conceptName, {});
-        const fact2 = testFact(conceptName, {});
+        const identifier = testQName('lei', '123', 'http://example.com');
+        const fact1 = testFact(conceptName, {}, identifier);
+        const fact2 = testFact(conceptName, {}, identifier);
         const reportSet = testReportSet({}, [fact1, fact2], {}, []);
         const summary = new DocumentSummary(reportSet);
 
@@ -75,9 +87,10 @@ describe("Tags summary", () => {
     });
 
     test("multiple tags", () => {
-        const fact1 = testFact("eg:Concept1", {});
-        const fact2 = testFact("eg:Concept2", {});
-        const fact3 = testFact("xz:Concept1", {});
+        const identifier = testQName('lei', '123', 'http://example.com');
+        const fact1 = testFact("eg:Concept1", {}, identifier);
+        const fact2 = testFact("eg:Concept2", {}, identifier);
+        const fact3 = testFact("xz:Concept1", {}, identifier);
         const reportSet = testReportSet({}, [fact1, fact2, fact3], {}, [])
         const summary = new DocumentSummary(reportSet);
 
@@ -98,12 +111,13 @@ describe("Tags summary", () => {
     });
 
     test("dimensions", () => {
+        const identifier = testQName('lei', '123', 'http://example.com');
         const dimension = "eg:dimension";
         const member = "eg:member";
         const dimensions = {
             [dimension]: member
         };
-        const fact = testFact("eg:Concept1", dimensions);
+        const fact = testFact("eg:Concept1", dimensions, identifier);
         const concepts = {
             [dimension]: testConcept(),
         }
@@ -121,6 +135,7 @@ describe("Tags summary", () => {
     });
 
     test("mixed dimensions", () => {
+        const identifier = testQName('lei', '123', 'http://example.com');
         const dimension1 = "ab:dimension";
         const dimension2 = "cd:dimension";
         const dimension3 = "ef:dimension";
@@ -131,7 +146,7 @@ describe("Tags summary", () => {
             [dimension2]: member1,
             [dimension3]: member2,
         };
-        const fact = testFact("ab:Concept1", dimensions);
+        const fact = testFact("ab:Concept1", dimensions, identifier);
         const concepts = {
             [dimension1]: testConcept(),
             [dimension2]: testConcept(),
@@ -169,12 +184,13 @@ describe("Tags summary", () => {
     });
 
     test("typed dimension", () => {
+        const identifier = testQName('lei', '123', 'http://example.com');
         const dimension = "eg:dimension";
         const typedDomain = "xz:domain";
         const dimensions = {
             [dimension]: typedDomain,
         };
-        const fact = testFact("eg:Concept1", dimensions);
+        const fact = testFact("eg:Concept1", dimensions, identifier);
         const concepts = {
             [dimension]: testConcept(typedDomain),
         }

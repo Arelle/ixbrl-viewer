@@ -1,12 +1,9 @@
 // See COPYRIGHT.md for copyright information
 
-#inspector .summary {
+#inspector .overview-inspector {
   .body {
     .total-facts-value,
-    .mandatory-facts-value {
-      .inline-button();
-    }
-
+    .mandatory-facts-value,
     .hidden-facts-value {
       .inline-button();
     }
@@ -20,79 +17,98 @@
       }
     }
 
-    .tag-summary-body {
-      overflow-x: auto;
+    table.tag-summary {
+      width: 100%;
+      border-collapse: collapse;
 
-      sup {
-        font-size: 0.9rem;
-        display: block;
+      thead, tfoot {
+        th, td {
+          background-color: var(--colour-table-header-bg);
+        }
       }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-
-        td,
-        th {
-          padding: 0.2rem;
-          text-align: left;
-        }
-
-        thead tr {
-          th {
-            white-space: nowrap;
-            position: relative;
-            height: 10rem;
-
-            &.namespace {
-              text-align: left;
-              vertical-align: bottom;
-            }
-
-            &.figure {
-              width: 5rem;
-
-              & > div {
-                position: absolute;
-                transform: translate(100px, -50%) rotate(45deg) translate(-50%, 50%);
-                text-align: right;
-                width: 200px;
-                right: 0;
-                bottom: 0;
-
-                &.has-tooltip {
-                  bottom: -0.8rem;
-                }
-              }
-            }
-
-          }
-        }
-
-
-        tbody th {
+      tr {
+        td, th {
+          border: solid 1px var(--colour-border-grey);
+          line-height: 2.6rem;
           font-weight: normal;
+          padding: 0.5rem;
+          text-align: center;
         }
 
-        tbody,
-        tfoot {
-          tr {
-            transition: background-color 0.25s ease;
+        & > :first-child {
+          text-align: left;
+          padding: 0.5rem 0.8rem;
+        }
 
-            &:nth-child(odd) {
-              background-color: var(--colour-row-odd);
-            }
+        & > :not(:first-child, :last-child) {
+          border-right: none;
+        }
 
-            &:hover {
-              background-color: var(--colour-row-hover);
-            }
+        & > :not(:first-child) {
+          border-left: none;
+        }
+      }
 
-            td.figure {
-              text-align: right;
-            }
-          }
+      &:not(.show-percent) {
+        .tag-count-percent {
+          display: none;
+        }
+      }
+
+      &.show-percent {
+        .tag-count-number {
+          display: none;
         }
       }
     }
   }
 }
+
+.radio-pills {
+  & > button {
+    &.selected {
+      background-color: var(--colour-bg);
+    }
+
+    &:first-of-type {
+      border-top-left-radius: 0.4rem;
+      border-bottom-left-radius: 0.4rem;
+    }
+
+    &:not(:last-of-type) {
+      border-right: none;
+    }
+
+    &:last-of-type {
+      border-top-right-radius: 0.4rem;
+      border-bottom-right-radius: 0.4rem;
+    }
+
+    &:focus-visible {
+      z-index: 1;
+    }
+
+    cursor: pointer;
+    text-align: center;
+    flex: 1 1 0;
+    background-color: var(--colour-inactive-bg);
+    border: solid 1px var(--colour-border-grey);
+    border-radius: 0;
+  }
+
+  display: flex;
+}
+
+.flex-row {
+  & > * {
+    flex: 1 1 0;
+    min-width: 14rem;
+  }
+
+  gap: 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+

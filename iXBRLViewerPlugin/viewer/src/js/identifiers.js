@@ -1,4 +1,5 @@
 // See COPYRIGHT.md for copyright information
+import i18next from 'i18next';
 
 const schemes = {
     "http://standards.iso.org/iso/17442": { "name": "LEI", "url": "https://search.gleif.org/#/record/%s" },
@@ -18,12 +19,16 @@ export class Identifiers {
         return undefined;
     }
 
-    static identifierNameForFact(fact) {
-        const data = schemes[fact.identifier().namespace];
+    static identifierName(identifier) {
+        const data = schemes[identifier.namespace];
         if (data !== undefined) {
             return data.name;
         }
         return undefined;
+    }
+
+    static identifierNameForFact(fact) {
+        return identifierName(fact.identifier());
     }
 
     static readableName(identifier) {
@@ -56,5 +61,18 @@ export class Identifiers {
             span.textContent = identifier.qname;
         }
         return span;
+    }
+
+    static seeMoreLinkHTML(identifier) {
+        const data = schemes[identifier.namespace];
+        if (data === undefined) { 
+            return undefined
+        }
+        const url = Identifiers.identifierURL(identifier);
+        const a = document.createElement("a");
+        a.textContent = i18next.t("inspector.summary.about.seeMoreReferenceData", { type: data.name });
+        a.setAttribute("target", "_blank");
+        a.setAttribute("href", url);
+        return a;
     }
 }

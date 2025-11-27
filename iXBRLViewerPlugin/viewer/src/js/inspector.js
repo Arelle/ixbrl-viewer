@@ -20,7 +20,7 @@ import { Calculation } from "./calculation.js";
 import { CalculationInspector } from './calculationInspector.js';
 import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
-import { toggleTheme } from './theme.js';
+import { getTheme, darkModeTheme, lightModeTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
 const SEARCH_FILTER_MULTISELECTS = {
@@ -105,18 +105,27 @@ export class Inspector {
                         }
                     }
                 });
-                $("#inspector .controls .search-button").on("click", () => inspector.inspectorMode("search-mode", true));
-                $("#inspector .controls .summary-button").on("click", () => inspector.inspectorMode("summary-mode", true));
-                $("#inspector .controls .outline-button").on("click", () => inspector.inspectorMode("outline-mode", true));
-                $("#inspector .back").on("click", () => inspector.popInspectorMode());
+                $("#inspector-tabs button").on("click", function () {
+                    inspector.inspectorMode($(this).data("mode"));
+                });
                 $(".popup-trigger").on("mouseenter", function () {
                     $(this).find(".popup-content").show()
                 }).on("mouseleave", function () {
                     $(this).find(".popup-content").hide()
                 });
+                $(".radio-pills button").on("click", function () {
+                    $(this).parent().find("button").removeClass("selected");
+                    $(this).addClass("selected");
+                });
+                $("#summary-tag-count-number").on("click", () => $(".tag-summary").removeClass("show-percent"));
+                $("#summary-tag-count-percent").on("click", () => $(".tag-summary").addClass("show-percent"));
                 $("#inspector").on("click", ".clipboard-copy", function () {
                     navigator.clipboard.writeText($(this).data("cb-text"));
                 });
+
+                $('#dark-mode-off').on("click", () => lightModeTheme());
+                $('#dark-mode-on').on("click", () => darkModeTheme());
+                $("#setting-dark-mode button").filter((i, e) => $(e).data("theme") === getTheme()).addClass("selected");
 
                 inspector.initializeTooltips();
 
@@ -193,10 +202,6 @@ export class Inspector {
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
         $('.ixbrl-next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
         $('.ixbrl-prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
-        $('#toggle-dark-mode')
-                .attr('title', i18next.t('toolbar.toggleDarkMode'))
-                .attr('aria-label', i18next.t('toolbar.toggleDarkMode'))
-                .on('click', toggleTheme);
     }
 
     postLoadAsync() {
@@ -299,11 +304,6 @@ export class Inspector {
                     "select-user-language"
             );
 
-            // Actions
-            if (this._reportSet.filingDocuments()) {
-                this._optionsMenu.addLabel(i18next.t("menu.actions"));
-                this._optionsMenu.addDownloadButton("Download filing documents", this._reportSet.filingDocuments())
-            }
 
             // Options
             if (this._reportSet.usesCalculations() && !this._iv.isFeatureEnabled(FEATURE_HIDE_CALCULATION_MODE_OPTION)) {
@@ -447,19 +447,13 @@ export class Inspector {
         this.search();
     }
 
-    inspectorMode(mode, toggle) {
-        const allModes = ["summary-mode", "outline-mode", "search-mode"];
-        const i = $("#inspector").removeClass(allModes.filter(m => m !== mode));
-        if (mode === undefined) {
-            this._prevInspectorMode = undefined;
-            return;
-        }
-        if (toggle) {
-            i.toggleClass(mode);
-        }
-        else {
-            i.addClass(mode);
-        }
+    inspectorMode(mode) {
+        const allModes = ["fact-mode", "overview-mode", "settings-mode"];
+        $("#inspector-tabs button")
+            .removeClass("selected")
+            .filter((i, e) => $(e).data("mode") === mode)
+            .addClass("selected");
+        $("#inspector").removeClass(allModes.filter(m => m !== mode)).addClass(mode);
     }
 
     /* 
@@ -472,10 +466,6 @@ export class Inspector {
         this.inspectorMode(newMode);
     }
 
-    popInspectorMode() {
-        this.inspectorMode(this._prevInspectorMode);
-        this._prevInspectorMode = undefined;
-    }
 
     setCalculationMode(useCalc11) {
         this._useCalc11 = useCalc11;
@@ -744,11 +734,50 @@ export class Inspector {
     }
 
     createSummary() {
-        const summaryDom = $("#inspector .summary .body");
+        const summaryDom = $("#inspector .overview-inspector .body");
+        this._populateAboutSummary(summaryDom);
         this._populateFactSummary(summaryDom);
         this._populateTagSummary(summaryDom);
+        this._populateNamespaceSummary(summaryDom);
         this._populateFileSummary(summaryDom);
+        this._populateDownloadsSummary(summaryDom);
         this._populateReportCreation(summaryDom);
+    }
+
+    _populateAboutSummary(summaryDom) {
+        const aboutTableBody = summaryDom.find("table.about tbody");
+        const entityNames = this.summary.entityNames();
+        if (entityNames.length > 0) {
+            const row = $("<tr></tr>").appendTo(aboutTableBody);
+            $("<th></th>")
+                .text(i18next.t("inspector.summary.about.name"))
+                .appendTo(row);
+
+            const cell = $("<td></td>").appendTo(row);
+            for (const entityName of entityNames) {
+                $("<span></span>")
+                    .text(entityName.value())
+                    .appendTo(cell);
+                $("<br />").appendTo(cell);
+            }
+        }
+        for (const identifier of this.summary.identifiers()) {
+            const identifierQName = this._reportSet.qname(identifier);
+            const name = Identifiers.identifierName(identifierQName);
+            const row = $("<tr></tr>").appendTo(aboutTableBody);
+            $("<th></th>")
+                .text(name ?? i18next.t("inspector.summary.about.entity"))
+                .appendTo(row);
+            const cell = $("<td></td>").appendTo(row);
+            $("<span></span>")
+                .text(identifierQName.localname)
+                .appendTo(cell);
+            const link = Identifiers.seeMoreLinkHTML(identifierQName);
+            if (link !== undefined) {
+                $("<br />").appendTo(cell);
+                cell.append(link);
+            }
+        }
     }
 
     _populateFactSummary(summaryDom) {
@@ -786,7 +815,6 @@ export class Inspector {
 
     _populateTagSummary(summaryDom) {
         const summaryTagsTableBody = summaryDom.find(".tag-summary-table-body");
-
         const tagCounts = this.summary.tagCounts();
 
         let totalPrimaryItemTags = 0;
@@ -797,7 +825,6 @@ export class Inspector {
             totalPrimaryItemTags += counts[PRIMARY_ITEMS_KEY];
             totalDimensionTags += counts[DIMENSIONS_KEY];
             totalMemberTags += counts[MEMBERS_KEY];
-            totalTags += counts[TOTAL_KEY];
         }
 
         function insertTagCount(row, count, total) {
@@ -808,13 +835,18 @@ export class Inspector {
             let formattedPercent = percent.toLocaleString(undefined, {
                 style: "percent",
             });
-            formattedPercent = ` (${formattedPercent})`;
 
-            $("<td></td>")
-                    .text(count)
+            let cell = $("<td></td>")
                     .addClass("figure")
-                    .append($("<sup></sup>").text(formattedPercent))
                     .appendTo(row);
+            $("<span></span>")
+                .addClass("tag-count-number")
+                .text(count)
+                .appendTo(cell);
+            $("<span></span>")
+                .addClass("tag-count-percent")
+                .text(formattedPercent)
+                .appendTo(cell);
         }
 
         const sortedPrefixCounts = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
@@ -824,7 +856,6 @@ export class Inspector {
             insertTagCount(countRow, counts[PRIMARY_ITEMS_KEY], totalPrimaryItemTags);
             insertTagCount(countRow, counts[DIMENSIONS_KEY], totalDimensionTags);
             insertTagCount(countRow, counts[MEMBERS_KEY], totalMemberTags);
-            insertTagCount(countRow, counts[TOTAL_KEY], totalTags);
         }
 
         const summaryTagsTableFooterRow = summaryDom.find(".tag-summary-table-footer-row");
@@ -832,7 +863,6 @@ export class Inspector {
         insertTagCount(summaryTagsTableFooterRow, totalPrimaryItemTags, totalPrimaryItemTags);
         insertTagCount(summaryTagsTableFooterRow, totalDimensionTags, totalDimensionTags);
         insertTagCount(summaryTagsTableFooterRow, totalMemberTags, totalMemberTags);
-        insertTagCount(summaryTagsTableFooterRow, totalTags, totalTags);
     }
 
     _populateFileSummary(summaryDom) {
@@ -850,30 +880,65 @@ export class Inspector {
         const summaryFilesContent = summaryDom.find(".files-summary");
         let visibleItems = 0;
 
-        function insertFileSummary(docs, classSelector) {
-            if (docs.length === 0) {
-                summaryFilesContent.find(classSelector).hide();
-            } else {
-                const ul = summaryFilesContent.find(classSelector + ' ul')
-                visibleItems += 1;
-                for (const doc of docs) {
-                    ul.append($("<li></li>").text(doc));
-                }
+        function insertFileSummary(docs) {
+            const ul = summaryFilesContent.find('ul.files-summary-list')
+            visibleItems += 1;
+            for (const doc of docs) {
+                ul.append($("<li></li>").text(doc));
             }
         }
 
-        insertFileSummary(inline, ".inline-docs");
-        insertFileSummary(schema, ".schemas");
-        insertFileSummary(presLinkbase, ".pres-links");
-        insertFileSummary(calcLinkbase, ".calc-links");
-        insertFileSummary(defLinkbase, ".def-links");
-        insertFileSummary(labelLinkbase, ".label-links");
-        insertFileSummary(refLinkbase, ".ref-links");
-        insertFileSummary(unrecognizedLinkbase, ".other-links");
+        insertFileSummary(inline);
+        insertFileSummary(schema);
+        insertFileSummary(presLinkbase);
+        insertFileSummary(calcLinkbase);
+        insertFileSummary(defLinkbase);
+        insertFileSummary(labelLinkbase);
+        insertFileSummary(refLinkbase);
+        insertFileSummary(unrecognizedLinkbase);
         if (visibleItems == 0) {
             summaryFilesContent.hide();
         }
     };
+
+    _populateNamespaceSummary(summaryDom) {
+        let key;
+        if (this._iv.isReviewModeEnabled()) {
+            key = [
+                "XBRL Elements",
+                "Untagged Numbers",
+                "Untagged Dates",
+            ]
+        } else {
+            key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
+        }
+        this._iv.callPluginMethod("extendHighlightKey", key);
+
+
+        const tableBody = summaryDom.find("table.namespace-key tbody");
+        
+        for (const [i, name] of key.entries()) {
+            const row = $("<tr></tr>").appendTo(tableBody);
+            $("<th></th>")
+                .append($("<span></span>").addClass("sample").addClass("sample-" + (i % HIGHLIGHT_COLORS)))
+                .appendTo(row);
+            $("<td></td>")
+                .text(name)
+                .appendTo(row);
+        }
+
+    }
+
+    _populateDownloadsSummary(summaryDom) {
+        // Actions
+        if (this._reportSet.filingDocuments()) {
+            summaryDom.find(".filing-documents .download-link").attr("href", this._reportSet.filingDocuments());
+        }
+        else {
+            summaryDom.find(".filingDocuments").hide();
+            summaryDom.find(".downloads-summary").hide();
+        }
+    }
 
     _populateReportCreation(summaryDom) {
         const softwareCredits = this.summary.getSoftwareCredits();
@@ -1478,7 +1543,7 @@ export class Inspector {
             $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("html-hidden-fact");
             $('#inspector .tags').show();
 
-            $('#inspector .fact-inspector')
+            $('#inspector .fact-inspector-body')
                 .empty()
                 .append(this._selectionSummaryAccordian().contents());
 
@@ -1559,7 +1624,7 @@ export class Inspector {
         }
         this.switchItem(vuid, noScroll);
         if (!noInspectorReset) {
-            this.inspectorMode(undefined);
+            this.inspectorMode("fact-mode");
         }
     }
 

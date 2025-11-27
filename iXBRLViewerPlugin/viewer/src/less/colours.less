@@ -15,12 +15,14 @@
 @colour-linked-fact: @colour-primary;
 @colour-related-fact: darken(desaturate(spin(@colour-secondary, 30.0000), 14.5078), 2.1569); // #0eb30e;
 
-@colour-text-title: lighten(@colour-foreground, 26.6667); // #444444;
-@colour-text: lighten(@colour-foreground, 34.9020); // #595959;
-@colour-text-light: lighten(@colour-foreground, 45); // #737373;
+@colour-text-title: @colour-text;
+@colour-text: lighten(@colour-foreground, 12);
+@colour-text-light: lighten(@colour-foreground, 40);
 @colour-text-form-value: lighten(@colour-foreground, 45); // #737373
 
 @colour-border-grey: lighten(@colour-foreground, 79.6078);
+@colour-inactive-bg: #f0f0f0;
+@colour-table-header-bg: #f9f9f9;
 
 @colour-highlight-default: lighten(desaturate(spin(@colour-secondary, -0.5660), 31.1688), 34); // #beea8f
 @colour-highlight-1: lighten(saturate(spin(@colour-tertiary, -25.3918), 17.2043), 36); // #dd73ff
@@ -28,6 +30,7 @@
 @colour-highlight-3: #a6fff7;
 @colour-highlight-4: #ff7467;
 @colour-highlight-5: #7e84fF;
+
 
 @colour-icon-grey: @colour-text;
 
@@ -39,5 +42,8 @@
 
 @colour-bg-tag: darken(@colour-bg, 65); // #595959;
 
-@colour-row-hover: darken(@colour-bg, 9.8039); // #e6e6e6
+@colour-primary-light: lighten(@colour-primary, 20);
+
+@colour-row-hover: darken(@colour-bg, 6); 
 @colour-row-odd: @colour-button-bg;
+

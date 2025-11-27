@@ -97,7 +97,6 @@ export class Viewer {
                             this._applyStyles();
                             this._bindHandlers();
                             this.scale = 1;
-                            this._setTitle(0);
                             this._addDocumentSetTabs();
                             resolve();
                         });
@@ -842,11 +841,8 @@ export class Viewer {
         this.changeItemClass(f.vuid, "ixbrl-linked-highlight", true);
     }
 
-    _setTitle(docIndex) {
-        const title = $('head title', this._iframes.eq(docIndex).contents()).text();
-        $('#top-bar .document-title')
-            .text(title)
-            .attr("aria-label", "Inline Viewer: " + title);
+    getTitle(docIndex) {
+        return $('head title', this._iframes.eq(docIndex).contents()).text();
     }
 
     showDocumentForItemId(vuid) {
@@ -855,6 +851,10 @@ export class Viewer {
 
     currentDocument() {
         return this._iframes.eq(this._currentDocumentIndex);
+    }
+
+    documentCount() {
+        return this._iframes.length;
     }
 
     selectDocument(docIndex) {
@@ -871,7 +871,6 @@ export class Viewer {
             .eq(docIndex)
             .height("100%")
             .data("selected", true);
-        this._setTitle(docIndex);
     }
 
     * postProcess() {

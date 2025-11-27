@@ -135,6 +135,7 @@
         "rowTotal": "Total"
       },
       "about": {
+        "title": "Title",
         "name": "Name",
         "entity": "Entity",
         "seeMoreReferenceData": "See more {{type}} reference data"

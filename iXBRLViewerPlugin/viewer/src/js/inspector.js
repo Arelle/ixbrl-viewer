@@ -752,6 +752,16 @@ export class Inspector {
 
     _populateAboutSummary(summaryDom) {
         const aboutTableBody = summaryDom.find("table.about tbody");
+        if (this._viewer.documentCount() === 1) {
+            const row = $("<tr></tr>").appendTo(aboutTableBody);
+            $("<th></th>")
+                .text(i18next.t("inspector.summary.about.title"))
+                .appendTo(row);
+
+            const cell = $("<td></td>")
+                .appendTo(row)
+                .text(this._viewer.getTitle(0));
+        }
         const entityNames = this.summary.entityNames();
         if (entityNames.length > 0) {
             const row = $("<tr></tr>").appendTo(aboutTableBody);

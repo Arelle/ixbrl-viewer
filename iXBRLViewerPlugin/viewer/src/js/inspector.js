@@ -127,6 +127,7 @@ export class Inspector {
                 $('#dark-mode-on').on("click", () => darkModeTheme());
                 $("#setting-dark-mode button").filter((i, e) => $(e).data("theme") === getTheme()).addClass("selected");
 
+
                 inspector.initializeTooltips();
 
                 inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
@@ -289,22 +290,6 @@ export class Inspector {
             );
             this.setDocumentLanguage(defaultDocLang);
 
-            // Application language
-            const defaultAppLang = i18next.language.substring(0, 2);
-            const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
-            const appLangs = Object.keys(i18next.options.resources)
-                .sort((a, b) => appLangNames.of(a).localeCompare(appLangNames.of(b)));
-
-            this._optionsMenu.addLabel(i18next.t("menu.applicationLanguage"));
-            this._optionsMenu.addCheckboxGroup(
-                    appLangs,
-                    Object.fromEntries(appLangs.map((l) => [l, appLangNames.of(l)])),
-                    defaultAppLang,
-                    (lang) => { this.changeApplicationLanguage(lang); },
-                    "select-user-language"
-            );
-
-
             // Options
             if (this._reportSet.usesCalculations() && !this._iv.isFeatureEnabled(FEATURE_HIDE_CALCULATION_MODE_OPTION)) {
                 this._optionsMenu.addLabel(i18next.t("menu.options"));
@@ -365,6 +350,26 @@ export class Inspector {
             return JSON.parse(pref);
         }
         return this._iv.isFeatureEnabled(FEATURE_HIGHLIGHT_FACTS_ON_STARTUP);
+    }
+
+    buildSettingsPage() {
+        // Application language
+        const defaultAppLang = i18next.language.substring(0, 2);
+        const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+        const appLangs = Object.keys(i18next.options.resources)
+            .sort((a, b) => appLangNames.of(a).localeCompare(appLangNames.of(b)));
+        const appLangSetting = $("#setting-viewer-language")
+            .empty()
+            .off("change.setting")
+            .on("change.setting", e => this.changeApplicationLanguage($(e.currentTarget).val()));
+
+        for (const l of appLangs) {
+            $("<option></option>")
+                .text(appLangNames.of(l))
+                .val(l)
+                .appendTo(appLangSetting);
+        }
+        appLangSetting.val(defaultAppLang);
     }
 
     buildToolbarHighlightMenu() {
@@ -443,6 +448,7 @@ export class Inspector {
         this.buildToolbarHighlightMenu();
         this.buildHighlightKey();
         this.buildUserGuideLink();
+        this.buildSettingsPage();
         this.update();
         this.search();
     }

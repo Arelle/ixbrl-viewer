@@ -98,6 +98,11 @@
     "searchResults": "",
     "searchTitle": "Chwiliwch",
     "settingsMenu": "",
+    "settings": {
+        "viewerLanguage": {
+            "title": "Iaith Cais"
+        }
+    },
     "showAnalysisChart": "",
     "showTextOnly": "Dangos testun yn unig",
     "summary": {

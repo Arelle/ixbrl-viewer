@@ -98,6 +98,12 @@
     "searchResults": "Search Results",
     "searchTitle": "Search",
     "settingsMenu": "Settings Menu",
+    "settings": {
+        "viewerLanguage": {
+            "title": "Viewer language",
+            "documentation": "Select the language you'd like to use with Inline Viewer"
+        }
+    },
     "showAnalysisChart": "Show analysis chart",
     "showTextOnly": "Show text only",
     "summary": {

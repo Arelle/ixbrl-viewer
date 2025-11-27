@@ -35,9 +35,9 @@ See COPYRIGHT.md for copyright information
     </div>
     <div id="pane-right">
       <nav id="inspector-tabs">
-        <button data-mode="fact-mode" data-i18n="inspect.tabs.xbrlFacts">XBRL facts</button>
-        <button data-mode="overview-mode" class="selected" data-i18n="inspect.tabs.overview">Overview</button>
-        <button data-mode="settings-mode" data-i18n="inspect.tabs.settings">Settings</button>
+        <button data-mode="fact-mode" data-i18n="inspector.tabs.xbrlFacts">XBRL facts</button>
+        <button data-mode="overview-mode" class="selected" data-i18n="inspector.tabs.overview">Overview</button>
+        <button data-mode="settings-mode" data-i18n="inspector.tabs.settings">Settings</button>
       </nav>
       <section id="inspector" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
         <!--
@@ -461,13 +461,21 @@ See COPYRIGHT.md for copyright information
         <div class="inspector-container settings-inspector">
           <div class="section">
             <div class="header-with-setting">
-              <h3 data-i18n="inspector.settings.colorMode">Viewer color mode</h3>
+              <h3 data-i18n="inspector.settings.colorMode.title">Viewer color mode</h3>
               <div class="radio-pills setting" id="setting-dark-mode">
                 <button data-theme="light" id="dark-mode-off">Light</button>
                 <button data-theme="dark" id="dark-mode-on">Dark</button>
               </div>
             </div>
             <p data-i18n="inspector.settings.colorMode.documentation">Choose if XBRL viewer's appearance should be light or dark.</p>
+          </div>
+          <div class="section">
+            <div class="header-with-setting">
+              <h3 data-i18n="inspector.settings.viewerLanguage.title">Viewer language</h3>
+              <select class="setting" id="setting-viewer-language">
+              </select>
+            </div>
+            <p data-i18n="inspector.settings.viewerLanguage.documentation">Select the language you'd like to use with XBRL viewer.</p>
           </div>
         </div>
 

@@ -37,7 +37,7 @@ arelle = [
 dev = [
     'flake8==7.3.0',
     'lxml-stubs==0.5.1',
-    'mypy==1.18.2',
+    'mypy==1.19.0',
     'pytest==8.4.2',
     'typing-extensions==4.15.0',
 ]

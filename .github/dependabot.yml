@@ -1,6 +1,8 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
+    cooldown:
+      default-days: 1
     directory: "/"
     schedule:
       interval: weekly
@@ -9,6 +11,8 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: npm
+    cooldown:
+      default-days: 1
     directory: "/"
     schedule:
       interval: weekly
@@ -33,6 +37,8 @@ updates:
           - "3.0.5"
           - "3.0.6"
   - package-ecosystem: pip
+    cooldown:
+      default-days: 1
     directory: "/"
     insecure-external-code-execution: allow
     schedule:

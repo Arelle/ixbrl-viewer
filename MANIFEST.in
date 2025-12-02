@@ -8,6 +8,7 @@ prune tools
 exclude .babelrc
 exclude .gitignore
 exclude .npmignore
+exclude .npmrc
 exclude .readthedocs.yaml
 exclude CODEOWNERS
 exclude jest.config.json

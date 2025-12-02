@@ -1,5 +1,5 @@
 import fs from 'fs';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import { DocFrame } from './page_objects/doc_frame.js';
 import { FactDetailsPanel } from './page_objects/fact_details_panel.js';
 import { PuppeteerScreenRecorder } from 'puppeteer-screen-recorder';
@@ -25,6 +25,7 @@ export class ViewerPage {
     async buildPage() {
         // Launch the browser
         this.browser = await puppeteer.launch({
+            channel: 'chrome',
             headless: this.#isCi ? 'new' : false,
             args: [`--window-size=1440,900`],
             defaultViewport: { width: 1440, height: 821 },

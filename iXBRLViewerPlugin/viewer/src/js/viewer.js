@@ -31,7 +31,7 @@ export class Viewer {
         this.onMouseLeave = $.Callbacks();
 
         this._ixNodeMap = {};
-        this._docOrderItemIndex = new DocOrderIndex();
+        this.docOrderItemIndex = new DocOrderIndex();
         this._currentDocumentIndex = 0;
     }
 
@@ -410,7 +410,7 @@ export class Viewer {
     //
     // Viewer._ixNodeMap is a map of these IDs to IXNode objects.
     //
-    // Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
+    // Viewer.docOrderItemIndex is a DocOrderIndex object that maintains a list of
     // fact and footnotes in document order.
     //
     _preProcessiXBRL(n, reportIndex, docIndex, inHidden) {
@@ -436,7 +436,7 @@ export class Viewer {
 
                     this._addIdToNodes(nodes, vuid);
                     let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
-                    this._docOrderItemIndex.addItem(vuid, docIndex);
+                    this.docOrderItemIndex.addItem(vuid, docIndex);
 
                     if (isNonFraction) {
                         nodes.addClass("ixbrl-element-nonfraction");
@@ -478,7 +478,7 @@ export class Viewer {
                 if (vuid !== null) {
                     let nodes = this._findOrCreateWrapperNode(n, inHidden);
                     nodes.addClass("ixbrl-element").data('ivids', [vuid]);
-                    this._docOrderItemIndex.addItem(vuid, docIndex);
+                    this.docOrderItemIndex.addItem(vuid, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */
                     const ixn = this._ixNodeMap[vuid];
@@ -526,15 +526,15 @@ export class Viewer {
     _selectAdjacentTag(offset, currentItem) {
         var nextVuid;
         if (currentItem !== null) {
-            nextVuid = this._docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
+            nextVuid = this.docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
             this.showDocumentForItemId(nextVuid);
         }
         // If no fact selected go to the first or last in the current document
         else if (offset > 0) {
-            nextVuid = this._docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
+            nextVuid = this.docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
         } 
         else {
-            nextVuid = this._docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
+            nextVuid = this.docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
         }
         
         const nextElement = this.elementsForItemId(nextVuid);

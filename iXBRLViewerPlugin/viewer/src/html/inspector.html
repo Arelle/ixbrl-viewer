@@ -14,12 +14,7 @@ See COPYRIGHT.md for copyright information
         <h1 class="document-title"></h1>
         <div class="top-bar-controls">
           <button class="inline-button validation-warning" data-i18n="[aria-label]inspector.validationResults" aria-label="Validation Results" title="Report has validation errors"></button>
-          <div class="menu" id='display-options-menu'>
-            <button data-i18n="[title]inspector.settingsMenu" title="Settings menu" class="menu-title"></button>
-            <div class="content-container">
-              <div class="content"></div>
-            </div>
-          </div>
+          <button data-i18n="[title]inspector.settings" title="Settings" id="settings-button"></button>
         </div>
       </header>
       <section id="viewer-pane" data-i18n="[aria-label]viewer.ixbrlDocumentView" aria-label="iXBRL Document View">
@@ -36,8 +31,8 @@ See COPYRIGHT.md for copyright information
     <div id="pane-right">
       <nav id="inspector-tabs">
         <button data-mode="fact-mode" data-i18n="inspector.tabs.xbrlFacts">XBRL facts</button>
-        <button data-mode="overview-mode" class="selected" data-i18n="inspector.tabs.overview">Overview</button>
-        <button data-mode="settings-mode" data-i18n="inspector.tabs.settings">Settings</button>
+        <button data-mode="search-mode" data-i18n="inspector.tabs.search">Search</button>
+        <button data-mode="overview-mode" data-i18n="inspector.tabs.overview">Overview</button>
       </nav>
       <section id="inspector" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
         <!--
@@ -49,8 +44,6 @@ See COPYRIGHT.md for copyright information
             </button>
             <button class="search-button" data-i18n="[title]inspector.searchTitle" title="Search">
             </button>
-            <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag"></button>
-            <button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag"></button>
           </nav>
         </div>
         -->
@@ -63,7 +56,21 @@ See COPYRIGHT.md for copyright information
               <p class="title" data-i18n="inspector.noFactSelected">No Fact Selected</p>
             </div>
             -->
+
+            <nav class="tag-nav">
+              <div>
+                  <div class="button">
+                    <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag">Previous</button>
+                  </div>
+                  <div class="text"></div>
+                  <div class="button">
+                    <button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag">Next</button>
+                  </div>
+              </div>
+            </nav>
             <div class="fact-selected-only">
+
+
               <div class="tags">
                 <div class="target-document-tag"></div>
                 <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>
@@ -127,7 +134,7 @@ See COPYRIGHT.md for copyright information
             </div>
           </div>
         </div>
-        <div class="inspector-container search-mode-only" role="search">
+        <div class="inspector-container search-container" role="search">
           <div class="inspector-title">
              <button class="back" title="Back">
              </button>
@@ -479,6 +486,7 @@ See COPYRIGHT.md for copyright information
           </div>
         </div>
 
+        <!--
         <div class="inspector-container outline-mode-only outline">
           <div class="inspector-title">
             <button class="back" title="Back"></button>
@@ -493,6 +501,8 @@ See COPYRIGHT.md for copyright information
             </div>
           </div>
         </div>
+        -->
+
         <footer class="inspector-foot powered-by">
           <div id="footer-logo"></div>
           <div class="version"></div>

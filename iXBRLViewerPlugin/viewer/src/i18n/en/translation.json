@@ -42,6 +42,7 @@
     "duplicatesCount": "{{current}} of {{total}}",
     "entity": "Entity",
     "factValue": "Fact Value",
+    "factCount": "{{current}} of {{total}}",
     "nonNumericFact": "non-numeric fact",
     "noPriorFactInThisReport": "No prior fact in this report",
     "noUnit": "<NOUNIT>",

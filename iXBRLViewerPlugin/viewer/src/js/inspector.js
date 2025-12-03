@@ -40,6 +40,8 @@ export class Inspector {
         this._viewerOptions = new ViewerOptions()
         this._currentItem = null;
         this._useCalc11 = true;
+        this._curInspectorMode = undefined;
+        this._prevInspectorMode = undefined;
     }
 
     i18nInit() {
@@ -108,6 +110,8 @@ export class Inspector {
                 $("#inspector-tabs button").on("click", function () {
                     inspector.inspectorMode($(this).data("mode"));
                 });
+                $("#settings-button").on("click", () => inspector.toggleSettingsMode());
+
                 $(".popup-trigger").on("mouseenter", function () {
                     $(this).find(".popup-content").show()
                 }).on("mouseleave", function () {
@@ -454,22 +458,23 @@ export class Inspector {
     }
 
     inspectorMode(mode) {
-        const allModes = ["fact-mode", "overview-mode", "settings-mode"];
+        const allModes = ["fact-mode", "search-mode", "overview-mode", "settings-mode"];
         $("#inspector-tabs button")
             .removeClass("selected")
             .filter((i, e) => $(e).data("mode") === mode)
             .addClass("selected");
-        $("#inspector").removeClass(allModes.filter(m => m !== mode)).addClass(mode);
+        $("#ixv").removeClass(allModes.filter(m => m !== mode)).addClass(mode);
+        this._curInspectorMode = mode;
     }
 
-    /* 
-     * Controls where the "back" button takes you. We only set this when you
-     * follow a link that switches between modes, otherwise back just takes you
-     * back to the main inspector mode.
-     */
-    pushInspectorMode(newMode, oldMode) {
-        this._prevInspectorMode = oldMode;
-        this.inspectorMode(newMode);
+    toggleSettingsMode() {
+        if (this._curInspectorMode !== "settings-mode") {
+            this._prevInspectorMode = this._curInspectorMode;
+            this.inspectorMode("settings-mode");
+        }
+        else {
+            this.inspectorMode(this._prevInspectorMode);
+        }
     }
 
 
@@ -1583,6 +1588,12 @@ export class Inspector {
                         n = i;
                     }
                 }
+
+                $('nav.tag-nav .text').text(i18next.t('factDetails.factCount', { 
+                    current: this._viewer.docOrderItemIndex.indexOf(cf.vuid) + 1, 
+                    total: this._viewer.docOrderItemIndex.length()
+                }));
+
                 $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
                 $('.duplicates .prev').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.duplicates .prev').get(0).focus(); });
                 $('.duplicates .next').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.duplicates .next').get(0).focus(); });

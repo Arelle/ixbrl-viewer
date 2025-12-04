@@ -24,6 +24,8 @@ import { getTheme, darkModeTheme, lightModeTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
 const SEARCH_FILTER_MULTISELECTS = {
+  visibilityFilter: "search-filter-visibility",
+  conceptTypeFilter: "search-filter-concept-type",
   periodFilter: "search-filter-period",
   dimensionTypeFilter: "search-filter-dimension-type",
   namespacesFilter: "search-filter-namespaces",
@@ -32,6 +34,8 @@ const SEARCH_FILTER_MULTISELECTS = {
   unitsFilter: "search-filter-units",
   calculationsFilter: "search-filter-calculations",
   dataTypesFilter: "search-filter-datatypes",
+  factValueFilter: "search-filter-fact-value",
+  mandatoryFactsFilter: "search-filter-mandatory-facts",
 };
 
 export class Inspector {
@@ -463,6 +467,7 @@ export class Inspector {
             .removeClass("selected")
             .filter((i, e) => $(e).data("mode") === mode)
             .addClass("selected");
+        $("#ixv").removeClass("show-filters");
         $("#ixv").removeClass(allModes.filter(m => m !== mode)).addClass(mode);
         this._curInspectorMode = mode;
     }
@@ -509,13 +514,16 @@ export class Inspector {
             .on("mouseenter", () => this._viewer.linkedHighlightFact(f))
             .on("mouseleave", () => this._viewer.clearLinkedHighlightFact(f))
             .data('ivid', f.vuid);
+      /*
         $('<button class="select-icon"></button>')
             .attr("title", i18next.t("search.viewFact"))
             .on("click", () => {
                 this.selectItem(f.vuid);
             })
             .appendTo(row)
+            */
         this._setLabelWithLang($('<div class="title"></div>'), f.getLabelOrNameAndLang("std"))
+            .on("click", () => this.selectItem(f.vuid))
             .appendTo(row);
         const dt = f.concept().dataType();
         if (dt !== undefined) {
@@ -569,15 +577,14 @@ export class Inspector {
     searchSpec() {
         const spec = {};
         spec.searchString = $('#ixbrl-search').val();
-        spec.visibilityFilter = $('#search-filter-visibility').val();
-        spec.showMandatoryFacts = $('#search-mandatory-fact-filter').prop('checked');
-        spec.conceptTypeFilter = $('#search-filter-concept-type').val();
         for (const [key, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
-          spec[key] = $(`#${name} select`).val();
+            spec[key] = $(`#${name} input:checked`).map((i,e) => $(e).val()).get();
         }
+
 
         const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter.includes(d.dataType.name));
         if (
+            //XXX 
             (spec.conceptTypeFilter == 'numeric' && selectedDataTypes.some(dt => !dt.isNumeric)) ||
             (spec.conceptTypeFilter == 'text' && selectedDataTypes.some(dt => dt.isNumeric))) {
             $("#search-filter-datatypes .datatype-conflict-warning").show();
@@ -585,75 +592,143 @@ export class Inspector {
         else {
             $("#search-filter-datatypes .datatype-conflict-warning").hide();
         }
-        spec.factValueFilter = $('#search-filter-fact-value').val();
         return spec;
     }
 
     hasActiveSearchFilters(searchSpec) {
+        return false;
+        /*
       return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0) ||
         searchSpec.visibilityFilter !== '*' ||
         searchSpec.showMandatoryFacts ||
         searchSpec.conceptTypeFilter !== "*" ||
         searchSpec.factValueFilter !== "*" ;
+        */
+    }
+
+    buildSearchSection(fieldId, titleKey, options) {
+        const id = "search-filter-" + fieldId;
+        const section = $("<div></div>")
+            .attr("id", id)
+            .addClass("filter-group");
+        $("<h3></h3>")
+            .text(i18next.t(titleKey))
+            .appendTo(section);
+        for (const [i, o] of options.entries()) {
+            const row = $("<div></div>")
+                .addClass("checkbox-row")
+                .appendTo(section);
+            const rowId = id + '-' + i;
+            $("<input></input>")
+                .val(o.value)
+                .attr("id", rowId)
+                .attr("type", "checkbox")
+                .appendTo(row)
+                .after(" ");
+            $("<label></label>")
+                .text(o.label)
+                .attr("for", rowId)
+                .appendTo(row);
+        }
+
+        return section; 
     }
 
     setupSearchControls(viewer) {
         const inspector = this;
-        $('.search-controls input, .search-controls select').on("change", () => this.search());
-        $(".search-controls button.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
-        $(".search-controls .reset").on("click", () => this.resetSearchFilters());
+
+        const visibilityOptions = [
+            { value: "visible", label: i18next.t("inspector.visible") },
+            { value: "hidden", label: i18next.t("inspector.hidden") },
+        ];
+        this.buildSearchSection("visibility", "inspector.visibility", visibilityOptions).appendTo(".search-filters-body");
+
+        const conceptTypeOptions = [
+            { value: "numeric", label: i18next.t("inspector.numericOption") },
+            { value: "text", label: i18next.t("inspector.textOption") },
+        ];
+        this.buildSearchSection("concept-type", "inspector.conceptType", conceptTypeOptions).appendTo(".search-filters-body");
+
+        const factValueOptions = [
+            { value: "positive", label: i18next.t("inspector.positive") },
+            { value: "negative", label: i18next.t("inspector.negative") },
+        ];
+        this.buildSearchSection("fact-value", "inspector.factValue", factValueOptions).appendTo(".search-filters-body");
+
+        const periodOptions = Object.entries(this._search.periods).map(([k,v]) => ({ value: k, label: v}));
+        this.buildSearchSection("period", "inspector.period", periodOptions).appendTo(".search-filters-body");
+
+        const namespacesOptions = Array.from(this._reportSet.getUsedConceptPrefixes())
+            .map(prefix => ({
+                value: prefix, 
+                label: `${this._reportSet.preferredPrefix(prefix)} (${this._reportSet.prefixMap()[prefix]})`
+            }));
+        this.buildSearchSection("namespaces", "inspector.namespaces", namespacesOptions).appendTo(".search-filters-body");
+
+        const datatypesOptions = this._reportSet.getUsedConceptDataTypes()
+            .map(dt => ({ 
+                value: dt.dataType.name, 
+                label: dt.dataType.label() 
+            }));
+        if (datatypesOptions.length > 0) {
+            this.buildSearchSection("datatypes", "inspector.datatypes", datatypesOptions).appendTo(".search-filters-body");
+        }
+
+        const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
+        if (targetDocuments.length != 1 || targetDocuments[0] !== null) {
+            const targetDocumentsOptions = targetDocuments
+                .map(td => ({ 
+                    value: td ?? ':default', 
+                    label: td ?? `<${i18next.t("search.default")}>`
+                }));
+            this.buildSearchSection("target-document", "inspector.targetDocument", targetDocumentsOptions).appendTo(".search-filters-body");
+        }
+
+        const unitsOptions = Array.from(this._reportSet.getUsedUnits())
+            .map(unit => ({
+                value: unit,
+                label: `${this._reportSet.getUnit(unit)?.label()} (${unit})`
+            }));
+        if (unitsOptions.length > 0) {
+            this.buildSearchSection("units", "inspector.units", unitsOptions).appendTo(".search-filters-body");
+        }
+
+        const scalesOptions = this._getScalesOptions();
+        if (scalesOptions.length > 0) {
+            this.buildSearchSection("scales", "inspector.scales", scalesOptions).appendTo(".search-filters-body");
+        }
+
+        const dimensionTypeOptions = [
+            { value: "none", label: i18next.t("inspector.noDimensions") },
+            { value: "explicit", label: i18next.t("inspector.explicitDimension") },
+            { value: "typed", label: i18next.t("inspector.typedDimensions") },
+        ];
+        this.buildSearchSection("dimension-type", "inspector.dimensions", dimensionTypeOptions).appendTo(".search-filters-body");
+
+        const calculationOptions = [
+            { value: "none", label: i18next.t("inspector.noCalculations") },
+            { value: "contributor", label: i18next.t("inspector.contributor") },
+            { value: "summation", label: i18next.t("inspector.summation") },
+        ];
+        this.buildSearchSection("calculations", "inspector.calculations", calculationOptions).appendTo(".search-filters-body");
+
+        if (this.summary.mandatoryFactsCount() > 0) {
+            const mandatoryFactsFilterOptions = [
+                { value: "mandatory", label: i18next.t("inspector.mandatoryFacts") },
+                { value: "other", label: i18next.t("inspector.otherFacts") },
+            ];
+            this.buildSearchSection("mandatory-facts", "inspector.mandatoryFacts", mandatoryFactsFilterOptions).appendTo(".search-filters-body");
+        }
+
+        $(".search-controls input, .search-filters input, .search-filters select").on("change", () => this.search());
+        $(".search-controls button.filter-toggle").on("click", () => $("#ixv").addClass('show-filters'));
+        $(".search-filters .close").on("click", () => $("#ixv").removeClass('show-filters'));
+        $(".search-filters button.search-apply-filters").on("click", () => $("#ixv").removeClass('show-filters'));
+        $(".search-filters button.search-reset-filters").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
             $(this).siblings().children('select option:selected').prop('selected', false);
             inspector.search();
         });
-        for (const key of Object.keys(this._search.periods)) {
-            $("<option>")
-                .attr("value", key)
-                .text(this._search.periods[key])
-                .appendTo('#search-filter-period select');
-        }
-        for (const prefix of this._reportSet.getUsedConceptPrefixes()) {
-            $("<option>")
-                .attr("value", prefix)
-                .text(`${this._reportSet.preferredPrefix(prefix)} (${this._reportSet.prefixMap()[prefix]})`)
-                .appendTo('#search-filter-namespaces select');
-        }
-        if (this._reportSet.getUsedConceptDataTypes().length > 0) {
-            for (const dataType of this._reportSet.getUsedConceptDataTypes()) {
-                $("<option>")
-                    .attr("value", dataType.dataType.name)
-                    .text(dataType.dataType.label())
-                    .appendTo('#search-filter-datatypes select');
-            }
-        }
-        else {
-            $('#search-filter-datatypes').hide();
-        }
-        const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
-        if (targetDocuments.length == 1 && targetDocuments[0] == null) {
-            $('#search-filter-target-document').hide();
-        }
-        else {
-            for (const targetDocument of targetDocuments) {
-                $("<option>")
-                    .attr("value", targetDocument ?? ':default')
-                    .text(targetDocument ?? `<${i18next.t("search.default")}>`)
-                    .appendTo('#search-filter-target-document select');
-            }
-        }
-        for (const unit of this._reportSet.getUsedUnits()) {
-            $("<option>")
-                    .attr("value", unit)
-                    .text(`${this._reportSet.getUnit(unit)?.label()} (${unit})`)
-                    .appendTo('#search-filter-units select');
-        }
-        const scalesOptions = this._getScalesOptions();
-        for (const scale of Object.keys(scalesOptions).sort()) {
-                $("<option>")
-                        .attr("value", scale)
-                        .text(scalesOptions[scale])
-                        .appendTo('#search-filter-scales select');
-        }
     }
 
     _getScalesOptions() {
@@ -668,18 +743,18 @@ export class Inspector {
                 scalesOptions[scale] = scale.toString();
             }
         });
-        return scalesOptions;
+        return Object.entries(scalesOptions)
+            .map(([k, v]) => ({ value: k, label: v }));
+
     }
 
     resetSearchFilters(defaults) {
         defaults = defaults ?? {};
-        $("#search-filter-period select option:selected").prop("selected", false);
-        $("#search-filter-visibility").val(defaults.visibility ?? "*");
-        $("#search-filter-concept-type").val("*");
-        $("#search-filter-fact-value").val("*");
-        $("#search-mandatory-fact-filter").prop("checked", defaults.mandatoryFacts ?? false);
-        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
-          $(`#${name} select option:selected`).prop("selected", false);
+        for (const [filter, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
+            $(`#${name} input`).prop("checked", false);
+            if (defaults[filter] !== undefined) {
+                $(`#${name} input[value="${defaults[filter]}"]`).prop("checked", true); 
+            }
         }
         this.search();
     }
@@ -716,7 +791,9 @@ export class Inspector {
             $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
             overlay.show();
         }
-        $("#matching-facts-summary").text(i18next.t("search.matchingFactsSummary", {nMatches: results.length, nTotal: this._reportSet.facts().length}));
+        const totalFacts = this._reportSet.facts().length;
+        $("#matching-facts-summary").text(i18next.t("search.matchingFactsSummary", {nMatches: results.length, nTotal: totalFacts}));
+        $("#search-filter-match-count").text(results.length);
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));
@@ -807,29 +884,27 @@ export class Inspector {
             .text(totalFacts)
             .on("click", () => {
                 this.resetSearchFilters();
-                this.pushInspectorMode("search-mode", "summary-mode");
+                this.inspectorMode("search-mode");
             });
 
         const hiddenFacts = this.summary.hiddenFacts();
         $(".hidden-facts-value", summaryDom)
             .text(hiddenFacts)
             .on("click", () => {
-                this.resetSearchFilters({visibility: 'hidden'});
-                this.pushInspectorMode("search-mode", "summary-mode");
+                this.resetSearchFilters({visibilityFilter: 'hidden'});
+                this.inspectorMode("search-mode");
             });
 
-        const mandatoryFacts = this.summary.mandatoryFacts();
-        if (!mandatoryFacts) {
+        const mandatoryFacts = this.summary.mandatoryFactsCount();
+        if (mandatoryFacts === 0) {
             $('#mandatory-facts-row').hide();
-            $('#mandatory-fact-filter-checkbox').hide();
         } else {
             $('#mandatory-facts-row').show();
-            $('#mandatory-fact-filter-checkbox').show();
             $(".mandatory-facts-value", summaryDom)
                     .text(mandatoryFacts)
                     .on("click", () => {
-                        this.resetSearchFilters({mandatoryFacts: true});
-                        this.pushInspectorMode("search-mode", "summary-mode");
+                        this.resetSearchFilters({mandatoryFactsFilter: "mandatory"});
+                        this.inspectorMode("search-mode");
                     });
         }
     }

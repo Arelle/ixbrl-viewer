@@ -146,7 +146,7 @@ export class DocumentSummary {
         return this._hiddenFacts;
     }
 
-    mandatoryFacts() {
+    mandatoryFactsCount() {
         if (this._mandatoryFacts === undefined) {
             this._mandatoryFacts = this._reportSet.facts().filter(f => f.isMandatory()).length;
         }

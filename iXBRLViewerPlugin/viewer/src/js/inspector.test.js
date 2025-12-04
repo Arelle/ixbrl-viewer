@@ -139,22 +139,22 @@ describe("Scales filter options", () => {
         insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
-        expect(scalesOptions).toEqual({
-            "1": "Tens",
-            "2": "Hundreds",
-            "3": "Thousands",
-            "4": "Ten Thousands",
-            "5": "Hundred Thousands",
-            "6": "Millions",
-            "7": "Ten Millions",
-            "8": "Hundred Millions",
-            "9": "Billions",
-            "10": "10",
-            "-1": "Tenths",
-            "-2": "Cents, Hundredths",
-            "-3": "Thousandths",
-            "-4": "-4",
-        });
+        expect(scalesOptions).toEqual([
+              { value: '1', label: 'Tens' },
+              { value: '2', label: 'Hundreds' },
+              { value: '3', label: 'Thousands' },
+              { value: '4', label: 'Ten Thousands' },
+              { value: '5', label: 'Hundred Thousands' },
+              { value: '6', label: 'Millions' },
+              { value: '7', label: 'Ten Millions' },
+              { value: '8', label: 'Hundred Millions' },
+              { value: '9', label: 'Billions' },
+              { value: '10', label: '10' },
+              { value: '-1', label: 'Tenths' },
+              { value: '-2', label: 'Cents, Hundredths' },
+              { value: '-3', label: 'Thousandths' },
+              { value: '-4', label: '-4' }
+        ]);
     })
 
     test("Scales filter options with only monetary facts", () => {
@@ -165,23 +165,23 @@ describe("Scales filter options", () => {
         insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
-        expect(scalesOptions).toEqual({
-            "1": "Tens",
-            "2": "Hundreds",
-            "3": "Thousands",
-            "4": "Ten Thousands",
-            "5": "Hundred Thousands",
-            "6": "Millions",
-            "7": "Ten Millions",
-            "8": "Hundred Millions",
-            "9": "Billions",
-            "10": "10",
-            "-1": "Tenths",
-            "-2": "Cents",
-            "-3": "Thousandths",
-            "-4": "-4",
-        });
-    })
+        expect(scalesOptions).toEqual([
+              { value: '1', label: 'Tens' },
+              { value: '2', label: 'Hundreds' },
+              { value: '3', label: 'Thousands' },
+              { value: '4', label: 'Ten Thousands' },
+              { value: '5', label: 'Hundred Thousands' },
+              { value: '6', label: 'Millions' },
+              { value: '7', label: 'Ten Millions' },
+              { value: '8', label: 'Hundred Millions' },
+              { value: '9', label: 'Billions' },
+              { value: '10', label: '10' },
+              { value: '-1', label: 'Tenths' },
+              { value: '-2', label: 'Cents' },
+              { value: '-3', label: 'Thousandths' },
+              { value: '-4', label: '-4' }
+        ]);
+    });
 
     test("Scales filter options with only non-monetary facts", () => {
         const insp = new TestInspector();
@@ -191,23 +191,23 @@ describe("Scales filter options", () => {
         insp.initialize(reportSet)
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
-        expect(scalesOptions).toEqual({
-            "1": "Tens",
-            "2": "Hundreds",
-            "3": "Thousands",
-            "4": "Ten Thousands",
-            "5": "Hundred Thousands",
-            "6": "Millions",
-            "7": "Ten Millions",
-            "8": "Hundred Millions",
-            "9": "Billions",
-            "10": "10",
-            "-1": "Tenths",
-            "-2": "Hundredths",
-            "-3": "Thousandths",
-            "-4": "-4",
-        });
-    })
+        expect(scalesOptions).toEqual([
+              { value: '1', label: 'Tens' },
+              { value: '2', label: 'Hundreds' },
+              { value: '3', label: 'Thousands' },
+              { value: '4', label: 'Ten Thousands' },
+              { value: '5', label: 'Hundred Thousands' },
+              { value: '6', label: 'Millions' },
+              { value: '7', label: 'Ten Millions' },
+              { value: '8', label: 'Hundred Millions' },
+              { value: '9', label: 'Billions' },
+              { value: '10', label: '10' },
+              { value: '-1', label: 'Tenths' },
+              { value: '-2', label: 'Hundredths' },
+              { value: '-3', label: 'Thousandths' },
+              { value: '-4', label: '-4' }
+        ]);
+    });
 });
 
 describe("Fact deep link", () => {

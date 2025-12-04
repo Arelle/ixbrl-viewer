@@ -34,8 +34,15 @@
 
 @colour-icon-grey: @colour-text;
 
-@colour-button-primary-bg: darken(@colour-primary-focus, 20);
-@colour-button-primary-border: darken(@colour-button-primary-bg, 10);
+@colour-button-primary-text: #ffffff;
+@colour-button-primary-bg: #3e63dd;
+@colour-button-primary-border: @colour-button-primary-bg;
+@colour-button-primary-bg-hover: darken(@colour-button-primary-bg, 5);
+
+@colour-button-secondary-text: @colour-text;
+@colour-button-secondary-bg: @colour-inactive-bg;
+@colour-button-secondary-border: @colour-button-secondary-bg;
+@colour-button-secondary-bg-hover: darken(@colour-button-secondary-bg, 5);
 
 @colour-button-bg: darken(@colour-bg, 2.7451); // #f8f8f8;
 @colour-bg-selected: darken(@colour-bg, 4.7059); // #f3f3f3;

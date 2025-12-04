@@ -3,7 +3,7 @@
 input[type="text"],
 select,
 button {
-  padding: 0.8rem;
+  padding: 1rem;
   border: solid 1px var(--colour-border-grey);
   border-radius: 0.4rem;
   color: var(--colour-text);
@@ -115,4 +115,26 @@ input:disabled {
   color: var(--colour-primary);
   padding: 0.3rem;
   border: none;
+}
+
+.primary-button {
+  background-color: var(--colour-button-primary-bg);
+  border: solid 0.1rem var(--colour-button-primary-border);
+  color: var(--colour-button-primary-text);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--colour-button-primary-bg-hover);
+  }
+}
+
+.secondary-button {
+  background-color: var(--colour-button-secondary-bg);
+  border: solid 0.1rem var(--colour-button-secondary-border);
+  color: var(--colour-button-secondary-text);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--colour-button-secondary-bg-hover);
+  }
 }

@@ -134,171 +134,39 @@ See COPYRIGHT.md for copyright information
             </div>
           </div>
         </div>
-        <div class="inspector-container search-container" role="search">
-          <div class="inspector-title">
-             <button class="back" title="Back">
-             </button>
-             <h2 data-i18n="inspector.search">Search</h2>
-          </div>
-          <div class="search-controls search-mode-only">
-            <div class="search-input">
-              <input id="ixbrl-search" type="text" data-i18n="[aria-label]inspector.searchReport" aria-label="Search iXBRL report" disabled="disabled" />
-              <button class="filter-toggle" data-i18n="[title]search.toggleFilterControls" title="Toggle filter controls"></button>
+        <div class="inspector-container search-inspector" role="search">
+          <div class="section search-controls">
+            <div class="search-input-group">
+              <input id="ixbrl-search" type="text" data-i18n="[aria-label]inspector.searchReport" aria-label="Search iXBRL report" disabled="disabled" placeholder="Search" />
             </div>
+            <button class="filter-toggle" data-i18n="[title]search.toggleFilterControls" title="Toggle filter controls">Filter</button>
             <div class="filter-info">
               <span id="matching-facts-summary"></span>
+              <!--
               <button class="reset" data-i18n="inspector.reset">Reset</button>
+              -->
             </div>
-            <div class="search-filters">
-              <h3 data-i18n="search.filter">Filter</h3>
-              <div class="filter-group">
-                <label class="control-label" data-i18n="inspector.visibility" for="search-filter-visibility">
-                  Visibility
-                </label>
-                <select id="search-filter-visibility">
-                  <option value="*">-</option>
-                  <option value="visible" data-i18n="inspector.visible">Visible</option>
-                  <option value="hidden" data-i18n="inspector.hidden">Hidden</option>
-                </select>
-              </div>
-              <div class="filter-group">
-                <label class="control-label" data-i18n="inspector.conceptType" for="search-filter-concept-type">
-                  Concept Type
-                </label>
-                <select id="search-filter-concept-type">
-                  <option value="*">-</option>
-                  <option value="numeric" data-i18n="inspector.numericOption">Numeric</option>
-                  <option value="text" data-i18n="inspector.textOption">Text</option>
-                </select>
-              </div>
+          </div>
 
-              <div class="filter-group">
-                <label class="control-label" data-i18n="inspector.factValue" for="search-filter-fact-value">
-                    Fact Value
-                </label>
-                <select id="search-filter-fact-value">
-                    <option value="*">-</option>
-                    <option value="negative" data-i18n="inspector.negative">Negative</option>
-                    <option value="positive" data-i18n="inspector.positive">Positive</option>
-                </select>
-              </div>
+          <div class="inspector-body">
 
-              <div id="search-filter-period" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-period-multiselect">
-                    <button data-i18n="inspector.period">Period</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" id="search-filter-period-multiselect">
-                  </select>
-                </div>
+            <section class="search-results" data-i18n="[aria-label]inspector.searchResults" aria-label="Search results">
+              <div class="results fact-list">
               </div>
+              <div class="search-overlay">
+                <div class="search-overlay-icon"></div>
+                <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
+                <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
+              </div>
+            </section>
+          </div> 
 
-              <div id="search-filter-namespaces" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-namespace-multiselect">
-                    <button data-i18n="inspector.namespaces">Namespaces</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body namespaces resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" id="search-filter-namespace-multiselect">
-                  </select>
-                </div>
-              </div>
-
-              <div id="search-filter-datatypes" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-datatype-multiselect">
-                    <button data-i18n="inspector.datatypes">Types</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body datatypes resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" id="search-filter-datatype-multiselect">
-                  </select>
-                  <div class="datatype-conflict-warning" data-i18n="search.dataTypeConflictWarning">Warning: selection conflicts with Concept Type filter</div>
-                </div>
-              </div>
-
-              <div id="search-filter-target-document" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-target-document-multiselect">
-                    <button data-i18n="inspector.targetDocument">Target Document</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body target-document resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" id="search-filter-target-document-multiselect">
-                  </select>
-                </div>
-              </div>
-
-              <div id="search-filter-units" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-units-multiselect">
-                    <button data-i18n="inspector.units">Units</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body units resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" id="search-filter-units-multiselect">
-                  </select>
-                </div>
-              </div>
-
-              <div id="search-filter-scales" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-scales-multiselect">
-                    <button data-i18n="inspector.scales">Scales</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body scales resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" id="search-filter-scales-multiselect">
-                  </select>
-                </div>
-              </div>
-
-              <div id="search-filter-dimension-type" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-dimension-type-multiselect">
-                    <button data-i18n="inspector.dimensions">Dimension Type</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body dimensions resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" size="2" id="search-filter-dimension-type-multiselect">
-                    <option value="explicit" data-i18n="inspector.explicitDimension">Explicit Dimensions</option>
-                    <option value="typed" data-i18n="inspector.typedDimensions">Typed Dimensions</option>
-                  </select>
-                </div>
-              </div>
-
-              <div id="search-filter-calculations" class="collapsible-section collapsible-only collapsed">
-                <h3 class="collapsible-header">
-                  <label for="search-filter-calculations-multiselect">
-                    <button data-i18n="inspector.calculations">Calculations</button>
-                  </label>
-                  <span class="collapsible-subheader"></span>
-                </h3>
-                <div class="collapsible-body calculations resetable-multiselect" style="display: none;">
-                  <button class="reset-multiselect" title="Reset" data-i18n="[title]search.reset"></button>
-                  <select multiple="multiple" size="2" id="search-filter-calculations-multiselect">
-                    <option value="summation" data-i18n="inspector.summation">Summation</option>
-                    <option value="contributor" data-i18n="inspector.contributor">Contributor</option>
-                  </select>
-                </div>
-              </div>
+          <div class="search-filters">
+            <div class="section search-filters-header">
+              <button title="Close" data-i18n="[title]dialog.close" class="close"></button>
+              <h2>Filter</h2>
+            </div>
+            <div class="search-filters-body">
 
               <div class="checkboxes">
                 <div id="mandatory-fact-filter-checkbox">
@@ -310,20 +178,14 @@ See COPYRIGHT.md for copyright information
               </div>
 
             </div>
-          </div> <!-- search controls -->
 
-          <div class="inspector-body">
+            <div class="search-filter-buttons">
+              <button class="search-reset-filters" data-i18n="search.resetFilters">Reset filters</button>
+              <button class="search-apply-filters"><span data-i18n="search.showResults">Show results</span> (<span id="search-filter-match-count"></span>)</button>
+            </div>
 
-            <section class="search-results search-mode-only" data-i18n="[aria-label]inspector.searchResults" aria-label="Search results">
-              <div class="results fact-list">
-              </div>
-              <div class="search-overlay">
-                <div class="search-overlay-icon"></div>
-                <div class="search-overlay-text search-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please enter some search terms</p></div>
-                <div class="search-overlay-text search-not-ready-only"><p class="title" data-i18n="inspector.factSearch">Fact Search</p><p class="text">Please wait - building index...</p></div>
-              </div>
-            </section>
-          </div> 
+          </div> <!-- search filters -->
+
         </div>
 
         <div class="inspector-container overview-inspector">

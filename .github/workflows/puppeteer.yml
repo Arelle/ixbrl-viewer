@@ -25,10 +25,10 @@ jobs:
           - '3.13'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
-      - uses: actions/setup-node@v6.0.0
+      - uses: actions/setup-node@v6.1.0
         with:
           cache: 'npm'
           check-latest: true

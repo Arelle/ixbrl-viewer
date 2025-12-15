@@ -88,7 +88,6 @@ ignore_errors = true
 # the py.typed marker here
 [[tool.mypy.overrides]]
 module = [
-    'ttk',
     'arelle.*',
 ]
 ignore_missing_imports = true

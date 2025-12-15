@@ -1,10 +1,7 @@
 # See COPYRIGHT.md for copyright information
 
 from tkinter import Toplevel, N, E, S, W, EW, StringVar, BooleanVar
-try:
-    from tkinter.ttk import Frame, Button, Label, Entry, Checkbutton
-except ImportError:
-    from ttk import Frame, Button, Label, Entry, Checkbutton
+from tkinter.ttk import Frame, Button, Label, Entry, Checkbutton
 
 import os
 

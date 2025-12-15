@@ -180,18 +180,18 @@ class XHTMLSerializer:
             self.write(f'<?xml version="{version}" encoding="{self.encoding}"{standalone}?>\n')
 
     def serialize(self, element: etree._ElementTree[etree._Element] | etree._Element) -> None:
-        if hasattr(element, 'getroot'):
+        if isinstance(element, etree._ElementTree):
             self.write_xml_declaration(element.docinfo)
 
-            element = element.getroot()
-            while element.getprevious() is not None:
-                element = element.getprevious()
+            node: etree._Element | None = element.getroot()
+            while node is not None and node.getprevious() is not None:
+                node = node.getprevious()
 
-            while element is not None:
-                self.write_node(element)
-                if isinstance(element, (etree._Comment, etree._ProcessingInstruction)):
+            while node is not None:
+                self.write_node(node)
+                if isinstance(node, (etree._Comment, etree._ProcessingInstruction)):
                     self.write("\n")
-                element = element.getnext()
+                node = node.getnext()
 
         else:
             self.write_xml_declaration()

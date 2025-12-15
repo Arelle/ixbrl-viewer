@@ -252,11 +252,11 @@ class IXBRLViewerBuilder:
 
     def validationErrors(self):
         logHandler = self.cntlr.logHandler
-        if getattr(logHandler, "logRecordBuffer") is None:
+        if getattr(logHandler, "logRecordBuffer", None) is None:
             raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
 
         errors = []
-        for logRec in getattr(logHandler, "logRecordBuffer"):
+        for logRec in getattr(logHandler, "logRecordBuffer", []):
             if logRec.levelno > logging.INFO:
                 errors.append({
                     "sev": logRec.levelname.title().upper(),

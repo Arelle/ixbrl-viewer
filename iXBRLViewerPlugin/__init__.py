@@ -1,4 +1,5 @@
 # See COPYRIGHT.md for copyright information
+
 from __future__ import annotations
 
 import argparse
@@ -8,6 +9,7 @@ import os
 import sys
 import tempfile
 import traceback
+import webbrowser
 from optparse import OptionGroup, OptionParser
 from pathlib import Path
 from typing import Any
@@ -19,10 +21,20 @@ from arelle.ModelXbrl import ModelXbrl
 from arelle.UrlUtil import isHttpUrl
 from bottle import static_file
 
-from .constants import CONFIG_COPY_SCRIPT, CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
-    CONFIG_SCRIPT_URL, DEFAULT_COPY_SCRIPT, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
-    DEFAULT_JS_FILENAME, DEFAULT_VIEWER_PATH, ERROR_MESSAGE_CODE, \
-    EXCEPTION_MESSAGE_CODE, FEATURE_CONFIGS
+from .constants import (
+    CONFIG_COPY_SCRIPT,
+    CONFIG_FEATURE_PREFIX,
+    CONFIG_LAUNCH_ON_LOAD,
+    CONFIG_SCRIPT_URL,
+    DEFAULT_COPY_SCRIPT,
+    DEFAULT_JS_FILENAME,
+    DEFAULT_LAUNCH_ON_LOAD,
+    DEFAULT_OUTPUT_NAME,
+    DEFAULT_VIEWER_PATH,
+    ERROR_MESSAGE_CODE,
+    EXCEPTION_MESSAGE_CODE,
+    FEATURE_CONFIGS,
+)
 from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError, isInlineDoc
 from .plugin import IXBRLViewerPluginData
 
@@ -334,7 +346,6 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         # Don't run on launch if the option has been disabled
         return
     try:
-        import webbrowser
         global tempViewer
         tempViewer = tempfile.TemporaryDirectory()
         viewer_file_name = DEFAULT_OUTPUT_NAME

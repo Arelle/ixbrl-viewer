@@ -1,8 +1,9 @@
 # See COPYRIGHT.md for copyright information
 
-from lxml import etree
-from enum import Enum
 import re
+from enum import Enum
+
+from lxml import etree
 
 XHTML_NS = 'http://www.w3.org/1999/xhtml'
 XML_NS = 'http://www.w3.org/XML/1998/namespace'

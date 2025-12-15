@@ -1,6 +1,7 @@
 # See COPYRIGHT.md for copyright information
 
 from __future__ import annotations
+
 import io
 import json
 import logging
@@ -19,13 +20,20 @@ from arelle import XbrlConst
 from arelle.Cntlr import Cntlr
 from arelle.ModelDocument import ModelDocument, Type
 from arelle.ModelRelationshipSet import ModelRelationshipSet
-from arelle.ModelValue import QName, INVALIDixVALUE
+from arelle.ModelValue import INVALIDixVALUE, QName
 from arelle.ModelXbrl import ModelXbrl
 from arelle.UrlUtil import isHttpUrl
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
-from .constants import DEFAULT_JS_FILENAME, DEFAULT_OUTPUT_NAME, ERROR_MESSAGE_CODE, FEATURE_CONFIGS, INFO_MESSAGE_CODE, MANDATORY_FACTS
+from .constants import (
+    DEFAULT_JS_FILENAME,
+    DEFAULT_OUTPUT_NAME,
+    ERROR_MESSAGE_CODE,
+    FEATURE_CONFIGS,
+    INFO_MESSAGE_CODE,
+    MANDATORY_FACTS,
+)
 from .xhtmlserialize import XHTMLSerializer
 
 REPORT_TYPE_EXTENSIONS = ('.xbrl', '.xhtml', '.html', '.htm', '.json')

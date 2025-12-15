@@ -1,13 +1,21 @@
 # See COPYRIGHT.md for copyright information
 
-from tkinter import Toplevel, N, E, S, W, EW, StringVar, BooleanVar
-from tkinter.ttk import Frame, Button, Label, Entry, Checkbutton
-
 import os
+from tkinter import EW, BooleanVar, E, N, S, StringVar, Toplevel, W
+from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label
 
-from .constants import CONFIG_COPY_SCRIPT, CONFIG_FEATURE_PREFIX, CONFIG_FILE_DIRECTORY, \
-    CONFIG_LAUNCH_ON_LOAD, CONFIG_OUTPUT_FILE, CONFIG_SCRIPT_URL, CONFIG_ZIP_OUTPUT, \
-    DEFAULT_COPY_SCRIPT, DEFAULT_LAUNCH_ON_LOAD, GUI_FEATURE_CONFIGS
+from .constants import (
+    CONFIG_COPY_SCRIPT,
+    CONFIG_FEATURE_PREFIX,
+    CONFIG_FILE_DIRECTORY,
+    CONFIG_LAUNCH_ON_LOAD,
+    CONFIG_OUTPUT_FILE,
+    CONFIG_SCRIPT_URL,
+    CONFIG_ZIP_OUTPUT,
+    DEFAULT_COPY_SCRIPT,
+    DEFAULT_LAUNCH_ON_LOAD,
+    GUI_FEATURE_CONFIGS,
+)
 
 UNSET_SCRIPT_URL = ''
 

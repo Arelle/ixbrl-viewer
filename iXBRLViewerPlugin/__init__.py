@@ -319,7 +319,11 @@ class iXBRLViewerLocalViewer(LocalViewer):
                 _fileExists = True
                 _file = os.path.basename(_file)
             if not _fileExists:
-                self.cntlr.addToLog("http://localhost:{}/{}".format(self.port, file), messageCode="localViewer:fileNotFound", level=logging.DEBUG)
+                self.cntlr.addToLog(
+                    f"http://localhost:{self.port}/{file}",
+                    messageCode="localViewer:fileNotFound",
+                    level=logging.DEBUG,
+                )
             return static_file(_file, root=_fileDir, headers=self.noCacheHeaders)  # extra_headers modification to py-bottle
         return static_file(file, root="/")  # absolute path used for ixbrlviewer.js.
 

@@ -67,17 +67,17 @@ class NamespaceMap:
             else:
                 p = preferredPrefix if preferredPrefix else "ns"
                 n = 0
-                while "%s%d" % (p,n) in self.prefixmap:
+                while f"{p}{n}" in self.prefixmap:
                     n += 1
 
-                prefix = "%s%d" % (p,n)
+                prefix = f"{p}{n}"
 
             self.prefixmap[prefix] = ns
             self.nsmap[ns] = prefix
         return prefix
 
     def qname(self, qname):
-        return "%s:%s" % (self.getPrefix(qname.namespaceURI, qname.prefix), qname.localName)
+        return f"{self.getPrefix(qname.namespaceURI, qname.prefix)}:{qname.localName}"
 
 class IXBRLViewerBuilderError(Exception):
     pass
@@ -260,7 +260,7 @@ class IXBRLViewerBuilder:
 
     def addFact(self, report: ModelXbrl, f):
         if f.id is None:
-            f.set("id","ixv-%d" % (self.idGen))
+            f.set("id", f"ixv-{self.idGen}")
 
         self.idGen += 1
         conceptName = self.nsmap.qname(f.qname)
@@ -326,10 +326,7 @@ class IXBRLViewerBuilder:
         elif f.context.isInstantPeriod and f.context.instantDatetime is not None:
             aspects["p"] = self.dateFormat(f.context.instantDatetime.isoformat())
         elif f.context.isStartEndPeriod and f.context.startDatetime is not None and f.context.endDatetime is not None:
-            aspects["p"] = "%s/%s" % (
-                self.dateFormat(f.context.startDatetime.isoformat()),
-                self.dateFormat(f.context.endDatetime.isoformat())
-            )
+            aspects["p"] = f"{self.dateFormat(f.context.startDatetime.isoformat())}/{self.dateFormat(f.context.endDatetime.isoformat())}"
 
         frels = self.footnoteRelationshipSet.fromModelObject(f)
         if frels:
@@ -353,12 +350,12 @@ class IXBRLViewerBuilder:
             denominatorsString = '*'.join(self.nsmap.qname(x) for x in sorted(denominators))
             if len(denominators) > 1:
                 if len(numerators) > 1:
-                    return "({})/({})".format(numeratorsString, denominatorsString)
-                return "{}/({})".format(numeratorsString, denominatorsString)
+                    return f"({numeratorsString})/({denominatorsString})"
+                return f"{numeratorsString}/({denominatorsString})"
             else:
                 if len(numerators) > 1:
-                    return "({})/{}".format(numeratorsString, denominatorsString)
-                return "{}/{}".format(numeratorsString, denominatorsString)
+                    return f"({numeratorsString})/{denominatorsString}"
+                return f"{numeratorsString}/{denominatorsString}"
         return numeratorsString
 
     def addViewerData(self, viewerFile, scriptUrl):
@@ -434,7 +431,7 @@ class IXBRLViewerBuilder:
 
         docSetFiles = None
         self.reportCount += 1
-        report.info(INFO_MESSAGE_CODE, "Creating iXBRL viewer (%d) [%s]" % (self.reportCount, self.currentTargetReport["target"]))
+        report.info(INFO_MESSAGE_CODE, f"Creating iXBRL viewer ({self.reportCount}) [{self.currentTargetReport['target']}]")
         if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
             # Sort by object index to preserve order in which files were specified.
             xmlDocsByFilename = {
@@ -600,15 +597,24 @@ class iXBRLViewer:
                 fileMode = 'w'
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.cntlr.addToLog("Directory %s does not exist" % destination, messageCode=ERROR_MESSAGE_CODE)
+                self.cntlr.addToLog(
+                    f"Directory {destination} does not exist",
+                    messageCode=ERROR_MESSAGE_CODE,
+                )
                 return
             elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.cntlr.addToLog("Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)), messageCode=ERROR_MESSAGE_CODE)
+                self.cntlr.addToLog(
+                    f"Directory {os.path.dirname(os.path.abspath(destination))} does not exist",
+                    messageCode=ERROR_MESSAGE_CODE,
+                )
                 return
             elif not destination.endswith('.zip'):
                 # File extension isn't a zip
-                self.cntlr.addToLog("File extension %s is not a zip" % os.path.splitext(destination)[0], messageCode=ERROR_MESSAGE_CODE)
+                self.cntlr.addToLog(
+                    f"File extension {os.path.splitext(destination)[0]} is not a zip",
+                    messageCode=ERROR_MESSAGE_CODE,
+                )
                 return
             else:
                 file = destination
@@ -616,13 +622,13 @@ class iXBRLViewer:
 
             with zipfile.ZipFile(file, fileMode, zipfile.ZIP_DEFLATED, True) as zout:
                 for f in self.files:
-                    self.cntlr.addToLog("Saving in output zip %s" % f.filename, messageCode=INFO_MESSAGE_CODE)
+                    self.cntlr.addToLog(f"Saving in output zip {f.filename}", messageCode=INFO_MESSAGE_CODE)
                     with zout.open(f.filename, "w") as fout:
                         writer = XHTMLSerializer(fout)
                         writer.serialize(f.xmlDocument)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
-                    self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
+                    self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     zout.write(self.filingDocuments, filename)
                 if copyScriptPath is not None:
                     self.cntlr.addToLog(f"Writing script from {copyScriptPath}", messageCode=INFO_MESSAGE_CODE)
@@ -632,20 +638,20 @@ class iXBRLViewer:
             # directory using its existing filename
             for f in self.files:
                 filename = os.path.join(destination, f.filename)
-                self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
+                self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                 with open(filename, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(f.xmlDocument)
             if self.filingDocuments:
                 filename = os.path.basename(self.filingDocuments)
-                self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
+                self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
             if self.assets:
                 with zipfile.ZipFile(self.reportZip) as z:
                     for asset in self.assets:
                         fileName = os.path.basename(asset)
                         path = os.path.join(destination, fileName)
-                        self.cntlr.addToLog("Writing %s" % asset, messageCode=INFO_MESSAGE_CODE)
+                        self.cntlr.addToLog(f"Writing {asset}", messageCode=INFO_MESSAGE_CODE)
                         with z.open(asset) as zf, open(path, 'wb') as f:
                             shutil.copyfileobj(zf, f)
 
@@ -653,21 +659,30 @@ class iXBRLViewer:
                 self._copyScript(Path(destination), copyScriptPath)
         else:
             if len(self.files) > 1:
-                self.cntlr.addToLog("More than one file in input, but output is not a directory", messageCode=ERROR_MESSAGE_CODE)
+                self.cntlr.addToLog(
+                    "More than one file in input, but output is not a directory",
+                    messageCode=ERROR_MESSAGE_CODE,
+                )
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
-                self.cntlr.addToLog("Directory %s does not exist" % destination, messageCode=ERROR_MESSAGE_CODE)
+                self.cntlr.addToLog(
+                    f"Directory {destination} does not exist",
+                    messageCode=ERROR_MESSAGE_CODE,
+                )
             elif not os.path.isdir(os.path.dirname(os.path.abspath(destination))):
                 # Directory part of filename doesn't exist
-                self.cntlr.addToLog("Directory %s does not exist" % os.path.dirname(os.path.abspath(destination)), messageCode=ERROR_MESSAGE_CODE)
+                self.cntlr.addToLog(
+                    f"Directory {os.path.dirname(os.path.abspath(destination))} does not exist",
+                    messageCode=ERROR_MESSAGE_CODE,
+                )
             else:
-                self.cntlr.addToLog("Writing %s" % destination, messageCode=INFO_MESSAGE_CODE)
+                self.cntlr.addToLog(f"Writing {destination}", messageCode=INFO_MESSAGE_CODE)
                 with open(destination, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(self.files[0].xmlDocument)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
-                    self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
+                    self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(destination), filename))
                 if copyScriptPath is not None:
                     outDirectory = Path(destination).parent

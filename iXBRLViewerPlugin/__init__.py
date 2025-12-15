@@ -145,9 +145,7 @@ def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl) -> None:
     try:
         if isInlineDoc(modelXbrl.modelDocument):
             builder = pluginData(cntlr).builder
-            if builder is None:
-                cntlr.addToLog("iXBRL Viewer builder not initialized.", messageCode=ERROR_MESSAGE_CODE)
-                return
+            assert builder is not None, "iXBRL Viewer builder must be initialized before processing model"
             builder.processModel(modelXbrl)
     except IXBRLViewerBuilderError as ex:
         print(ex)
@@ -193,9 +191,7 @@ def generateViewer(
     viewerURL = viewerURL or DEFAULT_VIEWER_PATH
 
     bldr = pluginData(cntlr).builder
-    if bldr is None:
-        cntlr.addToLog(f"iXBRL Viewer builder not initialized. {abortGenerationMsg}", messageCode=ERROR_MESSAGE_CODE)
-        return
+    assert bldr is not None, "iXBRL Viewer builder must be initialized before generating viewer"
 
     if bldr.reportCount == 0:
         cntlr.addToLog(f"No inline XBRL documents loaded. {abortGenerationMsg}", messageCode=ERROR_MESSAGE_CODE)

@@ -171,8 +171,7 @@ class IXBRLViewerBuilder:
 
     def addRoleDefinition(self, report: ModelXbrl, elr: str) -> None:
         prefix = self.roleMap.getPrefix(elr)
-        if self.currentTargetReport is None:
-            return
+        assert self.currentTargetReport is not None, "Current target report must be set to add role definition"
         if self.currentTargetReport.setdefault("roleDefs",{}).get(prefix, None) is None:
             rts = report.roleTypes.get(elr, [])
             label = next((rt.definition for rt in rts if rt.definition is not None), None)
@@ -185,8 +184,7 @@ class IXBRLViewerBuilder:
         labelsRelationshipSet = report.relationshipSet(XbrlConst.conceptLabel)
         labels = labelsRelationshipSet.fromModelObject(concept)
         conceptName = self.nsmap.qname(concept.qname)
-        if self.currentTargetReport is None:
-            return
+        assert self.currentTargetReport is not None, "Current target report must be set to add concept"
         if conceptName not in self.currentTargetReport["concepts"]:
             conceptData: dict[str, Any] = {
                 "labels": {  }
@@ -359,8 +357,8 @@ class IXBRLViewerBuilder:
                 if frel.toModelObject is not None:
                     factData.setdefault("fn", []).append(frel.toModelObject.id)
 
-        if self.currentTargetReport is not None:
-            self.currentTargetReport["facts"][f.id] = factData
+        assert self.currentTargetReport is not None, "Current target report must be set to add fact"
+        self.currentTargetReport["facts"][f.id] = factData
         self.addConcept(report, f.concept)
 
     def oimUnitString(self, unit: ModelUnit) -> str:

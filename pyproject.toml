@@ -78,7 +78,6 @@ strict = true
 [[tool.mypy.overrides]]
 module = [
     'iXBRLViewerPlugin',
-    'iXBRLViewerPlugin.iXBRLViewer',
 ]
 ignore_errors = true
 

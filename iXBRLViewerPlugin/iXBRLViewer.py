@@ -14,11 +14,13 @@ import zipfile
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 from arelle import XbrlConst
 from arelle.Cntlr import Cntlr
 from arelle.ModelDocument import ModelDocument, Type
+from arelle.ModelDtsObject import ModelConcept
+from arelle.ModelInstanceObject import ModelInlineFact, ModelUnit
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import INVALIDixVALUE, QName
 from arelle.ModelXbrl import ModelXbrl
@@ -55,11 +57,11 @@ class NamespaceMap:
     required.
     """
 
-    def __init__(self):
-        self.nsmap = dict()
-        self.prefixmap = dict()
+    def __init__(self) -> None:
+        self.nsmap: dict[str, str] = {}
+        self.prefixmap: dict[str, str] = {}
 
-    def getPrefix(self, ns, preferredPrefix = None):
+    def getPrefix(self, ns: str, preferredPrefix: str | None = None) -> str:
         """
         Get the prefix for the specified namespace.
 
@@ -84,7 +86,9 @@ class NamespaceMap:
             self.nsmap[ns] = prefix
         return prefix
 
-    def qname(self, qname):
+    def qname(self, qname: QName) -> str:
+        if qname.namespaceURI is None:
+            return qname.localName
         return f"{self.getPrefix(qname.namespaceURI, qname.prefix)}:{qname.localName}"
 
 class IXBRLViewerBuilderError(Exception):
@@ -95,27 +99,28 @@ def isInlineDoc(doc: ModelDocument | None) -> bool:
 
 class IXBRLViewerBuilder:
 
-    def __init__(self, 
-            cntlr: Cntlr,
-            basenameSuffix: str = '',
-            useStubViewer: bool = False,
-            features: dict[str, Any] | None = None,
-                 ):
+    def __init__(
+        self,
+        cntlr: Cntlr,
+        basenameSuffix: str = "",
+        useStubViewer: bool = False,
+        features: dict[str, Any] | None = None,
+    ):
         if features is None:
             features = {}
         featureNames = {c.key for c in FEATURE_CONFIGS}
         for featureName in features:
             assert featureName in featureNames, \
                 f'Given feature name `{featureName}` does not match any defined features: {featureNames}'
-        self.reportZip = None
+        self.reportZip: str | None = None
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
-        self.taxonomyData = {
+        self.taxonomyData: dict[str, Any] = {
             "sourceReports": [],
             "features": features,
         }
         self.basenameSuffix = basenameSuffix
-        self.currentTargetReport = None
+        self.currentTargetReport: dict[str, Any] | None = None
         self.useStubViewer = useStubViewer
         self.cntlr = cntlr
 
@@ -128,29 +133,29 @@ class IXBRLViewerBuilder:
         self.roleMap.getPrefix(XbrlConst.dimensionDefault, "d-d")
         self.roleMap.getPrefix(WIDER_NARROWER_ARCROLE, "w-n")
 
-        self.sourceReportsByFiles = dict()
+        self.sourceReportsByFiles: dict[frozenset[str], dict[str, Any]] = {}
         self.iv = iXBRLViewer(cntlr)
         if self.useStubViewer:
             self.iv.addFile(iXBRLViewerFile(DEFAULT_OUTPUT_NAME, self.getStubDocument()))
 
-        self.fromSingleZIP = None
+        self.fromSingleZIP: bool | None = None
         self.reportCount = 0
-        self.assets = []
+        self.assets: list[str] = []
 
-    def outputFilename(self, filename):
+    def outputFilename(self, filename: str) -> str:
         (base, ext) = os.path.splitext(filename)
         return base + self.basenameSuffix + ext
 
-    def lineWrap(self, s, n = 80):
+    def lineWrap(self, s: str, n: int = 80) -> str:
         return "\n".join([s[i:i+n] for i in range(0, len(s), n)])
 
-    def dateFormat(self, d):
+    def dateFormat(self, d: str) -> str:
         """
         Strip the time component from an ISO date if it's zero
         """
         return re.sub("T00:00:00$", "", d)
 
-    def escapeJSONForScriptTag(self, s):
+    def escapeJSONForScriptTag(self, s: str) -> str:
         """
         JSON encodes XML special characters XML and HTML apply difference escaping rules to content
         within script tags and we need our output to be valid XML, but treated as HTML by browsers.
@@ -164,22 +169,26 @@ class IXBRLViewerBuilder:
         """
         return s.replace("<","\\u003C").replace(">","\\u003E").replace("&","\\u0026")
 
-    def addRoleDefinition(self, report: ModelXbrl, elr):
+    def addRoleDefinition(self, report: ModelXbrl, elr: str) -> None:
         prefix = self.roleMap.getPrefix(elr)
+        if self.currentTargetReport is None:
+            return
         if self.currentTargetReport.setdefault("roleDefs",{}).get(prefix, None) is None:
             rts = report.roleTypes.get(elr, [])
             label = next((rt.definition for rt in rts if rt.definition is not None), None)
             if label is not None:
                 self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = label
 
-    def addConcept(self, report: ModelXbrl, concept, dimensionType = None):
+    def addConcept(self, report: ModelXbrl, concept: ModelConcept | None, dimensionType: str | None = None) -> None:
         if concept is None:
             return
         labelsRelationshipSet = report.relationshipSet(XbrlConst.conceptLabel)
         labels = labelsRelationshipSet.fromModelObject(concept)
         conceptName = self.nsmap.qname(concept.qname)
+        if self.currentTargetReport is None:
+            return
         if conceptName not in self.currentTargetReport["concepts"]:
-            conceptData = {
+            conceptData: dict[str, Any] = {
                 "labels": {  }
             }
             for lr in labels:
@@ -188,11 +197,12 @@ class IXBRLViewerBuilder:
                 self.addRoleDefinition(report, l.role)
 
             refData = []
-            for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
-                ref = []
-                for _refPart in _refRel.toModelObject.iterchildren():
-                    ref.append([_refPart.localName, _refPart.stringValue.strip()])
-                refData.append(ref)
+            if concept.modelXbrl is not None:
+                for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
+                    ref = []
+                    for _refPart in _refRel.toModelObject.iterchildren():
+                        ref.append([_refPart.localName, _refPart.stringValue.strip()])
+                    refData.append(ref)
 
             if len(refData) > 0:
                 conceptData['r'] = refData
@@ -221,19 +231,26 @@ class IXBRLViewerBuilder:
 
             self.currentTargetReport["concepts"][conceptName] = conceptData
 
-    def treeWalk(self, rels, item, indent = 0):
+    def treeWalk(self, rels: ModelRelationshipSet, item: Any, indent: int = 0) -> None:
         for r in rels.fromModelObject(item):
             if r.toModelObject is not None:
                 self.treeWalk(rels, r.toModelObject, indent + 1)
 
-    def getRelationships(self, report: ModelXbrl):
-        rels = {}
+    def getRelationships(self, report: ModelXbrl) -> dict[str, dict[str, dict[str, list[dict[str, str]]]]]:
+        rels: dict[str, dict[str, dict[str, list[dict[str, str]]]]] = {}
 
+        arcroles = {
+            XbrlConst.summationItem,
+            XbrlConst.summationItem11,
+            WIDER_NARROWER_ARCROLE,
+            XbrlConst.parentChild,
+            XbrlConst.dimensionDefault,
+        }
         for baseSetKey, _baseSetModelLinks  in report.baseSets.items():
             arcrole, ELR, _linkqname, _arcqname = baseSetKey
-            if arcrole in (XbrlConst.summationItem, XbrlConst.summationItem11, WIDER_NARROWER_ARCROLE, XbrlConst.parentChild, XbrlConst.dimensionDefault) and ELR is not None:
+            if ELR is not None and arcrole in arcroles:
                 self.addRoleDefinition(report, ELR)
-                rr = dict()
+                rr: dict[str, list[dict[str, str]]] = {}
                 relSet = report.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
                     if r.fromModelObject is not None and r.toModelObject is not None:
@@ -247,15 +264,15 @@ class IXBRLViewerBuilder:
                         self.addConcept(report, r.toModelObject)
                         self.addConcept(report, r.fromModelObject)
 
-                rels.setdefault(self.roleMap.getPrefix(arcrole),{})[self.roleMap.getPrefix(ELR)] = rr
+                rels.setdefault(self.roleMap.getPrefix(arcrole), {})[self.roleMap.getPrefix(ELR)] = rr
         return rels
 
-    def validationErrors(self):
+    def validationErrors(self) -> list[dict[str, str]]:
         logHandler = self.cntlr.logHandler
         if getattr(logHandler, "logRecordBuffer", None) is None:
             raise IXBRLViewerBuilderError("Logging is not configured to use a buffer.  Unable to retrieve validation messages")
 
-        errors = []
+        errors: list[dict[str, str]] = []
         for logRec in getattr(logHandler, "logRecordBuffer", []):
             if logRec.levelno > logging.INFO:
                 errors.append({
@@ -266,7 +283,7 @@ class IXBRLViewerBuilder:
 
         return errors
 
-    def addFact(self, report: ModelXbrl, f):
+    def addFact(self, report: ModelXbrl, f: ModelInlineFact) -> None:
         if f.id is None:
             f.set("id", f"ixv-{self.idGen}")
 
@@ -282,7 +299,7 @@ class IXBRLViewerBuilder:
             "m": isMandatory
         }
 
-        factData = {
+        factData: dict[str, Any] = {
             "a": aspects,
         }
 
@@ -320,7 +337,7 @@ class IXBRLViewerBuilder:
             if d != float("INF") and not math.isnan(d):
                 factData["d"] = d
 
-        for d, v in f.context.qnameDims.items():
+        for v in f.context.qnameDims.values():
             if v.memberQname is not None:
                 aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
                 self.addConcept(report, v.member)
@@ -342,10 +359,11 @@ class IXBRLViewerBuilder:
                 if frel.toModelObject is not None:
                     factData.setdefault("fn", []).append(frel.toModelObject.id)
 
-        self.currentTargetReport["facts"][f.id] = factData
+        if self.currentTargetReport is not None:
+            self.currentTargetReport["facts"][f.id] = factData
         self.addConcept(report, f.concept)
 
-    def oimUnitString(self, unit):
+    def oimUnitString(self, unit: ModelUnit) -> str:
         """
         Returns an OIM-format string representation of the given ModelUnit.
         See https://www.xbrl.org/Specification/oim-common/REC-2021-10-13/oim-common-REC-2021-10-13.html#term-unit-string-representation
@@ -366,13 +384,13 @@ class IXBRLViewerBuilder:
                 return f"{numeratorsString}/{denominatorsString}"
         return numeratorsString
 
-    def addViewerData(self, viewerFile, scriptUrl):
+    def addViewerData(self, viewerFile: 'iXBRLViewerFile', scriptUrl: str) -> bool:
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 
         for child in viewerFile.xmlDocument.getroot():
             if child.tag == '{http://www.w3.org/1999/xhtml}body':
                 for body_child in child:
-                    if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type','') == 'application/x.ixbrl-viewer+json':
+                    if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type', '') == 'application/x.ixbrl-viewer+json':
                         self.cntlr.addToLog("File already contains iXBRL viewer", messageCode="error")
                         return False
 
@@ -397,30 +415,26 @@ class IXBRLViewerBuilder:
                 return True
         return False
 
-    def getStubDocument(self):
+    def getStubDocument(self) -> etree._ElementTree[etree._Element]:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:
             return etree.parse(fin)
 
-    def newTargetReport(self, target):
+    def newTargetReport(self, target: str | None) -> dict[str, Any]:
         return {
             "concepts": {},
             "facts": {},
             "target": target,
         }
 
-    def addSourceReport(self):
-        sourceReport = {
+    def addSourceReport(self) -> dict[str, list[Any]]:
+        sourceReport: dict[str, list[Any]] = {
             "targetReports": []
         }
         self.taxonomyData["sourceReports"].append(sourceReport)
         return sourceReport
 
-    def processModel(
-            self,
-            report: ModelXbrl
-            ):
-
-        self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
+    def processModel(self, report: ModelXbrl) -> None:
+        self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")  # type: ignore[no-untyped-call]
         self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
         softwareCredits = set()
         for document in report.urlDocs.values():
@@ -431,15 +445,19 @@ class IXBRLViewerBuilder:
             self.currentTargetReport["softwareCredits"] = list(softwareCredits)
         for f in report.facts:
             if f.isTuple:
-                for nestedTupleFact in f.ixIter():
+                for nestedTupleFact in f.ixIter():  # type: ignore[attr-defined]
                     self.addFact(report, nestedTupleFact)
             else:
-                self.addFact(report, f)
+                self.addFact(report, cast(ModelInlineFact, f))
         self.currentTargetReport["rels"] = self.getRelationships(report)
 
         docSetFiles = None
         self.reportCount += 1
-        report.info(INFO_MESSAGE_CODE, f"Creating iXBRL viewer ({self.reportCount}) [{self.currentTargetReport['target']}]")
+        report.info(
+            INFO_MESSAGE_CODE,
+            f"Creating iXBRL viewer ({self.reportCount}) [{self.currentTargetReport['target']}]",
+        )
+        assert report.modelDocument is not None
         if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
             # Sort by object index to preserve order in which files were specified.
             xmlDocsByFilename = {
@@ -501,7 +519,7 @@ class IXBRLViewerBuilder:
                 self.filingDocZipPath = os.path.dirname(report.modelDocument.filepath)
         else:
             self.fromSingleZIP = False
-        if report.fileSource.isArchive:
+        if report.fileSource.isArchive and isinstance(report.fileSource.fs, zipfile.ZipFile):
             filelist = report.fileSource.fs.filelist
             for file in filelist:
                 directory, asset = os.path.split(file.filename)
@@ -515,7 +533,7 @@ class IXBRLViewerBuilder:
             scriptUrl: str = DEFAULT_JS_FILENAME,
             showValidations: bool = True,
             packageDownloadURL: str | None = None,
-    ) -> iXBRLViewer | None:
+    ) -> 'iXBRLViewer' | None:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
@@ -551,43 +569,44 @@ class IXBRLViewerBuilder:
 
 class iXBRLViewerFile:
 
-    def __init__(self, filename, xmlDocument):
+    def __init__(self, filename: str, xmlDocument: etree._ElementTree[etree._Element]) -> None:
         self.filename = filename
-        self.xmlDocument = deepcopy(xmlDocument)
+        self.xmlDocument: etree._ElementTree[etree._Element] = deepcopy(xmlDocument)
         # deepcopy does not retain the Python proxies, so iterating the node
         # tree during serialization will create new ones. However, the original
         # ModelObjectFactory is still referenced, and that references a
         # ModelXbrl that will potentially be closed by the time we serialize.
         # Serialization only requires standard XML features, so the default
         # lxml.etree classes (and thus lookup) are fine.
-        self.xmlDocument.parser.set_element_class_lookup(etree.ElementDefaultClassLookup())
+        if self.xmlDocument.parser is not None:
+            self.xmlDocument.parser.set_element_class_lookup(etree.ElementDefaultClassLookup())
 
 
 class iXBRLViewer:
 
-    def __init__(self, cntlr: Cntlr):
-        self.reportZip = None
-        self.filesByFilename = dict()
-        self.filingDocuments = None
+    def __init__(self, cntlr: Cntlr) -> None:
+        self.reportZip: str | None = None
+        self.filesByFilename: dict[str, iXBRLViewerFile] = {}
+        self.filingDocuments: str | None = None
         self.cntlr = cntlr
-        self.assets = []
+        self.assets: list[str] = []
 
-    def addReportAssets(self, assets):
+    def addReportAssets(self, assets: list[str]) -> None:
         self.assets.extend(assets)
 
-    def addFile(self, ivf):
+    def addFile(self, ivf: iXBRLViewerFile) -> None:
         # Overwrite previous occurrences of the same document, because it may
         # have had more IDs added to it by subsequent target documents.
         self.filesByFilename[ivf.filename] = ivf
 
     @property
-    def files(self):
+    def files(self) -> list[iXBRLViewerFile]:
         return list(self.filesByFilename.values())
 
-    def addFilingDoc(self, filingDocuments):
+    def addFilingDoc(self, filingDocuments: str) -> None:
         self.filingDocuments = filingDocuments
 
-    def save(self, destination: io.BytesIO | str, zipOutput: bool = False, copyScriptPath: Path | None = None):
+    def save(self, destination: io.BytesIO | str, zipOutput: bool = False, copyScriptPath: Path | None = None) -> None:
         """
         Save the iXBRL viewer.
         :param destination: The target that viewer data/files will be written to (path to file/directory, or a file object itself).
@@ -596,12 +615,17 @@ class iXBRLViewer:
         """
         if isinstance(destination, io.BytesIO) or zipOutput: # zip output stream
             # zipfile may be cumulatively added to by inline extraction, EdgarRenderer etc
+            filepath: io.BytesIO | str
+            fileMode: Literal['a', 'w']
             if isinstance(destination, io.BytesIO):
-                file = destination
+                filepath = destination
                 fileMode = 'a'
                 destination = os.sep
             elif os.path.isdir(destination):
-                file = os.path.join(destination, f'{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip')
+                filepath = os.path.join(
+                    destination,
+                    f'{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip',
+                )
                 fileMode = 'w'
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
@@ -625,10 +649,10 @@ class iXBRLViewer:
                 )
                 return
             else:
-                file = destination
+                filepath = destination
                 fileMode = 'w'
 
-            with zipfile.ZipFile(file, fileMode, zipfile.ZIP_DEFLATED, True) as zout:
+            with zipfile.ZipFile(filepath, fileMode, zipfile.ZIP_DEFLATED, allowZip64=True) as zout:
                 for f in self.files:
                     self.cntlr.addToLog(f"Saving in output zip {f.filename}", messageCode=INFO_MESSAGE_CODE)
                     with zout.open(f.filename, "w") as fout:
@@ -654,14 +678,14 @@ class iXBRLViewer:
                 filename = os.path.basename(self.filingDocuments)
                 self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
-            if self.assets:
+            if self.assets and self.reportZip is not None:
                 with zipfile.ZipFile(self.reportZip) as z:
                     for asset in self.assets:
                         fileName = os.path.basename(asset)
                         path = os.path.join(destination, fileName)
                         self.cntlr.addToLog(f"Writing {asset}", messageCode=INFO_MESSAGE_CODE)
-                        with z.open(asset) as zf, open(path, 'wb') as f:
-                            shutil.copyfileobj(zf, f)
+                        with z.open(asset) as zf, open(path, 'wb') as assetFile:
+                            shutil.copyfileobj(zf, assetFile)
 
             if copyScriptPath is not None:
                 self._copyScript(Path(destination), copyScriptPath)
@@ -696,7 +720,7 @@ class iXBRLViewer:
                     outDirectory = Path(destination).parent
                     self._copyScript(outDirectory, copyScriptPath)
 
-    def _copyScript(self, destDirectory: Path, scriptPath: Path):
+    def _copyScript(self, destDirectory: Path, scriptPath: Path) -> None:
         scriptDest = destDirectory / scriptPath.name
         if scriptPath != scriptDest:
             self.cntlr.addToLog(f"Copying script from {scriptPath} to {scriptDest}.", messageCode=INFO_MESSAGE_CODE)

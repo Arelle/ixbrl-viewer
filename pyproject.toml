@@ -80,7 +80,6 @@ module = [
     'iXBRLViewerPlugin',
     'iXBRLViewerPlugin.iXBRLViewer',
     'iXBRLViewerPlugin.ui',
-    'iXBRLViewerPlugin.xhtmlserialize',
 ]
 ignore_errors = true
 

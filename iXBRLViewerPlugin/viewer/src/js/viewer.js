@@ -558,7 +558,6 @@ export class Viewer {
         
         $('#iframe-container .zoom-in').on("click", () => this.zoomIn());
         $('#iframe-container .zoom-out').on("click", () => this.zoomOut());
-        $('#iframe-container .print').on("click", () => this.currentDocument().get(0).contentWindow.print());
 
         TableExport.addHandles(this._contents, this._reportSet);
     }

@@ -94,7 +94,8 @@ export class Inspector {
             inspector._reportSet = reportSet;
             inspector.i18nInit().then((t) => {
                 
-                $(".collapsible-header button:first-of-type").on("click", function () { 
+                // Bind to #ixv and filter as some collapsible sections get added dynamically.
+                $("#ixv").on("click", ".collapsible-header button:first-of-type", function () { 
                     const d = $(this).closest(".collapsible-section");
                     d.toggleClass("collapsed"); 
                     if (d.hasClass("collapsed")) {
@@ -134,6 +135,7 @@ export class Inspector {
                 $('#dark-mode-off').on("click", () => lightModeTheme());
                 $('#dark-mode-on').on("click", () => darkModeTheme());
                 $("#setting-dark-mode button").filter((i, e) => $(e).data("theme") === getTheme()).addClass("selected");
+                $('#print').on("click", () => inspector._viewer.currentDocument().get(0).contentWindow.print());
 
 
                 inspector.initializeTooltips();
@@ -209,8 +211,8 @@ export class Inspector {
         this._viewer.onSelect.add((vuid, eltSet, byClick) => this.selectItem(vuid, eltSet, byClick));
         this._viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
-        $('.ixbrl-next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
-        $('.ixbrl-prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
+        $('.tag-nav-all-facts .next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
+        $('.tag-nav-all-facts .prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
     }
 
     postLoadAsync() {
@@ -238,6 +240,8 @@ export class Inspector {
     }
 
     doInitialSelection() {
+        //XXX 
+        this.inspectorMode("search-mode");
         if (!this._currentItem && this._iv.isFeatureEnabled(FEATURE_SEARCH_ON_STARTUP)) {
             this.inspectorMode("search-mode");
         }
@@ -582,7 +586,7 @@ export class Inspector {
         }
 
 
-        const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter.includes(d.dataType.name));
+        const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter?.includes(d.dataType.name));
         if (
             //XXX 
             (spec.conceptTypeFilter == 'numeric' && selectedDataTypes.some(dt => !dt.isNumeric)) ||
@@ -1502,7 +1506,7 @@ export class Inspector {
             if (fact instanceof Fact) {
                 factHTML = $(require('../html/fact-details.html')); 
                 this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
-                this._setLabelWithLang($('.documentation', factHTML), fact.getLabelAndLang("doc"));
+                this._setLabelWithLang($('tr.documentation td', factHTML), fact.getLabelAndLang("doc"));
                 this._updateConcept(fact, factHTML);
                 $('tr.period td', factHTML)
                     .text(fact.periodString());
@@ -1645,7 +1649,7 @@ export class Inspector {
 
             if (cf instanceof Fact) {
                 $('#inspector').removeClass('footnote-mode');
-
+                this._setLabelWithLang($('#inspector .concept-name-title'), cf.getLabelOrNameAndLang("std"));
                 this.updateCalculation(cf);
                 this.updateOutline(cf);
                 this.updateFootnotes(cf);
@@ -1664,14 +1668,14 @@ export class Inspector {
                     }
                 }
 
-                $('nav.tag-nav .text').text(i18next.t('factDetails.factCount', { 
+                $('nav.tag-nav-all-facts .text').text(i18next.t('factDetails.factCount', { 
                     current: this._viewer.docOrderItemIndex.indexOf(cf.vuid) + 1, 
                     total: this._viewer.docOrderItemIndex.length()
                 }));
 
-                $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.duplicates .prev').get(0).focus(); });
-                $('.duplicates .next').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.duplicates .next').get(0).focus(); });
+                $('.tag-nav-duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
+                $('.tag-nav-duplicates .prev').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.tag-nav-duplicates .prev').get(0).focus(); });
+                $('.tag-nav-duplicates .next').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.tag-nav-duplicates .next').get(0).focus(); });
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {
@@ -1693,6 +1697,7 @@ export class Inspector {
             else if (cf instanceof Footnote) {
                 $('#inspector').addClass('footnote-mode');
                 $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML(cf));
+                $('#inspector .concept-name-title').hide();
                 $('#inspector .tags').hide();
             }
             $('.fact-details').localize();

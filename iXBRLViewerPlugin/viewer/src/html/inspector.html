@@ -9,11 +9,12 @@ See COPYRIGHT.md for copyright information
   <div id="panes">
     <div id="pane-left">
       <header id="top-bar">
-        <img class="header only-light" alt="Inline Viewer logo" src="../img/inline-viewer.svg" />
-        <img class="header only-dark" alt="Inline Viewer logo" src="../img/inline-viewer-dark.svg" />
-        <h1 class="document-title"></h1>
+        <div class="logo">
+            <b>XBRL</b> viewer
+        </div>
         <div class="top-bar-controls">
-          <button class="inline-button validation-warning" data-i18n="[aria-label]inspector.validationResults" aria-label="Validation Results" title="Report has validation errors"></button>
+          <button class="validation-warning" data-i18n="[aria-label]inspector.validationResults" aria-label="Validation Results" title="Report has validation errors"></button>
+          <button id="print" title="Print Document" data-i18n="[title]inspector.printDocument"></button>
           <button data-i18n="[title]inspector.settings" title="Settings" id="settings-button"></button>
         </div>
       </header>
@@ -22,7 +23,6 @@ See COPYRIGHT.md for copyright information
         <div id="iframe-container">
           <div class="zoom-in">+</div>
           <div class="zoom-out">-</div>
-          <div class="print" title="Print Document" data-i18n="[title]inspector.printDocument"></div>
         </div>
         <div id="viewer-resize-handle" class="resize"></div>
         <div class="resize-spacer"></div>
@@ -57,28 +57,25 @@ See COPYRIGHT.md for copyright information
             </div>
             -->
 
-            <nav class="tag-nav">
+            <nav class="tag-nav tag-nav-all-facts panel-indent">
               <div>
                   <div class="button">
-                    <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag">Previous</button>
+                    <button class="prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag">Previous</button>
                   </div>
                   <div class="text"></div>
                   <div class="button">
-                    <button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag">Next</button>
+                    <button class="next-tag" data-i18n="[title]inspector.nextTag" title="Next tag">Next</button>
                   </div>
               </div>
             </nav>
             <div class="fact-selected-only">
-
-
               <div class="tags">
                 <div class="target-document-tag"></div>
                 <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>
                 <div class="html-hidden-fact-tag" data-i18n="inspector.concealedFact">Concealed Fact</div>
               </div>
-              <div class="collapsible-section">
-                <div class="fact-inspector-body collapsible-body">
-                </div>
+              <h2 class="concept-name-title"></h2>
+              <div class="fact-inspector-body">
               </div>
               <div class="footnote-mode-off">
                 <div class="collapsible-section anchoring">

@@ -581,7 +581,7 @@ class iXBRLViewer:
     def addFilingDoc(self, filingDocuments):
         self.filingDocuments = filingDocuments
 
-    def save(self, destination: io.BytesIO | str, zipOutput: bool = False, copyScriptPath: Path | None = None):
+    def save(self, destination: io.BytesIO | str, zipOutput: bool = False, copyScriptPath: Path | None = None, stubFileOnly: bool = False):
         """
         Save the iXBRL viewer.
         :param destination: The target that viewer data/files will be written to (path to file/directory, or a file object itself).
@@ -619,7 +619,9 @@ class iXBRLViewer:
                     with zout.open(f.filename, "w") as fout:
                         writer = XHTMLSerializer(fout)
                         writer.serialize(f.xmlDocument)
-                if self.filingDocuments:
+                    if stubFileOnly:
+                        break # only output the stub file
+                if not stubFileOnly and self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog("Writing %s" % filename, messageCode=INFO_MESSAGE_CODE)
                     zout.write(self.filingDocuments, filename)

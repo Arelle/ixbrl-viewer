@@ -533,8 +533,14 @@ a {
           }
         }
         
-        button {
+        button.filter-toggle {
           .primary-button();
+
+          &::before {
+            .icon-filter();
+            padding-right: 0.8rem;
+            vertical-align: bottom;
+          }
         }
 
         .filter-info {

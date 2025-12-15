@@ -244,7 +244,7 @@ class IXBRLViewerBuilder:
             XbrlConst.parentChild,
             XbrlConst.dimensionDefault,
         }
-        for baseSetKey, _baseSetModelLinks  in report.baseSets.items():
+        for baseSetKey in report.baseSets:
             arcrole, ELR, _linkqname, _arcqname = baseSetKey
             if ELR is not None and arcrole in arcroles:
                 self.addRoleDefinition(report, ELR)

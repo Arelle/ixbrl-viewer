@@ -83,3 +83,10 @@ module = [
     'iXBRLViewerPlugin.xhtmlserialize',
 ]
 ignore_errors = true
+
+# --- arelle types ---
+# We don't publish arelle types (yet), as they're incomplete and we don't want other devs to rely on them.
+# But we should be using them ourselves to gradually improve typing in Arelle and its plugins.
+[[tool.mypy.overrides]]
+module = 'arelle.*'
+follow_untyped_imports = true

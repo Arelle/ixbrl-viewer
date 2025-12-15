@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import io
 import logging
 import os
+import shutil
 import sys
 import tempfile
 import traceback
@@ -346,8 +348,8 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         # Don't run on launch if the option has been disabled
         return
     try:
-        global tempViewer
-        tempViewer = tempfile.TemporaryDirectory()
+        tempViewerDir = tempfile.mkdtemp()
+        atexit.register(shutil.rmtree, tempViewerDir, ignore_errors=True)
         viewer_file_name = DEFAULT_OUTPUT_NAME
         features = {}
         for featureConfig in FEATURE_CONFIGS:
@@ -357,13 +359,13 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         processModel(cntlr, modelXbrl)
         generateViewer(
             cntlr=cntlr,
-            saveViewerDest=tempViewer.name,
+            saveViewerDest=tempViewerDir,
             viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL),
             copyScript=cntlr.config.get(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT),
         )
-        if Path(tempViewer.name, viewer_file_name).exists():
+        if Path(tempViewerDir, viewer_file_name).exists():
             localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
-            localhost = localViewer.init(cntlr, tempViewer.name)
+            localhost = localViewer.init(cntlr, tempViewerDir)
             webbrowser.open(f'{localhost}/{viewer_file_name}')
     except Exception as ex:
         modelXbrl.error(

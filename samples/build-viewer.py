@@ -28,7 +28,7 @@ from iXBRLViewerPlugin import generateViewer, getFeaturesFromOptions, FEATURE_CO
 class CntlrCreateViewer(Cntlr.Cntlr):
 
     def __init__(self):
-        super(CntlrCreateViewer, self).__init__(hasGui=False)
+        super().__init__(hasGui=False)
 
     def loadPackagesFromDir(self, directory):
         packages = glob.glob(os.path.join(directory, "*.zip"))

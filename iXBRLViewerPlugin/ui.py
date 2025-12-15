@@ -16,7 +16,7 @@ class BaseViewerDialog(Toplevel):
     Base class for shared dialog configuration between settings and save dialogs
     """
     def __init__(self, cntlr):
-        super(BaseViewerDialog, self).__init__(cntlr.parent)
+        super().__init__(cntlr.parent)
         self.cntlr = cntlr
         self.parent = cntlr.parent
 
@@ -153,7 +153,7 @@ class SaveViewerDialog(BaseViewerDialog):
     """
 
     def __init__(self, cntlr):
-        super(SaveViewerDialog, self).__init__(cntlr)
+        super().__init__(cntlr)
         self.accepted = False
         self._filename = StringVar()
         self._filename.set(self.cntlr.config.setdefault(CONFIG_OUTPUT_FILE, ""))
@@ -174,7 +174,7 @@ class SaveViewerDialog(BaseViewerDialog):
         y += 1
         zipViewerOutputCheckbutton = Checkbutton(frame, text="Zip Viewer Output", variable=self._zipViewerOutput, onvalue=True, offvalue=False)
         zipViewerOutputCheckbutton.grid(row=y, column=0, pady=3, padx=3)
-        return super(SaveViewerDialog, self).addFields(frame, y)
+        return super().addFields(frame, y)
 
     def browseForFile(self):
         instanceFile = self.cntlr.uiFileDialog(
@@ -213,7 +213,7 @@ class SettingsDialog(BaseViewerDialog):
     """
 
     def __init__(self, cntlr):
-        super(SettingsDialog, self).__init__(cntlr)
+        super().__init__(cntlr)
         self._launchOnLoad = BooleanVar()
         self._launchOnLoad.set(self.cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD))
 
@@ -224,7 +224,7 @@ class SettingsDialog(BaseViewerDialog):
         x += 1
         resetButton = Button(frame, text=_("Reset Defaults"), command=self.reset)
         resetButton.grid(row=y, column=x, sticky=E, pady=3, padx=30)
-        return super(SettingsDialog, self).addButtons(frame, x, y)
+        return super().addButtons(frame, x, y)
 
     def addFields(self, frame: Frame, y: int) -> int:
         """
@@ -235,7 +235,7 @@ class SettingsDialog(BaseViewerDialog):
         launchOnLoadLabel = Label(frame, text="Launches an instance of the viewer in Stub Viewer Mode whenever a document is loaded.")
         launchOnLoadCheckbutton.grid(row=y, column=0, pady=3, padx=3, sticky=W)
         launchOnLoadLabel.grid(row=y, column=1, columnspan=3, pady=3, padx=3, sticky=W)
-        return super(SettingsDialog, self).addFields(frame, y)
+        return super().addFields(frame, y)
 
     def getTitle(self) -> str:
         return "iXBRL Viewer Settings"

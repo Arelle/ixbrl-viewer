@@ -1,5 +1,7 @@
 # See COPYRIGHT.md for copyright information
 
+from __future__ import annotations
+
 import os
 from tkinter import EW, BooleanVar, E, N, S, StringVar, Toplevel, W
 from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label

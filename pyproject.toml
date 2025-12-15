@@ -28,6 +28,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    'bottle>=0.13,<0.14',
     'lxml>=4,<7'
 ]
 [project.optional-dependencies]

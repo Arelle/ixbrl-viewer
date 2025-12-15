@@ -15,6 +15,7 @@ from typing import Any
 from arelle import Cntlr
 from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
+from arelle.ModelXbrl import ModelXbrl
 from arelle.UrlUtil import isHttpUrl
 from bottle import static_file
 

@@ -83,12 +83,3 @@ module = [
     'iXBRLViewerPlugin.xhtmlserialize',
 ]
 ignore_errors = true
-
-# --- Modules lacking stubs ---
-# Add any module missing library stubs or not having
-# the py.typed marker here
-[[tool.mypy.overrides]]
-module = [
-    'arelle.*',
-]
-ignore_missing_imports = true

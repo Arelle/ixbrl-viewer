@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from arelle import XbrlConst
+from arelle.Cntlr import Cntlr
 from arelle.ModelDocument import ModelDocument, Type
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import QName, INVALIDixVALUE

@@ -229,8 +229,8 @@ class IXBRLViewerBuilder:
     def getRelationships(self, report: ModelXbrl):
         rels = {}
 
-        for baseSetKey, baseSetModelLinks  in report.baseSets.items():
-            arcrole, ELR, linkqname, arcqname = baseSetKey
+        for baseSetKey, _baseSetModelLinks  in report.baseSets.items():
+            arcrole, ELR, _linkqname, _arcqname = baseSetKey
             if arcrole in (XbrlConst.summationItem, XbrlConst.summationItem11, WIDER_NARROWER_ARCROLE, XbrlConst.parentChild, XbrlConst.dimensionDefault) and ELR is not None:
                 self.addRoleDefinition(report, ELR)
                 rr = dict()

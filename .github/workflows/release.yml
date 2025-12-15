@@ -36,11 +36,11 @@ jobs:
           node-version: latest
           registry-url: 'https://registry.npmjs.org'
       - name: Download ixbrlviewer.js artifact
-        uses: actions/download-artifact@v6.0.0
+        uses: actions/download-artifact@v7.0.0
         with:
           name: ixbrlviewer.js
       - name: Download npm artifact
-        uses: actions/download-artifact@v6.0.0
+        uses: actions/download-artifact@v7.0.0
         with:
           name: npm package
       - name: Publish with npm

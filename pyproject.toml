@@ -73,14 +73,6 @@ python_version = "3.14"
 show_error_codes = true
 strict = true
 
-# --- ignore modules ---
-# remove from list below as each module is updated with type hinting
-[[tool.mypy.overrides]]
-module = [
-    'iXBRLViewerPlugin',
-]
-ignore_errors = true
-
 # --- arelle types ---
 # We don't publish arelle types (yet), as they're incomplete and we don't want other devs to rely on them.
 # But we should be using them ourselves to gradually improve typing in Arelle and its plugins.

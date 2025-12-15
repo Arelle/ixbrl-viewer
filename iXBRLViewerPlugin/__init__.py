@@ -1,29 +1,49 @@
 # See COPYRIGHT.md for copyright information
+
 from __future__ import annotations
 
 import argparse
+import atexit
 import io
 import logging
 import os
+import shutil
 import sys
 import tempfile
 import traceback
+import webbrowser
 from optparse import OptionGroup, OptionParser
 from pathlib import Path
-from typing import Any
+from tkinter import Menu
+from typing import Any, cast
 
-from arelle import Cntlr
+from arelle.Cntlr import Cntlr
+from arelle.CntlrWinMain import CntlrWinMain
 from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
+from arelle.ModelXbrl import ModelXbrl
+from arelle.typing import TypeGetText
 from arelle.UrlUtil import isHttpUrl
-from arelle.webserver.bottle import static_file
+from bottle import static_file  # type: ignore[import-untyped]
 
-from .constants import CONFIG_COPY_SCRIPT, CONFIG_FEATURE_PREFIX, CONFIG_LAUNCH_ON_LOAD, \
-    CONFIG_SCRIPT_URL, DEFAULT_COPY_SCRIPT, DEFAULT_LAUNCH_ON_LOAD, DEFAULT_OUTPUT_NAME, \
-    DEFAULT_JS_FILENAME, DEFAULT_VIEWER_PATH, ERROR_MESSAGE_CODE, \
-    EXCEPTION_MESSAGE_CODE, FEATURE_CONFIGS
+from .constants import (
+    CONFIG_COPY_SCRIPT,
+    CONFIG_FEATURE_PREFIX,
+    CONFIG_LAUNCH_ON_LOAD,
+    CONFIG_SCRIPT_URL,
+    DEFAULT_COPY_SCRIPT,
+    DEFAULT_JS_FILENAME,
+    DEFAULT_LAUNCH_ON_LOAD,
+    DEFAULT_OUTPUT_NAME,
+    DEFAULT_VIEWER_PATH,
+    ERROR_MESSAGE_CODE,
+    EXCEPTION_MESSAGE_CODE,
+    FEATURE_CONFIGS,
+)
 from .iXBRLViewer import IXBRLViewerBuilder, IXBRLViewerBuilderError, isInlineDoc
 from .plugin import IXBRLViewerPluginData
+
+_: TypeGetText
 
 PLUGIN_NAME = 'ixbrl-viewer'
 
@@ -51,7 +71,7 @@ PLUGIN_NAME = 'ixbrl-viewer'
 #
 
 
-def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
+def iXBRLViewerCommandLineOptionExtender(parser: OptionParser, *args: Any, **kwargs: Any) -> None:
     parser.add_option("--save-viewer",
                       action="store",
                       dest="saveViewerDest",
@@ -111,20 +131,22 @@ def iXBRLViewerCommandLineOptionExtender(parser, *args, **kwargs):
         )
     parser.add_option_group(featureGroup)
 
-def pluginData(cntlr: Cntlr):
-    pluginData = cntlr.getPluginData(PLUGIN_NAME)
-    if pluginData is None:
-        pluginData = IXBRLViewerPluginData(PLUGIN_NAME)
-        cntlr.setPluginData(pluginData)
-    return pluginData
+def pluginData(cntlr: Cntlr) -> IXBRLViewerPluginData:
+    pd = cast(IXBRLViewerPluginData | None, cntlr.getPluginData(PLUGIN_NAME))
+    if pd is None:
+        pd = IXBRLViewerPluginData(PLUGIN_NAME)
+        cntlr.setPluginData(pd)
+    return pd
 
-def resetPluginData(cntlr: Cntlr):
+def resetPluginData(cntlr: Cntlr) -> None:
     pluginData(cntlr).builder = None
 
-def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl):
+def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl) -> None:
     try:
         if isInlineDoc(modelXbrl.modelDocument):
-            pluginData(cntlr).builder.processModel(modelXbrl)
+            builder = pluginData(cntlr).builder
+            assert builder is not None, "iXBRL Viewer builder must be initialized before processing model"
+            builder.processModel(modelXbrl)
     except IXBRLViewerBuilderError as ex:
         print(ex)
     except Exception as ex:
@@ -169,6 +191,7 @@ def generateViewer(
     viewerURL = viewerURL or DEFAULT_VIEWER_PATH
 
     bldr = pluginData(cntlr).builder
+    assert bldr is not None, "iXBRL Viewer builder must be initialized before generating viewer"
 
     if bldr.reportCount == 0:
         cntlr.addToLog(f"No inline XBRL documents loaded. {abortGenerationMsg}", messageCode=ERROR_MESSAGE_CODE)
@@ -220,13 +243,19 @@ def getFeaturesFromOptions(options: argparse.Namespace | OptionParser) -> dict[s
     return features
 
 
-def iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs):
+def iXBRLViewerCommandLineXbrlRun(
+        cntlr: Cntlr,
+        options: argparse.Namespace,
+        modelXbrl: ModelXbrl,
+        *args: Any,
+        **kwargs: Any,
+) -> None:
     pd = pluginData(cntlr)
     if pd.builder is None:
         pd.builder = IXBRLViewerBuilder(cntlr, useStubViewer = options.useStubViewer, features=getFeaturesFromOptions(options))
     processModel(cntlr, modelXbrl)
 
-def iXBRLViewerCommandLineFilingEnd(cntlr, options, *args, **kwargs):
+def iXBRLViewerCommandLineFilingEnd(cntlr: Cntlr, options: argparse.Namespace, *args: Any, **kwargs: Any) -> None:
     generateViewer(
         cntlr=cntlr,
         saveViewerDest=options.saveViewerDest or kwargs.get("responseZipStream"),
@@ -238,14 +267,14 @@ def iXBRLViewerCommandLineFilingEnd(cntlr, options, *args, **kwargs):
     )
 
 
-def iXBRLViewerSaveCommand(cntlr):
+def iXBRLViewerSaveCommand(cntlr: CntlrWinMain) -> None:
     from .ui import SaveViewerDialog
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
-        cntlr.addToLog("No document loaded.", messageCode=ERROR_MESSAGE_CODE)
+        cntlr.addToLog("No document loaded.", messageCode=ERROR_MESSAGE_CODE)  # type: ignore[no-untyped-call]
         return
     modelXbrl = cntlr.modelManager.modelXbrl
-    if modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-        cntlr.addToLog("No inline XBRL document loaded.", messageCode=ERROR_MESSAGE_CODE)
+    if modelXbrl.modelDocument is None or modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
+        cntlr.addToLog("No inline XBRL document loaded.", messageCode=ERROR_MESSAGE_CODE)  # type: ignore[no-untyped-call]
         return
     dialog = SaveViewerDialog(cntlr)
     dialog.render()
@@ -265,12 +294,12 @@ def iXBRLViewerSaveCommand(cntlr):
         )
 
 
-def iXBRLViewerSettingsCommand(cntlr):
+def iXBRLViewerSettingsCommand(cntlr: CntlrWinMain) -> None:
     from .ui import SettingsDialog
     SettingsDialog(cntlr).render()
 
 
-def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):
+def iXBRLViewerToolsMenuExtender(cntlr: CntlrWinMain, menu: Menu, *args: Any, **kwargs: Any) -> None:
     # Add Tools menu
     from tkinter import Menu  # must only import if GUI present (no tkinter on GUI-less servers)
     viewerMenu = Menu(cntlr.menubar, tearoff=0)
@@ -287,23 +316,23 @@ def iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs):
         command=lambda: iXBRLViewerSaveCommand(cntlr))
 
 
-def toolsMenuExtender(cntlr, menu, *args, **kwargs):
+def toolsMenuExtender(cntlr: CntlrWinMain, menu: Menu, *args: Any, **kwargs: Any) -> None:
     iXBRLViewerToolsMenuExtender(cntlr, menu, *args, **kwargs)
 
 
-def commandLineOptionExtender(*args, **kwargs):
+def commandLineOptionExtender(*args: Any, **kwargs: Any) -> None:
     iXBRLViewerCommandLineOptionExtender(*args, **kwargs)
 
 
-def commandLineRun(cntlr, options, modelXbrl, *args, **kwargs):
+def commandLineRun(cntlr: Cntlr, options: argparse.Namespace, modelXbrl: ModelXbrl, *args: Any, **kwargs: Any) -> None:
     iXBRLViewerCommandLineXbrlRun(cntlr, options, modelXbrl, *args, **kwargs)
 
-def commandLineFilingEnd(*args, **kwargs):
+def commandLineFilingEnd(*args: Any, **kwargs: Any) -> None:
     iXBRLViewerCommandLineFilingEnd(*args, **kwargs)
 
 class iXBRLViewerLocalViewer(LocalViewer):
     # plugin-specific local file handler
-    def getLocalFile(self, file, relpath, request):
+    def getLocalFile(self, file: str, relpath: str, request: Any) -> Any:
         if file == DEFAULT_JS_FILENAME:
             return static_file(DEFAULT_JS_FILENAME, os.path.dirname(DEFAULT_VIEWER_PATH))
         _report, _, _file = file.partition("/")
@@ -317,23 +346,28 @@ class iXBRLViewerLocalViewer(LocalViewer):
                 # xhtml in a subdirectory for output files may refer to an image file in parent directory
                 _fileExists = True
                 _file = os.path.basename(_file)
-            if not _fileExists:
-                self.cntlr.addToLog("http://localhost:{}/{}".format(self.port, file), messageCode="localViewer:fileNotFound", level=logging.DEBUG)
+            if not _fileExists and self.cntlr is not None:
+                self.cntlr.addToLog(
+                    f"http://localhost:{self.port}/{file}",
+                    messageCode="localViewer:fileNotFound",
+                    level=logging.DEBUG,
+                )
             return static_file(_file, root=_fileDir, headers=self.noCacheHeaders)  # extra_headers modification to py-bottle
         return static_file(file, root="/")  # absolute path used for ixbrlviewer.js.
 
 
-def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
+def guiRun(cntlr: CntlrWinMain, modelXbrl: ModelXbrl, attach: Any, *args: Any, **kwargs: Any) -> None:
     """ run iXBRL Viewer using GUI interactions for a single instance or testcases """
+    if cntlr.config is None:
+        return
     if not cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD):
         # Don't run on launch if the option has been disabled
         return
     try:
-        import webbrowser
-        global tempViewer
-        tempViewer = tempfile.TemporaryDirectory()
+        tempViewerDir = tempfile.mkdtemp()
+        atexit.register(shutil.rmtree, tempViewerDir, ignore_errors=True)
         viewer_file_name = DEFAULT_OUTPUT_NAME
-        features = {}
+        features: dict[str, bool] = {}
         for featureConfig in FEATURE_CONFIGS:
             if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', False):
                 features[featureConfig.key] = True
@@ -341,13 +375,13 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         processModel(cntlr, modelXbrl)
         generateViewer(
             cntlr=cntlr,
-            saveViewerDest=tempViewer.name,
+            saveViewerDest=tempViewerDir,
             viewerURL=cntlr.config.get(CONFIG_SCRIPT_URL),
             copyScript=cntlr.config.get(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT),
         )
-        if Path(tempViewer.name, viewer_file_name).exists():
-            localViewer = iXBRLViewerLocalViewer("iXBRL Viewer",  os.path.dirname(__file__))
-            localhost = localViewer.init(cntlr, tempViewer.name)
+        if Path(tempViewerDir, viewer_file_name).exists():
+            localViewer = iXBRLViewerLocalViewer("iXBRL Viewer", os.path.dirname(__file__))  # type: ignore[no-untyped-call]
+            localhost = localViewer.init(cntlr, tempViewerDir)  # type: ignore[no-untyped-call]
             webbrowser.open(f'{localhost}/{viewer_file_name}')
     except Exception as ex:
         modelXbrl.error(
@@ -357,7 +391,7 @@ def guiRun(cntlr, modelXbrl, attach, *args, **kwargs):
         )
 
 
-def load_plugin_url():
+def load_plugin_url() -> str:
     return __file__
 
 

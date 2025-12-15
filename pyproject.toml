@@ -28,6 +28,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    'bottle>=0.13,<0.14',
     'lxml>=4,<7'
 ]
 [project.optional-dependencies]
@@ -36,9 +37,9 @@ arelle = [
 ]
 dev = [
     'flake8==7.3.0',
-    'lxml-stubs==0.5.1',
     'mypy==1.19.0',
     'pytest==9.0.2',
+    'types-lxml==2025.11.25',
     'typing-extensions==4.15.0',
 ]
 
@@ -72,23 +73,9 @@ python_version = "3.14"
 show_error_codes = true
 strict = true
 
-# --- ignore modules ---
-# remove from list below as each module is updated with type hinting
+# --- arelle types ---
+# We don't publish arelle types (yet), as they're incomplete and we don't want other devs to rely on them.
+# But we should be using them ourselves to gradually improve typing in Arelle and its plugins.
 [[tool.mypy.overrides]]
-module = [
-    'iXBRLViewerPlugin',
-    'iXBRLViewerPlugin.iXBRLViewer',
-    'iXBRLViewerPlugin.ui',
-    'iXBRLViewerPlugin.xhtmlserialize',
-]
-ignore_errors = true
-
-# --- Modules lacking stubs ---
-# Add any module missing library stubs or not having
-# the py.typed marker here
-[[tool.mypy.overrides]]
-module = [
-    'ttk',
-    'arelle.*',
-]
-ignore_missing_imports = true
+module = 'arelle.*'
+follow_untyped_imports = true

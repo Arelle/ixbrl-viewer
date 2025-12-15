@@ -38,4 +38,3 @@ def mock_arelle():
         sys.modules['arelle.ValidateXbrlCalcs'] = Mock(
             inferredDecimals=inferredDecimals_effect
         )
-        sys.modules['arelle.webserver.bottle'] = Mock()

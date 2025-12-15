@@ -1,7 +1,12 @@
+# See COPYRIGHT.md for copyright information
+
+from __future__ import annotations
+
 from arelle.utils.PluginData import PluginData
+
 from .iXBRLViewer import IXBRLViewerBuilder
-from typing import Optional
 
-class IXBRLViewerPluginData(PluginData): # type: ignore[misc]
 
-    builder: Optional[IXBRLViewerBuilder] = None
+class IXBRLViewerPluginData(PluginData):
+
+    builder: IXBRLViewerBuilder | None = None

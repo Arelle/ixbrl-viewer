@@ -1,16 +1,29 @@
 # See COPYRIGHT.md for copyright information
 
-from tkinter import Toplevel, N, E, S, W, EW, StringVar, BooleanVar
-try:
-    from tkinter.ttk import Frame, Button, Label, Entry, Checkbutton
-except ImportError:
-    from ttk import Frame, Button, Label, Entry, Checkbutton
+from __future__ import annotations
 
 import os
+from tkinter import EW, NSEW, BooleanVar, E, Event, Misc, StringVar, Toplevel, W
+from tkinter.ttk import Button, Checkbutton, Entry, Frame, Label
+from typing import Any
 
-from .constants import CONFIG_COPY_SCRIPT, CONFIG_FEATURE_PREFIX, CONFIG_FILE_DIRECTORY, \
-    CONFIG_LAUNCH_ON_LOAD, CONFIG_OUTPUT_FILE, CONFIG_SCRIPT_URL, CONFIG_ZIP_OUTPUT, \
-    DEFAULT_COPY_SCRIPT, DEFAULT_LAUNCH_ON_LOAD, GUI_FEATURE_CONFIGS
+from arelle.CntlrWinMain import CntlrWinMain
+from arelle.typing import TypeGetText
+
+from .constants import (
+    CONFIG_COPY_SCRIPT,
+    CONFIG_FEATURE_PREFIX,
+    CONFIG_FILE_DIRECTORY,
+    CONFIG_LAUNCH_ON_LOAD,
+    CONFIG_OUTPUT_FILE,
+    CONFIG_SCRIPT_URL,
+    CONFIG_ZIP_OUTPUT,
+    DEFAULT_COPY_SCRIPT,
+    DEFAULT_LAUNCH_ON_LOAD,
+    GUI_FEATURE_CONFIGS,
+)
+
+_: TypeGetText
 
 UNSET_SCRIPT_URL = ''
 
@@ -18,20 +31,25 @@ class BaseViewerDialog(Toplevel):
     """
     Base class for shared dialog configuration between settings and save dialogs
     """
-    def __init__(self, cntlr):
-        super(BaseViewerDialog, self).__init__(cntlr.parent)
+    def __init__(self, cntlr: CntlrWinMain) -> None:
+        super().__init__(cntlr.parent)
         self.cntlr = cntlr
         self.parent = cntlr.parent
 
-        self._features = {}
+        self._features: dict[str, BooleanVar] = {}
         for featureConfig in GUI_FEATURE_CONFIGS:
             featureVar = BooleanVar()
-            featureVar.set(self.cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', featureConfig.guiDefault))
+            featureVar.set(self._cntlrConfig.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', featureConfig.guiDefault))
             self._features[featureConfig.key] = featureVar
         self._scriptUrl = StringVar()
-        self._scriptUrl.set(self.cntlr.config.setdefault(CONFIG_SCRIPT_URL, UNSET_SCRIPT_URL))
+        self._scriptUrl.set(self._cntlrConfig.setdefault(CONFIG_SCRIPT_URL, UNSET_SCRIPT_URL))
         self._copyScript = BooleanVar()
-        self._copyScript.set(self.cntlr.config.setdefault(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT))
+        self._copyScript.set(self._cntlrConfig.setdefault(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT))
+
+    @property
+    def _cntlrConfig(self) -> dict[str, Any]:
+        assert self.cntlr.config is not None
+        return self.cntlr.config
 
     def addButtons(self, frame: Frame, x: int, y: int) -> int:
         """
@@ -82,14 +100,14 @@ class BaseViewerDialog(Toplevel):
             featureLabel.grid(row=y, column=1, columnspan=2, pady=3, padx=3, sticky=W)
         return y
 
-    def close(self, event=None):
+    def close(self, event: Event[Misc] | None = None) -> None:
         """
         Closes the dialog.
         """
         self.parent.focus_set()
         self.destroy()
 
-    def confirm(self, event=None):
+    def confirm(self, event: Event[Misc] | None = None) -> None:
         """
         Closes the dialog after calling `onConfirm`.
         """
@@ -100,16 +118,16 @@ class BaseViewerDialog(Toplevel):
         """
         :return: Title of dialog window
         """
-        pass
+        raise NotImplementedError
 
-    def onConfirm(self):
+    def onConfirm(self) -> None:
         """
         Actions to confirm when "OK" button or "Enter" key are pressed.
         Window is closed immediately after.
         """
         pass
 
-    def render(self):
+    def render(self) -> None:
         """
         Performs the arrangement and rendering if dialog fields and buttons.
         Process control is held here via `wait_window` until the dialog is closed.
@@ -125,7 +143,7 @@ class BaseViewerDialog(Toplevel):
         x = 0
         self.addButtons(frame, x, y)
 
-        frame.grid(row=0, column=0, padx=10, pady=10, sticky=(N,E,S,W))
+        frame.grid(row=0, column=0, padx=10, pady=10, sticky=NSEW)
         frame.columnconfigure(1, weight=1)
 
         window = self.winfo_toplevel()
@@ -138,14 +156,14 @@ class BaseViewerDialog(Toplevel):
         self.grab_set()
         self.wait_window(self)
 
-    def copyScript(self):
+    def copyScript(self) -> bool:
         return self._copyScript.get()
 
-    def features(self):
+    def features(self) -> list[str]:
         # Return list of feature keys with corresponding BooleanVar is set to True
         return [feature for feature, value in self._features.items() if value.get()]
 
-    def scriptUrl(self):
+    def scriptUrl(self) -> str:
         return self._scriptUrl.get()
 
 
@@ -155,13 +173,13 @@ class SaveViewerDialog(BaseViewerDialog):
     Initializes with (but doesn't overwrite) default settings configured in the settings dialog.
     """
 
-    def __init__(self, cntlr):
-        super(SaveViewerDialog, self).__init__(cntlr)
+    def __init__(self, cntlr: CntlrWinMain) -> None:
+        super().__init__(cntlr)
         self.accepted = False
         self._filename = StringVar()
-        self._filename.set(self.cntlr.config.setdefault(CONFIG_OUTPUT_FILE, ""))
+        self._filename.set(self._cntlrConfig.setdefault(CONFIG_OUTPUT_FILE, ""))
         self._zipViewerOutput = BooleanVar()
-        self._zipViewerOutput.set(self.cntlr.config.setdefault(CONFIG_ZIP_OUTPUT, False))
+        self._zipViewerOutput.set(self._cntlrConfig.setdefault(CONFIG_ZIP_OUTPUT, False))
 
     def addFields(self, frame: Frame, y: int) -> int:
         """
@@ -177,36 +195,35 @@ class SaveViewerDialog(BaseViewerDialog):
         y += 1
         zipViewerOutputCheckbutton = Checkbutton(frame, text="Zip Viewer Output", variable=self._zipViewerOutput, onvalue=True, offvalue=False)
         zipViewerOutputCheckbutton.grid(row=y, column=0, pady=3, padx=3)
-        return super(SaveViewerDialog, self).addFields(frame, y)
+        return super().addFields(frame, y)
 
-    def browseForFile(self):
-        instanceFile = self.cntlr.uiFileDialog(
+    def browseForFile(self) -> None:
+        instanceFile = self.cntlr.uiFileDialog(  # type: ignore[no-untyped-call]
             "save",
             parent=self,
             title=_("arelle - Save iXBRL Viewer Instance"),
-            initialdir=self.cntlr.config.setdefault(CONFIG_FILE_DIRECTORY, "."),
+            initialdir=self._cntlrConfig.setdefault(CONFIG_FILE_DIRECTORY, "."),
             filetypes=[(_("iXBRL report .html"), "*.html")],
             defaultextension=".html")
         self._filename.set(instanceFile)
-        pass
 
     def getTitle(self) -> str:
         return "Save iXBRL Viewer"
 
-    def onConfirm(self):
+    def onConfirm(self) -> None:
         """
         Saves output-specific config values before triggering instance to be saved.
         """
-        self.cntlr.config[CONFIG_FILE_DIRECTORY] = os.path.dirname(self.filename())
-        self.cntlr.config[CONFIG_OUTPUT_FILE] = self.filename()
-        self.cntlr.config[CONFIG_ZIP_OUTPUT] = self.zipViewerOutput()
+        self._cntlrConfig[CONFIG_FILE_DIRECTORY] = os.path.dirname(self.filename())
+        self._cntlrConfig[CONFIG_OUTPUT_FILE] = self.filename()
+        self._cntlrConfig[CONFIG_ZIP_OUTPUT] = self.zipViewerOutput()
         self.cntlr.saveConfig()
         self.accepted = True
 
-    def filename(self):
+    def filename(self) -> str:
         return self._filename.get()
 
-    def zipViewerOutput(self):
+    def zipViewerOutput(self) -> bool:
         return self._zipViewerOutput.get()
 
 
@@ -215,10 +232,10 @@ class SettingsDialog(BaseViewerDialog):
     Dialog for saving default viewer settings.
     """
 
-    def __init__(self, cntlr):
-        super(SettingsDialog, self).__init__(cntlr)
+    def __init__(self, cntlr: CntlrWinMain) -> None:
+        super().__init__(cntlr)
         self._launchOnLoad = BooleanVar()
-        self._launchOnLoad.set(self.cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD))
+        self._launchOnLoad.set(self._cntlrConfig.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD))
 
     def addButtons(self, frame: Frame, x: int, y: int) -> int:
         """
@@ -227,7 +244,7 @@ class SettingsDialog(BaseViewerDialog):
         x += 1
         resetButton = Button(frame, text=_("Reset Defaults"), command=self.reset)
         resetButton.grid(row=y, column=x, sticky=E, pady=3, padx=30)
-        return super(SettingsDialog, self).addButtons(frame, x, y)
+        return super().addButtons(frame, x, y)
 
     def addFields(self, frame: Frame, y: int) -> int:
         """
@@ -238,24 +255,24 @@ class SettingsDialog(BaseViewerDialog):
         launchOnLoadLabel = Label(frame, text="Launches an instance of the viewer in Stub Viewer Mode whenever a document is loaded.")
         launchOnLoadCheckbutton.grid(row=y, column=0, pady=3, padx=3, sticky=W)
         launchOnLoadLabel.grid(row=y, column=1, columnspan=3, pady=3, padx=3, sticky=W)
-        return super(SettingsDialog, self).addFields(frame, y)
+        return super().addFields(frame, y)
 
     def getTitle(self) -> str:
         return "iXBRL Viewer Settings"
 
-    def onConfirm(self):
+    def onConfirm(self) -> None:
         """
         Saves configuration values for saving viewers as well as global viewer behavior settings
         """
-        self.cntlr.config[CONFIG_LAUNCH_ON_LOAD] = self._launchOnLoad.get()
-        self.cntlr.config[CONFIG_SCRIPT_URL] = self._scriptUrl.get()
-        self.cntlr.config[CONFIG_COPY_SCRIPT] = self._copyScript.get()
+        self._cntlrConfig[CONFIG_LAUNCH_ON_LOAD] = self._launchOnLoad.get()
+        self._cntlrConfig[CONFIG_SCRIPT_URL] = self._scriptUrl.get()
+        self._cntlrConfig[CONFIG_COPY_SCRIPT] = self._copyScript.get()
         for key, var in self._features.items():
-            self.cntlr.config[f'{CONFIG_FEATURE_PREFIX}{key}'] = var.get()
+            self._cntlrConfig[f'{CONFIG_FEATURE_PREFIX}{key}'] = var.get()
         self.cntlr.saveConfig()
         self.close()
 
-    def reset(self, event=None):
+    def reset(self, event: Event[Misc] | None = None) -> None:
         """
         Resets dialog variable values to default values
         """

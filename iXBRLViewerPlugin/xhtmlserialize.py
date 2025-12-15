@@ -141,10 +141,7 @@ class XHTMLSerializer:
         self.write('<' + ' '.join(parts))
         self.write_attributes(n)
 
-        if qname.localname == 'style':
-            inner_escape_mode = EscapeMode.STYLE
-        else:
-            inner_escape_mode = escape_mode
+        inner_escape_mode = EscapeMode.STYLE if qname.localname == 'style' else escape_mode
 
         if selfclose:
             self.write('/>')

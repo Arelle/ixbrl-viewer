@@ -556,9 +556,6 @@ export class Viewer {
         $("body", this._contents)
             .on("click", () => viewer.selectElement(null));
         
-        $('#iframe-container .zoom-in').on("click", () => this.zoomIn());
-        $('#iframe-container .zoom-out').on("click", () => this.zoomOut());
-
         TableExport.addHandles(this._contents, this._reportSet);
     }
 
@@ -804,23 +801,14 @@ export class Viewer {
         }
     }
 
-    _zoom() {
+    zoom(pct) {
+        this.scale = pct/100;
         const viewTop = this._contents.scrollTop();
         const height = $("html", this._contents).height();
         $('body', this._contents).css('zoom', this.scale);
 
         const newHeight = $("html", this._contents).height();
         this._contents.scrollTop(newHeight * (viewTop)/height );
-    }
-
-    zoomIn() {
-        this.scale *= 1.1;
-        this._zoom();
-    }
-
-    zoomOut() {
-        this.scale /= 1.1;
-        this._zoom();
     }
 
     factsInSameTable(fact) {

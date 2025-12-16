@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION} from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION, ZOOM_LEVELS} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -136,7 +136,9 @@ export class Inspector {
                 $('#dark-mode-on').on("click", () => darkModeTheme());
                 $("#setting-dark-mode button").filter((i, e) => $(e).data("theme") === getTheme()).addClass("selected");
                 $('#print').on("click", () => inspector._viewer.currentDocument().get(0).contentWindow.print());
-
+                $('#zoom-in').on("click", () => inspector.zoomRelative(1));
+                $('#zoom-out').on("click", () => inspector.zoomRelative(-1));
+                $('#zoom').on("change", (e) => inspector.zoomAbsolute($(e.currentTarget).val()));
 
                 inspector.initializeTooltips();
 
@@ -157,6 +159,7 @@ export class Inspector {
                 inspector.createSummary()
                 inspector.outline = new ReportSetOutline(reportSet);
                 inspector.createOutline();
+                inspector.initializeZoom();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
                     inspector.handleFactDeepLink();
@@ -213,6 +216,25 @@ export class Inspector {
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
         $('.tag-nav-all-facts .next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
         $('.tag-nav-all-facts .prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
+    }
+
+    initializeZoom() {
+        $("#zoom").empty();
+        for (const [n, zoom] of ZOOM_LEVELS.entries()) {
+            const option = $("<option></option>")
+                .attr("value", n)
+                .text(`${zoom}%`)
+                .appendTo("#zoom");
+            // Keep drop-down short, but keep fine-grained control with zoom
+            // in/out.
+            if (n % 2 == 1) {
+                option.attr("hidden", "hidden");
+            }
+            if (zoom == 100) {
+                option.attr("selected", "selected");
+                this._zoomLevel = n;
+            }
+        }
     }
 
     postLoadAsync() {
@@ -1808,5 +1830,17 @@ export class Inspector {
             const mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
             mb.show(() => this.showValidationReport());
         }
+    }
+
+    zoomRelative(dir) {
+        this._zoomLevel += dir;
+        this._zoomLevel = Math.min(ZOOM_LEVELS.length -1, Math.max(0, this._zoomLevel));
+        this._viewer.zoom(ZOOM_LEVELS[this._zoomLevel]);
+        $("#zoom").val(this._zoomLevel);
+    }
+
+    zoomAbsolute(level) {
+        this._zoomLevel = parseInt(level);
+        this._viewer.zoom(ZOOM_LEVELS[this._zoomLevel]);
     }
 }

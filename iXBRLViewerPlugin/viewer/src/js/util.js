@@ -42,6 +42,26 @@ export const ENTITY_CONCEPT_LOCALNAMES = [
     "NameOfReportingEntity", // Denmark
 ];
 
+export const ZOOM_LEVELS = [
+    25,
+    33,
+    50,
+    66,
+    80,
+    90,
+    100,
+    110,
+    120,
+    133,
+    150,
+    170,
+    200,
+    240,
+    300,
+    400,
+    500,
+];
+
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a

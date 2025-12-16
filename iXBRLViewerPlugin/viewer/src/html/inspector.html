@@ -4,13 +4,19 @@ See COPYRIGHT.md for copyright information
 
 <div id="ixv" xmlns="http://www.w3.org/1999/xhtml">
   <div class="loader loading">
-     <span class="text" data-i18n="inspector.loadingViewer">Loading Inline viewer</span>
+     <span class="text" data-i18n="inspector.loadingViewer">Loading Inline Viewer</span>
   </div>
   <div id="panes">
     <div id="pane-left">
       <header id="top-bar">
         <div class="logo">
-            <b>Inline</b> viewer
+            <b>Inline</b> Viewer
+        </div>
+        <div class="zoom-controls">
+          <button id="zoom-out" title="Zoom out" data-i18n="[title]viewer.zoomOut"></button>
+          <select id="zoom">
+          </select>
+          <button id="zoom-in" title="Zoom in" data-i18n="[title]viewer.zoomIn"></button>
         </div>
         <div class="top-bar-controls">
           <button class="validation-warning" data-i18n="[aria-label]inspector.validationResults" aria-label="Validation Results" title="Report has validation errors"></button>
@@ -20,10 +26,7 @@ See COPYRIGHT.md for copyright information
       </header>
       <section id="viewer-pane" data-i18n="[aria-label]viewer.ixbrlDocumentView" aria-label="iXBRL Document View">
         <div class="ixds-tabs"><div class="tab-area"></div></div>
-        <div id="iframe-container">
-          <div class="zoom-in">+</div>
-          <div class="zoom-out">-</div>
-        </div>
+        <div id="iframe-container"></div>
         <div id="viewer-resize-handle" class="resize"></div>
         <div class="resize-spacer"></div>
       </section>

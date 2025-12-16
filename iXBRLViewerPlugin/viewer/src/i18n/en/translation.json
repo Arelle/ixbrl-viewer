@@ -192,6 +192,8 @@
     "xbrlElements": "XBRL Elements"
   },
   "viewer": {
-    "ixbrlDocumentView": "iXBRL Document View"
+    "ixbrlDocumentView": "iXBRL Document View",
+    "zoomIn": "zoom in",
+    "zoomOut": "zoom out"
   }
 }

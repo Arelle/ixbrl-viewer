@@ -117,6 +117,8 @@ export class Inspector {
                 });
                 $("#settings-button").on("click", () => inspector.toggleSettingsMode());
 
+                $(".nested-item-select select").change(e => inspector.switchItem($(e.currentTarget).val(), true));
+
                 $(".popup-trigger").on("mouseenter", function () {
                     $(this).find(".popup-content").show()
                 }).on("mouseleave", function () {
@@ -1512,86 +1514,97 @@ export class Inspector {
      * corresponding to the current viewer selection.
      */
     _selectionSummaryAccordian() {
-        const cf = this._currentItem;
+        const fact = this._currentItem;
 
-        // dissolveSingle => title not shown if only one item in accordian
-        const a = new Accordian({
-            onSelect: (vuid) => this.switchItem(vuid),
-            alwaysOpen: true,
-            dissolveSingle: true,
-        });
+        if (this._currentItemList.length > 1) {
+            $("div.nested-item-select").show();
+            const select = $("div.nested-item-select select").empty();
+            const fs = new FactSet(this._currentItemList);
+            for (const [i, item] of this._currentItemList.toReversed().entries()) {
+                let factHTML;
+                const title = fs.minimallyUniqueLabel(item);
+                const option = $("<option></option>")
+                    .text(title)
+                    .val(item.vuid)
+                    .appendTo(select);
+                if (fact.vuid === item.vuid) {
+                    option.prop("selected", "selected");
+                    $("div.nested-item-select .description")
+                        .text(i18next.t('factDetails.nestedFactSummary', {
+                            current: i + 1,
+                            total: this._currentItemList.length
+                        }));
+                }
+            }
+        }
+        else {
+            $("div.nested-item-select").hide();
+        }
+    
+        let factHTML;
+        if (fact instanceof Fact) {
+            factHTML = $(require('../html/fact-details.html')); 
+            this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
+            this._setLabelWithLang($('tr.documentation td', factHTML), fact.getLabelAndLang("doc"));
+            this._updateConcept(fact, factHTML);
+            $('tr.period td', factHTML)
+                .text(fact.periodString());
+            if (fact.isNumeric()) {
+                $('tr.period td', factHTML).append(
+                    $("<button></button>") 
+                        .addClass(["analyse", "inline-button"])
+                        .attr("title", i18next.t("inspector.showAnalysisChart"))
+                        .text("")
+                        .on('click', () => this.analyseDimension(fact, ["p"]))
+                );
+            }
+            this._updateDataType(fact, factHTML);
+            this._updateBalance(fact, factHTML);
+            this._updateEntityIdentifier(fact, factHTML);
+            this._updateValue(fact, false, factHTML);
 
-        const fs = new FactSet(this._currentItemList);
-        for (const fact of this._currentItemList) {
-            let factHTML;
-            const title = fs.minimallyUniqueLabel(fact);
-            if (fact instanceof Fact) {
-                factHTML = $(require('../html/fact-details.html')); 
-                this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
-                this._setLabelWithLang($('tr.documentation td', factHTML), fact.getLabelAndLang("doc"));
-                this._updateConcept(fact, factHTML);
-                $('tr.period td', factHTML)
-                    .text(fact.periodString());
+            const accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
+            if (!fact.isNumeric() || fact.isNil()) {
+                accuracyTD.wrapInner("<i></i>");
+            }
+
+            const scaleTD = $('tr.scale td', factHTML).empty().append(fact.readableScale());
+            if (!fact.isNumeric() || fact.isNil()) {
+                scaleTD.wrapInner("<i></i>");
+            }
+
+            $('#dimensions', factHTML).empty();
+            const taxonomyDefinedAspects = fact.aspects().filter(a => a.isTaxonomyDefined());
+            if (taxonomyDefinedAspects.length === 0) {
+                $('.section.dimensions', factHTML).hide();
+            }
+            else {
+                $('.section.dimensions', factHTML).show();
+            }
+            for (const aspect of taxonomyDefinedAspects) {
+                const h = this._setLabelWithLang($('<div class="dimension"></div>'), aspect.labelOrNameAndLang())
+                    .appendTo($('#dimensions', factHTML));
                 if (fact.isNumeric()) {
-                    $('tr.period td', factHTML).append(
+                    h.append(
                         $("<button></button>") 
                             .addClass(["analyse", "inline-button"])
                             .attr("title", i18next.t("inspector.showAnalysisChart"))
                             .text("")
-                            .on('click', () => this.analyseDimension(fact, ["p"]))
-                    );
+                            .on("click", () => this.analyseDimension(fact, [aspect.name()]))
+                    )
                 }
-                this._updateDataType(fact, factHTML);
-                this._updateBalance(fact, factHTML);
-                this._updateEntityIdentifier(fact, factHTML);
-                this._updateValue(fact, false, factHTML);
-
-                const accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
-                if (!fact.isNumeric() || fact.isNil()) {
-                    accuracyTD.wrapInner("<i></i>");
-                }
-
-                const scaleTD = $('tr.scale td', factHTML).empty().append(fact.readableScale());
-                if (!fact.isNumeric() || fact.isNil()) {
-                    scaleTD.wrapInner("<i></i>");
-                }
-
-                $('#dimensions', factHTML).empty();
-                const taxonomyDefinedAspects = fact.aspects().filter(a => a.isTaxonomyDefined());
-                if (taxonomyDefinedAspects.length === 0) {
-                    $('#dimensions-label', factHTML).hide();
-                }
-                for (const aspect of taxonomyDefinedAspects) {
-                    const h = this._setLabelWithLang($('<div class="dimension"></div>'), aspect.labelOrNameAndLang())
-                        .appendTo($('#dimensions', factHTML));
-                    if (fact.isNumeric()) {
-                        h.append(
-                            $("<button></button>") 
-                                .addClass(["analyse", "inline-button"])
-                                .attr("title", i18next.t("inspector.showAnalysisChart"))
-                                .text("")
-                                .on("click", () => this.analyseDimension(fact, [aspect.name()]))
-                        )
-                    }
-                    const s = this._setLabelWithLang($('<div class="dimension-value"></div>'), aspect.valueLabelAndLang())
-                        .appendTo(h);
-                    if (aspect.isNil()) {
-                        s.wrapInner("<i></i>");
-                    }
+                const s = this._setLabelWithLang($('<div class="dimension-value"></div>'), aspect.valueLabelAndLang())
+                    .appendTo(h);
+                if (aspect.isNil()) {
+                    s.wrapInner("<i></i>");
                 }
             }
-            else if (fact instanceof Footnote) {
-                factHTML = $(require('../html/footnote-details.html')); 
-                this._updateValue(fact, false, factHTML);
-            }
-            a.addCard(
-                title,
-                factHTML, 
-                fact.vuid == cf.vuid,
-                fact.vuid
-            );
         }
-        return a;
+        else if (fact instanceof Footnote) {
+            factHTML = $(require('../html/footnote-details.html')); 
+            this._updateValue(fact, false, factHTML);
+        }
+        return factHTML;
     }
 
     analyseDimension(fact, dimensions) {
@@ -1667,7 +1680,7 @@ export class Inspector {
 
             $('#inspector .fact-inspector-body')
                 .empty()
-                .append(this._selectionSummaryAccordian().contents());
+                .append(this._selectionSummaryAccordian());
 
             if (cf instanceof Fact) {
                 $('#inspector').removeClass('footnote-mode');

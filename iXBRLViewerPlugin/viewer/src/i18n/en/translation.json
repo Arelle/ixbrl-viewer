@@ -43,6 +43,7 @@
     "entity": "Entity",
     "factValue": "Fact Value",
     "factCount": "{{current}} of {{total}}",
+    "nestedFactSummary": "Showing {{current}} of {{total}} nested facts:",
     "nonNumericFact": "non-numeric fact",
     "noPriorFactInThisReport": "No prior fact in this report",
     "noUnit": "<NOUNIT>",

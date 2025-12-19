@@ -14,17 +14,20 @@ import traceback
 import webbrowser
 from optparse import OptionGroup, OptionParser
 from pathlib import Path
-from tkinter import Menu
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from arelle.Cntlr import Cntlr
-from arelle.CntlrWinMain import CntlrWinMain
 from arelle.LocalViewer import LocalViewer
 from arelle.ModelDocument import Type
 from arelle.ModelXbrl import ModelXbrl
 from arelle.typing import TypeGetText
 from arelle.UrlUtil import isHttpUrl
 from bottle import static_file  # type: ignore[import-untyped]
+
+if TYPE_CHECKING:
+    from tkinter import Menu
+
+    from arelle.CntlrWinMain import CntlrWinMain
 
 from .constants import (
     CONFIG_COPY_SCRIPT,

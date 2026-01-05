@@ -39,7 +39,7 @@ dev = [
     'flake8==7.3.0',
     'mypy==1.19.1',
     'pytest==9.0.2',
-    'types-lxml==2025.11.25',
+    'types-lxml==2026.1.1',
     'typing-extensions==4.15.0',
 ]
 

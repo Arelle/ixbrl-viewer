@@ -125,21 +125,29 @@ export class Viewer {
     // display: block, a div is used, otherwise a span.  Returns the wrapper node
     // as a jQuery node
     _wrapNode(n) {
-        let wrapper = "<span>";
-        if (getComputedStyle(n).getPropertyValue("display") === "block") {
-            wrapper = '<div>';
-        }
-        else {
-            const nn = n.getElementsByTagName("*");
-            for (var i = 0; i < nn.length; i++) {
-                if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
-                    wrapper = '<div>';
-                    break;
+        // If element has child nodes that are non-whitespace text nodes,
+        // insert a wrapper node, otherwise, use each element child as
+        // a wrapper node
+        if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue) )) {
+            let wrapper = "<span>";
+            if (getComputedStyle(n).getPropertyValue("display") === "block") {
+                wrapper = '<div>';
+            }
+            else {
+                const nn = n.getElementsByTagName("*");
+                for (var i = 0; i < nn.length; i++) {
+                    if (getComputedStyle(nn[i]).getPropertyValue('display') === "block") {
+                        wrapper = '<div>';
+                        break;
+                    }
                 }
             }
+            $(n).wrap(wrapper);
+            return [n.parentNode];
         }
-        $(n).wrap(wrapper);
-        return n.parentNode;
+        else {
+            return Array.from(n.childNodes).filter(n => n.nodeType === Node.ELEMENT_NODE);
+        }
     }
 
 
@@ -264,7 +272,7 @@ export class Viewer {
          * so, use that as the wrapper element.
          * Check for 'display: table-cell' to avoid using hidden cells */
         const tableNode = domNode.closest("td,th");
-        const nodes = [];
+        let nodes;
         const innerText = $(domNode).text();
         if (tableNode !== null && getComputedStyle(tableNode).display === 'table-cell' && innerText.length > 0) {
             // Use indexOf rather than a single regex because innerText may
@@ -273,40 +281,42 @@ export class Viewer {
             const start = outerText.indexOf(innerText);
             const wrapper = outerText.substring(0, start) + outerText.substring(start + innerText.length);
             if (!/[0-9A-Za-z]/.test(wrapper)) {
-                nodes.push(tableNode)
+                nodes = [ tableNode ];
             } 
         }
         /* Otherwise, insert a <span> or <div> as wrapper */
-        if (nodes.length == 0) {
-            nodes.push(this._wrapNode(domNode));
+        if (nodes === undefined) {
+            nodes = this._wrapNode(domNode);
         }
-        // Create a list of the wrapper node, and all absolutely positioned descendants.
-        for (const e of nodes[0].querySelectorAll("*")) { 
-            if (getComputedStyle(e).getPropertyValue('position') === "absolute") { 
-                nodes.push(e);
-            } 
-        }
-        for (const [i, n] of nodes.entries()) {
-            // getBoundingClientRect blocks on layout, so only do it if we've actually got absolute nodes
-            if (nodes.length > 1) {
-                n.classList.add("ixbrl-contains-absolute");
+        const allNodes = [];
+        for (const node of nodes) {
+            let hasSubNodes = false;
+            allNodes.push(node);
+            node.classList.add("ixbrl-element");
+            for (const subNode of node.querySelectorAll("*")) { 
+                if (getComputedStyle(subNode).getPropertyValue('position') === "absolute") { 
+                    subNode.classList.add("ixbrl-sub-element");
+                    allNodes.push(node);
+                    hasSubNodes = true;
+                } 
             }
-            if (i == 0) {
-                n.classList.add("ixbrl-element");
-            }
-            else {
-                n.classList.add("ixbrl-sub-element");
+            if (hasSubNodes) {
+                node.classList.add("ixbrl-contains-absolute");
             }
         }
-        return $(nodes);
+        return $(allNodes);
     }
 
 
     // Adds the specified ID to the "ivids" data list on the given node
-    _addIdToNode(node, id) {
-        const ivids = node.data('ivids') || [];
-        ivids.push(id);
-        node.data('ivids', ivids);
+    _addIdToNodes(nodes, id) {
+        nodes.filter(".ixbrl-element").each((i, e) => {
+            const ivids = $(e).data('ivids') || [];
+            if (!ivids.includes(id)) {
+                ivids.push(id);
+            }
+            $(e).data('ivids', ivids);
+        });
     }
 
     _buildContinuationMaps() {
@@ -402,14 +412,21 @@ export class Viewer {
         const isNonNumeric = name === 'NONNUMERIC';
         const isNonFraction = name === 'NONFRACTION';
         const isFact = isNonNumeric || isNonFraction;
-        if (n.nodeType === 1) {
+
+        if (n.nodeType === Node.ELEMENT_NODE && name == 'HIDDEN') {
+            inHidden = true;
+        }
+        // Depth-first so we can re-use child wrapper nodes
+        this._preProcessChildNodes(n, reportIndex, docIndex, inHidden);
+
+        if (n.nodeType === Node.ELEMENT_NODE) {
             const vuid = viewerUniqueId(reportIndex, n.getAttribute("id"));
             if (isFact || isFootnote) {
                 // If @id is not present, it must be for a target document that wasn't processed.
                 if (n.hasAttribute("id")) {
                     let nodes = this._findOrCreateWrapperNode(n, inHidden);
 
-                    this._addIdToNode(nodes.first(), vuid);
+                    this._addIdToNodes(nodes, vuid);
                     let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
                     this._docOrderItemIndex.addItem(vuid, docIndex);
 
@@ -440,15 +457,12 @@ export class Viewer {
                     let nodes = this._findOrCreateWrapperNode(n, inHidden);
 
                     // For a continuation, store the IX ID(s) of the item(s), not the continuation
-                    this._addIdToNode(nodes.first(), this.continuationOfMap[vuid]);
+                    this._addIdToNodes(nodes, this.continuationOfMap[vuid]);
 
                     this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
 
                     nodes.addClass("ixbrl-continuation");
                 }
-            }
-            else if(name == 'HIDDEN') {
-                inHidden = true;
             }
             else {
                 // Handle SEC/ESEF links-to-hidden
@@ -474,7 +488,6 @@ export class Viewer {
                 }
             }
         }
-        this._preProcessChildNodes(n, reportIndex, docIndex, inHidden);
     }
 
     _preProcessChildNodes(domNode, reportIndex, docIndex, inHidden) {
@@ -714,7 +727,7 @@ export class Viewer {
     // Returns a jQuery node list containing the primary wrapper node for each
     // vuid provided
     primaryElementsForItemIds(vuids) {
-        return $(vuids.map(vuid => this.elementsForItemId(vuid).first().get(0)));
+        return $(vuids.map(vuid => this.elementsForItemId(vuid).filter(".ixbrl-element").toArray()).flat());
     }
 
     /*

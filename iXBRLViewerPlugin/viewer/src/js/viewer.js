@@ -305,7 +305,7 @@ export class Viewer {
             for (const subNode of node.querySelectorAll("*")) { 
                 if (getComputedStyle(subNode).getPropertyValue('position') === "absolute") { 
                     subNode.classList.add("ixbrl-sub-element");
-                    allNodes.push(node);
+                    allNodes.push(subNode);
                     hasSubNodes = true;
                 } 
             }

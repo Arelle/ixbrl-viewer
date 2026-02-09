@@ -121,13 +121,22 @@ export class Viewer {
         }
     }
 
-    // Wrap a DOM node in a div or span.  If the node or any descendent has
-    // display: block, a div is used, otherwise a span.  Returns the wrapper node
-    // as a jQuery node
+    // Choose or insert a node to use as the "wrapper" for the given ix node.
+    // This node will be used for highlighting and selection styling.
+    //
+    // If, ignoring whitespace-only text nodes, the child only has element
+    // children, use those nodes as the wrappers.
+    //
+    // Otherwise, insert a wrapper node around the element.  If the node or any
+    // descendent has display: block, a div is used, otherwise a span.  
+    //
+    // We want to avoid adding wrapper nodes around inline-block children, as
+    // wrapping in block or inline-block can interfere with layout (e.g. some
+    // documents have used inline-block to create a multi-column layout).
+    //
+    // Returns an array of the chosen nodes as DOM nodes.
+    //
     _wrapNode(n) {
-        // If element has child nodes that are non-whitespace text nodes,
-        // insert a wrapper node, otherwise, use each element child as
-        // a wrapper node
         if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue) )) {
             let wrapper = "<span>";
             if (getComputedStyle(n).getPropertyValue("display") === "block") {

@@ -1469,11 +1469,17 @@ a {
 
     &::after {
       content: "\24d8"; 
+      position: relative;
+      top: -0.2rem;
     }
   }
+}
 
+.collapsible-header.has-tooltip {
   button + .tooltip-icon {
-    margin-left: -1rem;
+    position: absolute;
+    top: 0.4rem;
+    right: 4rem;
   }
 }
 

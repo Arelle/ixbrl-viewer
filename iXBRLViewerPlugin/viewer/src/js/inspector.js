@@ -1708,9 +1708,15 @@ export class Inspector {
                     total: this._viewer.docOrderItemIndex.length()
                 }));
 
-                $('.tag-nav-duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.tag-nav-duplicates .prev').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.tag-nav-duplicates .prev').get(0).focus(); });
-                $('.tag-nav-duplicates .next').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.tag-nav-duplicates .next').get(0).focus(); });
+                if (ndup > 1) {
+                    $('.duplicates').show();
+                    $('.tag-nav-duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
+                    $('.tag-nav-duplicates .prev-tag').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.tag-nav-duplicates .prev-tag').get(0).focus(); });
+                    $('.tag-nav-duplicates .next-tag').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.tag-nav-duplicates .next-tag').get(0).focus(); });
+                }
+                else {
+                    $('.duplicates').hide();
+                }
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {

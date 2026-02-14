@@ -971,14 +971,15 @@ export class Inspector {
             let cell = $("<td></td>")
                     .addClass("figure")
                     .appendTo(row);
+            let div = $("<div></div>").appendTo(cell);
             $("<span></span>")
                 .addClass("tag-count-number")
                 .text(count)
-                .appendTo(cell);
+                .appendTo(div);
             $("<span></span>")
                 .addClass("tag-count-percent")
                 .text(formattedPercent)
-                .appendTo(cell);
+                .appendTo(div);
         }
 
         const sortedPrefixCounts = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));

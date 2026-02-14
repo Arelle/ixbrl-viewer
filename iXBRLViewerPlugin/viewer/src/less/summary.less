@@ -24,6 +24,25 @@
       thead, tfoot {
         th, td {
           background-color: var(--colour-table-header-bg);
+
+          & > div {
+            max-height: 2.6rem;
+          }
+        }
+      }
+
+      tfoot {
+        th, td {
+          transition: padding-top 0.5s 0s ease, border-bottom-width 0s 0s ease;
+
+          & > div {
+            transition: max-height 0.5s ease;
+            overflow: hidden;
+          }
+        }
+
+        .tag-count-percent {
+          opacity: 0;
         }
       }
 
@@ -34,6 +53,21 @@
           font-weight: normal;
           padding: 0.5rem;
           text-align: center;
+
+          & > div {
+            position: relative;
+
+            & > span {
+              opacity: 1;
+              transition: opacity 0.5s 0.1s ease-out;
+            }
+
+            span.tag-count-percent {
+               display: block;
+               position: absolute;
+               inset: 0;
+            }
+          }
         }
 
         & > :first-child {
@@ -51,14 +85,30 @@
       }
 
       &:not(.show-percent) {
-        .tag-count-percent {
-          display: none;
+        tbody .tag-count-percent {
+          opacity: 0;
+          transition: opacity 0.5s 0s ease-in;
         }
       }
 
       &.show-percent {
-        .tag-count-number {
-          display: none;
+        tbody .tag-count-number {
+          opacity: 0;
+          transition: opacity 0.5s 0s ease-in;
+        }
+
+        tfoot {
+          td, th {
+            padding-top: 0;
+            padding-bottom: 0;
+            border-bottom-width: 0;
+            transition: border-bottom-width 0s 0.5s ease;
+
+            & > div {
+              max-height: 0;
+              overflow: hidden;
+            }
+          }
         }
       }
     }

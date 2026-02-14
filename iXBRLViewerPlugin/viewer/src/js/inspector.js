@@ -1197,25 +1197,32 @@ export class Inspector {
         }
     }
 
-    _referencesHTML(fact) {
-        const a = new Accordian();
+    updateReferences(fact) {
+        const container = $("div.references").empty();
         for (const [i, r] of fact.concept().references().entries()) {
-            const title = $("<span></span>").text(r[0].value);
-            const body =  $('<table class="fact-properties"><tbody></tbody></table>')
-            const tbody = body.find("tbody");
+            const div = $("<div></div>").addClass("bordered-section").appendTo(container);
+            const title = $("<h4></h4>").text(r[0].value).appendTo(div);
+            const content = $("<div></div>").addClass("content").appendTo(div);
+            const table = $("<table></table>").addClass("property-table").appendTo(content);
+            const tbody = $("<tbody></tbody>").appendTo(table);
+
             for (const p of r) {
                 const row = $("<tr>")
                     .append($("<th></th>").text(i18next.t(`referenceParts:${p.part}`, {defaultValue: p.part})))
-                    .append($("<td></td>").text(p.value))
                     .appendTo(tbody);
-                if (p.part == 'URI') {
+                if (p.part != "URI") {
+                    $("<td></td>").text(p.value).appendTo(row);
+                }
+                else {
                     row.addClass("uri");
-                    row.find("td").wrapInner($("<a>").attr("href", p.value));
+                    $("<td></td>").append(
+                        $("<a></a>")
+                            .attr("href", p.value)
+                            .text(i18next.t(`inspector.goToReference`))
+                    ).appendTo(row);
                 }
             }
-            a.addCard(title, body, i == 0);
         }
-        return a.contents();
     }
 
     _calculationHTML(fact, elr) {
@@ -1693,7 +1700,7 @@ export class Inspector {
                 this.updateOutline(cf);
                 this.updateFootnotes(cf);
                 this.updateAnchoring(cf);
-                $('div.references').empty().append(this._referencesHTML(cf));
+                this.updateReferences(cf);
                 this.updateLabels(cf);
                 $('#inspector .search-results .fact-list-item').removeClass('selected');
                 $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');

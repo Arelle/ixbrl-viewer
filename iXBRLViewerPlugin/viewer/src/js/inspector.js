@@ -1182,20 +1182,19 @@ export class Inspector {
     }
 
     updateLabels(fact) {
-        const container = $("div.labels").empty();  
-        const dl = $("<dl></dl>").appendTo(container);
+        const tbody = $("table.labels tbody").empty();  
         for (const [role, roleLabel, label] of 
             Object.entries(fact.concept().labels())
             .map(([role, label]) => [role, fact.report.getLabelRoleLabel(role), label])
             .sort(this.labelRoleSort)) {
-            $("<dt></dt>")
+            const row = $("<tr></tr>").appendTo(tbody);
+            $("<th></th>")
                 .text(roleLabel)
-                .appendTo(dl);
-            $("<dd></dd>")
+                .appendTo(row);
+            $("<td></td>")
                 .text(label)
-                .appendTo(dl);
+                .appendTo(row);
         }
-        return dl;
     }
 
     _referencesHTML(fact) {

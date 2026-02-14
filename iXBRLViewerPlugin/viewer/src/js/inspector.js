@@ -1663,7 +1663,12 @@ export class Inspector {
             .css("right",  right)
             .css("top", iconPos.top + 30);
 
-        if ($("#tooltip").get(0).getBoundingClientRect().bottom > document.documentElement.clientHeight) {
+        // In quirks mode, clientHeight of body is viewport height.  In standards
+        // mode, clientHeight of html is viewport height.
+        const quirksMode = document.compatMode != 'CSS1Compat';
+        const de = quirksMode ? document.body : document.documentElement ;
+
+        if ($("#tooltip").get(0).getBoundingClientRect().bottom > de.clientHeight) {
           $("#tooltip").css("top","").css("bottom", 30);
         }
     }

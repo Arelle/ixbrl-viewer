@@ -898,12 +898,20 @@ export class Inspector {
             $("<span></span>")
                 .text(identifierQName.localname)
                 .appendTo(cell);
-            const link = Identifiers.seeMoreLinkHTML(identifierQName);
+            const link = Identifiers.seeMoreLink(identifierQName);
             if (link !== undefined) {
                 $("<br />").appendTo(cell);
-                cell.append(link);
+                cell.append(this._externalLink(link.href, link.text));
             }
         }
+    }
+
+    _externalLink(url, text) {
+        return $("<a></a>")
+            .addClass("external-link")
+            .attr("target", "_blank")
+            .attr("href", url)
+            .text(text);
     }
 
     _populateFactSummary(summaryDom) {
@@ -1216,9 +1224,7 @@ export class Inspector {
                 else {
                     row.addClass("uri");
                     $("<td></td>").append(
-                        $("<a></a>")
-                            .attr("href", p.value)
-                            .text(i18next.t(`inspector.goToReference`))
+                        this._externalLink(p.value, i18next.t(`inspector.goToReference`))
                     ).appendTo(row);
                 }
             }

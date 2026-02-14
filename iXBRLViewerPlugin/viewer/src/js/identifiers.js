@@ -63,16 +63,15 @@ export class Identifiers {
         return span;
     }
 
-    static seeMoreLinkHTML(identifier) {
+    static seeMoreLink(identifier) {
         const data = schemes[identifier.namespace];
         if (data === undefined) { 
             return undefined
         }
         const url = Identifiers.identifierURL(identifier);
-        const a = document.createElement("a");
-        a.textContent = i18next.t("inspector.summary.about.seeMoreReferenceData", { type: data.name });
-        a.setAttribute("target", "_blank");
-        a.setAttribute("href", url);
-        return a;
+        return { 
+          "href": url, 
+          "text": i18next.t("inspector.summary.about.seeMoreReferenceData", { type: data.name })
+        };
     }
 }

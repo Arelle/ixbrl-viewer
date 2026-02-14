@@ -1561,6 +1561,23 @@ ul.plain-list {
   }
 }
 
+.external-link {
+  .link-style();
+
+  margin-left: 2.8rem;
+  position: relative;
+
+  &::before {
+    .icon-link();
+
+    top: 0.2rem;
+    position: absolute;
+    left: -2.8rem;
+    font-size: 1.8rem;
+  }
+
+}
+
 .sample-0 {
   background: var(--colour-highlight-default);
 }

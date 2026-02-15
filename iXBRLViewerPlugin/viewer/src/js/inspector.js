@@ -846,7 +846,94 @@ export class Inspector {
     }
 
     updateCalculation(fact, elr) {
-        $('.calculations .tree').empty().append(this._calculationHTML(fact));
+        const section = $('.calculations').empty();
+
+        const calc = new Calculation(fact, this._useCalc11);
+        if (!calc.hasCalculations()) {
+            return;
+        }
+
+        const tableFacts = this._viewer.factsInSameTable(fact);
+        const selectedELR = calc.bestELRForFactSet(tableFacts);
+        const report = fact.report;
+
+        for (const rCalc of calc.resolvedCalculations()) {
+            const container = $("<div></div>").addClass("bordered-section").appendTo(section);
+            $("<h4></h4>")
+                .text(report.getRoleLabelOrURI(rCalc.elr))
+                .appendTo(container);
+
+            /*
+            const calcBody = $('<div></div>');
+            const calcTable = $('<table></table>')
+                .addClass("calculation-table")
+                .appendTo(calcBody);
+                */
+
+            for (const r of rCalc.rows) {
+
+                const row = $("<div></div>")
+                    .addClass("calculation-row")
+                    .appendTo(container);
+                const iconBox = $("<div></div>").addClass("icon-box").appendTo(row);
+                $("<div></div>").addClass("icon-bar").appendTo(iconBox);
+                const icon = $("<div></div>")
+                    .addClass("icon")
+                    .appendTo(iconBox);
+                if (r.weight == 1) {
+                    icon.addClass("plus");
+                }
+                if (r.weight == -1) {
+                    icon.addClass("minus");
+                }
+
+                const details = $("<div></div>")
+                    .addClass("calculation-details")
+                    .addClass("item")
+                    .appendTo(row);
+                if (!r.facts.isEmpty()) {
+                    const value = $("<div></div>")
+                        .addClass("calculation-value")
+                        .text(r.facts.mostPrecise().readableValue())
+                        .appendTo(details);
+                }
+                else {
+                    $("<div></div>")
+                        .addClass("not-reported")
+                        .text(i18next.t("calculation.notReported"))
+                        .appendTo(details);
+                }
+                const conceptLabel = $("<div></div>")
+                        .addClass("calculation-label")
+                        .text(r.concept.label())
+                        .appendTo(details);
+
+                if (!r.facts.isEmpty()) {
+                    conceptLabel.contents().wrap($("<button></button>").addClass("inline-button").addClass("underline")).wrap("<div></div>");
+                    details
+                        .addClass("calc-fact-link")
+                        .data('ivids', r.facts.items().map(f => f.vuid));
+                    row.on("click", () => this.selectItem(r.facts.items()[0].vuid));
+                    row.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
+                    row.on("mouseleave", () => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
+                    r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
+                }
+            }
+
+            const row = $("<div></div>").addClass("calculation-row").appendTo(container);
+            const iconBox = $("<div></div>").addClass("icon-box").appendTo(row);
+            $("<div></div>").addClass("icon-bar").appendTo(iconBox);
+            const icon = $("<div></div>")
+                .addClass("icon")
+                .addClass("equals")
+                .appendTo(iconBox);
+
+            const details = $("<div></div>").addClass("calculation-details").appendTo(row);
+            const value = $("<div></div>")
+                .addClass("calculation-value")
+                .text(fact.readableValue())
+                .appendTo(details);
+        }
     }
 
     createSummary() {
@@ -1232,99 +1319,6 @@ export class Inspector {
         }
     }
 
-    _calculationHTML(fact, elr) {
-        const calc = new Calculation(fact, this._useCalc11);
-        if (!calc.hasCalculations()) {
-            return "";
-        }
-        const tableFacts = this._viewer.factsInSameTable(fact);
-        const selectedELR = calc.bestELRForFactSet(tableFacts);
-        const report = fact.report;
-        const a = new Accordian();
-
-        for (const rCalc of calc.resolvedCalculations()) {
-            const label = report.getRoleLabelOrURI(rCalc.elr);
-            const calcBody = $('<div></div>');
-            const calcTable = $('<table></table>')
-                .addClass("calculation-table")
-                .appendTo(calcBody);
-
-            for (const r of rCalc.rows) {
-                const itemHTML = $("<tr></tr>")
-                    .addClass("item")
-                    .append($("<td></td>").addClass("weight").text(r.weightSign))
-                    .append($("<td></td>").addClass("concept-name").text(r.concept.label()))
-                    .append($("<td></td>").addClass("value"))
-                    .appendTo(calcTable);
-
-                if (!r.facts.isEmpty()) {
-                    itemHTML.addClass("calc-fact-link");
-                    itemHTML.find(".concept-name").contents().wrap($("<button></button>").addClass("inline-button"));
-                    itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
-                    itemHTML.on("click", () => this.selectItem(r.facts.items()[0].vuid));
-                    itemHTML.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
-                    itemHTML.on("mouseleave", () => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
-                    r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
-                    itemHTML.find(".value").text(r.facts.mostPrecise().readableValue());
-                }
-            }
-            $("<tr></tr>").addClass("item").addClass("total")
-                .append($("<td></td>").addClass("weight"))
-                .append($("<td></td>").addClass("concept-name").text(fact.concept().label()))
-                .append($("<td></td>").addClass("value").text(fact.readableValue()))
-                .appendTo(calcTable);
-
-            const calcStatusIcon = $("<span></span>");
-            const cardTitle = $("<span></span>")
-                .append(calcStatusIcon)
-                .append($("<span></span>").text(label));
-            const calcStatusText = $("<span></span>");
-            const calcDetailsLink = $("<button></button>")
-                    .addClass("calculation-details-link")
-                    .attr("title", i18next.t('factDetails.viewCalculationDetails'))
-                    .text("details")
-                    .on("click", (e) => {
-                        const dialog = new CalculationInspector();
-                        dialog.displayCalculation(rCalc);
-                        dialog.show();
-                        e.stopPropagation();
-                    })
-            $("<p></p>")
-                .append(calcStatusText)
-                .append($("<span></span>").text(" ("))
-                .append(calcDetailsLink)
-                .append($("<span></span>").text(")"))
-                .appendTo(calcBody);
-            if (rCalc.binds()) {
-                if (rCalc.isConsistent()) {
-                    calcStatusIcon
-                        .addClass("consistent-flag")
-                        .attr("title", i18next.t('factDetails.calculationIsConsistent'))
-                    calcStatusText.text(i18next.t('factDetails.calculationIsConsistent'));
-                }
-                else {
-                    calcStatusIcon
-                        .addClass("inconsistent-flag")
-                        .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
-                    calcStatusText.text(i18next.t('factDetails.calculationIsInconsistent'));
-                }
-            }
-            else if (rCalc.unchecked()) {
-                calcStatusIcon
-                    .addClass("unchecked-flag")
-                    .attr("title", i18next.t('factDetails.calculationUnchecked'))
-                if (rCalc.uncheckedDueToVersionMismatch()) {
-                    calcStatusText.text(i18next.t('factDetails.calculationUncheckedIncorrectVersion'));
-                }
-                else {
-                    calcStatusText.text(i18next.t('factDetails.calculationUnchecked'));
-                }
-            }
-
-            a.addCard(cardTitle, calcBody, rCalc.elr == selectedELR);
-        }
-        return a.contents();
-    }
 
     _footnotesHTML(fact) {
         const html = $("<div></div>").addClass("fact-list");

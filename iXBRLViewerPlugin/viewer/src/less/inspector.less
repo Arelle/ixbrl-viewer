@@ -37,6 +37,7 @@
   --colour-button-secondary-bg: @colour-button-secondary-bg;
   --colour-button-secondary-bg-hover: @colour-button-secondary-bg-hover;
   --colour-button-secondary-border: @colour-button-secondary-border;
+  --colour-calculation-icon-bg: @colour-calculation-icon-bg;
   --colour-foreground: @colour-foreground;
   --colour-highlight-1: @colour-highlight-1;
   --colour-highlight-2: @colour-highlight-2;
@@ -87,6 +88,7 @@
   --colour-button-secondary-bg-hover: @colour-button-secondary-bg-hover-d;
   --colour-button-secondary-bg: @colour-button-secondary-bg-d;
   --colour-button-secondary-border: @colour-button-secondary-border-d;
+  --colour-calculation-icon-bg: @colour-calculation-icon-bg-d;
   --colour-foreground: @colour-foreground-d;
   --colour-highlight-1: @colour-highlight-1-d;
   --colour-highlight-2: @colour-highlight-2-d;
@@ -490,6 +492,7 @@ a {
 
           &::before {
             .icon-search();
+
             position: absolute;
             line-height: 4rem;
             font-size: 1.6rem;
@@ -513,6 +516,7 @@ a {
 
           &::before {
             .icon-filter();
+
             padding-right: 0.8rem;
             vertical-align: bottom;
           }
@@ -546,6 +550,7 @@ a {
 
         .search-filter-buttons {
           .panel-indent();
+
           display: flex;
           flex-direction: row;
           flex: 0 0 auto;
@@ -863,13 +868,6 @@ a {
     }
   }
 
-  .inline-button {
-    display: inline;
-    cursor: pointer;
-    color: var(--colour-primary);
-    padding: 0.3rem;
-    border: none;
-  }
 
   .analyse {
     margin-left: 0.4rem;
@@ -1008,104 +1006,93 @@ a {
     }
 
     .calculations {
-      .card .title {
-        position: relative;
+      .calculation-row {
+        display: flex;
+        flex-direction: row;
+        padding-right: 0.8rem;
 
-        .inconsistent-flag {
-          padding-right: 0.75rem;
+        .icon-box {
+          width: 5.2rem;
+          flex: 0 0 auto;
           position: relative;
-          top: 0.2rem;
-          color: var(--colour-warning);
 
-          &::before {
-            .icon-circle-cross();
+          .icon-bar {
+            position: absolute;
+            left: 2.9rem;
+            top: 0;
+            bottom: 0;
+            border-left: solid 2px var(--colour-calculation-icon-bg);
+          }
+          
+          .icon {
+            position: absolute;
+            top: 0.3rem;
+            left: 1.7rem;
+            width: 2.4rem;
+            height: 2.4rem;
+            font-size: 2rem;
+            text-align: center;
+            border-radius: 1.2rem;
+            background-color: var(--colour-calculation-icon-bg);
+
+            &.plus::before {
+              content: "+";
+            }
+
+            &.minus::before {
+              position: relative;
+              top: 0.1rem;
+              content: "–";
+            }
+
+            &.equals::before {
+              content: "=";
+            }
           }
         }
 
-        .consistent-flag {
-          padding-right: 0.75rem;
-          position: relative;
-          top: 0.2rem;
-          color: var(--colour-primary);
+        &:first-of-type {
+          margin-top: 1.2rem;
 
-          &::before {
-            .icon-circle-tick();
+          .icon-box .icon-bar {
+              top: 1.5rem;
+          }
+
+        }
+
+        &:last-of-type {
+          margin-bottom: 1.2rem;
+
+          .icon-box .icon-bar {
+            bottom: 1.5rem;
           }
         }
 
-        .unchecked-flag {
-          padding-right: 0.5rem;
-          position: relative;
-          top: 0.2rem;
+        .calculation-details {
+          flex: 1 1 auto;
+          margin-bottom: 1rem;
+          padding-left: 0.6rem;
 
-          &::before {
-            .icon-question();
-          }
-        }
+          & > div {
+            height: 3rem;
+            line-height: 3rem;
 
-      }
-
-      table.calculation-table {
-        width: 100%;
-        border-collapse: collapse;
-
-        tr.item {
-          td {
-            padding: 0.2rem 0;
-            line-height: 1.8rem;
-
-            &.weight {
-              text-align: center;
+            &.not-reported {
+              font-style: italic;
+              color: var(--colour-text-light);
             }
 
-            &.value {
-              text-align: right;
+            & > button {
+              margin-left: -0.3rem;
             }
           }
 
-          &:not(.calc-fact-link, .total) .concept-name {
-            color: #777;
-          }
-
-          &:not(.calc-fact-link) {
-            td {
-              .text-md();
-
-              &.concept-name {
-                // Compensate for padding that gets added by button on clickable rows.
-                padding: 0.3rem;
-              }
-            }
-          }
-
-          &.calc-fact-link {
-            cursor: pointer;
-
-            .concept-name,
-            .value {
-              color: var(--colour-primary);
-
-              button {
-                .text-md();
-              }
-            }
-          }
 
           &.linked-highlight,
           &.calc-fact-link:hover {
             .linked-highlight-text();
           }
-
-          &.total td {
-            border-top: solid 1px var(--colour-border-grey);
-            padding-bottom: 1.2rem;
-          }
         }
-      }
-
-      .calculation-details-link {
-        .inline-button();
-        .text-md();
       }
     }
 

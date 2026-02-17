@@ -379,7 +379,6 @@ export class Inspector {
         $('#top-bar').prepend(homeLink);
     }
 
-
     highlightTagsOnStartup() {
         const pref = window.localStorage.getItem(STORAGE_HIGHLIGHT_FACTS);
         if (pref !== null) {
@@ -1552,7 +1551,6 @@ export class Inspector {
         if (fact instanceof Fact) {
             factHTML = $(require('../html/fact-details.html')); 
             this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
-            this._setLabelWithLang($('tr.documentation td', factHTML), fact.getLabelAndLang("doc"));
             this._updateConcept(fact, factHTML);
             $('tr.period td', factHTML)
                 .text(fact.periodString());

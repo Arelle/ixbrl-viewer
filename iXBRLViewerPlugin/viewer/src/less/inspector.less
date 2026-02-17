@@ -1010,6 +1010,8 @@ a {
         display: flex;
         flex-direction: row;
         padding-right: 0.8rem;
+        margin-top: 0;
+        margin-bottom: 0;
 
         .icon-box {
           width: 5.2rem;
@@ -1081,10 +1083,6 @@ a {
               font-style: italic;
               color: var(--colour-text-light);
             }
-
-            & > button {
-              margin-left: -0.3rem;
-            }
           }
 
 
@@ -1092,6 +1090,12 @@ a {
           &.calc-fact-link:hover {
             .linked-highlight-text();
           }
+        }
+      }
+
+      .property-table {
+        th {
+          padding-left: 1.7rem;
         }
       }
     }
@@ -1263,13 +1267,18 @@ a {
       width: 16rem;
       text-align: left;
       box-sizing: border-box;
-      padding-right: 30px;
+      padding-right: 3rem;
       font-weight: normal;
       color: var(--colour-text-light);
 
       &.has-tooltip {
         padding-right: 10px;
       }
+    }
+
+    &.narrow-header th {
+      width: 10rem;
+      padding-right: 1rem;
     }
 
     tr.value {

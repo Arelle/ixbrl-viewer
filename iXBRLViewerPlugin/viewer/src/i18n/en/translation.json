@@ -1,6 +1,8 @@
 {
   "calculation": {
     "calculated-total": "Calculated",
+    "calculationIsConsistent": "Calculation is consistent",
+    "calculationIsInconsistent": "Calculation is inconsistent",
     "concept": "Concept",
     "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
     "does-not-bind": "Calculation does not bind",
@@ -10,6 +12,8 @@
     "notReported": "not reported",
     "reported-total": "Reported",
     "reported-value": "Reported value",
+    "showDetails": "Show details",
+    "status": "Status",
     "useCalculations11": "Use Calculations v1.1"
   },
   "chart": {
@@ -28,8 +32,6 @@
   "factDetails": {
     "accuracy": "Accuracy",
     "balance": "Balance",
-    "calculationIsConsistent": "Calculation is consistent",
-    "calculationIsInconsistent": "Calculation is inconsistent",
     "calculationUnchecked": "Calculation not checked due to presence of duplicate facts",
     "calculationUncheckedIncorrectVersion": "Calculation 1.1 relationships not checked in legacy calculation mode",
     "change": "Change",
@@ -50,6 +52,8 @@
     "noUnit": "<NOUNIT>",
     "properties": "Properties",
     "scale": "Scale",
+    "calculationValuesMatch": "Reported and calculated values match",
+    "calculationValuesDoNotMatch": "Reported and calculated values do not match",
     "viewCalculationDetails": "View calculation details"
   },
   "footnotes": {

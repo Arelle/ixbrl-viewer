@@ -862,18 +862,12 @@ export class Inspector {
                 .text(report.getRoleLabelOrURI(rCalc.elr))
                 .appendTo(container);
 
-            /*
-            const calcBody = $('<div></div>');
-            const calcTable = $('<table></table>')
-                .addClass("calculation-table")
-                .appendTo(calcBody);
-                */
+            const content = $("<div></div>").addClass("content").appendTo(container);
 
             for (const r of rCalc.rows) {
-
                 const row = $("<div></div>")
                     .addClass("calculation-row")
-                    .appendTo(container);
+                    .appendTo(content);
                 const iconBox = $("<div></div>").addClass("icon-box").appendTo(row);
                 $("<div></div>").addClass("icon-bar").appendTo(iconBox);
                 const icon = $("<div></div>")
@@ -908,7 +902,11 @@ export class Inspector {
                         .appendTo(details);
 
                 if (!r.facts.isEmpty()) {
-                    conceptLabel.contents().wrap($("<button></button>").addClass("inline-button").addClass("underline")).wrap("<div></div>");
+                    conceptLabel.contents().wrap($("<button></button>")
+                        .addClass("inline-button")
+                        .addClass("underline")
+                        .addClass("negate-padding"))
+                        .wrap("<div></div>");
                     details
                         .addClass("calc-fact-link")
                         .data('ivids', r.facts.items().map(f => f.vuid));
@@ -919,7 +917,7 @@ export class Inspector {
                 }
             }
 
-            const row = $("<div></div>").addClass("calculation-row").appendTo(container);
+            const row = $("<div></div>").addClass("calculation-row").appendTo(content);
             const iconBox = $("<div></div>").addClass("icon-box").appendTo(row);
             $("<div></div>").addClass("icon-bar").appendTo(iconBox);
             const icon = $("<div></div>")
@@ -932,6 +930,55 @@ export class Inspector {
                 .addClass("calculation-value")
                 .text(fact.readableValue())
                 .appendTo(details);
+
+            const statusTable = $("<table></table>")
+                .addClass("property-table")
+                .addClass("narrow-header")
+                .appendTo(content);
+
+            let statusText = "";
+            if (rCalc.binds()) {
+                if (rCalc.isConsistent()) {
+                    statusText = i18next.t('factDetails.calculationValuesMatch');
+                }
+                else {
+                    statusText = i18next.t('factDetails.calculationValuesDoNotMatch');
+                }
+            }
+            else if (rCalc.unchecked()) {
+                if (rCalc.uncheckedDueToVersionMismatch()) {
+                    statusText = i18next.t('factDetails.calculationUncheckedIncorrectVersion');
+                }
+                else {
+                    statusText = i18next.t('factDetails.calculationUnchecked');
+                }
+            }
+
+            const statusRow = $("<tr></tr>").appendTo(statusTable);
+            $("<th></th>").text(i18next.t("calculation.status")).appendTo(statusRow);
+            $("<td></td>").text(statusText).appendTo(statusRow);
+            const detailsLinkRow = $("<tr></tr>").appendTo(statusTable);
+            $("<th></th>").appendTo(detailsLinkRow);
+            const detailsCell = $("<td></td>")
+                .addClass("contains-button")
+                .appendTo(detailsLinkRow);
+
+            $("<button></button>")
+                .addClass("inline-button")
+                .addClass("link-icon")
+                .addClass("negate-padding")
+                .addClass("underline")
+                .appendTo(detailsCell)
+                .append($("<div></div>").text(i18next.t("calculation.showDetails")))
+
+                .attr("title", i18next.t('factDetails.viewCalculationDetails'))
+                .on("click", (e) => {
+                    const dialog = new CalculationInspector();
+                    dialog.displayCalculation(rCalc);
+                    dialog.show();
+                    e.stopPropagation();
+                });
+
         }
     }
 

@@ -115,6 +115,23 @@ input:disabled {
     & > div {
       border-bottom: solid 0.1rem var(--colour-primary-light);
     }
+
+    &.link-icon > div {
+      position: relative;
+      margin-left: 2.8rem;
+
+      &::before {
+        .icon-link();
+
+        position: absolute;
+        font-size: 1.8rem;
+        left: -2.8rem;
+      }
+    }
+  }
+
+  &.negate-padding {
+    margin-left: -0.3rem;
   }
 }
 

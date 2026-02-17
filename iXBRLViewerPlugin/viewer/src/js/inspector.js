@@ -905,8 +905,7 @@ export class Inspector {
                     conceptLabel.contents().wrap($("<button></button>")
                         .addClass("inline-button")
                         .addClass("underline")
-                        .addClass("negate-padding"))
-                        .wrap("<div></div>");
+                        .addClass("negate-padding"));
                     details
                         .addClass("calc-fact-link")
                         .data('ivids', r.facts.items().map(f => f.vuid));
@@ -1271,24 +1270,22 @@ export class Inspector {
         }
     }
 
-    _anchorList(fact, anchors) {
-        const html = $("<ul></ul>");
+    _updateAnchorList(fact, anchors, container) {
+        container.empty();
         if (anchors.length > 0) {
             for (const c of anchors) {
                 const otherFacts = fact.report.getAlignedFacts(fact, { "c": c });
                 const labelLang = fact.report.getLabelAndLang(c, "std", true);
-
-                $("<li></li>")
-                    .appendTo(html)
-                    .append(this.factLinkHTML(labelLang, otherFacts));
+                this.factLinkHTML(labelLang, otherFacts)
+                    .addClass("negate-indent")
+                    .appendTo(container);
             }
         }
         else {
-            $('<li></li>')
-                .append($('<i></i>').text(i18next.t("common.none")))
-                .appendTo(html);
+            $("<span></span>")
+                .text(i18next.t("common.none"))
+                .appendTo(container);
         }
-        return html;
     }
 
     updateAnchoring(fact) {
@@ -1297,14 +1294,8 @@ export class Inspector {
         }
         else {
             $('.anchoring').show();
-
-            $('.anchoring .collapsible-body .anchors-wider')
-                .empty()
-                .append(this._anchorList(fact, fact.widerConcepts()));
-
-            $('.anchoring .collapsible-body .anchors-narrower')
-                .empty()
-                .append(this._anchorList(fact, fact.narrowerConcepts()));
+            this._updateAnchorList(fact, fact.widerConcepts(), $(".anchoring .anchors-wider"));
+            this._updateAnchorList(fact, fact.narrowerConcepts(), $(".anchoring .anchors-narrower"));
         }
 
     }
@@ -1417,7 +1408,9 @@ export class Inspector {
     }
 
     factLinkHTML(labelLang, factList) {
-        const html = $("<span></span>");
+        const html = $("<button></button>")
+            .addClass("inline-button")
+            .addClass("underline");
         this._setLabelWithLang(html, labelLang);
         if (factList.length > 0) {
             html

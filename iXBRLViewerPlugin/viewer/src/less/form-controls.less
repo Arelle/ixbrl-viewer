@@ -107,14 +107,15 @@ input:disabled {
   color: var(--colour-primary);
   padding: 0.3rem;
   border: none;
+  line-height: 2.6rem;
+  text-align: left;
   
   &.underline {
     padding-top: 0;
     padding-bottom: 0;
-
-    & > div {
-      border-bottom: solid 0.1rem var(--colour-primary-light);
-    }
+    text-decoration: underline;
+    text-decoration-color: var(--colour-primary-light);
+    text-underline-offset: 0.5rem;
 
     &.link-icon > div {
       position: relative;

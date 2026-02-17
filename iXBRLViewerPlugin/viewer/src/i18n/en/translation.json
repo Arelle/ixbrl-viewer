@@ -88,7 +88,7 @@
     "loadingViewer": "Loading iXBRL Viewer",
     "mandatoryFacts": "Mandatory Facts",
     "namespaces": "Namespaces",
-    "narrowerAnchor": "Narrower anchors",
+    "narrowerAnchors": "Narrower anchors",
     "negative": "Negative",
     "nextTag": "Next tag",
     "noCalculations": "No Calculations",
@@ -164,7 +164,7 @@
     "validationSeverity": "Severity",
     "visibility": "Fact visibility",
     "visible": "Visible",
-    "widerAnchor": "Wider anchor",
+    "widerAnchors": "Wider anchors",
     "xbrlGlossaryOpensInNewTab": "XBRL Glossary (opens in new tab)"
   },
   "menu": {

@@ -60,13 +60,13 @@ jobs:
       - name: Build Python package
         run: python -m build
       - name: Upload source distribution artifact
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: ixbrl-viewer.tar.gz
           if-no-files-found: error
           path: dist/*.tar.gz
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: ixbrl-viewer.whl
           if-no-files-found: error

@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import writeXlsxFile from 'write-excel-file'
+import writeXlsxFile from 'write-excel-file/browser'
 import { Fact } from './fact.js';
 
 

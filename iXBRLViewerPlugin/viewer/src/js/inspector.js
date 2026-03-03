@@ -1176,6 +1176,11 @@ export class Inspector {
         }
     };
 
+    _colorIndexForNamespace(namespace) {
+        const key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
+        return key.indexOf(namespace) % HIGHLIGHT_COLORS;
+    }
+
     _populateNamespaceSummary(summaryDom) {
         let key;
         if (this._iv.isReviewModeEnabled()) {
@@ -1188,7 +1193,6 @@ export class Inspector {
             key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
         }
         this._iv.callPluginMethod("extendHighlightKey", key);
-
 
         const tableBody = summaryDom.find("table.namespace-key tbody");
         
@@ -1526,15 +1530,26 @@ export class Inspector {
     }
 
     _updateConcept(fact, context) {
+        const localname = fact.conceptQName().localname;
         $('tr.concept td', context)
             .find('.text')
-                .text(fact.conceptDisplayName())
-                .attr("title", fact.conceptDisplayName())
+                .text(localname)
+                .attr("title", localname)
             .end()
             .find('.clipboard-copy')
-                .data('cb-text', fact.conceptDisplayName())
+                .data('cb-text', localname)
             .end();
+    }
 
+    _updateNamespace(fact, context) {
+        const prefix = fact.conceptTaxonomyName().prefix;
+        $('tr.namespace td', context)
+            .find(".text")
+              .text(prefix)
+            .end()
+            .find(".key")
+              .addClass("sample-" + (this._colorIndexForNamespace(prefix)))
+            .end();
     }
 
     _updateEntityIdentifier(fact, context) {
@@ -1602,6 +1617,7 @@ export class Inspector {
             factHTML = $(require('../html/fact-details.html')); 
             this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
             this._updateConcept(fact, factHTML);
+            this._updateNamespace(fact, factHTML);
             $('tr.period td', factHTML)
                 .text(fact.periodString());
             if (fact.isNumeric()) {

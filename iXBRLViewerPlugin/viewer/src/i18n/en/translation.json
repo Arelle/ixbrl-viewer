@@ -52,6 +52,7 @@
     "noUnit": "<NOUNIT>",
     "properties": "Properties",
     "scale": "Scale",
+    "source": "Source", 
     "calculationValuesMatch": "Reported and calculated values match",
     "calculationValuesDoNotMatch": "Reported and calculated values do not match",
     "viewCalculationDetails": "View calculation details"

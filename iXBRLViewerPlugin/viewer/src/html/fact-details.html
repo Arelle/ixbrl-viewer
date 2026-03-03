@@ -18,6 +18,10 @@ See COPYRIGHT.md for copyright information
     <h3 class="collapsible-header"><button data-i18n="factDetails.properties">Properties</button></h3>
     <div class="collapsible-body">
       <table class="property-table fact-properties">
+        <tr class="value">
+          <th data-i18n="factDetails.factValue">Fact Value</th>
+          <td><span class="value"></span> <button class="show-all inline-button" aria-label="Show full text">[...]</button> <span class="expand-text-block"></td>
+        </tr>
         <tr class="period">
           <th class="has-tooltip">
             <span data-i18n="factDetails.date">Date</span>
@@ -25,9 +29,18 @@ See COPYRIGHT.md for copyright information
           </th>
           <td></td>
         </tr>
-        <tr class="value">
-          <th data-i18n="factDetails.factValue">Fact Value</th>
-          <td><span class="value"></span> <button class="show-all inline-button" aria-label="Show full text">[...]</button> <span class="expand-text-block"></td>
+        <tr class="namespace">
+          <th >
+            <span data-i18n="factDetails.source">Source</span>
+          </th>
+          <td><span class="key"></span> <span class="text"></td>
+        </tr>
+        <tr class="concept">
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.concept">Concept</span>
+            <button class="tooltip-icon" data-tooltip-name="concept" data-tooltip-glossary-link="#concept"></button>
+          </th>
+          <td><div><span class="text"></span><span class="filler"></span><button class="clipboard-copy copy-icon inline-button" title="Copy concept to clipboard"></button></div></td>
         </tr>
         <tr class="accuracy">
           <th class="has-tooltip">
@@ -50,13 +63,6 @@ See COPYRIGHT.md for copyright information
         <tr class="entity-identifier">
           <th data-i18n="factDetails.entity">Entity</th>
           <td></td>
-        </tr>
-        <tr class="concept">
-          <th class="has-tooltip">
-            <span data-i18n="factDetails.concept">Concept</span>
-            <button class="tooltip-icon" data-tooltip-name="concept" data-tooltip-glossary-link="#concept"></button>
-          </th>
-          <td><div><span class="text"></span><span class="filler"></span><button class="clipboard-copy copy-icon inline-button" title="Copy concept to clipboard"></button></div></td>
         </tr>
         <tr class="datatype">
           <th data-i18n="factDetails.datatype">Type</th>

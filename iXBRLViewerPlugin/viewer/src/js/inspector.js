@@ -138,6 +138,10 @@ export class Inspector {
                 $('#dark-mode-on').on("click", () => darkModeTheme());
                 $("#setting-dark-mode button").filter((i, e) => $(e).data("theme") === getTheme()).addClass("selected");
                 $('#print').on("click", () => inspector._viewer.currentDocument().get(0).contentWindow.print());
+                $('#highlight-tags').on("click", () => inspector.toggleHighlightAllTags());
+                if (inspector.highlightTagsOnStartup()) {
+                  $('#highlight-tags').addClass("checked");
+                }
                 $('#zoom-in').on("click", () => inspector.zoomRelative(1));
                 $('#zoom-out').on("click", () => inspector.zoomRelative(-1));
                 $('#zoom').on("change", (e) => inspector.zoomAbsolute($(e.currentTarget).val()));
@@ -522,6 +526,12 @@ export class Inspector {
             window.localStorage.setItem(STORAGE_HIGHLIGHT_FACTS, JSON.stringify(checked));
         }
         this._viewer.highlightAllTags(checked, this._reportSet.namespaceGroups());
+    }
+
+    toggleHighlightAllTags() {
+        const control = $("#highlight-tags")
+        control.toggleClass("checked");
+        this.highlightAllTags(control.hasClass("checked"), true);
     }
 
     factListRow(f) {

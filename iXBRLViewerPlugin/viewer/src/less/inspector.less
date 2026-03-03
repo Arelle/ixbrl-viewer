@@ -297,6 +297,18 @@ a {
       }
     }
 
+    #highlight-tags {
+      &::after {
+        .icon-tag();
+
+        font-size: 2rem;
+      }
+
+      &.checked {
+        background-color: var(--colour-highlight-default);
+      }
+    }
+
     #settings-button::before {
       .icon-cog();
 

@@ -268,9 +268,7 @@ export class Inspector {
     }
 
     doInitialSelection() {
-        //XXX 
-        this.inspectorMode("search-mode");
-        if (!this._currentItem && this._iv.isFeatureEnabled(FEATURE_SEARCH_ON_STARTUP)) {
+        if (!this._currentItem) {
             this.inspectorMode("search-mode");
         }
     }

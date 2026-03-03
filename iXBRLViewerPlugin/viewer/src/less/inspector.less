@@ -359,8 +359,6 @@ a {
   }
 
   h2 {
-    .panel-indent();
-
     text-align: left;
     font-size: 1.6rem;
     font-weight: bold;
@@ -734,6 +732,10 @@ a {
       position: relative;
       overflow-y: auto;
       flex-grow: 1;
+
+      h2.concept-name-title {
+        .panel-indent();
+      }
 
       .no-fact-overlay,
       .no-outline-overlay {

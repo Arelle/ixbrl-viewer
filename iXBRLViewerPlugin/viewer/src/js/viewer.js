@@ -19,7 +19,6 @@ function localName(e) {
     }
 }
 
-
 export class Viewer {
     constructor(iv, iframes, reportSet) {
         this._iv = iv;
@@ -137,7 +136,7 @@ export class Viewer {
     // Returns an array of the chosen nodes as DOM nodes.
     //
     _wrapNode(n) {
-        if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue) )) {
+        if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue))) {
             let wrapper = "<span>";
             if (getComputedStyle(n).getPropertyValue("display") === "block") {
                 wrapper = '<div>';

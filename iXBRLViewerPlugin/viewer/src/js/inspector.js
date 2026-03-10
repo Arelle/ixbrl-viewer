@@ -1572,6 +1572,9 @@ export class Inspector {
     switchItem(vuid, noScroll) {
         if (vuid !== null) {
             this._currentItem = this._reportSet.getItemById(vuid) ?? null;
+            if (this._currentItem === null) {
+                console.warn(`Failed to get item for vuid ${vuid}`);
+            }
         }
         else {
             this._currentItem = null

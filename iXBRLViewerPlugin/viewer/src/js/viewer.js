@@ -472,8 +472,7 @@ export class Viewer {
                 // Handle SEC/ESEF links-to-hidden
                 const vuid = viewerUniqueId(reportIndex, getIXHiddenLinkStyle(n));
                 if (vuid !== null) {
-                    let nodes = this._findOrCreateWrapperNode(n, inHidden);
-                    nodes.addClass("ixbrl-element").data('ivids', [vuid]);
+                    let nodes = this._findOrCreateWrapperNode(n, inHidden, vuid);
                     this._docOrderItemIndex.addItem(vuid, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */

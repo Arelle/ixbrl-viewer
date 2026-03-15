@@ -893,8 +893,9 @@ export class Viewer {
                 }
                 // inline element but only contains sub-elements => don't highlight
                 else if (Array.from(e.childNodes).every(n => (
-                        n.nodeType !== Node.ELEMENT_NODE ||
-                        n.classList.contains("ixbrl-sub-element")
+                        (n.nodeType === Node.ELEMENT_NODE && n.classList.contains("ixbrl-sub-element")) ||
+                        (n.nodeType === Node.TEXT_NODE && n.data.trim().length == 0) || 
+                        (n.nodeType !== Node.ELEMENT_NODE && n.nodeType !== Node.TEXT_NODE)
                     ))) {
                     e.classList.add("ixbrl-no-highlight");
                 }

@@ -172,6 +172,7 @@ export class Inspector {
                     inspector.rebuildViewer();
                     inspector.setupValidationReportIcon();
                     inspector.initializeViewer();
+                    inspector.buildFactListByGroup();
                     inspector.doInitialSelection();
                     resolve();
                 });
@@ -269,7 +270,51 @@ export class Inspector {
 
     doInitialSelection() {
         if (!this._currentItem) {
-            this.inspectorMode("search-mode");
+            this.inspectorMode("fact-mode");
+            if (this.outline.hasOutline()) {
+                $("#inspector").addClass("show-facts-by-group");
+            }
+        }
+    }
+
+    buildFactListByGroup() {
+        const container = $("#inspector .facts-by-group");
+        if (!this.outline.hasOutline()) {
+            return;
+        }
+
+
+        const groups = this.outline.sortedSections();
+
+        for (const group of groups) {
+            const section = $("<div></div>")
+                .addClass("collapsible-section")
+                .appendTo(container);
+
+            const header = $("<h3></h3>")
+                .addClass("collapsible-header")
+                .appendTo(section);
+
+            $("<button></button>")
+                .text(group.report.getRoleLabelOrURI(group.elr))
+                .appendTo(header);
+
+            const body = $("<div></div>")
+                .addClass("collapsible-body")
+                .addClass("fact-list")
+                .appendTo(section);
+
+            const j = this._reportSet.facts().indexOf(group.firstFact);
+            const k = this._reportSet.facts().indexOf(group.lastFact);
+
+            let i = 0;
+            while (i < 50 && j + i <= k) {
+                this.factListRow(this._reportSet.facts()[j+i]).appendTo(body);
+                i++;
+            }
+
+
+
         }
     }
 
@@ -490,7 +535,7 @@ export class Inspector {
         this.search();
     }
 
-    inspectorMode(mode) {
+    inspectorMode(mode, focusInspector) {
         const allModes = ["fact-mode", "search-mode", "overview-mode", "settings-mode"];
         $("#inspector-tabs button")
             .removeClass("selected")
@@ -498,6 +543,12 @@ export class Inspector {
             .addClass("selected");
         $("#ixv").removeClass("show-filters");
         $("#ixv").removeClass(allModes.filter(m => m !== mode)).addClass(mode);
+        if (focusInspector === true) {
+            $("#inspector").removeClass("show-facts-by-group");
+        }
+        else if ((focusInspector === false || this._curInspectorMode === "fact-mode" && mode === "fact-mode") && this.outline.hasOutline()) {
+            $("#inspector").addClass("show-facts-by-group");
+        }
         this._curInspectorMode = mode;
     }
 
@@ -1240,7 +1291,7 @@ export class Inspector {
             for (const group of this.outline.sortedSections()) {
                 $('<button class="fact-list-item"></button>')
                     .text(group.report.getRoleLabelOrURI(group.elr))
-                    .on("click", () => this.selectItem(group.fact.vuid))
+                    .on("click", () => this.selectItem(group.firstFact.vuid))
                     .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
                     .on("mousedown", (e) => {
                         // Prevent text selection by double click
@@ -1747,6 +1798,9 @@ export class Inspector {
         if (!cf) {
             $('#inspector').removeClass('footnote-mode');
             $('#inspector').addClass('no-fact-selected');
+            if (this.outline.hasOutline()) {
+                $('#inspector').addClass('show-facts-by-group');
+            }
         } 
         else { 
             $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("html-hidden-fact");
@@ -1765,8 +1819,8 @@ export class Inspector {
                 this.updateAnchoring(cf);
                 this.updateReferences(cf);
                 this.updateLabels(cf);
-                $('#inspector .search-results .fact-list-item').removeClass('selected');
-                $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
+                $('#inspector .fact-list-item').removeClass('selected');
+                $('#inspector .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
 
                 const duplicates = cf.duplicates();
                 let n = 0;
@@ -1846,7 +1900,7 @@ export class Inspector {
         }
         this.switchItem(vuid, noScroll);
         if (!noInspectorReset) {
-            this.inspectorMode("fact-mode");
+            this.inspectorMode("fact-mode", vuid !== null);
         }
     }
 

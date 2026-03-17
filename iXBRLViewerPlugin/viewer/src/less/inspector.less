@@ -344,6 +344,7 @@ a {
       color: var(--colour-text);
     }
 
+    &.always-selectable, 
     &:not(.selected) {
       cursor: pointer;
 
@@ -1157,15 +1158,23 @@ a {
     }
   }
 
-  &:not(.no-fact-selected) {
+  &:not(.no-fact-selected),
+  &.show-facts-by-group {
     .no-fact-overlay {
       display: none;
     }
   }
 
-  &.no-fact-selected {
+  &.no-fact-selected,
+  &.show-facts-by-group {
     .fact-selected-only {
       display: none;
+    }
+  }
+
+  &:not(.show-facts-by-group) {
+    .facts-by-group {
+        display: none;
     }
   }
 

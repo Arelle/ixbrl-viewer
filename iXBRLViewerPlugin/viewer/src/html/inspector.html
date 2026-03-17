@@ -34,7 +34,7 @@ See COPYRIGHT.md for copyright information
     </div>
     <div id="pane-right">
       <nav id="inspector-tabs">
-        <button data-mode="fact-mode" data-i18n="inspector.tabs.xbrlFacts">XBRL facts</button>
+        <button data-mode="fact-mode" data-i18n="inspector.tabs.xbrlFacts" class="always-selectable">XBRL facts</button>
         <button data-mode="search-mode" data-i18n="inspector.tabs.search">Search</button>
         <button data-mode="overview-mode" data-i18n="inspector.tabs.overview">Overview</button>
       </nav>
@@ -46,6 +46,9 @@ See COPYRIGHT.md for copyright information
             <div class="no-fact-overlay">
               <div class="no-fact-overlay-icon"></div>
               <p class="title" data-i18n="inspector.noFactSelected">No Fact Selected</p>
+            </div>
+
+            <div class="facts-by-group">
             </div>
 
             <div class="fact-selected-only">

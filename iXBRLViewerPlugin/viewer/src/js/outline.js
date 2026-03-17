@@ -30,8 +30,10 @@ export class DocumentOutline {
         const facts = report.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
         const runLength = {};
         const runStart = {};
+        const runEnd = {};
         const longestRun = {};
         const longestRunStart = {};
+        const longestRunEnd = {};
         this._buildDimensionMap();
         const elrs = report.relationshipGroups("pres");
         for (const f of facts) {
@@ -46,12 +48,14 @@ export class DocumentOutline {
                         runStart[elr] = f;
                     }
                     runLength[elr]++;
+                    runEnd[elr] = f;
                 }
                 else if (elr in runLength) { 
                     // End of a run
                     if (!(elr in longestRun) || longestRun[elr] < runLength[elr]) {
                         longestRun[elr] = runLength[elr];
                         longestRunStart[elr] = runStart[elr];
+                        longestRunEnd[elr] = runEnd[elr];
                     }
                     delete runLength[elr];
                     delete runStart[elr];
@@ -65,10 +69,12 @@ export class DocumentOutline {
             if (!(elr in longestRun) || longestRun[elr] < runLength[elr]) {
                 longestRun[elr] = runLength[elr];
                 longestRunStart[elr] = runStart[elr];
+                longestRunEnd[elr] = runEnd[elr];
             }
         }
 
         this.sections = longestRunStart;
+        this.sectionEnds = longestRunEnd;
     }
 
     // Returns true if a fact participates in the given presentation group.
@@ -174,6 +180,6 @@ export class DocumentOutline {
         const filteredSections = sections.filter(s => !re.test(this.report.getRoleLabelOrURI(s)));
         return filteredSections
             .sort((a, b) => this.report.getRoleLabelOrURI(a).localeCompare(this.report.getRoleLabelOrURI(b)))
-            .map(elr => ({ report: this.report, fact: this.sections[elr], elr: elr }));
+            .map(elr => ({ report: this.report, firstFact: this.sections[elr], lastFact: this.sectionEnds[elr], elr: elr }));
     }
 }

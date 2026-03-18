@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION, ZOOM_LEVELS} from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION, ZOOM_LEVELS, FACTS_PER_GROUP} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -277,6 +277,22 @@ export class Inspector {
         }
     }
 
+    addFactListByGroupFacts(container, next, last) {
+        $(".show-more", container).remove();
+        for (let i = next; i < last; i++) {
+            if (i - next >= FACTS_PER_GROUP - 1) {
+                $("<button></button>") 
+                    .addClass("show-more")
+                    .text(i18next.t("inspector.showMore"))
+                    .on("click",  () => this.addFactListByGroupFacts(container, i, last))
+                    .appendTo(container);
+                break;
+            }
+            this.factListRow(this._reportSet.facts()[i]).appendTo(container);
+        }
+
+    }
+
     buildFactListByGroup() {
         const container = $("#inspector .facts-by-group");
         if (!this.outline.hasOutline()) {
@@ -304,17 +320,9 @@ export class Inspector {
                 .addClass("fact-list")
                 .appendTo(section);
 
-            const j = this._reportSet.facts().indexOf(group.firstFact);
-            const k = this._reportSet.facts().indexOf(group.lastFact);
-
-            let i = 0;
-            while (i < 50 && j + i <= k) {
-                this.factListRow(this._reportSet.facts()[j+i]).appendTo(body);
-                i++;
-            }
-
-
-
+            const first = this._reportSet.facts().indexOf(group.firstFact);
+            const last = this._reportSet.facts().indexOf(group.lastFact);
+            this.addFactListByGroupFacts(body, first, last);
         }
     }
 

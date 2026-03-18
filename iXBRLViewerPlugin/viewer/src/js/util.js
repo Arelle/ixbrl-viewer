@@ -64,6 +64,8 @@ export const ZOOM_LEVELS = [
     500,
 ];
 
+export const FACTS_PER_GROUP = 20;
+
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date
  * and time if the time component is not midnight.  Adjust specifies that a

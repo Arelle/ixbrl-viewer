@@ -1071,7 +1071,7 @@ export class Inspector {
                 .appendTo(row)
                 .text(this._viewer.getTitle(0));
         }
-        const entityNames = this.summary.entityNames();
+        const entityNames = Array.from(new Set(this.summary.entityNames().map(f => f.value())));
         if (entityNames.length > 0) {
             const row = $("<tr></tr>").appendTo(aboutTableBody);
             $("<th></th>")
@@ -1081,7 +1081,7 @@ export class Inspector {
             const cell = $("<td></td>").appendTo(row);
             for (const entityName of entityNames) {
                 $("<span></span>")
-                    .text(entityName.value())
+                    .text(entityName)
                     .appendTo(cell);
                 $("<br />").appendTo(cell);
             }

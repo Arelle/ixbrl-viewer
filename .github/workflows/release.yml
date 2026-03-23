@@ -48,7 +48,7 @@ jobs:
           NPM_CONFIG_DRY_RUN: ${{ github.repository != 'Arelle/ixbrl-viewer' }}
         run: npm publish ixbrl-viewer-*.tgz --provenance --access public
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v2.6.1
         with:
           fail_on_unmatched_files: true
           files: './*'
@@ -82,7 +82,7 @@ jobs:
       - name: Publish package on release
         uses: pypa/gh-action-pypi-publish@v1.13.0
       - name: Upload release artifact
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v2.6.1
         with:
           fail_on_unmatched_files: true
           files: 'dist/*'

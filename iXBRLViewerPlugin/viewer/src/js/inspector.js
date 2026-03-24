@@ -271,8 +271,9 @@ export class Inspector {
         if (this._reportSet) {
             // Doc language
             const defaultDocLang = this.selectDefaultLanguage();
-            const docLangs = this._reportSet.availableLanguages();
             const docLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+            const docLangs = [...this._reportSet.availableLanguages()]
+                .sort((a, b) => docLangNames.of(a).localeCompare(docLangNames.of(b)));
 
             this._optionsMenu.addLabel(i18next.t("menu.documentLanguage"));
             this._optionsMenu.addCheckboxGroup(
@@ -286,8 +287,9 @@ export class Inspector {
 
             // Application language
             const defaultAppLang = i18next.language.substring(0, 2);
-            const appLangs = Object.keys(i18next.options.resources);
             const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+            const appLangs = Object.keys(i18next.options.resources)
+                .sort((a, b) => appLangNames.of(a).localeCompare(appLangNames.of(b)));
 
             this._optionsMenu.addLabel(i18next.t("menu.applicationLanguage"));
             this._optionsMenu.addCheckboxGroup(

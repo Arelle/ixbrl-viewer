@@ -21,6 +21,7 @@ from arelle.Cntlr import Cntlr
 from arelle.ModelDocument import ModelDocument, Type
 from arelle.ModelDtsObject import ModelConcept
 from arelle.ModelInstanceObject import ModelInlineFact, ModelUnit
+from arelle.ModelDtsObject import ModelResource, ModelRoleType
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import INVALIDixVALUE, QName
 from arelle.ModelXbrl import ModelXbrl
@@ -169,14 +170,31 @@ class IXBRLViewerBuilder:
         """
         return s.replace("<","\\u003C").replace(">","\\u003E").replace("&","\\u0026")
 
+    def getLabelsForRoleType(self, report: ModelXbrl, roleType: ModelRoleType) -> dict[str, str]:
+        relSet = report.relationshipSet(XbrlConst.elementLabel)
+        labels: dict[str, str] = {}
+        for r in relSet.fromModelObject(roleType):
+            label_resource: ModelResource = r.toModelObject
+            if (lang := label_resource.xmlLang) is None or label_resource.role != XbrlConst.genStandardLabel:
+                continue
+
+            lang = lang.lower()
+            label = label_resource.stringValue.strip()
+            labels[lang] = label
+        return labels
+
     def addRoleDefinition(self, report: ModelXbrl, elr: str) -> None:
         prefix = self.roleMap.getPrefix(elr)
         assert self.currentTargetReport is not None, "Current target report must be set to add role definition"
-        if self.currentTargetReport.setdefault("roleDefs",{}).get(prefix, None) is None:
+        if self.currentTargetReport.setdefault("roleDefs", {}).get(prefix, None) is None:
             rts = report.roleTypes.get(elr, [])
-            label = next((rt.definition for rt in rts if rt.definition is not None), None)
-            if label is not None:
-                self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = label
+            if (definition := next((rt.definition for rt in rts if rt.definition is not None), None)) is not None:
+                self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = definition
+
+            label_by_lang: dict[str, str] = {k: v for rt in rts for k, v in self.getLabelsForRoleType(report, rt).items()}
+
+            if label_by_lang:
+                self.currentTargetReport["roleDefs"].setdefault(prefix, {}).update(label_by_lang)
 
     def addConcept(self, report: ModelXbrl, concept: ModelConcept | None, dimensionType: str | None = None) -> None:
         if concept is None:
@@ -190,9 +208,9 @@ class IXBRLViewerBuilder:
                 "labels": {  }
             }
             for lr in labels:
-                l = lr.toModelObject
-                conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
-                self.addRoleDefinition(report, l.role)
+                label = lr.toModelObject
+                conceptData["labels"].setdefault(self.roleMap.getPrefix(label.role),{})[label.xmlLang.lower()] = label.text
+                self.addRoleDefinition(report, label.role)
 
             refData = []
             if concept.modelXbrl is not None:

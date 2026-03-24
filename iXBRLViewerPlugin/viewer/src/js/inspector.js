@@ -279,7 +279,7 @@ export class Inspector {
                 docLangs,
                 Object.fromEntries(docLangs.map((l) => [l, docLangNames.of(l)])),
                 defaultDocLang,
-                (lang) => { this.setDocumentLanguage(lang); this.update() },
+                (lang) => { this.setDocumentLanguage(lang); this.createOutline(); this.update() },
                 "select-language"
             );
             this.setDocumentLanguage(defaultDocLang);
@@ -892,6 +892,7 @@ export class Inspector {
     createOutline() {
         if (this.outline.hasOutline()) {
             $('.outline .no-outline-overlay').hide();
+            $('.outline .body').empty();
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
             for (const group of this.outline.sortedSections()) {
                 $('<button class="fact-list-item"></button>')

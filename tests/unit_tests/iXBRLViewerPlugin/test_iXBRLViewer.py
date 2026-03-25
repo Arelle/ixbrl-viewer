@@ -444,6 +444,11 @@ class TestIXBRLViewer:
             info=info_effect,
             modelDocument=self.modelDocument,
             ixdsTarget=None,
+            prefixedNamespaces={
+                'snake': 'http://example.com/snake',
+                'badger': 'http://example.com/badger',
+                'mushroom': 'http://example.com/mushroom'
+                },
             urlDocs=dict((
                 urlDocEntry('/filesystem/local-inline.htm', Type.INLINEXBRL),
                 urlDocEntry('https://example.com/remote-inline.htm', Type.INLINEXBRL),
@@ -474,6 +479,7 @@ class TestIXBRLViewer:
             fileSource=file_source,
             info=info_effect,
             modelDocument=self.modelDocument,
+            prefixedNamespaces={},
             ixdsTarget=None,
             urlDocs={}
         )
@@ -486,6 +492,7 @@ class TestIXBRLViewer:
             fileSource=file_source,
             info=info_effect,
             modelDocument=self.modelDocumentInlineSet,
+            prefixedNamespaces={},
             ixdsTarget=None,
             urlDocs={}
         )

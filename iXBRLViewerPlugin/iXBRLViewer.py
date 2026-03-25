@@ -85,14 +85,14 @@ class NamespaceMap:
             # QNames without a prefix but the report will know the prefix
             preferredPrefix = self._reportNsMap.get(ns, None)
 
-        bound_prefixes = frozenset(self._nsmap.values())
+        all_bound_prefixes = self._nsmap.values()
 
-        if preferredPrefix and preferredPrefix not in bound_prefixes:
+        if preferredPrefix and preferredPrefix not in all_bound_prefixes:
             chosenPrefix = preferredPrefix
         else:
             p = preferredPrefix if preferredPrefix else "ns"
             n = 0
-            while (chosenPrefix := f"{p}{n}") in bound_prefixes:
+            while (chosenPrefix := f"{p}{n}") in all_bound_prefixes:
                 n += 1
 
         self._nsmap[ns] = chosenPrefix

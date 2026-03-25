@@ -8,5 +8,4 @@ from .iXBRLViewer import IXBRLViewerBuilder
 
 
 class IXBRLViewerPluginData(PluginData):
-
     builder: IXBRLViewerBuilder | None = None

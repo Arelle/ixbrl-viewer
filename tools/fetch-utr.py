@@ -53,9 +53,7 @@ units = {
     "_source": {
         "url": utr_url,
         "sha256": hashlib.sha256(bytes).hexdigest(),
-        "timestamp": datetime.datetime.now(datetime.timezone.utc)
-        .replace(microsecond=0)
-        .isoformat(),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat(),
     }
 }
 print(

@@ -25,8 +25,8 @@ import iXBRLViewerPlugin.iXBRLViewer
 from arelle.plugin import inlineXbrlDocumentSet
 from iXBRLViewerPlugin import generateViewer, getFeaturesFromOptions, FEATURE_CONFIGS
 
-class CntlrCreateViewer(Cntlr.Cntlr):
 
+class CntlrCreateViewer(Cntlr.Cntlr):
     def __init__(self):
         super().__init__(hasGui=False)
 
@@ -39,13 +39,19 @@ class CntlrCreateViewer(Cntlr.Cntlr):
             else:
                 self.addToLog("Failed to load package", messageCode="error", file=p)
         PackageManager.rebuildRemappings(self)
-    
+
     def createViewer(self, f, scriptUrl=None, outPath=None, useStubViewer=False):
         if os.path.isdir(f):
-            files = glob.glob(os.path.join(f, "*.xhtml")) + glob.glob(os.path.join(f, "*.html")) + glob.glob(os.path.join(f, "*.htm"))
+            files = (
+                glob.glob(os.path.join(f, "*.xhtml"))
+                + glob.glob(os.path.join(f, "*.html"))
+                + glob.glob(os.path.join(f, "*.htm"))
+            )
             files.sort()
             if len(files) > 1:
-                f = os.path.join(f, inlineXbrlDocumentSet.IXDS_SURROGATE) + inlineXbrlDocumentSet.IXDS_DOC_SEPARATOR.join(files)
+                f = os.path.join(
+                    f, inlineXbrlDocumentSet.IXDS_SURROGATE
+                ) + inlineXbrlDocumentSet.IXDS_DOC_SEPARATOR.join(files)
             elif len(files) == 1:
                 f = files[0]
             else:
@@ -56,34 +62,38 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         self.modelManager.validate()
 
         try:
-            generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer, copyScript=False)
+            generateViewer(
+                self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer, copyScript=False
+            )
         except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
             print(e)
             sys.exit(1)
+
 
 parser = argparse.ArgumentParser(description="Create iXBRL Viewer instances")
 parser.add_argument("--package-dir", "-p", help="Path to directory containing taxonomy packages")
 parser.add_argument("--viewer-url", "-u", help="URL to ixbrlviewer.js", default="ixbrlviewer.js")
 parser.add_argument("--out", "-o", help="File or directory to write output to", default="viewer.html")
-parser.add_argument("--use-stub-viewer",
-                    action="store_true",
-                    help="Use stub viewer for faster loading of inspector (requires web server)")
-parser.add_argument('files', metavar='FILES', nargs='+',
-                    help='Files to process')
-featureGroup = parser.add_argument_group('Viewer Features')
+parser.add_argument(
+    "--use-stub-viewer",
+    action="store_true",
+    help="Use stub viewer for faster loading of inspector (requires web server)",
+)
+parser.add_argument("files", metavar="FILES", nargs="+", help="Files to process")
+featureGroup = parser.add_argument_group("Viewer Features")
 for featureConfig in FEATURE_CONFIGS:
-    arg = f'--viewer-feature-{featureConfig.key}'
+    arg = f"--viewer-feature-{featureConfig.key}"
     featureGroup.add_argument(arg, arg.lower(), action="store_true", default=False, help=featureConfig.description)
 
 args = parser.parse_args()
 
 cntlr = CntlrCreateViewer()
 cntlr.startLogging(
-    logFileName='logToPrint',
+    logFileName="logToPrint",
     logFormat="[%(messageCode)s] %(message)s - %(file)s",
     logLevel="DEBUG",
     logRefObjectProperties=True,
-    logToBuffer=True
+    logToBuffer=True,
 )
 cntlr.modelManager.validateInferDecimals = True
 cntlr.modelManager.validateCalcLB = True
@@ -96,8 +106,4 @@ if args.package_dir:
     cntlr.loadPackagesFromDir(args.package_dir)
 
 for f in args.files:
-    cntlr.createViewer(
-        f,
-        outPath=args.out,
-        scriptUrl=args.viewer_url,
-        useStubViewer=args.use_stub_viewer)
+    cntlr.createViewer(f, outPath=args.out, scriptUrl=args.viewer_url, useStubViewer=args.use_stub_viewer)

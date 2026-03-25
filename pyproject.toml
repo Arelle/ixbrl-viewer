@@ -79,3 +79,7 @@ strict = true
 [[tool.mypy.overrides]]
 module = 'arelle.*'
 follow_untyped_imports = true
+
+[tool.ruff]
+# Allow lines to be as long as 120.
+line-length = 120

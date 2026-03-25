@@ -25,12 +25,14 @@ from .constants import (
 
 _: TypeGetText
 
-UNSET_SCRIPT_URL = ''
+UNSET_SCRIPT_URL = ""
+
 
 class BaseViewerDialog(Toplevel):
     """
     Base class for shared dialog configuration between settings and save dialogs
     """
+
     def __init__(self, cntlr: CntlrWinMain) -> None:
         super().__init__(cntlr.parent)
         self.cntlr = cntlr
@@ -39,7 +41,9 @@ class BaseViewerDialog(Toplevel):
         self._features: dict[str, BooleanVar] = {}
         for featureConfig in GUI_FEATURE_CONFIGS:
             featureVar = BooleanVar()
-            featureVar.set(self._cntlrConfig.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', featureConfig.guiDefault))
+            featureVar.set(
+                self._cntlrConfig.setdefault(f"{CONFIG_FEATURE_PREFIX}{featureConfig.key}", featureConfig.guiDefault)
+            )
             self._features[featureConfig.key] = featureVar
         self._scriptUrl = StringVar()
         self._scriptUrl.set(self._cntlrConfig.setdefault(CONFIG_SCRIPT_URL, UNSET_SCRIPT_URL))
@@ -83,7 +87,9 @@ class BaseViewerDialog(Toplevel):
         scriptUrlEntry.grid(row=y, column=1, columnspan=2, sticky=EW, pady=3, padx=3)
 
         y += 1
-        copyScriptCheckbutton = Checkbutton(frame, text="Copy Script", variable=self._copyScript, onvalue=True, offvalue=False)
+        copyScriptCheckbutton = Checkbutton(
+            frame, text="Copy Script", variable=self._copyScript, onvalue=True, offvalue=False
+        )
         copyScriptLabel = Label(frame, text="Copy the iXBRL Viewer script into the output directory.")
         copyScriptCheckbutton.grid(row=y, column=0, pady=3, padx=3, sticky=W)
         copyScriptLabel.grid(row=y, column=1, columnspan=3, pady=3, padx=3, sticky=W)
@@ -94,7 +100,9 @@ class BaseViewerDialog(Toplevel):
         for featureConfig in GUI_FEATURE_CONFIGS:
             y += 1
             featureVar = self._features[featureConfig.key]
-            featureCheckbutton = Checkbutton(frame, text=featureConfig.label, variable=featureVar, onvalue=True, offvalue=False)
+            featureCheckbutton = Checkbutton(
+                frame, text=featureConfig.label, variable=featureVar, onvalue=True, offvalue=False
+            )
             featureLabel = Label(frame, text=featureConfig.description)
             featureCheckbutton.grid(row=y, column=0, pady=3, padx=3, sticky=W)
             featureLabel.grid(row=y, column=1, columnspan=2, pady=3, padx=3, sticky=W)
@@ -193,7 +201,9 @@ class SaveViewerDialog(BaseViewerDialog):
         filenameEntry.grid(row=y, column=1, sticky=EW, pady=3, padx=3)
         filenameBrowse.grid(row=y, column=2, sticky=EW, pady=3, padx=3)
         y += 1
-        zipViewerOutputCheckbutton = Checkbutton(frame, text="Zip Viewer Output", variable=self._zipViewerOutput, onvalue=True, offvalue=False)
+        zipViewerOutputCheckbutton = Checkbutton(
+            frame, text="Zip Viewer Output", variable=self._zipViewerOutput, onvalue=True, offvalue=False
+        )
         zipViewerOutputCheckbutton.grid(row=y, column=0, pady=3, padx=3)
         return super().addFields(frame, y)
 
@@ -204,7 +214,8 @@ class SaveViewerDialog(BaseViewerDialog):
             title=_("arelle - Save iXBRL Viewer Instance"),
             initialdir=self._cntlrConfig.setdefault(CONFIG_FILE_DIRECTORY, "."),
             filetypes=[(_("iXBRL report .html"), "*.html")],
-            defaultextension=".html")
+            defaultextension=".html",
+        )
         self._filename.set(instanceFile)
 
     def getTitle(self) -> str:
@@ -251,8 +262,12 @@ class SettingsDialog(BaseViewerDialog):
         Adds launch-on-load checkbox above other settings
         """
         y += 1
-        launchOnLoadCheckbutton = Checkbutton(frame, text="Launch on Load", variable=self._launchOnLoad, onvalue=True, offvalue=False)
-        launchOnLoadLabel = Label(frame, text="Launches an instance of the viewer in Stub Viewer Mode whenever a document is loaded.")
+        launchOnLoadCheckbutton = Checkbutton(
+            frame, text="Launch on Load", variable=self._launchOnLoad, onvalue=True, offvalue=False
+        )
+        launchOnLoadLabel = Label(
+            frame, text="Launches an instance of the viewer in Stub Viewer Mode whenever a document is loaded."
+        )
         launchOnLoadCheckbutton.grid(row=y, column=0, pady=3, padx=3, sticky=W)
         launchOnLoadLabel.grid(row=y, column=1, columnspan=3, pady=3, padx=3, sticky=W)
         return super().addFields(frame, y)
@@ -268,7 +283,7 @@ class SettingsDialog(BaseViewerDialog):
         self._cntlrConfig[CONFIG_SCRIPT_URL] = self._scriptUrl.get()
         self._cntlrConfig[CONFIG_COPY_SCRIPT] = self._copyScript.get()
         for key, var in self._features.items():
-            self._cntlrConfig[f'{CONFIG_FEATURE_PREFIX}{key}'] = var.get()
+            self._cntlrConfig[f"{CONFIG_FEATURE_PREFIX}{key}"] = var.get()
         self.cntlr.saveConfig()
         self.close()
 

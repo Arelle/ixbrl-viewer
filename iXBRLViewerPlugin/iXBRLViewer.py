@@ -14,12 +14,12 @@ import zipfile
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal, NamedTuple, cast
 
 from arelle import XbrlConst
 from arelle.Cntlr import Cntlr
 from arelle.ModelDocument import ModelDocument, Type
-from arelle.ModelDtsObject import ModelConcept
+from arelle.ModelDtsObject import ModelConcept, ModelResource, ModelRoleType
 from arelle.ModelInstanceObject import ModelInlineFact, ModelUnit
 from arelle.ModelRelationshipSet import ModelRelationshipSet
 from arelle.ModelValue import INVALIDixVALUE, QName
@@ -49,6 +49,11 @@ LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
 }
 
 WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
+
+
+def isInlineDoc(doc: ModelDocument | None) -> bool:
+    return doc is not None and doc.type in {Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET}
+
 
 class NamespaceMap:
     """
@@ -91,11 +96,16 @@ class NamespaceMap:
             return qname.localName
         return f"{self.getPrefix(qname.namespaceURI, qname.prefix)}:{qname.localName}"
 
+
 class IXBRLViewerBuilderError(Exception):
     pass
 
-def isInlineDoc(doc: ModelDocument | None) -> bool:
-    return doc is not None and doc.type in {Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET}
+
+class LabelData(NamedTuple):
+    lang: str
+    value: str
+    labelRole: str
+
 
 class IXBRLViewerBuilder:
 
@@ -169,14 +179,65 @@ class IXBRLViewerBuilder:
         """
         return s.replace("<","\\u003C").replace(">","\\u003E").replace("&","\\u0026")
 
+    def getLabelData(
+        self, resource: ModelResource | None, requiredLabelRole: str | None = None
+    ) -> LabelData | None:
+        if resource is None:
+            return None
+        if requiredLabelRole is not None and resource.role != requiredLabelRole:
+            return None
+        lang = resource.xmlLang
+        labelRole = resource.role
+        if lang is None or labelRole is None:
+            return None
+        return LabelData(lang.lower(), resource.stringValue.strip(), labelRole)
+
+    def getLabelsForRoleType(
+        self, report: ModelXbrl, roleType: ModelRoleType
+    ) -> dict[str, str]:
+        relSet = report.relationshipSet(XbrlConst.elementLabel)
+        labels: dict[str, str] = {}
+        for r in relSet.fromModelObject(roleType):
+            if (
+                result := self.getLabelData(
+                    r.toModelObject, requiredLabelRole=XbrlConst.genStandardLabel
+                )
+            ) is None:
+                continue
+            labels[result.lang] = result.value
+        return labels
+
     def addRoleDefinition(self, report: ModelXbrl, elr: str) -> None:
         prefix = self.roleMap.getPrefix(elr)
-        assert self.currentTargetReport is not None, "Current target report must be set to add role definition"
-        if self.currentTargetReport.setdefault("roleDefs",{}).get(prefix, None) is None:
-            rts = report.roleTypes.get(elr, [])
-            label = next((rt.definition for rt in rts if rt.definition is not None), None)
-            if label is not None:
-                self.currentTargetReport["roleDefs"].setdefault(prefix,{})["en"] = label
+        assert self.currentTargetReport is not None, (
+            "Current target report must be set to add role definition"
+        )
+        if (
+            self.currentTargetReport.setdefault("roleDefs", {}).get(prefix, None)
+            is not None
+        ):
+            return
+
+        rts = report.roleTypes.get(elr, [])
+        if (
+            definition := next(
+                (rt.definition for rt in rts if rt.definition is not None), None
+            )
+        ) is not None:
+            self.currentTargetReport["roleDefs"].setdefault(prefix, {})["en"] = (
+                definition
+            )
+
+        label_by_lang: dict[str, str] = {
+            lang: label
+            for rt in rts
+            for lang, label in self.getLabelsForRoleType(report, rt).items()
+        }
+
+        if label_by_lang:
+            self.currentTargetReport["roleDefs"].setdefault(prefix, {}).update(
+                label_by_lang
+            )
 
     def addConcept(self, report: ModelXbrl, concept: ModelConcept | None, dimensionType: str | None = None) -> None:
         if concept is None:
@@ -190,15 +251,23 @@ class IXBRLViewerBuilder:
                 "labels": {  }
             }
             for lr in labels:
-                l = lr.toModelObject
-                conceptData["labels"].setdefault(self.roleMap.getPrefix(l.role),{})[l.xmlLang.lower()] = l.text;
-                self.addRoleDefinition(report, l.role)
+                if (result := self.getLabelData(lr.toModelObject)) is None:
+                    continue
+                conceptData["labels"].setdefault(
+                    self.roleMap.getPrefix(result.labelRole), {}
+                )[result.lang] = result.value
+                self.addRoleDefinition(report, result.labelRole)
 
             refData = []
             if concept.modelXbrl is not None:
-                for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
+                for _refRel in concept.modelXbrl.relationshipSet(
+                    XbrlConst.conceptReference
+                ).fromModelObject(concept):
+                    currentRef: ModelResource
+                    if (currentRef := _refRel.toModelObject) is None:
+                        continue
                     ref = []
-                    for _refPart in _refRel.toModelObject.iterchildren():
+                    for _refPart in currentRef.iterchildren():
                         ref.append([_refPart.localName, _refPart.stringValue.strip()])
                     refData.append(ref)
 

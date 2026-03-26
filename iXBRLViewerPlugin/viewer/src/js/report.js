@@ -150,17 +150,16 @@ export class XBRLReport {
     }
 
     getRoleLabel(rolePrefix) {
-        /* This is currently hard-coded to "en" as the generator does not yet
-         * support generic labels, and instead provides the (non-localisable) role
-         * definition as a single "en" label.
-         *
-         * Returns the ELR URI if there is no label
-         */
         const labels = this._reportData.roleDefs[rolePrefix];
-        if (labels !== undefined) {
-            const label = labels["en"];
+        if (labels === undefined) {
+            return undefined;
+        }
+        const lang = this.reportSet.viewerOptions.language;
+        const candidates = [lang, "en", Object.keys(labels)[0]].filter(Boolean);
+        for (const l of candidates) {
             // Earlier versions of the generator added a "null" label if no labels
             // were available.
+            const label = labels[l];
             if (label !== undefined && label !== null) {
                 return label;
             }

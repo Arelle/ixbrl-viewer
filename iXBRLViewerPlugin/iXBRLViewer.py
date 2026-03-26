@@ -260,9 +260,14 @@ class IXBRLViewerBuilder:
 
             refData = []
             if concept.modelXbrl is not None:
-                for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
+                for _refRel in concept.modelXbrl.relationshipSet(
+                    XbrlConst.conceptReference
+                ).fromModelObject(concept):
+                    currentRef: ModelResource
+                    if (currentRef := _refRel.toModelObject) is None:
+                        continue
                     ref = []
-                    for _refPart in _refRel.toModelObject.iterchildren():
+                    for _refPart in currentRef.iterchildren():
                         ref.append([_refPart.localName, _refPart.stringValue.strip()])
                     refData.append(ref)
 

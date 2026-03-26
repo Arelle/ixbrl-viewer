@@ -110,13 +110,12 @@ class NamespaceMap:
         self._nsmap.clear()
         self._reportNsMap.clear()
 
-    def reset(self, report: ModelXbrl) -> None:
+    def stashReportNSMap(self, report: ModelXbrl) -> None:
         """
-        Clear any existing prefix bindings and stash a copy of Arelle's
-        prefix/namespace map for **this** report in case we need it later.
+        Stash a copy of Arelle's prefix/namespace map in case it can be used
+        later to find a preferred prefix.
         """
-        self.clear()
-        self._reportNsMap.update({ns: p for p, ns in report.prefixedNamespaces.items()})
+        self._reportNsMap = {ns: p for p, ns in report.prefixedNamespaces.items()}
 
 
 class IXBRLViewerBuilderError(Exception):
@@ -460,7 +459,7 @@ class IXBRLViewerBuilder:
         return sourceReport
 
     def processModel(self, report: ModelXbrl) -> None:
-        self.nsmap.reset(report)
+        self.nsmap.stashReportNSMap(report)
         self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")  # type: ignore[no-untyped-call]
         self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
         softwareCredits = set()

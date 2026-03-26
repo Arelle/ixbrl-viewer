@@ -175,7 +175,7 @@ class IXBRLViewerBuilder:
         labels: dict[str, str] = {}
         for r in relSet.fromModelObject(roleType):
             label_resource: ModelResource = r.toModelObject
-            if (lang := label_resource.xmlLang) is None or label_resource.role != XbrlConst.genStandardLabel:
+            if label_resource is None or (lang := label_resource.xmlLang) is None or label_resource.role != XbrlConst.genStandardLabel:
                 continue
 
             lang = lang.lower()

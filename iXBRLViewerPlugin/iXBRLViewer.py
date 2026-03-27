@@ -63,8 +63,15 @@ class NamespaceMap:
     """
 
     def __init__(self) -> None:
-        self.nsmap: dict[str, str] = {}
-        self.prefixmap: dict[str, str] = {}
+        self._nsmap: dict[str, str] = {}
+        self._reportNsMap: dict[str, str] = {}
+
+    @property    
+    def prefixmap(self) -> dict[str, str]:
+        """
+        Get the current prefix map (prefix to namespace URI).
+        """
+        return {p: ns for ns, p in self._nsmap.items()}
 
     def getPrefix(self, ns: str, preferredPrefix: str | None = None) -> str:
         """
@@ -75,26 +82,45 @@ class NamespaceMap:
         prefix (or the string "ns")
         """
 
-        prefix = self.nsmap.get(ns, None)
-        if not prefix:
-            if preferredPrefix and preferredPrefix not in self.prefixmap:
-                prefix = preferredPrefix
-            else:
-                p = preferredPrefix if preferredPrefix else "ns"
-                n = 0
-                while f"{p}{n}" in self.prefixmap:
-                    n += 1
+        if (boundPrefix := self._nsmap.get(ns, None)) is not None:
+            return boundPrefix
 
-                prefix = f"{p}{n}"
+        if preferredPrefix is None:
+            # For example, EE2.0 fact values (expanded names) get turned in to
+            # QNames without a prefix but the report will know the prefix
+            preferredPrefix = self._reportNsMap.get(ns, None)
 
-            self.prefixmap[prefix] = ns
-            self.nsmap[ns] = prefix
-        return prefix
+        all_bound_prefixes = self._nsmap.values()
+
+        if preferredPrefix and preferredPrefix not in all_bound_prefixes:
+            chosenPrefix = preferredPrefix
+        else:
+            p = preferredPrefix if preferredPrefix else "ns"
+            n = 0
+            while (chosenPrefix := f"{p}{n}") in all_bound_prefixes:
+                n += 1
+
+        self._nsmap[ns] = chosenPrefix
+        return chosenPrefix
 
     def qname(self, qname: QName) -> str:
         if qname.namespaceURI is None:
             return qname.localName
         return f"{self.getPrefix(qname.namespaceURI, qname.prefix)}:{qname.localName}"
+
+    def clear(self) -> None:
+        """
+        Clear the namespace map.
+        """
+        self._nsmap.clear()
+        self._reportNsMap.clear()
+
+    def stashReportNSMap(self, report: ModelXbrl) -> None:
+        """
+        Stash a copy of Arelle's prefix/namespace map in case it can be used
+        later to find a preferred prefix.
+        """
+        self._reportNsMap = {ns: p for p, ns in report.prefixedNamespaces.items()}
 
 
 class IXBRLViewerBuilderError(Exception):
@@ -501,6 +527,7 @@ class IXBRLViewerBuilder:
         return sourceReport
 
     def processModel(self, report: ModelXbrl) -> None:
+        self.nsmap.stashReportNSMap(report)
         self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")  # type: ignore[no-untyped-call]
         self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
         softwareCredits = set()
@@ -600,7 +627,7 @@ class IXBRLViewerBuilder:
             scriptUrl: str = DEFAULT_JS_FILENAME,
             showValidations: bool = True,
             packageDownloadURL: str | None = None,
-    ) -> 'iXBRLViewer' | None:
+    ) -> iXBRLViewer | None:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.

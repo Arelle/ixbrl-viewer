@@ -95,6 +95,67 @@ class TestNamespaceMap:
         result_2 = ns_map.getPrefix(namespace_2)
         assert result_2 == 'ns1'
 
+    def test_stashReportNSMap_uses_report_prefix(self):
+        """
+        After stashing, getPrefix should use the prefix from the report's
+        prefixedNamespaces map as the preferred prefix.
+        """
+        ns_map = NamespaceMap()
+        report = Mock()
+        report.prefixedNamespaces = {"myprefix": "http://example.com"}
+        ns_map.stashReportNSMap(report)
+        assert ns_map.getPrefix("http://example.com") == "myprefix"
+
+    def test_stashReportNSMap_without_stash_uses_generated_prefix(self):
+        """
+        Without stashing, getPrefix should fall back to a generated prefix.
+        """
+        ns_map = NamespaceMap()
+        assert ns_map.getPrefix("http://example.com") == "ns0"
+
+    def test_stashReportNSMap_prefix_differs_from_unstashed(self):
+        """
+        Stashing should produce a different prefix than without stashing for
+        the same namespace.
+        """
+        report = Mock()
+        report.prefixedNamespaces = {"myprefix": "http://example.com"}
+
+        stashed = NamespaceMap()
+        stashed.stashReportNSMap(report)
+
+        unstashed = NamespaceMap()
+
+        assert stashed.getPrefix("http://example.com") != unstashed.getPrefix("http://example.com")
+
+    def test_stashReportNSMap_stashed_prefix_already_taken(self):
+        """
+        If the stashed prefix is already bound to another namespace, getPrefix
+        should fall back to a numbered suffix rather than silently reusing it.
+        """
+        ns_map = NamespaceMap()
+        report = Mock()
+        report.prefixedNamespaces = {"myprefix": "http://example.com"}
+        ns_map.stashReportNSMap(report)
+        # Bind "myprefix" to a different namespace first
+        ns_map.getPrefix("http://other.com", "myprefix")
+        # Now the stashed preferred prefix is taken; should number-suffix
+        assert ns_map.getPrefix("http://example.com") == "myprefix0"
+
+    def test_stashReportNSMap_does_not_affect_already_bound_namespace(self):
+        """
+        If getPrefix was called before stashReportNSMap, the already-bound
+        prefix should be returned unchanged on subsequent calls.
+        """
+        ns_map = NamespaceMap()
+        # Bind the namespace before stashing
+        assert ns_map.getPrefix("http://example.com") == "ns0"
+        report = Mock()
+        report.prefixedNamespaces = {"myprefix": "http://example.com"}
+        ns_map.stashReportNSMap(report)
+        # Stash should not retroactively change the bound prefix
+        assert ns_map.getPrefix("http://example.com") == "ns0"
+
 
 class TestIXBRLViewer:
 
@@ -444,6 +505,11 @@ class TestIXBRLViewer:
             info=info_effect,
             modelDocument=self.modelDocument,
             ixdsTarget=None,
+            prefixedNamespaces={
+                'snake': 'http://example.com/snake',
+                'badger': 'http://example.com/badger',
+                'mushroom': 'http://example.com/mushroom'
+                },
             urlDocs=dict((
                 urlDocEntry('/filesystem/local-inline.htm', Type.INLINEXBRL),
                 urlDocEntry('https://example.com/remote-inline.htm', Type.INLINEXBRL),
@@ -474,6 +540,7 @@ class TestIXBRLViewer:
             fileSource=file_source,
             info=info_effect,
             modelDocument=self.modelDocument,
+            prefixedNamespaces={},
             ixdsTarget=None,
             urlDocs={}
         )
@@ -486,6 +553,7 @@ class TestIXBRLViewer:
             fileSource=file_source,
             info=info_effect,
             modelDocument=self.modelDocumentInlineSet,
+            prefixedNamespaces={},
             ixdsTarget=None,
             urlDocs={}
         )

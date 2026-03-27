@@ -271,23 +271,25 @@ export class Inspector {
         if (this._reportSet) {
             // Doc language
             const defaultDocLang = this.selectDefaultLanguage();
-            const docLangs = this._reportSet.availableLanguages();
             const docLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+            const docLangs = [...this._reportSet.availableLanguages()]
+                .sort((a, b) => docLangNames.of(a).localeCompare(docLangNames.of(b)));
 
             this._optionsMenu.addLabel(i18next.t("menu.documentLanguage"));
             this._optionsMenu.addCheckboxGroup(
                 docLangs,
                 Object.fromEntries(docLangs.map((l) => [l, docLangNames.of(l)])),
                 defaultDocLang,
-                (lang) => { this.setDocumentLanguage(lang); this.update() },
+                (lang) => { this.setDocumentLanguage(lang); this.createOutline(); this.update() },
                 "select-language"
             );
             this.setDocumentLanguage(defaultDocLang);
 
             // Application language
             const defaultAppLang = i18next.language.substring(0, 2);
-            const appLangs = Object.keys(i18next.options.resources);
             const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+            const appLangs = Object.keys(i18next.options.resources)
+                .sort((a, b) => appLangNames.of(a).localeCompare(appLangNames.of(b)));
 
             this._optionsMenu.addLabel(i18next.t("menu.applicationLanguage"));
             this._optionsMenu.addCheckboxGroup(
@@ -892,6 +894,7 @@ export class Inspector {
     createOutline() {
         if (this.outline.hasOutline()) {
             $('.outline .no-outline-overlay').hide();
+            $('.outline .body').empty();
             const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
             for (const group of this.outline.sortedSections()) {
                 $('<button class="fact-list-item"></button>')

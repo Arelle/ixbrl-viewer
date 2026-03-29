@@ -523,7 +523,7 @@ a {
         }
         
         button.filter-toggle {
-          .primary-button();
+          .secondary-button();
 
           &::before {
             .icon-filter();
@@ -531,6 +531,10 @@ a {
             padding-right: 0.8rem;
             vertical-align: bottom;
           }
+        }
+
+        &.active-filters button.filter-toggle {
+          .primary-button();
         }
 
         .filter-info {

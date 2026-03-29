@@ -690,14 +690,7 @@ export class Inspector {
     }
 
     hasActiveSearchFilters(searchSpec) {
-        return false;
-        /*
-      return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0) ||
-        searchSpec.visibilityFilter !== '*' ||
-        searchSpec.showMandatoryFacts ||
-        searchSpec.conceptTypeFilter !== "*" ||
-        searchSpec.factValueFilter !== "*" ;
-        */
+        return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0);
     }
 
     buildSearchSection(fieldId, titleKey, options) {

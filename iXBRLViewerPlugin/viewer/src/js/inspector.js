@@ -61,7 +61,6 @@ export class Inspector {
             returnEmptyString: false,
             fallbackLng: 'en',
             debug: false,
-            showSupportNotice: false,
             resources: 
                 Object.fromEntries(
                   langs.map(l => [l, Object.fromEntries(

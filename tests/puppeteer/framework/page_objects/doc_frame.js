@@ -52,6 +52,7 @@ export class Highlight {
     static purple = 'rgb(221, 115, 255)';
     static propBgColor = 'background-color';
     static propOutline = 'outline';
+    static propOutlineStyle = 'outline-style';
     static transparent = 'rgba(0, 0, 0, 0)';
 
     constructor(color, locator, property, docContent) {
@@ -74,19 +75,17 @@ export class Highlight {
     };
 
     static searchHover(docContent, active = true) {
-        const color = active
-            ? `${this.darkBlue} dashed 2px`
-            : 'rgb(0, 0, 0) none 0px';
+        const color = active ? `${this.darkBlue} dashed 2px` : 'none';
+        const property = active ? this.propOutline : this.propOutlineStyle;
         const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
-        return new Highlight(color, locator, this.propOutline, docContent);
+        return new Highlight(color, locator, property, docContent);
     };
 
     static selectedFact(docContent, active = true) {
-        const color = active
-            ? `${this.lightBlue} solid 2px`
-            : 'rgb(0, 0, 0) none 0px';
+        const color = active ? `${this.lightBlue} solid 2px` : 'none';
+        const property = active ? this.propOutline : this.propOutlineStyle;
         const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
-        return new Highlight(color, locator, this.propOutline, docContent);
+        return new Highlight(color, locator, property, docContent);
     };
 
     static untaggedDate(docContent, active = true) {

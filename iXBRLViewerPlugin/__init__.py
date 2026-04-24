@@ -273,11 +273,11 @@ def iXBRLViewerCommandLineFilingEnd(cntlr: Cntlr, options: argparse.Namespace, *
 def iXBRLViewerSaveCommand(cntlr: CntlrWinMain) -> None:
     from .ui import SaveViewerDialog
     if cntlr.modelManager is None or cntlr.modelManager.modelXbrl is None:
-        cntlr.addToLog("No document loaded.", messageCode=ERROR_MESSAGE_CODE)  # type: ignore[no-untyped-call]
+        cntlr.addToLog("No document loaded.", messageCode=ERROR_MESSAGE_CODE)
         return
     modelXbrl = cntlr.modelManager.modelXbrl
     if modelXbrl.modelDocument is None or modelXbrl.modelDocument.type not in (Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET):
-        cntlr.addToLog("No inline XBRL document loaded.", messageCode=ERROR_MESSAGE_CODE)  # type: ignore[no-untyped-call]
+        cntlr.addToLog("No inline XBRL document loaded.", messageCode=ERROR_MESSAGE_CODE)
         return
     dialog = SaveViewerDialog(cntlr)
     dialog.render()

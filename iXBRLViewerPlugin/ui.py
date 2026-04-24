@@ -198,9 +198,9 @@ class SaveViewerDialog(BaseViewerDialog):
         return super().addFields(frame, y)
 
     def browseForFile(self) -> None:
-        instanceFile = self.cntlr.uiFileDialog(  # type: ignore[no-untyped-call]
+        instanceFile = self.cntlr.uiFileDialog(
             "save",
-            parent=self,
+            parent=self,  # type: ignore[arg-type]
             title=_("arelle - Save iXBRL Viewer Instance"),
             initialdir=self._cntlrConfig.setdefault(CONFIG_FILE_DIRECTORY, "."),
             filetypes=[(_("iXBRL report .html"), "*.html")],

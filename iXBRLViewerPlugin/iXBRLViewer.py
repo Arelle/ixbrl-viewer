@@ -552,12 +552,13 @@ class IXBRLViewerBuilder:
             f"Creating iXBRL viewer ({self.reportCount}) [{self.currentTargetReport['target']}]",
         )
         assert report.modelDocument is not None
+        assert report.modelDocument.xmlDocument is not None
         if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
             # Sort by object index to preserve order in which files were specified.
             xmlDocsByFilename = {
                 os.path.basename(self.outputFilename(doc.filepath)): doc.xmlDocument
                 for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
-                if doc.type == Type.INLINEXBRL
+                if doc.type == Type.INLINEXBRL and doc.xmlDocument is not None
             }
             docSetFiles = list(xmlDocsByFilename.keys())
 

@@ -1573,14 +1573,21 @@ export class Inspector {
      */
     switchItem(vuid, noScroll) {
         if (vuid !== null) {
-            this._currentItem = this._reportSet.getItemById(vuid);
+            this._currentItem = this._reportSet.getItemById(vuid) ?? null;
+            if (this._currentItem === null) {
+                console.warn(`Failed to get item for vuid ${vuid}`);
+            }
+        }
+        else {
+            this._currentItem = null
+        }
+        if (this._currentItem !== null) {
             if (!noScroll) {
                 this._viewer.showItemById(vuid);
             }
             this._viewer.highlightItem(vuid);
         }
         else {
-            this._currentItem = null;
             this._viewer.clearHighlighting();
         }
         this.update();

@@ -528,7 +528,7 @@ class IXBRLViewerBuilder:
 
     def processModel(self, report: ModelXbrl) -> None:
         self.nsmap.stashReportNSMap(report)
-        self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")  # type: ignore[no-untyped-call]
+        self.footnoteRelationshipSet = ModelRelationshipSet(report, "XBRL-footnotes")
         self.currentTargetReport = self.newTargetReport(getattr(report, "ixdsTarget", None))
         softwareCredits = set()
         for document in report.urlDocs.values():

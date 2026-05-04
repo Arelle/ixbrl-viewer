@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from tkinter import Menu
 
     from arelle.CntlrWinMain import CntlrWinMain
+    from bottle import HttpResponse
 
 from .constants import (
     CONFIG_COPY_SCRIPT,
@@ -335,7 +336,9 @@ def commandLineFilingEnd(*args: Any, **kwargs: Any) -> None:
 
 class iXBRLViewerLocalViewer(LocalViewer):
     # plugin-specific local file handler
-    def getLocalFile(self, file: str, relpath: str, request: Any) -> Any:
+    def getLocalFile(self, file: str | None, relpath: str | None, request: Any) -> HttpResponse | None:
+        if file is None:
+            return None
         if file == DEFAULT_JS_FILENAME:
             return static_file(DEFAULT_JS_FILENAME, os.path.dirname(DEFAULT_VIEWER_PATH))
         _report, _, _file = file.partition("/")
@@ -383,8 +386,8 @@ def guiRun(cntlr: CntlrWinMain, modelXbrl: ModelXbrl, attach: Any, *args: Any, *
             copyScript=cntlr.config.get(CONFIG_COPY_SCRIPT, DEFAULT_COPY_SCRIPT),
         )
         if Path(tempViewerDir, viewer_file_name).exists():
-            localViewer = iXBRLViewerLocalViewer("iXBRL Viewer", os.path.dirname(__file__))  # type: ignore[no-untyped-call]
-            localhost = localViewer.init(cntlr, tempViewerDir)  # type: ignore[no-untyped-call]
+            localViewer = iXBRLViewerLocalViewer("iXBRL Viewer", os.path.dirname(__file__))
+            localhost = localViewer.init(cntlr, tempViewerDir)
             webbrowser.open(f'{localhost}/{viewer_file_name}')
     except Exception as ex:
         modelXbrl.error(

@@ -20,6 +20,7 @@ jobs:
         node-version:
           - '22'
           - '24'
+          - '26'
         python-version:
           - '3.14'
     runs-on: ${{ matrix.os }}

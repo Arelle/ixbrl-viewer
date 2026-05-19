@@ -417,6 +417,14 @@ a {
     box-sizing: border-box;
     position: relative;
 
+
+    h2.inspector-title {
+      .section();
+
+      line-height: var(--top-bar-height);
+      margin-block: 0;
+    }
+
     .tag-nav {
       margin-top: 1.8rem;
       margin-bottom: 1.8rem;
@@ -485,6 +493,39 @@ a {
       }
     }
 
+    .modal-inspector {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+
+      .modal-inspector-header {
+        display: flex;
+        flex: 0 0 auto;
+
+        .close {
+          border: none;
+          padding: 0;
+          position: absolute;
+          right: 1.8rem;
+          font-size: 3rem;
+          z-index: 20;
+          cursor: pointer;
+          top: -0.4rem;
+          line-height: var(--top-bar-height);
+          color: var(--colour-text);
+
+          &::before {
+            content: "\00d7";
+          }
+        }
+      }
+
+      .modal-inspector-body {
+        overflow-y: auto;
+        flex: 1 1 auto;
+      }
+    }
+
     &.search-inspector {
       .search-controls {
         .show-filters & {
@@ -541,26 +582,14 @@ a {
             color: var(--colour-text-light);
             text-align: center;
         }
-
       }
+
 
       .search-filters {
         display: none;
-        flex-direction: column;
-        height: 100%;
 
         .show-filters & {
           display: flex;
-        }
-
-        .search-filters-header {
-          display: flex;
-          flex: 0 0 auto;
-        }
-
-        .search-filters-body {
-          overflow-y: auto;
-          flex: 1 1 auto;
         }
 
         .search-filter-buttons {
@@ -596,22 +625,6 @@ a {
           margin: 0;
         }
 
-        .close {
-          border: none;
-          padding: 0;
-          position: absolute;
-          right: 1.8rem;
-          font-size: 3rem;
-          z-index: 20;
-          cursor: pointer;
-          top: -0.4rem;
-          line-height: var(--top-bar-height);
-          color: var(--colour-text);
-
-          &::before {
-            content: "\00d7";
-          }
-        }
 
 
         h3 {

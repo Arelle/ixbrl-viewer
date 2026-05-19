@@ -116,6 +116,7 @@ export class Inspector {
                     inspector.inspectorMode($(this).data("mode"));
                 });
                 $("#settings-button").on("click", () => inspector.toggleSettingsMode());
+                $(".settings-inspector .close").on("click", () => inspector.closeSettingsMode());
 
                 $(".nested-item-select select").change(e => inspector.switchItem($(e.currentTarget).val(), true));
 
@@ -566,8 +567,12 @@ export class Inspector {
             this.inspectorMode("settings-mode");
         }
         else {
-            this.inspectorMode(this._prevInspectorMode);
+            this.closeSettingsMode();
         }
+    }
+
+    closeSettingsMode() {
+        this.inspectorMode(this._prevInspectorMode);
     }
 
 

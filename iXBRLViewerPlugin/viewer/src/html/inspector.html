@@ -166,13 +166,12 @@ See COPYRIGHT.md for copyright information
             </section>
           </div> 
 
-          <div class="search-filters">
-            <div class="section search-filters-header">
+          <div class="search-filters modal-inspector">
+            <div class="section modal-inspector-header">
               <button title="Close" data-i18n="[title]dialog.close" class="close"></button>
               <h2>Filter</h2>
             </div>
-            <div class="search-filters-body">
-
+            <div class="modal-inspector-body search-filters-body">
               <div class="checkboxes">
                 <div id="mandatory-fact-filter-checkbox">
                   <label class="checkbox">
@@ -333,23 +332,31 @@ See COPYRIGHT.md for copyright information
         </div> <!-- summary -->
 
         <div class="inspector-container settings-inspector">
-          <div class="section">
-            <div class="header-with-setting">
-              <h3 data-i18n="inspector.settings.colorMode.title">Viewer color mode</h3>
-              <div class="radio-pills setting" id="setting-dark-mode">
-                <button data-theme="light" id="dark-mode-off">Light</button>
-                <button data-theme="dark" id="dark-mode-on">Dark</button>
+          <div class="modal-inspector">
+            <div class="modal-inspector-header">
+              <button title="Close" data-i18n="[title]dialog.close" class="close"></button>
+              <h2 data-i18n="inspector.settings.title" class="inspector-title">Settings</h2>
+            </div>
+            <div class="modal-inspector-body">
+              <div class="section">
+                <div class="header-with-setting">
+                  <h3 data-i18n="inspector.settings.colorMode.title">Viewer color mode</h3>
+                  <div class="radio-pills setting" id="setting-dark-mode">
+                    <button data-theme="light" id="dark-mode-off">Light</button>
+                    <button data-theme="dark" id="dark-mode-on">Dark</button>
+                  </div>
+                </div>
+                <p data-i18n="inspector.settings.colorMode.documentation">Choose if Inline Viewer's appearance should be light or dark.</p>
+              </div>
+              <div class="section">
+                <div class="header-with-setting">
+                  <h3 data-i18n="inspector.settings.viewerLanguage.title">Viewer language</h3>
+                  <select class="setting" id="setting-viewer-language">
+                  </select>
+                </div>
+                <p data-i18n="inspector.settings.viewerLanguage.documentation">Select the language you'd like to use with Inline Viewer.</p>
               </div>
             </div>
-            <p data-i18n="inspector.settings.colorMode.documentation">Choose if Inline Viewer's appearance should be light or dark.</p>
-          </div>
-          <div class="section">
-            <div class="header-with-setting">
-              <h3 data-i18n="inspector.settings.viewerLanguage.title">Viewer language</h3>
-              <select class="setting" id="setting-viewer-language">
-              </select>
-            </div>
-            <p data-i18n="inspector.settings.viewerLanguage.documentation">Select the language you'd like to use with Inline Viewer.</p>
           </div>
         </div>
 

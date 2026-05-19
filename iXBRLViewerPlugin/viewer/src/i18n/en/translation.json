@@ -113,6 +113,7 @@
     "searchTitle": "Search",
     "settingsMenu": "Settings Menu",
     "settings": {
+        "title": "Settings",
         "viewerLanguage": {
             "title": "Viewer language",
             "documentation": "Select the language you'd like to use with Inline Viewer"

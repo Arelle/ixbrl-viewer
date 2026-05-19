@@ -17,6 +17,7 @@
   --colour-primary: @colour-primary;
   --colour-secondary: @colour-secondary;
   --colour-related-fact: @colour-related-fact;
+  --highlight-outline-weight: 0.19em;
 }
 
 // To ensure highlighting takes place, !important is used to override inline styles.
@@ -82,7 +83,7 @@
 .ixbrl-related {
   &:not(.ixbrl-no-highlight),
   .ixbrl-sub-element:not(.ixbrl-no-highlight) {
-    outline: solid 0.125em var(--colour-related-fact);
+    outline: solid var(--highlight-outline-weight) var(--colour-related-fact);
     outline-offset: 0.0625em;
 
     td&, th& {
@@ -95,7 +96,7 @@
 .ixbrl-linked-highlight {
   &:not(.ixbrl-no-highlight),
   .ixbrl-sub-element:not(.ixbrl-no-highlight) {
-    outline: dashed 0.125em var(--colour-linked-fact);
+    outline: dashed var(--highlight-outline-weight) var(--colour-linked-fact);
     outline-offset: 0.0625em;
 
     td&, th& {
@@ -109,7 +110,7 @@
 .ixbrl-element:not(.ixbrl-no-highlight),
 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
   &:hover {
-    outline: dashed 0.125em var(--colour-primary-focus);
+    outline: dashed 0.1875em var(--colour-primary-focus);
     outline-offset: 0.0625em;
     cursor: pointer;
 
@@ -127,7 +128,7 @@
     // elements don't get a dashed line on hover
     &,
     &:hover {
-      outline: solid 0.125em var(--colour-primary-focus);
+      outline: solid var(--highlight-outline-weight) var(--colour-primary-focus);
       outline-offset: 0.0625em;
 
       td&, th& {

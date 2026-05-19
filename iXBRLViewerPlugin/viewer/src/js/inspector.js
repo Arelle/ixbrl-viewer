@@ -388,21 +388,6 @@ export class Inspector {
                 this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
             }
         }
-        let helpLinks = {}
-        let supportLinkUrl = this._iv.getSupportLinkUrl();
-        if (supportLinkUrl) {
-            helpLinks[i18next.t("menu.contactUs")] = supportLinkUrl;
-        }
-        let surveyLinkUrl = this._iv.getSurveyLinkUrl();
-        if (surveyLinkUrl) {
-            helpLinks[i18next.t("menu.survey")] = surveyLinkUrl;
-        }
-        if (Object.entries(helpLinks).length > 0) {
-            this._optionsMenu.addLabel(i18next.t("menu.help"));
-            for (const [label, value] of Object.entries(helpLinks)) {
-                this._optionsMenu.addLink(label, value);
-            }
-        }
         this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
     }
 
@@ -514,15 +499,30 @@ export class Inspector {
         }
     }
 
-    buildUserGuideLink() {
-        $('.top-bar-controls #user-guide-link').remove();
-        const userGuideUrl = this._iv.getGuideLinkUrl();
-        const userGuideLink = $('<a></a>')
-                .attr('href', userGuideUrl)
-                .attr('id', 'user-guide-link')
+    buildDocumentationLink(id, label, target) {
+        const link = $('<a></a>')
+                .attr('href', target)
                 .attr('target', '_blank')
-                .text(i18next.t("menu.userGuide"));
-        userGuideLink.insertBefore('#toggle-dark-mode');
+                .addClass("external-link")
+                .text(label);
+        return $("<li></li>").append(link);
+    }
+
+    buildDocumentationLinks() {
+        const links = $('.documentation-links').empty();
+        const userGuideUrl = this._iv.getGuideLinkUrl();
+
+        links.append(this.buildDocumentationLink("user-guide-link", i18next.t("menu.userGuide"), userGuideUrl));
+
+        let supportLinkUrl = this._iv.getSupportLinkUrl();
+        if (supportLinkUrl) {
+            links.append(this.buildDocumentationLink("contact-us-link", i18next.t("menu.contactUs"), supportLinkUrl));
+        }
+
+        let surveyLinkUrl = this._iv.getSurveyLinkUrl();
+        if (surveyLinkUrl) {
+            links.append(this.buildDocumentationLink("survey-link", i18next.t("menu.survey"), surveyLinkUrl));
+        }
     }
 
     changeApplicationLanguage(lang) {
@@ -538,7 +538,7 @@ export class Inspector {
         this.buildHomeLink()
         this.buildToolbarHighlightMenu();
         this.buildHighlightKey();
-        this.buildUserGuideLink();
+        this.buildDocumentationLinks();
         this.buildSettingsPage();
         this.update();
         this.search();

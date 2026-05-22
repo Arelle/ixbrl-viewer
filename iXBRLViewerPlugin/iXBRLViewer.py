@@ -224,13 +224,11 @@ class IXBRLViewerBuilder:
         relSet = report.relationshipSet(XbrlConst.elementLabel)
         labels: dict[str, str] = {}
         for r in relSet.fromModelObject(roleType):
-            if (
-                result := self.getLabelData(
-                    r.toModelObject, requiredLabelRole=XbrlConst.genStandardLabel
-                )
-            ) is None:
+            if not isinstance(r.toModelObject, ModelResource):
                 continue
-            labels[result.lang] = result.value
+            result = self.getLabelData(r.toModelObject, requiredLabelRole=XbrlConst.genStandardLabel)
+            if result is not None:
+                labels[result.lang] = result.value
         return labels
 
     def addRoleDefinition(self, report: ModelXbrl, elr: str) -> None:
@@ -266,7 +264,7 @@ class IXBRLViewerBuilder:
             )
 
     def addConcept(self, report: ModelXbrl, concept: ModelConcept | None, dimensionType: str | None = None) -> None:
-        if concept is None:
+        if concept is None or concept.qname is None:
             return
         labelsRelationshipSet = report.relationshipSet(XbrlConst.conceptLabel)
         labels = labelsRelationshipSet.fromModelObject(concept)
@@ -277,6 +275,8 @@ class IXBRLViewerBuilder:
                 "labels": {  }
             }
             for lr in labels:
+                if not isinstance(lr.toModelObject, ModelResource):
+                    continue
                 if (result := self.getLabelData(lr.toModelObject)) is None:
                     continue
                 conceptData["labels"].setdefault(
@@ -286,12 +286,10 @@ class IXBRLViewerBuilder:
 
             refData = []
             if concept.modelXbrl is not None:
-                for _refRel in concept.modelXbrl.relationshipSet(
-                    XbrlConst.conceptReference
-                ).fromModelObject(concept):
-                    currentRef: ModelResource
-                    if (currentRef := _refRel.toModelObject) is None:
+                for _refRel in concept.modelXbrl.relationshipSet(XbrlConst.conceptReference).fromModelObject(concept):
+                    if not isinstance(_refRel.toModelObject, ModelResource):
                         continue
+                    currentRef = _refRel.toModelObject
                     ref = []
                     for _refPart in currentRef.iterchildren():
                         ref.append([_refPart.localName, _refPart.stringValue.strip()])
@@ -312,12 +310,12 @@ class IXBRLViewerBuilder:
             if concept.balance is not None:
                 conceptData['b'] = concept.balance
 
-            if concept.type is not None:
+            if concept.type is not None and concept.type.qname is not None:
                 conceptData['dt'] = self.nsmap.qname(concept.type.qname)
 
             if concept.isTypedDimension:
                 typedDomainElement = concept.typedDomainElement
-                if typedDomainElement is not None:
+                if isinstance(typedDomainElement, ModelConcept) and typedDomainElement.qname is not None:
                     typedDomainName = self.nsmap.qname(typedDomainElement.qname)
                     conceptData['td'] = typedDomainName
                     self.addConcept(report, typedDomainElement)
@@ -329,8 +327,8 @@ class IXBRLViewerBuilder:
             if r.toModelObject is not None:
                 self.treeWalk(rels, r.toModelObject, indent + 1)
 
-    def getRelationships(self, report: ModelXbrl) -> dict[str, dict[str, dict[str, list[dict[str, str]]]]]:
-        rels: dict[str, dict[str, dict[str, list[dict[str, str]]]]] = {}
+    def getRelationships(self, report: ModelXbrl) -> dict[str, dict[str, dict[str, list[dict[str, str | float]]]]]:
+        rels: dict[str, dict[str, dict[str, list[dict[str, str | float]]]]] = {}
 
         arcroles = {
             XbrlConst.summationItem,
@@ -343,19 +341,22 @@ class IXBRLViewerBuilder:
             arcrole, ELR, _linkqname, _arcqname = baseSetKey
             if ELR is not None and arcrole in arcroles:
                 self.addRoleDefinition(report, ELR)
-                rr: dict[str, list[dict[str, str]]] = {}
+                rr: dict[str, list[dict[str, str | float]]] = {}
                 relSet = report.relationshipSet(arcrole, ELR)
                 for r in relSet.modelRelationships:
-                    if r.fromModelObject is not None and r.toModelObject is not None:
-                        fromKey = self.nsmap.qname(r.fromModelObject.qname)
-                        rel = {
-                            "t": self.nsmap.qname(r.toModelObject.qname),
-                        }
-                        if r.weight is not None:
-                            rel['w'] = r.weight
-                        rr.setdefault(fromKey, []).append(rel)
-                        self.addConcept(report, r.toModelObject)
-                        self.addConcept(report, r.fromModelObject)
+                    if not isinstance(r.fromModelObject, ModelConcept) or not isinstance(r.toModelObject, ModelConcept):
+                        continue
+                    if r.fromModelObject.qname is None or r.toModelObject.qname is None:
+                        continue
+                    fromKey = self.nsmap.qname(r.fromModelObject.qname)
+                    rel: dict[str, str | float] = {
+                        "t": self.nsmap.qname(r.toModelObject.qname),
+                    }
+                    if r.weight is not None:
+                        rel['w'] = r.weight
+                    rr.setdefault(fromKey, []).append(rel)
+                    self.addConcept(report, r.toModelObject)
+                    self.addConcept(report, r.fromModelObject)
 
                 rels.setdefault(self.roleMap.getPrefix(arcrole), {})[self.roleMap.getPrefix(ELR)] = rr
         return rels

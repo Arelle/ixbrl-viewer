@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 import pytest
 from arelle import XbrlConst
 from arelle.ModelDocument import Type
+from arelle.ModelDtsObject import ModelConcept
 from arelle.ModelValue import qname
 from lxml import etree
 
@@ -199,6 +200,7 @@ class TestIXBRLViewer:
         )
 
         self.cash_concept = Mock(
+            spec=ModelConcept,
             qname=Mock(
                 localName='Cash',
                 prefix='us-gaap',
@@ -210,6 +212,7 @@ class TestIXBRLViewer:
         )
 
         to_concept = Mock(
+            spec=ModelConcept,
             qname=Mock(
                 localName='to_concept',
                 prefix='us-gaap',
@@ -220,6 +223,7 @@ class TestIXBRLViewer:
             type=self.monetary_type,
         )
         from_concept = Mock(
+            spec=ModelConcept,
             qname=Mock(
                 localName='from_concept',
                 prefix='us-gaap',
@@ -231,6 +235,7 @@ class TestIXBRLViewer:
         )
 
         dimension_concept = Mock(
+            spec=ModelConcept,
             qname=Mock(
                 localName='dimension',
                 prefix='us-gaap',
@@ -242,6 +247,7 @@ class TestIXBRLViewer:
         )
 
         typed_dimension_domain_concept = Mock(
+            spec=ModelConcept,
             qname=Mock(
                 localName='typed_dimension_domain',
                 prefix='us-gaap',
@@ -253,6 +259,7 @@ class TestIXBRLViewer:
         )
 
         typed_dimension_concept = Mock(
+            spec=ModelConcept,
             qname=Mock(
                 localName='typed_dimension',
                 prefix='us-gaap',
@@ -265,6 +272,7 @@ class TestIXBRLViewer:
         )
 
         member_concept = Mock(
+            spec=ModelConcept,
             qname=Mock(
                 localName='member',
                 prefix='us-gaap',

@@ -32,6 +32,9 @@ updates:
         patterns:
           - "stylelint*"
     ignore:
+      - dependency-name: "puppeteer-core"
+        versions:
+          - ">=25"
       - dependency-name: "puppeteer-screen-recorder"
         versions:
           - "3.0.5"

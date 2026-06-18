@@ -53,8 +53,8 @@
     "write-excel-file": "^4.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.4",
-    "@babel/preset-env": "^7.24.4",
+    "@babel/core": "^8.0.0",
+    "@babel/preset-env": "^8.0.0",
     "babel-jest": "^30.0.2",
     "base64-inline-loader": "^2.0.1",
     "html-loader": "^5.0.0",

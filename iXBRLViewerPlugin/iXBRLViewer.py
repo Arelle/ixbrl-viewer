@@ -378,6 +378,8 @@ class IXBRLViewerBuilder:
         return errors
 
     def addFact(self, report: ModelXbrl, f: ModelInlineFact) -> None:
+        if f.qname is None or f.context is None:
+            return
         if f.id is None:
             f.set("id", f"ixv-{self.idGen}")
 
@@ -432,6 +434,8 @@ class IXBRLViewerBuilder:
                 factData["d"] = d
 
         for v in f.context.qnameDims.values():
+            if v.dimensionQname is None:
+                continue
             if v.memberQname is not None:
                 aspects[self.nsmap.qname(v.dimensionQname)] = self.nsmap.qname(v.memberQname)
                 self.addConcept(report, v.member)

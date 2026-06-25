@@ -19,7 +19,6 @@ function localName(e) {
     }
 }
 
-
 export class Viewer {
     constructor(iv, iframes, reportSet) {
         this._iv = iv;
@@ -137,7 +136,7 @@ export class Viewer {
     // Returns an array of the chosen nodes as DOM nodes.
     //
     _wrapNode(n) {
-        if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue) )) {
+        if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue))) {
             let wrapper = "<span>";
             if (getComputedStyle(n).getPropertyValue("display") === "block") {
                 wrapper = '<div>';
@@ -270,7 +269,7 @@ export class Viewer {
         }
     }
 
-    _findOrCreateWrapperNode(domNode, inHidden) {
+    _findOrCreateWrapperNode(domNode, inHidden, vuid) {
         const v = this;
 
         if (inHidden) {
@@ -300,6 +299,7 @@ export class Viewer {
         const allNodes = [];
         for (const node of nodes) {
             let hasSubNodes = false;
+            this._addIdToNode(node, vuid);
             allNodes.push(node);
             node.classList.add("ixbrl-element");
             for (const subNode of node.querySelectorAll("*")) { 
@@ -318,14 +318,12 @@ export class Viewer {
 
 
     // Adds the specified ID to the "ivids" data list on the given node
-    _addIdToNodes(nodes, id) {
-        nodes.filter(".ixbrl-element").each((i, e) => {
-            const ivids = $(e).data('ivids') || [];
-            if (!ivids.includes(id)) {
-                ivids.push(id);
-            }
-            $(e).data('ivids', ivids);
-        });
+    _addIdToNode(node, id) {
+        const ivids = $(node).data('ivids') || [];
+        if (!ivids.includes(id)) {
+            ivids.push(id);
+        }
+        $(node).data('ivids', ivids);
     }
 
     _buildContinuationMaps() {
@@ -433,9 +431,8 @@ export class Viewer {
             if (isFact || isFootnote) {
                 // If @id is not present, it must be for a target document that wasn't processed.
                 if (n.hasAttribute("id")) {
-                    let nodes = this._findOrCreateWrapperNode(n, inHidden);
+                    let nodes = this._findOrCreateWrapperNode(n, inHidden, vuid);
 
-                    this._addIdToNodes(nodes, vuid);
                     let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
                     this._docOrderItemIndex.addItem(vuid, docIndex);
 
@@ -463,10 +460,8 @@ export class Viewer {
             }
             else if (isContinuation) {
                 if (n.hasAttribute("id") && this.continuationOfMap[vuid] !== undefined) {
-                    let nodes = this._findOrCreateWrapperNode(n, inHidden);
-
                     // For a continuation, store the IX ID(s) of the item(s), not the continuation
-                    this._addIdToNodes(nodes, this.continuationOfMap[vuid]);
+                    let nodes = this._findOrCreateWrapperNode(n, inHidden, this.continuationOfMap[vuid]);
 
                     this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
 
@@ -477,8 +472,7 @@ export class Viewer {
                 // Handle SEC/ESEF links-to-hidden
                 const vuid = viewerUniqueId(reportIndex, getIXHiddenLinkStyle(n));
                 if (vuid !== null) {
-                    let nodes = this._findOrCreateWrapperNode(n, inHidden);
-                    nodes.addClass("ixbrl-element").data('ivids', [vuid]);
+                    let nodes = this._findOrCreateWrapperNode(n, inHidden, vuid);
                     this._docOrderItemIndex.addItem(vuid, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */
@@ -671,7 +665,7 @@ export class Viewer {
     // have nested elements, we select the innermost, as this gives the most
     // intuitive behaviour when clicking "next".
     selectElementByClick(e) {
-        let itemIDList = [];
+        let itemIdList = [];
         const viewer = this;
         let sameContentAncestorVuid;
         // If the user clicked on a sub-element (and which is not also a proper
@@ -691,12 +685,16 @@ export class Viewer {
         // content as "e"
         e.parents(".ixbrl-element").addBack().each(function () { 
             const vuids = viewer._ixIdsForElement($(this));
-            itemIDList = itemIDList.concat(vuids);
-            if ($(this).text() == e.text() && sameContentAncestorVuid === undefined) {
+            for (const vuid of vuids) {
+                if (!itemIdList.includes(vuid)) {
+                    itemIdList.push(vuid);
+                }
+            }
+            if (sameContentAncestorVuid === undefined && $(this).text() == e.text()) {
                 sameContentAncestorVuid = vuids[0];
             }
         });
-        this.selectElement(sameContentAncestorVuid, itemIDList, true);
+        this.selectElement(sameContentAncestorVuid, itemIdList, true);
     }
 
     _mouseEnter(e) {
@@ -888,7 +886,17 @@ export class Viewer {
                 }
             }
             for (const [i, e] of elts.entries()) {
-                if (getComputedStyle(e).getPropertyValue("display") !== 'inline' && e.getBoundingClientRect().height == 0) {
+                if (getComputedStyle(e).getPropertyValue("display") !== 'inline') {
+                    if (e.getBoundingClientRect().height == 0) {
+                        e.classList.add("ixbrl-no-highlight");
+                    }
+                }
+                // inline element but only contains sub-elements => don't highlight
+                else if (Array.from(e.childNodes).every(n => (
+                        (n.nodeType === Node.ELEMENT_NODE && n.classList.contains("ixbrl-sub-element")) ||
+                        (n.nodeType === Node.TEXT_NODE && n.data.trim().length == 0) || 
+                        (n.nodeType !== Node.ELEMENT_NODE && n.nodeType !== Node.TEXT_NODE)
+                    ))) {
                     e.classList.add("ixbrl-no-highlight");
                 }
                 if (i % 100 === 0) {

@@ -4,7 +4,7 @@ import Decimal from 'decimal.js';
 import { setDefault } from './util.js';
 import { Interval } from './interval.js';
 import { FactSet } from './factset.js';
-import { CALC11_ARCROLE, CALC_ARCROLE } from './util.js';
+import { CALC11_ARCROLE, CALC_ARCROLE, CALC_ARCROLES } from './util.js';
 
 export class Calculation {
     
@@ -20,7 +20,7 @@ export class Calculation {
         const report = fact.report;
         if (!this._conceptToFact) {
             const ctf = {};
-            for (const version of [CALC_ARCROLE, CALC11_ARCROLE]) {
+            for (const version of CALC_ARCROLES) {
                 const rels = report.getChildRelationships(fact.conceptName(), version)
                 for (const [elr, rr] of Object.entries(rels)) {
                     setDefault(ctf, version, {});

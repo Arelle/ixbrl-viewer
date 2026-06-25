@@ -694,17 +694,6 @@ export class Inspector {
             spec[key] = $(`#${name} input:checked`).map((i,e) => $(e).val()).get();
         }
 
-
-        const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter?.includes(d.dataType.name));
-        if (
-            //XXX 
-            (spec.conceptTypeFilter == 'numeric' && selectedDataTypes.some(dt => !dt.isNumeric)) ||
-            (spec.conceptTypeFilter == 'text' && selectedDataTypes.some(dt => dt.isNumeric))) {
-            $("#search-filter-datatypes .datatype-conflict-warning").show();
-        }
-        else {
-            $("#search-filter-datatypes .datatype-conflict-warning").hide();
-        }
         return spec;
     }
 

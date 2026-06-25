@@ -46,6 +46,7 @@ export class Inspector {
         this._useCalc11 = true;
         this._curInspectorMode = undefined;
         this._prevInspectorMode = undefined;
+        this._searchReady = false;
     }
 
     i18nInit() {
@@ -554,6 +555,7 @@ export class Inspector {
         this.buildHighlightKey();
         this.buildDocumentationLinks();
         this.buildSettingsPage();
+        this.setupSearchControls();
         this.update();
         this.search();
     }
@@ -729,9 +731,14 @@ export class Inspector {
         return section; 
     }
 
-    setupSearchControls(viewer) {
+    setupSearchControls() {
         const inspector = this;
 
+        if (!this._searchReady) {
+            return;
+        }
+
+        $(".search-filters-body").empty();
         const visibilityOptions = [
             { value: "visible", label: i18next.t("inspector.visible") },
             { value: "hidden", label: i18next.t("inspector.hidden") },
@@ -855,6 +862,7 @@ export class Inspector {
     }
 
     searchReady() {
+        this._searchReady = true;
         this.setupSearchControls();
         $('#inspector').addClass('search-ready');
         $('#ixbrl-search').prop('disabled', false);

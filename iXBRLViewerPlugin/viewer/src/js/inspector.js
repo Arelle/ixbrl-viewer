@@ -460,6 +460,19 @@ export class Inspector {
                 .appendTo(appLangSetting);
         }
         appLangSetting.val(defaultAppLang);
+
+        const calculationModeSetting = $("#setting-calculation-mode");
+
+        if (this._reportSet.usesCalculations10() && !this._iv.isFeatureEnabled(FEATURE_HIDE_CALCULATION_MODE_OPTION)) {
+            calculationModeSetting
+                .off("change.setting")
+                .on("change.setting", e => this.setCalculationMode($(e.currentTarget).val() === "calc11"))
+                .closest(".section").show();
+        }
+        else {
+            calculationModeSetting.closest(".section").hide();
+        }
+
     }
 
     buildToolbarHighlightMenu() {

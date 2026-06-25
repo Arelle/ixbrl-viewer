@@ -14,7 +14,8 @@
     "reported-value": "Reported value",
     "showDetails": "Show details",
     "status": "Status",
-    "useCalculations11": "Use Calculations v1.1"
+    "useCalculations11": "Use Calculations v1.1",
+    "useLegacyCalculations": "Use legacy calculations"
   },
   "chart": {
     "comparisonChart": "Comparison chart"
@@ -115,9 +116,17 @@
     "settingsMenu": "Settings Menu",
     "settings": {
         "title": "Settings",
+        "colorMode": {
+            "title": "Viewer color mode",
+            "documentation": "Choose if Inline Viewer's appearance should be light or dark"
+        },
         "viewerLanguage": {
             "title": "Viewer language",
             "documentation": "Select the language you'd like to use with Inline Viewer"
+        },
+        "calculationMode": {
+            "title": "Calculation mode",
+            "documentation": "Select the calculation evaluation mode for legacy calculation relationships"
         }
     },
     "showAnalysisChart": "Show analysis chart",

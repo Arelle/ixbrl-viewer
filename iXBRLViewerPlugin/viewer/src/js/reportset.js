@@ -245,7 +245,7 @@ export class ReportSet {
         return this.reportsData().some(r => r.rels?.["w-n"] !== undefined);
     }
 
-    usesCalculations() {
+    usesCalculations10() {
         return this.reportsData().some(r => Object.keys(r.rels?.calc ?? {}).length > 0);
     }
 

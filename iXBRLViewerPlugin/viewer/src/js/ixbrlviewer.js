@@ -44,11 +44,6 @@ export class iXBRLViewer {
      * contents, or additional header elements inserted relative to the provided
      * style element.
      *
-     * extendDisplayOptionsMenu(menu)
-     *
-     * Called when the display options menu is created or recreated.  menu is a
-     * Menu object, and can be modified to add additional menu items.
-     *
      * extendHighlightKey(key)
      *
      * Called when the highlight color key is created.  key is an array of labels,

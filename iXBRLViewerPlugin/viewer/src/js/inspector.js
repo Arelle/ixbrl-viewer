@@ -153,9 +153,6 @@ export class Inspector {
                 inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
                 inspector.buildToolbarHighlightMenu();
 
-                inspector._optionsMenu = new Menu($("#display-options-menu"));
-                inspector.buildDisplayOptionsMenu();
-
                 inspector.setDefaultDocumentLanguage();
                 inspector.buildDocumentLanguages();
 
@@ -392,19 +389,6 @@ export class Inspector {
         }
     }
 
-    // XXX this is no longer used
-    buildDisplayOptionsMenu() {
-        this._optionsMenu.reset();
-        if (this._reportSet) {
-            // Options
-            if (this._reportSet.usesCalculations() && !this._iv.isFeatureEnabled(FEATURE_HIDE_CALCULATION_MODE_OPTION)) {
-                this._optionsMenu.addLabel(i18next.t("menu.options"));
-                this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
-            }
-        }
-        this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
-    }
-
     buildHomeLink() {
         $('#top-bar #home-link').remove();
         if (!this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_URL)) {
@@ -503,29 +487,6 @@ export class Inspector {
         this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
     }
 
-    buildHighlightKey() {
-        $(".highlight-key .items").empty();
-        let key;
-        if (this._iv.isReviewModeEnabled()) {
-            key = [
-                "XBRL Elements",
-                "Untagged Numbers",
-                "Untagged Dates",
-            ]
-        } else {
-            key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
-        }
-        this._iv.callPluginMethod("extendHighlightKey", key);
-
-        for (const [i, name] of key.entries()) {
-            $("<div>")
-                .addClass("item")
-                .append($("<span></span>").addClass("sample").addClass("sample-" + (i % HIGHLIGHT_COLORS)))
-                .append($("<span></span>").text(name))
-                .appendTo($(".highlight-key .items"));
-        }
-    }
-
     buildDocumentationLink(id, label, target) {
         const link = $('<a></a>')
                 .attr('href', target)
@@ -561,11 +522,8 @@ export class Inspector {
     rebuildViewer() {
         $("#ixv").localize();
         $('html').attr('lang', i18next.resolvedLanguage);
-        this.buildDisplayOptionsMenu();
         this.buildDocumentLanguages();
         this.buildHomeLink()
-        this.buildToolbarHighlightMenu();
-        this.buildHighlightKey();
         this.buildDocumentationLinks();
         this.buildSettingsPage();
         this.setupSearchControls();

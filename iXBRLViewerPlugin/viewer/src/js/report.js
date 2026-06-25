@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import { Concept } from "./concept.js";
-import { setDefault } from "./util.js";
+import { setDefault, CALC_ARCROLES } from "./util.js";
 import i18next from "i18next";
 
 // Class to represent the XBRL data from a single target document in a single
@@ -292,30 +292,26 @@ export class XBRLReport {
 
     isCalculationContributor(c) {
         if (this._calculationContributors === undefined) {
-            if (this._reportData.rels?.calc) {
-                this._calculationContributors = new Set(Object.values(this._reportData.rels.calc).flatMap(calculations => {
-                    return Object.values(calculations).flatMap(contributors => {
-                        return contributors.map(c => c.t);
-                    });
-                }));
-            } else {
-                this._calculationContributors = new Set();
+            this._calculationContributors = {};
+            for (const version of CALC_ARCROLES) {
+                const calcRels = this._reportData.rels?.[version] ?? {};
+                this._calculationContributors[version] = new Set(Object.values(calcRels).flatMap(calculations =>
+                    Object.values(calculations).flatMap(calcRow => calcRow.map(c => c.t))
+                ));
             }
         }
-        return this._calculationContributors.has(c);
+        return Object.values(this._calculationContributors).some(x => x.has(c));
     }
 
     isCalculationSummation(c) {
         if (this._calculationSummations === undefined) {
-            if (this._reportData.rels?.calc) {
-                this._calculationSummations = new Set(Object.values(this._reportData.rels.calc).flatMap(calculations => {
-                    return Object.keys(calculations);
-                }));
-            } else {
-                this._calculationSummations = new Set();
+            this._calculationSummations = {}
+            for (const version of CALC_ARCROLES) {
+                const calcRels = this._reportData.rels?.[version] ?? {};
+                this._calculationSummations[version] = new Set(Object.values(calcRels).flatMap(calculations => Object.keys(calculations)));
             }
         }
-        return this._calculationSummations.has(c);
+        return Object.values(this._calculationSummations).some(x => x.has(c));
     }
 
     /**

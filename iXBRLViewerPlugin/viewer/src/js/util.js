@@ -10,6 +10,7 @@ export const NAMESPACE_XBRLI = 'http://www.xbrl.org/2003/instance';
 
 export const CALC_ARCROLE = "calc";
 export const CALC11_ARCROLE = "calc11";
+export const CALC_ARCROLES = [ CALC_ARCROLE, CALC11_ARCROLE ];
 
 export const GLOSSARY_URL = "https://xbrl.org/glossary/";
 

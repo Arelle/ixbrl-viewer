@@ -64,9 +64,9 @@ const testReportData = {
     }
 };
 
-function testReportSet(facts) {
+function testReportSet(facts, reportData) {
     // Deep copy of standing data
-    const data = JSON.parse(JSON.stringify(testReportData));
+    const data = JSON.parse(JSON.stringify(reportData ?? testReportData));
     data.facts = facts;
     const reportset = new ReportSet(data);
     reportset._initialize();
@@ -81,6 +81,76 @@ function testFact(aspectData, value, decimals) {
 function getFact(reportSet, id) {
   return reportSet.getItemById(viewerUniqueId(0, id));
 }
+
+describe("isCalculationSummation / isCalculationContributor - calc 1.0", () => {
+    const reportSet = testReportSet({
+        "f1": testFact({"c": "eg:Total", "u": "iso2417:GBP"}, 10000, -3),
+        "f2": testFact({"c": "eg:Item1", "u": "iso2417:GBP"}, 12000, -3),
+        "f3": testFact({"c": "eg:Item2", "u": "iso2417:GBP"}, 2000, -3),
+    });
+
+    test("calc 1.0 - summation", () => {
+        const f1 =  getFact(reportSet, "f1");
+        expect(f1.isCalculationSummation()).toBe(true);
+        expect(f1.isCalculationContributor()).toBe(false);
+    });
+
+    test("calc 1.0 - contributor", () => {
+        const f2 =  getFact(reportSet, "f2");
+        expect(f2.isCalculationSummation()).toBe(false);
+        expect(f2.isCalculationContributor()).toBe(true);
+    });
+});
+
+describe("isCalculationSummation / isCalculationContributor - calc 1.1", () => {
+
+    const calc11ReportData = JSON.parse(JSON.stringify(testReportData));
+    calc11ReportData.rels.calc11 = calc11ReportData.rels.calc;
+    delete calc11ReportData.rels.calc;
+
+    const reportSet = testReportSet({
+        "f1": testFact({"c": "eg:Total", "u": "iso2417:GBP"}, 10000, -3),
+        "f2": testFact({"c": "eg:Item1", "u": "iso2417:GBP"}, 12000, -3),
+        "f3": testFact({"c": "eg:Item2", "u": "iso2417:GBP"}, 2000, -3),
+    }, calc11ReportData);
+
+    test("calc 1.1 - summation", () => {
+        const f1 =  getFact(reportSet, "f1");
+        expect(f1.isCalculationSummation()).toBe(true);
+        expect(f1.isCalculationContributor()).toBe(false);
+    });
+
+    test("calc 1.1 - contributor", () => {
+        const f2 =  getFact(reportSet, "f2");
+        expect(f2.isCalculationSummation()).toBe(false);
+        expect(f2.isCalculationContributor()).toBe(true);
+    });
+});
+
+describe("isCalculationSummation / isCalculationContributor - unknown calc version", () => {
+
+    const calcXReportData = JSON.parse(JSON.stringify(testReportData));
+    calcXReportData.rels.calc9 = calcXReportData.rels.calc;
+    delete calcXReportData.rels.calc;
+
+    const reportSet = testReportSet({
+        "f1": testFact({"c": "eg:Total", "u": "iso2417:GBP"}, 10000, -3),
+        "f2": testFact({"c": "eg:Item1", "u": "iso2417:GBP"}, 12000, -3),
+        "f3": testFact({"c": "eg:Item2", "u": "iso2417:GBP"}, 2000, -3),
+    }, calcXReportData);
+
+    test("calc 1.1 - summation", () => {
+        const f1 =  getFact(reportSet, "f1");
+        expect(f1.isCalculationSummation()).toBe(false);
+        expect(f1.isCalculationContributor()).toBe(false);
+    });
+
+    test("calc 1.1 - contributor", () => {
+        const f2 =  getFact(reportSet, "f2");
+        expect(f2.isCalculationSummation()).toBe(false);
+        expect(f2.isCalculationContributor()).toBe(false);
+    });
+});
 
 describe("Simple consistent calculation", () => {
     const reportSet = testReportSet({

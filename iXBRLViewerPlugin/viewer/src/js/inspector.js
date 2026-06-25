@@ -155,6 +155,9 @@ export class Inspector {
                 inspector._optionsMenu = new Menu($("#display-options-menu"));
                 inspector.buildDisplayOptionsMenu();
 
+                inspector.setDefaultDocumentLanguage();
+                inspector.buildDocumentLanguages();
+
                 inspector.buildHomeLink()
 
                 $("#ixv").localize();
@@ -363,25 +366,35 @@ export class Inspector {
         }
     }
 
-    buildDisplayOptionsMenu() {
-        this._optionsMenu.reset();
+    buildDocumentLanguages() {
         if (this._reportSet) {
-            // Doc language
-            const defaultDocLang = this.selectDefaultLanguage();
             const docLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
             const docLangs = [...this._reportSet.availableLanguages()]
                 .sort((a, b) => docLangNames.of(a).localeCompare(docLangNames.of(b)));
+            const languageSelect = $("select#document-language").empty();
+            if (docLangs.length > 1) {
+                languageSelect.closest("tbody").show();
+                for (const l of docLangs) {
+                    $("<option></option>")
+                        .text(docLangNames.of(l))
+                        .val(l)
+                        .prop("selected", l == this._viewerOptions.language)
+                        .appendTo(languageSelect);
+                }
+                languageSelect
+                    .off("change.setting")
+                    .on("change.setting", e => this.setDocumentLanguage($(e.currentTarget).val()));
+            }
+            else {
+                languageSelect.closest("tbody").hide();
+            }
+        }
+    }
 
-            this._optionsMenu.addLabel(i18next.t("menu.documentLanguage"));
-            this._optionsMenu.addCheckboxGroup(
-                docLangs,
-                Object.fromEntries(docLangs.map((l) => [l, docLangNames.of(l)])),
-                defaultDocLang,
-                (lang) => { this.setDocumentLanguage(lang); this.createOutline(); this.update() },
-                "select-language"
-            );
-            this.setDocumentLanguage(defaultDocLang);
-
+    // XXX this is no longer used
+    buildDisplayOptionsMenu() {
+        this._optionsMenu.reset();
+        if (this._reportSet) {
             // Options
             if (this._reportSet.usesCalculations() && !this._iv.isFeatureEnabled(FEATURE_HIDE_CALCULATION_MODE_OPTION)) {
                 this._optionsMenu.addLabel(i18next.t("menu.options"));
@@ -535,6 +548,7 @@ export class Inspector {
         $("#ixv").localize();
         $('html').attr('lang', i18next.resolvedLanguage);
         this.buildDisplayOptionsMenu();
+        this.buildDocumentLanguages();
         this.buildHomeLink()
         this.buildToolbarHighlightMenu();
         this.buildHighlightKey();
@@ -1384,8 +1398,8 @@ export class Inspector {
     }
 
     updateLabels(fact) {
-        const tbody = $("table.labels tbody").empty();  
-        for (const [role, roleLabel, label] of 
+        const tbody = $("table.labels tbody.labels").empty();
+        for (const [role, roleLabel, label] of
             Object.entries(fact.concept().labels())
             .map(([role, label]) => [role, fact.report.getLabelRoleLabel(role), label])
             .sort(this.labelRoleSort)) {
@@ -1949,20 +1963,23 @@ export class Inspector {
         return langs;
     }
 
-    selectDefaultLanguage() {
+    setDefaultDocumentLanguage() {
         const al = this._reportSet.availableLanguages();
         for (const pl of this.preferredLanguages()) {
             for (const l of al) {
                 if (l.toLowerCase() == pl.toLowerCase()) {
-                    return l;
+                    this._viewerOptions.language = l;
+                    return;
                 }
             }
         }
-        return this._reportSet.availableLanguages()[0];
+        this._viewerOptions.language = this._reportSet.availableLanguages()[0];
     }
 
     setDocumentLanguage(lang) {
         this._viewerOptions.language = lang;
+        this.createOutline();
+        this.update();
     }
 
     showValidationReport() {

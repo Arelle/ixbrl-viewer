@@ -143,6 +143,7 @@ export class Inspector {
                 $('#highlight-tags').on("click", () => inspector.toggleHighlightAllTags());
                 if (inspector.highlightTagsOnStartup()) {
                   $('#highlight-tags').addClass("checked");
+                  inspector.highlightAllTags(true);
                 }
                 $('#zoom-in').on("click", () => inspector.zoomRelative(1));
                 $('#zoom-out').on("click", () => inspector.zoomRelative(-1));

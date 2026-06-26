@@ -41,6 +41,13 @@ const testReportData = {
     "rels": {},
 };
 
+function testViewer() {
+    return {
+        documentCount: () => 1,
+        getTitle: () => "Document title",
+    };
+}
+
 function testReport(facts, ixData) {
     // Deep copy of standing data
     const data = JSON.parse(JSON.stringify(testReportData));
@@ -55,7 +62,7 @@ function fromFact(value) {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
-                    "u": "iso4217:USD", 
+                    "u": "iso4217:USD",
                     "p": "2017-01-01/2018-01-01",
                 }};
     return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
@@ -66,10 +73,10 @@ function toFact(value) {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
-                    "u": "iso4217:USD", 
+                    "u": "iso4217:USD",
                     "p": "2018-01-01/2019-01-01",
                 }};
-    
+
     return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
 }
 
@@ -105,6 +112,7 @@ describe("Scales filter options", () => {
                 "c": "eg:Concept1",
                 "u": isMonetary ? "iso4217:USD" : "test:shares",
                 "p": "2018-01-01/2019-01-01",
+                "e": "eg:1234",
             },
         };
     }
@@ -136,7 +144,7 @@ describe("Scales filter options", () => {
             ...monetaryFactData,
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(reportSet)
+        insp.initialize(reportSet, testViewer());
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual([
@@ -162,7 +170,7 @@ describe("Scales filter options", () => {
         const reportSet = testReport({
             ...monetaryFactData,
         }, ixData);
-        insp.initialize(reportSet)
+        insp.initialize(reportSet, testViewer());
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual([
@@ -188,7 +196,7 @@ describe("Scales filter options", () => {
         const reportSet = testReport({
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(reportSet)
+        insp.initialize(reportSet, testViewer());
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
         expect(scalesOptions).toEqual([
@@ -304,7 +312,7 @@ describe("Handle message", () => {
         });
         insp.handleMessage(event);
         expect(mockSelect).toHaveBeenCalledWith("0-");
-    })
+    });
     test("Invalid task", () => {
         mockSelect.mockClear();
         const event = generateEvent({

@@ -390,11 +390,11 @@ export class Inspector {
     }
 
     buildHomeLink() {
-        $('#top-bar #home-link').remove();
+        $('#top-bar div.home-link').remove();
         if (!this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_URL)) {
             return;
         }
-        $("#top-bar img.header").remove();
+        $("#top-bar div.logo").remove();
         let homeLinkUrl = this._iv.getStaticFeatureValue(FEATURE_HOME_LINK_URL);
         let homeLinkText;
         if (this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_LABEL)) {
@@ -411,11 +411,13 @@ export class Inspector {
             }
             homeLinkUrl += query;
         }
+        const homeLinkDiv = $("<div></div>")
+            .addClass("home-link");
         const homeLink = $('<a></a>')
                 .attr('href', homeLinkUrl)
-                .attr('id', 'home-link')
-                .text(homeLinkText);
-        $('#top-bar').prepend(homeLink);
+                .text(homeLinkText)
+                .appendTo(homeLinkDiv);
+        $('#top-bar').prepend(homeLinkDiv);
     }
 
     highlightTagsOnStartup() {

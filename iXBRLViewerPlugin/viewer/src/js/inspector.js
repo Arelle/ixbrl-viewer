@@ -150,13 +150,14 @@ export class Inspector {
 
                 inspector.initializeTooltips();
 
+                inspector.initializeReviewMode();
+
                 inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
-                inspector.buildToolbarHighlightMenu();
 
                 inspector.setDefaultDocumentLanguage();
                 inspector.buildDocumentLanguages();
-
                 inspector.buildHomeLink()
+
 
                 $("#ixv").localize();
 
@@ -217,6 +218,14 @@ export class Inspector {
                 }
             }, 500);
         });
+    }
+
+    initializeReviewMode() {
+        if (this._iv.isReviewModeEnabled()) {
+            $('#highlight-untagged-numbers').on("click", () => this.toggleHighlightUntaggedNumbers());
+            $('#highlight-untagged-dates').on("click", () => this.toggleHighlightUntaggedDates());
+            $(".review-mode-only").show();
+        }
     }
 
     initializeViewer() {
@@ -458,35 +467,6 @@ export class Inspector {
         else {
             calculationModeSetting.closest(".section").hide();
         }
-
-    }
-
-    buildToolbarHighlightMenu() {
-        const iv = this._iv;
-        this._toolbarMenu.reset();
-        this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked, explicitClick) => this.highlightAllTags(checked, explicitClick), "highlight-tags", null, this.highlightTagsOnStartup())
-        if (iv.isReviewModeEnabled()) {
-            this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
-                const body = iv.viewer.contents().find("body");
-                if (checked) {
-                    body.addClass("review-highlight-untagged-numbers");
-                }
-                else {
-                    body.removeClass("review-highlight-untagged-numbers");
-                }
-            }, "highlight-untagged-numbers", "highlight-tags");
-
-            this._toolbarMenu.addCheckboxItem("Untagged Dates", function (checked) {
-                const body = iv.viewer.contents().find("body");
-                if (checked) {
-                    body.addClass("review-highlight-untagged-dates");
-                }
-                else {
-                    body.removeClass("review-highlight-untagged-dates");
-                }
-            }, "highlight-untagged-dates", "highlight-untagged-numbers");
-        }
-        this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
     }
 
     buildDocumentationLink(id, label, target) {
@@ -583,6 +563,30 @@ export class Inspector {
         const control = $("#highlight-tags")
         control.toggleClass("checked");
         this.highlightAllTags(control.hasClass("checked"), true);
+    }
+
+    toggleHighlightUntaggedNumbers() {
+        const control = $("#highlight-untagged-numbers")
+        control.toggleClass("checked");
+        const body = this._viewer.contents().find("body");
+        if (control.hasClass("checked")) {
+            body.addClass("review-highlight-untagged-numbers");
+        }
+        else {
+            body.removeClass("review-highlight-untagged-numbers");
+        }
+    }
+
+    toggleHighlightUntaggedDates() {
+        const control = $("#highlight-untagged-dates")
+        control.toggleClass("checked");
+        const body = this._viewer.contents().find("body");
+        if (control.hasClass("checked")) {
+            body.addClass("review-highlight-untagged-dates");
+        }
+        else {
+            body.removeClass("review-highlight-untagged-dates");
+        }
     }
 
     factListRow(f) {

@@ -316,6 +316,30 @@ a {
       }
     }
 
+    #highlight-untagged-numbers {
+      &::after {
+        .icon-numbers();
+
+        font-size: 2rem;
+      }
+
+      &.checked {
+        background-color: var(--colour-highlight-1);
+      }
+    }
+
+    #highlight-untagged-dates {
+      &::after {
+        .icon-calendar();
+
+        font-size: 2rem;
+      }
+
+      &.checked {
+        background-color: var(--colour-highlight-2);
+      }
+    }
+
     #settings-button::before {
       .icon-cog();
 
@@ -1448,6 +1472,10 @@ a {
       display: flex;
     }
   }
+}
+
+.review-mode-only {
+  display: none;
 }
 
 .fact-link {

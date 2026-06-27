@@ -1,0 +1,26 @@
+{
+  "signatures": [
+    {
+      "id": "sig-tampered",
+      "signerName": "Jane Doe",
+      "signerRole": "CFO",
+      "verificationStatus": "invalid",
+      "revoked": false,
+      "algorithm": "RSA-PSS/SHA-256",
+      "targetDigest": "sha256-0000000000000000000000000000000000000000000000000000000000000000",
+      "publicKey": {"key_ops":["verify"],"ext":true,"alg":"PS256","kty":"RSA","n":"piHt3gXaqs8sqatAY8Wo5KXu5rHFvnsbO7NzpR5VOdGLOFyzL6iQqCTnV5-txzoAxs4oWr06OTPPG55Xmi0huAaDVieSsf7g48vL-UEEYpr9sAX8pjUnSeEnQSsWRp0U6DtebLxcIpuaV49gpfiR2ZkkmQnfApGhJfnANZvNVuUpkbkZRqNGktCX-3zUqgT9w9ahbybEYxlBKhDLH3y8Eb_g8UKswIz8PoE884XMRpzHGQwdE9OMms4QNALpmmCOJvhB5s5t66GQzES0KRqi8oX0UeUUPZbTMclb-ckQ5EUHT4Zpugz3ku6Lua9RkpxthoqnRVgzWCUhT9Kw1DYvcQ","e":"AQAB"},
+      "signatureValue": "3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3t7e3g",
+      "wholeReport": true,
+      "coverage": { "facts": [], "divs": [], "selectors": [] },
+      "coverageLabel": "Whole report",
+      "verificationTrace": [
+        { "name": "Fetch manifest", "outcome": "pass", "specRef": "D6 §4.1", "detail": {} },
+        { "name": "Parse signature record", "outcome": "pass", "specRef": "D6 §4.1", "detail": {} },
+        { "name": "Fetch subset file", "outcome": "pass", "specRef": "D6 §4.3", "detail": {} },
+        { "name": "Compute digest", "outcome": "pass", "specRef": "D6 §5.1", "detail": {} },
+        { "name": "Compare digests", "outcome": "fail", "specRef": "D6 §5.1", "detail": { "reason": "Digest mismatch: expected sha256-e3b0c44…, got sha256-0000000…" }, "testCases": ["TC-11", "TC-D6-05"] },
+        { "name": "PKI signature verify", "outcome": "fail", "specRef": "D6 §5.1", "detail": { "reason": "Signature value does not match public key", "pkiStatus": "invalid" }, "testCases": ["TC-PKI-02"] }
+      ]
+    }
+  ]
+}

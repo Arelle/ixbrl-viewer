@@ -1,0 +1,21 @@
+{
+  "signatures": [
+    {
+      "id": "sig-revoked",
+      "signerName": "Revoked Signer",
+      "signerRole": "Former CFO",
+      "verificationStatus": "revoked",
+      "revoked": true,
+      "algorithm": "RSA-PSS/SHA-256",
+      "targetDigest": "sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "wholeReport": true,
+      "coverage": { "facts": [], "divs": [], "selectors": [] },
+      "coverageLabel": "Whole report",
+      "verificationTrace": [
+        { "name": "Fetch manifest", "outcome": "pass", "specRef": "D6 §4.1" },
+        { "name": "Compare digests", "outcome": "pass", "specRef": "D6 §5.1" },
+        { "name": "Check revocation", "outcome": "fail", "specRef": "D6 §5.3", "detail": { "reason": "Signer certificate has been revoked" } }
+      ]
+    }
+  ]
+}

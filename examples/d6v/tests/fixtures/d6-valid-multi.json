@@ -1,0 +1,56 @@
+{
+  "signatures": [
+    {
+      "id": "sig-cfo",
+      "signerName": "Jane Doe",
+      "signerRole": "CFO",
+      "verificationStatus": "valid",
+      "revoked": false,
+      "algorithm": "RSA-PSS/SHA-256",
+      "targetDigest": "sha256-aabbccdd00112233445566778899aabbccddeeff00112233445566778899aabb",
+      "wholeReport": true,
+      "coverage": { "facts": [], "divs": [], "selectors": [] },
+      "coverageLabel": "Whole report",
+      "verificationTrace": [
+        { "name": "Fetch manifest", "outcome": "pass", "specRef": "D6 §4.1" },
+        { "name": "Compare digests", "outcome": "pass", "specRef": "D6 §5.1" }
+      ]
+    },
+    {
+      "id": "sig-ceo",
+      "signerName": "John Smith",
+      "signerRole": "CEO",
+      "verificationStatus": "valid",
+      "revoked": false,
+      "algorithm": "RSA-PSS/SHA-256",
+      "targetDigest": "sha256-1122334455667788990011223344556677889900112233445566778899001122",
+      "wholeReport": false,
+      "coverage": { "facts": ["f10", "f11"], "divs": ["management-report"], "selectors": [] },
+      "coverageLabel": "2 facts, 1 section",
+      "verificationTrace": [
+        { "name": "Fetch manifest", "outcome": "pass", "specRef": "D6 §4.1" },
+        { "name": "Compare digests", "outcome": "pass", "specRef": "D6 §5.1" }
+      ]
+    },
+    {
+      "id": "sig-auditor",
+      "signerName": "Audit Partner",
+      "signerRole": "Auditor",
+      "verificationStatus": "valid",
+      "revoked": false,
+      "algorithm": "RSA-PSS/SHA-256",
+      "targetDigest": "sha256-ffeeddccbbaa99887766554433221100ffeeddccbbaa99887766554433221100",
+      "wholeReport": false,
+      "coverage": {
+        "facts": [],
+        "divs": [],
+        "selectors": [{ "selector": ".audit-opinion" }]
+      },
+      "coverageLabel": "1 CSS selector",
+      "verificationTrace": [
+        { "name": "Fetch manifest", "outcome": "pass", "specRef": "D6 §4.1" },
+        { "name": "Compare digests", "outcome": "pass", "specRef": "D6 §5.1" }
+      ]
+    }
+  ]
+}

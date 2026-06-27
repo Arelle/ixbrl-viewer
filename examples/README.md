@@ -26,3 +26,5 @@ There is an [example plugin](example_plugin/README.md) that makes use of the [pl
 The [d6v plugin](d6v/README.md) is a more advanced example of the [plugin architecture](../PLUGINS.md).
 It adds D6 digital signature verification and display to inline XBRL reports, including signature status
 cards, coverage highlighting, and a META-INF inspector.
+
+![d6v valid demo](d6v/d6v-demo-valid.gif)

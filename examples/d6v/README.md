@@ -6,6 +6,14 @@ verification and display to inline XBRL reports.
 *Target specification: Digital Signatures in XBRL 1.0 (D6), Candidate
 Recommendation 2025-01-28.*
 
+### Valid signatures
+
+![d6v valid demo](d6v-demo-valid.gif)
+
+### Tampered signatures
+
+![d6v tampered demo](d6v-demo-invalid.gif)
+
 ## What it does
 
 - Adds a **Signature pane** inside the iXBRL Viewer inspector area

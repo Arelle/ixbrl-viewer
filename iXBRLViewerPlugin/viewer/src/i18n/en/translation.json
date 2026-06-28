@@ -59,7 +59,8 @@
     "viewCalculationDetails": "View calculation details"
   },
   "footnotes": {
-    "footnote": "Footnote"
+    "footnote": "Footnote",
+    "content": "Content"
   },
   "inspector": {
     "anchoring": "Anchoring",

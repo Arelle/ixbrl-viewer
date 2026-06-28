@@ -681,13 +681,13 @@ export class Inspector {
         return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0);
     }
 
-    buildSearchSection(fieldId, titleKey, options) {
+    buildSearchSection(fieldId, title, options) {
         const id = "search-filter-" + fieldId;
         const section = $("<div></div>")
             .attr("id", id)
             .addClass("filter-group");
         $("<h3></h3>")
-            .text(i18next.t(titleKey))
+            .text(title)
             .appendTo(section);
         for (const [i, o] of options.entries()) {
             const row = $("<div></div>")
@@ -721,29 +721,29 @@ export class Inspector {
             { value: "visible", label: i18next.t("inspector.visible") },
             { value: "hidden", label: i18next.t("inspector.hidden") },
         ];
-        this.buildSearchSection("visibility", "inspector.visibility", visibilityOptions).appendTo(".search-filters-body");
+        this.buildSearchSection("visibility", i18next.t("inspector.visibility"), visibilityOptions).appendTo(".search-filters-body");
 
         const conceptTypeOptions = [
             { value: "numeric", label: i18next.t("inspector.numericOption") },
             { value: "text", label: i18next.t("inspector.textOption") },
         ];
-        this.buildSearchSection("concept-type", "inspector.conceptType", conceptTypeOptions).appendTo(".search-filters-body");
+        this.buildSearchSection("concept-type", i18next.t("inspector.conceptType"), conceptTypeOptions).appendTo(".search-filters-body");
 
         const factValueOptions = [
             { value: "positive", label: i18next.t("inspector.positive") },
             { value: "negative", label: i18next.t("inspector.negative") },
         ];
-        this.buildSearchSection("fact-value", "inspector.factValue", factValueOptions).appendTo(".search-filters-body");
+        this.buildSearchSection("fact-value", i18next.t("inspector.factValue"), factValueOptions).appendTo(".search-filters-body");
 
         const periodOptions = Object.entries(this._search.periods).map(([k,v]) => ({ value: k, label: v}));
-        this.buildSearchSection("period", "inspector.period", periodOptions).appendTo(".search-filters-body");
+        this.buildSearchSection("period", i18next.t("inspector.period"), periodOptions).appendTo(".search-filters-body");
 
         const namespacesOptions = Array.from(this._reportSet.getUsedConceptPrefixes())
             .map(prefix => ({
                 value: prefix, 
                 label: `${this._reportSet.preferredPrefix(prefix)} (${this._reportSet.prefixMap()[prefix]})`
             }));
-        this.buildSearchSection("namespaces", "inspector.namespaces", namespacesOptions).appendTo(".search-filters-body");
+        this.buildSearchSection("namespaces", i18next.t("inspector.namespaces"), namespacesOptions).appendTo(".search-filters-body");
 
         const datatypesOptions = this._reportSet.getUsedConceptDataTypes()
             .map(dt => ({ 
@@ -751,7 +751,7 @@ export class Inspector {
                 label: dt.dataType.label() 
             }));
         if (datatypesOptions.length > 0) {
-            this.buildSearchSection("datatypes", "inspector.datatypes", datatypesOptions).appendTo(".search-filters-body");
+            this.buildSearchSection("datatypes", i18next.t("inspector.datatypes"), datatypesOptions).appendTo(".search-filters-body");
         }
 
         const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
@@ -761,7 +761,7 @@ export class Inspector {
                     value: td ?? ':default', 
                     label: td ?? `<${i18next.t("search.default")}>`
                 }));
-            this.buildSearchSection("target-document", "inspector.targetDocument", targetDocumentsOptions).appendTo(".search-filters-body");
+            this.buildSearchSection("target-document", i18next.t("inspector.targetDocument"), targetDocumentsOptions).appendTo(".search-filters-body");
         }
 
         const unitsOptions = Array.from(this._reportSet.getUsedUnits())
@@ -770,12 +770,12 @@ export class Inspector {
                 label: `${this._reportSet.getUnit(unit)?.label()} (${unit})`
             }));
         if (unitsOptions.length > 0) {
-            this.buildSearchSection("units", "inspector.units", unitsOptions).appendTo(".search-filters-body");
+            this.buildSearchSection("units", i18next.t("inspector.units"), unitsOptions).appendTo(".search-filters-body");
         }
 
         const scalesOptions = this._getScalesOptions();
         if (scalesOptions.length > 0) {
-            this.buildSearchSection("scales", "inspector.scales", scalesOptions).appendTo(".search-filters-body");
+            this.buildSearchSection("scales", i18next.t("inspector.scales"), scalesOptions).appendTo(".search-filters-body");
         }
 
         const dimensionTypeOptions = [
@@ -783,21 +783,21 @@ export class Inspector {
             { value: "explicit", label: i18next.t("inspector.explicitDimension") },
             { value: "typed", label: i18next.t("inspector.typedDimensions") },
         ];
-        this.buildSearchSection("dimension-type", "inspector.dimensions", dimensionTypeOptions).appendTo(".search-filters-body");
+        this.buildSearchSection("dimension-type", i18next.t("inspector.dimensions"), dimensionTypeOptions).appendTo(".search-filters-body");
 
         const calculationOptions = [
             { value: "none", label: i18next.t("inspector.noCalculations") },
             { value: "contributor", label: i18next.t("inspector.contributor") },
             { value: "summation", label: i18next.t("inspector.summation") },
         ];
-        this.buildSearchSection("calculations", "inspector.calculations", calculationOptions).appendTo(".search-filters-body");
+        this.buildSearchSection("calculations", i18next.t("inspector.calculations"), calculationOptions).appendTo(".search-filters-body");
 
         if (this.summary.mandatoryFactsCount() > 0) {
             const mandatoryFactsFilterOptions = [
                 { value: "mandatory", label: i18next.t("inspector.mandatoryFacts") },
                 { value: "other", label: i18next.t("inspector.otherFacts") },
             ];
-            this.buildSearchSection("mandatory-facts", "inspector.mandatoryFacts", mandatoryFactsFilterOptions).appendTo(".search-filters-body");
+            this.buildSearchSection("mandatory-facts", i18next.t("inspector.mandatoryFacts"), mandatoryFactsFilterOptions).appendTo(".search-filters-body");
         }
 
         $(".search-controls input, .search-filters input, .search-filters select").on("change", () => this.search());

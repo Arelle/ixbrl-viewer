@@ -6,12 +6,12 @@ export class Search {
 
     constructor(viewerPage) {
         this.#viewerPage = viewerPage;
-        this.filterToggle = new Button(this.#viewerPage,
-            '//*[contains(@class,"filter-toggle")]', 'Filter Toggle');
+        this.filterButton = new Button(this.#viewerPage,
+            '//*[contains(@class,"filter-toggle")]', 'Filter Button');
         this.reset = new Button(this.#viewerPage,
-            '//*[contains(@data-i18n,"inspector.reset")]', 'Reset');
+            '//*[contains(@class, "search-reset-filters")]', 'Reset');
         this.searchButton = new Button(this.#viewerPage,
-            '//*[contains(@class,"search-button")]', 'Search');
+            '//*[contains(@data-mode,"search-mode")]', 'Search');
         this.searchInput = new TextInput(this.#viewerPage,
             '//*[@id="ixbrl-search"]', 'Search Input');
     }
@@ -41,15 +41,15 @@ export class Search {
     }
 
     async filterConceptType(option) {
-        const dropdown = await this.#viewerPage.page
-            .waitForSelector('#search-filter-concept-type');
-        await dropdown.select(option);
+        const checkbox = await this.#viewerPage.page
+            .waitForSelector(`#search-filter-concept-type input[value = "${option}"]`);
+        await checkbox.click();
     }
 
     async filterPeriod(option) {
-        const dropdown = await this.#viewerPage.page
-            .waitForSelector('#search-filter-period select');
-        await dropdown.select(option);
+        const checkbox = await this.#viewerPage.page
+            .waitForSelector(`#search-filter-period input[value = "${option}"]`);
+        await checkbox.click();
     }
 
     getSearchResultCard(conceptName) {
@@ -63,11 +63,9 @@ export class SearchResultCard {
     constructor(viewerPage, conceptName) {
         this.conceptName = conceptName;
         this.#viewerPage = viewerPage;
-        this.locator = `//*[contains(@class,"title")
+        this.locator = `//*[contains(@class,"search-results")]//*[contains(@class,"title")
             and contains(text(),"${this.conceptName}")]
             //ancestor::*[contains(@class,"fact-list-item")]`;
-        this.selectButton = new Button(this.#viewerPage,
-            `${this.locator}//*[contains(@class,"select-icon")]`,
-            'Select Button');
+        this.selectButton = new Button(this.#viewerPage, this.locator, 'Select Button');
     }
 }

@@ -44,6 +44,12 @@ export class Button {
         await button.click();
     }
 
+    async doubleClick() {
+        this.#viewerPage.log(`Select ${this.#name}`);
+        const button = await this.getButtonElement();
+        await button.click({count:2});
+    }
+
     async getButtonElement() {
         return await this.#viewerPage.page.waitForSelector(
             'xpath/' + this.#xpathSelector, { visible: true });

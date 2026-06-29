@@ -1,18 +1,18 @@
-import { Checkbox } from '../core_elements.js';
+import { Button } from '../core_elements.js';
 
 export class Toolbar {
     #viewerPage;
 
     constructor(viewerPage) {
         this.#viewerPage = viewerPage;
-        this.xbrlElementHighlight = new Checkbox(this.#viewerPage,
-            '//*[contains(@class,"top-bar-controls")]//*[contains(text(),"XBRL Elements")]//input',
+        this.xbrlElementHighlight = new Button(this.#viewerPage,
+            '//button[@id="highlight-tags"]',
             'XBRL Element Highlight');
-        this.unTaggedDateHighlight = new Checkbox(this.#viewerPage,
-            '//*[contains(@class,"top-bar-controls")]//*[contains(text(),"Untagged Dates")]//input',
+        this.unTaggedDateHighlight = new Button(this.#viewerPage,
+            '//button[@id="highlight-untagged-dates"]',
             'Untagged Dates');
-        this.unTaggedNumberHighlight = new Checkbox(this.#viewerPage,
-            '//*[contains(@class,"top-bar-controls")]//*[contains(text(),"Untagged Numbers")]//input',
+        this.unTaggedNumberHighlight = new Button(this.#viewerPage,
+            '//button[@id="highlight-untagged-numbers"]',
             'Untagged Numbers');
     }
 }

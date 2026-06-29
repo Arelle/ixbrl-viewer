@@ -5,6 +5,9 @@
 .vscode
 build
 node_modules/
+examples/d6v/demo/fonts/
+examples/d6v/demo/tampered/
+examples/d6v/demo/valid/
 dist/
 docs/_build
 docs/source/apidocs

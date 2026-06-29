@@ -1,0 +1,34 @@
+{
+  "signatures": [
+    {
+      "id": "sig-1",
+      "signerName": "Jane Doe",
+      "signerRole": "CFO",
+      "verificationStatus": "valid",
+      "revoked": false,
+      "algorithm": "RSA-PSS/SHA-256",
+      "targetDigest": "sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicKey": {"key_ops":["verify"],"ext":true,"alg":"PS256","kty":"RSA","n":"piHt3gXaqs8sqatAY8Wo5KXu5rHFvnsbO7NzpR5VOdGLOFyzL6iQqCTnV5-txzoAxs4oWr06OTPPG55Xmi0huAaDVieSsf7g48vL-UEEYpr9sAX8pjUnSeEnQSsWRp0U6DtebLxcIpuaV49gpfiR2ZkkmQnfApGhJfnANZvNVuUpkbkZRqNGktCX-3zUqgT9w9ahbybEYxlBKhDLH3y8Eb_g8UKswIz8PoE884XMRpzHGQwdE9OMms4QNALpmmCOJvhB5s5t66GQzES0KRqi8oX0UeUUPZbTMclb-ckQ5EUHT4Zpugz3ku6Lua9RkpxthoqnRVgzWCUhT9Kw1DYvcQ","e":"AQAB"},
+      "signatureValue": "LVz8vlkDvRlWq_1CB0yUcEXvVqix9EWyHHRzSQvIDfWvY-PdtT8VA9R0XHFKnz3T_mOHAgJDIOzbO0N60XBupjui1ZITmvL0rbblTjYt0HazbimnQqf2ABXeVGiiRQfCRISsW5WpsEwIM6jBghPoFXvB4r2rABQQxLwOlmdmCIDPIpcmVCLQ0stUfRwD5dwAofnJWCLVaBrx9CDNepW4ZEcyubwkJdSwX7oFqfWttF9g5XsfoN5qYSxBJiPTwO8FyU4IrFpjtjS-tkOjNp7P-GI67ee4PV8KtjOEP4fAR-xUc95tfvGTLBmCC_9y09QjQMN6-G8t46iRa3dxsYhV8g",
+      "signatureFile": "META-INF/sig-1.json",
+      "subsetFile": "META-INF/subset-1.json",
+      "wholeReport": false,
+      "coverage": {
+        "facts": ["f1", "f2", "f3"],
+        "divs": ["audit-section"],
+        "selectors": []
+      },
+      "coverageLabel": "3 facts, 1 section",
+      "verificationTrace": [
+        { "name": "Fetch manifest", "outcome": "pass", "specRef": "D6 §4.1", "testCases": ["TC-01"], "detail": {} },
+        { "name": "Parse signature record", "outcome": "pass", "specRef": "D6 §4.1", "testCases": ["TC-05"], "detail": {} },
+        { "name": "Fetch subset file", "outcome": "pass", "specRef": "D6 §4.3", "testCases": ["TC-D6-01"], "detail": {} },
+        { "name": "Compute digest", "outcome": "pass", "specRef": "D6 §5.1", "testCases": ["TC-10"], "detail": {} },
+        { "name": "Compare digests", "outcome": "pass", "specRef": "D6 §5.1", "testCases": ["TC-10"], "detail": {} },
+        { "name": "Check revocation", "outcome": "pass", "specRef": "D6 §5.3", "testCases": ["TC-14"], "detail": {} },
+        { "name": "Resolve coverage", "outcome": "pass", "specRef": "D6 §4.3", "testCases": ["TC-15", "TC-17"], "detail": {} },
+        { "name": "PKI signature verify", "outcome": "pass", "specRef": "D6 §5.1", "testCases": ["TC-PKI-01"], "detail": { "algorithm": "RSA-PSS/SHA-256", "pkiStatus": "valid" } }
+      ]
+    }
+  ]
+}

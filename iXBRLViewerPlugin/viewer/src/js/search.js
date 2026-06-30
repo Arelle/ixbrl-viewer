@@ -94,31 +94,34 @@ export class ReportSearch {
 
     visibilityFilter(s, item) {
         return (
-                s.visibilityFilter === '*' ||
-                s.visibilityFilter === 'visible' && !item.isHidden() ||
-                s.visibilityFilter === 'hidden' && item.isHidden()
+            s.visibilityFilter.length == 0 ||
+            s.visibilityFilter.includes('visible') && !item.isHidden() ||
+            s.visibilityFilter.includes('hidden') && item.isHidden()
         )
     }
 
     periodFilter(s, item) {
         return (
-            s.periodFilter.length === 0 ||
+            s.periodFilter.length == 0 ||
             s.periodFilter.some(p => item.period().key() === p)
         );
     }
 
     conceptTypeFilter(s, item) {
         return (
-            s.conceptTypeFilter === '*' ||
-            s.conceptTypeFilter === (item.isNumeric() ? 'numeric' : 'text')
+            s.conceptTypeFilter.length == 0 ||
+            s.conceptTypeFilter.includes("numeric") && item.isNumeric() ||
+            s.conceptTypeFilter.includes("text") && !item.isNumeric()
         );
     }
 
     dimensionTypeFilter(s, item) {
         const typed = s.dimensionTypeFilter.includes('typed');
         const explicit = s.dimensionTypeFilter.includes('explicit');
+        const none = s.dimensionTypeFilter.includes('none');
         return (
-            s.dimensionTypeFilter.length === 0 ||
+            s.dimensionTypeFilter.length == 0 ||
+            (none && !item.hasTypedDimension() && !item.hasExplicitDimension()) ||
             (typed && item.hasTypedDimension()) ||
             (explicit && item.hasExplicitDimension())
         )
@@ -126,17 +129,19 @@ export class ReportSearch {
 
     factValueFilter(s, item) {
         return (
-            s.factValueFilter === '*' ||
-            (s.factValueFilter === 'positive' && item.isPositive()) ||
-            (s.factValueFilter === 'negative' && item.isNegative())
+            s.factValueFilter.length == 0 ||
+            (s.factValueFilter.includes('positive') && item.isPositive()) ||
+            (s.factValueFilter.includes('negative') && item.isNegative())
         );
     }
 
     calculationsFilter(s, item) {
         const summation = s.calculationsFilter.includes('summation');
         const contributor = s.calculationsFilter.includes('contributor');
+        const none = s.calculationsFilter.includes('none');
         return (
-            s.calculationsFilter.length === 0 ||
+            s.calculationsFilter.length == 0 ||
+            (none && !item.isCalculationSummation() && !item.isCalculationContributor()) ||
             (summation && item.isCalculationSummation()) ||
             (contributor && item.isCalculationContributor())
         );
@@ -144,45 +149,47 @@ export class ReportSearch {
 
     namespacesFilter(s, item) {
         return (
-            s.namespacesFilter.length === 0 ||
+            s.namespacesFilter.length == 0 ||
             s.namespacesFilter.some(p => item.getConceptPrefix() === p)
         );
     }
 
     dataTypesFilter(s, item) {
         return (
-            s.dataTypesFilter == null ||
-            s.dataTypesFilter.length === 0 ||
+            s.dataTypesFilter.length == 0 ||
             s.dataTypesFilter.some(p => item.concept().dataType()?.name === p)
         );
     }
 
     unitsFilter(s, item) {
         return (
-                s.unitsFilter.length === 0 ||
-                s.unitsFilter.some(u => item.unit()?.value() === u)
+            s.unitsFilter.length == 0 ||
+            s.unitsFilter.some(u => item.unit()?.value() === u)
         );
     }
 
     scalesFilter(s, item) {
         return (
-                s.scalesFilter.length === 0 ||
-                s.scalesFilter.some(x => item.scale() === Number(x))
+            s.scalesFilter.length == 0 ||
+            s.scalesFilter.some(x => item.scale() === Number(x))
         );
     }
 
     targetDocumentFilter(s, item) {
         return (
-            s.targetDocumentFilter.length === 0 ||
+            s.targetDocumentFilter.length == 0 ||
             s.targetDocumentFilter.some(t => (item.targetDocument() ?? ':default') === t)
         );
     }
 
     mandatoryFactFilter(s, item) {
-        if(!s.showMandatoryFacts) {
-            return true;
-        }
-        return item.isMandatory();
+        const includeMandatory = s.mandatoryFactsFilter.includes('mandatory');
+        const includeOther = s.mandatoryFactsFilter.includes('other');
+        return (
+            s.mandatoryFactsFilter.length === 0 ||
+            (item.isMandatory() && includeMandatory) ||
+            (!item.isMandatory() && includeOther)
+        );
     }
 
     search(s) {

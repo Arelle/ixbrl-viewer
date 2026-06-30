@@ -1,18 +1,15 @@
 // See COPYRIGHT.md for copyright information
 
 .block-list-item {
-  margin: 0.5rem 0;
-  padding: 0.3rem 0.9rem;
-  background-color: var(--colour-button-bg);
+  margin: 0.8rem 0;
+  padding: 0.8rem 1.6rem;
   cursor: pointer;
   position: relative;
-  border-left: solid 0.4rem var(--colour-button-bg);
-  border-right: none;
-  border-top: none;
-  border-bottom: none;
-  border-radius: 0;
+  border: solid 0.1rem var(--colour-border-grey);
+  border-radius: 0.8rem;
   text-align: left;
   width: 100%;
+  display: block;
 
   & > * {
     margin: 0.8rem 0;
@@ -28,8 +25,8 @@
   }
 
   &.selected {
-    border-left: solid 0.4rem var(--colour-primary);
-    background-color: var(--colour-bg-selected);
+    border: solid 0.2rem var(--colour-primary);
+    padding: 0.7rem 1.5rem;
   }
 
   &.linked-highlight {

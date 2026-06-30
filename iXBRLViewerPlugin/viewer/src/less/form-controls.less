@@ -3,12 +3,14 @@
 input[type="text"],
 select,
 button {
-  padding: 7px 5px;
+  padding: 1rem;
   border: solid 1px var(--colour-border-grey);
-  border-radius: 5px;
+  border-radius: 0.4rem;
   color: var(--colour-text);
   background-color: unset;
   box-sizing: border-box;
+  font-size: 1.4rem;
+  line-height: 1.8rem;
 }
 
 .square-button-bare {
@@ -105,6 +107,33 @@ input:disabled {
   color: var(--colour-primary);
   padding: 0.3rem;
   border: none;
+  line-height: 2.6rem;
+  text-align: left;
+  
+  &.underline {
+    padding-top: 0;
+    padding-bottom: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--colour-primary-light);
+    text-underline-offset: 0.5rem;
+
+    &.link-icon > div {
+      position: relative;
+      margin-left: 2.8rem;
+
+      &::before {
+        .icon-link();
+
+        position: absolute;
+        font-size: 1.8rem;
+        left: -2.8rem;
+      }
+    }
+  }
+
+  &.negate-padding {
+    margin-left: -0.3rem;
+  }
 }
 
 .bare-button {
@@ -113,4 +142,40 @@ input:disabled {
   color: var(--colour-primary);
   padding: 0.3rem;
   border: none;
+}
+
+.primary-button {
+  background-color: var(--colour-button-primary-bg);
+  border: solid 0.1rem var(--colour-button-primary-border);
+  color: var(--colour-button-primary-text);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--colour-button-primary-bg-hover);
+  }
+}
+
+.secondary-button {
+  background-color: var(--colour-button-secondary-bg);
+  border: solid 0.1rem var(--colour-button-secondary-border);
+  color: var(--colour-button-secondary-text);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--colour-button-secondary-bg-hover);
+  }
+}
+
+.icon-button {
+  cursor: pointer;
+  padding: 0.8rem;
+  border: none;
+
+  &:hover {
+    background-color: var(--colour-row-hover);
+  }
+
+  &.checked {
+    background-color: var(--colour-row-hover);
+  }
 }

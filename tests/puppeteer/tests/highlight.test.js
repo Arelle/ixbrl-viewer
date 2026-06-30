@@ -122,12 +122,12 @@ describe('ixbrl-viewer:', () => {
             ...inactiveGaapFactHighlights, ...inactiveDeiFactHighlights]);
 
         // Enable fact highlights and assert values
-        await viewerPage.toolbar.xbrlElementHighlight.toggleOn();
+        await viewerPage.toolbar.xbrlElementHighlight.select();
         await viewerPage.docFrame.assertHighlights([
             ...activeGaapFactHighlights, ...activeDeiFactHighlights]);
 
         // Disable highlights
-        await viewerPage.toolbar.xbrlElementHighlight.toggleOff();
+        await viewerPage.toolbar.xbrlElementHighlight.select();
 
         // Assert values are no longer highlighted
         await viewerPage.docFrame.assertHighlights([
@@ -145,7 +145,7 @@ describe('ixbrl-viewer:', () => {
         ]);
 
         // Enable untagged date highlighting and assert values
-        await viewerPage.toolbar.unTaggedDateHighlight.toggleOn();
+        await viewerPage.toolbar.unTaggedDateHighlight.select();
         await viewerPage.docFrame.assertHighlights([
             ...activeUntaggedDateHighlights,
             ...inactiveUntaggedNumberHighlights,
@@ -153,7 +153,7 @@ describe('ixbrl-viewer:', () => {
         ]);
 
         // Enable untagged number highlighting and assert values
-        await viewerPage.toolbar.unTaggedNumberHighlight.toggleOn();
+        await viewerPage.toolbar.unTaggedNumberHighlight.select();
         await viewerPage.docFrame.assertHighlights([
             ...activeUntaggedNumberHighlights,
             ...activeUntaggedDateHighlights,
@@ -162,7 +162,7 @@ describe('ixbrl-viewer:', () => {
         ]);
 
         // Enable fact highlights and assert values
-        await viewerPage.toolbar.xbrlElementHighlight.toggleOn();
+        await viewerPage.toolbar.xbrlElementHighlight.select();
         await viewerPage.docFrame.assertHighlights([
             ...activeReviewFactHighlights,
             ...activeUntaggedNumberHighlights,
@@ -170,11 +170,11 @@ describe('ixbrl-viewer:', () => {
         ]);
 
         // Disable highlights
-        await viewerPage.toolbar.unTaggedDateHighlight.toggleOff();
+        await viewerPage.toolbar.unTaggedDateHighlight.select();
         await viewerPage.waitMilliseconds(100);
-        await viewerPage.toolbar.unTaggedNumberHighlight.toggleOff();
+        await viewerPage.toolbar.unTaggedNumberHighlight.select();
         await viewerPage.waitMilliseconds(100);
-        await viewerPage.toolbar.xbrlElementHighlight.toggleOff();
+        await viewerPage.toolbar.xbrlElementHighlight.select();
 
         // Assert values are no longer highlighted
         await viewerPage.docFrame.assertHighlights([

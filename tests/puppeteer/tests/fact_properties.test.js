@@ -27,21 +27,23 @@ describe('ixbrl-viewer',() => {
                 await viewerPage.docFrame.selectFact('dei:DocumentType');
 
                 // Assert the fact details
-                await detailsPanel.concept.assertText('(dei) Document Type');
+                await detailsPanel.concept.assertText('Document Type');
                 await detailsPanel.date.assertText('1 Jan 2020 to 30 Sep 2020');
                 await detailsPanel.factValue.assertText(documentType);
                 await detailsPanel.accuracy.assertText('n/a');
                 await detailsPanel.entity.assertText('[CIK] 0000990763');
+                await detailsPanel.source.assertText('dei');
 
                 // Navigate to the previous fact (last fact in document)
                 await detailsPanel.previousFact.select();
 
                 // Assert the previous fact was selected
-                await detailsPanel.concept.assertText('(us-gaap) Revenues');
+                await detailsPanel.concept.assertText('Revenues');
                 await detailsPanel.date.assertText('1 Jan 2011 to 31 Mar 2011');
                 await detailsPanel.factValue.assertText('US $ 5,117,000,000');
                 await detailsPanel.accuracy.assertText('millions');
                 await detailsPanel.entity.assertText('[CIK] 0000990763');
+                await detailsPanel.source.assertText('us-gaap');
 
                 // Assert Calculations
                 await detailsPanel.assertCalculation('1001002 - Statement - Statement', {
@@ -49,7 +51,7 @@ describe('ixbrl-viewer',() => {
                         'Other Income': '+',
                         'Net Investment Income': '+',
                         'Premiums Earned, Net': '+',
-                        'Revenues': ''
+                        'TOTAL': '='
                 });
 
                 // Assert footnotes applied
@@ -57,7 +59,8 @@ describe('ixbrl-viewer',() => {
 
                 // Navigate to next fact and assert it takes us back to the first one
                 await detailsPanel.nextFact.select();
-                await detailsPanel.concept.assertText('(dei) Document Type');
+                await detailsPanel.concept.assertText('Document Type');
+                await detailsPanel.source.assertText('dei');
 
                 // Duplicate Facts - Verify we're looking at fact 1 of 2
                 await detailsPanel.duplicateText.assertText('1 of 2');

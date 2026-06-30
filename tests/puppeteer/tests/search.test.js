@@ -38,9 +38,9 @@ describe('ixbrl-viewer:', () => {
         await search.assertSearchResultsContain([concept1, concept2, concept4]);
 
         // Navigate to the fact details for concept1
-        await search.getSearchResultCard(concept1).selectButton.select();
+        await search.getSearchResultCard(concept1).selectButton.doubleClick();
         await viewerPage.factDetailsPanel.concept
-            .assertText('(dei) Entity Address, City or Town');
+            .assertText('Entity Address, City or Town');
 
         // Assert the fact was highlighted in the document
         await docFrame.assertHighlights([Highlight.selectedFact('Ames')]);
@@ -51,12 +51,12 @@ describe('ixbrl-viewer:', () => {
         await search.assertSearchResultsContain([concept1, concept2, concept4]);
 
         // Select concept2 fact and assert selection changes
-        await search.getSearchResultCard(concept2).selectButton.select();
+        await search.getSearchResultCard(concept2).selectButton.doubleClick();
         await docFrame.assertHighlights(
             [Highlight.selectedFact('Ames', false)]);
         await docFrame.assertHighlights([Highlight.selectedFact('IA')]);
         await viewerPage.factDetailsPanel.concept.assertText(
-            '(dei) Entity Address, State or Province');
+            'Entity Address, State or Province');
 
         // Return to search and test hover highlight
         await search.searchButton.select();
@@ -69,7 +69,7 @@ describe('ixbrl-viewer:', () => {
             .assertHighlights([Highlight.searchHover('Ames', false)]);
 
         // Filter by concept type and assert values have been filtered
-        await search.filterToggle.select();
+        await search.filterButton.select();
         await search.filterConceptType('numeric');
         await search.assertSearchResultsContain([concept4]);
         await search.assertSearchResultsDoNotContain([concept1, concept2]);

@@ -99,17 +99,18 @@ function testReportSet(reports) {
 function testSearchSpec(searchString='') {
     const spec = {};
     spec.searchString = searchString;
-    spec.visibilityFilter = '*';
+    spec.visibilityFilter = [];
     spec.namespacesFilter = [];
     spec.unitsFilter = [];
     spec.scalesFilter = [];
     spec.periodFilter = [];
-    spec.conceptTypeFilter = '*';
+    spec.conceptTypeFilter = [];
     spec.dataTypesFilter = [];
     spec.dimensionTypeFilter = [];
-    spec.factValueFilter = '*';
+    spec.factValueFilter = [];
     spec.calculationsFilter = [];
     spec.targetDocumentFilter = [];
+    spec.mandatoryFactsFilter = [];
     return spec;
 }
 
@@ -134,7 +135,7 @@ describe("Search fact value filter", () => {
 
     test("Fact Value Negative filter works", () => {
         const spec = testSearchSpec('Cash');
-        spec.factValueFilter = 'negative'
+        spec.factValueFilter = ['negative'];
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"].localId()).toEqual("negative")
@@ -142,8 +143,8 @@ describe("Search fact value filter", () => {
 
     test("Fact Value Negative filter works with other filter", () => {
         const spec = testSearchSpec('Cash');
-        spec.factValueFilter = 'negative'
-        spec.periodFilter = ['2018-01-01/2019-01-01']
+        spec.factValueFilter = ['negative'];
+        spec.periodFilter = ['2018-01-01/2019-01-01'];
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"].localId()).toEqual("negative")
@@ -151,7 +152,7 @@ describe("Search fact value filter", () => {
 
     test("Fact Value Positive filter works", () => {
         const spec = testSearchSpec('Cash');
-        spec.factValueFilter = 'positive'
+        spec.factValueFilter = ['positive'];
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)
         expect(results[0]["fact"].localId()).toEqual("positive")
@@ -159,7 +160,7 @@ describe("Search fact value filter", () => {
 
     test("Fact Value Positive filter works with other filter", () => {
         const spec = testSearchSpec('Cash');
-        spec.factValueFilter = 'positive'
+        spec.factValueFilter = ['positive'];
         spec.periodFilter = ['2018-01-01/2019-01-01']
         const results = reportSearch.search(spec);
         expect(results.length).toEqual(1)

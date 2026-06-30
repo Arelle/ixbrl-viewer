@@ -170,10 +170,10 @@ describe("Label role labels", () => {
     testReportSet._initialize();
     const testReport = testReportSet.reports[0];
     test("Built-in (via i18n)", () => {
-        expect(testReport.getLabelRoleLabel("std")).toBe("Standard Label");
+        expect(testReport.getLabelRoleLabel("std")).toBe("Standard");
     });
     test("Built-in (via i18n)", () => {
-        expect(testReport.getLabelRoleLabel("doc")).toBe("Documentation Label");
+        expect(testReport.getLabelRoleLabel("doc")).toBe("Documentation");
     });
     test("Built-in (via de-camelcase)", () => {
         expect(testReport.getLabelRoleLabel("verbose")).toBe("Verbose Label");

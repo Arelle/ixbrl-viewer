@@ -41,6 +41,13 @@ const testReportData = {
     "rels": {},
 };
 
+function testViewer() {
+    return {
+        documentCount: () => 1,
+        getTitle: () => "Document title",
+    };
+}
+
 function testReport(facts, ixData) {
     // Deep copy of standing data
     const data = JSON.parse(JSON.stringify(testReportData));
@@ -55,7 +62,7 @@ function fromFact(value) {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
-                    "u": "iso4217:USD", 
+                    "u": "iso4217:USD",
                     "p": "2017-01-01/2018-01-01",
                 }};
     return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
@@ -66,10 +73,10 @@ function toFact(value) {
                 "v": value,
                 "a": {
                     "c": "eg:Concept1",
-                    "u": "iso4217:USD", 
+                    "u": "iso4217:USD",
                     "p": "2018-01-01/2019-01-01",
                 }};
-    
+
     return testReport({"f1": factData}, {"f1": {} }).getItemById("0-f1");
 }
 
@@ -105,6 +112,7 @@ describe("Scales filter options", () => {
                 "c": "eg:Concept1",
                 "u": isMonetary ? "iso4217:USD" : "test:shares",
                 "p": "2018-01-01/2019-01-01",
+                "e": "eg:1234",
             },
         };
     }
@@ -136,25 +144,25 @@ describe("Scales filter options", () => {
             ...monetaryFactData,
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(reportSet)
+        insp.initialize(reportSet, testViewer());
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
-        expect(scalesOptions).toEqual({
-            "1": "Tens",
-            "2": "Hundreds",
-            "3": "Thousands",
-            "4": "Ten Thousands",
-            "5": "Hundred Thousands",
-            "6": "Millions",
-            "7": "Ten Millions",
-            "8": "Hundred Millions",
-            "9": "Billions",
-            "10": "10",
-            "-1": "Tenths",
-            "-2": "Cents, Hundredths",
-            "-3": "Thousandths",
-            "-4": "-4",
-        });
+        expect(scalesOptions).toEqual([
+              { value: '1', label: 'Tens' },
+              { value: '2', label: 'Hundreds' },
+              { value: '3', label: 'Thousands' },
+              { value: '4', label: 'Ten Thousands' },
+              { value: '5', label: 'Hundred Thousands' },
+              { value: '6', label: 'Millions' },
+              { value: '7', label: 'Ten Millions' },
+              { value: '8', label: 'Hundred Millions' },
+              { value: '9', label: 'Billions' },
+              { value: '10', label: '10' },
+              { value: '-1', label: 'Tenths' },
+              { value: '-2', label: 'Cents, Hundredths' },
+              { value: '-3', label: 'Thousandths' },
+              { value: '-4', label: '-4' }
+        ]);
     })
 
     test("Scales filter options with only monetary facts", () => {
@@ -162,52 +170,52 @@ describe("Scales filter options", () => {
         const reportSet = testReport({
             ...monetaryFactData,
         }, ixData);
-        insp.initialize(reportSet)
+        insp.initialize(reportSet, testViewer());
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
-        expect(scalesOptions).toEqual({
-            "1": "Tens",
-            "2": "Hundreds",
-            "3": "Thousands",
-            "4": "Ten Thousands",
-            "5": "Hundred Thousands",
-            "6": "Millions",
-            "7": "Ten Millions",
-            "8": "Hundred Millions",
-            "9": "Billions",
-            "10": "10",
-            "-1": "Tenths",
-            "-2": "Cents",
-            "-3": "Thousandths",
-            "-4": "-4",
-        });
-    })
+        expect(scalesOptions).toEqual([
+              { value: '1', label: 'Tens' },
+              { value: '2', label: 'Hundreds' },
+              { value: '3', label: 'Thousands' },
+              { value: '4', label: 'Ten Thousands' },
+              { value: '5', label: 'Hundred Thousands' },
+              { value: '6', label: 'Millions' },
+              { value: '7', label: 'Ten Millions' },
+              { value: '8', label: 'Hundred Millions' },
+              { value: '9', label: 'Billions' },
+              { value: '10', label: '10' },
+              { value: '-1', label: 'Tenths' },
+              { value: '-2', label: 'Cents' },
+              { value: '-3', label: 'Thousandths' },
+              { value: '-4', label: '-4' }
+        ]);
+    });
 
     test("Scales filter options with only non-monetary facts", () => {
         const insp = new TestInspector();
         const reportSet = testReport({
             ...nonMonetaryFactData,
         }, ixData);
-        insp.initialize(reportSet)
+        insp.initialize(reportSet, testViewer());
         insp.i18nInit();
         const scalesOptions = insp._getScalesOptions();
-        expect(scalesOptions).toEqual({
-            "1": "Tens",
-            "2": "Hundreds",
-            "3": "Thousands",
-            "4": "Ten Thousands",
-            "5": "Hundred Thousands",
-            "6": "Millions",
-            "7": "Ten Millions",
-            "8": "Hundred Millions",
-            "9": "Billions",
-            "10": "10",
-            "-1": "Tenths",
-            "-2": "Hundredths",
-            "-3": "Thousandths",
-            "-4": "-4",
-        });
-    })
+        expect(scalesOptions).toEqual([
+              { value: '1', label: 'Tens' },
+              { value: '2', label: 'Hundreds' },
+              { value: '3', label: 'Thousands' },
+              { value: '4', label: 'Ten Thousands' },
+              { value: '5', label: 'Hundred Thousands' },
+              { value: '6', label: 'Millions' },
+              { value: '7', label: 'Ten Millions' },
+              { value: '8', label: 'Hundred Millions' },
+              { value: '9', label: 'Billions' },
+              { value: '10', label: '10' },
+              { value: '-1', label: 'Tenths' },
+              { value: '-2', label: 'Hundredths' },
+              { value: '-3', label: 'Thousandths' },
+              { value: '-4', label: '-4' }
+        ]);
+    });
 });
 
 describe("Fact deep link", () => {
@@ -304,7 +312,7 @@ describe("Handle message", () => {
         });
         insp.handleMessage(event);
         expect(mockSelect).toHaveBeenCalledWith("0-");
-    })
+    });
     test("Invalid task", () => {
         mockSelect.mockClear();
         const event = generateEvent({

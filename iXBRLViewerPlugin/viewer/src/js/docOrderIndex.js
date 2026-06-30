@@ -2,24 +2,32 @@
 
 export class DocOrderIndex {
     constructor() {
-        this.index = [];
+        this._index = [];
     }
 
     addItem(vuid, docIndex) {
-        this.index.push({vuid: vuid, docIndex: docIndex});
+        this._index.push({vuid: vuid, docIndex: docIndex});
+    }
+
+    indexOf(vuid) {
+        return this._index.findIndex(n => n.vuid === vuid);
+    }
+
+    length(vuid) {
+        return this._index.length;
     }
 
     getAdjacentItem(vuid, offset) {
-        const currentIndex = this.index.findIndex(n => n.vuid === vuid);
-        const l = this.index.length;
-        return this.index[(currentIndex + offset + l) % l].vuid;
+        const currentIndex = this.indexOf(vuid);
+        const l = this._index.length;
+        return this._index[(currentIndex + offset + l) % l].vuid;
     }
 
     getFirstInDocument(docIndex) {
-        return this.index.filter(n => n.docIndex === docIndex)[0].vuid;
+        return this._index.filter(n => n.docIndex === docIndex)[0].vuid;
     }
 
     getLastInDocument(docIndex) {
-        return this.index.filter(n => n.docIndex === docIndex).at(-1).vuid;
+        return this._index.filter(n => n.docIndex === docIndex).at(-1).vuid;
     }
 }

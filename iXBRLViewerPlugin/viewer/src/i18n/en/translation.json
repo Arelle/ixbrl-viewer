@@ -1,15 +1,21 @@
 {
   "calculation": {
     "calculated-total": "Calculated",
+    "calculationIsConsistent": "Calculation is consistent",
+    "calculationIsInconsistent": "Calculation is inconsistent",
     "concept": "Concept",
     "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
     "does-not-bind": "Calculation does not bind",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistent duplicate facts present",
     "maximum": "Maximum",
     "minimum": "Minimum",
+    "notReported": "not reported",
     "reported-total": "Reported",
     "reported-value": "Reported value",
-    "useCalculations11": "Use Calculations v1.1"
+    "showDetails": "Show details",
+    "status": "Status",
+    "useCalculations11": "Use Calculations v1.1",
+    "useLegacyCalculations": "Use legacy calculations"
   },
   "chart": {
     "comparisonChart": "Comparison chart"
@@ -27,8 +33,6 @@
   "factDetails": {
     "accuracy": "Accuracy",
     "balance": "Balance",
-    "calculationIsConsistent": "Calculation is consistent",
-    "calculationIsInconsistent": "Calculation is inconsistent",
     "calculationUnchecked": "Calculation not checked due to presence of duplicate facts",
     "calculationUncheckedIncorrectVersion": "Calculation 1.1 relationships not checked in legacy calculation mode",
     "change": "Change",
@@ -42,15 +46,21 @@
     "duplicatesCount": "{{current}} of {{total}}",
     "entity": "Entity",
     "factValue": "Fact Value",
+    "factCount": "{{current}} of {{total}}",
+    "nestedFactSummary": "Showing {{current}} of {{total}} nested facts:",
     "nonNumericFact": "non-numeric fact",
     "noPriorFactInThisReport": "No prior fact in this report",
     "noUnit": "<NOUNIT>",
     "properties": "Properties",
     "scale": "Scale",
+    "source": "Source", 
+    "calculationValuesMatch": "Reported and calculated values match",
+    "calculationValuesDoNotMatch": "Reported and calculated values do not match",
     "viewCalculationDetails": "View calculation details"
   },
   "footnotes": {
-    "footnote": "Footnote"
+    "footnote": "Footnote",
+    "content": "Content"
   },
   "inspector": {
     "anchoring": "Anchoring",
@@ -71,21 +81,28 @@
     "factValue": "Fact Value",
     "footnoteProperties": "Footnote Properties",
     "footnotes": "Footnotes",
+    "goToReference": "Go to reference",
     "hidden": "Hidden",
     "hiddenFact": "Hidden Fact",
     "highlight": "Highlight",
+    "highlightTags": "Highlight tags",
     "initializing": "Initializing",
     "ixbrlInspector": "iXBRL Inspector",
     "labels": "",
+    "language": "Language",
     "loadingViewer": "Loading iXBRL Viewer",
-    "mandatoryFacts": "Only Mandatory Facts",
+    "mandatoryFacts": "Mandatory Facts",
     "namespaces": "Namespaces",
-    "narrowerAnchor": "Narrower anchors",
+    "narrowerAnchors": "Narrower anchors",
     "negative": "Negative",
     "nextTag": "Next tag",
+    "noCalculations": "No Calculations",
+    "noDimensions": "No Dimensions",
     "noFactSelected": "No Fact Selected",
     "numericOption": "Numeric",
+    "occurrences": "Occurrences",
     "outlineUnavailable": "Outline Unavailable",
+    "otherFacts": "Other Facts",
     "period": "Period",
     "positive": "Positive",
     "previousTag": "Previous tag",
@@ -98,14 +115,30 @@
     "searchResults": "Search Results",
     "searchTitle": "Search",
     "settingsMenu": "Settings Menu",
+    "settings": {
+        "title": "Settings",
+        "colorMode": {
+            "title": "Viewer color mode",
+            "documentation": "Choose if Inline Viewer's appearance should be light or dark"
+        },
+        "viewerLanguage": {
+            "title": "Viewer language",
+            "documentation": "Select the language you'd like to use with Inline Viewer"
+        },
+        "calculationMode": {
+            "title": "Calculation mode",
+            "documentation": "Select the calculation evaluation mode for legacy calculation relationships"
+        }
+    },
     "showAnalysisChart": "Show analysis chart",
+    "showMore": "Show more",
     "showTextOnly": "Show text only",
     "summary": {
       "fact": {
-        "header": "Fact Summary",
-        "hidden": "Hidden facts",
+        "header": "XBRL facts summary",
+        "hidden": "Hidden",
         "mandatory": "Mandatory facts",
-        "total": "Total facts"
+        "total": "Total"
       },
       "file": {
         "calculations": "Calculation Linkbases",
@@ -127,6 +160,12 @@
         "colTotal": "Total",
         "header": "Tag Summary",
         "rowTotal": "Total"
+      },
+      "about": {
+        "title": "Title",
+        "name": "Name",
+        "entity": "Entity",
+        "seeMoreReferenceData": "See more {{type}} reference data"
       }
     },
     "summation": "Summation",
@@ -138,9 +177,9 @@
     "validationMessage": "Message",
     "validationResults": "Validation results",
     "validationSeverity": "Severity",
-    "visibility": "Visibility",
+    "visibility": "Fact visibility",
     "visible": "Visible",
-    "widerAnchor": "Wider anchor",
+    "widerAnchors": "Wider anchors",
     "xbrlGlossaryOpensInNewTab": "XBRL Glossary (opens in new tab)"
   },
   "menu": {
@@ -162,7 +201,9 @@
     "matchingFactsSummary": "Showing {{nMatches}} of {{nTotal}} facts",
     "noMatchFound": "No match found",
     "reset": "Reset",
+    "resetFilters": "Reset filters",
     "selected": "selected",
+    "showResults": "Show results",
     "showMoreResults": "Show more results",
     "toggleFilterControls": "Toggler filter controls",
     "tryAgainDifferentKeywords": "Try again with different keywords",
@@ -174,6 +215,8 @@
     "xbrlElements": "XBRL Elements"
   },
   "viewer": {
-    "ixbrlDocumentView": "iXBRL Document View"
+    "ixbrlDocumentView": "iXBRL Document View",
+    "zoomIn": "zoom in",
+    "zoomOut": "zoom out"
   }
 }

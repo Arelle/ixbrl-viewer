@@ -375,7 +375,7 @@ export class iXBRLViewer {
                         viewer.initialize()
                             .then(() => inspector.initialize(reportSet, viewer))
                             .then(() => {
-                                interact('#viewer-pane').resizable({
+                                interact('#pane-left').resizable({
                                     edges: { left: false, right: ".resize", bottom: false, top: false},
                                     restrictEdges: {
                                         outer: 'parent',
@@ -385,14 +385,15 @@ export class iXBRLViewer {
                                         min: { width: 100 }
                                     },
                                 })
-                                .on('resizestart', () => 
-                                    $('#ixv').css("pointer-events", "none")
+                                .on('resizestart', () => {
+                                    $('#ixv').css("pointer-events", "none");
+                                    $('#pane-left').css("flex-grow", 0);
+                                }
                                 )
                                 .on('resizemove', (event) => {
                                     const target = event.target;
                                     const w = 100 * event.rect.width / $(target).parent().width();
                                     target.style.width = `${w}%`;
-                                    $('#inspector').css('width', `${100 - w}%`);
                                 })
                                 .on('resizeend', (event) =>
                                     $('#ixv').css("pointer-events", "auto")

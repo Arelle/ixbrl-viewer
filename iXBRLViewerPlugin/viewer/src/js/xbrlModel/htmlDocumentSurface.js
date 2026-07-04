@@ -2,6 +2,7 @@
 
 import $ from 'jquery';
 import { viewerUniqueId } from '../util.js';
+import { iframeReady } from './surfaceUtil.js';
 
 // A "document surface" binds XbrlModel facts to a rendered document.  It is the
 // only XbrlModel-specific piece that touches the rendered document, so that
@@ -21,6 +22,22 @@ import { viewerUniqueId } from '../util.js';
 // drawing overlay rectangles from xbrl:pdfPage / xbrl:pdfMcid locators instead
 // of wrapping DOM elements.
 export class HtmlDocumentSurface {
+
+    // Fetch the plain-HTML document and load it into the iframe, resolving once
+    // it is ready to be bound.  A <base> is added and scripts stripped by
+    // iv._prepareDocumentHtml.
+    async prepareDocument(iframe, documentUrl, iv) {
+        const resp = await fetch(documentUrl);
+        if (!resp.ok) {
+            throw new Error(`Could not load document (${resp.status})`);
+        }
+        const html = await resp.text();
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(iv._prepareDocumentHtml(html, documentUrl));
+        doc.close();
+        await iframeReady(iframe);
+    }
 
     // Bind the report's facts to the document loaded in the viewer's (single)
     // iframe.  Facts whose span id is not present in the document are dropped

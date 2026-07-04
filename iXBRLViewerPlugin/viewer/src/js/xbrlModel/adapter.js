@@ -190,8 +190,39 @@ function htmlSpanIdsForFact(fact) {
     return ids;
 }
 
+// PDF locators for a fact: an array of { page, mcids } - one entry per value
+// source that carries xbrl:pdfPage + xbrl:pdfMcid.  A single fact may be split
+// across several marked-content ids (and pages), so all are kept and become the
+// wrapper nodes of one IXNode.
+function pdfLocatorsForFact(fact) {
+    const locators = [];
+    for (const fv of fact.factValues ?? []) {
+        for (const vs of fv.valueSources ?? []) {
+            let page = null;
+            const mcids = [];
+            for (const p of vs.properties ?? []) {
+                if (p.property === "xbrl:pdfPage") {
+                    page = p.value;
+                }
+                else if (p.property === "xbrl:pdfMcid") {
+                    for (const m of (Array.isArray(p.value) ? p.value : [p.value])) {
+                        if (m != null) {
+                            mcids.push(m);
+                        }
+                    }
+                }
+            }
+            if (page != null && mcids.length > 0) {
+                locators.push({ page, mcids });
+            }
+        }
+    }
+    return locators;
+}
+
 function buildFacts(factset) {
     const facts = {};
+    let pdfKeyCounter = 0;
     for (const fact of factset.facts ?? []) {
         const dims = fact.factDimensions ?? {};
         const concept = dims["xbrl:concept"];
@@ -232,20 +263,34 @@ function buildFacts(factset) {
             }
         }
 
+        // HTML surface: one viewer fact per html span id (repeated span ids
+        // become duplicates, as for repeated iXBRL tags).
         const spanIds = htmlSpanIdsForFact(fact);
-        if (spanIds.length === 0) {
-            // No document locator (e.g. a hidden fact).  Skipped for this first
-            // surface; hidden-fact support would key these by fact name and
-            // bind them to an empty IXNode.
+        if (spanIds.length > 0) {
+            for (const spanId of spanIds) {
+                const factData = { a: { ...a }, v: jsonValue };
+                if (decimals !== undefined) {
+                    factData.d = decimals;
+                }
+                facts[spanId] = factData;
+            }
             continue;
         }
-        for (const spanId of spanIds) {
-            const factData = { a: { ...a }, v: jsonValue };
+
+        // PDF surface: one viewer fact per fact, keyed by a synthesised id, with
+        // its page/mcid locators attached for the document surface to place
+        // overlay boxes.
+        const pdfLocators = pdfLocatorsForFact(fact);
+        if (pdfLocators.length > 0) {
+            const factData = { a: { ...a }, v: jsonValue, pdf: pdfLocators };
             if (decimals !== undefined) {
                 factData.d = decimals;
             }
-            facts[spanId] = factData;
+            facts["pf-" + (pdfKeyCounter++)] = factData;
+            continue;
         }
+
+        // No document locator (e.g. a hidden fact): skipped for now.
     }
     return facts;
 }

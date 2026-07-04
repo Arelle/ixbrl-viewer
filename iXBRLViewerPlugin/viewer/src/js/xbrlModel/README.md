@@ -14,30 +14,86 @@ seams were added:
 1. **Adapter** (`adapter.js`) — converts an XbrlModel factset + converted
    taxonomy into the internal report-data structure that `ReportSet` consumes
    (`concepts`, `facts`, `rels`, `prefixes`, `roles`, ...).  Facts are keyed by
-   their `xbrl:htmlSpanId` so they can be bound to the document, mirroring the
-   way the iXBRL path keys facts by the `ix:` element id.  OIM networks become
-   the viewer's ELR-keyed `pres`/`calc11` relationships; explicit vs typed
-   dimensions are classified from whether a cube dimension has a `domainNetwork`.
+   a document locator: `xbrl:htmlSpanId` for the HTML surface, or a synthesised
+   id carrying `xbrl:pdfPage`/`xbrl:pdfMcid` locators for the PDF surface.  OIM
+   networks become the viewer's ELR-keyed `pres`/`calc11` relationships; explicit
+   vs typed dimensions are classified from whether a cube dimension has a
+   `domainNetwork`.
 
-2. **Document surface** (`htmlDocumentSurface.js`) — binds facts to the rendered
-   document.  `HtmlDocumentSurface` matches each fact's span id to an element id
-   in a plain-HTML document and produces the exact DOM decorations
-   (`.ixbrl-element` + `ivids`, and an `IXNode` in the viewer's map) that the
-   existing `Viewer` selection/highlight/navigation code already relies on.
+2. **Document surface** — loads the document into the viewer's iframe
+   (`prepareDocument`) and binds facts to it (`bind`).  Both surfaces produce the
+   exact DOM decorations (`.ixbrl-element` + `ivids`, and an `IXNode` in the
+   viewer's map) that the existing `Viewer` selection/highlight/navigation code
+   already relies on, so nothing downstream is surface-specific:
+
+   - `HtmlDocumentSurface` matches each fact's span id to an element id in a
+     plain-HTML document and wraps the matched element.
+   - `PdfDocumentSurface` renders the PDF with PDF.js, builds a marked-content-id
+     → rectangle map per page from `getTextContent({ includeMarkedContent: true })`,
+     and lays absolutely-positioned `.ixbrl-element` overlay `<div>`s over each
+     fact's marked-content rectangles (one IXNode per fact, its overlay divs as
+     wrapper nodes).  Selection, highlighting and navigation therefore work
+     unchanged — there is no PDF-specific selection code.
 
 `XbrlModelViewer` (`xbrlModelViewer.js`) is a thin `Viewer` subclass that
 overrides only the fact-discovery step (`Viewer._processDocuments`) to delegate
 to a document surface.  Everything after discovery — styling, event handlers,
 navigation, the inspector — is shared and unmodified.
 
-### Adding the PDF surface
+The surface is chosen in `iXBRLViewer.loadXbrlModel` from the factset's
+`factLocatorType` (or the document extension / a `documentType` config value).
 
-The document surface is the single extension point for new renderings.  A
-`PdfDocumentSurface` would implement the same `bind(viewer)` contract, rendering
-pages with PDF.js and drawing overlay rectangles from `xbrl:pdfPage` /
-`xbrl:pdfMcid` locators (see `oim/.../inlinePdfViewer/model-pdf-viewer.html`),
-instead of wrapping DOM elements.  No changes to the adapter, report model, or
-inspector should be required.
+### PDF.js packaging
+
+`PdfDocumentSurface` loads PDF.js via a runtime dynamic `import()` in
+`pdfjsLoader.js`, so the (large) PDF.js and PDF worker bundles are only fetched
+when a PDF is actually viewed, and never parsed by the CommonJS jest tests.
+webpack emits them as separate chunks (`<id>.ixbrlviewer.js`) plus a module
+worker chunk, which must be served **alongside** `ixbrlviewer.js` (the same way
+the standalone `inlinePdfViewer` demo serves `pdf.mjs` / `pdf.worker.mjs`).  The
+iXBRL and HTML paths never load these chunks.
+
+## Building
+
+Build the viewer bundle from the repository root:
+
+```sh
+npm ci          # first time only
+npm run prod    # production build  -> iXBRLViewerPlugin/viewer/dist/
+# or: npm run dev   (unminified, faster; emits *.dev.js)
+```
+
+No special flag is needed to include the PDF features — `PdfDocumentSurface` is
+part of the normal build.  Because it pulls in PDF.js via a runtime dynamic
+`import()`, webpack automatically splits PDF.js and its worker into separate
+chunks that are only fetched when a PDF is actually viewed.
+
+A production build (`npm run prod`) emits into `iXBRLViewerPlugin/viewer/dist/`:
+
+```
+ixbrlviewer.js                  868K   main bundle (all you need for iXBRL / HTML)
+362.ixbrlviewer.js              285B   PDF.js loader chunk   ┐
+489.ixbrlviewer.js              326K   PDF.js chunk          ├ needed only for PDF
+821.ixbrlviewer.js              1.3M   PDF worker chunk      ┘
+ixbrlviewer.js.LICENSE.txt             license sidecars (one per emitted chunk)
+489.ixbrlviewer.js.LICENSE.txt
+821.ixbrlviewer.js.LICENSE.txt
+```
+
+(The numeric chunk ids — `362`, `489`, `821` — are assigned by webpack and may
+change between builds; copy whatever `*.ixbrlviewer.js` files are emitted.)  A
+`dev` build additionally emits `ixbrlviewer.dev.js` and correspondingly named
+`*.dev.js` PDF chunks.
+
+- **iXBRL / HTML viewing** needs only `ixbrlviewer.js`.
+- **PDF viewing** needs `ixbrlviewer.js` **plus every** `*.ixbrlviewer.js` chunk
+  (and their `.LICENSE.txt` sidecars), all served in the same directory so the
+  lazily-loaded PDF.js/worker chunks resolve next to the main bundle.
+
+> Note: `iXBRLViewerPlugin/viewer/version.js` runs `git describe --tags` during
+> the build, so the build fails in a clone with no tags (`fatal: No names
+> found`).  If you hit this, create any tag first, e.g. `git tag v0.0.0-dev`
+> (delete it afterwards with `git tag -d v0.0.0-dev`).
 
 ## Running
 
@@ -106,11 +162,50 @@ The stub page loads the bundle, which reads `ixbrlviewer.config.json`, sees the
 HTML with the inspector.  (Serving over `http://` is required — the viewer does
 not run from `file:` URLs.)
 
+### PDF variant
+
+The same setup works for a PDF: point the config at a PDF factset and a `.pdf`
+document (the surface is chosen automatically from the factset's
+`factLocatorType`, or you can force it with `"documentType": "pdf"`):
+
+```json
+{
+  "xbrlModel": {
+    "factset": "aapl-10K-20250927-factset-pdf.json",
+    "document": "aapl-20250927.pdf",
+    "taxonomy": "aapl-10K-20250927.json"
+  }
+}
+```
+
+For the PDF variant the demo directory must **also** contain the PDF.js chunk
+files webpack emits next to the bundle (`<id>.ixbrlviewer.js`, e.g. the PDF.js
+and PDF-worker chunks) — copy every `*.ixbrlviewer.js` from `../dist`, not just
+`ixbrlviewer.js`.
+
+PDFs whose fonts are **not embedded** (or that use CID/CJK fonts) also need
+PDF.js's font/cmap resources served.  Place PDF.js's `standard_fonts/` and
+`cmaps/` folders (from `node_modules/pdfjs-dist/`) next to the config, or point
+elsewhere with `"pdfResourcesUrl"` in the `xbrlModel` config block:
+
+```
+demo/
+├── ... (bundle, chunks, config, factset, taxonomy)
+├── aapl-20250927.pdf
+├── standard_fonts/      <- from node_modules/pdfjs-dist/standard_fonts
+└── cmaps/               <- from node_modules/pdfjs-dist/cmaps
+```
+
+These are only fetched for fonts a PDF doesn't embed, so a PDF with fully
+embedded fonts renders correctly even without them.
+
 ## Known simplifications (this PoC)
 
 - Numeric facts are shown using their pre-formatted document text (facts are
   treated as non-numeric); unit-aware numeric rendering is a follow-up.
-- Only located facts (those with an `xbrl:htmlSpanId`) are shown; hidden facts
-  are not yet surfaced.
+- Only located facts (with an `xbrl:htmlSpanId` or `xbrl:pdfPage`/`xbrl:pdfMcid`
+  locator) are shown; hidden facts are not yet surfaced.
+- The PDF surface renders all pages up front (simple, matches the scroll model);
+  lazy per-page rendering would scale better for very large PDFs.
 - Cube/network navigation reuses the presentation-outline machinery via mapped
   `pres` relationships; a native cube/network navigation panel is a follow-up.

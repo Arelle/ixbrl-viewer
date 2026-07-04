@@ -9,6 +9,7 @@ import { initializeTheme } from './theme.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
 import { XbrlModelViewer } from './xbrlModel/xbrlModelViewer.js';
 import { HtmlDocumentSurface } from './xbrlModel/htmlDocumentSurface.js';
+import { PdfDocumentSurface } from './xbrlModel/pdfDocumentSurface.js';
 import { buildReportData } from './xbrlModel/adapter.js';
 import { FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK, USER_GUIDE_URL, moveNonAppAttributes } from "./util";
 
@@ -513,52 +514,46 @@ export class iXBRLViewer {
                     }
                 }
 
-                const docResp = await fetch(documentUrl);
-                if (!docResp.ok) {
-                    throw new Error(`Could not load document (${docResp.status})`);
-                }
-                const documentHtml = await docResp.text();
-
                 const reportData = buildReportData(factsetDoc, taxonomyDoc, { documentFile });
                 iv.setFeatures(reportData.features ?? {}, window.location.search);
 
                 const reportSet = new ReportSet(reportData);
                 reportSet.taxonomyNamer = new TaxonomyNamer(new Map(Object.entries(this.runtimeConfig.taxonomyNames ?? {})));
 
-                // Load the plain document into an iframe.
+                // Select the document surface by locator type / document
+                // extension.  Each surface loads the document into the iframe and
+                // binds facts to it; they are otherwise interchangeable.
+                const locatorType = cfg.documentType ?? sourceMapping.factLocatorType ?? "";
+                const isPdf = /pdf/i.test(locatorType) || /\.pdf(\?|#|$)/i.test(documentUrl);
+                let surface;
+                if (isPdf) {
+                    // PDF.js needs its standard_fonts/ and cmaps/ folders served
+                    // to render fonts correctly.  Default to resolving them next
+                    // to the config; override with xbrlModel.pdfResourcesUrl.
+                    const resourcesBase = iv.resolveRelativeUrl(cfg.pdfResourcesUrl ?? "./");
+                    surface = new PdfDocumentSurface({ resourcesBase });
+                }
+                else {
+                    surface = new HtmlDocumentSurface();
+                }
+
                 const iframeContainer = $('#ixv #iframe-container');
                 const iframe = $('<iframe title="XbrlModel document view" tabindex="0"/>')
                     .data("report-index", 0)
                     .appendTo(iframeContainer)[0];
-                const doc = iframe.contentDocument || iframe.contentWindow.document;
-                doc.open();
-                doc.write(iv._prepareDocumentHtml(documentHtml, documentUrl));
-                doc.close();
                 const iframes = $(iframe);
 
-                return iv.setProgress("Loading XbrlModel Viewer")
-                    .then(() => new Promise((resolve) => {
-                        const timer = setInterval(() => {
-                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                            if ((iframeDoc.readyState === 'complete' || iframeDoc.readyState === 'interactive')
-                                    && $(iframe).contents().find("body").children().length > 0) {
-                                clearInterval(timer);
-                                resolve();
-                            }
-                        }, 100);
-                    }))
+                await surface.prepareDocument(iframe, documentUrl, iv);
+
+                const viewer = new XbrlModelViewer(iv, iframes, reportSet, surface);
+                iv.viewer = viewer;
+                return viewer.initialize()
+                    .then(() => inspector.initialize(reportSet, viewer))
                     .then(() => {
-                        const surface = new HtmlDocumentSurface();
-                        const viewer = new XbrlModelViewer(iv, iframes, reportSet, surface);
-                        iv.viewer = viewer;
-                        return viewer.initialize()
-                            .then(() => inspector.initialize(reportSet, viewer))
-                            .then(() => {
-                                iv._setupInspectorResize();
-                                $('#ixv .loader').remove();
-                                viewer.postLoadAsync();
-                                inspector.postLoadAsync();
-                            });
+                        iv._setupInspectorResize();
+                        $('#ixv .loader').remove();
+                        viewer.postLoadAsync();
+                        inspector.postLoadAsync();
                     });
             })
             .catch((err) => {

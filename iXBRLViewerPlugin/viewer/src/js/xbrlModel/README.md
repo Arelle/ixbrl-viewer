@@ -199,6 +199,29 @@ demo/
 These are only fetched for fonts a PDF doesn't embed, so a PDF with fully
 embedded fonts renders correctly even without them.
 
+#### PDF range requests (`pdfDisableRange`)
+
+By default the PDF surface fetches the whole PDF in a single request rather than
+via HTTP range requests.  This is robust everywhere: local files, and servers
+that don't honour `Range` (e.g. Python's `http.server`, which ignores `Range`
+and returns the full file with `200` — a mismatch that makes PDF.js throw
+`The "L" parameter in the linearization dictionary does not equal the stream
+length`).
+
+For a large PDF served from a **range-capable** server (S3/CloudFront, nginx,
+Apache, …), you can opt back into range requests for progressive
+first-page-fast loading:
+
+```json
+{
+  "xbrlModel": {
+    "factset": "…-factset-pdf.json",
+    "document": "…​.pdf",
+    "pdfDisableRange": false
+  }
+}
+```
+
 ## Known simplifications (this PoC)
 
 - Numeric facts are marked numeric (from `xbrl:unit`) and their reported value is

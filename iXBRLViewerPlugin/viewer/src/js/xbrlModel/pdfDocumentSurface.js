@@ -29,6 +29,11 @@ export class PdfDocumentSurface {
         // (expensive) text/marked-content extracted up front; fact-less pages
         // just need sizing.  Null => extract every page.
         this._factPages = options.factPages ?? null;
+        // When true (default), fetch the whole PDF in one request instead of via
+        // HTTP range requests.  Robust everywhere (local files, servers that
+        // ignore Range); set false for large PDFs on a range-capable server to
+        // get progressive first-page-fast loading.
+        this._disableRange = options.disableRange ?? true;
         // Base URL under which PDF.js's resource folders (standard_fonts/,
         // cmaps/) are served.  These are needed for correct glyph rendering of
         // non-embedded standard fonts and CID fonts; without them PDF.js renders
@@ -54,6 +59,17 @@ export class PdfDocumentSurface {
         // iframe.  Without this, embedded fonts are registered in the top
         // document and the iframe canvas renders ".notdef" boxes.
         const docParams = { url: documentUrl, ownerDocument: doc };
+        if (this._disableRange) {
+            // Fetch the whole PDF in a single request instead of via HTTP range
+            // requests.  Range/streaming support varies by server (Python's
+            // http.server ignores Range and returns the full file with 200) and
+            // by browser, and a mismatch makes PDF.js throw on the linearization
+            // dictionary ("L parameter ... does not equal the stream length") or
+            // read the wrong bytes.  Local files download quickly anyway.
+            docParams.disableRange = true;
+            docParams.disableStream = true;
+            docParams.disableAutoFetch = true;
+        }
         if (this._resourcesBase) {
             docParams.standardFontDataUrl = new URL("standard_fonts/", this._resourcesBase).href;
             docParams.cMapUrl = new URL("cmaps/", this._resourcesBase).href;
@@ -137,7 +153,15 @@ export class PdfDocumentSurface {
             this._pages[num] = { container, canvas, page, viewport, refNum, vTop, mcidRects, mcidText, canvasRendered: false };
             return;
         }
-        const textContent = await page.getTextContent({ includeMarkedContent: true });
+        let textContent;
+        try {
+            textContent = await page.getTextContent({ includeMarkedContent: true });
+        }
+        catch (e) {
+            // A malformed page shouldn't abort the whole document.
+            this._pages[num] = { container, canvas, page, viewport, refNum, vTop, mcidRects, mcidText, canvasRendered: false };
+            return;
+        }
         let mcid = null;
         for (const t of textContent.items) {
             if (t.type === "beginMarkedContentProps" || t.type === "beginMarkedContent") {

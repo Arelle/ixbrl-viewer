@@ -539,7 +539,11 @@ export class iXBRLViewer {
                             factPages.add(loc.page);
                         }
                     }
-                    surface = new PdfDocumentSurface({ resourcesBase, factPages });
+                    // disableRange defaults to true (robust on any server); set
+                    // xbrlModel.pdfDisableRange:false for progressive range-based
+                    // loading of large PDFs on a range-capable server.
+                    const disableRange = cfg.pdfDisableRange ?? true;
+                    surface = new PdfDocumentSurface({ resourcesBase, factPages, disableRange });
                 }
                 else {
                     surface = new HtmlDocumentSurface();

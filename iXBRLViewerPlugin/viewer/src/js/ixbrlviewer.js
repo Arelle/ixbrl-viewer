@@ -531,7 +531,15 @@ export class iXBRLViewer {
                     // to render fonts correctly.  Default to resolving them next
                     // to the config; override with xbrlModel.pdfResourcesUrl.
                     const resourcesBase = iv.resolveRelativeUrl(cfg.pdfResourcesUrl ?? "./");
-                    surface = new PdfDocumentSurface({ resourcesBase });
+                    // Pages that carry facts (so the surface only extracts text
+                    // from those up front).
+                    const factPages = new Set();
+                    for (const factData of Object.values(reportData.sourceReports[0].targetReports[0].facts)) {
+                        for (const loc of factData.pdf ?? []) {
+                            factPages.add(loc.page);
+                        }
+                    }
+                    surface = new PdfDocumentSurface({ resourcesBase, factPages });
                 }
                 else {
                     surface = new HtmlDocumentSurface();

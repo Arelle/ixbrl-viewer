@@ -25,6 +25,10 @@ export class PdfDocumentSurface {
         // pageNum -> { container, refNum, vTop, mcidRects: {mcidStr: [rect]}, mcidText: {mcidStr: str} }
         this._pages = {};
         this._scale = 1.5;
+        // Set of page numbers that carry facts.  Only these pages need their
+        // (expensive) text/marked-content extracted up front; fact-less pages
+        // just need sizing.  Null => extract every page.
+        this._factPages = options.factPages ?? null;
         // Base URL under which PDF.js's resource folders (standard_fonts/,
         // cmaps/) are served.  These are needed for correct glyph rendering of
         // non-embedded standard fonts and CID fonts; without them PDF.js renders
@@ -69,10 +73,22 @@ export class PdfDocumentSurface {
                 + `Check that the config's "document" points to a .pdf file.`,
             );
         }
+        // Prepare every page (size + text/marked-content geometry) up front so
+        // that all fact overlays, values and navigation work immediately, but
+        // DEFER the expensive canvas rasterization: pages are rasterized lazily
+        // as they scroll into view (see _setupLazyRender).  This is what lets a
+        // large report (e.g. 452 pages) become visible quickly instead of
+        // blocking on rendering every page.
         for (let num = 1; num <= pdf.numPages; num++) {
-            await iv.setProgress(`Rendering PDF page ${num} of ${pdf.numPages}`);
-            await this._renderPage(pdf, num, doc, pagesEl);
+            // Update progress only periodically: setProgress waits on a double
+            // requestAnimationFrame, so calling it every page would add ~30ms per
+            // page (many seconds over a large document).
+            if (num === 1 || num % 20 === 0 || num === pdf.numPages) {
+                await iv.setProgress(`Processing PDF page ${num} of ${pdf.numPages}`);
+            }
+            await this._preparePage(pdf, num, doc, pagesEl);
         }
+        this._setupLazyRender(iframe);
     }
 
     _skeletonHtml() {
@@ -90,31 +106,37 @@ export class PdfDocumentSurface {
         </style></head><body><div id="pdf-pages"></div></body></html>`;
     }
 
-    async _renderPage(pdf, num, doc, pagesEl) {
+    // Prepare a page's layout and marked-content geometry WITHOUT rasterizing
+    // it.  Creates a correctly-sized container with an (initially empty) canvas
+    // that _renderCanvas fills in on demand.
+    async _preparePage(pdf, num, doc, pagesEl) {
         const page = await pdf.getPage(num);
         const refNum = page.ref?.num ?? page._pageInfo?.ref?.num;
         const viewport = page.getViewport({ scale: this._scale });
-        const outputScale = 1;
 
         const container = doc.createElement("div");
         container.className = "pdf-page";
+        container.dataset.page = String(num);
         container.style.width = Math.floor(viewport.width) + "px";
         container.style.height = Math.floor(viewport.height) + "px";
         pagesEl.appendChild(container);
 
         const canvas = doc.createElement("canvas");
-        canvas.width = Math.floor(viewport.width * outputScale);
-        canvas.height = Math.floor(viewport.height * outputScale);
         canvas.style.width = Math.floor(viewport.width) + "px";
         canvas.style.height = Math.floor(viewport.height) + "px";
         container.appendChild(canvas);
 
-        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
-
-        // Build marked-content id -> rectangles / text for this page.
+        // Build marked-content id -> rectangles / text for this page, but only
+        // for pages that actually carry facts - text extraction is the expensive
+        // part of the up-front pass, and most pages of a large report have no
+        // tagged facts.
         const vTop = viewport.viewBox[3];
         const mcidRects = {};
         const mcidText = {};
+        if (this._factPages !== null && !this._factPages.has(num)) {
+            this._pages[num] = { container, canvas, page, viewport, refNum, vTop, mcidRects, mcidText, canvasRendered: false };
+            return;
+        }
         const textContent = await page.getTextContent({ includeMarkedContent: true });
         let mcid = null;
         for (const t of textContent.items) {
@@ -143,7 +165,84 @@ export class PdfDocumentSurface {
             }
         }
 
-        this._pages[num] = { container, refNum, vTop, mcidRects, mcidText };
+        this._pages[num] = { container, canvas, page, viewport, refNum, vTop, mcidRects, mcidText, canvasRendered: false };
+    }
+
+    // Rasterize pages lazily: render pages within (or near) the visible scroll
+    // region and release the pixel memory of pages that scroll far away, so a
+    // large PDF doesn't render (or hold in memory) hundreds of pages at once.
+    // The iframe's document is the scroll container (matching the rest of the
+    // viewer, e.g. Viewer._zoom uses iframe.contents().scrollTop()).
+    _setupLazyRender(iframe) {
+        const win = iframe.contentWindow;
+        let scheduled = false;
+        const onScroll = () => {
+            if (scheduled) {
+                return;
+            }
+            scheduled = true;
+            win.requestAnimationFrame(() => {
+                scheduled = false;
+                this._renderVisible(win);
+            });
+        };
+        win.addEventListener("scroll", onScroll, { passive: true });
+        win.addEventListener("resize", onScroll);
+        // The iframe is only sized once the loader is removed (after this runs),
+        // and getBoundingClientRect is only meaningful then.  Poll until the
+        // iframe has a height, then stop and rely on scroll/resize.
+        this._lazyTimer = win.setInterval(() => {
+            this._renderVisible(win);
+            if (win.innerHeight > 0) {
+                win.clearInterval(this._lazyTimer);
+                this._lazyTimer = null;
+            }
+        }, 250);
+        this._renderVisible(win);
+    }
+
+    _renderVisible(win) {
+        const viewportHeight = win.innerHeight || 900;
+        const margin = 1000; // render a little beyond the viewport (prefetch)
+        for (const num of Object.keys(this._pages)) {
+            const rect = this._pages[num].container.getBoundingClientRect();
+            const near = rect.bottom > -margin && rect.top < viewportHeight + margin;
+            if (near) {
+                this._renderCanvas(Number(num));
+            }
+            else {
+                this._clearCanvas(Number(num));
+            }
+        }
+    }
+
+    async _renderCanvas(num) {
+        const pg = this._pages[num];
+        if (!pg || pg.canvasRendered) {
+            return;
+        }
+        pg.canvasRendered = true;
+        const { canvas, page, viewport } = pg;
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        try {
+            await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+        }
+        catch (e) {
+            pg.canvasRendered = false; // allow a later retry
+        }
+    }
+
+    _clearCanvas(num) {
+        const pg = this._pages[num];
+        if (!pg || !pg.canvasRendered) {
+            return;
+        }
+        // Release the backing store; the container keeps its size, so layout and
+        // fact overlays are unaffected.  Re-rendered if scrolled back into view.
+        pg.canvasRendered = false;
+        pg.canvas.width = 0;
+        pg.canvas.height = 0;
     }
 
     // Resolve a locator's marked-content ids to page rectangles + text.

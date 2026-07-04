@@ -208,8 +208,15 @@ embedded fonts renders correctly even without them.
   `fact-details.html` template.
 - Only located facts (with an `xbrl:htmlSpanId` or `xbrl:pdfPage`/`xbrl:pdfMcid`
   locator) are shown; hidden facts are not yet surfaced.
-- The PDF surface renders all pages up front (simple, matches the scroll model);
-  lazy per-page rendering would scale better for very large PDFs.
+- The PDF surface prepares every page's layout + fact overlays up front (so
+  navigation, values and highlighting work everywhere immediately) but rasterizes
+  page canvases **lazily** as they scroll into view, releasing the pixel memory
+  of pages that scroll far away.  Text is only extracted from pages that carry
+  facts.  This keeps a large report (e.g. L'Oreal, 452 pages) visible in ~1-2s
+  instead of blocking on rendering every page.
+- A fact whose value is split across several PDF marked-content ids can show a
+  repeated/garbled value (the mapped text concatenates duplicates); it is shown
+  as text (never run through numeric formatting), so it doesn't error.
 
 ## Cubes panel
 

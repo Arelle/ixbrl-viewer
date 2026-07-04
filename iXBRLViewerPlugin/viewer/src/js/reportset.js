@@ -261,4 +261,29 @@ export class ReportSet {
         return Object.values(this._items).filter(i => i instanceof Fact && i.report == report);
     }
 
+    /* True if any report carries XBRL Model cubes (XbrlModel mode only). */
+    hasCubes() {
+        return this.reports.some(r => r.cubes().length > 0);
+    }
+
+    /* Flat list of cubes across all reports, each tagged with its report. */
+    cubes() {
+        return this.reports.flatMap(r => r.cubes().map(c => ({ ...c, report: r })));
+    }
+
+    /*
+     * Map of concept name -> array of Facts present in the report, for
+     * navigating from taxonomy structures (e.g. cubes) to facts.  Lazy-loaded.
+     */
+    conceptFactsIndex() {
+        if (this._conceptFactsIndex === undefined) {
+            const index = {};
+            for (const f of this.facts()) {
+                (index[f.conceptName()] ??= []).push(f);
+            }
+            this._conceptFactsIndex = index;
+        }
+        return this._conceptFactsIndex;
+    }
+
 }

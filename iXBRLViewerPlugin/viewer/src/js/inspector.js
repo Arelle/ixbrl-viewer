@@ -108,6 +108,7 @@ export class Inspector {
                 $("#inspector .controls .search-button").on("click", () => inspector.inspectorMode("search-mode", true));
                 $("#inspector .controls .summary-button").on("click", () => inspector.inspectorMode("summary-mode", true));
                 $("#inspector .controls .outline-button").on("click", () => inspector.inspectorMode("outline-mode", true));
+                $("#inspector .controls .cubes-button").on("click", () => inspector.inspectorMode("cubes-mode", true));
                 $("#inspector .back").on("click", () => inspector.popInspectorMode());
                 $(".popup-trigger").on("mouseenter", function () {
                     $(this).find(".popup-content").show()
@@ -137,6 +138,7 @@ export class Inspector {
                 inspector.createSummary()
                 inspector.outline = new ReportSetOutline(reportSet);
                 inspector.createOutline();
+                inspector.createCubes();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
                     inspector.handleFactDeepLink();
@@ -448,7 +450,7 @@ export class Inspector {
     }
 
     inspectorMode(mode, toggle) {
-        const allModes = ["summary-mode", "outline-mode", "search-mode"];
+        const allModes = ["summary-mode", "outline-mode", "cubes-mode", "search-mode"];
         const i = $("#inspector").removeClass(allModes.filter(m => m !== mode));
         if (mode === undefined) {
             this._prevInspectorMode = undefined;
@@ -908,6 +910,42 @@ export class Inspector {
                     })
                     .appendTo(container);
             }
+        }
+    }
+
+    /*
+     * Build the Cubes navigation panel from the report's XBRL Model cubes.
+     * Each cube lists as a button showing its label and the number of its
+     * line-item facts present in the document; clicking navigates to the first
+     * such fact.  The Cubes button is only shown when the report has cubes, so
+     * the iXBRL viewer is unaffected.
+     */
+    createCubes() {
+        const hasCubes = this._reportSet.hasCubes();
+        $('#inspector').toggleClass('has-cubes', hasCubes);
+        if (!hasCubes) {
+            return;
+        }
+
+        const conceptFacts = this._reportSet.conceptFactsIndex();
+        const cubes = this._reportSet.cubes()
+            .map(cube => {
+                const facts = cube.concepts.flatMap(c => conceptFacts[c] ?? []);
+                return { cube, facts };
+            })
+            .filter(c => c.facts.length > 0)
+            .sort((a, b) => b.facts.length - a.facts.length);
+
+        $('.cubes .no-cubes-overlay').toggle(cubes.length === 0);
+        const body = $('.cubes .body').empty();
+        const container = $('<div class="fact-list"></div>').appendTo(body);
+        for (const { cube, facts } of cubes) {
+            const item = $('<button class="fact-list-item"></button>')
+                .on("click", () => this.selectItem(facts[0].vuid))
+                .on("mousedown", (e) => { if (e.detail > 1) { e.preventDefault(); } })
+                .appendTo(container);
+            $('<span class="cube-label"></span>').text(cube.label).appendTo(item);
+            $('<span class="cube-count"></span>').text(facts.length).appendTo(item);
         }
     }
 

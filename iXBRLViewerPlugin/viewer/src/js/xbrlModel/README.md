@@ -210,5 +210,16 @@ embedded fonts renders correctly even without them.
   locator) are shown; hidden facts are not yet surfaced.
 - The PDF surface renders all pages up front (simple, matches the scroll model);
   lazy per-page rendering would scale better for very large PDFs.
-- Cube/network navigation reuses the presentation-outline machinery via mapped
-  `pres` relationships; a native cube/network navigation panel is a follow-up.
+
+## Cubes panel
+
+The inspector has a native **Cubes** navigation panel (a mode button next to
+Document Outline).  The adapter reads the taxonomy's cubes, resolving each cube's
+`xbrl:concept` dimension domain network into its line-item concepts
+(`XBRLReport.cubes()`); the inspector lists each cube with the number of its
+facts present in the document and navigates to them on click
+(`ReportSet.conceptFactsIndex()`).  The button is gated on
+`ReportSet.hasCubes()`, so it only appears for XBRL Model reports and the iXBRL
+viewer is unaffected.  (A separate Networks panel was intentionally not added -
+the Document Outline, built from the presentation/parent-child networks, already
+covers that.)

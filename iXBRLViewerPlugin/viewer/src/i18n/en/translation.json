@@ -60,6 +60,8 @@
     "concealedFact": "Concealed fact",
     "conceptType": "Concept Type",
     "contributor": "Contributor",
+    "cubes": "Cubes",
+    "cubesUnavailable": "No Cubes",
     "datatypes": "Types",
     "dimensions": "Dimension Type",
     "documentOutline": "Document outline",

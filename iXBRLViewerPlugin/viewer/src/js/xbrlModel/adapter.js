@@ -66,6 +66,70 @@ function cleanNetworkLabel(name) {
         .trim() || localName(name);
 }
 
+function cleanCubeLabel(name) {
+    return localName(name)
+        .replace(/_Cube$/, "")
+        .replace(/^.*?Table_/, "")
+        .replace(/_/g, " ")
+        .trim() || localName(name);
+}
+
+function firstStdLabel(labelsByObject, name) {
+    const std = labelsByObject[name]?.std;
+    return std ? Object.values(std)[0] : undefined;
+}
+
+// Cubes (hypercubes/tables) are the semantic structures of the XBRL model.  A
+// cube's xbrl:concept dimension points to a domain network whose members are the
+// cube's line-item concepts; those drive navigation to the cube's facts.  Cubes
+// without a concept domain (e.g. the open default cube) are omitted.
+function buildCubes(taxonomy, labelsByObject) {
+    const domainByName = {};
+    for (const dn of taxonomy.domainNetworks ?? []) {
+        domainByName[dn.name] = dn;
+    }
+
+    const cubes = [];
+    for (const cube of taxonomy.cubes ?? []) {
+        let conceptDomainNet = null;
+        const dimensions = [];
+        for (const cd of cube.cubeDimensions ?? []) {
+            const dim = cd.dimension ?? cd.dimensionName;
+            if (dim === "xbrl:concept") {
+                conceptDomainNet = cd.domainNetwork ?? cd.domainName;
+            }
+            else if (dim && !CORE_DIMENSIONS.has(dim)) {
+                dimensions.push(dim);
+            }
+        }
+        if (!conceptDomainNet) {
+            continue;
+        }
+        const dn = domainByName[conceptDomainNet];
+        if (!dn) {
+            continue;
+        }
+        const concepts = [];
+        const seen = new Set();
+        for (const rel of dn.relationships ?? []) {
+            if (rel.target && !seen.has(rel.target)) {
+                seen.add(rel.target);
+                concepts.push(rel.target);
+            }
+        }
+        if (concepts.length === 0) {
+            continue;
+        }
+        cubes.push({
+            name: cube.name,
+            label: firstStdLabel(labelsByObject, cube.name) ?? cleanCubeLabel(cube.name),
+            concepts,
+            dimensions,
+        });
+    }
+    return cubes;
+}
+
 // An XbrlModel document may be wrapped in a top-level "xbrlModel" key.
 export function unwrapModel(doc) {
     return doc?.xbrlModel ?? doc ?? {};
@@ -405,12 +469,15 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
         }
     }
 
+    const cubes = buildCubes(taxonomy, labelsByObject);
+
     const documentFile = options.documentFile;
     const reportData = {
         concepts,
         facts,
         rels,
         roleDefs,
+        cubes,
         localDocs: documentFile ? { [documentFile]: ["inline"] } : {},
     };
 

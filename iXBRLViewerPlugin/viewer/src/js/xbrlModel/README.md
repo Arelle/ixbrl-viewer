@@ -201,8 +201,11 @@ embedded fonts renders correctly even without them.
 
 ## Known simplifications (this PoC)
 
-- Numeric facts are shown using their pre-formatted document text (facts are
-  treated as non-numeric); unit-aware numeric rendering is a follow-up.
+- Numeric facts are marked numeric (from `xbrl:unit`) and their reported value is
+  reconstructed from the document text plus `scale`/`sign`/`transformation`, so
+  the inspector shows unit, accuracy (decimals) and scale.  The `transformation`
+  (format) is captured but not shown — surfacing it needs a row in the shared
+  `fact-details.html` template.
 - Only located facts (with an `xbrl:htmlSpanId` or `xbrl:pdfPage`/`xbrl:pdfMcid`
   locator) are shown; hidden facts are not yet surfaced.
 - The PDF surface renders all pages up front (simple, matches the scroll model);

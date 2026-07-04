@@ -246,14 +246,20 @@ function buildFacts(factset) {
                 a[k] = v;
             }
         }
-        // NOTE: xbrl:unit is deliberately not mapped to the numeric "u" aspect
-        // for this first surface.  Numeric values in HTML are already display-
-        // formatted text; treating facts as non-numeric lets us show that text
-        // verbatim without re-running numeric formatting.  Unit-aware numeric
-        // rendering is a follow-up once value/decimals are carried in the OIM.
+        // Numeric facts carry a unit (mapped to the "u" aspect, which is what
+        // makes Fact.isNumeric() true and surfaces the unit/accuracy/scale in the
+        // inspector) plus decimals/scale/sign/transform used to reconstruct the
+        // value from the document text (see parseNumericValue).
+        const unit = dims["xbrl:unit"];
+        if (unit !== undefined) {
+            a.u = unit;
+        }
 
         let jsonValue = null;
         let decimals;
+        let scale;
+        let sign;
+        let transformation;
         for (const fv of fact.factValues ?? []) {
             if (fv.value !== undefined) {
                 jsonValue = fv.value;
@@ -261,18 +267,35 @@ function buildFacts(factset) {
             if (fv.decimals !== undefined) {
                 decimals = fv.decimals;
             }
+            if (fv.scale !== undefined) {
+                scale = fv.scale;
+            }
+            if (fv.sign !== undefined) {
+                sign = fv.sign;
+            }
+            if (fv.transformation !== undefined) {
+                transformation = fv.transformation;
+            }
         }
+
+        const makeFactData = () => {
+            const factData = { a: { ...a }, v: jsonValue };
+            if (decimals !== undefined) {
+                factData.d = decimals;
+            }
+            // Numeric metadata for the surface to compute the value/scale.
+            if (unit !== undefined) {
+                factData.num = { scale, sign, transformation, explicitValue: jsonValue };
+            }
+            return factData;
+        };
 
         // HTML surface: one viewer fact per html span id (repeated span ids
         // become duplicates, as for repeated iXBRL tags).
         const spanIds = htmlSpanIdsForFact(fact);
         if (spanIds.length > 0) {
             for (const spanId of spanIds) {
-                const factData = { a: { ...a }, v: jsonValue };
-                if (decimals !== undefined) {
-                    factData.d = decimals;
-                }
-                facts[spanId] = factData;
+                facts[spanId] = makeFactData();
             }
             continue;
         }
@@ -282,10 +305,8 @@ function buildFacts(factset) {
         // overlay boxes.
         const pdfLocators = pdfLocatorsForFact(fact);
         if (pdfLocators.length > 0) {
-            const factData = { a: { ...a }, v: jsonValue, pdf: pdfLocators };
-            if (decimals !== undefined) {
-                factData.d = decimals;
-            }
+            const factData = makeFactData();
+            factData.pdf = pdfLocators;
             facts["pf-" + (pdfKeyCounter++)] = factData;
             continue;
         }

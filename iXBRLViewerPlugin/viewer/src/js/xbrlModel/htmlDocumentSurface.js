@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import { viewerUniqueId } from '../util.js';
-import { iframeReady } from './surfaceUtil.js';
+import { iframeReady, applyFactValue } from './surfaceUtil.js';
 
 // A "document surface" binds XbrlModel facts to a rendered document.  It is the
 // only XbrlModel-specific piece that touches the rendered document, so that
@@ -67,16 +67,13 @@ export class HtmlDocumentSurface {
             const nodes = viewer._findOrCreateWrapperNode(el, false);
             const vuid = viewerUniqueId(reportIndex, spanId);
             viewer._addIdToNodes(nodes, vuid);
-            viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+            const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
             viewer._docOrderItemIndex.addItem(vuid, 0);
             viewer.itemContinuationMap[vuid] = [];
-            nodes.addClass("ixbrl-element-nonnumeric");
+            nodes.addClass(factData.a.u !== undefined ? "ixbrl-element-nonfraction" : "ixbrl-element-nonnumeric");
 
-            // The displayed value comes from the document unless the OIM
-            // provided one directly.
-            if (factData.v === null || factData.v === undefined) {
-                factData.v = $(el).text().replace(/\s+/g, " ").trim();
-            }
+            // Value comes from the OIM (numeric facts) or the document text.
+            applyFactValue(factData, ixn, $(el).text());
         }
 
         return Promise.resolve();

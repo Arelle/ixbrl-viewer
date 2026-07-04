@@ -2,6 +2,7 @@
 
 import $ from 'jquery';
 import { viewerUniqueId } from '../util.js';
+import { applyFactValue } from './surfaceUtil.js';
 
 // Document surface that renders a PDF with PDF.js and binds XbrlModel facts to
 // it using xbrl:pdfPage / xbrl:pdfMcid locators.
@@ -193,13 +194,14 @@ export class PdfDocumentSurface {
         for (const { key, factData, rectSets } of entries) {
             const overlayNodes = [];
             const textParts = [];
+            const numericClass = factData.a.u !== undefined ? "ixbrl-element-nonfraction" : "ixbrl-element-nonnumeric";
             for (const rs of rectSets) {
                 if (rs.text) {
                     textParts.push(rs.text);
                 }
                 for (const rect of rs.rects) {
                     const div = doc.createElement("div");
-                    div.className = "ixbrl-element ixbrl-element-nonnumeric";
+                    div.className = "ixbrl-element " + numericClass;
                     div.style.left = rect.left + "px";
                     div.style.top = rect.top + "px";
                     div.style.width = rect.width + "px";
@@ -212,13 +214,12 @@ export class PdfDocumentSurface {
             const vuid = viewerUniqueId(reportIndex, key);
             const nodes = $(overlayNodes);
             viewer._addIdToNodes(nodes, vuid);
-            viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+            const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
             viewer._docOrderItemIndex.addItem(vuid, 0);
             viewer.itemContinuationMap[vuid] = [];
 
-            if (factData.v === null || factData.v === undefined) {
-                factData.v = textParts.join(" ").replace(/\s+/g, " ").trim();
-            }
+            // Value comes from the OIM (numeric facts) or the mapped MCID text.
+            applyFactValue(factData, ixn, textParts.join(" "));
         }
 
         return Promise.resolve();

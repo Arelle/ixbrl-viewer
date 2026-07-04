@@ -396,7 +396,10 @@ function buildNetworks(taxonomy) {
         const arcrole = isCalc ? "calc11" : "pres";
         const group = setDefault(setDefault(rels, arcrole, {}), elr, {});
         for (const r of relationships) {
-            if (!r.source || !r.target) {
+            if (!r.source || !r.target || r.source === r.target) {
+                // Skip self-referential edges: some taxonomies (e.g. IFRS
+                // parent-child networks) include a concept related to itself,
+                // which would otherwise create an infinite tree.
                 continue;
             }
             const rel = { t: r.target };

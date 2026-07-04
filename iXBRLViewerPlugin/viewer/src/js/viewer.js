@@ -54,56 +54,65 @@ export class Viewer {
     }
 
     initialize() {
-        return new Promise(async (resolve, reject) => {
-            const viewer = this;
-            viewer._buildContinuationMaps();
-            viewer._checkContinuationCount()
-                .catch(err => { throw err })
-                .then(() => viewer._iv.setProgress("Pre-processing document"))
+        return new Promise((resolve, reject) => {
+            this._processDocuments()
                 .then(() => {
-
-                    viewer._iframes.each(function (docIndex) { 
-                        $(this).data("selected", docIndex == viewer._currentDocumentIndex);
-                        const reportIndex = $(this).data("report-index");
-                        viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex, false);
-                    });
-
-                    viewer._setContinuationMaps();
-
-                    /* Call plugin promise for each document in turn */
-                    (async function () {
-                        for (const [docIndex, iframe] of viewer._iframes.toArray().entries()) {
-                            const body = $(iframe).contents().find("body").get(0);
-                            await viewer._iv.pluginPromise('preProcessiXBRL', body, docIndex);
-                            if (viewer._iv.isReviewModeEnabled()) {
-                                await new Promise((resolve, _) => {
-                                    viewer._iv.setProgress("Finding untagged numbers and dates").then(() => {
-                                        // Temporarily hide all children of "body" to avoid constant
-                                        // re-layouts when wrapping untagged numbers
-                                        const children = $(body).children(':visible');
-                                        children.hide();
-                                        $(body).addClass("review");
-                                        viewer._wrapUntaggedNumbers($(body), docIndex, false);
-                                        children.show();
-                                        resolve();
-                                    });
-                                });
-                            }
-                        }
-                    })()
-                        .then(() => viewer._iv.setProgress("Preparing document") )
-                        .then(() => {
-                            this._reportSet.setIXNodeMap(this._ixNodeMap);
-                            this._applyStyles();
-                            this._bindHandlers();
-                            this.scale = 1;
-                            this._setTitle(0);
-                            this._addDocumentSetTabs();
-                            resolve();
-                        });
+                    this._reportSet.setIXNodeMap(this._ixNodeMap);
+                    this._applyStyles();
+                    this._bindHandlers();
+                    this.scale = 1;
+                    this._setTitle(0);
+                    this._addDocumentSetTabs();
+                    resolve();
                 })
                 .catch(err => reject(err));
         });
+    }
+
+    // Discover the facts in the source document(s), building the IXNode map and
+    // adding wrapper nodes/classes for each tagged element.  This is the only
+    // document-format-specific step: the default implementation scans the
+    // inline-XBRL DOM, and alternative document surfaces (e.g. XbrlModel)
+    // override it to bind facts by other means.  Everything after this step
+    // (styling, handlers, navigation) is format-agnostic.
+    _processDocuments() {
+        const viewer = this;
+        viewer._buildContinuationMaps();
+        return viewer._checkContinuationCount()
+            .then(() => viewer._iv.setProgress("Pre-processing document"))
+            .then(() => {
+
+                viewer._iframes.each(function (docIndex) {
+                    $(this).data("selected", docIndex == viewer._currentDocumentIndex);
+                    const reportIndex = $(this).data("report-index");
+                    viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex, false);
+                });
+
+                viewer._setContinuationMaps();
+
+                /* Call plugin promise for each document in turn */
+                return (async function () {
+                    for (const [docIndex, iframe] of viewer._iframes.toArray().entries()) {
+                        const body = $(iframe).contents().find("body").get(0);
+                        await viewer._iv.pluginPromise('preProcessiXBRL', body, docIndex);
+                        if (viewer._iv.isReviewModeEnabled()) {
+                            await new Promise((resolve, _) => {
+                                viewer._iv.setProgress("Finding untagged numbers and dates").then(() => {
+                                    // Temporarily hide all children of "body" to avoid constant
+                                    // re-layouts when wrapping untagged numbers
+                                    const children = $(body).children(':visible');
+                                    children.hide();
+                                    $(body).addClass("review");
+                                    viewer._wrapUntaggedNumbers($(body), docIndex, false);
+                                    children.show();
+                                    resolve();
+                                });
+                            });
+                        }
+                    }
+                })()
+                    .then(() => viewer._iv.setProgress("Preparing document"));
+            });
     }
 
     _addDocumentSetTabs() {

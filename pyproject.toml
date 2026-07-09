@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=82,<83", "wheel>=0.46,<0.48", "setuptools_scm>=10.0,<11.0"]
+requires = ["setuptools>=82,<84", "wheel>=0.46,<0.48", "setuptools_scm>=10.0,<11.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -40,7 +40,7 @@ dev = [
     'mypy==2.1.0',
     'pytest==9.1.1',
     'types-lxml==2026.2.16',
-    'typing-extensions==4.15.0',
+    'typing-extensions==4.16.0',
 ]
 
 # https://setuptools.pypa.io/en/latest/userguide/entry_point.html#entry-points-for-plugins

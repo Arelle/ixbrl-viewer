@@ -9,7 +9,7 @@
 // only used when the viewer is loaded in XbrlModel mode (see
 // iXBRLViewer.loadXbrlModel).
 //
-// Facts are keyed by their xbrl:htmlSpanId, which is the id attribute of the
+// Facts are keyed by their xbrl:htmlElementId, which is the id attribute of the
 // element in the plain-HTML document.  This mirrors the way the iXBRL path keys
 // facts by the ix: element id, so that the document surface can bind facts to
 // the document and the rest of the viewer works unchanged.  A single XBRL fact
@@ -238,12 +238,15 @@ function collectDimensionConcepts(taxonomy) {
     return { explicit, typed };
 }
 
-function htmlSpanIdsForFact(fact) {
+function htmlElementIdsForFact(fact) {
     const ids = [];
     for (const fv of fact.factValues ?? []) {
         for (const vs of fv.valueSources ?? []) {
             for (const p of vs.properties ?? []) {
-                if (p.property === "xbrl:htmlSpanId") {
+                // xbrl:htmlElementId is the current spec property name;
+                // xbrl:htmlSpanId is accepted as a legacy alias for factsets not
+                // yet regenerated to the renamed property.
+                if (p.property === "xbrl:htmlElementId" || p.property === "xbrl:htmlSpanId") {
                     for (const id of p.value ?? []) {
                         ids.push(id);
                     }
@@ -354,12 +357,12 @@ function buildFacts(factset) {
             return factData;
         };
 
-        // HTML surface: one viewer fact per html span id (repeated span ids
+        // HTML surface: one viewer fact per html element id (repeated ids
         // become duplicates, as for repeated iXBRL tags).
-        const spanIds = htmlSpanIdsForFact(fact);
-        if (spanIds.length > 0) {
-            for (const spanId of spanIds) {
-                facts[spanId] = makeFactData();
+        const elementIds = htmlElementIdsForFact(fact);
+        if (elementIds.length > 0) {
+            for (const elementId of elementIds) {
+                facts[elementId] = makeFactData();
             }
             continue;
         }

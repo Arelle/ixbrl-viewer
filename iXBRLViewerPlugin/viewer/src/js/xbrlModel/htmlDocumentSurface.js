@@ -10,7 +10,7 @@ import { iframeReady, applyFactValue } from './surfaceUtil.js';
 // adapter, or the inspector.
 //
 // HtmlDocumentSurface binds facts to a plain-HTML rendering by matching each
-// fact's xbrl:htmlSpanId (the key of the facts map produced by the adapter) to
+// fact's xbrl:htmlElementId (the key of the facts map produced by the adapter) to
 // an element id in the document.  For each match it produces exactly the DOM
 // decorations the existing Viewer relies on:
 //

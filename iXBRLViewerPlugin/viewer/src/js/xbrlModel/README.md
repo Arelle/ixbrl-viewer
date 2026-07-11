@@ -6,6 +6,12 @@ instead of the embedded inline-XBRL JSON.  The existing embedded-iXBRL path is
 completely unchanged; the XbrlModel path is only taken when the runtime config
 contains an `xbrlModel` block.
 
+> **Planned refactor:** this overlay is to be restructured as a standalone
+> plugin (like `examples/example_plugin` / `examples/d6v`).  See
+> [`REFACTOR-TO-PLUGIN.md`](./REFACTOR-TO-PLUGIN.md) (design + extension-points
+> API) and [`MAINTAINER-COVER-NOTE.md`](./MAINTAINER-COVER-NOTE.md) (proposal for
+> the maintainers) — details in [Planned refactor](#planned-refactor-move-this-overlay-into-a-standalone-plugin) below.
+
 ## Design
 
 The whole feature reuses the existing report model and inspector.  Only two
@@ -14,7 +20,7 @@ seams were added:
 1. **Adapter** (`adapter.js`) — converts an XbrlModel factset + converted
    taxonomy into the internal report-data structure that `ReportSet` consumes
    (`concepts`, `facts`, `rels`, `prefixes`, `roles`, ...).  Facts are keyed by
-   a document locator: `xbrl:htmlSpanId` for the HTML surface, or a synthesised
+   a document locator: `xbrl:htmlElementId` for the HTML surface, or a synthesised
    id carrying `xbrl:pdfPage`/`xbrl:pdfMcid` locators for the PDF surface.  OIM
    networks become the viewer's ELR-keyed `pres`/`calc11` relationships; explicit
    vs typed dimensions are classified from whether a cube dimension has a
@@ -229,7 +235,7 @@ first-page-fast loading:
   the inspector shows unit, accuracy (decimals) and scale.  The `transformation`
   (format) is captured but not shown — surfacing it needs a row in the shared
   `fact-details.html` template.
-- Only located facts (with an `xbrl:htmlSpanId` or `xbrl:pdfPage`/`xbrl:pdfMcid`
+- Only located facts (with an `xbrl:htmlElementId` or `xbrl:pdfPage`/`xbrl:pdfMcid`
   locator) are shown; hidden facts are not yet surfaced.
 - The PDF surface prepares every page's layout + fact overlays up front (so
   navigation, values and highlighting work everywhere immediately) but rasterizes
@@ -253,3 +259,24 @@ facts present in the document and navigates to them on click
 viewer is unaffected.  (A separate Networks panel was intentionally not added -
 the Document Outline, built from the presentation/parent-child networks, already
 covers that.)
+
+## Planned refactor: move this overlay into a standalone plugin
+
+The maintainers have asked that this overlay be restructured as a standalone
+plugin (in the style of `examples/example_plugin` and `examples/d6v`) rather than
+editing core viewer files.  The design for that — a proposed set of core
+extension points, an inventory of what moves where, and a step-by-step plan — is
+written up in two companion documents in this directory:
+
+- **[`REFACTOR-TO-PLUGIN.md`](./REFACTOR-TO-PLUGIN.md)** — the full design and
+  extension-points API (`provideReportData`, `provideDocumentSurface`,
+  `extendInspector`), the current-code inventory, and the refactor steps.  This
+  is the document to work from when implementing the refactor.
+- **[`MAINTAINER-COVER-NOTE.md`](./MAINTAINER-COVER-NOTE.md)** — a short cover
+  note for the maintainers summarising the proposal and listing the decisions
+  needed (EP3 shape, exports, whether `reportData` is a documented contract, the
+  surface-contract method visibility, and the `outline.js` cycle-guard bugfix).
+
+The extension-point shapes should be agreed with the maintainers first; the
+refactor is then mostly relocating the self-contained `xbrlModel/` modules into a
+plugin package and reverting the core edits.

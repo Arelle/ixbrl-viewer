@@ -425,6 +425,35 @@ a {
         margin: 0.8rem 0.9rem;
       }
 
+      // Tooltip for the toolbar buttons, driven by aria-label.  Provided in CSS
+      // (rather than the native title attribute) so it renders consistently,
+      // including in embedded browsers/webviews that suppress native tooltips.
+      .has-button-tooltip {
+        position: relative;
+
+        &:hover::after,
+        &:focus-visible::after {
+          content: attr(aria-label);
+          position: absolute;
+          top: calc(100% + 0.4rem);
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 100;
+          padding: 0.4rem 0.8rem;
+          border-radius: 0.4rem;
+          // Match the app's existing tooltip convention (light in light mode,
+          // dark in dark mode via the theme variables).
+          background: var(--colour-bg);
+          color: var(--colour-text);
+          border: solid 0.1rem var(--colour-border-grey);
+          box-shadow: rgb(0 0 0 / 30%) 0.2rem 0.2rem 0.2rem;
+          font-size: 1.2rem;
+          line-height: 1.4;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+      }
+
       .search-button {
         .square-button();
 
@@ -450,6 +479,16 @@ a {
 
         &::before {
           .icon-summary();
+
+          position: relative;
+        }
+      }
+
+      .cubes-button {
+        .square-button();
+
+        &::before {
+          .icon-dimension();
 
           position: relative;
         }
@@ -650,6 +689,13 @@ a {
 
         .no-outline-overlay-icon::before {
           .icon-outline();
+
+          font-size: 10rem;
+          line-height: normal;
+        }
+
+        .no-cubes-overlay-icon::before {
+          .icon-dimension();
 
           font-size: 10rem;
           line-height: normal;
@@ -1142,6 +1188,35 @@ a {
     }
   }
 
+  &.cubes-mode {
+    #inspector-head {
+      .controls {
+        .cubes-button {
+          .square-button.primary();
+        }
+      }
+    }
+  }
+
+  // The Cubes button only applies to XBRL Model reports (which carry cubes).
+  &:not(.has-cubes) .cubes-button {
+    display: none;
+  }
+
+  .cubes .fact-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.8rem;
+
+    .cube-count {
+      .text-sm();
+
+      flex-shrink: 0;
+      color: var(--colour-text-light);
+    }
+  }
+
   .powered-by {
     .text-sm();
 
@@ -1183,8 +1258,13 @@ a {
     display: none;
   }
 
+  &:not(.cubes-mode) .cubes-mode-only {
+    display: none;
+  }
+
   &.search-mode .fact-mode-only,
   &.summary-mode .fact-mode-only,
+  &.cubes-mode .fact-mode-only,
   &.outline-mode .fact-mode-only {
     display: none;
   }

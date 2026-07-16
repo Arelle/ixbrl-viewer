@@ -206,6 +206,16 @@ export class XBRLReport {
         return this._reportData.localDocs;
     }
 
+    /*
+     * Returns the XBRL Model cubes (hypercubes/tables) for this report, or an
+     * empty array.  Only populated for reports loaded from an XBRL Model
+     * (the iXBRL path does not carry cubes).  Each cube is
+     * { name, label, concepts: [conceptName], dimensions: [dimName] }.
+     */
+    cubes() {
+        return this._reportData.cubes ?? [];
+    }
+
     qname(v) {
         return this.reportSet.qname(v);
     }

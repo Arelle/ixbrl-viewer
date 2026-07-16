@@ -1,0 +1,7 @@
+{
+  "xbrlModel": {
+    "factset": "aapl-10K-20250927-factset.json",
+    "document": "aapl-20250927.htm",
+    "taxonomy": "aapl-10K-20250927.json"
+  }
+}

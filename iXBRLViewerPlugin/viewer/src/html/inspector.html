@@ -40,14 +40,16 @@ See COPYRIGHT.md for copyright information
   <section id="inspector" class="no-fact-selected" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
     <div id="inspector-head">
       <nav class="controls">
-        <button class="summary-button" data-i18n="[title]inspector.documentSummary" title="Document summary">
+        <button class="summary-button has-button-tooltip" data-i18n="[aria-label]inspector.documentSummary" aria-label="Document summary">
         </button>
-        <button class="outline-button" data-i18n="[title]inspector.documentOutline" title="Document outline">
+        <button class="outline-button has-button-tooltip" data-i18n="[aria-label]inspector.documentOutline" aria-label="Document outline">
         </button>
-        <button class="search-button" data-i18n="[title]inspector.searchTitle" title="Search">
+        <button class="cubes-button has-button-tooltip" data-i18n="[aria-label]inspector.cubes" aria-label="Cubes">
         </button>
-        <button class="ixbrl-prev-tag" data-i18n="[title]inspector.previousTag" title="Previous tag"></button>
-        <button class="ixbrl-next-tag" data-i18n="[title]inspector.nextTag" title="Next tag"></button>
+        <button class="search-button has-button-tooltip" data-i18n="[aria-label]inspector.searchTitle" aria-label="Search">
+        </button>
+        <button class="ixbrl-prev-tag has-button-tooltip" data-i18n="[aria-label]inspector.previousTag" aria-label="Previous tag"></button>
+        <button class="ixbrl-next-tag has-button-tooltip" data-i18n="[aria-label]inspector.nextTag" aria-label="Next tag"></button>
       </nav>
     </div>
 
@@ -462,6 +464,20 @@ See COPYRIGHT.md for copyright information
         <div class="no-outline-overlay">
           <div class="no-outline-overlay-icon"></div>
           <p class="title" data-i18n="inspector.outlineUnavailable">Outline Unavailable</p>
+        </div>
+        <div class="body">
+        </div>
+      </div>
+    </div>
+    <div class="inspector-container cubes-mode-only cubes">
+      <div class="inspector-title">
+        <button class="back" title="Back"></button>
+        <h2 data-i18n="inspector.cubes">Cubes</h2>
+      </div>
+      <div class="inspector-body">
+        <div class="no-cubes-overlay">
+          <div class="no-cubes-overlay-icon"></div>
+          <p class="title" data-i18n="inspector.cubesUnavailable">No Cubes</p>
         </div>
         <div class="body">
         </div>

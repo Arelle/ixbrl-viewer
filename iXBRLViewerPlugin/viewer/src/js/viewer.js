@@ -31,7 +31,7 @@ export class Viewer {
         this.onMouseLeave = $.Callbacks();
 
         this._ixNodeMap = {};
-        this._docOrderItemIndex = new DocOrderIndex();
+        this.docOrderItemIndex = new DocOrderIndex();
         this._currentDocumentIndex = 0;
     }
 
@@ -97,7 +97,6 @@ export class Viewer {
                             this._applyStyles();
                             this._bindHandlers();
                             this.scale = 1;
-                            this._setTitle(0);
                             this._addDocumentSetTabs();
                             resolve();
                         });
@@ -411,7 +410,7 @@ export class Viewer {
     //
     // Viewer._ixNodeMap is a map of these IDs to IXNode objects.
     //
-    // Viewer._docOrderItemIndex is a DocOrderIndex object that maintains a list of
+    // Viewer.docOrderItemIndex is a DocOrderIndex object that maintains a list of
     // fact and footnotes in document order.
     //
     _preProcessiXBRL(n, reportIndex, docIndex, inHidden) {
@@ -437,7 +436,7 @@ export class Viewer {
 
                     this._addIdToNodes(nodes, vuid);
                     let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
-                    this._docOrderItemIndex.addItem(vuid, docIndex);
+                    this.docOrderItemIndex.addItem(vuid, docIndex);
 
                     if (isNonFraction) {
                         nodes.addClass("ixbrl-element-nonfraction");
@@ -479,7 +478,7 @@ export class Viewer {
                 if (vuid !== null) {
                     let nodes = this._findOrCreateWrapperNode(n, inHidden);
                     nodes.addClass("ixbrl-element").data('ivids', [vuid]);
-                    this._docOrderItemIndex.addItem(vuid, docIndex);
+                    this.docOrderItemIndex.addItem(vuid, docIndex);
                     /* We may have already seen the corresponding ix element in the hidden
                      * section */
                     const ixn = this._ixNodeMap[vuid];
@@ -527,15 +526,15 @@ export class Viewer {
     _selectAdjacentTag(offset, currentItem) {
         var nextVuid;
         if (currentItem !== null) {
-            nextVuid = this._docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
+            nextVuid = this.docOrderItemIndex.getAdjacentItem(currentItem.vuid, offset);
             this.showDocumentForItemId(nextVuid);
         }
         // If no fact selected go to the first or last in the current document
         else if (offset > 0) {
-            nextVuid = this._docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
+            nextVuid = this.docOrderItemIndex.getFirstInDocument(this._currentDocumentIndex);
         } 
         else {
-            nextVuid = this._docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
+            nextVuid = this.docOrderItemIndex.getLastInDocument(this._currentDocumentIndex);
         }
         
         const nextElement = this.elementsForItemId(nextVuid);
@@ -557,10 +556,6 @@ export class Viewer {
         $("body", this._contents)
             .on("click", () => viewer.selectElement(null));
         
-        $('#iframe-container .zoom-in').on("click", () => this.zoomIn());
-        $('#iframe-container .zoom-out').on("click", () => this.zoomOut());
-        $('#iframe-container .print').on("click", () => this.currentDocument().get(0).contentWindow.print());
-
         TableExport.addHandles(this._contents, this._reportSet);
     }
 
@@ -806,23 +801,14 @@ export class Viewer {
         }
     }
 
-    _zoom() {
+    zoom(pct) {
+        this.scale = pct/100;
         const viewTop = this._contents.scrollTop();
         const height = $("html", this._contents).height();
         $('body', this._contents).css('zoom', this.scale);
 
         const newHeight = $("html", this._contents).height();
         this._contents.scrollTop(newHeight * (viewTop)/height );
-    }
-
-    zoomIn() {
-        this.scale *= 1.1;
-        this._zoom();
-    }
-
-    zoomOut() {
-        this.scale /= 1.1;
-        this._zoom();
     }
 
     factsInSameTable(fact) {
@@ -842,11 +828,8 @@ export class Viewer {
         this.changeItemClass(f.vuid, "ixbrl-linked-highlight", true);
     }
 
-    _setTitle(docIndex) {
-        const title = $('head title', this._iframes.eq(docIndex).contents()).text();
-        $('#top-bar .document-title')
-            .text(title)
-            .attr("aria-label", "Inline Viewer: " + title);
+    getTitle(docIndex) {
+        return $('head title', this._iframes.eq(docIndex).contents()).text();
     }
 
     showDocumentForItemId(vuid) {
@@ -855,6 +838,10 @@ export class Viewer {
 
     currentDocument() {
         return this._iframes.eq(this._currentDocumentIndex);
+    }
+
+    documentCount() {
+        return this._iframes.length;
     }
 
     selectDocument(docIndex) {
@@ -871,7 +858,6 @@ export class Viewer {
             .eq(docIndex)
             .height("100%")
             .data("selected", true);
-        this._setTitle(docIndex);
     }
 
     * postProcess() {

@@ -24,6 +24,8 @@ export const FEATURE_HOME_LINK_URL = 'home_link_url';
 export const FEATURE_REVIEW = 'review';
 export const FEATURE_SUPPORT_LINK = 'support_link';
 export const FEATURE_SURVEY_LINK = 'survey_link';
+
+// This feature has no effect until we implement fact list by section
 export const FEATURE_SEARCH_ON_STARTUP = 'search_on_startup';
 export const FEATURE_HIGHLIGHT_FACTS_ON_STARTUP = 'highlight_facts_on_startup';
 export const FEATURE_HIDE_CALCULATION_MODE_OPTION = 'hide_calculation_mode_option';
@@ -35,6 +37,34 @@ export const STORAGE_THEME = "ixbrl-viewer-theme";
 export const STORAGE_HIGHLIGHT_FACTS = "ixbrl-viewer-highlight-all-facts";
 export const STORAGE_HOME_LINK_QUERY = "ixbrl-viewer-home-link-query";
 export const USER_GUIDE_URL = "https://arelle-ixbrl-viewer.readthedocs.io/en/latest/user_guides/user_guide.html";
+export const ENTITY_CONCEPT_LOCALNAMES = [
+    "NameOfReportingEntityOrOtherMeansOfIdentification", // IFRS
+    "EntityRegistrantName", // SEC / DEI
+    "EntityCurrentLegalOrRegisteredName", // UK
+    "NameOfReportingEntity", // Denmark
+];
+
+export const ZOOM_LEVELS = [
+    25,
+    33,
+    50,
+    66,
+    80,
+    90,
+    100,
+    110,
+    120,
+    133,
+    150,
+    170,
+    200,
+    240,
+    300,
+    400,
+    500,
+];
+
+export const FACTS_PER_GROUP = 20;
 
 /* 
  * Takes a moment.js oject and converts it to a human readable date, or date

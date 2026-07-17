@@ -23,7 +23,7 @@ import glob
 import argparse
 import iXBRLViewerPlugin.iXBRLViewer
 from arelle.plugin import inlineXbrlDocumentSet
-from iXBRLViewerPlugin import generateViewer, getFeaturesFromOptions, FEATURE_CONFIGS
+from iXBRLViewerPlugin import generateViewer, getFeaturesFromOptions, FEATURE_CONFIGS, IXBRLViewerBuilder, pluginData, processModel
 
 class CntlrCreateViewer(Cntlr.Cntlr):
 
@@ -55,11 +55,8 @@ class CntlrCreateViewer(Cntlr.Cntlr):
         self.modelManager.load(fs)
         self.modelManager.validate()
 
-        try:
-            generateViewer(self, outPath, scriptUrl, showValidationMessages=True, useStubViewer=useStubViewer, copyScript=False)
-        except iXBRLViewerPlugin.iXBRLViewer.IXBRLViewerBuilderError as e:
-            print(e)
-            sys.exit(1)
+        pluginData(cntlr).builder.processModel(self.modelManager.modelXbrl)
+
 
 parser = argparse.ArgumentParser(description="Create iXBRL Viewer instances")
 parser.add_argument("--package-dir", "-p", help="Path to directory containing taxonomy packages")
@@ -78,6 +75,7 @@ for featureConfig in FEATURE_CONFIGS:
 args = parser.parse_args()
 
 cntlr = CntlrCreateViewer()
+pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer = args.use_stub_viewer)
 cntlr.startLogging(
     logFileName='logToPrint',
     logFormat="[%(messageCode)s] %(message)s - %(file)s",
@@ -98,6 +96,7 @@ if args.package_dir:
 for f in args.files:
     cntlr.createViewer(
         f,
-        outPath=args.out,
-        scriptUrl=args.viewer_url,
-        useStubViewer=args.use_stub_viewer)
+        outPath=args.out)
+
+iv = pluginData(cntlr).builder.createViewer(scriptUrl=args.viewer_url)
+iv.save(args.out)

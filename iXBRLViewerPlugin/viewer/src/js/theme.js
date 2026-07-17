@@ -42,9 +42,20 @@ export function initializeTheme() {
     }
 }
 
+// UNUSED
 export function toggleTheme() {
     const currentTheme = getTheme();
     const newTheme = currentTheme === LIGHT_THEME ? DARK_THEME : LIGHT_THEME;
     setTheme(newTheme);
     storeTheme(newTheme);
+}
+
+export function darkModeTheme() {
+    setTheme(DARK_THEME);
+    storeTheme(DARK_THEME);
+}
+
+export function lightModeTheme() {
+    setTheme(LIGHT_THEME);
+    storeTheme(LIGHT_THEME);
 }

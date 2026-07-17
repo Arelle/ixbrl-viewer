@@ -176,10 +176,10 @@ export class CalculationInspector extends Dialog {
             messageCell.addClass("unchecked").find(".message").text(i18next.t('calculation.does-not-bind'));
         } 
         else if (resolvedCalculation.isConsistent()) {
-            messageCell.addClass("consistent").find(".message").text(i18next.t('factDetails.calculationIsConsistent'));
+            messageCell.addClass("consistent").find(".message").text(i18next.t('calculation.calculationIsConsistent'));
         }
         else {
-            messageCell.addClass("inconsistent").find(".message").text(i18next.t('factDetails.calculationIsInconsistent'));
+            messageCell.addClass("inconsistent").find(".message").text(i18next.t('calculation.calculationIsInconsistent'));
         }
     }
 }

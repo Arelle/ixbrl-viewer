@@ -3,22 +3,25 @@ See COPYRIGHT.md for copyright information
 -->
 
 <div class="fact-details">
-  <dl>
-    <dt data-i18n="factDetails.concept">Concept</dt>
-    <dd>
-      <div class="std-label"></div>
-      <div class="documentation"></div>
-    </dd>
-    <dt id="dimensions-label" class="has-tooltip">
-      <span data-i18n="factDetails.dimensions">Dimensions</span>
-      <button class="tooltip-icon" data-tooltip-name="dimension" data-tooltip-glossary-link="true"></button>
-    </dt>
-    <dd>
-      <div id="dimensions"></div>
-    </dd>
-    <dt data-i18n="factDetails.properties">Properties</dt>
-    <dd>
+  <div class="section dimensions">
+    <dl>
+      <dt id="dimensions-label" class="has-tooltip">
+        <span data-i18n="factDetails.dimensions">Dimensions</span>
+        <button class="tooltip-icon" data-tooltip-name="dimension" data-tooltip-glossary-link="true"></button>
+      </dt>
+      <dd>
+        <div id="dimensions"></div>
+      </dd>
+    </dl>
+  </div>
+  <div class="collapsible-section">
+    <h3 class="collapsible-header"><button data-i18n="factDetails.properties">Properties</button></h3>
+    <div class="collapsible-body">
       <table class="property-table fact-properties">
+        <tr class="value">
+          <th data-i18n="factDetails.factValue">Fact Value</th>
+          <td><span class="value"></span> <button class="show-all inline-button" aria-label="Show full text">[...]</button> <span class="expand-text-block"></td>
+        </tr>
         <tr class="period">
           <th class="has-tooltip">
             <span data-i18n="factDetails.date">Date</span>
@@ -26,9 +29,18 @@ See COPYRIGHT.md for copyright information
           </th>
           <td></td>
         </tr>
-        <tr class="value">
-          <th data-i18n="factDetails.factValue">Fact Value</th>
-          <td><span class="value"></span> <button class="show-all inline-button" aria-label="Show full text">[...]</button> <span class="expand-text-block"></td>
+        <tr class="namespace">
+          <th >
+            <span data-i18n="factDetails.source">Source</span>
+          </th>
+          <td><span class="key"></span> <span class="text"></td>
+        </tr>
+        <tr class="concept">
+          <th class="has-tooltip">
+            <span data-i18n="factDetails.concept">Concept</span>
+            <button class="tooltip-icon" data-tooltip-name="concept" data-tooltip-glossary-link="#concept"></button>
+          </th>
+          <td><div><span class="text"></span><span class="filler"></span><button class="clipboard-copy copy-icon inline-button" title="Copy concept to clipboard"></button></div></td>
         </tr>
         <tr class="accuracy">
           <th class="has-tooltip">
@@ -52,13 +64,6 @@ See COPYRIGHT.md for copyright information
           <th data-i18n="factDetails.entity">Entity</th>
           <td></td>
         </tr>
-        <tr class="concept">
-          <th class="has-tooltip">
-            <span data-i18n="factDetails.concept">Concept</span>
-            <button class="tooltip-icon" data-tooltip-name="concept" data-tooltip-glossary-link="#concept"></button>
-          </th>
-          <td><div><span class="text"></span><span class="filler"></span><button class="clipboard-copy copy-icon inline-button" title="Copy concept to clipboard"></button></div></td>
-        </tr>
         <tr class="datatype">
           <th data-i18n="factDetails.datatype">Type</th>
           <td></td>
@@ -68,11 +73,22 @@ See COPYRIGHT.md for copyright information
           <td></td>
         </tr>
       </table>
-    </dd>
-  </dl>
-  <div class="duplicates">
-    <button class="prev" title="Show previous duplicate"></button> 
-    <span class="text"></span> 
-    <button class="next" title="Show next duplicate"></button>
+    </div>
   </div>
+</div>
+<div class="collapsible-section duplicates">
+  <h3 class="collapsible-header"><button data-i18n="inspector.occurrences">Occurrences</button></h3>
+  <div class="collapsible-body">
+    <nav class="tag-nav tag-nav-duplicates">
+      <div>
+        <div class="button">
+          <button class="prev-tag" data-i18n="[title]inspector.previousTag" title="Show previous instance">Previous</button>
+        </div>
+        <div class="text"></div>
+        <div class="button">
+          <button class="next-tag" data-i18n="[title]inspector.nextTag" title="Show next instance">Next</button>
+        </div>
+      </div>
+    </div>
+  </nav>
 </div>

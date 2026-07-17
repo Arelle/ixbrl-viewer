@@ -51,6 +51,10 @@ export class Fact {
         return this.report.reportSet.taxonomyNamer.convertQName(this.conceptQName());
     }
 
+    conceptTaxonomyName() {
+        return this.report.reportSet.taxonomyNamer.fromQName(this.conceptQName());
+    }
+
     concept() {
         return this.report.getConcept(this.f.a.c); 
     }

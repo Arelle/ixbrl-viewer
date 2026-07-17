@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION} from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION, ZOOM_LEVELS, FACTS_PER_GROUP} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -20,10 +20,12 @@ import { Calculation } from "./calculation.js";
 import { CalculationInspector } from './calculationInspector.js';
 import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
-import { toggleTheme } from './theme.js';
+import { getTheme, darkModeTheme, lightModeTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
 const SEARCH_FILTER_MULTISELECTS = {
+  visibilityFilter: "search-filter-visibility",
+  conceptTypeFilter: "search-filter-concept-type",
   periodFilter: "search-filter-period",
   dimensionTypeFilter: "search-filter-dimension-type",
   namespacesFilter: "search-filter-namespaces",
@@ -32,6 +34,8 @@ const SEARCH_FILTER_MULTISELECTS = {
   unitsFilter: "search-filter-units",
   calculationsFilter: "search-filter-calculations",
   dataTypesFilter: "search-filter-datatypes",
+  factValueFilter: "search-filter-fact-value",
+  mandatoryFactsFilter: "search-filter-mandatory-facts",
 };
 
 export class Inspector {
@@ -40,6 +44,9 @@ export class Inspector {
         this._viewerOptions = new ViewerOptions()
         this._currentItem = null;
         this._useCalc11 = true;
+        this._curInspectorMode = undefined;
+        this._prevInspectorMode = undefined;
+        this._searchReady = false;
     }
 
     i18nInit() {
@@ -88,7 +95,8 @@ export class Inspector {
             inspector._reportSet = reportSet;
             inspector.i18nInit().then((t) => {
                 
-                $(".collapsible-header button:first-of-type").on("click", function () { 
+                // Bind to #ixv and filter as some collapsible sections get added dynamically.
+                $("#ixv").on("click", ".collapsible-header button:first-of-type", function () { 
                     const d = $(this).closest(".collapsible-section");
                     d.toggleClass("collapsed"); 
                     if (d.hasClass("collapsed")) {
@@ -105,28 +113,52 @@ export class Inspector {
                         }
                     }
                 });
-                $("#inspector .controls .search-button").on("click", () => inspector.inspectorMode("search-mode", true));
-                $("#inspector .controls .summary-button").on("click", () => inspector.inspectorMode("summary-mode", true));
-                $("#inspector .controls .outline-button").on("click", () => inspector.inspectorMode("outline-mode", true));
-                $("#inspector .back").on("click", () => inspector.popInspectorMode());
+                $("#inspector-tabs button").on("click", function () {
+                    inspector.inspectorMode($(this).data("mode"));
+                });
+                $("#settings-button").on("click", () => inspector.toggleSettingsMode());
+                $(".settings-inspector .close").on("click", () => inspector.closeSettingsMode());
+
+                $(".nested-item-select select").change(e => inspector.switchItem($(e.currentTarget).val(), true));
+
                 $(".popup-trigger").on("mouseenter", function () {
                     $(this).find(".popup-content").show()
                 }).on("mouseleave", function () {
                     $(this).find(".popup-content").hide()
                 });
+                $(".radio-pills button").on("click", function () {
+                    $(this).parent().find("button").removeClass("selected");
+                    $(this).addClass("selected");
+                });
+                $("#summary-tag-count-number").on("click", () => $(".tag-summary").removeClass("show-percent"));
+                $("#summary-tag-count-percent").on("click", () => $(".tag-summary").addClass("show-percent"));
                 $("#inspector").on("click", ".clipboard-copy", function () {
                     navigator.clipboard.writeText($(this).data("cb-text"));
                 });
 
+                $('#dark-mode-off').on("click", () => lightModeTheme());
+                $('#dark-mode-on').on("click", () => darkModeTheme());
+                $("#setting-dark-mode button").filter((i, e) => $(e).data("theme") === getTheme()).addClass("selected");
+                $('#print').on("click", () => inspector._viewer.currentDocument().get(0).contentWindow.print());
+                $('#highlight-tags').on("click", () => inspector.toggleHighlightAllTags());
+                if (inspector.highlightTagsOnStartup()) {
+                  $('#highlight-tags').addClass("checked");
+                  inspector.highlightAllTags(true);
+                }
+                $('#zoom-in').on("click", () => inspector.zoomRelative(1));
+                $('#zoom-out').on("click", () => inspector.zoomRelative(-1));
+                $('#zoom').on("change", (e) => inspector.zoomAbsolute($(e.currentTarget).val()));
+
                 inspector.initializeTooltips();
 
+                inspector.initializeReviewMode();
+
                 inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
-                inspector.buildToolbarHighlightMenu();
 
-                inspector._optionsMenu = new Menu($("#display-options-menu"));
-                inspector.buildDisplayOptionsMenu();
-
+                inspector.setDefaultDocumentLanguage();
+                inspector.buildDocumentLanguages();
                 inspector.buildHomeLink()
+
 
                 $("#ixv").localize();
 
@@ -137,12 +169,14 @@ export class Inspector {
                 inspector.createSummary()
                 inspector.outline = new ReportSetOutline(reportSet);
                 inspector.createOutline();
+                inspector.initializeZoom();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
                     inspector.handleFactDeepLink();
                     inspector.rebuildViewer();
                     inspector.setupValidationReportIcon();
                     inspector.initializeViewer();
+                    inspector.buildFactListByGroup();
                     inspector.doInitialSelection();
                     resolve();
                 });
@@ -187,16 +221,39 @@ export class Inspector {
         });
     }
 
+    initializeReviewMode() {
+        if (this._iv.isReviewModeEnabled()) {
+            $('#highlight-untagged-numbers').on("click", () => this.toggleHighlightUntaggedNumbers());
+            $('#highlight-untagged-dates').on("click", () => this.toggleHighlightUntaggedDates());
+            $(".review-mode-only").show();
+        }
+    }
+
     initializeViewer() {
         this._viewer.onSelect.add((vuid, eltSet, byClick) => this.selectItem(vuid, eltSet, byClick));
         this._viewer.onMouseEnter.add((id) => this.viewerMouseEnter(id));
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
-        $('.ixbrl-next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
-        $('.ixbrl-prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
-        $('#toggle-dark-mode')
-                .attr('title', i18next.t('toolbar.toggleDarkMode'))
-                .attr('aria-label', i18next.t('toolbar.toggleDarkMode'))
-                .on('click', toggleTheme);
+        $('.tag-nav-all-facts .next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
+        $('.tag-nav-all-facts .prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
+    }
+
+    initializeZoom() {
+        $("#zoom").empty();
+        for (const [n, zoom] of ZOOM_LEVELS.entries()) {
+            const option = $("<option></option>")
+                .attr("value", n)
+                .text(`${zoom}%`)
+                .appendTo("#zoom");
+            // Keep drop-down short, but keep fine-grained control with zoom
+            // in/out.
+            if (n % 2 == 1) {
+                option.attr("hidden", "hidden");
+            }
+            if (zoom == 100) {
+                option.attr("selected", "selected");
+                this._zoomLevel = n;
+            }
+        }
     }
 
     postLoadAsync() {
@@ -224,8 +281,60 @@ export class Inspector {
     }
 
     doInitialSelection() {
-        if (!this._currentItem && this._iv.isFeatureEnabled(FEATURE_SEARCH_ON_STARTUP)) {
-            this.inspectorMode("search-mode");
+        if (!this._currentItem) {
+            this.inspectorMode("fact-mode");
+            if (this.outline.hasOutline()) {
+                $("#inspector").addClass("show-facts-by-group");
+            }
+        }
+    }
+
+    addFactListByGroupFacts(container, next, last) {
+        $(".show-more", container).remove();
+        for (let i = next; i < last; i++) {
+            if (i - next >= FACTS_PER_GROUP - 1) {
+                $("<button></button>") 
+                    .addClass("show-more")
+                    .text(i18next.t("inspector.showMore"))
+                    .on("click",  () => this.addFactListByGroupFacts(container, i, last))
+                    .appendTo(container);
+                break;
+            }
+            this.factListRow(this._reportSet.facts()[i]).appendTo(container);
+        }
+
+    }
+
+    buildFactListByGroup() {
+        const container = $("#inspector .facts-by-group");
+        if (!this.outline.hasOutline()) {
+            return;
+        }
+
+
+        const groups = this.outline.sortedSections();
+
+        for (const group of groups) {
+            const section = $("<div></div>")
+                .addClass("collapsible-section")
+                .appendTo(container);
+
+            const header = $("<h3></h3>")
+                .addClass("collapsible-header")
+                .appendTo(section);
+
+            $("<button></button>")
+                .text(group.report.getRoleLabelOrURI(group.elr))
+                .appendTo(header);
+
+            const body = $("<div></div>")
+                .addClass("collapsible-body")
+                .addClass("fact-list")
+                .appendTo(section);
+
+            const first = this._reportSet.facts().indexOf(group.firstFact);
+            const last = this._reportSet.facts().indexOf(group.lastFact);
+            this.addFactListByGroupFacts(body, first, last);
         }
     }
 
@@ -265,76 +374,37 @@ export class Inspector {
         }
     }
 
-    buildDisplayOptionsMenu() {
-        this._optionsMenu.reset();
+    buildDocumentLanguages() {
         if (this._reportSet) {
-            // Doc language
-            const defaultDocLang = this.selectDefaultLanguage();
             const docLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
             const docLangs = [...this._reportSet.availableLanguages()]
                 .sort((a, b) => docLangNames.of(a).localeCompare(docLangNames.of(b)));
-
-            this._optionsMenu.addLabel(i18next.t("menu.documentLanguage"));
-            this._optionsMenu.addCheckboxGroup(
-                docLangs,
-                Object.fromEntries(docLangs.map((l) => [l, docLangNames.of(l)])),
-                defaultDocLang,
-                (lang) => { this.setDocumentLanguage(lang); this.createOutline(); this.update() },
-                "select-language"
-            );
-            this.setDocumentLanguage(defaultDocLang);
-
-            // Application language
-            const defaultAppLang = i18next.language.substring(0, 2);
-            const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
-            const appLangs = Object.keys(i18next.options.resources)
-                .sort((a, b) => appLangNames.of(a).localeCompare(appLangNames.of(b)));
-
-            this._optionsMenu.addLabel(i18next.t("menu.applicationLanguage"));
-            this._optionsMenu.addCheckboxGroup(
-                    appLangs,
-                    Object.fromEntries(appLangs.map((l) => [l, appLangNames.of(l)])),
-                    defaultAppLang,
-                    (lang) => { this.changeApplicationLanguage(lang); },
-                    "select-user-language"
-            );
-
-            // Actions
-            if (this._reportSet.filingDocuments()) {
-                this._optionsMenu.addLabel(i18next.t("menu.actions"));
-                this._optionsMenu.addDownloadButton("Download filing documents", this._reportSet.filingDocuments())
+            const languageSelect = $("select#document-language").empty();
+            if (docLangs.length > 1) {
+                languageSelect.closest("tbody").show();
+                for (const l of docLangs) {
+                    $("<option></option>")
+                        .text(docLangNames.of(l))
+                        .val(l)
+                        .prop("selected", l == this._viewerOptions.language)
+                        .appendTo(languageSelect);
+                }
+                languageSelect
+                    .off("change.setting")
+                    .on("change.setting", e => this.setDocumentLanguage($(e.currentTarget).val()));
             }
-
-            // Options
-            if (this._reportSet.usesCalculations() && !this._iv.isFeatureEnabled(FEATURE_HIDE_CALCULATION_MODE_OPTION)) {
-                this._optionsMenu.addLabel(i18next.t("menu.options"));
-                this._optionsMenu.addCheckboxItem(i18next.t("calculation.useCalculations11"), (useCalc11) => this.setCalculationMode(useCalc11), "calculation-mode", "select-language", this._useCalc11);
+            else {
+                languageSelect.closest("tbody").hide();
             }
         }
-        let helpLinks = {}
-        let supportLinkUrl = this._iv.getSupportLinkUrl();
-        if (supportLinkUrl) {
-            helpLinks[i18next.t("menu.contactUs")] = supportLinkUrl;
-        }
-        let surveyLinkUrl = this._iv.getSurveyLinkUrl();
-        if (surveyLinkUrl) {
-            helpLinks[i18next.t("menu.survey")] = surveyLinkUrl;
-        }
-        if (Object.entries(helpLinks).length > 0) {
-            this._optionsMenu.addLabel(i18next.t("menu.help"));
-            for (const [label, value] of Object.entries(helpLinks)) {
-                this._optionsMenu.addLink(label, value);
-            }
-        }
-        this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
     }
 
     buildHomeLink() {
-        $('#top-bar #home-link').remove();
+        $('#top-bar div.home-link').remove();
         if (!this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_URL)) {
             return;
         }
-        $("#top-bar img.header").remove();
+        $("#top-bar div.logo").remove();
         let homeLinkUrl = this._iv.getStaticFeatureValue(FEATURE_HOME_LINK_URL);
         let homeLinkText;
         if (this._iv.isStaticFeatureEnabled(FEATURE_HOME_LINK_LABEL)) {
@@ -351,13 +421,14 @@ export class Inspector {
             }
             homeLinkUrl += query;
         }
+        const homeLinkDiv = $("<div></div>")
+            .addClass("home-link");
         const homeLink = $('<a></a>')
                 .attr('href', homeLinkUrl)
-                .attr('id', 'home-link')
-                .text(homeLinkText);
-        $('#top-bar').prepend(homeLink);
+                .text(homeLinkText)
+                .appendTo(homeLinkDiv);
+        $('#top-bar').prepend(homeLinkDiv);
     }
-
 
     highlightTagsOnStartup() {
         const pref = window.localStorage.getItem(STORAGE_HIGHLIGHT_FACTS);
@@ -367,66 +438,62 @@ export class Inspector {
         return this._iv.isFeatureEnabled(FEATURE_HIGHLIGHT_FACTS_ON_STARTUP);
     }
 
-    buildToolbarHighlightMenu() {
-        const iv = this._iv;
-        this._toolbarMenu.reset();
-        this._toolbarMenu.addCheckboxItem(i18next.t("toolbar.xbrlElements"), (checked, explicitClick) => this.highlightAllTags(checked, explicitClick), "highlight-tags", null, this.highlightTagsOnStartup())
-        if (iv.isReviewModeEnabled()) {
-            this._toolbarMenu.addCheckboxItem("Untagged Numbers", function (checked) {
-                const body = iv.viewer.contents().find("body");
-                if (checked) {
-                    body.addClass("review-highlight-untagged-numbers");
-                }
-                else {
-                    body.removeClass("review-highlight-untagged-numbers");
-                }
-            }, "highlight-untagged-numbers", "highlight-tags");
+    buildSettingsPage() {
+        // Application language
+        const defaultAppLang = i18next.language.substring(0, 2);
+        const appLangNames = new Intl.DisplayNames(this.preferredLanguages(), { "type": "language" });
+        const appLangs = Object.keys(i18next.options.resources)
+            .sort((a, b) => appLangNames.of(a).localeCompare(appLangNames.of(b)));
+        const appLangSetting = $("#setting-viewer-language")
+            .empty()
+            .off("change.setting")
+            .on("change.setting", e => this.changeApplicationLanguage($(e.currentTarget).val()));
 
-            this._toolbarMenu.addCheckboxItem("Untagged Dates", function (checked) {
-                const body = iv.viewer.contents().find("body");
-                if (checked) {
-                    body.addClass("review-highlight-untagged-dates");
-                }
-                else {
-                    body.removeClass("review-highlight-untagged-dates");
-                }
-            }, "highlight-untagged-dates", "highlight-untagged-numbers");
+        for (const l of appLangs) {
+            $("<option></option>")
+                .text(appLangNames.of(l))
+                .val(l)
+                .appendTo(appLangSetting);
         }
-        this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
-    }
+        appLangSetting.val(defaultAppLang);
 
-    buildHighlightKey() {
-        $(".highlight-key .items").empty();
-        let key;
-        if (this._iv.isReviewModeEnabled()) {
-            key = [
-                "XBRL Elements",
-                "Untagged Numbers",
-                "Untagged Dates",
-            ]
-        } else {
-            key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
+        const calculationModeSetting = $("#setting-calculation-mode");
+
+        if (this._reportSet.usesCalculations10() && !this._iv.isFeatureEnabled(FEATURE_HIDE_CALCULATION_MODE_OPTION)) {
+            calculationModeSetting
+                .off("change.setting")
+                .on("change.setting", e => this.setCalculationMode($(e.currentTarget).val() === "calc11"))
+                .closest(".section").show();
         }
-        this._iv.callPluginMethod("extendHighlightKey", key);
-
-        for (const [i, name] of key.entries()) {
-            $("<div>")
-                .addClass("item")
-                .append($("<span></span>").addClass("sample").addClass("sample-" + (i % HIGHLIGHT_COLORS)))
-                .append($("<span></span>").text(name))
-                .appendTo($(".highlight-key .items"));
+        else {
+            calculationModeSetting.closest(".section").hide();
         }
     }
 
-    buildUserGuideLink() {
-        $('.top-bar-controls #user-guide-link').remove();
-        const userGuideUrl = this._iv.getGuideLinkUrl();
-        const userGuideLink = $('<a></a>')
-                .attr('href', userGuideUrl)
-                .attr('id', 'user-guide-link')
+    buildDocumentationLink(id, label, target) {
+        const link = $('<a></a>')
+                .attr('href', target)
                 .attr('target', '_blank')
-                .text(i18next.t("menu.userGuide"));
-        userGuideLink.insertBefore('#toggle-dark-mode');
+                .addClass("external-link")
+                .text(label);
+        return $("<li></li>").append(link);
+    }
+
+    buildDocumentationLinks() {
+        const links = $('.documentation-links').empty();
+        const userGuideUrl = this._iv.getGuideLinkUrl();
+
+        links.append(this.buildDocumentationLink("user-guide-link", i18next.t("menu.userGuide"), userGuideUrl));
+
+        let supportLinkUrl = this._iv.getSupportLinkUrl();
+        if (supportLinkUrl) {
+            links.append(this.buildDocumentationLink("contact-us-link", i18next.t("menu.contactUs"), supportLinkUrl));
+        }
+
+        let surveyLinkUrl = this._iv.getSurveyLinkUrl();
+        if (surveyLinkUrl) {
+            links.append(this.buildDocumentationLink("survey-link", i18next.t("menu.survey"), surveyLinkUrl));
+        }
     }
 
     changeApplicationLanguage(lang) {
@@ -438,44 +505,46 @@ export class Inspector {
     rebuildViewer() {
         $("#ixv").localize();
         $('html').attr('lang', i18next.resolvedLanguage);
-        this.buildDisplayOptionsMenu();
+        this.buildDocumentLanguages();
         this.buildHomeLink()
-        this.buildToolbarHighlightMenu();
-        this.buildHighlightKey();
-        this.buildUserGuideLink();
+        this.buildDocumentationLinks();
+        this.buildSettingsPage();
+        this.setupSearchControls();
         this.update();
         this.search();
     }
 
-    inspectorMode(mode, toggle) {
-        const allModes = ["summary-mode", "outline-mode", "search-mode"];
-        const i = $("#inspector").removeClass(allModes.filter(m => m !== mode));
-        if (mode === undefined) {
-            this._prevInspectorMode = undefined;
-            return;
+    inspectorMode(mode, focusInspector) {
+        const allModes = ["fact-mode", "search-mode", "overview-mode", "settings-mode"];
+        $("#inspector-tabs button")
+            .removeClass("selected")
+            .filter((i, e) => $(e).data("mode") === mode)
+            .addClass("selected");
+        $("#ixv").removeClass("show-filters");
+        $("#ixv").removeClass(allModes.filter(m => m !== mode)).addClass(mode);
+        if (focusInspector === true) {
+            $("#inspector").removeClass("show-facts-by-group");
         }
-        if (toggle) {
-            i.toggleClass(mode);
+        else if ((focusInspector === false || this._curInspectorMode === "fact-mode" && mode === "fact-mode") && this.outline.hasOutline()) {
+            $("#inspector").addClass("show-facts-by-group");
+        }
+        this._curInspectorMode = mode;
+    }
+
+    toggleSettingsMode() {
+        if (this._curInspectorMode !== "settings-mode") {
+            this._prevInspectorMode = this._curInspectorMode;
+            this.inspectorMode("settings-mode");
         }
         else {
-            i.addClass(mode);
+            this.closeSettingsMode();
         }
     }
 
-    /* 
-     * Controls where the "back" button takes you. We only set this when you
-     * follow a link that switches between modes, otherwise back just takes you
-     * back to the main inspector mode.
-     */
-    pushInspectorMode(newMode, oldMode) {
-        this._prevInspectorMode = oldMode;
-        this.inspectorMode(newMode);
+    closeSettingsMode() {
+        this.inspectorMode(this._prevInspectorMode);
     }
 
-    popInspectorMode() {
-        this.inspectorMode(this._prevInspectorMode);
-        this._prevInspectorMode = undefined;
-    }
 
     setCalculationMode(useCalc11) {
         this._useCalc11 = useCalc11;
@@ -489,6 +558,36 @@ export class Inspector {
             window.localStorage.setItem(STORAGE_HIGHLIGHT_FACTS, JSON.stringify(checked));
         }
         this._viewer.highlightAllTags(checked, this._reportSet.namespaceGroups());
+    }
+
+    toggleHighlightAllTags() {
+        const control = $("#highlight-tags")
+        control.toggleClass("checked");
+        this.highlightAllTags(control.hasClass("checked"), true);
+    }
+
+    toggleHighlightUntaggedNumbers() {
+        const control = $("#highlight-untagged-numbers")
+        control.toggleClass("checked");
+        const body = this._viewer.contents().find("body");
+        if (control.hasClass("checked")) {
+            body.addClass("review-highlight-untagged-numbers");
+        }
+        else {
+            body.removeClass("review-highlight-untagged-numbers");
+        }
+    }
+
+    toggleHighlightUntaggedDates() {
+        const control = $("#highlight-untagged-dates")
+        control.toggleClass("checked");
+        const body = this._viewer.contents().find("body");
+        if (control.hasClass("checked")) {
+            body.addClass("review-highlight-untagged-dates");
+        }
+        else {
+            body.removeClass("review-highlight-untagged-dates");
+        }
     }
 
     factListRow(f) {
@@ -508,13 +607,16 @@ export class Inspector {
             .on("mouseenter", () => this._viewer.linkedHighlightFact(f))
             .on("mouseleave", () => this._viewer.clearLinkedHighlightFact(f))
             .data('ivid', f.vuid);
+      /*
         $('<button class="select-icon"></button>')
             .attr("title", i18next.t("search.viewFact"))
             .on("click", () => {
                 this.selectItem(f.vuid);
             })
             .appendTo(row)
+            */
         this._setLabelWithLang($('<div class="title"></div>'), f.getLabelOrNameAndLang("std"))
+            .on("click", () => this.selectItem(f.vuid))
             .appendTo(row);
         const dt = f.concept().dataType();
         if (dt !== undefined) {
@@ -568,91 +670,145 @@ export class Inspector {
     searchSpec() {
         const spec = {};
         spec.searchString = $('#ixbrl-search').val();
-        spec.visibilityFilter = $('#search-filter-visibility').val();
-        spec.showMandatoryFacts = $('#search-mandatory-fact-filter').prop('checked');
-        spec.conceptTypeFilter = $('#search-filter-concept-type').val();
         for (const [key, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
-          spec[key] = $(`#${name} select`).val();
+            spec[key] = $(`#${name} input:checked`).map((i,e) => $(e).val()).get();
         }
 
-        const selectedDataTypes = this._reportSet.getUsedConceptDataTypes().filter(d => spec.dataTypesFilter.includes(d.dataType.name));
-        if (
-            (spec.conceptTypeFilter == 'numeric' && selectedDataTypes.some(dt => !dt.isNumeric)) ||
-            (spec.conceptTypeFilter == 'text' && selectedDataTypes.some(dt => dt.isNumeric))) {
-            $("#search-filter-datatypes .datatype-conflict-warning").show();
-        }
-        else {
-            $("#search-filter-datatypes .datatype-conflict-warning").hide();
-        }
-        spec.factValueFilter = $('#search-filter-fact-value').val();
         return spec;
     }
 
     hasActiveSearchFilters(searchSpec) {
-      return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0) ||
-        searchSpec.visibilityFilter !== '*' ||
-        searchSpec.showMandatoryFacts ||
-        searchSpec.conceptTypeFilter !== "*" ||
-        searchSpec.factValueFilter !== "*" ;
+        return Object.keys(SEARCH_FILTER_MULTISELECTS).some(k => searchSpec[k].length > 0);
     }
 
-    setupSearchControls(viewer) {
+    buildSearchSection(fieldId, title, options) {
+        const id = "search-filter-" + fieldId;
+        const section = $("<div></div>")
+            .attr("id", id)
+            .addClass("filter-group");
+        $("<h3></h3>")
+            .text(title)
+            .appendTo(section);
+        for (const [i, o] of options.entries()) {
+            const row = $("<div></div>")
+                .addClass("checkbox-row")
+                .appendTo(section);
+            const rowId = id + '-' + i;
+            $("<input></input>")
+                .val(o.value)
+                .attr("id", rowId)
+                .attr("type", "checkbox")
+                .appendTo(row)
+                .after(" ");
+            $("<label></label>")
+                .text(o.label)
+                .attr("for", rowId)
+                .appendTo(row);
+        }
+
+        return section; 
+    }
+
+    setupSearchControls() {
         const inspector = this;
-        $('.search-controls input, .search-controls select').on("change", () => this.search());
-        $(".search-controls button.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
-        $(".search-controls .reset").on("click", () => this.resetSearchFilters());
+
+        if (!this._searchReady) {
+            return;
+        }
+
+        $(".search-filters-body").empty();
+        const visibilityOptions = [
+            { value: "visible", label: i18next.t("inspector.visible") },
+            { value: "hidden", label: i18next.t("inspector.hidden") },
+        ];
+        this.buildSearchSection("visibility", i18next.t("inspector.visibility"), visibilityOptions).appendTo(".search-filters-body");
+
+        const conceptTypeOptions = [
+            { value: "numeric", label: i18next.t("inspector.numericOption") },
+            { value: "text", label: i18next.t("inspector.textOption") },
+        ];
+        this.buildSearchSection("concept-type", i18next.t("inspector.conceptType"), conceptTypeOptions).appendTo(".search-filters-body");
+
+        const factValueOptions = [
+            { value: "positive", label: i18next.t("inspector.positive") },
+            { value: "negative", label: i18next.t("inspector.negative") },
+        ];
+        this.buildSearchSection("fact-value", i18next.t("inspector.factValue"), factValueOptions).appendTo(".search-filters-body");
+
+        const periodOptions = Object.entries(this._search.periods).map(([k,v]) => ({ value: k, label: v}));
+        this.buildSearchSection("period", i18next.t("inspector.period"), periodOptions).appendTo(".search-filters-body");
+
+        const namespacesOptions = Array.from(this._reportSet.getUsedConceptPrefixes())
+            .map(prefix => ({
+                value: prefix, 
+                label: `${this._reportSet.preferredPrefix(prefix)} (${this._reportSet.prefixMap()[prefix]})`
+            }));
+        this.buildSearchSection("namespaces", i18next.t("inspector.namespaces"), namespacesOptions).appendTo(".search-filters-body");
+
+        const datatypesOptions = this._reportSet.getUsedConceptDataTypes()
+            .map(dt => ({ 
+                value: dt.dataType.name, 
+                label: dt.dataType.label() 
+            }));
+        if (datatypesOptions.length > 0) {
+            this.buildSearchSection("datatypes", i18next.t("inspector.datatypes"), datatypesOptions).appendTo(".search-filters-body");
+        }
+
+        const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
+        if (targetDocuments.length != 1 || targetDocuments[0] !== null) {
+            const targetDocumentsOptions = targetDocuments
+                .map(td => ({ 
+                    value: td ?? ':default', 
+                    label: td ?? `<${i18next.t("search.default")}>`
+                }));
+            this.buildSearchSection("target-document", i18next.t("inspector.targetDocument"), targetDocumentsOptions).appendTo(".search-filters-body");
+        }
+
+        const unitsOptions = Array.from(this._reportSet.getUsedUnits())
+            .map(unit => ({
+                value: unit,
+                label: `${this._reportSet.getUnit(unit)?.label()} (${unit})`
+            }));
+        if (unitsOptions.length > 0) {
+            this.buildSearchSection("units", i18next.t("inspector.units"), unitsOptions).appendTo(".search-filters-body");
+        }
+
+        const scalesOptions = this._getScalesOptions();
+        if (scalesOptions.length > 0) {
+            this.buildSearchSection("scales", i18next.t("inspector.scales"), scalesOptions).appendTo(".search-filters-body");
+        }
+
+        const dimensionTypeOptions = [
+            { value: "none", label: i18next.t("inspector.noDimensions") },
+            { value: "explicit", label: i18next.t("inspector.explicitDimension") },
+            { value: "typed", label: i18next.t("inspector.typedDimensions") },
+        ];
+        this.buildSearchSection("dimension-type", i18next.t("inspector.dimensions"), dimensionTypeOptions).appendTo(".search-filters-body");
+
+        const calculationOptions = [
+            { value: "none", label: i18next.t("inspector.noCalculations") },
+            { value: "contributor", label: i18next.t("inspector.contributor") },
+            { value: "summation", label: i18next.t("inspector.summation") },
+        ];
+        this.buildSearchSection("calculations", i18next.t("inspector.calculations"), calculationOptions).appendTo(".search-filters-body");
+
+        if (this.summary.mandatoryFactsCount() > 0) {
+            const mandatoryFactsFilterOptions = [
+                { value: "mandatory", label: i18next.t("inspector.mandatoryFacts") },
+                { value: "other", label: i18next.t("inspector.otherFacts") },
+            ];
+            this.buildSearchSection("mandatory-facts", i18next.t("inspector.mandatoryFacts"), mandatoryFactsFilterOptions).appendTo(".search-filters-body");
+        }
+
+        $(".search-controls input, .search-filters input, .search-filters select").on("change", () => this.search());
+        $(".search-controls button.filter-toggle").on("click", () => $("#ixv").addClass('show-filters'));
+        $(".search-filters .close").on("click", () => $("#ixv").removeClass('show-filters'));
+        $(".search-filters button.search-apply-filters").on("click", () => $("#ixv").removeClass('show-filters'));
+        $(".search-filters button.search-reset-filters").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
             $(this).siblings().children('select option:selected').prop('selected', false);
             inspector.search();
         });
-        for (const key of Object.keys(this._search.periods)) {
-            $("<option>")
-                .attr("value", key)
-                .text(this._search.periods[key])
-                .appendTo('#search-filter-period select');
-        }
-        for (const prefix of this._reportSet.getUsedConceptPrefixes()) {
-            $("<option>")
-                .attr("value", prefix)
-                .text(`${this._reportSet.preferredPrefix(prefix)} (${this._reportSet.prefixMap()[prefix]})`)
-                .appendTo('#search-filter-namespaces select');
-        }
-        if (this._reportSet.getUsedConceptDataTypes().length > 0) {
-            for (const dataType of this._reportSet.getUsedConceptDataTypes()) {
-                $("<option>")
-                    .attr("value", dataType.dataType.name)
-                    .text(dataType.dataType.label())
-                    .appendTo('#search-filter-datatypes select');
-            }
-        }
-        else {
-            $('#search-filter-datatypes').hide();
-        }
-        const targetDocuments = Array.from(this._reportSet.getTargetDocuments());
-        if (targetDocuments.length == 1 && targetDocuments[0] == null) {
-            $('#search-filter-target-document').hide();
-        }
-        else {
-            for (const targetDocument of targetDocuments) {
-                $("<option>")
-                    .attr("value", targetDocument ?? ':default')
-                    .text(targetDocument ?? `<${i18next.t("search.default")}>`)
-                    .appendTo('#search-filter-target-document select');
-            }
-        }
-        for (const unit of this._reportSet.getUsedUnits()) {
-            $("<option>")
-                    .attr("value", unit)
-                    .text(`${this._reportSet.getUnit(unit)?.label()} (${unit})`)
-                    .appendTo('#search-filter-units select');
-        }
-        const scalesOptions = this._getScalesOptions();
-        for (const scale of Object.keys(scalesOptions).sort()) {
-                $("<option>")
-                        .attr("value", scale)
-                        .text(scalesOptions[scale])
-                        .appendTo('#search-filter-scales select');
-        }
     }
 
     _getScalesOptions() {
@@ -667,23 +823,24 @@ export class Inspector {
                 scalesOptions[scale] = scale.toString();
             }
         });
-        return scalesOptions;
+        return Object.entries(scalesOptions)
+            .map(([k, v]) => ({ value: k, label: v }));
+
     }
 
     resetSearchFilters(defaults) {
         defaults = defaults ?? {};
-        $("#search-filter-period select option:selected").prop("selected", false);
-        $("#search-filter-visibility").val(defaults.visibility ?? "*");
-        $("#search-filter-concept-type").val("*");
-        $("#search-filter-fact-value").val("*");
-        $("#search-mandatory-fact-filter").prop("checked", defaults.mandatoryFacts ?? false);
-        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
-          $(`#${name} select option:selected`).prop("selected", false);
+        for (const [filter, name] of Object.entries(SEARCH_FILTER_MULTISELECTS)) {
+            $(`#${name} input`).prop("checked", false);
+            if (defaults[filter] !== undefined) {
+                $(`#${name} input[value="${defaults[filter]}"]`).prop("checked", true); 
+            }
         }
         this.search();
     }
 
     searchReady() {
+        this._searchReady = true;
         this.setupSearchControls();
         $('#inspector').addClass('search-ready');
         $('#ixbrl-search').prop('disabled', false);
@@ -715,7 +872,9 @@ export class Inspector {
             $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
             overlay.show();
         }
-        $("#matching-facts-summary").text(i18next.t("search.matchingFactsSummary", {nMatches: results.length, nTotal: this._reportSet.facts().length}));
+        const totalFacts = this._reportSet.facts().length;
+        $("#matching-facts-summary").text(i18next.t("search.matchingFactsSummary", {nMatches: results.length, nTotal: totalFacts}));
+        $("#search-filter-match-count").text(results.length);
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));
@@ -740,15 +899,205 @@ export class Inspector {
     }
 
     updateCalculation(fact, elr) {
-        $('.calculations .tree').empty().append(this._calculationHTML(fact));
+        const section = $('.calculations').empty();
+
+        const calc = new Calculation(fact, this._useCalc11);
+        if (!calc.hasCalculations()) {
+            return;
+        }
+
+        const tableFacts = this._viewer.factsInSameTable(fact);
+        const selectedELR = calc.bestELRForFactSet(tableFacts);
+        const report = fact.report;
+
+        for (const rCalc of calc.resolvedCalculations()) {
+            const container = $("<div></div>").addClass("bordered-section").appendTo(section);
+            $("<h4></h4>")
+                .text(report.getRoleLabelOrURI(rCalc.elr))
+                .appendTo(container);
+
+            const content = $("<div></div>").addClass("content").appendTo(container);
+
+            for (const r of rCalc.rows) {
+                const row = $("<div></div>")
+                    .addClass("calculation-row")
+                    .appendTo(content);
+                const iconBox = $("<div></div>").addClass("icon-box").appendTo(row);
+                $("<div></div>").addClass("icon-bar").appendTo(iconBox);
+                const icon = $("<div></div>")
+                    .addClass("icon")
+                    .appendTo(iconBox);
+                if (r.weight == 1) {
+                    icon.addClass("plus");
+                }
+                if (r.weight == -1) {
+                    icon.addClass("minus");
+                }
+
+                const details = $("<div></div>")
+                    .addClass("calculation-details")
+                    .addClass("item")
+                    .appendTo(row);
+                if (!r.facts.isEmpty()) {
+                    const value = $("<div></div>")
+                        .addClass("calculation-value")
+                        .text(r.facts.mostPrecise().readableValue())
+                        .appendTo(details);
+                }
+                else {
+                    $("<div></div>")
+                        .addClass("not-reported")
+                        .text(i18next.t("calculation.notReported"))
+                        .appendTo(details);
+                }
+                const conceptLabel = $("<div></div>")
+                        .addClass("calculation-label")
+                        .text(r.concept.label())
+                        .appendTo(details);
+
+                if (!r.facts.isEmpty()) {
+                    conceptLabel.contents().wrap($("<button></button>")
+                        .addClass("inline-button")
+                        .addClass("underline")
+                        .addClass("negate-padding"));
+                    details
+                        .addClass("calc-fact-link")
+                        .data('ivids', r.facts.items().map(f => f.vuid));
+                    row.on("click", () => this.selectItem(r.facts.items()[0].vuid));
+                    row.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
+                    row.on("mouseleave", () => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
+                    r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
+                }
+            }
+
+            const row = $("<div></div>").addClass("calculation-row").appendTo(content);
+            const iconBox = $("<div></div>").addClass("icon-box").appendTo(row);
+            $("<div></div>").addClass("icon-bar").appendTo(iconBox);
+            const icon = $("<div></div>")
+                .addClass("icon")
+                .addClass("equals")
+                .appendTo(iconBox);
+
+            const details = $("<div></div>").addClass("calculation-details").appendTo(row);
+            const value = $("<div></div>")
+                .addClass("calculation-value")
+                .text(fact.readableValue())
+                .appendTo(details);
+
+            const statusTable = $("<table></table>")
+                .addClass("property-table")
+                .addClass("narrow-header")
+                .appendTo(content);
+
+            let statusText = "";
+            if (rCalc.binds()) {
+                if (rCalc.isConsistent()) {
+                    statusText = i18next.t('factDetails.calculationValuesMatch');
+                }
+                else {
+                    statusText = i18next.t('factDetails.calculationValuesDoNotMatch');
+                }
+            }
+            else if (rCalc.unchecked()) {
+                if (rCalc.uncheckedDueToVersionMismatch()) {
+                    statusText = i18next.t('factDetails.calculationUncheckedIncorrectVersion');
+                }
+                else {
+                    statusText = i18next.t('factDetails.calculationUnchecked');
+                }
+            }
+
+            const statusRow = $("<tr></tr>").appendTo(statusTable);
+            $("<th></th>").text(i18next.t("calculation.status")).appendTo(statusRow);
+            $("<td></td>").text(statusText).appendTo(statusRow);
+            const detailsLinkRow = $("<tr></tr>").appendTo(statusTable);
+            $("<th></th>").appendTo(detailsLinkRow);
+            const detailsCell = $("<td></td>")
+                .addClass("contains-button")
+                .appendTo(detailsLinkRow);
+
+            $("<button></button>")
+                .addClass("inline-button")
+                .addClass("link-icon")
+                .addClass("negate-padding")
+                .addClass("underline")
+                .appendTo(detailsCell)
+                .append($("<div></div>").text(i18next.t("calculation.showDetails")))
+
+                .attr("title", i18next.t('factDetails.viewCalculationDetails'))
+                .on("click", (e) => {
+                    const dialog = new CalculationInspector();
+                    dialog.displayCalculation(rCalc);
+                    dialog.show();
+                    e.stopPropagation();
+                });
+
+        }
     }
 
     createSummary() {
-        const summaryDom = $("#inspector .summary .body");
+        const summaryDom = $("#inspector .overview-inspector .body");
+        this._populateAboutSummary(summaryDom);
         this._populateFactSummary(summaryDom);
         this._populateTagSummary(summaryDom);
+        this._populateNamespaceSummary(summaryDom);
         this._populateFileSummary(summaryDom);
+        this._populateDownloadsSummary(summaryDom);
         this._populateReportCreation(summaryDom);
+    }
+
+    _populateAboutSummary(summaryDom) {
+        const aboutTableBody = summaryDom.find("table.about tbody");
+        if (this._viewer.documentCount() === 1) {
+            const row = $("<tr></tr>").appendTo(aboutTableBody);
+            $("<th></th>")
+                .text(i18next.t("inspector.summary.about.title"))
+                .appendTo(row);
+
+            const cell = $("<td></td>")
+                .appendTo(row)
+                .text(this._viewer.getTitle(0));
+        }
+        const entityNames = Array.from(new Set(this.summary.entityNames().map(f => f.value())));
+        if (entityNames.length > 0) {
+            const row = $("<tr></tr>").appendTo(aboutTableBody);
+            $("<th></th>")
+                .text(i18next.t("inspector.summary.about.name"))
+                .appendTo(row);
+
+            const cell = $("<td></td>").appendTo(row);
+            for (const entityName of entityNames) {
+                $("<span></span>")
+                    .text(entityName)
+                    .appendTo(cell);
+                $("<br />").appendTo(cell);
+            }
+        }
+        for (const identifier of this.summary.identifiers()) {
+            const identifierQName = this._reportSet.qname(identifier);
+            const name = Identifiers.identifierName(identifierQName);
+            const row = $("<tr></tr>").appendTo(aboutTableBody);
+            $("<th></th>")
+                .text(name ?? i18next.t("inspector.summary.about.entity"))
+                .appendTo(row);
+            const cell = $("<td></td>").appendTo(row);
+            $("<span></span>")
+                .text(identifierQName.localname)
+                .appendTo(cell);
+            const link = Identifiers.seeMoreLink(identifierQName);
+            if (link !== undefined) {
+                $("<br />").appendTo(cell);
+                cell.append(this._externalLink(link.href, link.text));
+            }
+        }
+    }
+
+    _externalLink(url, text) {
+        return $("<a></a>")
+            .addClass("external-link")
+            .attr("target", "_blank")
+            .attr("href", url)
+            .text(text);
     }
 
     _populateFactSummary(summaryDom) {
@@ -757,36 +1106,33 @@ export class Inspector {
             .text(totalFacts)
             .on("click", () => {
                 this.resetSearchFilters();
-                this.pushInspectorMode("search-mode", "summary-mode");
+                this.inspectorMode("search-mode");
             });
 
         const hiddenFacts = this.summary.hiddenFacts();
         $(".hidden-facts-value", summaryDom)
             .text(hiddenFacts)
             .on("click", () => {
-                this.resetSearchFilters({visibility: 'hidden'});
-                this.pushInspectorMode("search-mode", "summary-mode");
+                this.resetSearchFilters({visibilityFilter: 'hidden'});
+                this.inspectorMode("search-mode");
             });
 
-        const mandatoryFacts = this.summary.mandatoryFacts();
-        if (!mandatoryFacts) {
+        const mandatoryFacts = this.summary.mandatoryFactsCount();
+        if (mandatoryFacts === 0) {
             $('#mandatory-facts-row').hide();
-            $('#mandatory-fact-filter-checkbox').hide();
         } else {
             $('#mandatory-facts-row').show();
-            $('#mandatory-fact-filter-checkbox').show();
             $(".mandatory-facts-value", summaryDom)
                     .text(mandatoryFacts)
                     .on("click", () => {
-                        this.resetSearchFilters({mandatoryFacts: true});
-                        this.pushInspectorMode("search-mode", "summary-mode");
+                        this.resetSearchFilters({mandatoryFactsFilter: "mandatory"});
+                        this.inspectorMode("search-mode");
                     });
         }
     }
 
     _populateTagSummary(summaryDom) {
         const summaryTagsTableBody = summaryDom.find(".tag-summary-table-body");
-
         const tagCounts = this.summary.tagCounts();
 
         let totalPrimaryItemTags = 0;
@@ -797,7 +1143,6 @@ export class Inspector {
             totalPrimaryItemTags += counts[PRIMARY_ITEMS_KEY];
             totalDimensionTags += counts[DIMENSIONS_KEY];
             totalMemberTags += counts[MEMBERS_KEY];
-            totalTags += counts[TOTAL_KEY];
         }
 
         function insertTagCount(row, count, total) {
@@ -808,13 +1153,19 @@ export class Inspector {
             let formattedPercent = percent.toLocaleString(undefined, {
                 style: "percent",
             });
-            formattedPercent = ` (${formattedPercent})`;
 
-            $("<td></td>")
-                    .text(count)
+            let cell = $("<td></td>")
                     .addClass("figure")
-                    .append($("<sup></sup>").text(formattedPercent))
                     .appendTo(row);
+            let div = $("<div></div>").appendTo(cell);
+            $("<span></span>")
+                .addClass("tag-count-number")
+                .text(count)
+                .appendTo(div);
+            $("<span></span>")
+                .addClass("tag-count-percent")
+                .text(formattedPercent)
+                .appendTo(div);
         }
 
         const sortedPrefixCounts = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
@@ -824,7 +1175,6 @@ export class Inspector {
             insertTagCount(countRow, counts[PRIMARY_ITEMS_KEY], totalPrimaryItemTags);
             insertTagCount(countRow, counts[DIMENSIONS_KEY], totalDimensionTags);
             insertTagCount(countRow, counts[MEMBERS_KEY], totalMemberTags);
-            insertTagCount(countRow, counts[TOTAL_KEY], totalTags);
         }
 
         const summaryTagsTableFooterRow = summaryDom.find(".tag-summary-table-footer-row");
@@ -832,7 +1182,6 @@ export class Inspector {
         insertTagCount(summaryTagsTableFooterRow, totalPrimaryItemTags, totalPrimaryItemTags);
         insertTagCount(summaryTagsTableFooterRow, totalDimensionTags, totalDimensionTags);
         insertTagCount(summaryTagsTableFooterRow, totalMemberTags, totalMemberTags);
-        insertTagCount(summaryTagsTableFooterRow, totalTags, totalTags);
     }
 
     _populateFileSummary(summaryDom) {
@@ -850,30 +1199,69 @@ export class Inspector {
         const summaryFilesContent = summaryDom.find(".files-summary");
         let visibleItems = 0;
 
-        function insertFileSummary(docs, classSelector) {
-            if (docs.length === 0) {
-                summaryFilesContent.find(classSelector).hide();
-            } else {
-                const ul = summaryFilesContent.find(classSelector + ' ul')
-                visibleItems += 1;
-                for (const doc of docs) {
-                    ul.append($("<li></li>").text(doc));
-                }
+        function insertFileSummary(docs) {
+            const ul = summaryFilesContent.find('ul.files-summary-list')
+            visibleItems += 1;
+            for (const doc of docs) {
+                ul.append($("<li></li>").text(doc));
             }
         }
 
-        insertFileSummary(inline, ".inline-docs");
-        insertFileSummary(schema, ".schemas");
-        insertFileSummary(presLinkbase, ".pres-links");
-        insertFileSummary(calcLinkbase, ".calc-links");
-        insertFileSummary(defLinkbase, ".def-links");
-        insertFileSummary(labelLinkbase, ".label-links");
-        insertFileSummary(refLinkbase, ".ref-links");
-        insertFileSummary(unrecognizedLinkbase, ".other-links");
+        insertFileSummary(inline);
+        insertFileSummary(schema);
+        insertFileSummary(presLinkbase);
+        insertFileSummary(calcLinkbase);
+        insertFileSummary(defLinkbase);
+        insertFileSummary(labelLinkbase);
+        insertFileSummary(refLinkbase);
+        insertFileSummary(unrecognizedLinkbase);
         if (visibleItems == 0) {
             summaryFilesContent.hide();
         }
     };
+
+    _colorIndexForNamespace(namespace) {
+        const key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
+        return key.indexOf(namespace) % HIGHLIGHT_COLORS;
+    }
+
+    _populateNamespaceSummary(summaryDom) {
+        let key;
+        if (this._iv.isReviewModeEnabled()) {
+            key = [
+                "XBRL Elements",
+                "Untagged Numbers",
+                "Untagged Dates",
+            ]
+        } else {
+            key = this._reportSet.namespaceGroups().map(p => this._reportSet.preferredPrefix(p));
+        }
+        this._iv.callPluginMethod("extendHighlightKey", key);
+
+        const tableBody = summaryDom.find("table.namespace-key tbody");
+        
+        for (const [i, name] of key.entries()) {
+            const row = $("<tr></tr>").appendTo(tableBody);
+            $("<th></th>")
+                .append($("<span></span>").addClass("sample").addClass("sample-" + (i % HIGHLIGHT_COLORS)))
+                .appendTo(row);
+            $("<td></td>")
+                .text(name)
+                .appendTo(row);
+        }
+
+    }
+
+    _populateDownloadsSummary(summaryDom) {
+        // Actions
+        if (this._reportSet.filingDocuments()) {
+            summaryDom.find(".filing-documents .download-link").attr("href", this._reportSet.filingDocuments());
+        }
+        else {
+            summaryDom.find(".filingDocuments").hide();
+            summaryDom.find(".downloads-summary").hide();
+        }
+    }
 
     _populateReportCreation(summaryDom) {
         const softwareCredits = this.summary.getSoftwareCredits();
@@ -898,7 +1286,7 @@ export class Inspector {
             for (const group of this.outline.sortedSections()) {
                 $('<button class="fact-list-item"></button>')
                     .text(group.report.getRoleLabelOrURI(group.elr))
-                    .on("click", () => this.selectItem(group.fact.vuid))
+                    .on("click", () => this.selectItem(group.firstFact.vuid))
                     .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
                     .on("mousedown", (e) => {
                         // Prevent text selection by double click
@@ -940,24 +1328,22 @@ export class Inspector {
         }
     }
 
-    _anchorList(fact, anchors) {
-        const html = $("<ul></ul>");
+    _updateAnchorList(fact, anchors, container) {
+        container.empty();
         if (anchors.length > 0) {
             for (const c of anchors) {
                 const otherFacts = fact.report.getAlignedFacts(fact, { "c": c });
                 const labelLang = fact.report.getLabelAndLang(c, "std", true);
-
-                $("<li></li>")
-                    .appendTo(html)
-                    .append(this.factLinkHTML(labelLang, otherFacts));
+                this.factLinkHTML(labelLang, otherFacts)
+                    .addClass("negate-indent")
+                    .appendTo(container);
             }
         }
         else {
-            $('<li></li>')
-                .append($('<i></i>').text(i18next.t("common.none")))
-                .appendTo(html);
+            $("<span></span>")
+                .text(i18next.t("common.none"))
+                .appendTo(container);
         }
-        return html;
     }
 
     updateAnchoring(fact) {
@@ -966,14 +1352,8 @@ export class Inspector {
         }
         else {
             $('.anchoring').show();
-
-            $('.anchoring .collapsible-body .anchors-wider')
-                .empty()
-                .append(this._anchorList(fact, fact.widerConcepts()));
-
-            $('.anchoring .collapsible-body .anchors-narrower')
-                .empty()
-                .append(this._anchorList(fact, fact.narrowerConcepts()));
+            this._updateAnchorList(fact, fact.widerConcepts(), $(".anchoring .anchors-wider"));
+            this._updateAnchorList(fact, fact.narrowerConcepts(), $(".anchoring .anchors-narrower"));
         }
 
     }
@@ -993,136 +1373,47 @@ export class Inspector {
     }
 
     updateLabels(fact) {
-        const container = $("div.labels").empty();  
-        const dl = $("<dl></dl>").appendTo(container);
-        for (const [role, roleLabel, label] of 
+        const tbody = $("table.labels tbody.labels").empty();
+        for (const [role, roleLabel, label] of
             Object.entries(fact.concept().labels())
             .map(([role, label]) => [role, fact.report.getLabelRoleLabel(role), label])
             .sort(this.labelRoleSort)) {
-            $("<dt></dt>")
+            const row = $("<tr></tr>").appendTo(tbody);
+            $("<th></th>")
                 .text(roleLabel)
-                .appendTo(dl);
-            $("<dd></dd>")
+                .appendTo(row);
+            $("<td></td>")
                 .text(label)
-                .appendTo(dl);
+                .appendTo(row);
         }
-        return dl;
     }
 
-    _referencesHTML(fact) {
-        const a = new Accordian();
+    updateReferences(fact) {
+        const container = $("div.references").empty();
         for (const [i, r] of fact.concept().references().entries()) {
-            const title = $("<span></span>").text(r[0].value);
-            const body =  $('<table class="fact-properties"><tbody></tbody></table>')
-            const tbody = body.find("tbody");
+            const div = $("<div></div>").addClass("bordered-section").appendTo(container);
+            const title = $("<h4></h4>").text(r[0].value).appendTo(div);
+            const content = $("<div></div>").addClass("content").appendTo(div);
+            const table = $("<table></table>").addClass("property-table").appendTo(content);
+            const tbody = $("<tbody></tbody>").appendTo(table);
+
             for (const p of r) {
                 const row = $("<tr>")
                     .append($("<th></th>").text(i18next.t(`referenceParts:${p.part}`, {defaultValue: p.part})))
-                    .append($("<td></td>").text(p.value))
                     .appendTo(tbody);
-                if (p.part == 'URI') {
+                if (p.part != "URI") {
+                    $("<td></td>").text(p.value).appendTo(row);
+                }
+                else {
                     row.addClass("uri");
-                    row.find("td").wrapInner($("<a>").attr("href", p.value));
+                    $("<td></td>").append(
+                        this._externalLink(p.value, i18next.t(`inspector.goToReference`))
+                    ).appendTo(row);
                 }
             }
-            a.addCard(title, body, i == 0);
         }
-        return a.contents();
     }
 
-    _calculationHTML(fact, elr) {
-        const calc = new Calculation(fact, this._useCalc11);
-        if (!calc.hasCalculations()) {
-            return "";
-        }
-        const tableFacts = this._viewer.factsInSameTable(fact);
-        const selectedELR = calc.bestELRForFactSet(tableFacts);
-        const report = fact.report;
-        const a = new Accordian();
-
-        for (const rCalc of calc.resolvedCalculations()) {
-            const label = report.getRoleLabelOrURI(rCalc.elr);
-            const calcBody = $('<div></div>');
-            const calcTable = $('<table></table>')
-                .addClass("calculation-table")
-                .appendTo(calcBody);
-
-            for (const r of rCalc.rows) {
-                const itemHTML = $("<tr></tr>")
-                    .addClass("item")
-                    .append($("<td></td>").addClass("weight").text(r.weightSign))
-                    .append($("<td></td>").addClass("concept-name").text(r.concept.label()))
-                    .append($("<td></td>").addClass("value"))
-                    .appendTo(calcTable);
-
-                if (!r.facts.isEmpty()) {
-                    itemHTML.addClass("calc-fact-link");
-                    itemHTML.find(".concept-name").contents().wrap($("<button></button>").addClass("inline-button"));
-                    itemHTML.data('ivids', r.facts.items().map(f => f.vuid));
-                    itemHTML.on("click", () => this.selectItem(r.facts.items()[0].vuid));
-                    itemHTML.on("mouseenter", () => r.facts.items().forEach(f => this._viewer.linkedHighlightFact(f)));
-                    itemHTML.on("mouseleave", () => r.facts.items().forEach(f => this._viewer.clearLinkedHighlightFact(f)));
-                    r.facts.items().forEach(f => this._viewer.highlightRelatedFact(f));
-                    itemHTML.find(".value").text(r.facts.mostPrecise().readableValue());
-                }
-            }
-            $("<tr></tr>").addClass("item").addClass("total")
-                .append($("<td></td>").addClass("weight"))
-                .append($("<td></td>").addClass("concept-name").text(fact.concept().label()))
-                .append($("<td></td>").addClass("value").text(fact.readableValue()))
-                .appendTo(calcTable);
-
-            const calcStatusIcon = $("<span></span>");
-            const cardTitle = $("<span></span>")
-                .append(calcStatusIcon)
-                .append($("<span></span>").text(label));
-            const calcStatusText = $("<span></span>");
-            const calcDetailsLink = $("<button></button>")
-                    .addClass("calculation-details-link")
-                    .attr("title", i18next.t('factDetails.viewCalculationDetails'))
-                    .text("details")
-                    .on("click", (e) => {
-                        const dialog = new CalculationInspector();
-                        dialog.displayCalculation(rCalc);
-                        dialog.show();
-                        e.stopPropagation();
-                    })
-            $("<p></p>")
-                .append(calcStatusText)
-                .append($("<span></span>").text(" ("))
-                .append(calcDetailsLink)
-                .append($("<span></span>").text(")"))
-                .appendTo(calcBody);
-            if (rCalc.binds()) {
-                if (rCalc.isConsistent()) {
-                    calcStatusIcon
-                        .addClass("consistent-flag")
-                        .attr("title", i18next.t('factDetails.calculationIsConsistent'))
-                    calcStatusText.text(i18next.t('factDetails.calculationIsConsistent'));
-                }
-                else {
-                    calcStatusIcon
-                        .addClass("inconsistent-flag")
-                        .attr("title", i18next.t('factDetails.calculationIsInconsistent'))
-                    calcStatusText.text(i18next.t('factDetails.calculationIsInconsistent'));
-                }
-            }
-            else if (rCalc.unchecked()) {
-                calcStatusIcon
-                    .addClass("unchecked-flag")
-                    .attr("title", i18next.t('factDetails.calculationUnchecked'))
-                if (rCalc.uncheckedDueToVersionMismatch()) {
-                    calcStatusText.text(i18next.t('factDetails.calculationUncheckedIncorrectVersion'));
-                }
-                else {
-                    calcStatusText.text(i18next.t('factDetails.calculationUnchecked'));
-                }
-            }
-
-            a.addCard(cardTitle, calcBody, rCalc.elr == selectedELR);
-        }
-        return a.contents();
-    }
 
     _footnotesHTML(fact) {
         const html = $("<div></div>").addClass("fact-list");
@@ -1175,7 +1466,9 @@ export class Inspector {
     }
 
     factLinkHTML(labelLang, factList) {
-        const html = $("<span></span>");
+        const html = $("<button></button>")
+            .addClass("inline-button")
+            .addClass("underline");
         this._setLabelWithLang(html, labelLang);
         if (factList.length > 0) {
             html
@@ -1281,15 +1574,26 @@ export class Inspector {
     }
 
     _updateConcept(fact, context) {
+        const localname = fact.conceptQName().localname;
         $('tr.concept td', context)
             .find('.text')
-                .text(fact.conceptDisplayName())
-                .attr("title", fact.conceptDisplayName())
+                .text(localname)
+                .attr("title", localname)
             .end()
             .find('.clipboard-copy')
-                .data('cb-text', fact.conceptDisplayName())
+                .data('cb-text', localname)
             .end();
+    }
 
+    _updateNamespace(fact, context) {
+        const prefix = fact.conceptTaxonomyName().prefix;
+        $('tr.namespace td', context)
+            .find(".text")
+              .text(prefix)
+            .end()
+            .find(".key")
+              .addClass("sample-" + (this._colorIndexForNamespace(prefix)))
+            .end();
     }
 
     _updateEntityIdentifier(fact, context) {
@@ -1325,86 +1629,97 @@ export class Inspector {
      * corresponding to the current viewer selection.
      */
     _selectionSummaryAccordian() {
-        const cf = this._currentItem;
+        const fact = this._currentItem;
 
-        // dissolveSingle => title not shown if only one item in accordian
-        const a = new Accordian({
-            onSelect: (vuid) => this.switchItem(vuid),
-            alwaysOpen: true,
-            dissolveSingle: true,
-        });
+        if (this._currentItemList.length > 1) {
+            $("div.nested-item-select").show();
+            const select = $("div.nested-item-select select").empty();
+            const fs = new FactSet(this._currentItemList);
+            for (const [i, item] of this._currentItemList.toReversed().entries()) {
+                let factHTML;
+                const title = fs.minimallyUniqueLabel(item);
+                const option = $("<option></option>")
+                    .text(title)
+                    .val(item.vuid)
+                    .appendTo(select);
+                if (fact.vuid === item.vuid) {
+                    option.prop("selected", "selected");
+                    $("div.nested-item-select .description")
+                        .text(i18next.t('factDetails.nestedFactSummary', {
+                            current: i + 1,
+                            total: this._currentItemList.length
+                        }));
+                }
+            }
+        }
+        else {
+            $("div.nested-item-select").hide();
+        }
+    
+        let factHTML;
+        if (fact instanceof Fact) {
+            factHTML = $(require('../html/fact-details.html')); 
+            this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
+            this._updateConcept(fact, factHTML);
+            this._updateNamespace(fact, factHTML);
+            $('tr.period td', factHTML)
+                .text(fact.periodString());
+            if (fact.isNumeric()) {
+                $('tr.period td', factHTML).append(
+                    $("<button></button>") 
+                        .addClass(["analyse", "inline-button"])
+                        .attr("title", i18next.t("inspector.showAnalysisChart"))
+                        .text("")
+                        .on('click', () => this.analyseDimension(fact, ["p"]))
+                );
+            }
+            this._updateDataType(fact, factHTML);
+            this._updateBalance(fact, factHTML);
+            this._updateEntityIdentifier(fact, factHTML);
+            this._updateValue(fact, false, factHTML);
 
-        const fs = new FactSet(this._currentItemList);
-        for (const fact of this._currentItemList) {
-            let factHTML;
-            const title = fs.minimallyUniqueLabel(fact);
-            if (fact instanceof Fact) {
-                factHTML = $(require('../html/fact-details.html')); 
-                this._setLabelWithLang($('.std-label', factHTML), fact.getLabelOrNameAndLang("std", true));
-                this._setLabelWithLang($('.documentation', factHTML), fact.getLabelAndLang("doc"));
-                this._updateConcept(fact, factHTML);
-                $('tr.period td', factHTML)
-                    .text(fact.periodString());
+            const accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
+            if (!fact.isNumeric() || fact.isNil()) {
+                accuracyTD.wrapInner("<i></i>");
+            }
+
+            const scaleTD = $('tr.scale td', factHTML).empty().append(fact.readableScale());
+            if (!fact.isNumeric() || fact.isNil()) {
+                scaleTD.wrapInner("<i></i>");
+            }
+
+            $('#dimensions', factHTML).empty();
+            const taxonomyDefinedAspects = fact.aspects().filter(a => a.isTaxonomyDefined());
+            if (taxonomyDefinedAspects.length === 0) {
+                $('.section.dimensions', factHTML).hide();
+            }
+            else {
+                $('.section.dimensions', factHTML).show();
+            }
+            for (const aspect of taxonomyDefinedAspects) {
+                const h = this._setLabelWithLang($('<div class="dimension"></div>'), aspect.labelOrNameAndLang())
+                    .appendTo($('#dimensions', factHTML));
                 if (fact.isNumeric()) {
-                    $('tr.period td', factHTML).append(
+                    h.append(
                         $("<button></button>") 
                             .addClass(["analyse", "inline-button"])
                             .attr("title", i18next.t("inspector.showAnalysisChart"))
                             .text("")
-                            .on('click', () => this.analyseDimension(fact, ["p"]))
-                    );
+                            .on("click", () => this.analyseDimension(fact, [aspect.name()]))
+                    )
                 }
-                this._updateDataType(fact, factHTML);
-                this._updateBalance(fact, factHTML);
-                this._updateEntityIdentifier(fact, factHTML);
-                this._updateValue(fact, false, factHTML);
-
-                const accuracyTD = $('tr.accuracy td', factHTML).empty().append(fact.readableAccuracy());
-                if (!fact.isNumeric() || fact.isNil()) {
-                    accuracyTD.wrapInner("<i></i>");
-                }
-
-                const scaleTD = $('tr.scale td', factHTML).empty().append(fact.readableScale());
-                if (!fact.isNumeric() || fact.isNil()) {
-                    scaleTD.wrapInner("<i></i>");
-                }
-
-                $('#dimensions', factHTML).empty();
-                const taxonomyDefinedAspects = fact.aspects().filter(a => a.isTaxonomyDefined());
-                if (taxonomyDefinedAspects.length === 0) {
-                    $('#dimensions-label', factHTML).hide();
-                }
-                for (const aspect of taxonomyDefinedAspects) {
-                    const h = this._setLabelWithLang($('<div class="dimension"></div>'), aspect.labelOrNameAndLang())
-                        .appendTo($('#dimensions', factHTML));
-                    if (fact.isNumeric()) {
-                        h.append(
-                            $("<button></button>") 
-                                .addClass(["analyse", "inline-button"])
-                                .attr("title", i18next.t("inspector.showAnalysisChart"))
-                                .text("")
-                                .on("click", () => this.analyseDimension(fact, [aspect.name()]))
-                        )
-                    }
-                    const s = this._setLabelWithLang($('<div class="dimension-value"></div>'), aspect.valueLabelAndLang())
-                        .appendTo(h);
-                    if (aspect.isNil()) {
-                        s.wrapInner("<i></i>");
-                    }
+                const s = this._setLabelWithLang($('<div class="dimension-value"></div>'), aspect.valueLabelAndLang())
+                    .appendTo(h);
+                if (aspect.isNil()) {
+                    s.wrapInner("<i></i>");
                 }
             }
-            else if (fact instanceof Footnote) {
-                factHTML = $(require('../html/footnote-details.html')); 
-                this._updateValue(fact, false, factHTML);
-            }
-            a.addCard(
-                title,
-                factHTML, 
-                fact.vuid == cf.vuid,
-                fact.vuid
-            );
         }
-        return a;
+        else if (fact instanceof Footnote) {
+            factHTML = $(require('../html/footnote-details.html')); 
+            this._updateValue(fact, false, factHTML);
+        }
+        return factHTML;
     }
 
     analyseDimension(fact, dimensions) {
@@ -1463,7 +1778,12 @@ export class Inspector {
             .css("right",  right)
             .css("top", iconPos.top + 30);
 
-        if ($("#tooltip").get(0).getBoundingClientRect().bottom > document.documentElement.clientHeight) {
+        // In quirks mode, clientHeight of body is viewport height.  In standards
+        // mode, clientHeight of html is viewport height.
+        const quirksMode = document.compatMode != 'CSS1Compat';
+        const de = quirksMode ? document.body : document.documentElement ;
+
+        if ($("#tooltip").get(0).getBoundingClientRect().bottom > de.clientHeight) {
           $("#tooltip").css("top","").css("bottom", 30);
         }
     }
@@ -1473,26 +1793,29 @@ export class Inspector {
         if (!cf) {
             $('#inspector').removeClass('footnote-mode');
             $('#inspector').addClass('no-fact-selected');
+            if (this.outline.hasOutline()) {
+                $('#inspector').addClass('show-facts-by-group');
+            }
         } 
         else { 
             $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("html-hidden-fact");
             $('#inspector .tags').show();
 
-            $('#inspector .fact-inspector')
+            $('#inspector .fact-inspector-body')
                 .empty()
-                .append(this._selectionSummaryAccordian().contents());
+                .append(this._selectionSummaryAccordian());
 
             if (cf instanceof Fact) {
                 $('#inspector').removeClass('footnote-mode');
-
+                this._setLabelWithLang($('#inspector .concept-name-title'), cf.getLabelOrNameAndLang("std"));
                 this.updateCalculation(cf);
                 this.updateOutline(cf);
                 this.updateFootnotes(cf);
                 this.updateAnchoring(cf);
-                $('div.references').empty().append(this._referencesHTML(cf));
+                this.updateReferences(cf);
                 this.updateLabels(cf);
-                $('#inspector .search-results .fact-list-item').removeClass('selected');
-                $('#inspector .search-results .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
+                $('#inspector .fact-list-item').removeClass('selected');
+                $('#inspector .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
 
                 const duplicates = cf.duplicates();
                 let n = 0;
@@ -1502,9 +1825,21 @@ export class Inspector {
                         n = i;
                     }
                 }
-                $('.duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
-                $('.duplicates .prev').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.duplicates .prev').get(0).focus(); });
-                $('.duplicates .next').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.duplicates .next').get(0).focus(); });
+
+                $('nav.tag-nav-all-facts .text').text(i18next.t('factDetails.factCount', { 
+                    current: this._viewer.docOrderItemIndex.indexOf(cf.vuid) + 1, 
+                    total: this._viewer.docOrderItemIndex.length()
+                }));
+
+                if (ndup > 1) {
+                    $('.duplicates').show();
+                    $('.tag-nav-duplicates .text').text(i18next.t('factDetails.duplicatesCount', { current: n + 1, total: ndup}));
+                    $('.tag-nav-duplicates .prev-tag').off().on("click", () => { this.selectItem(duplicates[(n+ndup-1) % ndup].vuid); $('.tag-nav-duplicates .prev-tag').get(0).focus(); });
+                    $('.tag-nav-duplicates .next-tag').off().on("click", () => { this.selectItem(duplicates[(n+1) % ndup].vuid); $('.tag-nav-duplicates .next-tag').get(0).focus(); });
+                }
+                else {
+                    $('.duplicates').hide();
+                }
 
                 this.getPeriodIncrease(cf);
                 if (cf.isHidden()) {
@@ -1526,6 +1861,7 @@ export class Inspector {
             else if (cf instanceof Footnote) {
                 $('#inspector').addClass('footnote-mode');
                 $('#inspector .footnote-details .footnote-facts').empty().append(this._footnoteFactsHTML(cf));
+                $('#inspector .concept-name-title').hide();
                 $('#inspector .tags').hide();
             }
             $('.fact-details').localize();
@@ -1559,7 +1895,7 @@ export class Inspector {
         }
         this.switchItem(vuid, noScroll);
         if (!noInspectorReset) {
-            this.inspectorMode(undefined);
+            this.inspectorMode("fact-mode", vuid !== null);
         }
     }
 
@@ -1602,20 +1938,23 @@ export class Inspector {
         return langs;
     }
 
-    selectDefaultLanguage() {
+    setDefaultDocumentLanguage() {
         const al = this._reportSet.availableLanguages();
         for (const pl of this.preferredLanguages()) {
             for (const l of al) {
                 if (l.toLowerCase() == pl.toLowerCase()) {
-                    return l;
+                    this._viewerOptions.language = l;
+                    return;
                 }
             }
         }
-        return this._reportSet.availableLanguages()[0];
+        this._viewerOptions.language = this._reportSet.availableLanguages()[0];
     }
 
     setDocumentLanguage(lang) {
         this._viewerOptions.language = lang;
+        this.createOutline();
+        this.update();
     }
 
     showValidationReport() {
@@ -1636,5 +1975,17 @@ export class Inspector {
             const mb = new MessageBox("Validation errors", message, "View Details", "Dismiss");
             mb.show(() => this.showValidationReport());
         }
+    }
+
+    zoomRelative(dir) {
+        this._zoomLevel += dir;
+        this._zoomLevel = Math.min(ZOOM_LEVELS.length -1, Math.max(0, this._zoomLevel));
+        this._viewer.zoom(ZOOM_LEVELS[this._zoomLevel]);
+        $("#zoom").val(this._zoomLevel);
+    }
+
+    zoomAbsolute(level) {
+        this._zoomLevel = parseInt(level);
+        this._viewer.zoom(ZOOM_LEVELS[this._zoomLevel]);
     }
 }

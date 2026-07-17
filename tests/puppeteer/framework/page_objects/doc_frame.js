@@ -45,9 +45,9 @@ export class DocFrame {
 
 export class Highlight {
 
-    static darkBlue = 'rgb(2, 109, 206)';
+    static darkBlue = 'rgb(58, 91, 199)';
     static green = 'rgb(190, 234, 143)';
-    static lightBlue = 'rgb(0, 148, 255)';
+    static primaryBlue = 'rgb(93, 127, 211)';
     static yellow = 'rgb(255, 172, 41)';
     static purple = 'rgb(221, 115, 255)';
     static propBgColor = 'background-color';
@@ -75,14 +75,14 @@ export class Highlight {
     };
 
     static searchHover(docContent, active = true) {
-        const color = active ? `${this.darkBlue} dashed 2px` : 'none';
+        const color = active ? `${this.darkBlue} dashed 3px` : 'none';
         const property = active ? this.propOutline : this.propOutlineStyle;
         const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
         return new Highlight(color, locator, property, docContent);
     };
 
     static selectedFact(docContent, active = true) {
-        const color = active ? `${this.lightBlue} solid 2px` : 'none';
+        const color = active ? `${this.primaryBlue} solid 3px` : 'none';
         const property = active ? this.propOutline : this.propOutlineStyle;
         const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
         return new Highlight(color, locator, property, docContent);

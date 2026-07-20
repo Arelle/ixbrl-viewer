@@ -238,11 +238,19 @@ function collectDimensionConcepts(taxonomy) {
     return { explicit, typed };
 }
 
+// Locators live in the properties of valueSources (Form A: the document text is the
+// source of truth and the value is derived from it) or of valueAnchors (Form B: the
+// value is provided in the factset and the anchor only locates it in the document).
+// Both carry the same locator properties, so read both to make either form locatable.
+function factLocators(fv) {
+    return [...(fv.valueSources ?? []), ...(fv.valueAnchors ?? [])];
+}
+
 function htmlElementIdsForFact(fact) {
     const ids = [];
     for (const fv of fact.factValues ?? []) {
-        for (const vs of fv.valueSources ?? []) {
-            for (const p of vs.properties ?? []) {
+        for (const locator of factLocators(fv)) {
+            for (const p of locator.properties ?? []) {
                 // xbrl:htmlElementId is the current spec property name;
                 // xbrl:htmlSpanId is accepted as a legacy alias for factsets not
                 // yet regenerated to the renamed property.
@@ -258,13 +266,13 @@ function htmlElementIdsForFact(fact) {
 }
 
 // PDF locators for a fact: an array of { page, mcids } - one entry per value
-// source that carries xbrl:pdfPage + xbrl:pdfMcid.  A single fact may be split
-// across several marked-content ids (and pages), so all are kept and become the
-// wrapper nodes of one IXNode.
+// source or anchor that carries xbrl:pdfPage + xbrl:pdfMcid.  A single fact may be
+// split across several marked-content ids (and pages), so all are kept and become
+// the wrapper nodes of one IXNode.
 function pdfLocatorsForFact(fact) {
     const locators = [];
     for (const fv of fact.factValues ?? []) {
-        for (const vs of fv.valueSources ?? []) {
+        for (const vs of factLocators(fv)) {
             let page = null;
             const mcids = [];
             for (const p of vs.properties ?? []) {

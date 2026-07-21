@@ -54,6 +54,11 @@ seams were added:
        referenced by many facts (the SEC Tailored Shareholder Report pattern), so
        all of them share one overlay (their vuids all land in its `ivids`) —
        selecting any highlights the chart, clicking it surfaces the set.
+     - **form field** (`xbrl:pdfFormFieldLocatorType`: `xbrl:pdfFormField`, a PDF
+       AcroForm field name, with **no page number**) — the field's page,
+       rectangle and value are discovered via PDF.js `getFieldObjects()` (one
+       call), and one overlay is placed over the field; the value defaults to the
+       AcroForm field's own value.
      - **html fallback** (`xbrl:htmlElementLocatorType`) — facts not located in
        the PDF; not shown in a PDF view.
 
@@ -297,10 +302,6 @@ first-page-fast loading:
 - A fact whose value is split across several PDF marked-content ids can show a
   repeated/garbled value (the mapped text concatenates duplicates); it is shown
   as text (never run through numeric formatting), so it doesn't error.
-- `xbrl:pdfFormFieldLocatorType` (a fact located by a PDF form-field name, with
-  no page number) is **not yet implemented** — the observed aligned factsets use
-  content / image / html locators only.  Adding it would extract the field name
-  and scan each page's `getAnnotations()` for the matching field's rectangle.
 - OIM permits a fact to have no entity and/or no period dimension; the viewer now
   handles that (entity shows "n/a", it no longer assumes an entity is present).
   Facts whose concept isn't in a loaded taxonomy fall back to the concept QName.

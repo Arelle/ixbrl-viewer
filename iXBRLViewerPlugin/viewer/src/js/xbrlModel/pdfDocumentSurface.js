@@ -98,6 +98,7 @@ export class PdfDocumentSurface {
                 + `Check that the config's "document" points to a .pdf file.`,
             );
         }
+        this._pdf = pdf; // retained for form-field lookup (getFieldObjects) in bind
         // Prepare every page (size + text/marked-content geometry) up front so
         // that all fact overlays, values and navigation work immediately, but
         // DEFER the expensive canvas rasterization: pages are rasterized lazily
@@ -319,16 +320,20 @@ export class PdfDocumentSurface {
         };
     }
 
-    bind(viewer) {
+    async bind(viewer) {
         const reportIndex = 0;
         viewer._iframes.eq(0).data("selected", true);
         const facts = viewer._reportSet.reportsData()[0].facts;
         const doc = viewer._iframes.eq(0).contents().get(0);
 
+        // Resolve AcroForm fields once (only if any fact is form-field located).
+        const hasFormFields = Object.values(facts).some(fd => fd.pdfFormField);
+        const fieldMap = hasFormFields ? await this._buildFormFieldMap() : {};
+
         // Group image facts by their shared region (page+bbox) so that one
         // embedded chart image becomes a single highlight carrying all its facts.
-        // Content facts become per-fact overlays.  Facts that resolve to nothing
-        // (e.g. html-fallback facts, in a PDF view) are dropped.
+        // Content and form-field facts become per-fact overlays.  Facts that
+        // resolve to nothing (e.g. html-fallback facts, in a PDF view) are dropped.
         const imageRegions = {}; // regionKey -> { rect, container, page, factKeys: [] }
         const tasks = [];        // ordered render tasks
         for (const [key, factData] of Object.entries(facts)) {
@@ -358,6 +363,17 @@ export class PdfDocumentSurface {
                 }
             }
 
+            if (factData.pdfFormField) {
+                for (const name of factData.pdfFormField) {
+                    const r = this._resolveFormField(name, fieldMap);
+                    if (!r) {
+                        continue;
+                    }
+                    located = true;
+                    tasks.push({ type: "formfield", sortKey: r.page * 1e6 + r.rect.top, key, factData, rect: r.rect, container: r.container, fieldValue: r.value });
+                }
+            }
+
             if (!located) {
                 delete facts[key];
             }
@@ -371,12 +387,78 @@ export class PdfDocumentSurface {
             if (task.type === "content") {
                 this._bindContentFact(viewer, doc, reportIndex, task, facts);
             }
-            else {
+            else if (task.type === "image") {
                 this._bindImageRegion(viewer, doc, reportIndex, task.region, facts);
             }
+            else {
+                this._bindFormFieldFact(viewer, doc, reportIndex, task, facts);
+            }
         }
+    }
 
-        return Promise.resolve();
+    // Map AcroForm field name -> { page (1-based), rect (user-space), value } via
+    // PDF.js getFieldObjects (one call for the whole document).  Form-field
+    // locators carry no page number, so the field's location is discovered here.
+    async _buildFormFieldMap() {
+        const map = {};
+        try {
+            const fieldObjects = await this._pdf.getFieldObjects();
+            for (const [name, objs] of Object.entries(fieldObjects ?? {})) {
+                for (const o of objs ?? []) {
+                    if (o && Array.isArray(o.rect) && o.page != null && map[name] === undefined) {
+                        map[name] = { page: o.page + 1, rect: o.rect, value: o.value };
+                    }
+                }
+            }
+        }
+        catch (e) {
+            // No AcroForm, or getFieldObjects unsupported.
+        }
+        return map;
+    }
+
+    // Resolve an AcroForm field name to a CSS rectangle over its page + its value.
+    _resolveFormField(name, fieldMap) {
+        const fld = fieldMap[name];
+        if (!fld) {
+            return null;
+        }
+        const pageInfo = this._pages[fld.page];
+        if (!pageInfo) {
+            return null;
+        }
+        const s = this._scale;
+        const [x0, y0, x1, y1] = fld.rect;
+        return {
+            container: pageInfo.container,
+            page: fld.page,
+            value: fld.value,
+            rect: {
+                left: x0 * s,
+                top: (pageInfo.vTop - y1) * s,
+                width: (x1 - x0) * s,
+                height: (y1 - y0) * s,
+            },
+        };
+    }
+
+    _bindFormFieldFact(viewer, doc, reportIndex, { key, factData, rect, container, fieldValue }, facts) {
+        const numericClass = factData.a.u !== undefined ? "ixbrl-element-nonfraction" : "ixbrl-element-nonnumeric";
+        const div = doc.createElement("div");
+        div.className = "ixbrl-element " + numericClass + " xbrl-formfield";
+        div.style.left = rect.left + "px";
+        div.style.top = rect.top + "px";
+        div.style.width = rect.width + "px";
+        div.style.height = rect.height + "px";
+        container.appendChild(div);
+        const vuid = viewerUniqueId(reportIndex, key);
+        const nodes = $([div]);
+        viewer._addIdToNodes(nodes, vuid);
+        const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+        viewer._docOrderItemIndex.addItem(vuid, 0);
+        viewer.itemContinuationMap[vuid] = [];
+        // Value: the OIM fact value if present, else the form field's own value.
+        applyFactValue(facts[key], ixn, fieldValue != null ? String(fieldValue) : "");
     }
 
     _bindContentFact(viewer, doc, reportIndex, { key, factData, rectSets }, facts) {

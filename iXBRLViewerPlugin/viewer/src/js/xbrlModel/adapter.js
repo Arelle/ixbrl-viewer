@@ -329,6 +329,27 @@ function pdfImageLocatorsForFact(fact) {
     return locators;
 }
 
+// PDF form-field locators (xbrl:pdfFormFieldLocatorType): xbrl:pdfFormField is
+// an AcroForm field name.  There is no page number - the surface finds the
+// field (its page, rectangle and value) via PDF.js getFieldObjects().
+function pdfFormFieldsForFact(fact) {
+    const names = [];
+    for (const fv of fact.factValues ?? []) {
+        for (const vs of factLocators(fv)) {
+            for (const p of vs.properties ?? []) {
+                if (p.property === "xbrl:pdfFormField") {
+                    for (const name of (Array.isArray(p.value) ? p.value : [p.value])) {
+                        if (name != null) {
+                            names.push(name);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return names;
+}
+
 function buildFacts(factset) {
     const facts = {};
     let pdfKeyCounter = 0;
@@ -406,13 +427,17 @@ function buildFacts(factset) {
         // locators attached for the document surface to place overlay boxes.
         const pdfContent = pdfLocatorsForFact(fact);
         const pdfImage = pdfImageLocatorsForFact(fact);
-        if (pdfContent.length > 0 || pdfImage.length > 0) {
+        const pdfFormField = pdfFormFieldsForFact(fact);
+        if (pdfContent.length > 0 || pdfImage.length > 0 || pdfFormField.length > 0) {
             const factData = makeFactData();
             if (pdfContent.length > 0) {
                 factData.pdf = pdfContent;
             }
             if (pdfImage.length > 0) {
                 factData.pdfImage = pdfImage;
+            }
+            if (pdfFormField.length > 0) {
+                factData.pdfFormField = pdfFormField;
             }
             facts["pf-" + (pdfKeyCounter++)] = factData;
             continue;

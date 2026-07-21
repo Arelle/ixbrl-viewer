@@ -547,7 +547,7 @@ export class iXBRLViewer {
         // locators rather than assuming the first mapping.
         const hasPdfFacts = (m.facts ?? []).some(f => (f.factValues ?? []).some(fv =>
             [...(fv.valueSources ?? []), ...(fv.valueAnchors ?? [])].some(vs =>
-                (vs.properties ?? []).some(p => p.property === "xbrl:pdfPage"))));
+                (vs.properties ?? []).some(p => (p.property ?? "").startsWith("xbrl:pdf")))));
 
         // Resolve the source document: content from the chooser, else the
         // sourceMapping/config URL matching the intended surface.

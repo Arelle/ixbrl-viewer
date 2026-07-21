@@ -1957,7 +1957,7 @@ export class Inspector {
     }
 
     zoomAbsolute(level) {
-        this._zoomLevel = parseInt(level);
+        this._zoomLevel = Math.min(ZOOM_LEVELS.length - 1, Math.max(0, Number.parseInt(level, 10)));
         this._viewer.zoom(ZOOM_LEVELS[this._zoomLevel]);
     }
 }

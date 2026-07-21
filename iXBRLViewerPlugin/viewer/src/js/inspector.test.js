@@ -6,7 +6,7 @@ import { ReportSetOutline } from "./outline.js";
 import { IXNode } from "./ixnode.js";
 import { Menu } from "./menu.js";
 import { TestInspector } from "./test-utils.js";
-import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId, FACTS_PER_GROUP } from "./util.js";
+import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId, FACTS_PER_GROUP, ZOOM_LEVELS } from "./util.js";
 
 
 const testReportData = {
@@ -585,6 +585,59 @@ describe("Plugin extension points", () => {
         const items = insp._toolbarMenu._elt.find(".content .item");
         expect(items).toHaveLength(1);
         expect(items.eq(0).text()).toBe("Untagged Facts");
+    });
+});
+
+describe("Zoom boundary clamping", () => {
+    const setUpInspector = () => {
+        const insp = new TestInspector();
+        insp._viewer = { zoom: jest.fn() };
+        return insp;
+    };
+
+    test("zoomRelative does not go below the minimum zoom level", () => {
+        const insp = setUpInspector();
+        insp._zoomLevel = 0;
+        insp.zoomRelative(-1);
+        expect(insp._zoomLevel).toBe(0);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[0]);
+    });
+
+    test("zoomRelative does not go above the maximum zoom level", () => {
+        const insp = setUpInspector();
+        insp._zoomLevel = ZOOM_LEVELS.length - 1;
+        insp.zoomRelative(1);
+        expect(insp._zoomLevel).toBe(ZOOM_LEVELS.length - 1);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[ZOOM_LEVELS.length - 1]);
+    });
+
+    test("zoomRelative moves one step within bounds", () => {
+        const insp = setUpInspector();
+        insp._zoomLevel = 5;
+        insp.zoomRelative(1);
+        expect(insp._zoomLevel).toBe(6);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[6]);
+    });
+
+    test("zoomAbsolute sets the zoom level to the given index", () => {
+        const insp = setUpInspector();
+        insp.zoomAbsolute("3");
+        expect(insp._zoomLevel).toBe(3);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[3]);
+    });
+
+    test("zoomAbsolute clamps an index below the minimum zoom level", () => {
+        const insp = setUpInspector();
+        insp.zoomAbsolute("-1");
+        expect(insp._zoomLevel).toBe(0);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[0]);
+    });
+
+    test("zoomAbsolute clamps an index above the maximum zoom level", () => {
+        const insp = setUpInspector();
+        insp.zoomAbsolute(String(ZOOM_LEVELS.length));
+        expect(insp._zoomLevel).toBe(ZOOM_LEVELS.length - 1);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[ZOOM_LEVELS.length - 1]);
     });
 });
 

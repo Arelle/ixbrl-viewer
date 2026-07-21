@@ -23,6 +23,7 @@ function testConcept(typedDomainElement) {
 function testFact(conceptName, dimensions, identifier) {
     return {
         conceptName: () => conceptName,
+        conceptQName: () => ({ localname: conceptName.split(':')[1] }),
         dimensions: () => dimensions,
         identifier: () => identifier
     }
@@ -211,6 +212,60 @@ describe("Tags summary", () => {
                 "total": 1
             }
         });
+    });
+});
+
+describe("Identifiers summary", () => {
+
+    test("no facts yields no identifiers", () => {
+        const reportSet = testReportSet({}, [], {}, []);
+        const summary = new DocumentSummary(reportSet);
+
+        expect(summary.identifiers()).toEqual([]);
+    });
+
+    test("orders identifiers by descending fact count", () => {
+        const conceptName = "eg:Concept1";
+        const idA = testQName('lei', 'A', 'http://example.com');
+        const idB = testQName('lei', 'B', 'http://example.com');
+        const facts = [
+            testFact(conceptName, {}, idA),
+            testFact(conceptName, {}, idB),
+            testFact(conceptName, {}, idB),
+        ];
+        const reportSet = testReportSet({}, facts, {}, []);
+        const summary = new DocumentSummary(reportSet);
+
+        expect(summary.identifiers()).toEqual([idB.qname, idA.qname]);
+    });
+});
+
+describe("Entity names summary", () => {
+
+    test("no facts yields no entity names", () => {
+        const reportSet = testReportSet({}, [], {}, []);
+        const summary = new DocumentSummary(reportSet);
+
+        expect(summary.entityNames()).toEqual([]);
+    });
+
+    test("returns facts tagged with recognized entity name concepts", () => {
+        const identifier = testQName('lei', '123', 'http://example.com');
+        const entityFact = testFact("dei:EntityRegistrantName", {}, identifier);
+        const otherFact = testFact("eg:Concept1", {}, identifier);
+        const reportSet = testReportSet({}, [entityFact, otherFact], {}, []);
+        const summary = new DocumentSummary(reportSet);
+
+        expect(summary.entityNames()).toEqual([entityFact]);
+    });
+
+    test("returns no facts when no entity name concepts are present", () => {
+        const identifier = testQName('lei', '123', 'http://example.com');
+        const otherFact = testFact("eg:Concept1", {}, identifier);
+        const reportSet = testReportSet({}, [otherFact], {}, []);
+        const summary = new DocumentSummary(reportSet);
+
+        expect(summary.entityNames()).toEqual([]);
     });
 });
 

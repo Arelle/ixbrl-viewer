@@ -1,24 +1,24 @@
 {
   "calculation": {
-    "calculated-total": "",
-    "calculationIsConsistent": "",
-    "calculationIsInconsistent": "",
-    "concept": "",
-    "consistent-duplicate-facts-present": "",
-    "does-not-bind": "",
-    "inconsistent-duplicate-facts-present": "",
-    "maximum": "",
-    "minimum": "",
-    "notReported": "",
-    "reported-total": "",
-    "reported-value": "",
-    "showDetails": "",
-    "status": "",
-    "useCalculations11": "",
-    "useLegacyCalculations": ""
+    "calculated-total": "Calculado",
+    "calculationIsConsistent": "El cálculo es coherente",
+    "calculationIsInconsistent": "El cálculo no es coherente",
+    "concept": "Concepto",
+    "consistent-duplicate-facts-present": "{{nfacts}} hechos duplicados coherentes presentes",
+    "does-not-bind": "El cálculo no vincula",
+    "inconsistent-duplicate-facts-present": "{{nfacts}} hechos duplicados incoherentes presentes",
+    "maximum": "Máximo",
+    "minimum": "Mínimo",
+    "notReported": "no reportado",
+    "reported-total": "Reportado",
+    "reported-value": "Valor reportado",
+    "showDetails": "Mostrar detalles",
+    "status": "Estado",
+    "useCalculations11": "Usar cálculos v1.1",
+    "useLegacyCalculations": "Usar cálculos heredados"
   },
   "chart": {
-    "comparisonChart": ""
+    "comparisonChart": "Gráfico comparativo"
   },
   "common": {
     "accuracyInfinite": "Precisió infinita",
@@ -28,121 +28,121 @@
     "unspecified": "Sin especificar"
   },
   "dialog": {
-    "close": ""
+    "close": "cerrar"
   },
   "factDetails": {
     "accuracy": "Precisión",
-    "balance": "",
-    "calculationUnchecked": "",
-    "calculationUncheckedIncorrectVersion": "",
-    "calculationValuesDoNotMatch": "",
-    "calculationValuesMatch": "",
+    "balance": "Saldo",
+    "calculationUnchecked": "Cálculo no verificado debido a la presencia de hechos duplicados",
+    "calculationUncheckedIncorrectVersion": "Las relaciones de Cálculo 1.1 no se verificaron en el modo de cálculo heredado",
+    "calculationValuesDoNotMatch": "Los valores reportados y calculados no coinciden",
+    "calculationValuesMatch": "Los valores reportados y calculados coinciden",
     "change": "Cambio",
     "changeFromIn": "Anteriormente {{from}} en ",
     "changePercentageDecrease": "{{decrease}}% menos que en ",
     "changePercentageIncrease": "{{increase}}% más que en ",
     "concept": "Concepto",
-    "datatype": "",
+    "datatype": "Tipo",
     "date": "Fecha",
     "dimensions": "Dimensiones",
     "duplicatesCount": "{{current}} de {{total}}",
     "entity": "Entidad",
-    "factCount": "",
+    "factCount": "{{current}} de {{total}}",
     "factValue": "Valor del hecho",
-    "nestedFactSummary": "",
-    "nonNumericFact": "",
+    "nestedFactSummary": "Mostrando {{current}} de {{total}} hechos anidados:",
+    "nonNumericFact": "hecho no numérico",
     "noPriorFactInThisReport": "No hay un hecho previo",
     "noUnit": "Sin unidad",
     "properties": "Características",
     "scale": "Escala",
-    "source": "",
-    "viewCalculationDetails": ""
+    "source": "Fuente",
+    "viewCalculationDetails": "Ver detalles del cálculo"
   },
   "footnotes": {
-    "content": "",
+    "content": "Contenido",
     "footnote": "Nota al pie de página"
   },
   "inspector": {
     "anchoring": "Anclaje",
     "associatedFacts": "Hechos asociados",
-    "calculationDetails": "",
+    "calculationDetails": "Detalles del cálculo",
     "calculations": "Cálculos",
-    "concealedFact": "",
+    "concealedFact": "Hecho oculto",
     "conceptType": "Tipo de concepto",
-    "contributor": "",
+    "contributor": "Colaborador",
     "datatypes": "Tipos de datos",
     "dimensions": "Tipo de dimensión",
-    "documentation": "",
-    "explicitDimension": "",
-    "fact-groups": "",
+    "documentation": "Documentación",
+    "explicitDimension": "Dimensiones explícitas",
+    "fact-groups": "Secciones",
     "factSearch": "Búsqueda de hechos",
-    "factValue": "",
+    "factValue": "Valor del hecho",
     "footnotes": "Notas al pie de página",
-    "goToReference": "",
+    "goToReference": "Ir a la referencia",
     "hidden": "Oculto",
     "hiddenFact": "Hecho oculto",
-    "highlightMenu": "",
-    "highlightTags": "",
-    "highlightUntaggedDates": "",
-    "highlightUntaggedNumbers": "",
-    "initializing": "",
-    "ixbrlInspector": "",
-    "labels": "",
-    "language": "",
+    "highlightMenu": "Opciones de resaltado",
+    "highlightTags": "Resaltar etiquetas",
+    "highlightUntaggedDates": "Resaltar fechas sin etiquetar",
+    "highlightUntaggedNumbers": "Resaltar números sin etiquetar",
+    "initializing": "Inicializando",
+    "ixbrlInspector": "Inspector iXBRL",
+    "labels": "Etiquetas",
+    "language": "Idioma",
     "loadingViewer": "Preparando el visor iXBRL",
     "mandatoryFacts": "Sólo hechos obligatorios",
     "namespaces": "Espacios de nombres",
-    "narrowerAnchors": "",
+    "narrowerAnchors": "Anclajes más estrechos",
     "negative": "Negativo",
-    "nextTag": "",
-    "noCalculations": "",
-    "noDimensions": "",
+    "nextTag": "Siguiente etiqueta",
+    "noCalculations": "Sin cálculos",
+    "noDimensions": "Sin dimensiones",
     "noFactSelected": "Ningún hecho seleccionado",
     "numericOption": "Numérico",
-    "occurrences": "",
-    "otherFacts": "",
+    "occurrences": "Ocurrencias",
+    "otherFacts": "Otros hechos",
     "period": "Periodo",
     "positive": "Positivo",
-    "previousTag": "",
-    "printDocument": "",
+    "previousTag": "Etiqueta anterior",
+    "printDocument": "Imprimir documento",
     "references": "Referencias",
     "scales": "Escalas",
-    "searchReport": "",
-    "searchResults": "",
+    "searchReport": "Buscar en el informe iXBRL",
+    "searchResults": "Resultados de búsqueda",
     "settings": {
       "calculationMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Seleccione el modo de evaluación de cálculo para las relaciones de cálculo heredadas",
+        "title": "Modo de cálculo"
       },
       "colorMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Elija si la apariencia del Visor en Línea debe ser clara u oscura",
+        "title": "Modo de color del visor"
       },
       "plugins": {
-        "title": ""
+        "title": "Complementos"
       },
-      "title": "",
+      "title": "Configuración",
       "viewerLanguage": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Seleccione el idioma que le gustaría usar con el Visor en Línea",
+        "title": "Idioma del visor"
       }
     },
-    "settingsButton": "",
-    "showAnalysisChart": "",
-    "showMore": "",
-    "showTextOnly": "",
+    "settingsButton": "Configuración",
+    "showAnalysisChart": "Mostrar gráfico de análisis",
+    "showMore": "Mostrar más",
+    "showTextOnly": "Mostrar solo texto",
     "summary": {
       "about": {
-        "entity": "",
-        "name": "",
-        "seeMoreReferenceData": "",
-        "title": ""
+        "entity": "Entidad",
+        "name": "Nombre",
+        "seeMoreReferenceData": "Ver más datos de referencia de {{type}}",
+        "title": "Título"
       },
       "aboutCompany": {
-        "header": ""
+        "header": "Sobre la empresa"
       },
       "downloads": {
-        "header": ""
+        "header": "Descargas"
       },
       "fact": {
         "header": "Resumen de los hechos",
@@ -150,11 +150,11 @@
         "mandatory": "Hechos obligatorios",
         "total": "Hechos totales"
       },
-      "factSource": "",
+      "factSource": "Fuente de los hechos",
       "includedDocuments": {
-        "header": ""
+        "header": "Documentos incluidos"
       },
-      "reportCreation": "",
+      "reportCreation": "Creación de informe",
       "tag": {
         "colConcepts": "Conceptos",
         "colDimensions": "Dimensiones",
@@ -163,23 +163,23 @@
         "rowTotal": "Total"
       }
     },
-    "summation": "",
+    "summation": "Suma",
     "tabs": {
-      "overview": "",
-      "search": "",
-      "xbrlFacts": ""
+      "overview": "Resumen",
+      "search": "Buscar",
+      "xbrlFacts": "Hechos XBRL"
     },
-    "targetDocument": "",
+    "targetDocument": "Documento de destino",
     "textOption": "Texto",
-    "typedDimensions": "",
+    "typedDimensions": "Dimensiones tipificadas",
     "units": "Unidads",
-    "validationCode": "",
-    "validationMessage": "",
-    "validationResults": "",
-    "validationSeverity": "",
+    "validationCode": "Código",
+    "validationMessage": "Mensaje",
+    "validationResults": "Resultados de validación",
+    "validationSeverity": "Gravedad",
     "visibility": "Visibilidad",
     "visible": "Visible",
-    "widerAnchors": "",
+    "widerAnchors": "Anclajes más amplios",
     "xbrlGlossaryOpensInNewTab": "Glosario XBRL (se abre en una pestaña nueva)"
   },
   "menu": {
@@ -188,23 +188,23 @@
     "userGuide": "Guía del Usuario"
   },
   "search": {
-    "concealedFact": "",
-    "default": "",
+    "concealedFact": "Hecho oculto",
+    "default": "predeterminado",
     "hiddenFact": "Hecho oculto",
-    "matchingFactsSummary": "",
+    "matchingFactsSummary": "Mostrando {{nMatches}} de {{nTotal}} hechos",
     "noMatchFound": "No se encontró ninguna coincidencia",
-    "resetFilters": "",
+    "resetFilters": "Restablecer filtros",
     "showMoreResults": "Mostrar más resultados",
-    "showResults": "",
-    "toggleFilterControls": "",
+    "showResults": "Mostrar resultados",
+    "toggleFilterControls": "Alternar controles de filtro",
     "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },
   "toolbar": {
     "homePage": "Inicio"
   },
   "viewer": {
-    "ixbrlDocumentView": "",
-    "zoomIn": "",
-    "zoomOut": ""
+    "ixbrlDocumentView": "Vista de documento iXBRL",
+    "zoomIn": "acercar",
+    "zoomOut": "alejar"
   }
 }

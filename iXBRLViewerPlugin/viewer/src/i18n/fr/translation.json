@@ -1,21 +1,21 @@
 {
   "calculation": {
     "calculated-total": "Calculé",
-    "calculationIsConsistent": "",
-    "calculationIsInconsistent": "",
+    "calculationIsConsistent": "Le calcul est cohérent",
+    "calculationIsInconsistent": "Le calcul n'est pas cohérent",
     "concept": "Concept",
     "consistent-duplicate-facts-present": "{{nfacts}} faits dupliqués cohérents présents",
     "does-not-bind": "Le calcul ne lie pas",
     "inconsistent-duplicate-facts-present": "{{nfacts}} faits dupliqués incohérents présents",
     "maximum": "Maximum",
     "minimum": "Minimum",
-    "notReported": "",
+    "notReported": "non déclaré",
     "reported-total": "Déclaré",
     "reported-value": "Valeur déclarée",
-    "showDetails": "",
-    "status": "",
+    "showDetails": "Afficher les détails",
+    "status": "Statut",
     "useCalculations11": "Utiliser Calculations v1.1",
-    "useLegacyCalculations": ""
+    "useLegacyCalculations": "Utiliser les calculs hérités"
   },
   "chart": {
     "comparisonChart": "Graphique comparatif"
@@ -35,8 +35,8 @@
     "balance": "Solde",
     "calculationUnchecked": "Calcul non vérifié en raison de la présence de faits dupliqués",
     "calculationUncheckedIncorrectVersion": "Relations de calcul 1.1 non vérifiées en mode calcul hérité",
-    "calculationValuesDoNotMatch": "",
-    "calculationValuesMatch": "",
+    "calculationValuesDoNotMatch": "Les valeurs déclarées et calculées ne correspondent pas",
+    "calculationValuesMatch": "Les valeurs déclarées et calculées correspondent",
     "change": "Variation",
     "changeFromIn": "De {{from}} en ",
     "changePercentageDecrease": "diminution de {{decrease}}% sur ",
@@ -47,19 +47,19 @@
     "dimensions": "Dimensions",
     "duplicatesCount": "{{current}} sur {{total}}",
     "entity": "Entité",
-    "factCount": "",
+    "factCount": "{{current}} sur {{total}}",
     "factValue": "Valeur du fait",
-    "nestedFactSummary": "",
+    "nestedFactSummary": "Affichage de {{current}} sur {{total}} faits imbriqués :",
     "nonNumericFact": "fait non numérique",
     "noPriorFactInThisReport": "Aucun fait antérieur dans ce rapport",
     "noUnit": "<SANS_UNITÉ>",
     "properties": "Propriétés",
     "scale": "Échelle",
-    "source": "",
+    "source": "Source",
     "viewCalculationDetails": "Voir les détails du calcul"
   },
   "footnotes": {
-    "content": "",
+    "content": "Contenu",
     "footnote": "Note de bas de page"
   },
   "inspector": {
@@ -72,35 +72,35 @@
     "contributor": "Contributeur",
     "datatypes": "Types",
     "dimensions": "Type de dimension",
-    "documentation": "",
+    "documentation": "Documentation",
     "explicitDimension": "Dimensions explicites",
     "fact-groups": "Sections",
     "factSearch": "Recherche de faits",
     "factValue": "Valeur du fait",
     "footnotes": "Notes de bas de page",
-    "goToReference": "",
+    "goToReference": "Aller à la référence",
     "hidden": "Caché",
     "hiddenFact": "Fait caché",
-    "highlightMenu": "",
-    "highlightTags": "",
-    "highlightUntaggedDates": "",
-    "highlightUntaggedNumbers": "",
+    "highlightMenu": "Options de surbrillance",
+    "highlightTags": "Surligner les balises",
+    "highlightUntaggedDates": "Surligner les dates non balisées",
+    "highlightUntaggedNumbers": "Surligner les nombres non balisés",
     "initializing": "Initialisation",
     "ixbrlInspector": "Inspecteur iXBRL",
-    "labels": "",
-    "language": "",
+    "labels": "Libellés",
+    "language": "Langue",
     "loadingViewer": "Chargement du visualiseur iXBRL",
     "mandatoryFacts": "Seulement les faits obligatoires",
     "namespaces": "Espaces de noms",
-    "narrowerAnchors": "",
+    "narrowerAnchors": "Ancrages plus étroits",
     "negative": "Négatif",
     "nextTag": "Étiquette suivante",
-    "noCalculations": "",
-    "noDimensions": "",
+    "noCalculations": "Aucun calcul",
+    "noDimensions": "Aucune dimension",
     "noFactSelected": "Aucun fait sélectionné",
     "numericOption": "Numérique",
-    "occurrences": "",
-    "otherFacts": "",
+    "occurrences": "Occurrences",
+    "otherFacts": "Autres faits",
     "period": "Période",
     "positive": "Positif",
     "previousTag": "Étiquette précédente",
@@ -111,38 +111,38 @@
     "searchResults": "Résultats de la recherche",
     "settings": {
       "calculationMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Sélectionnez le mode d'évaluation du calcul pour les relations de calcul héritées",
+        "title": "Mode de calcul"
       },
       "colorMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Choisissez si l'apparence de la visionneuse intégrée doit être claire ou sombre",
+        "title": "Mode de couleur de la visionneuse"
       },
       "plugins": {
-        "title": ""
+        "title": "Extensions"
       },
-      "title": "",
+      "title": "Paramètres",
       "viewerLanguage": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Sélectionnez la langue que vous souhaitez utiliser avec la visionneuse intégrée",
+        "title": "Langue de la visionneuse"
       }
     },
-    "settingsButton": "",
+    "settingsButton": "Paramètres",
     "showAnalysisChart": "Afficher le graphique d’analyse",
-    "showMore": "",
+    "showMore": "Afficher plus",
     "showTextOnly": "Afficher uniquement le texte",
     "summary": {
       "about": {
-        "entity": "",
-        "name": "",
-        "seeMoreReferenceData": "",
-        "title": ""
+        "entity": "Entité",
+        "name": "Nom",
+        "seeMoreReferenceData": "Voir plus de données de référence {{type}}",
+        "title": "Titre"
       },
       "aboutCompany": {
-        "header": ""
+        "header": "À propos de l'entreprise"
       },
       "downloads": {
-        "header": ""
+        "header": "Téléchargements"
       },
       "fact": {
         "header": "Résumé des faits",
@@ -150,9 +150,9 @@
         "mandatory": "Faits obligatoires",
         "total": "Total des faits"
       },
-      "factSource": "",
+      "factSource": "Source des faits",
       "includedDocuments": {
-        "header": ""
+        "header": "Documents inclus"
       },
       "reportCreation": "Création du rapport",
       "tag": {
@@ -165,9 +165,9 @@
     },
     "summation": "Somme",
     "tabs": {
-      "overview": "",
-      "search": "",
-      "xbrlFacts": ""
+      "overview": "Aperçu",
+      "search": "Rechercher",
+      "xbrlFacts": "Faits XBRL"
     },
     "targetDocument": "Document cible",
     "textOption": "Texte",
@@ -179,7 +179,7 @@
     "validationSeverity": "Gravité",
     "visibility": "Visibilité",
     "visible": "Visible",
-    "widerAnchors": "",
+    "widerAnchors": "Ancrages plus larges",
     "xbrlGlossaryOpensInNewTab": "Glossaire XBRL (ouvre dans un nouvel onglet)"
   },
   "menu": {
@@ -193,9 +193,9 @@
     "hiddenFact": "Fait caché",
     "matchingFactsSummary": "Affichage de {{nMatches}} faits sur {{nTotal}}",
     "noMatchFound": "Aucune correspondance trouvée",
-    "resetFilters": "",
+    "resetFilters": "Réinitialiser les filtres",
     "showMoreResults": "Afficher plus de résultats",
-    "showResults": "",
+    "showResults": "Afficher les résultats",
     "toggleFilterControls": "Basculer les contrôles de filtre",
     "tryAgainDifferentKeywords": "Essayez avec des mots-clés différents"
   },
@@ -204,7 +204,7 @@
   },
   "viewer": {
     "ixbrlDocumentView": "Vue du document iXBRL",
-    "zoomIn": "",
-    "zoomOut": ""
+    "zoomIn": "zoomer",
+    "zoomOut": "dézoomer"
   }
 }

@@ -1,21 +1,21 @@
 {
   "calculation": {
     "calculated-total": "Bereken totaal",
-    "calculationIsConsistent": "",
-    "calculationIsInconsistent": "",
+    "calculationIsConsistent": "Berekening is consistent",
+    "calculationIsInconsistent": "Berekening is inconsistent",
     "concept": "Concept",
     "consistent-duplicate-facts-present": "{{nfacts}} consistente dubbele feiten aanwezig",
     "does-not-bind": "Berekening bindt niet",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inconsistente dubbele feiten aanwezig",
     "maximum": "Maximum",
     "minimum": "Minimum",
-    "notReported": "",
+    "notReported": "niet gerapporteerd",
     "reported-total": "Gerapporteerd totaal",
     "reported-value": "Gerapporteerde waarde",
-    "showDetails": "",
-    "status": "",
+    "showDetails": "Details tonen",
+    "status": "Status",
     "useCalculations11": "Gebruik Berekeningen v1.1",
-    "useLegacyCalculations": ""
+    "useLegacyCalculations": "Verouderde berekeningen gebruiken"
   },
   "chart": {
     "comparisonChart": "Vergelijkingsgrafiek"
@@ -35,8 +35,8 @@
     "balance": "Saldo",
     "calculationUnchecked": "Berekening niet gecontroleerd vanwege aanwezigheid van dubbele feiten",
     "calculationUncheckedIncorrectVersion": "Berekeningsrelaties 1.1 niet gecontroleerd in legacy berekeningsmodus",
-    "calculationValuesDoNotMatch": "",
-    "calculationValuesMatch": "",
+    "calculationValuesDoNotMatch": "Gerapporteerde en berekende waarden komen niet overeen",
+    "calculationValuesMatch": "Gerapporteerde en berekende waarden komen overeen",
     "change": "Wijziging",
     "changeFromIn": "Van {{from}} in ",
     "changePercentageDecrease": "{{decrease}}% daling op ",
@@ -47,19 +47,19 @@
     "dimensions": "Dimensies",
     "duplicatesCount": "{{current}} van {{total}}",
     "entity": "Entiteit",
-    "factCount": "",
+    "factCount": "{{current}} van {{total}}",
     "factValue": "Feitwaarde",
-    "nestedFactSummary": "",
+    "nestedFactSummary": "{{current}} van {{total}} geneste feiten weergegeven:",
     "nonNumericFact": "niet-numeriek feit",
     "noPriorFactInThisReport": "Geen eerder feit in dit rapport",
     "noUnit": "<GEEN EENHEID>",
     "properties": "Eigenschappen",
     "scale": "Schaal",
-    "source": "",
+    "source": "Bron",
     "viewCalculationDetails": "Bekijk berekeningsdetails"
   },
   "footnotes": {
-    "content": "",
+    "content": "Inhoud",
     "footnote": "Voetnoot"
   },
   "inspector": {
@@ -72,35 +72,35 @@
     "contributor": "Bijdrager",
     "datatypes": "Typen",
     "dimensions": "Dimensietype",
-    "documentation": "",
+    "documentation": "Documentatie",
     "explicitDimension": "Expliciete dimensies",
     "fact-groups": "Secties",
     "factSearch": "Feiten zoeken",
     "factValue": "Feitwaarde",
     "footnotes": "Voetnoten",
-    "goToReference": "",
+    "goToReference": "Ga naar referentie",
     "hidden": "Verborgen",
     "hiddenFact": "Verborgen feit",
-    "highlightMenu": "",
-    "highlightTags": "",
-    "highlightUntaggedDates": "",
-    "highlightUntaggedNumbers": "",
+    "highlightMenu": "Markeringsopties",
+    "highlightTags": "Tags markeren",
+    "highlightUntaggedDates": "Niet-getagde datums markeren",
+    "highlightUntaggedNumbers": "Niet-getagde getallen markeren",
     "initializing": "Initialiseren",
     "ixbrlInspector": "iXBRL Inspecteur",
-    "labels": "",
-    "language": "",
+    "labels": "Labels",
+    "language": "Taal",
     "loadingViewer": "iXBRL Viewer laden",
     "mandatoryFacts": "Alleen verplichte feiten",
     "namespaces": "Namespaces",
-    "narrowerAnchors": "",
+    "narrowerAnchors": "Nauwere ankers",
     "negative": "Negatief",
     "nextTag": "Volgende tag",
-    "noCalculations": "",
-    "noDimensions": "",
+    "noCalculations": "Geen berekeningen",
+    "noDimensions": "Geen dimensies",
     "noFactSelected": "Geen feit geselecteerd",
     "numericOption": "Numeriek",
-    "occurrences": "",
-    "otherFacts": "",
+    "occurrences": "Voorkomens",
+    "otherFacts": "Andere feiten",
     "period": "Periode",
     "positive": "Positief",
     "previousTag": "Vorige tag",
@@ -111,38 +111,38 @@
     "searchResults": "Zoekresultaten",
     "settings": {
       "calculationMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Selecteer de berekeningsevaluatiemodus voor verouderde berekeningsrelaties",
+        "title": "Berekeningsmodus"
       },
       "colorMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Kies of het uiterlijk van Inline Viewer licht of donker moet zijn",
+        "title": "Kleurmodus van de viewer"
       },
       "plugins": {
-        "title": ""
+        "title": "Plug-ins"
       },
-      "title": "",
+      "title": "Instellingen",
       "viewerLanguage": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Selecteer de taal die u wilt gebruiken met Inline Viewer",
+        "title": "Taal van de viewer"
       }
     },
-    "settingsButton": "",
+    "settingsButton": "Instellingen",
     "showAnalysisChart": "Toon analysegrafiek",
-    "showMore": "",
+    "showMore": "Meer weergeven",
     "showTextOnly": "Toon alleen tekst",
     "summary": {
       "about": {
-        "entity": "",
-        "name": "",
-        "seeMoreReferenceData": "",
-        "title": ""
+        "entity": "Entiteit",
+        "name": "Naam",
+        "seeMoreReferenceData": "Bekijk meer {{type}} referentiegegevens",
+        "title": "Titel"
       },
       "aboutCompany": {
-        "header": ""
+        "header": "Over het bedrijf"
       },
       "downloads": {
-        "header": ""
+        "header": "Downloads"
       },
       "fact": {
         "header": "Feitsamenvatting",
@@ -150,9 +150,9 @@
         "mandatory": "Verplichte feiten",
         "total": "Totaal feiten"
       },
-      "factSource": "",
+      "factSource": "Bron van feiten",
       "includedDocuments": {
-        "header": ""
+        "header": "Opgenomen documenten"
       },
       "reportCreation": "Rapportage creatie",
       "tag": {
@@ -165,9 +165,9 @@
     },
     "summation": "Opsomming",
     "tabs": {
-      "overview": "",
-      "search": "",
-      "xbrlFacts": ""
+      "overview": "Overzicht",
+      "search": "Zoeken",
+      "xbrlFacts": "XBRL-feiten"
     },
     "targetDocument": "Doeldocument",
     "textOption": "Tekst",
@@ -179,7 +179,7 @@
     "validationSeverity": "Ernst",
     "visibility": "Zichtbaarheid",
     "visible": "Zichtbaar",
-    "widerAnchors": "",
+    "widerAnchors": "Bredere ankers",
     "xbrlGlossaryOpensInNewTab": "XBRL Woordenlijst (opent in nieuw tabblad)"
   },
   "menu": {
@@ -193,9 +193,9 @@
     "hiddenFact": "Verborgen feit",
     "matchingFactsSummary": "{{nMatches}} van {{nTotal}} feiten worden getoond",
     "noMatchFound": "Geen overeenkomst gevonden",
-    "resetFilters": "",
+    "resetFilters": "Filters resetten",
     "showMoreResults": "Toon meer resultaten",
-    "showResults": "",
+    "showResults": "Resultaten weergeven",
     "toggleFilterControls": "Filterbediening schakelen",
     "tryAgainDifferentKeywords": "Probeer het opnieuw met andere zoekwoorden"
   },
@@ -204,7 +204,7 @@
   },
   "viewer": {
     "ixbrlDocumentView": "iXBRL-documentweergave",
-    "zoomIn": "",
-    "zoomOut": ""
+    "zoomIn": "inzoomen",
+    "zoomOut": "uitzoomen"
   }
 }

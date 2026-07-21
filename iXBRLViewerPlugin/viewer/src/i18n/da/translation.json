@@ -1,21 +1,21 @@
 {
   "calculation": {
     "calculated-total": "Beregnet",
-    "calculationIsConsistent": "",
-    "calculationIsInconsistent": "",
+    "calculationIsConsistent": "Beregningen er konsistent",
+    "calculationIsInconsistent": "Beregningen er inkonsistent",
     "concept": "Begreb",
     "consistent-duplicate-facts-present": "{{nfacts}} konsistente dublet-fakta til stede",
     "does-not-bind": "Beregning binder ikke",
     "inconsistent-duplicate-facts-present": "{{nfacts}} inkonsistente dublet-fakta til stede",
     "maximum": "Maksimum",
     "minimum": "Minimum",
-    "notReported": "",
+    "notReported": "ikke indberettet",
     "reported-total": "Rapporteret",
     "reported-value": "Rapporteret værdi",
-    "showDetails": "",
-    "status": "",
+    "showDetails": "Vis detaljer",
+    "status": "Status",
     "useCalculations11": "Brug Beregninger v1.1",
-    "useLegacyCalculations": ""
+    "useLegacyCalculations": "Brug ældre beregninger"
   },
   "chart": {
     "comparisonChart": "Sammenligningsdiagram"
@@ -35,8 +35,8 @@
     "balance": "Balance",
     "calculationUnchecked": "Beregning ikke kontrolleret pga. dublet-fakta",
     "calculationUncheckedIncorrectVersion": "Beregning 1.1 relationer ikke kontrolleret i legacy-beregningstilstand",
-    "calculationValuesDoNotMatch": "",
-    "calculationValuesMatch": "",
+    "calculationValuesDoNotMatch": "Indberettede og beregnede værdier stemmer ikke overens",
+    "calculationValuesMatch": "Indberettede og beregnede værdier stemmer overens",
     "change": "Ændring",
     "changeFromIn": "Fra {{from}} i ",
     "changePercentageDecrease": "{{decrease}}% fald på ",
@@ -47,19 +47,19 @@
     "dimensions": "Dimensioner",
     "duplicatesCount": "{{current}} af {{total}}",
     "entity": "Enhed",
-    "factCount": "",
+    "factCount": "{{current}} af {{total}}",
     "factValue": "Faktaværdi",
-    "nestedFactSummary": "",
+    "nestedFactSummary": "Viser {{current}} af {{total}} indlejrede fakta:",
     "nonNumericFact": "ikke-numerisk faktum",
     "noPriorFactInThisReport": "Intet tidligere faktum i denne rapport",
     "noUnit": "<INGENENHED>",
     "properties": "Egenskaber",
     "scale": "Skala",
-    "source": "",
+    "source": "Kilde",
     "viewCalculationDetails": "Se beregningsdetaljer"
   },
   "footnotes": {
-    "content": "",
+    "content": "Indhold",
     "footnote": "Fodnote"
   },
   "inspector": {
@@ -72,35 +72,35 @@
     "contributor": "Bidragyder",
     "datatypes": "Typer",
     "dimensions": "Dimensionstype",
-    "documentation": "",
+    "documentation": "Dokumentation",
     "explicitDimension": "Eksplícitte dimensioner",
     "fact-groups": "Sektioner",
     "factSearch": "Faktasøgning",
     "factValue": "Faktaværdi",
     "footnotes": "Fodnoter",
-    "goToReference": "",
+    "goToReference": "Gå til reference",
     "hidden": "Skjult",
     "hiddenFact": "Skjult faktum",
-    "highlightMenu": "",
-    "highlightTags": "",
-    "highlightUntaggedDates": "",
-    "highlightUntaggedNumbers": "",
+    "highlightMenu": "Fremhævningsindstillinger",
+    "highlightTags": "Fremhæv tags",
+    "highlightUntaggedDates": "Fremhæv utaggede datoer",
+    "highlightUntaggedNumbers": "Fremhæv utaggede tal",
     "initializing": "Initialiserer",
     "ixbrlInspector": "iXBRL Inspektør",
-    "labels": "",
-    "language": "",
+    "labels": "Etiketter",
+    "language": "Sprog",
     "loadingViewer": "Indlæser iXBRL Viewer",
     "mandatoryFacts": "Kun obligatoriske fakta",
     "namespaces": "Navnerum",
-    "narrowerAnchors": "",
+    "narrowerAnchors": "Smallere ankre",
     "negative": "Negativ",
     "nextTag": "Næste tag",
-    "noCalculations": "",
-    "noDimensions": "",
+    "noCalculations": "Ingen beregninger",
+    "noDimensions": "Ingen dimensioner",
     "noFactSelected": "Intet faktum valgt",
     "numericOption": "Numerisk",
-    "occurrences": "",
-    "otherFacts": "",
+    "occurrences": "Forekomster",
+    "otherFacts": "Andre fakta",
     "period": "Periode",
     "positive": "Positiv",
     "previousTag": "Forrige tag",
@@ -111,38 +111,38 @@
     "searchResults": "Søgeresultater",
     "settings": {
       "calculationMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Vælg beregningsevalueringstilstand for ældre beregningsrelationer",
+        "title": "Beregningstilstand"
       },
       "colorMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Vælg om Inline Viewers udseende skal være lyst eller mørkt",
+        "title": "Fremviserens farvetilstand"
       },
       "plugins": {
-        "title": ""
+        "title": "Plugins"
       },
-      "title": "",
+      "title": "Indstillinger",
       "viewerLanguage": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Vælg det sprog, du vil bruge med Inline Viewer",
+        "title": "Fremviserens sprog"
       }
     },
-    "settingsButton": "",
+    "settingsButton": "Indstillinger",
     "showAnalysisChart": "Vis analyse diagram",
-    "showMore": "",
+    "showMore": "Vis mere",
     "showTextOnly": "Vis kun tekst",
     "summary": {
       "about": {
-        "entity": "",
-        "name": "",
-        "seeMoreReferenceData": "",
-        "title": ""
+        "entity": "Enhed",
+        "name": "Navn",
+        "seeMoreReferenceData": "Se mere {{type}} referencedata",
+        "title": "Titel"
       },
       "aboutCompany": {
-        "header": ""
+        "header": "Om virksomheden"
       },
       "downloads": {
-        "header": ""
+        "header": "Downloads"
       },
       "fact": {
         "header": "Faktaoversigt",
@@ -150,9 +150,9 @@
         "mandatory": "Obligatoriske fakta",
         "total": "Totale fakta"
       },
-      "factSource": "",
+      "factSource": "Faktakilde",
       "includedDocuments": {
-        "header": ""
+        "header": "Inkluderede dokumenter"
       },
       "reportCreation": "Rapportoprettelse",
       "tag": {
@@ -165,9 +165,9 @@
     },
     "summation": "Opsummering",
     "tabs": {
-      "overview": "",
-      "search": "",
-      "xbrlFacts": ""
+      "overview": "Oversigt",
+      "search": "Søg",
+      "xbrlFacts": "XBRL-fakta"
     },
     "targetDocument": "Måldokument",
     "textOption": "Tekst",
@@ -179,7 +179,7 @@
     "validationSeverity": "Alvorlighed",
     "visibility": "Synlighed",
     "visible": "Synlig",
-    "widerAnchors": "",
+    "widerAnchors": "Bredere ankre",
     "xbrlGlossaryOpensInNewTab": "XBRL-ordbog (åbner i ny fane)"
   },
   "menu": {
@@ -193,9 +193,9 @@
     "hiddenFact": "Skjult faktum",
     "matchingFactsSummary": "Viser {{nMatches}} af {{nTotal}} fakta",
     "noMatchFound": "Ingen match fundet",
-    "resetFilters": "",
+    "resetFilters": "Nulstil filtre",
     "showMoreResults": "Vis flere resultater",
-    "showResults": "",
+    "showResults": "Vis resultater",
     "toggleFilterControls": "Skift filterkontroller",
     "tryAgainDifferentKeywords": "Prøv igen med andre søgeord"
   },
@@ -204,7 +204,7 @@
   },
   "viewer": {
     "ixbrlDocumentView": "iXBRL dokumentvisning",
-    "zoomIn": "",
-    "zoomOut": ""
+    "zoomIn": "zoom ind",
+    "zoomOut": "zoom ud"
   }
 }

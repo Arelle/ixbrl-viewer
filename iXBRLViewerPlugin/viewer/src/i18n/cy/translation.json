@@ -1,24 +1,24 @@
 {
   "calculation": {
     "calculated-total": "Wedi'i gyfrifo",
-    "calculationIsConsistent": "",
-    "calculationIsInconsistent": "",
+    "calculationIsConsistent": "Mae'r cyfrifiad yn gyson",
+    "calculationIsInconsistent": "Nid yw'r cyfrifiad yn gyson",
     "concept": "Cysyniad",
     "consistent-duplicate-facts-present": "{{nfacts}} ffeithiau dyblyg cyson yn bresennol",
     "does-not-bind": "Nid yw cyfrifo yn rhwymo",
     "inconsistent-duplicate-facts-present": "{{nfacts}} ffeithiau dyblyg anghyson yn bresennol",
     "maximum": "Uchafswm",
     "minimum": "Isafswm",
-    "notReported": "",
+    "notReported": "heb ei adrodd",
     "reported-total": "Adroddwyd",
     "reported-value": "Gwerth a adroddwyd",
-    "showDetails": "",
-    "status": "",
+    "showDetails": "Dangos manylion",
+    "status": "Statws",
     "useCalculations11": "Defnyddiwch Gyfrifiadau v1.1",
-    "useLegacyCalculations": ""
+    "useLegacyCalculations": "Defnyddio hen gyfrifiadau"
   },
   "chart": {
-    "comparisonChart": ""
+    "comparisonChart": "Siart gymharu"
   },
   "common": {
     "accuracyInfinite": "Anfeidrol drachywiredd",
@@ -28,15 +28,15 @@
     "unspecified": "Amhenodol"
   },
   "dialog": {
-    "close": ""
+    "close": "cau"
   },
   "factDetails": {
     "accuracy": "Cywirdeb",
-    "balance": "",
+    "balance": "Balans",
     "calculationUnchecked": "Nid yw'r cyfrifiad wedi'i wirio oherwydd presenoldeb ffeithiau dyblyg",
     "calculationUncheckedIncorrectVersion": "Cyfrifiad 1.1 perthnasau heb eu gwirio yn y modd cyfrifo etifeddiaeth",
-    "calculationValuesDoNotMatch": "",
-    "calculationValuesMatch": "",
+    "calculationValuesDoNotMatch": "Nid yw'r gwerthoedd a adroddwyd a'r gwerthoedd a gyfrifwyd yn cyfateb",
+    "calculationValuesMatch": "Mae'r gwerthoedd a adroddwyd a'r gwerthoedd a gyfrifwyd yn cyfateb",
     "change": "Newid",
     "changeFromIn": "Oddiwrth {{from}} mewn ",
     "changePercentageDecrease": "{{decrease}}gostyngiad % ar ",
@@ -47,19 +47,19 @@
     "dimensions": "Dimensiynau",
     "duplicatesCount": "{{current}} o {{total}}",
     "entity": "Endid",
-    "factCount": "",
+    "factCount": "{{current}} o {{total}}",
     "factValue": "Gwerth Ffaith",
-    "nestedFactSummary": "",
+    "nestedFactSummary": "Yn dangos {{current}} o {{total}} ffaith nythog:",
     "nonNumericFact": "ffaith nad yw'n rhifol",
     "noPriorFactInThisReport": "Dim ffaith flaenorol yn yr adroddiad hwn",
     "noUnit": "<NOUNIT>",
     "properties": "Priodweddau",
     "scale": "Graddfa",
-    "source": "",
+    "source": "Ffynhonnell",
     "viewCalculationDetails": "Gweld manylion y cyfrifiad"
   },
   "footnotes": {
-    "content": "",
+    "content": "Cynnwys",
     "footnote": "Troednodyn"
   },
   "inspector": {
@@ -72,77 +72,77 @@
     "contributor": "Cyfranwr",
     "datatypes": "Mathau data",
     "dimensions": "Math Dimensiwn",
-    "documentation": "",
+    "documentation": "Dogfennaeth",
     "explicitDimension": "Dimensiynau Penodol",
     "fact-groups": "Adrannau",
     "factSearch": "Chwiliad Ffeithiau",
     "factValue": "Gwerth Ffaith",
     "footnotes": "Troednodiadau",
-    "goToReference": "",
+    "goToReference": "Ewch i'r cyfeirnod",
     "hidden": "Gudd",
     "hiddenFact": "Ffaith Gudd",
-    "highlightMenu": "",
-    "highlightTags": "",
-    "highlightUntaggedDates": "",
-    "highlightUntaggedNumbers": "",
+    "highlightMenu": "Opsiynau amlygu",
+    "highlightTags": "Amlygu tagiau",
+    "highlightUntaggedDates": "Amlygu dyddiadau heb dagiau",
+    "highlightUntaggedNumbers": "Amlygu rhifau heb dagiau",
     "initializing": "Cychwyn",
-    "ixbrlInspector": "",
-    "labels": "",
-    "language": "",
+    "ixbrlInspector": "Arolygydd iXBRL",
+    "labels": "Labeli",
+    "language": "Iaith",
     "loadingViewer": "Wrthi'n llwytho Gwyliwr iXBRL",
     "mandatoryFacts": "Dim ond Ffeithiau Gorfodol",
     "namespaces": "Gofodau Enw",
-    "narrowerAnchors": "",
+    "narrowerAnchors": "Angorion culach",
     "negative": "Negyddol",
     "nextTag": "Tag nesaf",
-    "noCalculations": "",
-    "noDimensions": "",
+    "noCalculations": "Dim Cyfrifiadau",
+    "noDimensions": "Dim Dimensiynau",
     "noFactSelected": "Dim Ffaith wedi'i Dewis",
     "numericOption": "Rhifol",
-    "occurrences": "",
-    "otherFacts": "",
+    "occurrences": "Digwyddiadau",
+    "otherFacts": "Ffeithiau Eraill",
     "period": "Cyfnod",
     "positive": "Cadarnhaol",
     "previousTag": "Tag blaenorol",
     "printDocument": "Argraffu Dogfen",
     "references": "Cyfeiriadau",
     "scales": "Graddfeydd",
-    "searchReport": "",
-    "searchResults": "",
+    "searchReport": "Chwilio Adroddiad iXBRL",
+    "searchResults": "Canlyniadau Chwilio",
     "settings": {
       "calculationMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Dewiswch y modd gwerthuso cyfrifo ar gyfer perthnasoedd cyfrifo etifeddol",
+        "title": "Modd cyfrifo"
       },
       "colorMode": {
-        "documentation": "",
-        "title": ""
+        "documentation": "Dewiswch a ddylai golwg y Gwelydd Mewnlin fod yn olau neu'n dywyll",
+        "title": "Modd lliw'r gwelydd"
       },
       "plugins": {
-        "title": ""
+        "title": "Ategion"
       },
-      "title": "",
+      "title": "Gosodiadau",
       "viewerLanguage": {
-        "documentation": "",
+        "documentation": "Dewiswch yr iaith yr hoffech ei defnyddio gyda'r Gwelydd Mewnlin",
         "title": "Iaith Cais"
       }
     },
-    "settingsButton": "",
-    "showAnalysisChart": "",
-    "showMore": "",
+    "settingsButton": "Gosodiadau",
+    "showAnalysisChart": "Dangos siart ddadansoddi",
+    "showMore": "Dangos mwy",
     "showTextOnly": "Dangos testun yn unig",
     "summary": {
       "about": {
-        "entity": "",
-        "name": "",
-        "seeMoreReferenceData": "",
-        "title": ""
+        "entity": "Endid",
+        "name": "Enw",
+        "seeMoreReferenceData": "Gweld mwy o ddata cyfeirio {{type}}",
+        "title": "Teitl"
       },
       "aboutCompany": {
-        "header": ""
+        "header": "Am y cwmni"
       },
       "downloads": {
-        "header": ""
+        "header": "Llwythi i lawr"
       },
       "fact": {
         "header": "Crynodeb o Ffeithiau",
@@ -150,9 +150,9 @@
         "mandatory": "Ffeithiau Gorfodol",
         "total": "Cyfanswm y Ffeithiau"
       },
-      "factSource": "",
+      "factSource": "Ffynhonnell ffeithiau",
       "includedDocuments": {
-        "header": ""
+        "header": "Dogfennau wedi'u cynnwys"
       },
       "reportCreation": "Creu Adroddiad",
       "tag": {
@@ -165,9 +165,9 @@
     },
     "summation": "Crynhoad",
     "tabs": {
-      "overview": "",
-      "search": "",
-      "xbrlFacts": ""
+      "overview": "Trosolwg",
+      "search": "Chwilio",
+      "xbrlFacts": "Ffeithiau XBRL"
     },
     "targetDocument": "Dogfen Darged",
     "textOption": "Testun",
@@ -179,7 +179,7 @@
     "validationSeverity": "Difrifoldeb",
     "visibility": "Gwelededd",
     "visible": "Gweladwy",
-    "widerAnchors": "",
+    "widerAnchors": "Angorion ehangach",
     "xbrlGlossaryOpensInNewTab": "Geirfa XBRL (yn agor mewn tab newydd)"
   },
   "menu": {
@@ -191,20 +191,20 @@
     "concealedFact": "Ffaith guddiedig",
     "default": "rhagosodedig",
     "hiddenFact": "Ffaith gudd",
-    "matchingFactsSummary": "",
+    "matchingFactsSummary": "Yn dangos {{nMatches}} o {{nTotal}} ffaith",
     "noMatchFound": "Heb ganfod cyfatebiaeth",
-    "resetFilters": "",
+    "resetFilters": "Ailosod hidlwyr",
     "showMoreResults": "Dangos mwy o ganlyniadau",
-    "showResults": "",
-    "toggleFilterControls": "",
+    "showResults": "Dangos canlyniadau",
+    "toggleFilterControls": "Toglo rheolyddion hidlo",
     "tryAgainDifferentKeywords": "Ceisiwch eto gyda geiriau allweddol gwahanol"
   },
   "toolbar": {
     "homePage": "Hafan"
   },
   "viewer": {
-    "ixbrlDocumentView": "",
-    "zoomIn": "",
-    "zoomOut": ""
+    "ixbrlDocumentView": "Golwg Dogfen iXBRL",
+    "zoomIn": "chwyddo i mewn",
+    "zoomOut": "chwyddo allan"
   }
 }

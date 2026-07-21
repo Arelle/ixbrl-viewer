@@ -82,7 +82,7 @@ export class DocumentOutline {
         // Roots are abstract so no need to check for concepts with outgoing
         // relationships only.
 
-        if (this.report.getParentRelationshipsInGroup(fact.conceptName(), "pres", elr).length == 0) {
+        if (this.report.getParentRelationshipsInGroup(fact.conceptName(), "pres", elr).length === 0) {
             return false;
         }
         const fd = fact.dimensions();

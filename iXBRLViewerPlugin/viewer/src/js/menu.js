@@ -28,7 +28,7 @@ export class Menu {
     }
 
     close() {
-        if (this.type == "dropdown") {
+        if (this.type === "dropdown") {
             this._elt.find(".content-container").hide();
         }
     }

@@ -190,12 +190,10 @@
     "matchingFactsSummary": "",
     "noMatchFound": "No se encontró ninguna coincidencia",
     "resetFilters": "",
-    "selected": "seleccionados",
     "showMoreResults": "Mostrar más resultados",
     "showResults": "",
     "toggleFilterControls": "",
-    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
-    "viewFact": ""
+    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },
   "toolbar": {
     "homePage": "Inicio"

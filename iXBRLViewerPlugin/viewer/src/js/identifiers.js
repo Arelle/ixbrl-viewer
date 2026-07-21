@@ -27,10 +27,6 @@ export class Identifiers {
         return undefined;
     }
 
-    static identifierNameForFact(fact) {
-        return identifierName(fact.identifier());
-    }
-
     static readableName(identifier) {
         const data = schemes[identifier.namespace];
         if (data !== undefined) {

@@ -190,12 +190,10 @@
     "matchingFactsSummary": "Viser {{nMatches}} af {{nTotal}} fakta",
     "noMatchFound": "Ingen match fundet",
     "resetFilters": "",
-    "selected": "valgt",
     "showMoreResults": "Vis flere resultater",
     "showResults": "",
     "toggleFilterControls": "Skift filterkontroller",
-    "tryAgainDifferentKeywords": "Prøv igen med andre søgeord",
-    "viewFact": "Se faktum"
+    "tryAgainDifferentKeywords": "Prøv igen med andre søgeord"
   },
   "toolbar": {
     "homePage": "Hjem"

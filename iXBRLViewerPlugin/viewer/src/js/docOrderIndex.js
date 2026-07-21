@@ -13,7 +13,7 @@ export class DocOrderIndex {
         return this._index.findIndex(n => n.vuid === vuid);
     }
 
-    length(vuid) {
+    length() {
         return this._index.length;
     }
 

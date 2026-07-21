@@ -190,12 +190,10 @@
     "matchingFactsSummary": "",
     "noMatchFound": "Heb ganfod cyfatebiaeth",
     "resetFilters": "",
-    "selected": "dethol",
     "showMoreResults": "Dangos mwy o ganlyniadau",
     "showResults": "",
     "toggleFilterControls": "",
-    "tryAgainDifferentKeywords": "Ceisiwch eto gyda geiriau allweddol gwahanol",
-    "viewFact": ""
+    "tryAgainDifferentKeywords": "Ceisiwch eto gyda geiriau allweddol gwahanol"
   },
   "toolbar": {
     "homePage": "Hafan"

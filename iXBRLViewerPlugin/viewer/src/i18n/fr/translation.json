@@ -190,12 +190,10 @@
     "matchingFactsSummary": "Affichage de {{nMatches}} faits sur {{nTotal}}",
     "noMatchFound": "Aucune correspondance trouvée",
     "resetFilters": "",
-    "selected": "sélectionné",
     "showMoreResults": "Afficher plus de résultats",
     "showResults": "",
     "toggleFilterControls": "Basculer les contrôles de filtre",
-    "tryAgainDifferentKeywords": "Essayez avec des mots-clés différents",
-    "viewFact": "Voir le fait"
+    "tryAgainDifferentKeywords": "Essayez avec des mots-clés différents"
   },
   "toolbar": {
     "homePage": "Accueil"

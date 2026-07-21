@@ -190,12 +190,10 @@
     "matchingFactsSummary": "{{nMatches}} van {{nTotal}} feiten worden getoond",
     "noMatchFound": "Geen overeenkomst gevonden",
     "resetFilters": "",
-    "selected": "geselecteerd",
     "showMoreResults": "Toon meer resultaten",
     "showResults": "",
     "toggleFilterControls": "Filterbediening schakelen",
-    "tryAgainDifferentKeywords": "Probeer het opnieuw met andere zoekwoorden",
-    "viewFact": "Feit bekijken"
+    "tryAgainDifferentKeywords": "Probeer het opnieuw met andere zoekwoorden"
   },
   "toolbar": {
     "homePage": "Startpagina"

@@ -168,7 +168,6 @@ export class Inspector {
                 inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
                 inspector.outline = new ReportSetOutline(reportSet);
-                inspector.createOutline();
                 inspector.initializeZoom();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
@@ -607,14 +606,6 @@ export class Inspector {
             .on("mouseenter", () => this._viewer.linkedHighlightFact(f))
             .on("mouseleave", () => this._viewer.clearLinkedHighlightFact(f))
             .data('ivid', f.vuid);
-      /*
-        $('<button class="select-icon"></button>')
-            .attr("title", i18next.t("search.viewFact"))
-            .on("click", () => {
-                this.selectItem(f.vuid);
-            })
-            .appendTo(row)
-            */
         this._setLabelWithLang($('<div class="title"></div>'), f.getLabelOrNameAndLang("std"))
             .on("click", () => this.selectItem(f.vuid))
             .appendTo(row);
@@ -805,10 +796,6 @@ export class Inspector {
         $(".search-filters .close").on("click", () => $("#ixv").removeClass('show-filters'));
         $(".search-filters button.search-apply-filters").on("click", () => $("#ixv").removeClass('show-filters'));
         $(".search-filters button.search-reset-filters").on("click", () => this.resetSearchFilters());
-        $(".search-controls .search-filters .reset-multiselect").on("click", function () {
-            $(this).siblings().children('select option:selected').prop('selected', false);
-            inspector.search();
-        });
     }
 
     _getScalesOptions() {
@@ -878,23 +865,6 @@ export class Inspector {
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));
-        }
-        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
-          this.updateMultiSelectSubheader(name);
-        }
-    }
-
-    updateMultiSelectSubheader(id) {
-        const subheader = $(`#${id} .collapsible-subheader`);
-        const selectedOptions = $(`#${id} select option:selected`);
-        if (selectedOptions.length === 1) {
-            subheader.text(` ${selectedOptions.text()}`);
-        }
-        else if (selectedOptions.length > 0) {
-            const totalOptions = $(`#${id} select option`).length;
-            subheader.text(` (${selectedOptions.length}/${totalOptions} ${i18next.t("search.selected")})`)
-        } else {
-            subheader.empty();
         }
     }
 
@@ -1277,27 +1247,6 @@ export class Inspector {
             reportCreationContent.hide();
         }
     };
-
-    createOutline() {
-        if (this.outline.hasOutline()) {
-            $('.outline .no-outline-overlay').hide();
-            $('.outline .body').empty();
-            const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
-            for (const group of this.outline.sortedSections()) {
-                $('<button class="fact-list-item"></button>')
-                    .text(group.report.getRoleLabelOrURI(group.elr))
-                    .on("click", () => this.selectItem(group.firstFact.vuid))
-                    .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
-                    .on("mousedown", (e) => {
-                        // Prevent text selection by double click
-                        if (e.detail > 1) { 
-                            e.preventDefault() 
-                        } 
-                    })
-                    .appendTo(container);
-            }
-        }
-    }
 
     updateOutline(cf) {
         $('.fact-groups').empty();
@@ -1953,7 +1902,6 @@ export class Inspector {
 
     setDocumentLanguage(lang) {
         this._viewerOptions.language = lang;
-        this.createOutline();
         this.update();
     }
 

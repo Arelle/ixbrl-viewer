@@ -190,12 +190,10 @@
     "matchingFactsSummary": "Показано {{nMatches}} з {{nTotal}} фактів",
     "noMatchFound": "Збігів не знайдено",
     "resetFilters": "",
-    "selected": "вибрано",
     "showMoreResults": "Показати більше результатів",
     "showResults": "",
     "toggleFilterControls": "Перемкнути фільтри",
-    "tryAgainDifferentKeywords": "Спробуйте інші ключові слова",
-    "viewFact": "Переглянути факт"
+    "tryAgainDifferentKeywords": "Спробуйте інші ключові слова"
   },
   "toolbar": {
     "homePage": "Головна"

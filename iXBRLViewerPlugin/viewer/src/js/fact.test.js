@@ -249,7 +249,9 @@ describe("Simple fact properties", () => {
         expect(f.isNumeric()).toBeFalsy();
         expect(f.decimals()).toBeUndefined();
         expect(f.isMonetaryValue()).toBeFalsy();
-        expect(f.readableValue()).toEqual("Member One, <no label>");
+        jest.spyOn(console, 'log').withImplementation(() => {}, () => {
+            expect(f.readableValue()).toEqual("Member One, <no label>");
+        });
         expect(f.isInvalidIXValue()).toBeFalsy();
 
         f.f.v = "eg:Member1 eg:UnlabelledMember";

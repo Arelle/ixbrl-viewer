@@ -318,7 +318,9 @@ describe("Handle message", () => {
         const event = generateEvent({
             task: "INVALID_TASK",
         });
-        insp.handleMessage(event);
+        jest.spyOn(console, 'log').withImplementation(() => {}, () => {
+            insp.handleMessage(event);
+        });
         expect(mockSelect).not.toHaveBeenCalled();
     })
     test("Invalid JSON", () => {

@@ -224,23 +224,24 @@ describe("Search calculation filter", () => {
         const results = reportSearch.search(spec).map(r => r.fact.localId()).sort();
         expect(results).toEqual(['item1', 'item2', 'summation']);
     });
-    const emptyReport = testReport(
-            {
-                "concepts": {
-                    ...createSimpleConcept("test:Concept", "Concept"),
-                },
-                "facts": {
-                    ...createSimpleFact("fact", "test:Fact"),
-                },
-            },
-    )
-    const emptyReportSearch = getReportSearch(emptyReport);
-
     test("Calculations filter works on empty report", () => {
-        const spec = testSearchSpec();
-        spec.calculationsFilter = ['summation', 'contributor'];
-        const results = emptyReportSearch.search(spec).map(r => r.fact.localId()).sort();
-        expect(results).toEqual([]);
+        const emptyReport = testReport(
+                {
+                    "concepts": {
+                        ...createSimpleConcept("test:Concept", "Concept"),
+                    },
+                    "facts": {
+                        ...createSimpleFact("fact", "test:Fact"),
+                    },
+                },
+        );
+        jest.spyOn(console, 'log').withImplementation(() => {}, () => {
+            const emptyReportSearch = getReportSearch(emptyReport);
+            const spec = testSearchSpec();
+            spec.calculationsFilter = ['summation', 'contributor'];
+            const results = emptyReportSearch.search(spec).map(r => r.fact.localId()).sort();
+            expect(results).toEqual([]);
+        });
     });
 });
 
@@ -431,23 +432,24 @@ describe("Search dimension type filter", () => {
         expect(results).toEqual(['explicit', 'explicit2', 'explicitAndTyped', 'explicitAndTyped2', 'typed', 'typed2']);
     });
 
-    const emptyReport = testReport(
-            {
-                "concepts": {
-                    ...createSimpleConcept("test:Concept", "Concept"),
-                },
-                "facts": {
-                    ...createSimpleFact("fact", "test:Fact"),
-                },
-            },
-    )
-    const emptyReportSearch = getReportSearch(emptyReport);
-
     test("Dimension filter works on empty report", () => {
-        const spec = testSearchSpec();
-        spec.dimensionTypeFilter = ['explicit'];
-        const results = emptyReportSearch.search(spec).map(r => r.fact.localId()).sort();
-        expect(results).toEqual([]);
+        const emptyReport = testReport(
+                {
+                    "concepts": {
+                        ...createSimpleConcept("test:Concept", "Concept"),
+                    },
+                    "facts": {
+                        ...createSimpleFact("fact", "test:Fact"),
+                    },
+                },
+        );
+        jest.spyOn(console, 'log').withImplementation(() => {}, () => {
+            const emptyReportSearch = getReportSearch(emptyReport);
+            const spec = testSearchSpec();
+            spec.dimensionTypeFilter = ['explicit'];
+            const results = emptyReportSearch.search(spec).map(r => r.fact.localId()).sort();
+            expect(results).toEqual([]);
+        });
     });
 });
 

@@ -1,15 +1,21 @@
 {
   "calculation": {
     "calculated-total": "",
+    "calculationIsConsistent": "",
+    "calculationIsInconsistent": "",
     "concept": "",
     "consistent-duplicate-facts-present": "",
     "does-not-bind": "",
     "inconsistent-duplicate-facts-present": "",
     "maximum": "",
     "minimum": "",
+    "notReported": "",
     "reported-total": "",
     "reported-value": "",
-    "useCalculations11": ""
+    "showDetails": "",
+    "status": "",
+    "useCalculations11": "",
+    "useLegacyCalculations": ""
   },
   "chart": {
     "comparisonChart": ""
@@ -27,10 +33,10 @@
   "factDetails": {
     "accuracy": "Precisión",
     "balance": "",
-    "calculationIsConsistent": "",
-    "calculationIsInconsistent": "",
     "calculationUnchecked": "",
     "calculationUncheckedIncorrectVersion": "",
+    "calculationValuesDoNotMatch": "",
+    "calculationValuesMatch": "",
     "change": "Cambio",
     "changeFromIn": "Anteriormente {{from}} en ",
     "changePercentageDecrease": "{{decrease}}% menos que en ",
@@ -41,15 +47,19 @@
     "dimensions": "Dimensiones",
     "duplicatesCount": "{{current}} de {{total}}",
     "entity": "Entidad",
+    "factCount": "",
     "factValue": "Valor del hecho",
+    "nestedFactSummary": "",
     "nonNumericFact": "",
     "noPriorFactInThisReport": "No hay un hecho previo",
     "noUnit": "Sin unidad",
     "properties": "Características",
     "scale": "Escala",
+    "source": "",
     "viewCalculationDetails": ""
   },
   "footnotes": {
+    "content": "",
     "footnote": "Nota al pie de página"
   },
   "inspector": {
@@ -62,61 +72,82 @@
     "contributor": "",
     "datatypes": "Tipos de datos",
     "dimensions": "Tipo de dimensión",
-    "documentOutline": "Esquema del documento",
-    "documentSummary": "Resumen del documento",
+    "documentation": "",
     "explicitDimension": "",
     "fact-groups": "",
-    "factProperties": "Propiedades del hecho",
     "factSearch": "Búsqueda de hechos",
     "factValue": "",
-    "footnoteProperties": "Propiedades de la nota al pie de página",
     "footnotes": "Notas al pie de página",
+    "goToReference": "",
     "hidden": "Oculto",
     "hiddenFact": "Hecho oculto",
-    "highlight": "Destacar",
+    "highlightTags": "",
+    "highlightUntaggedDates": "",
+    "highlightUntaggedNumbers": "",
     "initializing": "",
     "ixbrlInspector": "",
     "labels": "",
+    "language": "",
     "loadingViewer": "Preparando el visor iXBRL",
     "mandatoryFacts": "Sólo hechos obligatorios",
     "namespaces": "Espacios de nombres",
-    "narrowerAnchor": "Anclaje angosto",
+    "narrowerAnchors": "",
     "negative": "Negativo",
     "nextTag": "",
+    "noCalculations": "",
+    "noDimensions": "",
     "noFactSelected": "Ningún hecho seleccionado",
     "numericOption": "Numérico",
-    "outlineUnavailable": "",
+    "occurrences": "",
+    "otherFacts": "",
     "period": "Periodo",
     "positive": "Positivo",
     "previousTag": "",
     "printDocument": "",
     "references": "Referencias",
-    "reset": "Limpiar",
     "scales": "Escalas",
-    "search": "Buscar",
     "searchReport": "",
     "searchResults": "",
-    "searchTitle": "Búsqueda de hechos",
-    "settingsMenu": "",
+    "settings": {
+      "calculationMode": {
+        "documentation": "",
+        "title": ""
+      },
+      "colorMode": {
+        "documentation": "",
+        "title": ""
+      },
+      "title": "",
+      "viewerLanguage": {
+        "documentation": "",
+        "title": ""
+      }
+    },
     "showAnalysisChart": "",
+    "showMore": "",
     "showTextOnly": "",
     "summary": {
+      "about": {
+        "entity": "",
+        "name": "",
+        "seeMoreReferenceData": "",
+        "title": ""
+      },
+      "aboutCompany": {
+        "header": ""
+      },
+      "downloads": {
+        "header": ""
+      },
       "fact": {
         "header": "Resumen de los hechos",
         "hidden": "Hechos ocultos",
         "mandatory": "Hechos obligatorios",
         "total": "Hechos totales"
       },
-      "file": {
-        "calculations": "",
-        "definitions": "",
-        "header": "Resumen del archivo",
-        "inline": "Documentos en línea",
-        "labels": "",
-        "other": "",
-        "presentation": "",
-        "references": "",
-        "schemas": ""
+      "factSource": "",
+      "includedDocuments": {
+        "header": ""
       },
       "reportCreation": "",
       "tag": {
@@ -124,12 +155,15 @@
         "colDimensions": "Dimensiones",
         "colMembers": "Miembros",
         "colNamespace": "Espacio de nombres",
-        "colTotal": "Total",
-        "header": "Resumen de la etiqueta",
         "rowTotal": "Total"
       }
     },
     "summation": "",
+    "tabs": {
+      "overview": "",
+      "search": "",
+      "xbrlFacts": ""
+    },
     "targetDocument": "",
     "textOption": "Texto",
     "typedDimensions": "",
@@ -140,40 +174,34 @@
     "validationSeverity": "",
     "visibility": "Visibilidad",
     "visible": "Visible",
-    "widerAnchor": "Anclaje amplio",
+    "widerAnchors": "",
     "xbrlGlossaryOpensInNewTab": "Glosario XBRL (se abre en una pestaña nueva)"
   },
   "menu": {
-    "actions": "Comportamientos",
-    "applicationLanguage": "Idioma de Aplicación",
     "contactUs": "Contacta con nosotros",
-    "documentLanguage": "Idioma del Documento",
-    "help": "Ayuda",
-    "options": "Opciones",
     "survey": "Encuesta",
     "userGuide": "Guía del Usuario"
   },
   "search": {
     "concealedFact": "",
-    "dataTypeConflictWarning": "",
     "default": "",
-    "filter": "Filtro",
     "hiddenFact": "Hecho oculto",
     "matchingFactsSummary": "",
     "noMatchFound": "No se encontró ninguna coincidencia",
-    "reset": "",
+    "resetFilters": "",
     "selected": "seleccionados",
     "showMoreResults": "Mostrar más resultados",
+    "showResults": "",
     "toggleFilterControls": "",
     "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
     "viewFact": ""
   },
   "toolbar": {
-    "homePage": "Inicio",
-    "toggleDarkMode": "Alternar modo oscuro",
-    "xbrlElements": "Elementos XBRL"
+    "homePage": "Inicio"
   },
   "viewer": {
-    "ixbrlDocumentView": ""
+    "ixbrlDocumentView": "",
+    "zoomIn": "",
+    "zoomOut": ""
   }
 }

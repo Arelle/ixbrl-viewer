@@ -1,15 +1,21 @@
 {
   "calculation": {
     "calculated-total": "Розраховано",
+    "calculationIsConsistent": "",
+    "calculationIsInconsistent": "",
     "concept": "Концепція",
     "consistent-duplicate-facts-present": "{{nfacts}} послідовних дублікованих фактів присутні",
     "does-not-bind": "Розрахунок не зв'язується",
     "inconsistent-duplicate-facts-present": "{{nfacts}} непослідовних дублікованих фактів присутні",
     "maximum": "Максимум",
     "minimum": "Мінімум",
+    "notReported": "",
     "reported-total": "Звітний",
     "reported-value": "Звітне значення",
-    "useCalculations11": "Використовувати розрахунки v1.1"
+    "showDetails": "",
+    "status": "",
+    "useCalculations11": "Використовувати розрахунки v1.1",
+    "useLegacyCalculations": ""
   },
   "chart": {
     "comparisonChart": "Діаграма порівняння"
@@ -27,10 +33,10 @@
   "factDetails": {
     "accuracy": "Точність",
     "balance": "Баланс",
-    "calculationIsConsistent": "Розрахунок є послідовним",
-    "calculationIsInconsistent": "Розрахунок є непослідовним",
     "calculationUnchecked": "Розрахунок не перевірено через наявність дублікованих фактів",
     "calculationUncheckedIncorrectVersion": "Розрахунки 1.1 не перевірено в режимі старої версії розрахунків",
+    "calculationValuesDoNotMatch": "",
+    "calculationValuesMatch": "",
     "change": "Зміна",
     "changeFromIn": "З {{from}} в ",
     "changePercentageDecrease": "{{decrease}}% зменшення на ",
@@ -41,15 +47,19 @@
     "dimensions": "Вимірювання",
     "duplicatesCount": "{{current}} з {{total}}",
     "entity": "Суб'єкт",
+    "factCount": "",
     "factValue": "Значення факту",
+    "nestedFactSummary": "",
     "nonNumericFact": "нечисловий факт",
     "noPriorFactInThisReport": "Немає попереднього факту в цьому звіті",
     "noUnit": "<НІОДИНИЦЮ>",
     "properties": "Властивості",
     "scale": "Масштаб",
+    "source": "",
     "viewCalculationDetails": "Переглянути деталі розрахунку"
   },
   "footnotes": {
+    "content": "",
     "footnote": "Примітка"
   },
   "inspector": {
@@ -62,61 +72,82 @@
     "contributor": "Автор",
     "datatypes": "Типи",
     "dimensions": "Тип вимірювання",
-    "documentOutline": "Структура документа",
-    "documentSummary": "Резюме документа",
+    "documentation": "",
     "explicitDimension": "Явні вимірювання",
     "fact-groups": "Розділи",
-    "factProperties": "Властивості факту",
     "factSearch": "Пошук фактів",
     "factValue": "Значення факту",
-    "footnoteProperties": "Властивості примітки",
     "footnotes": "Примітки",
+    "goToReference": "",
     "hidden": "Приховано",
     "hiddenFact": "Прихований факт",
-    "highlight": "Підсвітити",
+    "highlightTags": "",
+    "highlightUntaggedDates": "",
+    "highlightUntaggedNumbers": "",
     "initializing": "Ініціалізація",
     "ixbrlInspector": "iXBRL Інспектор",
     "labels": "",
+    "language": "",
     "loadingViewer": "Завантаження переглядача iXBRL",
     "mandatoryFacts": "Тільки обов'язкові факти",
     "namespaces": "Простори імен",
-    "narrowerAnchor": "Вужчі якоря",
+    "narrowerAnchors": "",
     "negative": "Негативний",
     "nextTag": "Наступний тег",
+    "noCalculations": "",
+    "noDimensions": "",
     "noFactSelected": "Не вибрано факт",
     "numericOption": "Числовий",
-    "outlineUnavailable": "Структура недоступна",
+    "occurrences": "",
+    "otherFacts": "",
     "period": "Період",
     "positive": "Позитивний",
     "previousTag": "Попередній тег",
     "printDocument": "Друк документа",
     "references": "Посилання",
-    "reset": "Скинути",
     "scales": "Масштаби",
-    "search": "Пошук",
     "searchReport": "Пошук у звіті iXBRL",
     "searchResults": "Результати пошуку",
-    "searchTitle": "Пошук",
-    "settingsMenu": "Меню налаштувань",
+    "settings": {
+      "calculationMode": {
+        "documentation": "",
+        "title": ""
+      },
+      "colorMode": {
+        "documentation": "",
+        "title": ""
+      },
+      "title": "",
+      "viewerLanguage": {
+        "documentation": "",
+        "title": ""
+      }
+    },
     "showAnalysisChart": "Показати діаграму аналізу",
+    "showMore": "",
     "showTextOnly": "Показати тільки текст",
     "summary": {
+      "about": {
+        "entity": "",
+        "name": "",
+        "seeMoreReferenceData": "",
+        "title": ""
+      },
+      "aboutCompany": {
+        "header": ""
+      },
+      "downloads": {
+        "header": ""
+      },
       "fact": {
         "header": "Резюме фактів",
         "hidden": "Приховані факти",
         "mandatory": "Обов'язкові факти",
         "total": "Всього фактів"
       },
-      "file": {
-        "calculations": "Лінкбази розрахунків",
-        "definitions": "Лінкбази визначень",
-        "header": "Резюме файлу",
-        "inline": "Вбудовані документи",
-        "labels": "Лінкбази міток",
-        "other": "Інші лінкбази",
-        "presentation": "Лінкбази презентації",
-        "references": "Лінкбази посилань",
-        "schemas": "Схеми"
+      "factSource": "",
+      "includedDocuments": {
+        "header": ""
       },
       "reportCreation": "Створення звіту",
       "tag": {
@@ -124,12 +155,15 @@
         "colDimensions": "Вимірювання",
         "colMembers": "Члени",
         "colNamespace": "Простір імен",
-        "colTotal": "Всього",
-        "header": "Резюме тегів",
         "rowTotal": "Всього"
       }
     },
     "summation": "Підсумок",
+    "tabs": {
+      "overview": "",
+      "search": "",
+      "xbrlFacts": ""
+    },
     "targetDocument": "Цільовий документ",
     "textOption": "Текст",
     "typedDimensions": "Типізовані вимірювання",
@@ -140,40 +174,34 @@
     "validationSeverity": "Рівень серйозності",
     "visibility": "Видимість",
     "visible": "Видимий",
-    "widerAnchor": "Ширший якір",
+    "widerAnchors": "",
     "xbrlGlossaryOpensInNewTab": "Глосарій XBRL (відкривається в новій вкладці)"
   },
   "menu": {
-    "actions": "Дії",
-    "applicationLanguage": "Мова застосунку",
     "contactUs": "Зв'яжіться з нами",
-    "documentLanguage": "Мова документа",
-    "help": "Допомога",
-    "options": "Параметри",
     "survey": "Опитування",
     "userGuide": "Керівництво користувача"
   },
   "search": {
     "concealedFact": "Прихований факт",
-    "dataTypeConflictWarning": "Попередження: вибір конфліктує з фільтром типу концепції",
     "default": "за замовчуванням",
-    "filter": "Фільтр",
     "hiddenFact": "Прихований факт",
     "matchingFactsSummary": "Показано {{nMatches}} з {{nTotal}} фактів",
     "noMatchFound": "Збігів не знайдено",
-    "reset": "Скинути",
+    "resetFilters": "",
     "selected": "вибрано",
     "showMoreResults": "Показати більше результатів",
+    "showResults": "",
     "toggleFilterControls": "Перемкнути фільтри",
     "tryAgainDifferentKeywords": "Спробуйте інші ключові слова",
     "viewFact": "Переглянути факт"
   },
   "toolbar": {
-    "homePage": "Головна",
-    "toggleDarkMode": "Увімкнути/вимкнути темну тему",
-    "xbrlElements": "Елементи XBRL"
+    "homePage": "Головна"
   },
   "viewer": {
-    "ixbrlDocumentView": "Перегляд документа iXBRL"
+    "ixbrlDocumentView": "Перегляд документа iXBRL",
+    "zoomIn": "",
+    "zoomOut": ""
   }
 }

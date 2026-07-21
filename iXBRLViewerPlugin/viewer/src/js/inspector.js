@@ -280,7 +280,13 @@ export class Inspector {
     }
 
     doInitialSelection() {
-        if (!this._currentItem) {
+        if (this._currentItem) {
+            return;
+        }
+        if (this._iv.isFeatureEnabled(FEATURE_SEARCH_ON_STARTUP)) {
+            this.inspectorMode("search-mode");
+        }
+        else {
             this.inspectorMode("fact-mode");
             if (this.outline.hasOutline()) {
                 $("#inspector").addClass("show-facts-by-group");

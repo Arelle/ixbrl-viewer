@@ -258,6 +258,46 @@ describe("Fact deep link", () => {
     })
 });
 
+describe("doInitialSelection", () => {
+    const setUpInspector = (searchOnStartup, hasOutline = false) => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "search_on_startup": searchOnStartup }, "");
+        insp.outline = { hasOutline: jest.fn(() => hasOutline) };
+        insp.inspectorMode = jest.fn();
+        return insp;
+    };
+
+    test("enters search mode when search_on_startup is enabled and no deep link is present", () => {
+        const insp = setUpInspector(true);
+        insp._currentItem = undefined;
+        insp.doInitialSelection();
+        expect(insp.inspectorMode).toHaveBeenCalledWith("search-mode");
+    });
+
+    test("enters fact-mode when search_on_startup is disabled", () => {
+        const insp = setUpInspector(false);
+        insp._currentItem = undefined;
+        insp.doInitialSelection();
+        expect(insp.inspectorMode).toHaveBeenCalledWith("fact-mode");
+    });
+
+    test("adds show-facts-by-group class when the outline has an outline and search_on_startup is disabled", () => {
+        const insp = setUpInspector(false, true);
+        insp._currentItem = undefined;
+        $("#inspector").remove();
+        $(document.body).append('<div id="inspector"></div>');
+        insp.doInitialSelection();
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(true);
+    });
+
+    test("uses the deep-linked fact when one is present, regardless of search_on_startup", () => {
+        const insp = setUpInspector(true);
+        insp._currentItem = { some: "fact" };
+        insp.doInitialSelection();
+        expect(insp.inspectorMode).not.toHaveBeenCalled();
+    });
+});
+
 describe("Handle message", () => {
     const generateEvent = (data) => {
         return {

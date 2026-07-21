@@ -301,6 +301,54 @@ describe("doInitialSelection", () => {
     });
 });
 
+describe("highlightTagsOnStartup", () => {
+    afterEach(() => {
+        window.localStorage.clear();
+    });
+
+    test("returns true when highlight_facts_on_startup is enabled and no stored preference exists", () => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "highlight_facts_on_startup": true }, "");
+        expect(insp.highlightTagsOnStartup()).toBe(true);
+    });
+
+    test("returns false when highlight_facts_on_startup is disabled and no stored preference exists", () => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "highlight_facts_on_startup": false }, "");
+        expect(insp.highlightTagsOnStartup()).toBe(false);
+    });
+});
+
+describe("Calculation mode setting visibility", () => {
+    beforeAll(() => {
+        return new TestInspector().i18nInit();
+    });
+
+    const setUpInspector = (usesCalculations10, hideCalculationModeOption) => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "hide_calculation_mode_option": hideCalculationModeOption }, "");
+        insp._reportSet = { usesCalculations10: jest.fn(() => usesCalculations10) };
+        $(document.body).append('<table><tbody><tr class="section"><td><select id="setting-calculation-mode"></select></td></tr></tbody></table>');
+        return insp;
+    };
+
+    afterEach(() => {
+        $("#setting-calculation-mode").closest(".section").remove();
+    });
+
+    test("hides calc-mode section when hide_calculation_mode_option is enabled", () => {
+        const insp = setUpInspector(true, true);
+        insp.buildSettingsPage();
+        expect($("#setting-calculation-mode").closest(".section").css("display")).toBe("none");
+    });
+
+    test("shows calc-mode section when hide_calculation_mode_option is disabled and report uses calculations 1.0", () => {
+        const insp = setUpInspector(true, false);
+        insp.buildSettingsPage();
+        expect($("#setting-calculation-mode").closest(".section").css("display")).not.toBe("none");
+    });
+});
+
 describe("Handle message", () => {
     const generateEvent = (data) => {
         return {

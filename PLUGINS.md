@@ -5,7 +5,9 @@ build JavaScript iXBRL viewers with additional functionality.
 
 A plugin is a class with one or more of the following methods:
 
-* `extendDisplayOptionsMenu(menu)` - provides a menu object that can be modified to add additional options.
+* `extendDisplayOptionsMenu(menu)` - called when the display options menu is created or recreated, with a menu object that can be modified to add additional options.
+* `extendToolbarHighlightMenu(menu)` - called when the toolbar highlight menu is created or recreated, with a menu object that can be modified to add additional highlight toolbar options.
+* `extendHighlightKey(key)` - called when the highlight color key is created, with an array of labels that can be modified or extended.
 * `preProcessiXBRL(body, docIndex)` - called once with the `<body>` DOM node for each document in the document set.
 * `updateViewerStyleElements(styleElts)` - called on initialization with a jQuery object containing the `<style>` element from each document in the document set, allow additional styles to be registered.
 

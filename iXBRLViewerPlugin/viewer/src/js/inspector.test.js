@@ -4,6 +4,7 @@ import $ from 'jquery';
 import { ReportSet } from "./reportset.js";
 import { ReportSetOutline } from "./outline.js";
 import { IXNode } from "./ixnode.js";
+import { Menu } from "./menu.js";
 import { TestInspector } from "./test-utils.js";
 import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId, FACTS_PER_GROUP } from "./util.js";
 
@@ -534,6 +535,56 @@ describe("_populateFileSummary", () => {
 
         expect(summaryDom.find(".files-summary").css("display")).not.toBe("none");
         expect(summaryDom.find(".files-summary-list li").text()).toBe("report.html");
+    });
+});
+
+describe("Plugin extension points", () => {
+    const menuFixture = (id) => $(`
+        <div class="menu" id="${id}">
+          <button class="menu-title"></button>
+          <div class="content-container">
+            <div class="content"></div>
+          </div>
+        </div>
+    `);
+
+    test("extendDisplayOptionsMenu is invoked on registered plugins and rendered menu items appear in the DOM", () => {
+        const insp = new TestInspector();
+        const plugin = {
+            extendDisplayOptionsMenu: jest.fn((menu) => {
+                menu.addCheckboxItem("Plugin option", () => {}, "plugin-option");
+                menu.addLink("Plugin link", "https://example.com");
+            }),
+        };
+        insp._iv.registerPlugin(plugin);
+        insp._optionsMenu = new Menu(menuFixture("display-options-menu"));
+
+        insp.buildDisplayOptionsMenu();
+
+        expect(plugin.extendDisplayOptionsMenu).toHaveBeenCalledWith(insp._optionsMenu);
+        const items = insp._optionsMenu._elt.find(".content .item");
+        expect(items).toHaveLength(2);
+        expect(items.eq(0).text()).toBe("Plugin option");
+        expect(items.eq(1).text()).toBe("Plugin link");
+        expect(items.eq(1).attr("href")).toBe("https://example.com");
+    });
+
+    test("extendToolbarHighlightMenu is invoked on registered plugins and rendered menu items appear in the DOM", () => {
+        const insp = new TestInspector();
+        const plugin = {
+            extendToolbarHighlightMenu: jest.fn((menu) => {
+                menu.addCheckboxItem("Untagged Facts", () => {}, "highlight-untagged-facts");
+            }),
+        };
+        insp._iv.registerPlugin(plugin);
+        insp._toolbarMenu = new Menu(menuFixture("toolbar-highlight-menu"));
+
+        insp.buildToolbarHighlightMenu();
+
+        expect(plugin.extendToolbarHighlightMenu).toHaveBeenCalledWith(insp._toolbarMenu);
+        const items = insp._toolbarMenu._elt.find(".content .item");
+        expect(items).toHaveLength(1);
+        expect(items.eq(0).text()).toBe("Untagged Facts");
     });
 });
 

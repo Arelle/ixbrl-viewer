@@ -153,7 +153,11 @@ export class Inspector {
 
                 inspector.initializeReviewMode();
 
+                inspector._optionsMenu = new Menu($("#display-options-menu"), {type: "static"});
+                inspector.buildDisplayOptionsMenu();
+
                 inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
+                inspector.buildToolbarHighlightMenu();
 
                 inspector.setDefaultDocumentLanguage();
                 inspector.buildDocumentLanguages();
@@ -473,6 +477,18 @@ export class Inspector {
         }
     }
 
+    buildDisplayOptionsMenu() {
+        this._optionsMenu.reset();
+        this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
+        $("#display-options-menu").closest(".section").toggle(!this._optionsMenu.isEmpty());
+    }
+
+    buildToolbarHighlightMenu() {
+        this._toolbarMenu.reset();
+        this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
+        $("#toolbar-highlight-menu").toggle(!this._toolbarMenu.isEmpty());
+    }
+
     buildDocumentationLink(id, label, target) {
         const link = $('<a></a>')
                 .attr('href', target)
@@ -510,6 +526,8 @@ export class Inspector {
         $('html').attr('lang', i18next.resolvedLanguage);
         this.buildDocumentLanguages();
         this.buildHomeLink()
+        this.buildDisplayOptionsMenu();
+        this.buildToolbarHighlightMenu();
         this.buildDocumentationLinks();
         this.buildSettingsPage();
         this.setupSearchControls();

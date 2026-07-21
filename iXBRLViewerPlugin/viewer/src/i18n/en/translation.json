@@ -81,6 +81,7 @@
     "goToReference": "Go to reference",
     "hidden": "Hidden",
     "hiddenFact": "Hidden Fact",
+    "highlightMenu": "Highlight options",
     "highlightTags": "Highlight tags",
     "highlightUntaggedDates": "Highlight untagged dates",
     "highlightUntaggedNumbers": "Highlight untagged numbers",
@@ -116,6 +117,9 @@
       "colorMode": {
         "documentation": "Choose if Inline Viewer's appearance should be light or dark",
         "title": "Viewer color mode"
+      },
+      "plugins": {
+        "title": "Plugins"
       },
       "title": "Settings",
       "viewerLanguage": {

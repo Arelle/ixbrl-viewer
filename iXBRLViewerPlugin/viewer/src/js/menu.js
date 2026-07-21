@@ -1,7 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import i18next from "i18next";
 
 export class Menu {
     constructor(elt, attr) {
@@ -25,6 +24,10 @@ export class Menu {
 
     reset() {
         this._elt.find(".content").empty();
+    }
+
+    isEmpty() {
+        return this._elt.find(".content").children().length === 0;
     }
 
     close() {
@@ -67,7 +70,7 @@ export class Menu {
                     .prop("checked", onByDefault)
                     .change(function () {
                         callback($(this).prop("checked"), true);
-                        menu.close(); 
+                        menu.close();
                     })
             )
             .append($("<span></span>").addClass("checkmark"));

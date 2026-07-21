@@ -23,6 +23,12 @@ See COPYRIGHT.md for copyright information
           <button id="highlight-untagged-numbers" class="review-mode-only" title="Highlight untagged numbers" data-i18n="[title]inspector.highlightUntaggedNumbers" ></button>
           <button id="highlight-untagged-dates" class="review-mode-only" title="Highlight untagged dates" data-i18n="[title]inspector.highlightUntaggedDates" ></button>
           <button id="highlight-tags" title="Highlight tags" data-i18n="[title]inspector.highlightTags" ></button>
+          <div class="menu" id="toolbar-highlight-menu">
+            <button data-i18n="[title]inspector.highlightMenu" title="Highlight options" class="menu-title"></button>
+            <div class="content-container">
+              <div class="content"></div>
+            </div>
+          </div>
           <button id="print" title="Print Document" data-i18n="[title]inspector.printDocument"></button>
           <button data-i18n="[title]inspector.settingsButton" title="Settings" id="settings-button"></button>
         </div>
@@ -369,6 +375,14 @@ See COPYRIGHT.md for copyright information
                 <h3 data-i18n="inspector.documentation">Documentation</h3>
                 <ul class="documentation-links">
                 </ul>
+              </div>
+              <div class="section">
+                <h3 data-i18n="inspector.settings.plugins.title">Plugins</h3>
+                <div class="menu inline-menu" id="display-options-menu">
+                  <div class="content-container">
+                    <div class="content"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

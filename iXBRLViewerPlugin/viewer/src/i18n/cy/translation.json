@@ -81,6 +81,7 @@
     "goToReference": "",
     "hidden": "Gudd",
     "hiddenFact": "Ffaith Gudd",
+    "highlightMenu": "",
     "highlightTags": "",
     "highlightUntaggedDates": "",
     "highlightUntaggedNumbers": "",
@@ -115,6 +116,9 @@
       },
       "colorMode": {
         "documentation": "",
+        "title": ""
+      },
+      "plugins": {
         "title": ""
       },
       "title": "",

@@ -65,9 +65,12 @@ export class Identifiers {
             return undefined
         }
         const url = Identifiers.identifierURL(identifier);
-        return { 
-          "href": url, 
-          "text": i18next.t("inspector.summary.about.seeMoreReferenceData", { type: data.name })
+        if (url === undefined) {
+            return undefined;
+        }
+        return {
+            "href": url,
+            "text": i18next.t("inspector.summary.about.seeMoreReferenceData", { type: data.name })
         };
     }
 }

@@ -123,6 +123,7 @@
         "title": "Viewer language"
       }
     },
+    "settingsButton": "Settings",
     "showAnalysisChart": "Show analysis chart",
     "showMore": "Show more",
     "showTextOnly": "Show text only",

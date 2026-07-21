@@ -123,6 +123,7 @@
         "title": ""
       }
     },
+    "settingsButton": "",
     "showAnalysisChart": "Afficher le graphique d’analyse",
     "showMore": "",
     "showTextOnly": "Afficher uniquement le texte",

@@ -1171,7 +1171,9 @@ export class Inspector {
 
         function insertFileSummary(docs) {
             const ul = summaryFilesContent.find('ul.files-summary-list')
-            visibleItems += 1;
+            if (docs.length > 0) {
+                visibleItems += 1;
+            }
             for (const doc of docs) {
                 ul.append($("<li></li>").text(doc));
             }
@@ -1228,7 +1230,7 @@ export class Inspector {
             summaryDom.find(".filing-documents .download-link").attr("href", this._reportSet.filingDocuments());
         }
         else {
-            summaryDom.find(".filingDocuments").hide();
+            summaryDom.find(".filing-documents").hide();
             summaryDom.find(".downloads-summary").hide();
         }
     }

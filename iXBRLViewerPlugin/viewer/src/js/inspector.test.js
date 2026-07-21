@@ -1,5 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
+import $ from 'jquery';
 import { ReportSet } from "./reportset.js";
 import { TestInspector } from "./test-utils.js";
 import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId } from "./util.js";
@@ -336,4 +337,88 @@ describe("Handle message", () => {
         insp.handleMessage(event);
         expect(mockSelect).not.toHaveBeenCalled();
     })
+});
+
+describe("_populateFileSummary", () => {
+    const emptyDocuments = {
+        inline: [],
+        schema: [],
+        calcLinkbase: [],
+        defLinkbase: [],
+        labelLinkbase: [],
+        presLinkbase: [],
+        refLinkbase: [],
+        unrecognizedLinkbase: [],
+    };
+
+    const buildSummaryDom = () => $(`
+        <div>
+          <div class="collapsible-section files-summary">
+            <div class="collapsible-body">
+              <ul class="plain-list files-summary-list"></ul>
+            </div>
+          </div>
+        </div>
+    `);
+
+    test("hides the files summary section when there are no local documents", () => {
+        const insp = new TestInspector();
+        insp.summary = { getLocalDocuments: () => emptyDocuments };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateFileSummary(summaryDom);
+
+        expect(summaryDom.find(".files-summary").css("display")).toBe("none");
+    });
+
+    test("shows the files summary section when there are local documents", () => {
+        const insp = new TestInspector();
+        insp.summary = {
+            getLocalDocuments: () => ({
+                ...emptyDocuments,
+                inline: ["report.html"],
+            }),
+        };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateFileSummary(summaryDom);
+
+        expect(summaryDom.find(".files-summary").css("display")).not.toBe("none");
+        expect(summaryDom.find(".files-summary-list li").text()).toBe("report.html");
+    });
+});
+
+describe("_populateDownloadsSummary", () => {
+    const buildSummaryDom = () => $(`
+        <div>
+          <div class="collapsible-section downloads-summary">
+            <div class="bordered-section filing-documents">
+              <a class="download-link" href=""></a>
+            </div>
+          </div>
+        </div>
+    `);
+
+    test("sets the download link href on the .filing-documents element when present", () => {
+        const insp = new TestInspector();
+        insp._reportSet = { filingDocuments: () => "https://example.com/documents.zip" };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateDownloadsSummary(summaryDom);
+
+        expect(summaryDom.find(".filing-documents .download-link").attr("href")).toBe("https://example.com/documents.zip");
+        expect(summaryDom.find(".filing-documents").css("display")).not.toBe("none");
+        expect(summaryDom.find(".downloads-summary").css("display")).not.toBe("none");
+    });
+
+    test("hides the .filing-documents element when there are no filing documents", () => {
+        const insp = new TestInspector();
+        insp._reportSet = { filingDocuments: () => undefined };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateDownloadsSummary(summaryDom);
+
+        expect(summaryDom.find(".filing-documents").css("display")).toBe("none");
+        expect(summaryDom.find(".downloads-summary").css("display")).toBe("none");
+    });
 });

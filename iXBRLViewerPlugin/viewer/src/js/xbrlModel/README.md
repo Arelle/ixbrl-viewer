@@ -1,10 +1,13 @@
 # XbrlModel document surface (proof of concept)
 
 This directory adds an **alternative load path** for the viewer that reads an
-XbrlModel OIM **factset** + **converted taxonomy** and a **plain document**,
+XbrlModel OIM model — a **compiled factset-with-taxonomy**, or a separate
+**factset** + **converted taxonomy** — plus a **plain document** (HTML or PDF),
 instead of the embedded inline-XBRL JSON.  The existing embedded-iXBRL path is
-completely unchanged; the XbrlModel path is only taken when the runtime config
-contains an `xbrlModel` block.
+completely unchanged; the XbrlModel path is taken when the runtime config
+contains an `xbrlModel` block **or** the viewer URL has an `?xbrlModel=<url>`
+argument.  The model can come from a served URL, a compiled single file, or a
+local file chosen in a GUI picker (see [Model sources](#model-sources)).
 
 > **Planned refactor:** this overlay is to be restructured as a standalone
 > plugin (like `examples/example_plugin` / `examples/d6v`).  See
@@ -17,23 +20,28 @@ contains an `xbrlModel` block.
 The whole feature reuses the existing report model and inspector.  Only two
 seams were added:
 
-1. **Adapter** (`adapter.js`) — converts an XbrlModel factset + converted
-   taxonomy into the internal report-data structure that `ReportSet` consumes
-   (`concepts`, `facts`, `rels`, `prefixes`, `roles`, ...).  Facts are keyed by
-   a document locator: `xbrl:htmlElementId` for the HTML surface, or a synthesised
-   id carrying `xbrl:pdfPage`/`xbrl:pdfMcid` locators for the PDF surface.  OIM
-   networks become the viewer's ELR-keyed `pres`/`calc11` relationships; explicit
-   vs typed dimensions are classified from whether a cube dimension has a
-   `domainNetwork`.
+1. **Adapter** (`adapter.js`) — converts an XbrlModel model into the internal
+   report-data structure that `ReportSet` consumes (`concepts`, `facts`, `rels`,
+   `prefixes`, `roles`, `cubes`, ...).  It takes a factset document plus a
+   taxonomy document; for a **compiled model** (facts and taxonomy in one file)
+   the same document is passed as both.  Facts are keyed by a document locator:
+   `xbrl:htmlElementId` for the HTML surface (legacy `xbrl:htmlSpanId` is still
+   accepted), or a synthesised id carrying `xbrl:pdfPage`/`xbrl:pdfMcid` locators
+   for the PDF surface.  OIM networks become the viewer's ELR-keyed `pres`/`calc11`
+   relationships; explicit vs typed dimensions are classified from whether a cube
+   dimension has a `domainNetwork`.
 
 2. **Document surface** — loads the document into the viewer's iframe
-   (`prepareDocument`) and binds facts to it (`bind`).  Both surfaces produce the
-   exact DOM decorations (`.ixbrl-element` + `ivids`, and an `IXNode` in the
-   viewer's map) that the existing `Viewer` selection/highlight/navigation code
-   already relies on, so nothing downstream is surface-specific:
+   (`prepareDocument`) and binds facts to it (`bind`).  `prepareDocument` accepts
+   a document *source* — either `{ url }` (fetched) or already-loaded content
+   (`{ text }` for HTML, `{ data }` ArrayBuffer for PDF) so a local file picked in
+   the chooser can be rendered without a server.  Both surfaces produce the exact
+   DOM decorations (`.ixbrl-element` + `ivids`, and an `IXNode` in the viewer's
+   map) that the existing `Viewer` selection/highlight/navigation code already
+   relies on, so nothing downstream is surface-specific:
 
-   - `HtmlDocumentSurface` matches each fact's span id to an element id in a
-     plain-HTML document and wraps the matched element.
+   - `HtmlDocumentSurface` matches each fact's `htmlElementId` to an element id in
+     a plain-HTML document and wraps the matched element.
    - `PdfDocumentSurface` renders the PDF with PDF.js, builds a marked-content-id
      → rectangle map per page from `getTextContent({ includeMarkedContent: true })`,
      and lays absolutely-positioned `.ixbrl-element` overlay `<div>`s over each
@@ -46,8 +54,11 @@ overrides only the fact-discovery step (`Viewer._processDocuments`) to delegate
 to a document surface.  Everything after discovery — styling, event handlers,
 navigation, the inspector — is shared and unmodified.
 
-The surface is chosen in `iXBRLViewer.loadXbrlModel` from the factset's
+`iXBRLViewer.loadXbrlModel` resolves the model source (URL argument → config
+`model`/`factset` → chooser) and hands the parsed model to `_loadXbrlModelDoc`,
+which builds the report data and chooses the surface from the factset's
 `factLocatorType` (or the document extension / a `documentType` config value).
+The GUI file picker lives in `xbrlModelChooser.js`.
 
 ### PDF.js packaging
 
@@ -121,6 +132,34 @@ factset's own `documentInfo` (`sourceMappings` and `importMapping`), relative to
 the factset URL.  Serve a directory containing the bundle, a stub `index.html`
 that loads it, the config, and the three data files, then open `index.html`
 through a web server (not `file:`).
+
+### Model sources
+
+There are four ways to point the viewer at a model:
+
+1. **Separate files** (above): `factset` + `taxonomy` + `document`.
+2. **A single compiled model** — one file containing both the taxonomy structures
+   and the (located) facts.  Use `model` instead of `factset`; the taxonomy is
+   read from the same file:
+   ```json
+   { "xbrlModel": { "model": "aapl-compiled.json" } }
+   ```
+   The document is resolved from the model's `sourceMappings` (or an explicit
+   `document`).  (A *compiled model* is auto-detected: it carries `concepts` /
+   `labels` / `cubes` alongside its `facts`.)
+3. **A URL argument** — `…/index.html?xbrlModel=<url>` opens a model (compiled or
+   factset) with **no config file at all**, so a plain viewer bundle can be
+   pointed at any served model:
+   ```
+   http://localhost:8000/index.html?xbrlModel=aapl-compiled.json
+   ```
+4. **A local-file chooser** — with an `xbrlModel` block but no `model`/`factset`
+   and no URL argument (e.g. `{ "xbrlModel": {} }`), the viewer shows a chooser.
+   Pick a compiled model `.json` from disk, and — when its source document (HTML
+   or PDF) is also local — pick that too.  Files are read in the browser (no
+   server round-trip for the document), so this works for fully local models.
+
+Priority when several are present: `?xbrlModel=` argument → `model` → `factset`.
 
 ### Quick test with the built-in HTTP server
 

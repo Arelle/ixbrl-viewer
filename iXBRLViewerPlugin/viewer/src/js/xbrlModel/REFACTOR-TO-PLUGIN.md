@@ -50,7 +50,12 @@ The refactor therefore has two halves:
 
 ### Self-contained `xbrlModel/` modules (move as-is into the plugin package)
 `adapter.js`, `htmlDocumentSurface.js`, `pdfDocumentSurface.js`,
-`xbrlModelViewer.js`, `surfaceUtil.js`, `pdfjsLoader.js`.
+`xbrlModelViewer.js`, `surfaceUtil.js`, `pdfjsLoader.js`, `xbrlModelChooser.js`.
+
+The model-source resolution and document-content handling added to
+`ixbrlviewer.js` (`_loadXbrlModelDoc`, the `?xbrlModel=` argument, compiled-model
+detection, and passing `{text}`/`{data}` document sources to the surfaces) move
+behind EP1/EP2 as well.
 
 ---
 

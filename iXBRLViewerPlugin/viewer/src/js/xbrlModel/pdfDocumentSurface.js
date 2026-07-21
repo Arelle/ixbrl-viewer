@@ -41,7 +41,10 @@ export class PdfDocumentSurface {
         this._resourcesBase = options.resourcesBase ?? null;
     }
 
-    async prepareDocument(iframe, documentUrl, iv) {
+    // documentSource is { url } (PDF.js fetches it) or { data } (an ArrayBuffer
+    // of already-loaded bytes, e.g. a local file picked in the GUI chooser).
+    async prepareDocument(iframe, documentSource, iv) {
+        const src = typeof documentSource === "string" ? { url: documentSource } : documentSource;
         // Load PDF.js lazily (and via a further dynamic import in the loader) so
         // it is only pulled in for the PDF surface and never parsed by the test
         // environment.
@@ -58,7 +61,13 @@ export class PdfDocumentSurface {
         // rules there for native font rendering, and the page canvas lives in the
         // iframe.  Without this, embedded fonts are registered in the top
         // document and the iframe canvas renders ".notdef" boxes.
-        const docParams = { url: documentUrl, ownerDocument: doc };
+        const docParams = { ownerDocument: doc };
+        if (src.data !== undefined) {
+            docParams.data = src.data;
+        }
+        else {
+            docParams.url = src.url;
+        }
         if (this._disableRange) {
             // Fetch the whole PDF in a single request instead of via HTTP range
             // requests.  Range/streaming support varies by server (Python's
@@ -85,7 +94,7 @@ export class PdfDocumentSurface {
             // "document" points at the HTML file, or a 404 page, while the PDF
             // surface was selected from the factset's pdf locator type).
             throw new Error(
-                `Could not open '${documentUrl}' as a PDF (${e?.message ?? e}). `
+                `Could not open '${src.url ?? "(local file)"}' as a PDF (${e?.message ?? e}). `
                 + `Check that the config's "document" points to a .pdf file.`,
             );
         }

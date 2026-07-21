@@ -26,15 +26,24 @@ export class HtmlDocumentSurface {
     // Fetch the plain-HTML document and load it into the iframe, resolving once
     // it is ready to be bound.  A <base> is added and scripts stripped by
     // iv._prepareDocumentHtml.
-    async prepareDocument(iframe, documentUrl, iv) {
-        const resp = await fetch(documentUrl);
-        if (!resp.ok) {
-            throw new Error(`Could not load document (${resp.status})`);
+    // documentSource is { url } (fetch) or { text, baseUrl } (already-loaded
+    // content, e.g. a local file picked in the GUI chooser).
+    async prepareDocument(iframe, documentSource, iv) {
+        const src = typeof documentSource === "string" ? { url: documentSource } : documentSource;
+        let html;
+        if (src.text !== undefined) {
+            html = src.text;
         }
-        const html = await resp.text();
+        else {
+            const resp = await fetch(src.url);
+            if (!resp.ok) {
+                throw new Error(`Could not load document (${resp.status})`);
+            }
+            html = await resp.text();
+        }
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
-        doc.write(iv._prepareDocumentHtml(html, documentUrl));
+        doc.write(iv._prepareDocumentHtml(html, src.baseUrl ?? src.url ?? ""));
         doc.close();
         await iframeReady(iframe);
     }

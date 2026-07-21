@@ -541,15 +541,27 @@ export class iXBRLViewer {
             }
         }
 
-        // Resolve the source document: content from the chooser, else a URL.
-        const sourceMapping = (di.sourceMappings ?? [])[0] ?? {};
+        // Does the model locate facts in a PDF?  This is authoritative for
+        // document and surface selection: a factset may list several
+        // sourceMappings (e.g. an html source plus the pdf), so pick by fact
+        // locators rather than assuming the first mapping.
+        const hasPdfFacts = (m.facts ?? []).some(f => (f.factValues ?? []).some(fv =>
+            [...(fv.valueSources ?? []), ...(fv.valueAnchors ?? [])].some(vs =>
+                (vs.properties ?? []).some(p => p.property === "xbrl:pdfPage"))));
+
+        // Resolve the source document: content from the chooser, else the
+        // sourceMapping/config URL matching the intended surface.
+        const mappings = di.sourceMappings ?? [];
+        const wantsExt = hasPdfFacts ? /\.pdf(\?|#|$)/i : /\.html?(\?|#|$)/i;
         let docSource = documentSource;
         let documentFile;
         if (docSource) {
             documentFile = docSource.filename;
         }
         else {
-            const documentRel = cfg.document ?? sourceMapping.url;
+            const documentRel = cfg.document
+                ?? mappings.find(sm => sm.url && wantsExt.test(sm.url))?.url
+                ?? mappings.find(sm => sm.url)?.url;
             if (!documentRel) {
                 throw new Error("No source document specified in the model, config, or chooser");
             }
@@ -564,10 +576,10 @@ export class iXBRLViewer {
         const reportSet = new ReportSet(reportData);
         reportSet.taxonomyNamer = new TaxonomyNamer(new Map(Object.entries(this.runtimeConfig.taxonomyNames ?? {})));
 
-        // Select the document surface: explicit chooser type, else locator type /
-        // document extension.
-        const locatorType = cfg.documentType ?? sourceMapping.factLocatorType ?? "";
-        const isPdf = docSource.isPdf ?? (/pdf/i.test(locatorType) || /\.pdf(\?|#|$)/i.test(docSource.url ?? documentFile ?? ""));
+        // Select the document surface: explicit chooser type / config, else
+        // whether the model has PDF-located facts, else the document extension.
+        const isPdf = docSource.isPdf
+            ?? (/pdf/i.test(cfg.documentType ?? "") || hasPdfFacts || /\.pdf(\?|#|$)/i.test(docSource.url ?? documentFile ?? ""));
         let surface;
         if (isPdf) {
             // PDF.js needs its standard_fonts/ and cmaps/ folders served to render

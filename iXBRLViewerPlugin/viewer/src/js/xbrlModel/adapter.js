@@ -295,6 +295,40 @@ function pdfLocatorsForFact(fact) {
     return locators;
 }
 
+// PDF image locators for a fact (xbrl:pdfImageLocatorType): xbrl:pdfPage +
+// xbrl:pdfBBox ("x0 y0 x1 y1" in PDF user-space points, origin lower-left).
+// One embedded chart image is referenced by many facts (the SEC Tailored
+// Shareholder Report pattern: a chart plus a hidden data table), so several
+// facts share the same page+bbox; `key` groups them into one highlight region.
+function pdfImageLocatorsForFact(fact) {
+    const locators = [];
+    for (const fv of fact.factValues ?? []) {
+        for (const vs of factLocators(fv)) {
+            let page = null;
+            let bboxStr = null;
+            for (const p of vs.properties ?? []) {
+                if (p.property === "xbrl:pdfPage") {
+                    page = p.value;
+                }
+                else if (p.property === "xbrl:pdfBBox") {
+                    bboxStr = p.value;
+                }
+            }
+            if (page != null && bboxStr) {
+                const n = String(bboxStr).trim().split(/\s+/).map(Number);
+                if (n.length === 4 && n.every(v => !Number.isNaN(v))) {
+                    locators.push({
+                        page,
+                        bbox: { x0: n[0], y0: n[1], x1: n[2], y1: n[3] },
+                        key: page + "|" + n.join(" "),
+                    });
+                }
+            }
+        }
+    }
+    return locators;
+}
+
 function buildFacts(factset) {
     const facts = {};
     let pdfKeyCounter = 0;
@@ -306,6 +340,8 @@ function buildFacts(factset) {
         }
 
         const a = { c: concept };
+        // OIM allows the entity (and period) dimension to be absent; only set the
+        // aspect when present.  The viewer handles a missing entity/period.
         if (dims["xbrl:entity"] !== undefined) {
             a.e = dims["xbrl:entity"];
         }
@@ -365,24 +401,31 @@ function buildFacts(factset) {
             return factData;
         };
 
-        // HTML surface: one viewer fact per html element id (repeated ids
-        // become duplicates, as for repeated iXBRL tags).
+        // PDF surface first: a fact located in the PDF carries content (MCID)
+        // and/or image (bbox) locators; keyed by a synthesised id, with its
+        // locators attached for the document surface to place overlay boxes.
+        const pdfContent = pdfLocatorsForFact(fact);
+        const pdfImage = pdfImageLocatorsForFact(fact);
+        if (pdfContent.length > 0 || pdfImage.length > 0) {
+            const factData = makeFactData();
+            if (pdfContent.length > 0) {
+                factData.pdf = pdfContent;
+            }
+            if (pdfImage.length > 0) {
+                factData.pdfImage = pdfImage;
+            }
+            facts["pf-" + (pdfKeyCounter++)] = factData;
+            continue;
+        }
+
+        // HTML fallback: facts not located in the PDF keep their retained html
+        // source.  One viewer fact per html element id (repeated ids become
+        // duplicates, as for repeated iXBRL tags).
         const elementIds = htmlElementIdsForFact(fact);
         if (elementIds.length > 0) {
             for (const elementId of elementIds) {
                 facts[elementId] = makeFactData();
             }
-            continue;
-        }
-
-        // PDF surface: one viewer fact per fact, keyed by a synthesised id, with
-        // its page/mcid locators attached for the document surface to place
-        // overlay boxes.
-        const pdfLocators = pdfLocatorsForFact(fact);
-        if (pdfLocators.length > 0) {
-            const factData = makeFactData();
-            factData.pdf = pdfLocators;
-            facts["pf-" + (pdfKeyCounter++)] = factData;
             continue;
         }
 
@@ -460,6 +503,14 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
     const dimensionConcepts = collectDimensionConcepts(taxonomy);
     const concepts = buildConcepts(taxonomy, labelsByObject, dimensionConcepts);
     const facts = buildFacts(factset);
+    // Ensure every fact's concept is registered so the inspector falls back to
+    // the concept QName (not "<no label>") when no taxonomy/labels are loaded.
+    for (const factData of Object.values(facts)) {
+        const c = factData.a.c;
+        if (c && concepts[c] === undefined) {
+            concepts[c] = { labels: labelsByObject[c] ?? { std: {} } };
+        }
+    }
     const { rels, roles, roleDefs } = buildNetworks(taxonomy);
 
     // Register a role-map entry for every label-role prefix in use, so the

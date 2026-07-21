@@ -299,61 +299,135 @@ export class PdfDocumentSurface {
         return { container: pageInfo.container, rects, text: textParts.join(" ") };
     }
 
+    // Resolve an image locator's bbox (PDF user-space points, origin lower-left)
+    // to a CSS rectangle over the page canvas.
+    _resolveImageLocator(loc) {
+        const pageInfo = this._pages[loc.page];
+        if (!pageInfo) {
+            return null;
+        }
+        const s = this._scale;
+        const b = loc.bbox;
+        return {
+            container: pageInfo.container,
+            rect: {
+                left: b.x0 * s,
+                top: (pageInfo.vTop - b.y1) * s,
+                width: (b.x1 - b.x0) * s,
+                height: (b.y1 - b.y0) * s,
+            },
+        };
+    }
+
     bind(viewer) {
         const reportIndex = 0;
         viewer._iframes.eq(0).data("selected", true);
         const facts = viewer._reportSet.reportsData()[0].facts;
-
-        // Order facts in reading order (page, then vertical position) so that
-        // document-order navigation and the outline behave sensibly.
-        const entries = [];
-        for (const [key, factData] of Object.entries(facts)) {
-            const resolved = (factData.pdf ?? []).map(loc => this._resolveLocator(loc));
-            const rectSets = resolved.filter(r => r.rects.length > 0);
-            if (rectSets.length === 0) {
-                // Fact not locatable in the rendered PDF - drop it so no
-                // unbindable Fact object is created.
-                delete facts[key];
-                continue;
-            }
-            const firstPage = factData.pdf[0]?.page ?? 0;
-            const minTop = Math.min(...rectSets.flatMap(r => r.rects.map(x => x.top)));
-            entries.push({ key, factData, rectSets, sortKey: firstPage * 1e6 + minTop });
-        }
-        entries.sort((a, b) => a.sortKey - b.sortKey);
-
         const doc = viewer._iframes.eq(0).contents().get(0);
-        for (const { key, factData, rectSets } of entries) {
-            const overlayNodes = [];
-            const textParts = [];
-            const numericClass = factData.a.u !== undefined ? "ixbrl-element-nonfraction" : "ixbrl-element-nonnumeric";
-            for (const rs of rectSets) {
-                if (rs.text) {
-                    textParts.push(rs.text);
-                }
-                for (const rect of rs.rects) {
-                    const div = doc.createElement("div");
-                    div.className = "ixbrl-element " + numericClass;
-                    div.style.left = rect.left + "px";
-                    div.style.top = rect.top + "px";
-                    div.style.width = rect.width + "px";
-                    div.style.height = rect.height + "px";
-                    rs.container.appendChild(div);
-                    overlayNodes.push(div);
+
+        // Group image facts by their shared region (page+bbox) so that one
+        // embedded chart image becomes a single highlight carrying all its facts.
+        // Content facts become per-fact overlays.  Facts that resolve to nothing
+        // (e.g. html-fallback facts, in a PDF view) are dropped.
+        const imageRegions = {}; // regionKey -> { rect, container, page, factKeys: [] }
+        const tasks = [];        // ordered render tasks
+        for (const [key, factData] of Object.entries(facts)) {
+            let located = false;
+
+            if (factData.pdf) {
+                const rectSets = factData.pdf.map(loc => this._resolveLocator(loc)).filter(r => r.rects.length > 0);
+                if (rectSets.length > 0) {
+                    located = true;
+                    const page = factData.pdf[0]?.page ?? 0;
+                    const top = Math.min(...rectSets.flatMap(r => r.rects.map(x => x.top)));
+                    tasks.push({ type: "content", sortKey: page * 1e6 + top, key, factData, rectSets });
                 }
             }
 
+            if (factData.pdfImage) {
+                for (const loc of factData.pdfImage) {
+                    const r = this._resolveImageLocator(loc);
+                    if (!r) {
+                        continue;
+                    }
+                    located = true;
+                    const region = imageRegions[loc.key] ?? (imageRegions[loc.key] = {
+                        rect: r.rect, container: r.container, page: loc.page, factKeys: [],
+                    });
+                    region.factKeys.push(key);
+                }
+            }
+
+            if (!located) {
+                delete facts[key];
+            }
+        }
+        for (const region of Object.values(imageRegions)) {
+            tasks.push({ type: "image", sortKey: region.page * 1e6 + region.rect.top, region });
+        }
+        tasks.sort((a, b) => a.sortKey - b.sortKey);
+
+        for (const task of tasks) {
+            if (task.type === "content") {
+                this._bindContentFact(viewer, doc, reportIndex, task, facts);
+            }
+            else {
+                this._bindImageRegion(viewer, doc, reportIndex, task.region, facts);
+            }
+        }
+
+        return Promise.resolve();
+    }
+
+    _bindContentFact(viewer, doc, reportIndex, { key, factData, rectSets }, facts) {
+        const overlayNodes = [];
+        const textParts = [];
+        const numericClass = factData.a.u !== undefined ? "ixbrl-element-nonfraction" : "ixbrl-element-nonnumeric";
+        for (const rs of rectSets) {
+            if (rs.text) {
+                textParts.push(rs.text);
+            }
+            for (const rect of rs.rects) {
+                const div = doc.createElement("div");
+                div.className = "ixbrl-element " + numericClass;
+                div.style.left = rect.left + "px";
+                div.style.top = rect.top + "px";
+                div.style.width = rect.width + "px";
+                div.style.height = rect.height + "px";
+                rs.container.appendChild(div);
+                overlayNodes.push(div);
+            }
+        }
+        const vuid = viewerUniqueId(reportIndex, key);
+        const nodes = $(overlayNodes);
+        viewer._addIdToNodes(nodes, vuid);
+        const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+        viewer._docOrderItemIndex.addItem(vuid, 0);
+        viewer.itemContinuationMap[vuid] = [];
+        // Value comes from the OIM (numeric facts) or the mapped MCID text.
+        applyFactValue(factData, ixn, textParts.join(" "));
+    }
+
+    // One overlay div for the whole chart region, shared by all its facts:
+    // selecting any fact highlights the region, and clicking the region surfaces
+    // all of them (they all appear in the div's "ivids" list).
+    _bindImageRegion(viewer, doc, reportIndex, region, facts) {
+        const div = doc.createElement("div");
+        div.className = "ixbrl-element ixbrl-element-nonnumeric xbrl-image-region";
+        div.style.left = region.rect.left + "px";
+        div.style.top = region.rect.top + "px";
+        div.style.width = region.rect.width + "px";
+        div.style.height = region.rect.height + "px";
+        region.container.appendChild(div);
+        const nodes = $([div]);
+        for (const key of region.factKeys) {
             const vuid = viewerUniqueId(reportIndex, key);
-            const nodes = $(overlayNodes);
             viewer._addIdToNodes(nodes, vuid);
             const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
             viewer._docOrderItemIndex.addItem(vuid, 0);
             viewer.itemContinuationMap[vuid] = [];
-
-            // Value comes from the OIM (numeric facts) or the mapped MCID text.
-            applyFactValue(factData, ixn, textParts.join(" "));
+            // Image facts carry an explicit OIM value (the chart has no text).
+            applyFactValue(facts[key], ixn, "");
         }
-
-        return Promise.resolve();
     }
 }

@@ -42,12 +42,24 @@ seams were added:
 
    - `HtmlDocumentSurface` matches each fact's `htmlElementId` to an element id in
      a plain-HTML document and wraps the matched element.
-   - `PdfDocumentSurface` renders the PDF with PDF.js, builds a marked-content-id
-     → rectangle map per page from `getTextContent({ includeMarkedContent: true })`,
-     and lays absolutely-positioned `.ixbrl-element` overlay `<div>`s over each
-     fact's marked-content rectangles (one IXNode per fact, its overlay divs as
-     wrapper nodes).  Selection, highlighting and navigation therefore work
-     unchanged — there is no PDF-specific selection code.
+   - `PdfDocumentSurface` handles the PDF locator types defined by the spec
+     (`factValue.source` → `factSource` → `factMap` → `factLocatorType`):
+     - **content** (`xbrl:pdfContentLocatorType`: `xbrl:pdfPage` + `xbrl:pdfMcid`)
+       — builds a marked-content-id → rectangle map per page from
+       `getTextContent({ includeMarkedContent: true })` and lays one
+       `.ixbrl-element` overlay per fact over its MCID glyph rectangles.
+     - **image** (`xbrl:pdfImageLocatorType`: `xbrl:pdfPage` + `xbrl:pdfBBox`
+       "x0 y0 x1 y1", origin lower-left) — a single overlay per unique
+       page+bbox, i.e. **region-level** highlighting: one embedded chart image is
+       referenced by many facts (the SEC Tailored Shareholder Report pattern), so
+       all of them share one overlay (their vuids all land in its `ivids`) —
+       selecting any highlights the chart, clicking it surfaces the set.
+     - **html fallback** (`xbrl:htmlElementLocatorType`) — facts not located in
+       the PDF; not shown in a PDF view.
+
+     One IXNode per fact, overlay div(s) as wrapper nodes.  Selection,
+     highlighting and navigation work unchanged — there is no PDF-specific
+     selection code.
 
 `XbrlModelViewer` (`xbrlModelViewer.js`) is a thin `Viewer` subclass that
 overrides only the fact-discovery step (`Viewer._processDocuments`) to delegate
@@ -285,6 +297,13 @@ first-page-fast loading:
 - A fact whose value is split across several PDF marked-content ids can show a
   repeated/garbled value (the mapped text concatenates duplicates); it is shown
   as text (never run through numeric formatting), so it doesn't error.
+- `xbrl:pdfFormFieldLocatorType` (a fact located by a PDF form-field name, with
+  no page number) is **not yet implemented** — the observed aligned factsets use
+  content / image / html locators only.  Adding it would extract the field name
+  and scan each page's `getAnnotations()` for the matching field's rectangle.
+- OIM permits a fact to have no entity and/or no period dimension; the viewer now
+  handles that (entity shows "n/a", it no longer assumes an entity is present).
+  Facts whose concept isn't in a loaded taxonomy fall back to the concept QName.
 
 ## Cubes panel
 

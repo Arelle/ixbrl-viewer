@@ -1331,9 +1331,15 @@ export class Inspector {
     }
 
     _updateEntityIdentifier(fact, context) {
-        $('tr.entity-identifier td', context)
-            .empty()
-            .append(Identifiers.readableNameHTML(fact.identifier()));
+        const identifier = fact.identifier();
+        const td = $('tr.entity-identifier td', context).empty();
+        if (identifier === undefined) {
+            // The entity dimension may be absent (permitted by OIM).
+            td.append($('<i></i>').text(i18next.t('common.notApplicable', { defaultValue: 'n/a' })));
+        }
+        else {
+            td.append(Identifiers.readableNameHTML(identifier));
+        }
     }
 
     _footnoteFactsHTML(fact) {

@@ -7,7 +7,7 @@ export class ReportSetOutline {
     }
 
     hasOutline() {
-        return this.outlines.some(o => Object.keys(o.sections).length > 0);
+        return this.outlines.some(o => Object.keys(o.sectionFacts).length > 0);
     }
 
     sortedSections() {
@@ -28,12 +28,8 @@ export class DocumentOutline {
     constructor(report) {
         this.report = report;
         const facts = report.facts().sort((a, b) => a.ixNode.docOrderindex - b.ixNode.docOrderindex);
-        const runLength = {};
-        const runStart = {};
-        const runEnd = {};
-        const longestRun = {};
-        const longestRunStart = {};
-        const longestRunEnd = {};
+        const runFacts = {};
+        const longestRunFacts = {};
         this._buildDimensionMap();
         const elrs = report.relationshipGroups("pres");
         for (const f of facts) {
@@ -42,39 +38,31 @@ export class DocumentOutline {
             }
             for (const elr of elrs) {
                 if (this.factInGroup(f, elr)) {
-                    if (!(elr in runLength)) {
-                        // Start counting a run
-                        runLength[elr] = 0;
-                        runStart[elr] = f;
+                    if (!(elr in runFacts)) {
+                        // Start a new run
+                        runFacts[elr] = [];
                     }
-                    runLength[elr]++;
-                    runEnd[elr] = f;
+                    runFacts[elr].push(f);
                 }
-                else if (elr in runLength) { 
+                else if (elr in runFacts) {
                     // End of a run
-                    if (!(elr in longestRun) || longestRun[elr] < runLength[elr]) {
-                        longestRun[elr] = runLength[elr];
-                        longestRunStart[elr] = runStart[elr];
-                        longestRunEnd[elr] = runEnd[elr];
+                    if (!(elr in longestRunFacts) || longestRunFacts[elr].length < runFacts[elr].length) {
+                        longestRunFacts[elr] = runFacts[elr];
                     }
-                    delete runLength[elr];
-                    delete runStart[elr];
+                    delete runFacts[elr];
                 }
             }
         }
 
         // End of document, check if any current runs are the longest run for the
         // ELR.
-        for (const elr in runLength) {
-            if (!(elr in longestRun) || longestRun[elr] < runLength[elr]) {
-                longestRun[elr] = runLength[elr];
-                longestRunStart[elr] = runStart[elr];
-                longestRunEnd[elr] = runEnd[elr];
+        for (const elr in runFacts) {
+            if (!(elr in longestRunFacts) || longestRunFacts[elr].length < runFacts[elr].length) {
+                longestRunFacts[elr] = runFacts[elr];
             }
         }
 
-        this.sections = longestRunStart;
-        this.sectionEnds = longestRunEnd;
+        this.sectionFacts = longestRunFacts;
     }
 
     // Returns true if a fact participates in the given presentation group.
@@ -164,22 +152,22 @@ export class DocumentOutline {
         const factGroups = [];
         for (const group of this.report.relationshipGroups("pres")) {
             if (this.factInGroup(fact, group)) {
-                factGroups.push({ elr: group, fact: this.sections[group], report: this.report});
+                factGroups.push({ elr: group, fact: this.sectionFacts[group][0], report: this.report});
             }
         }
         return factGroups;
     }
 
     hasOutline() {
-        return Object.keys(this.sections).length > 0;
+        return Object.keys(this.sectionFacts).length > 0;
     }
 
     sortedSections() {
-        const sections = Object.keys(this.sections);
+        const sections = Object.keys(this.sectionFacts);
         const re = /\(parenthetical\)\s*$/i;
         const filteredSections = sections.filter(s => !re.test(this.report.getRoleLabelOrURI(s)));
         return filteredSections
             .sort((a, b) => this.report.getRoleLabelOrURI(a).localeCompare(this.report.getRoleLabelOrURI(b)))
-            .map(elr => ({ report: this.report, firstFact: this.sections[elr], lastFact: this.sectionEnds[elr], elr: elr }));
+            .map(elr => ({ report: this.report, firstFact: this.sectionFacts[elr][0], facts: this.sectionFacts[elr], elr }));
     }
 }

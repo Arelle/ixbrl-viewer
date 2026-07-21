@@ -2,8 +2,10 @@
 
 import $ from 'jquery';
 import { ReportSet } from "./reportset.js";
+import { ReportSetOutline } from "./outline.js";
+import { IXNode } from "./ixnode.js";
 import { TestInspector } from "./test-utils.js";
-import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId } from "./util.js";
+import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId, FACTS_PER_GROUP } from "./util.js";
 
 
 const testReportData = {
@@ -377,6 +379,113 @@ describe("Handle message", () => {
         insp.handleMessage(event);
         expect(mockSelect).not.toHaveBeenCalled();
     })
+});
+
+describe("Facts by group", () => {
+    const groupReportData = {
+        prefixes: {
+            eg: "http://www.example.com",
+        },
+        concepts: {
+            "eg:Root1": { labels: { std: { en: "Root 1" } } },
+            "eg:LineItem1": { labels: { std: { en: "Line Item 1" } } },
+            "eg:LineItem2": { labels: { std: { en: "Line Item 2" } } },
+        },
+        roles: {
+            elr1: "http://www.example.com/elr1",
+            elr2: "http://www.example.com/elr2",
+        },
+        roleDefs: {
+            elr1: { en: "001 Group 1" },
+            elr2: { en: "002 Group 2" },
+        },
+        rels: {
+            pres: {
+                elr1: { "eg:Root1": [{ t: "eg:LineItem1" }] },
+                elr2: { "eg:Root1": [{ t: "eg:LineItem2" }] },
+            },
+        },
+        facts: {},
+        languages: {},
+    };
+
+    // insertionOrder controls the key order of the "facts" object (and thus
+    // reportSet.facts() order); docOrder controls the order IXNode objects
+    // are constructed in, which determines document order (docOrderindex).
+    function buildGroupReportSet(insertionOrder, docOrder, conceptOf) {
+        const data = JSON.parse(JSON.stringify(groupReportData));
+        data.facts = {};
+        for (const id of insertionOrder) {
+            data.facts[id] = { a: { c: conceptOf(id), p: "2019-01-01" } };
+        }
+        const reportSet = new ReportSet(data);
+        const ixNodeMap = {};
+        for (const id of docOrder) {
+            ixNodeMap[viewerUniqueId(0, id)] = new IXNode(id, $('<span></span>'));
+        }
+        reportSet.setIXNodeMap(ixNodeMap);
+        return reportSet;
+    }
+
+    function conceptOf(id) {
+        return id.startsWith("f1") ? "eg:LineItem1" : "eg:LineItem2";
+    }
+
+    function setUpInspector(reportSet) {
+        const insp = new TestInspector();
+        insp._reportSet = reportSet;
+        insp.outline = new ReportSetOutline(reportSet);
+        $("#inspector").remove();
+        $(document.body).append('<div id="inspector"><div class="facts-by-group"></div></div>');
+        return insp;
+    }
+
+    test("only renders facts belonging to the specified group, even when fact-array order differs from document order", () => {
+        // Insertion order into reportSet.facts() puts f2 (an elr2 fact)
+        // between f1 and f1a (both elr1), even though document order is
+        // f1, f1a, f2. This reproduces the bug where index-based slicing of
+        // reportSet.facts() pulled in facts from other groups.
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const groupBodies = $("#inspector .facts-by-group .collapsible-body");
+        const elr1Body = groupBodies.eq(0);
+        const renderedIds = elr1Body.find(".fact-list-item").map((_, el) => $(el).data("ivid")).get();
+        expect(renderedIds).not.toContain(viewerUniqueId(0, "f2"));
+    });
+
+    test("includes the last fact in the group (no off-by-one)", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const elr1Body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        const renderedIds = elr1Body.find(".fact-list-item").map((_, el) => $(el).data("ivid")).get();
+        expect(renderedIds).toEqual([viewerUniqueId(0, "f1"), viewerUniqueId(0, "f1a")]);
+    });
+
+    test("paginates a group's facts with a show-more button", () => {
+        const ids = [];
+        for (let i = 0; i < FACTS_PER_GROUP + 5; i++) {
+            ids.push(`f1-${i}`);
+        }
+        const reportSet = buildGroupReportSet(ids, ids, () => "eg:LineItem1");
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        expect(body.find(".fact-list-item").length).toBe(FACTS_PER_GROUP - 1);
+        expect(body.find(".show-more").length).toBe(1);
+
+        body.find(".show-more").trigger("click");
+
+        expect(body.find(".fact-list-item").length).toBe(ids.length);
+        expect(body.find(".show-more").length).toBe(0);
+    });
 });
 
 describe("_populateFileSummary", () => {

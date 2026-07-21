@@ -294,18 +294,18 @@ export class Inspector {
         }
     }
 
-    addFactListByGroupFacts(container, next, last) {
+    addFactListByGroupFacts(container, facts, next) {
         $(".show-more", container).remove();
-        for (let i = next; i < last; i++) {
+        for (let i = next; i < facts.length; i++) {
             if (i - next >= FACTS_PER_GROUP - 1) {
-                $("<button></button>") 
+                $("<button></button>")
                     .addClass("show-more")
                     .text(i18next.t("inspector.showMore"))
-                    .on("click",  () => this.addFactListByGroupFacts(container, i, last))
+                    .on("click",  () => this.addFactListByGroupFacts(container, facts, i))
                     .appendTo(container);
                 break;
             }
-            this.factListRow(this._reportSet.facts()[i]).appendTo(container);
+            this.factListRow(facts[i]).appendTo(container);
         }
 
     }
@@ -337,9 +337,7 @@ export class Inspector {
                 .addClass("fact-list")
                 .appendTo(section);
 
-            const first = this._reportSet.facts().indexOf(group.firstFact);
-            const last = this._reportSet.facts().indexOf(group.lastFact);
-            this.addFactListByGroupFacts(body, first, last);
+            this.addFactListByGroupFacts(body, group.facts, 0);
         }
     }
 

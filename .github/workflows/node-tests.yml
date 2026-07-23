@@ -24,7 +24,7 @@ jobs:
           - '26'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.0.0
         with:
           cache: 'npm'

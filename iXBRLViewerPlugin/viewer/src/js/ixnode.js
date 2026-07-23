@@ -46,6 +46,12 @@ export class IXNode {
     }
 
     htmlHidden() {
-        return this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is(':hidden') || this.wrapperNodes.is((i,e) => isTransparent($(e).css('color')));
+        // jQuery's ":hidden" pseudo-selector is a Sizzle extension; when the wrapper elements
+        // live in another document (e.g. the PDF surface's iframe) jQuery falls back to the
+        // native matchesSelector, which rejects ":hidden" with a SyntaxError and breaks search.
+        // Use the same layout test jQuery's ":hidden" applies, without the pseudo-selector.
+        const noLayout = (i, e) => !(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+        return this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is(noLayout)
+            || this.wrapperNodes.is((i, e) => isTransparent($(e).css('color')));
     }
 }

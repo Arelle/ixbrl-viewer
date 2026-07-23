@@ -100,7 +100,7 @@ export class Viewer {
                                 viewer._iv.setProgress("Finding untagged numbers and dates").then(() => {
                                     // Temporarily hide all children of "body" to avoid constant
                                     // re-layouts when wrapping untagged numbers
-                                    const children = $(body).children(':visible');
+                                    const children = $(body).children().filter((i, e) => !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length));
                                     children.hide();
                                     $(body).addClass("review");
                                     viewer._wrapUntaggedNumbers($(body), docIndex, false);

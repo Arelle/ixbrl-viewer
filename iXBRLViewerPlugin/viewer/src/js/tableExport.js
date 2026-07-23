@@ -32,7 +32,7 @@ export class TableExport {
         const rows = [];
         table.find("tr").each(function () {
             const row = [];
-            $(this).find("td:visible, th:visible").each(function () {
+            $(this).find("td, th").filter((i, e) => !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length)).each(function () {
                 const colspan = $(this).attr("colspan");
                 if (colspan) {
                     for (let i=0; i < colspan-1; i++) {

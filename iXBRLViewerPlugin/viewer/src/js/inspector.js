@@ -604,7 +604,7 @@ export class Inspector {
         $(".search-controls button.filter-toggle").on("click", () => $(".search-controls").toggleClass('show-filters'));
         $(".search-controls .reset").on("click", () => this.resetSearchFilters());
         $(".search-controls .search-filters .reset-multiselect").on("click", function () {
-            $(this).siblings().children('select option:selected').prop('selected', false);
+            $(this).siblings().find('select option').prop('selected', false);
             inspector.search();
         });
         for (const key of Object.keys(this._search.periods)) {
@@ -674,13 +674,13 @@ export class Inspector {
 
     resetSearchFilters(defaults) {
         defaults = defaults ?? {};
-        $("#search-filter-period select option:selected").prop("selected", false);
+        $("#search-filter-period select option").prop("selected", false);
         $("#search-filter-visibility").val(defaults.visibility ?? "*");
         $("#search-filter-concept-type").val("*");
         $("#search-filter-fact-value").val("*");
         $("#search-mandatory-fact-filter").prop("checked", defaults.mandatoryFacts ?? false);
         for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
-          $(`#${name} select option:selected`).prop("selected", false);
+          $(`#${name} select option`).prop("selected", false);
         }
         this.search();
     }
@@ -729,7 +729,8 @@ export class Inspector {
 
     updateMultiSelectSubheader(id) {
         const subheader = $(`#${id} .collapsible-subheader`);
-        const selectedOptions = $(`#${id} select option:selected`);
+        // jQuery 4 dropped the ":selected" pseudo-selector; filter by the native option state.
+        const selectedOptions = $(`#${id} select option`).filter((i, o) => o.selected);
         if (selectedOptions.length === 1) {
             subheader.text(` ${selectedOptions.text()}`);
         }

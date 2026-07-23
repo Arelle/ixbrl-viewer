@@ -788,6 +788,15 @@ export class Viewer {
         const reportSet = this._reportSet;
         const viewer = this;
         if (on) {
+            // The colour group is a property of the fact's concept namespace, so compute it once
+            // per fact id and cache it -- a document-surface fact can span thousands of overlay
+            // elements (one per glyph rect), and recomputing getItemById()/conceptQName() for each
+            // was O(elements) new Fact objects + QName parses (tens of thousands), the dominant
+            // cost of enabling highlight-on-startup for a large PDF (e.g. L'Oreal, ~26k overlays).
+            // Each element is coloured directly (it is the current .ixbrl-element in the iteration,
+            // and every coloured element is itself iterated), so primaryElementsForItemIds is not
+            // needed.
+            const colourForId = {}; // ixn.id -> colour index (or null when its namespace has none)
             $(".ixbrl-element", this._contents)
                 .addClass("ixbrl-highlight")
                 .each(function () {
@@ -796,15 +805,17 @@ export class Viewer {
                     // highlight color for an element that is double tagged in a
                     // table cell.
                     const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
-                    if (ixn !== undefined ) {
+                    if (ixn === undefined) {
+                        return;
+                    }
+                    let i = colourForId[ixn.id];
+                    if (i === undefined) {
                         const item = reportSet.getItemById(ixn.id);
-                        if (item !== undefined) {
-                            const elements = viewer.primaryElementsForItemIds(ixn.chainIXIds());
-                            const i = groups[item.conceptQName().prefix];
-                            if (i !== undefined) {
-                                elements.addClass("ixbrl-highlight-" + i);
-                            }
-                        }
+                        i = (item !== undefined) ? (groups[item.conceptQName().prefix] ?? null) : null;
+                        colourForId[ixn.id] = i;
+                    }
+                    if (i !== null) {
+                        this.classList.add("ixbrl-highlight-" + i);
                     }
             });
         }

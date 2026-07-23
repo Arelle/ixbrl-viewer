@@ -236,7 +236,14 @@ export class PdfDocumentSurface {
     }
 
     _renderVisible(win) {
-        const viewportHeight = win.innerHeight || 900;
+        // Bail until the iframe is actually laid out. Before the loader overlay is removed the
+        // iframe has no height and every page container's getBoundingClientRect() is 0/0/0/0, so
+        // ALL pages would test as "near" (top 0 < margin, bottom 0 > -margin) and rasterize at
+        // once -- catastrophic for a large, graphics-heavy PDF (e.g. L'Oreal's 272-page report).
+        if (!win.innerHeight) {
+            return;
+        }
+        const viewportHeight = win.innerHeight;
         const margin = 1000; // render a little beyond the viewport (prefetch)
         for (const num of Object.keys(this._pages)) {
             const rect = this._pages[num].container.getBoundingClientRect();
@@ -455,6 +462,7 @@ export class PdfDocumentSurface {
         const nodes = $([div]);
         viewer._addIdToNodes(nodes, vuid);
         const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+        ixn._htmlHiddenCache = false; // PDF overlays are positioned divs, never html-hidden -- skip the costly layout probe
         viewer._docOrderItemIndex.addItem(vuid, 0);
         viewer.itemContinuationMap[vuid] = [];
         // Value: the OIM fact value if present, else the form field's own value.
@@ -484,6 +492,7 @@ export class PdfDocumentSurface {
         const nodes = $(overlayNodes);
         viewer._addIdToNodes(nodes, vuid);
         const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+        ixn._htmlHiddenCache = false; // PDF overlays are positioned divs, never html-hidden -- skip the costly layout probe
         viewer._docOrderItemIndex.addItem(vuid, 0);
         viewer.itemContinuationMap[vuid] = [];
         // Value comes from the OIM (numeric facts) or the mapped MCID text.
@@ -506,6 +515,7 @@ export class PdfDocumentSurface {
             const vuid = viewerUniqueId(reportIndex, key);
             viewer._addIdToNodes(nodes, vuid);
             const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+            ixn._htmlHiddenCache = false; // PDF overlays are positioned divs, never html-hidden -- skip the costly layout probe
             viewer._docOrderItemIndex.addItem(vuid, 0);
             viewer.itemContinuationMap[vuid] = [];
             // Image facts carry an explicit OIM value (the chart has no text).

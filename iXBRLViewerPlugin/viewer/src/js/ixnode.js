@@ -46,12 +46,20 @@ export class IXNode {
     }
 
     htmlHidden() {
-        // jQuery's ":hidden" pseudo-selector is a Sizzle extension; when the wrapper elements
-        // live in another document (e.g. the PDF surface's iframe) jQuery falls back to the
-        // native matchesSelector, which rejects ":hidden" with a SyntaxError and breaks search.
-        // Use the same layout test jQuery's ":hidden" applies, without the pseudo-selector.
-        const noLayout = (i, e) => !(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
-        return this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is(noLayout)
-            || this.wrapperNodes.is((i, e) => isTransparent($(e).css('color')));
+        // Cached: the hidden state is a static property of the document, but this test reads
+        // layout (getClientRects/offsetWidth) and computed style for every wrapper node, which
+        // is called once per fact during search -- pathological for a document surface whose
+        // facts span tens of thousands of overlay nodes (a full forced reflow each time). A
+        // surface that knows its overlays are never hidden pre-seeds `_htmlHiddenCache = false`.
+        if (this._htmlHiddenCache === undefined) {
+            // jQuery's ":hidden" pseudo-selector is a Sizzle extension; jQuery 4 delegates to the
+            // native matchesSelector, which rejects ":hidden" with a SyntaxError (and it breaks
+            // for elements in another document, e.g. the PDF surface's iframe). Use the same
+            // layout test jQuery's ":hidden" applies, without the pseudo-selector.
+            const noLayout = (i, e) => !(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+            this._htmlHiddenCache = this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is(noLayout)
+                || this.wrapperNodes.is((i, e) => isTransparent($(e).css('color')));
+        }
+        return this._htmlHiddenCache;
     }
 }

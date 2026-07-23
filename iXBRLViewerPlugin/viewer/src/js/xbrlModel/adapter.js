@@ -70,6 +70,7 @@ function cleanCubeLabel(name) {
     return localName(name)
         .replace(/_Cube$/, "")
         .replace(/^.*?Table_/, "")
+        .replace(/^group_/, "")
         .replace(/_/g, " ")
         .trim() || localName(name);
 }
@@ -77,6 +78,67 @@ function cleanCubeLabel(name) {
 function firstStdLabel(labelsByObject, name) {
     const std = labelsByObject[name]?.std;
     return std ? Object.values(std)[0] : undefined;
+}
+
+function cleanGroupLabel(name) {
+    return localName(name)
+        .replace(/^group_cat_/, "")
+        .replace(/^group_/, "")
+        .replace(/_/g, " ")
+        .trim() || localName(name);
+}
+
+// Reporting-structure sections (the OIM groupTree + groups + groupContents) used to
+// organize the Cubes navigation panel hierarchically.  Each node is
+// { name, label, cubes: [cubeName], children: [node] }, nested per the groupTree's
+// xbrl:taxonomy-group relationships (source = the taxonomy for a top-level group, or a
+// parent group; target = a child group) in relationship order.  Only cube contents are
+// carried as leaves; a section whose subtree contains no cube is hidden by the consumer.
+// Returns null when the model carries no group tree (viewer falls back to the flat cube list).
+function buildSections(taxonomy, labelsByObject) {
+    const groups = taxonomy.groups ?? [];
+    const groupTree = taxonomy.groupTree;
+    if (groups.length === 0 || !groupTree) {
+        return null;
+    }
+    const cubeNames = new Set((taxonomy.cubes ?? []).map(c => c.name));
+    const cubesByGroup = {};
+    for (const gc of taxonomy.groupContents ?? []) {
+        if (cubeNames.has(gc.forObject)) {
+            (cubesByGroup[gc.groupName] ??= []).push(gc.forObject);
+        }
+    }
+    const nodeByName = {};
+    for (const g of groups) {
+        nodeByName[g.name] = {
+            name: g.name,
+            label: firstStdLabel(labelsByObject, g.name) ?? cleanGroupLabel(g.name),
+            cubes: cubesByGroup[g.name] ?? [],
+            children: [],
+        };
+    }
+    const placed = new Set();
+    const roots = [];
+    for (const rel of groupTree.relationships ?? []) {
+        const child = nodeByName[rel.target];
+        if (!child || placed.has(rel.target)) {
+            continue;
+        }
+        const parent = nodeByName[rel.source]; // undefined when source is the taxonomy (top level)
+        if (parent) {
+            parent.children.push(child);
+        }
+        else {
+            roots.push(child);
+        }
+        placed.add(rel.target);
+    }
+    for (const g of groups) { // groups not placed by any relationship list flat at the top
+        if (!placed.has(g.name)) {
+            roots.push(nodeByName[g.name]);
+        }
+    }
+    return roots.length ? roots : null;
 }
 
 // Cubes (hypercubes/tables) are the semantic structures of the XBRL model.  A
@@ -560,6 +622,7 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
     }
 
     const cubes = buildCubes(taxonomy, labelsByObject);
+    const sections = buildSections(taxonomy, labelsByObject);
 
     const documentFile = options.documentFile;
     const reportData = {
@@ -568,6 +631,7 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
         rels,
         roleDefs,
         cubes,
+        sections,
         localDocs: documentFile ? { [documentFile]: ["inline"] } : {},
     };
 

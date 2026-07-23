@@ -216,6 +216,16 @@ export class XBRLReport {
         return this._reportData.cubes ?? [];
     }
 
+    /*
+     * Returns the reporting-structure section tree (OIM groupTree) that organizes this
+     * report's cubes, or null when the report carries no group tree (the Cubes panel then
+     * falls back to a flat cube list).  Each node is
+     * { name, label, cubes: [cubeName], children: [node] }.
+     */
+    sections() {
+        return this._reportData.sections ?? null;
+    }
+
     qname(v) {
         return this.reportSet.qname(v);
     }

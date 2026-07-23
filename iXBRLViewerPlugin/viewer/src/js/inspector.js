@@ -928,24 +928,83 @@ export class Inspector {
         }
 
         const conceptFacts = this._reportSet.conceptFactsIndex();
-        const cubes = this._reportSet.cubes()
-            .map(cube => {
-                const facts = cube.concepts.flatMap(c => conceptFacts[c] ?? []);
-                return { cube, facts };
-            })
-            .filter(c => c.facts.length > 0)
-            .sort((a, b) => b.facts.length - a.facts.length);
+        const cubesByName = {};
+        for (const c of this._reportSet.cubes()) {
+            cubesByName[c.name] = c;
+        }
+        const cubeFacts = (name) =>
+            (cubesByName[name]?.concepts ?? []).flatMap(c => conceptFacts[c] ?? []);
 
-        $('.cubes .no-cubes-overlay').toggle(cubes.length === 0);
-        const body = $('.cubes .body').empty();
-        const container = $('<div class="fact-list"></div>').appendTo(body);
-        for (const { cube, facts } of cubes) {
-            const item = $('<button class="fact-list-item"></button>')
+        // A single cube, rendered as a clickable row (label + line-item fact count).
+        // labelOverride lets a collapsed single-cube section show the section's name.
+        const renderCubeLeaf = (cube, facts, container, labelOverride) => {
+            const item = $('<button class="fact-list-item cube-leaf"></button>')
                 .on("click", () => this.selectItem(facts[0].vuid))
                 .on("mousedown", (e) => { if (e.detail > 1) { e.preventDefault(); } })
                 .appendTo(container);
-            $('<span class="cube-label"></span>').text(cube.label).appendTo(item);
+            $('<span class="cube-label"></span>').text(labelOverride ?? cube.label).appendTo(item);
             $('<span class="cube-count"></span>').text(facts.length).appendTo(item);
+        };
+
+        const body = $('.cubes .body').empty();
+        const sections = this._reportSet.sections();
+
+        if (sections) {
+            // Hierarchical: the reporting-structure tree (OIM groupTree) with cubes as leaves.
+            // A section is rendered only when its subtree contains at least one cube that has
+            // facts in the document, so empty sections are hidden.  Returns the subtree fact count.
+            const renderNode = (node, container) => {
+                const leaves = node.cubes
+                    .map(n => ({ cube: cubesByName[n], facts: cubeFacts(n) }))
+                    .filter(l => l.cube && l.facts.length > 0);
+                const childWrap = $('<div class="section-children"></div>');
+                let childTotal = 0;
+                for (const child of node.children) {
+                    childTotal += renderNode(child, childWrap);
+                }
+                const hasChildren = childWrap.children().length > 0;
+                if (leaves.length === 0 && !hasChildren) {
+                    return 0; // empty section -- hide it
+                }
+                // Collapse a section whose only content is a single cube into that cube (shown
+                // with the section's name), avoiding a redundant "section > single cube" level.
+                if (leaves.length === 1 && !hasChildren) {
+                    renderCubeLeaf(leaves[0].cube, leaves[0].facts, container, node.label);
+                    return leaves[0].facts.length;
+                }
+                const total = leaves.reduce((s, l) => s + l.facts.length, 0) + childTotal;
+                const section = $('<div class="section-node"></div>').appendTo(container);
+                const header = $('<button class="section-header"></button>')
+                    .on("click", () => section.toggleClass("collapsed"))
+                    .appendTo(section);
+                $('<span class="section-twisty"></span>').appendTo(header);
+                $('<span class="section-label"></span>').text(node.label).appendTo(header);
+                $('<span class="cube-count"></span>').text(total).appendTo(header);
+                const content = $('<div class="section-content"></div>').appendTo(section);
+                for (const { cube, facts } of leaves) {
+                    renderCubeLeaf(cube, facts, content);
+                }
+                childWrap.appendTo(content);
+                return total;
+            };
+            const container = $('<div class="section-tree"></div>').appendTo(body);
+            let shown = 0;
+            for (const root of sections) {
+                shown += renderNode(root, container);
+            }
+            $('.cubes .no-cubes-overlay').toggle(shown === 0);
+        }
+        else {
+            // Flat fallback: report has no group tree -- list cubes by descending fact count.
+            const cubes = this._reportSet.cubes()
+                .map(cube => ({ cube, facts: cubeFacts(cube.name) }))
+                .filter(c => c.facts.length > 0)
+                .sort((a, b) => b.facts.length - a.facts.length);
+            $('.cubes .no-cubes-overlay').toggle(cubes.length === 0);
+            const container = $('<div class="fact-list"></div>').appendTo(body);
+            for (const { cube, facts } of cubes) {
+                renderCubeLeaf(cube, facts, container);
+            }
         }
     }
 

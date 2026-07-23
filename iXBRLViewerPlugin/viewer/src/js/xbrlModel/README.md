@@ -29,7 +29,9 @@ seams were added:
    accepted), or a synthesised id carrying `xbrl:pdfPage`/`xbrl:pdfMcid` locators
    for the PDF surface.  OIM networks become the viewer's ELR-keyed `pres`/`calc11`
    relationships; explicit vs typed dimensions are classified from whether a cube
-   dimension has a `domainNetwork`.
+   dimension has a `domainNetwork`; and the OIM `groupTree` becomes a
+   reporting-structure section tree that organises the Cubes panel (see
+   [Cubes panel](#cubes-panel-reporting-structure-section-tree)).
 
 2. **Document surface** — loads the document into the viewer's iframe
    (`prepareDocument`) and binds facts to it (`bind`).  `prepareDocument` accepts
@@ -306,18 +308,42 @@ first-page-fast loading:
   handles that (entity shows "n/a", it no longer assumes an entity is present).
   Facts whose concept isn't in a loaded taxonomy fall back to the concept QName.
 
-## Cubes panel
+## Cubes panel (reporting-structure section tree)
 
 The inspector has a native **Cubes** navigation panel (a mode button next to
 Document Outline).  The adapter reads the taxonomy's cubes, resolving each cube's
 `xbrl:concept` dimension domain network into its line-item concepts
 (`XBRLReport.cubes()`); the inspector lists each cube with the number of its
 facts present in the document and navigates to them on click
-(`ReportSet.conceptFactsIndex()`).  The button is gated on
-`ReportSet.hasCubes()`, so it only appears for XBRL Model reports and the iXBRL
-viewer is unaffected.  (A separate Networks panel was intentionally not added -
-the Document Outline, built from the presentation/parent-child networks, already
-covers that.)
+(`ReportSet.conceptFactsIndex()`).  The button is gated on `ReportSet.hasCubes()`,
+so it only appears for XBRL Model reports and the iXBRL viewer is unaffected.
+
+When the model carries a **group tree** (the OIM `groupTree` — the reporting
+structure the legacy loader infers from SEC/IFRS role conventions, see
+`oim-taxonomy-conversion.md`), the panel renders the cubes **hierarchically** by
+reporting section rather than as a flat list:
+
+- `adapter.buildSections` turns `groupTree` + `groups` + `groupContents` into a
+  nested tree (`{ name, label, cubes, children }`), ordered by the
+  `xbrl:taxonomy-group` relationships (a top-level group's source is
+  `xbrl:rootSource`); `XBRLReport.sections()` / `ReportSet.sections()` expose it.
+- The inspector nests each cube under its reporting section (categories such as
+  *Cover* / *Notes to Financial Statements* / *Details* as expandable parents),
+  rolls a fact count up each section, and **hides empty sections** (a section
+  whose subtree contains no cube with facts in the document).
+- A section whose only content is a **single cube** is collapsed into that cube
+  (shown with the section's name), so there is no redundant "section → lone cube"
+  level.
+- When the model has **no** group tree, the panel falls back to the original flat
+  cube list (ordered by descending fact count).
+
+Note the reporting structure is pruned to the reported facts: the `report` save
+mode drops empty abstract subgroups (see `PruneModel.py`), so the sections the
+viewer shows match what a machine consumer reads from the same compiled model —
+the UI's empty-section hiding is then only a safety net.
+
+(A separate Networks panel was intentionally not added — the Document Outline,
+built from the presentation/parent-child networks, already covers that.)
 
 ## Planned refactor: move this overlay into a standalone plugin
 

@@ -1,18 +1,24 @@
 {
   "calculation": {
-    "calculated-total": "",
-    "concept": "",
-    "consistent-duplicate-facts-present": "",
-    "does-not-bind": "",
-    "inconsistent-duplicate-facts-present": "",
-    "maximum": "",
-    "minimum": "",
-    "reported-total": "",
-    "reported-value": "",
-    "useCalculations11": ""
+    "calculated-total": "Calculado",
+    "calculationIsConsistent": "El cálculo es coherente",
+    "calculationIsInconsistent": "El cálculo no es coherente",
+    "concept": "Concepto",
+    "consistent-duplicate-facts-present": "{{nfacts}} hechos duplicados coherentes presentes",
+    "does-not-bind": "El cálculo no vincula",
+    "inconsistent-duplicate-facts-present": "{{nfacts}} hechos duplicados incoherentes presentes",
+    "maximum": "Máximo",
+    "minimum": "Mínimo",
+    "notReported": "no reportado",
+    "reported-total": "Reportado",
+    "reported-value": "Valor reportado",
+    "showDetails": "Mostrar detalles",
+    "status": "Estado",
+    "useCalculations11": "Usar cálculos v1.1",
+    "useLegacyCalculations": "Usar cálculos heredados"
   },
   "chart": {
-    "comparisonChart": ""
+    "comparisonChart": "Gráfico comparativo"
   },
   "common": {
     "accuracyInfinite": "Precisió infinita",
@@ -22,158 +28,183 @@
     "unspecified": "Sin especificar"
   },
   "dialog": {
-    "close": ""
+    "close": "cerrar"
   },
   "factDetails": {
     "accuracy": "Precisión",
-    "balance": "",
-    "calculationIsConsistent": "",
-    "calculationIsInconsistent": "",
-    "calculationUnchecked": "",
-    "calculationUncheckedIncorrectVersion": "",
+    "balance": "Saldo",
+    "calculationUnchecked": "Cálculo no verificado debido a la presencia de hechos duplicados",
+    "calculationUncheckedIncorrectVersion": "Las relaciones de Cálculo 1.1 no se verificaron en el modo de cálculo heredado",
+    "calculationValuesDoNotMatch": "Los valores reportados y calculados no coinciden",
+    "calculationValuesMatch": "Los valores reportados y calculados coinciden",
     "change": "Cambio",
     "changeFromIn": "Anteriormente {{from}} en ",
     "changePercentageDecrease": "{{decrease}}% menos que en ",
     "changePercentageIncrease": "{{increase}}% más que en ",
     "concept": "Concepto",
-    "datatype": "",
+    "datatype": "Tipo",
     "date": "Fecha",
     "dimensions": "Dimensiones",
     "duplicatesCount": "{{current}} de {{total}}",
     "entity": "Entidad",
+    "factCount": "{{current}} de {{total}}",
     "factValue": "Valor del hecho",
-    "nonNumericFact": "",
+    "nestedFactSummary": "Mostrando {{current}} de {{total}} hechos anidados:",
+    "nonNumericFact": "hecho no numérico",
     "noPriorFactInThisReport": "No hay un hecho previo",
     "noUnit": "Sin unidad",
     "properties": "Características",
     "scale": "Escala",
-    "viewCalculationDetails": ""
+    "source": "Fuente",
+    "viewCalculationDetails": "Ver detalles del cálculo"
   },
   "footnotes": {
+    "content": "Contenido",
     "footnote": "Nota al pie de página"
   },
   "inspector": {
     "anchoring": "Anclaje",
     "associatedFacts": "Hechos asociados",
-    "calculationDetails": "",
+    "calculationDetails": "Detalles del cálculo",
     "calculations": "Cálculos",
-    "concealedFact": "",
+    "concealedFact": "Hecho oculto",
     "conceptType": "Tipo de concepto",
-    "contributor": "",
+    "contributor": "Colaborador",
     "datatypes": "Tipos de datos",
     "dimensions": "Tipo de dimensión",
-    "documentOutline": "Esquema del documento",
-    "documentSummary": "Resumen del documento",
-    "explicitDimension": "",
-    "fact-groups": "",
-    "factProperties": "Propiedades del hecho",
+    "documentation": "Documentación",
+    "explicitDimension": "Dimensiones explícitas",
+    "fact-groups": "Secciones",
     "factSearch": "Búsqueda de hechos",
-    "factValue": "",
-    "footnoteProperties": "Propiedades de la nota al pie de página",
+    "factValue": "Valor del hecho",
     "footnotes": "Notas al pie de página",
+    "goToReference": "Ir a la referencia",
     "hidden": "Oculto",
     "hiddenFact": "Hecho oculto",
-    "highlight": "Destacar",
-    "initializing": "",
-    "ixbrlInspector": "",
-    "labels": "",
+    "highlightMenu": "Opciones de resaltado",
+    "highlightTags": "Resaltar etiquetas",
+    "highlightUntaggedDates": "Resaltar fechas sin etiquetar",
+    "highlightUntaggedNumbers": "Resaltar números sin etiquetar",
+    "initializing": "Inicializando",
+    "ixbrlInspector": "Inspector iXBRL",
+    "labels": "Etiquetas",
+    "language": "Idioma",
     "loadingViewer": "Preparando el visor iXBRL",
     "mandatoryFacts": "Sólo hechos obligatorios",
     "namespaces": "Espacios de nombres",
-    "narrowerAnchor": "Anclaje angosto",
+    "narrowerAnchors": "Anclajes más estrechos",
     "negative": "Negativo",
-    "nextTag": "",
+    "nextTag": "Siguiente etiqueta",
+    "noCalculations": "Sin cálculos",
+    "noDimensions": "Sin dimensiones",
     "noFactSelected": "Ningún hecho seleccionado",
     "numericOption": "Numérico",
-    "outlineUnavailable": "",
+    "occurrences": "Ocurrencias",
+    "otherFacts": "Otros hechos",
     "period": "Periodo",
     "positive": "Positivo",
-    "previousTag": "",
-    "printDocument": "",
+    "previousTag": "Etiqueta anterior",
+    "printDocument": "Imprimir documento",
     "references": "Referencias",
-    "reset": "Limpiar",
     "scales": "Escalas",
-    "search": "Buscar",
-    "searchReport": "",
-    "searchResults": "",
-    "searchTitle": "Búsqueda de hechos",
-    "settingsMenu": "",
-    "showAnalysisChart": "",
-    "showTextOnly": "",
+    "searchReport": "Buscar en el informe iXBRL",
+    "searchResults": "Resultados de búsqueda",
+    "settings": {
+      "calculationMode": {
+        "documentation": "Seleccione el modo de evaluación de cálculo para las relaciones de cálculo heredadas",
+        "title": "Modo de cálculo"
+      },
+      "colorMode": {
+        "documentation": "Elija si la apariencia del Visor en Línea debe ser clara u oscura",
+        "title": "Modo de color del visor"
+      },
+      "plugins": {
+        "title": "Complementos"
+      },
+      "title": "Configuración",
+      "viewerLanguage": {
+        "documentation": "Seleccione el idioma que le gustaría usar con el Visor en Línea",
+        "title": "Idioma del visor"
+      }
+    },
+    "settingsButton": "Configuración",
+    "showAnalysisChart": "Mostrar gráfico de análisis",
+    "showMore": "Mostrar más",
+    "showTextOnly": "Mostrar solo texto",
     "summary": {
+      "about": {
+        "entity": "Entidad",
+        "name": "Nombre",
+        "seeMoreReferenceData": "Ver más datos de referencia de {{type}}",
+        "title": "Título"
+      },
+      "aboutCompany": {
+        "header": "Sobre la empresa"
+      },
+      "downloads": {
+        "header": "Descargas"
+      },
       "fact": {
         "header": "Resumen de los hechos",
         "hidden": "Hechos ocultos",
         "mandatory": "Hechos obligatorios",
         "total": "Hechos totales"
       },
-      "file": {
-        "calculations": "",
-        "definitions": "",
-        "header": "Resumen del archivo",
-        "inline": "Documentos en línea",
-        "labels": "",
-        "other": "",
-        "presentation": "",
-        "references": "",
-        "schemas": ""
+      "factSource": "Fuente de los hechos",
+      "includedDocuments": {
+        "header": "Documentos incluidos"
       },
-      "reportCreation": "",
+      "reportCreation": "Creación de informe",
       "tag": {
         "colConcepts": "Conceptos",
         "colDimensions": "Dimensiones",
         "colMembers": "Miembros",
         "colNamespace": "Espacio de nombres",
-        "colTotal": "Total",
-        "header": "Resumen de la etiqueta",
         "rowTotal": "Total"
       }
     },
-    "summation": "",
-    "targetDocument": "",
+    "summation": "Suma",
+    "tabs": {
+      "overview": "Resumen",
+      "search": "Buscar",
+      "xbrlFacts": "Hechos XBRL"
+    },
+    "targetDocument": "Documento de destino",
     "textOption": "Texto",
-    "typedDimensions": "",
+    "typedDimensions": "Dimensiones tipificadas",
     "units": "Unidads",
-    "validationCode": "",
-    "validationMessage": "",
-    "validationResults": "",
-    "validationSeverity": "",
+    "validationCode": "Código",
+    "validationMessage": "Mensaje",
+    "validationResults": "Resultados de validación",
+    "validationSeverity": "Gravedad",
     "visibility": "Visibilidad",
     "visible": "Visible",
-    "widerAnchor": "Anclaje amplio",
+    "widerAnchors": "Anclajes más amplios",
     "xbrlGlossaryOpensInNewTab": "Glosario XBRL (se abre en una pestaña nueva)"
   },
   "menu": {
-    "actions": "Comportamientos",
-    "applicationLanguage": "Idioma de Aplicación",
     "contactUs": "Contacta con nosotros",
-    "documentLanguage": "Idioma del Documento",
-    "help": "Ayuda",
-    "options": "Opciones",
     "survey": "Encuesta",
     "userGuide": "Guía del Usuario"
   },
   "search": {
-    "concealedFact": "",
-    "dataTypeConflictWarning": "",
-    "default": "",
-    "filter": "Filtro",
+    "concealedFact": "Hecho oculto",
+    "default": "predeterminado",
     "hiddenFact": "Hecho oculto",
-    "matchingFactsSummary": "",
+    "matchingFactsSummary": "Mostrando {{nMatches}} de {{nTotal}} hechos",
     "noMatchFound": "No se encontró ninguna coincidencia",
-    "reset": "",
-    "selected": "seleccionados",
+    "resetFilters": "Restablecer filtros",
     "showMoreResults": "Mostrar más resultados",
-    "toggleFilterControls": "",
-    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes",
-    "viewFact": ""
+    "showResults": "Mostrar resultados",
+    "toggleFilterControls": "Alternar controles de filtro",
+    "tryAgainDifferentKeywords": "Intente nuevamente con palabras clave diferentes"
   },
   "toolbar": {
-    "homePage": "Inicio",
-    "toggleDarkMode": "Alternar modo oscuro",
-    "xbrlElements": "Elementos XBRL"
+    "homePage": "Inicio"
   },
   "viewer": {
-    "ixbrlDocumentView": ""
+    "ixbrlDocumentView": "Vista de documento iXBRL",
+    "zoomIn": "acercar",
+    "zoomOut": "alejar"
   }
 }

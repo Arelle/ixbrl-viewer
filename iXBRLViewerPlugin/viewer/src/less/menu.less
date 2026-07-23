@@ -109,13 +109,20 @@
         }
       }
     }
-  }
 
-  .toolbar-menu {
-    .menu-checkbox {
-      .wk-checkbox();
+    // A menu whose content should render inline in its container (e.g. a
+    // settings page section) rather than as a fixed-position dropdown.
+    &.inline-menu {
+      line-height: initial;
 
-      margin-left: 1.8rem;
+      .content-container {
+        position: static;
+        display: block;
+
+        .content {
+          border: none;
+        }
+      }
     }
   }
 }

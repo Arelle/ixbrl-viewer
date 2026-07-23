@@ -3,6 +3,8 @@
 import {iXBRLViewer} from "./ixbrlviewer";
 import {
     FEATURE_GUIDE_LINK,
+    FEATURE_HOME_LINK_LABEL,
+    FEATURE_HOME_LINK_URL,
     FEATURE_REVIEW,
     FEATURE_SUPPORT_LINK,
     FEATURE_SURVEY_LINK,
@@ -168,6 +170,29 @@ describe("Survey link enablement", () => {
     test("Survey link disabled by query", () => {
         viewer.setFeatures({[FEATURE_SURVEY_LINK]: '/survey'}, FEATURE_SURVEY_LINK + '=false')
         expect(viewer.getSurveyLinkUrl()).toEqual('/survey');
+    });
+});
+
+describe("Home link feature values", () => {
+    var viewer = null;
+    beforeAll(() => {
+        viewer = new iXBRLViewer({})
+    });
+
+    test("getStaticFeatureValue returns configured home link url and label", () => {
+        viewer.setFeatures({[FEATURE_HOME_LINK_URL]: '/home', [FEATURE_HOME_LINK_LABEL]: 'Home'}, '')
+        expect(viewer.getStaticFeatureValue(FEATURE_HOME_LINK_URL)).toEqual('/home');
+        expect(viewer.getStaticFeatureValue(FEATURE_HOME_LINK_LABEL)).toEqual('Home');
+    });
+
+    test("Query string cannot override static-only home link url", () => {
+        viewer.setFeatures({[FEATURE_HOME_LINK_URL]: '/home'}, FEATURE_HOME_LINK_URL + '=/other')
+        expect(viewer.getStaticFeatureValue(FEATURE_HOME_LINK_URL)).toEqual('/home');
+    });
+
+    test("Query string cannot override static-only home link label", () => {
+        viewer.setFeatures({[FEATURE_HOME_LINK_LABEL]: 'Home'}, FEATURE_HOME_LINK_LABEL + '=Other')
+        expect(viewer.getStaticFeatureValue(FEATURE_HOME_LINK_LABEL)).toEqual('Home');
     });
 });
 

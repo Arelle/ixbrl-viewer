@@ -16,6 +16,7 @@ from .mock_arelle import mock_arelle
 
 mock_arelle()
 
+from iXBRLViewerPlugin.constants import MANDATORY_FACTS
 from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewerFile
 
 class TestNamespaceMap:
@@ -814,6 +815,124 @@ class TestIXBRLViewer:
         assert facts.keys() == {"fact_id2", "fact_id3"}
         assert facts["fact_id2"]["a"]["u"] == "iso4217:USD"
         assert facts["fact_id3"]["a"]["u"] is None
+
+    def test_MANDATORY_FACTS_companies_house_contains_expected_facts(self):
+        """
+        MANDATORY_FACTS['companies-house'] should list the FRC-mandated
+        Companies House facts.
+        """
+        assert MANDATORY_FACTS['companies-house'] == [
+            "UKCompaniesHouseRegisteredNumber",
+            "EntityCurrentLegalOrRegisteredName",
+            "BalanceSheetDate",
+            "DateAuthorisationFinancialStatementsForIssue",
+            "DirectorSigningFinancialStatements",
+            "EntityDormantTruefalse",
+            "EntityTradingStatus",
+            "AccountsStatusAuditedOrUnaudited",
+            "AccountsTypeFullOrAbbreviated",
+            "AccountingStandardsApplied",
+            "LegalFormEntity",
+            "StartDateForPeriodCoveredByReport",
+            "EndDateForPeriodCoveredByReport",
+            "CharityRegistrationNumberEnglandWales",
+            "CharityRegistrationNumberScotland",
+            "CharityRegistrationNumberNorthernIreland",
+        ]
+
+    def test_addFact_stamps_m_aspect_true_for_mandatory_concept(self):
+        """
+        When the `mandatory_facts` feature selects the `companies-house`
+        profile, addFact should stamp `m: True` on a fact whose concept is
+        in that profile's mandatory facts list.
+        """
+        builder = IXBRLViewerBuilder(self.cntlr_mock, features={'mandatory_facts': 'companies-house'})
+        builder.footnoteRelationshipSet = Mock(fromModelObject=Mock(return_value=[]))
+        builder.currentTargetReport = builder.newTargetReport(None)
+
+        mandatory_qname = Mock(
+            localName='UKCompaniesHouseRegisteredNumber',
+            prefix='uk-bus',
+            namespaceURI='http://xbrl.frc.org.uk/cd/2021-01-01/business'
+        )
+        mandatory_concept = Mock(
+            spec=ModelConcept,
+            qname=mandatory_qname,
+            balance=None,
+            isTypedDimension=False,
+            isEnumeration=False,
+            isTextBlock=False,
+            type=self.string_type,
+            modelXbrl=self.modelXbrl_1,
+        )
+        fact = Mock(
+            id='fact_mandatory',
+            qname=mandatory_qname,
+            concept=mandatory_concept,
+            context=Mock(
+                entityIdentifier=('scheme', 'ident'),
+                qnameDims={},
+                isForeverPeriod=False,
+                isInstantPeriod=False,
+                isStartEndPeriod=False,
+            ),
+            isNumeric=False,
+            isNil=False,
+            isTuple=False,
+            value='12345678',
+            format=None,
+        )
+
+        builder.addFact(self.modelXbrl_1, fact)
+
+        assert builder.currentTargetReport["facts"]["fact_mandatory"]["a"]["m"] is True
+
+    def test_addFact_stamps_m_aspect_false_for_non_mandatory_concept(self):
+        """
+        Even with the `companies-house` mandatory_facts profile selected,
+        addFact should stamp `m: False` on a fact whose concept is not in
+        that profile's mandatory facts list.
+        """
+        builder = IXBRLViewerBuilder(self.cntlr_mock, features={'mandatory_facts': 'companies-house'})
+        builder.footnoteRelationshipSet = Mock(fromModelObject=Mock(return_value=[]))
+        builder.currentTargetReport = builder.newTargetReport(None)
+
+        non_mandatory_qname = Mock(
+            localName='Cash',
+            prefix='us-gaap',
+            namespaceURI='http://viewer.com'
+        )
+        non_mandatory_concept = Mock(
+            spec=ModelConcept,
+            qname=non_mandatory_qname,
+            balance=None,
+            isTypedDimension=False,
+            isEnumeration=False,
+            isTextBlock=False,
+            type=self.monetary_type,
+            modelXbrl=self.modelXbrl_1,
+        )
+        fact = Mock(
+            id='fact_non_mandatory',
+            qname=non_mandatory_qname,
+            concept=non_mandatory_concept,
+            context=Mock(
+                entityIdentifier=('scheme', 'ident'),
+                qnameDims={},
+                isForeverPeriod=False,
+                isInstantPeriod=False,
+                isStartEndPeriod=False,
+            ),
+            isNumeric=False,
+            isNil=False,
+            isTuple=False,
+            value='1000',
+            format=None,
+        )
+
+        builder.addFact(self.modelXbrl_1, fact)
+
+        assert builder.currentTargetReport["facts"]["fact_non_mandatory"]["a"]["m"] is False
 
     def test_enableFeature_valid(self):
         """

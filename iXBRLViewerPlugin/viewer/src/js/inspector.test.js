@@ -1,8 +1,12 @@
 // See COPYRIGHT.md for copyright information
 
+import $ from 'jquery';
 import { ReportSet } from "./reportset.js";
+import { ReportSetOutline } from "./outline.js";
+import { IXNode } from "./ixnode.js";
+import { Menu } from "./menu.js";
 import { TestInspector } from "./test-utils.js";
-import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId } from "./util.js";
+import { NAMESPACE_ISO4217, SHOW_FACT, viewerUniqueId, FACTS_PER_GROUP, ZOOM_LEVELS } from "./util.js";
 
 
 const testReportData = {
@@ -257,6 +261,94 @@ describe("Fact deep link", () => {
     })
 });
 
+describe("doInitialSelection", () => {
+    const setUpInspector = (searchOnStartup, hasOutline = false) => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "search_on_startup": searchOnStartup }, "");
+        insp.outline = { hasOutline: jest.fn(() => hasOutline) };
+        insp.inspectorMode = jest.fn();
+        return insp;
+    };
+
+    test("enters search mode when search_on_startup is enabled and no deep link is present", () => {
+        const insp = setUpInspector(true);
+        insp._currentItem = undefined;
+        insp.doInitialSelection();
+        expect(insp.inspectorMode).toHaveBeenCalledWith("search-mode");
+    });
+
+    test("enters fact-mode when search_on_startup is disabled", () => {
+        const insp = setUpInspector(false);
+        insp._currentItem = undefined;
+        insp.doInitialSelection();
+        expect(insp.inspectorMode).toHaveBeenCalledWith("fact-mode");
+    });
+
+    test("adds show-facts-by-group class when the outline has an outline and search_on_startup is disabled", () => {
+        const insp = setUpInspector(false, true);
+        insp._currentItem = undefined;
+        $("#inspector").remove();
+        $(document.body).append('<div id="inspector"></div>');
+        insp.doInitialSelection();
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(true);
+    });
+
+    test("uses the deep-linked fact when one is present, regardless of search_on_startup", () => {
+        const insp = setUpInspector(true);
+        insp._currentItem = { some: "fact" };
+        insp.doInitialSelection();
+        expect(insp.inspectorMode).not.toHaveBeenCalled();
+    });
+});
+
+describe("highlightTagsOnStartup", () => {
+    afterEach(() => {
+        window.localStorage.clear();
+    });
+
+    test("returns true when highlight_facts_on_startup is enabled and no stored preference exists", () => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "highlight_facts_on_startup": true }, "");
+        expect(insp.highlightTagsOnStartup()).toBe(true);
+    });
+
+    test("returns false when highlight_facts_on_startup is disabled and no stored preference exists", () => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "highlight_facts_on_startup": false }, "");
+        expect(insp.highlightTagsOnStartup()).toBe(false);
+    });
+});
+
+describe("Calculation mode setting visibility", () => {
+    beforeAll(() => {
+        return new TestInspector().i18nInit();
+    });
+
+    const setUpInspector = (usesCalculations10, hideCalculationModeOption) => {
+        const insp = new TestInspector();
+        insp._iv.setFeatures({ "hide_calculation_mode_option": hideCalculationModeOption }, "");
+        insp._reportSet = { usesCalculations10: jest.fn(() => usesCalculations10) };
+        $(document.body).append('<table><tbody><tr class="section"><td><select id="setting-calculation-mode"></select></td></tr></tbody></table>');
+        return insp;
+    };
+
+    afterEach(() => {
+        $("#setting-calculation-mode").closest(".section").remove();
+    });
+
+    test("hides calc-mode section when hide_calculation_mode_option is enabled", () => {
+        const insp = setUpInspector(true, true);
+        insp.buildSettingsPage();
+        expect($("#setting-calculation-mode").closest(".section").css("display")).toBe("none");
+    });
+
+    test("shows calc-mode section when hide_calculation_mode_option is disabled and report uses calculations 1.0", () => {
+        const insp = setUpInspector(true, false);
+        insp.buildSettingsPage();
+        expect($("#setting-calculation-mode").closest(".section").css("display")).not.toBe("none");
+    });
+});
+
 describe("Handle message", () => {
     const generateEvent = (data) => {
         return {
@@ -318,7 +410,9 @@ describe("Handle message", () => {
         const event = generateEvent({
             task: "INVALID_TASK",
         });
-        insp.handleMessage(event);
+        jest.spyOn(console, 'log').withImplementation(() => {}, () => {
+            insp.handleMessage(event);
+        });
         expect(mockSelect).not.toHaveBeenCalled();
     })
     test("Invalid JSON", () => {
@@ -334,4 +428,298 @@ describe("Handle message", () => {
         insp.handleMessage(event);
         expect(mockSelect).not.toHaveBeenCalled();
     })
+});
+
+describe("Facts by group", () => {
+    const groupReportData = {
+        prefixes: {
+            eg: "http://www.example.com",
+        },
+        concepts: {
+            "eg:Root1": { labels: { std: { en: "Root 1" } } },
+            "eg:LineItem1": { labels: { std: { en: "Line Item 1" } } },
+            "eg:LineItem2": { labels: { std: { en: "Line Item 2" } } },
+        },
+        roles: {
+            elr1: "http://www.example.com/elr1",
+            elr2: "http://www.example.com/elr2",
+        },
+        roleDefs: {
+            elr1: { en: "001 Group 1" },
+            elr2: { en: "002 Group 2" },
+        },
+        rels: {
+            pres: {
+                elr1: { "eg:Root1": [{ t: "eg:LineItem1" }] },
+                elr2: { "eg:Root1": [{ t: "eg:LineItem2" }] },
+            },
+        },
+        facts: {},
+        languages: {},
+    };
+
+    // insertionOrder controls the key order of the "facts" object (and thus
+    // reportSet.facts() order); docOrder controls the order IXNode objects
+    // are constructed in, which determines document order (docOrderindex).
+    function buildGroupReportSet(insertionOrder, docOrder, conceptOf) {
+        const data = JSON.parse(JSON.stringify(groupReportData));
+        data.facts = {};
+        for (const id of insertionOrder) {
+            data.facts[id] = { a: { c: conceptOf(id), p: "2019-01-01" } };
+        }
+        const reportSet = new ReportSet(data);
+        const ixNodeMap = {};
+        for (const id of docOrder) {
+            ixNodeMap[viewerUniqueId(0, id)] = new IXNode(id, $('<span></span>'));
+        }
+        reportSet.setIXNodeMap(ixNodeMap);
+        return reportSet;
+    }
+
+    function conceptOf(id) {
+        return id.startsWith("f1") ? "eg:LineItem1" : "eg:LineItem2";
+    }
+
+    function setUpInspector(reportSet) {
+        const insp = new TestInspector();
+        insp._reportSet = reportSet;
+        insp.outline = new ReportSetOutline(reportSet);
+        $("#inspector").remove();
+        $(document.body).append('<div id="inspector"><div class="facts-by-group"></div></div>');
+        return insp;
+    }
+
+    test("only renders facts belonging to the specified group, even when fact-array order differs from document order", () => {
+        // Insertion order into reportSet.facts() puts f2 (an elr2 fact)
+        // between f1 and f1a (both elr1), even though document order is
+        // f1, f1a, f2. This reproduces the bug where index-based slicing of
+        // reportSet.facts() pulled in facts from other groups.
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const groupBodies = $("#inspector .facts-by-group .collapsible-body");
+        const elr1Body = groupBodies.eq(0);
+        const renderedIds = elr1Body.find(".fact-list-item").map((_, el) => $(el).data("ivid")).get();
+        expect(renderedIds).not.toContain(viewerUniqueId(0, "f2"));
+    });
+
+    test("includes the last fact in the group (no off-by-one)", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const elr1Body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        const renderedIds = elr1Body.find(".fact-list-item").map((_, el) => $(el).data("ivid")).get();
+        expect(renderedIds).toEqual([viewerUniqueId(0, "f1"), viewerUniqueId(0, "f1a")]);
+    });
+
+    test("paginates a group's facts with a show-more button", () => {
+        const ids = [];
+        for (let i = 0; i < FACTS_PER_GROUP + 5; i++) {
+            ids.push(`f1-${i}`);
+        }
+        const reportSet = buildGroupReportSet(ids, ids, () => "eg:LineItem1");
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        expect(body.find(".fact-list-item").length).toBe(FACTS_PER_GROUP - 1);
+        expect(body.find(".show-more").length).toBe(1);
+
+        body.find(".show-more").trigger("click");
+
+        expect(body.find(".fact-list-item").length).toBe(ids.length);
+        expect(body.find(".show-more").length).toBe(0);
+    });
+});
+
+describe("_populateFileSummary", () => {
+    const emptyDocuments = {
+        inline: [],
+        schema: [],
+        calcLinkbase: [],
+        defLinkbase: [],
+        labelLinkbase: [],
+        presLinkbase: [],
+        refLinkbase: [],
+        unrecognizedLinkbase: [],
+    };
+
+    const buildSummaryDom = () => $(`
+        <div>
+          <div class="collapsible-section files-summary">
+            <div class="collapsible-body">
+              <ul class="plain-list files-summary-list"></ul>
+            </div>
+          </div>
+        </div>
+    `);
+
+    test("hides the files summary section when there are no local documents", () => {
+        const insp = new TestInspector();
+        insp.summary = { getLocalDocuments: () => emptyDocuments };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateFileSummary(summaryDom);
+
+        expect(summaryDom.find(".files-summary").css("display")).toBe("none");
+    });
+
+    test("shows the files summary section when there are local documents", () => {
+        const insp = new TestInspector();
+        insp.summary = {
+            getLocalDocuments: () => ({
+                ...emptyDocuments,
+                inline: ["report.html"],
+            }),
+        };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateFileSummary(summaryDom);
+
+        expect(summaryDom.find(".files-summary").css("display")).not.toBe("none");
+        expect(summaryDom.find(".files-summary-list li").text()).toBe("report.html");
+    });
+});
+
+describe("Plugin extension points", () => {
+    const menuFixture = (id) => $(`
+        <div class="menu" id="${id}">
+          <button class="menu-title"></button>
+          <div class="content-container">
+            <div class="content"></div>
+          </div>
+        </div>
+    `);
+
+    test("extendDisplayOptionsMenu is invoked on registered plugins and rendered menu items appear in the DOM", () => {
+        const insp = new TestInspector();
+        const plugin = {
+            extendDisplayOptionsMenu: jest.fn((menu) => {
+                menu.addCheckboxItem("Plugin option", () => {}, "plugin-option");
+                menu.addLink("Plugin link", "https://example.com");
+            }),
+        };
+        insp._iv.registerPlugin(plugin);
+        insp._optionsMenu = new Menu(menuFixture("display-options-menu"));
+
+        insp.buildDisplayOptionsMenu();
+
+        expect(plugin.extendDisplayOptionsMenu).toHaveBeenCalledWith(insp._optionsMenu);
+        const items = insp._optionsMenu._elt.find(".content .item");
+        expect(items).toHaveLength(2);
+        expect(items.eq(0).text()).toBe("Plugin option");
+        expect(items.eq(1).text()).toBe("Plugin link");
+        expect(items.eq(1).attr("href")).toBe("https://example.com");
+    });
+
+    test("extendToolbarHighlightMenu is invoked on registered plugins and rendered menu items appear in the DOM", () => {
+        const insp = new TestInspector();
+        const plugin = {
+            extendToolbarHighlightMenu: jest.fn((menu) => {
+                menu.addCheckboxItem("Untagged Facts", () => {}, "highlight-untagged-facts");
+            }),
+        };
+        insp._iv.registerPlugin(plugin);
+        insp._toolbarMenu = new Menu(menuFixture("toolbar-highlight-menu"));
+
+        insp.buildToolbarHighlightMenu();
+
+        expect(plugin.extendToolbarHighlightMenu).toHaveBeenCalledWith(insp._toolbarMenu);
+        const items = insp._toolbarMenu._elt.find(".content .item");
+        expect(items).toHaveLength(1);
+        expect(items.eq(0).text()).toBe("Untagged Facts");
+    });
+});
+
+describe("Zoom boundary clamping", () => {
+    const setUpInspector = () => {
+        const insp = new TestInspector();
+        insp._viewer = { zoom: jest.fn() };
+        return insp;
+    };
+
+    test("zoomRelative does not go below the minimum zoom level", () => {
+        const insp = setUpInspector();
+        insp._zoomLevel = 0;
+        insp.zoomRelative(-1);
+        expect(insp._zoomLevel).toBe(0);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[0]);
+    });
+
+    test("zoomRelative does not go above the maximum zoom level", () => {
+        const insp = setUpInspector();
+        insp._zoomLevel = ZOOM_LEVELS.length - 1;
+        insp.zoomRelative(1);
+        expect(insp._zoomLevel).toBe(ZOOM_LEVELS.length - 1);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[ZOOM_LEVELS.length - 1]);
+    });
+
+    test("zoomRelative moves one step within bounds", () => {
+        const insp = setUpInspector();
+        insp._zoomLevel = 5;
+        insp.zoomRelative(1);
+        expect(insp._zoomLevel).toBe(6);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[6]);
+    });
+
+    test("zoomAbsolute sets the zoom level to the given index", () => {
+        const insp = setUpInspector();
+        insp.zoomAbsolute("3");
+        expect(insp._zoomLevel).toBe(3);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[3]);
+    });
+
+    test("zoomAbsolute clamps an index below the minimum zoom level", () => {
+        const insp = setUpInspector();
+        insp.zoomAbsolute("-1");
+        expect(insp._zoomLevel).toBe(0);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[0]);
+    });
+
+    test("zoomAbsolute clamps an index above the maximum zoom level", () => {
+        const insp = setUpInspector();
+        insp.zoomAbsolute(String(ZOOM_LEVELS.length));
+        expect(insp._zoomLevel).toBe(ZOOM_LEVELS.length - 1);
+        expect(insp._viewer.zoom).toHaveBeenCalledWith(ZOOM_LEVELS[ZOOM_LEVELS.length - 1]);
+    });
+});
+
+describe("_populateDownloadsSummary", () => {
+    const buildSummaryDom = () => $(`
+        <div>
+          <div class="collapsible-section downloads-summary">
+            <div class="bordered-section filing-documents">
+              <a class="download-link" href=""></a>
+            </div>
+          </div>
+        </div>
+    `);
+
+    test("sets the download link href on the .filing-documents element when present", () => {
+        const insp = new TestInspector();
+        insp._reportSet = { filingDocuments: () => "https://example.com/documents.zip" };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateDownloadsSummary(summaryDom);
+
+        expect(summaryDom.find(".filing-documents .download-link").attr("href")).toBe("https://example.com/documents.zip");
+        expect(summaryDom.find(".filing-documents").css("display")).not.toBe("none");
+        expect(summaryDom.find(".downloads-summary").css("display")).not.toBe("none");
+    });
+
+    test("hides the .filing-documents element when there are no filing documents", () => {
+        const insp = new TestInspector();
+        insp._reportSet = { filingDocuments: () => undefined };
+        const summaryDom = buildSummaryDom();
+
+        insp._populateDownloadsSummary(summaryDom);
+
+        expect(summaryDom.find(".filing-documents").css("display")).toBe("none");
+        expect(summaryDom.find(".downloads-summary").css("display")).toBe("none");
+    });
 });

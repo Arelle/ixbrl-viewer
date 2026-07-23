@@ -23,8 +23,14 @@ See COPYRIGHT.md for copyright information
           <button id="highlight-untagged-numbers" class="review-mode-only" title="Highlight untagged numbers" data-i18n="[title]inspector.highlightUntaggedNumbers" ></button>
           <button id="highlight-untagged-dates" class="review-mode-only" title="Highlight untagged dates" data-i18n="[title]inspector.highlightUntaggedDates" ></button>
           <button id="highlight-tags" title="Highlight tags" data-i18n="[title]inspector.highlightTags" ></button>
+          <div class="menu" id="toolbar-highlight-menu">
+            <button data-i18n="[title]inspector.highlightMenu" title="Highlight options" class="menu-title"></button>
+            <div class="content-container">
+              <div class="content"></div>
+            </div>
+          </div>
           <button id="print" title="Print Document" data-i18n="[title]inspector.printDocument"></button>
-          <button data-i18n="[title]inspector.settings" title="Settings" id="settings-button"></button>
+          <button data-i18n="[title]inspector.settingsButton" title="Settings" id="settings-button"></button>
         </div>
       </header>
       <section id="viewer-pane" data-i18n="[aria-label]viewer.ixbrlDocumentView" aria-label="iXBRL Document View">
@@ -180,15 +186,6 @@ See COPYRIGHT.md for copyright information
               <h2>Filter</h2>
             </div>
             <div class="modal-inspector-body search-filters-body">
-              <div class="checkboxes">
-                <div id="mandatory-fact-filter-checkbox">
-                  <label class="checkbox">
-                    <input id="search-mandatory-fact-filter" type="checkbox" style="display: none;"/> <span data-i18n="inspector.mandatoryFacts">Only Mandatory Facts</span>
-                    <span class="checkmark"></span>
-                  </label>
-                </div>
-              </div>
-
             </div>
 
             <div class="search-filter-buttons">
@@ -372,12 +369,20 @@ See COPYRIGHT.md for copyright information
                     <option value="calc10" data-i18n="calculation.useLegacyCalculations"></option>
                   </select>
                 </div>
-                <p data-i18n="inspector.settings.calculationMode.documentation">Select the language you'd like to use with Inline Viewer.</p>
+                <p data-i18n="inspector.settings.calculationMode.documentation">Select the calculation evaluation mode for legacy calculation relationships</p>
               </div>
               <div class="section">
                 <h3 data-i18n="inspector.documentation">Documentation</h3>
                 <ul class="documentation-links">
                 </ul>
+              </div>
+              <div class="section">
+                <h3 data-i18n="inspector.settings.plugins.title">Plugins</h3>
+                <div class="menu inline-menu" id="display-options-menu">
+                  <div class="content-container">
+                    <div class="content"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -477,6 +482,6 @@ See COPYRIGHT.md for copyright information
         <div class="buttons">
         </div>
       </div>
-    </div>
-  </dialog>
+    </dialog>
+  </div>
 </div>

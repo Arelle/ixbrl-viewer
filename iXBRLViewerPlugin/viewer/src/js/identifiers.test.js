@@ -51,3 +51,13 @@ describe("readableNameHTML", () => {
         expect(html.childNodes[1].textContent).toBe("1234");
     });
 });
+
+describe("seeMoreLink", () => {
+    test("Known scheme without URL", () => {
+        expect(Identifiers.seeMoreLink(qname("ua:1234"))).toBe(undefined);
+    });
+    test("Known scheme with URL", () => {
+        const link = Identifiers.seeMoreLink(qname("cik:1234"));
+        expect(link.href).toBe("https://www.sec.gov/cgi-bin/browse-edgar?CIK=1234");
+    });
+});

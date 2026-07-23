@@ -153,7 +153,11 @@ export class Inspector {
 
                 inspector.initializeReviewMode();
 
+                inspector._optionsMenu = new Menu($("#display-options-menu"), {type: "static"});
+                inspector.buildDisplayOptionsMenu();
+
                 inspector._toolbarMenu = new Menu($("#toolbar-highlight-menu"));
+                inspector.buildToolbarHighlightMenu();
 
                 inspector.setDefaultDocumentLanguage();
                 inspector.buildDocumentLanguages();
@@ -168,7 +172,6 @@ export class Inspector {
                 inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
                 inspector.outline = new ReportSetOutline(reportSet);
-                inspector.createOutline();
                 inspector.initializeZoom();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
                     inspector._search = new ReportSearch(reportSet);
@@ -281,7 +284,13 @@ export class Inspector {
     }
 
     doInitialSelection() {
-        if (!this._currentItem) {
+        if (this._currentItem) {
+            return;
+        }
+        if (this._iv.isFeatureEnabled(FEATURE_SEARCH_ON_STARTUP)) {
+            this.inspectorMode("search-mode");
+        }
+        else {
             this.inspectorMode("fact-mode");
             if (this.outline.hasOutline()) {
                 $("#inspector").addClass("show-facts-by-group");
@@ -289,18 +298,18 @@ export class Inspector {
         }
     }
 
-    addFactListByGroupFacts(container, next, last) {
+    addFactListByGroupFacts(container, facts, next) {
         $(".show-more", container).remove();
-        for (let i = next; i < last; i++) {
+        for (let i = next; i < facts.length; i++) {
             if (i - next >= FACTS_PER_GROUP - 1) {
-                $("<button></button>") 
+                $("<button></button>")
                     .addClass("show-more")
                     .text(i18next.t("inspector.showMore"))
-                    .on("click",  () => this.addFactListByGroupFacts(container, i, last))
+                    .on("click",  () => this.addFactListByGroupFacts(container, facts, i))
                     .appendTo(container);
                 break;
             }
-            this.factListRow(this._reportSet.facts()[i]).appendTo(container);
+            this.factListRow(facts[i]).appendTo(container);
         }
 
     }
@@ -332,9 +341,7 @@ export class Inspector {
                 .addClass("fact-list")
                 .appendTo(section);
 
-            const first = this._reportSet.facts().indexOf(group.firstFact);
-            const last = this._reportSet.facts().indexOf(group.lastFact);
-            this.addFactListByGroupFacts(body, first, last);
+            this.addFactListByGroupFacts(body, group.facts, 0);
         }
     }
 
@@ -470,6 +477,18 @@ export class Inspector {
         }
     }
 
+    buildDisplayOptionsMenu() {
+        this._optionsMenu.reset();
+        this._iv.callPluginMethod("extendDisplayOptionsMenu", this._optionsMenu);
+        $("#display-options-menu").closest(".section").toggle(!this._optionsMenu.isEmpty());
+    }
+
+    buildToolbarHighlightMenu() {
+        this._toolbarMenu.reset();
+        this._iv.callPluginMethod("extendToolbarHighlightMenu", this._toolbarMenu);
+        $("#toolbar-highlight-menu").toggle(!this._toolbarMenu.isEmpty());
+    }
+
     buildDocumentationLink(id, label, target) {
         const link = $('<a></a>')
                 .attr('href', target)
@@ -507,6 +526,8 @@ export class Inspector {
         $('html').attr('lang', i18next.resolvedLanguage);
         this.buildDocumentLanguages();
         this.buildHomeLink()
+        this.buildDisplayOptionsMenu();
+        this.buildToolbarHighlightMenu();
         this.buildDocumentationLinks();
         this.buildSettingsPage();
         this.setupSearchControls();
@@ -607,14 +628,6 @@ export class Inspector {
             .on("mouseenter", () => this._viewer.linkedHighlightFact(f))
             .on("mouseleave", () => this._viewer.clearLinkedHighlightFact(f))
             .data('ivid', f.vuid);
-      /*
-        $('<button class="select-icon"></button>')
-            .attr("title", i18next.t("search.viewFact"))
-            .on("click", () => {
-                this.selectItem(f.vuid);
-            })
-            .appendTo(row)
-            */
         this._setLabelWithLang($('<div class="title"></div>'), f.getLabelOrNameAndLang("std"))
             .on("click", () => this.selectItem(f.vuid))
             .appendTo(row);
@@ -805,10 +818,6 @@ export class Inspector {
         $(".search-filters .close").on("click", () => $("#ixv").removeClass('show-filters'));
         $(".search-filters button.search-apply-filters").on("click", () => $("#ixv").removeClass('show-filters'));
         $(".search-filters button.search-reset-filters").on("click", () => this.resetSearchFilters());
-        $(".search-controls .search-filters .reset-multiselect").on("click", function () {
-            $(this).siblings().children('select option:selected').prop('selected', false);
-            inspector.search();
-        });
     }
 
     _getScalesOptions() {
@@ -878,23 +887,6 @@ export class Inspector {
         /* Don't highlight search results if there's no search string */
         if (spec.searchString != "") {
             this._viewer.highlightRelatedFacts(results.map(r => r.fact));
-        }
-        for (const name of Object.values(SEARCH_FILTER_MULTISELECTS)) {
-          this.updateMultiSelectSubheader(name);
-        }
-    }
-
-    updateMultiSelectSubheader(id) {
-        const subheader = $(`#${id} .collapsible-subheader`);
-        const selectedOptions = $(`#${id} select option:selected`);
-        if (selectedOptions.length === 1) {
-            subheader.text(` ${selectedOptions.text()}`);
-        }
-        else if (selectedOptions.length > 0) {
-            const totalOptions = $(`#${id} select option`).length;
-            subheader.text(` (${selectedOptions.length}/${totalOptions} ${i18next.t("search.selected")})`)
-        } else {
-            subheader.empty();
         }
     }
 
@@ -1201,7 +1193,9 @@ export class Inspector {
 
         function insertFileSummary(docs) {
             const ul = summaryFilesContent.find('ul.files-summary-list')
-            visibleItems += 1;
+            if (docs.length > 0) {
+                visibleItems += 1;
+            }
             for (const doc of docs) {
                 ul.append($("<li></li>").text(doc));
             }
@@ -1258,7 +1252,7 @@ export class Inspector {
             summaryDom.find(".filing-documents .download-link").attr("href", this._reportSet.filingDocuments());
         }
         else {
-            summaryDom.find(".filingDocuments").hide();
+            summaryDom.find(".filing-documents").hide();
             summaryDom.find(".downloads-summary").hide();
         }
     }
@@ -1277,27 +1271,6 @@ export class Inspector {
             reportCreationContent.hide();
         }
     };
-
-    createOutline() {
-        if (this.outline.hasOutline()) {
-            $('.outline .no-outline-overlay').hide();
-            $('.outline .body').empty();
-            const container = $('<div class="fact-list"></div>').appendTo($('.outline .body'));
-            for (const group of this.outline.sortedSections()) {
-                $('<button class="fact-list-item"></button>')
-                    .text(group.report.getRoleLabelOrURI(group.elr))
-                    .on("click", () => this.selectItem(group.firstFact.vuid))
-                    .on("dblclick", () => $('#inspector').removeClass("outline-mode"))
-                    .on("mousedown", (e) => {
-                        // Prevent text selection by double click
-                        if (e.detail > 1) { 
-                            e.preventDefault() 
-                        } 
-                    })
-                    .appendTo(container);
-            }
-        }
-    }
 
     updateOutline(cf) {
         $('.fact-groups').empty();
@@ -1953,7 +1926,6 @@ export class Inspector {
 
     setDocumentLanguage(lang) {
         this._viewerOptions.language = lang;
-        this.createOutline();
         this.update();
     }
 
@@ -1985,7 +1957,7 @@ export class Inspector {
     }
 
     zoomAbsolute(level) {
-        this._zoomLevel = parseInt(level);
+        this._zoomLevel = Math.min(ZOOM_LEVELS.length - 1, Math.max(0, Number.parseInt(level, 10)));
         this._viewer.zoom(ZOOM_LEVELS[this._zoomLevel]);
     }
 }

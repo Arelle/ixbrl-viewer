@@ -301,8 +301,8 @@ describe("Section grouping", () => {
         const reportSet = testReportSet(["f1", "f1a"]);
         const outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1");
-        expect(outline.sections["elr3"]).toBeUndefined();
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1");
+        expect(outline.sectionFacts["elr3"]).toBeUndefined();
     });
 
     test("Longest runs 1", () => {
@@ -311,8 +311,8 @@ describe("Section grouping", () => {
         const reportSet = testReportSet(["f1", "f1a", "f2", "f1b", "f2a", "f2b"]);
         const outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1");
-        expect(outline.sections["elr3"].localId()).toEqual("f2a");
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1");
+        expect(outline.sectionFacts["elr3"][0].localId()).toEqual("f2a");
     });
 
     test("Longest runs 2", () => {
@@ -321,8 +321,8 @@ describe("Section grouping", () => {
         const reportSet = testReportSet(["f1", "f2", "f2b", "f1a", "f1b", "f2a"]);
         const outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1a");
-        expect(outline.sections["elr3"].localId()).toEqual("f2");
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1a");
+        expect(outline.sectionFacts["elr3"][0].localId()).toEqual("f2");
     });
 
     test("Equal length runs", () => {
@@ -331,8 +331,27 @@ describe("Section grouping", () => {
         const reportSet = testReportSet(["f1", "f1a", "f2", "f1b", "f1c", "f2b" ]);
         const outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1");
-        expect(outline.sections["elr3"].localId()).toEqual("f2");
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1");
+        expect(outline.sectionFacts["elr3"][0].localId()).toEqual("f2");
+    });
+
+    test("Per-group fact list matches the run, with no leakage from other groups", () => {
+        // f1, f1a form the ELR1 run; f2 belongs only to ELR3; f1b starts a
+        // second (shorter) ELR1 run that loses out to f1/f1a.
+        const reportSet = testReportSet(["f1", "f1a", "f2", "f1b"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        const sections = outline.sortedSections();
+        const elr1 = sections.find(s => s.elr === "elr1");
+        const elr3 = sections.find(s => s.elr === "elr3");
+        expect(elr1.facts.map(f => f.localId())).toEqual(["f1", "f1a"]);
+        expect(elr3.facts.map(f => f.localId())).toEqual(["f2"]);
+    });
+
+    test("Per-group fact list includes the last fact in the run", () => {
+        const reportSet = testReportSet(["f1", "f1a", "f1b"]);
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        const elr1 = outline.sortedSections().find(s => s.elr === "elr1");
+        expect(elr1.facts.map(f => f.localId())).toEqual(["f1", "f1a", "f1b"]);
     });
 
     test("Hidden facts", () => {
@@ -340,29 +359,29 @@ describe("Section grouping", () => {
         const reportSet = testReportSet(["f1a", "f1", "f2", "f1b", "f1c", "f1d"]);
         let outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1b");
-        expect(outline.sections["elr3"].localId()).toEqual("f2");
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1b");
+        expect(outline.sectionFacts["elr3"][0].localId()).toEqual("f2");
 
         // Make f1c hidden.  We now have ELR1*2 ELR3*1 ELR1*2
         // The first ELR1 run should be selected.
         getFact(reportSet, "f1c").ixNode.isHidden = true;
         outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1a");
-        expect(outline.sections["elr3"].localId()).toEqual("f2");
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1a");
+        expect(outline.sectionFacts["elr3"][0].localId()).toEqual("f2");
 
         // Make f1a hidden.  f1b-[f1c]-f1d is now the longest run.
         getFact(reportSet, "f1a").ixNode.isHidden = true;
         outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1", "elr3"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1b");
-        expect(outline.sections["elr3"].localId()).toEqual("f2");
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1b");
+        expect(outline.sectionFacts["elr3"][0].localId()).toEqual("f2");
 
         // Hide f2.  We now have a single run for ELR1
         getFact(reportSet, "f2").ixNode.isHidden = true;
         outline = new DocumentOutline(reportSet.reports[0]);
         expect(outline.sortedSections().map(g => g.elr)).toEqual(["elr1"]);
-        expect(outline.sections["elr1"].localId()).toEqual("f1");
+        expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1");
 
     });
 });

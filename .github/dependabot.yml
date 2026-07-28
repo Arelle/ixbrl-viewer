@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: "github-actions"
     cooldown:
       default-days: 1
-    directory: "/"
+    directories:
+      - /**
     schedule:
       interval: weekly
     groups:
@@ -13,7 +14,8 @@ updates:
   - package-ecosystem: npm
     cooldown:
       default-days: 1
-    directory: "/"
+    directories:
+      - /**
     schedule:
       interval: weekly
     allow:
@@ -42,7 +44,8 @@ updates:
   - package-ecosystem: pip
     cooldown:
       default-days: 1
-    directory: "/"
+    directories:
+      - /**
     insecure-external-code-execution: allow
     schedule:
       interval: weekly

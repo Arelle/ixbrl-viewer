@@ -11,6 +11,9 @@ updates:
       github-action-dependencies:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: npm
     cooldown:
       default-days: 1
@@ -27,6 +30,9 @@ updates:
         exclude-patterns:
           - "*jest*"
           - "stylelint*"
+        update-types:
+          - minor
+          - patch
       jest:
         patterns:
           - "*jest*"
@@ -55,3 +61,6 @@ updates:
       python-dependencies:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch

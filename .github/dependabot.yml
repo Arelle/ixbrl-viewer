@@ -1,8 +1,6 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
-    cooldown:
-      default-days: 1
     directories:
       - /**
     schedule:
@@ -16,7 +14,7 @@ updates:
           - patch
   - package-ecosystem: npm
     cooldown:
-      default-days: 1
+      default-days: 3
     directories:
       - /**
     schedule:
@@ -49,7 +47,7 @@ updates:
           - "3.0.6"
   - package-ecosystem: pip
     cooldown:
-      default-days: 1
+      default-days: 3
     directories:
       - /**
     insecure-external-code-execution: allow

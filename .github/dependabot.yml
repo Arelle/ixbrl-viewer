@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: github-actions
     cooldown:
       default-days: 1
     directories:
@@ -52,6 +52,6 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      pip-dependencies:
+      python-dependencies:
         patterns:
           - "*"

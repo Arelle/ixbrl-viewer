@@ -1,19 +1,22 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    cooldown:
-      default-days: 1
-    directory: "/"
+  - package-ecosystem: github-actions
+    directories:
+      - /**
     schedule:
       interval: weekly
     groups:
       github-action-dependencies:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: npm
     cooldown:
-      default-days: 1
-    directory: "/"
+      default-days: 3
+    directories:
+      - /**
     schedule:
       interval: weekly
     allow:
@@ -25,6 +28,9 @@ updates:
         exclude-patterns:
           - "*jest*"
           - "stylelint*"
+        update-types:
+          - minor
+          - patch
       jest:
         patterns:
           - "*jest*"
@@ -41,14 +47,18 @@ updates:
           - "3.0.6"
   - package-ecosystem: pip
     cooldown:
-      default-days: 1
-    directory: "/"
+      default-days: 3
+    directories:
+      - /**
     insecure-external-code-execution: allow
     schedule:
       interval: weekly
     allow:
       - dependency-type: all
     groups:
-      pip-dependencies:
+      python-dependencies:
         patterns:
           - "*"
+        update-types:
+          - minor
+          - patch

@@ -725,8 +725,31 @@ a {
       overflow-y: auto;
       flex-grow: 1;
 
-      h2.concept-name-title {
+      .concept-name-row {
         .panel-indent();
+
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.6rem;
+
+        h2.concept-name-title {
+          flex: 1 1 55%;
+          padding: 0;
+        }
+
+        .tags {
+          flex-shrink: 0;
+          max-width: 100%;
+          margin-left: auto;
+          margin-right: -0.3rem;
+
+          .target-document-tag {
+            max-width: 100%;
+            white-space: normal;
+            overflow-wrap: anywhere;
+          }
+        }
       }
 
       .no-fact-overlay {
@@ -858,12 +881,6 @@ a {
 
     position: relative;
     top: 1px;
-  }
-
-  .inspector-body .tags {
-    position: absolute;
-    top: 1.5rem;
-    right: 0.9rem;
   }
 
   .target-document-tag {

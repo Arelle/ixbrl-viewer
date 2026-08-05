@@ -537,6 +537,95 @@ describe("Facts by group", () => {
     });
 });
 
+describe("Collapsible sections", () => {
+    function setUpSections() {
+        const insp = new TestInspector();
+        $("#ixv").remove();
+        $(document.body).append(`
+            <div id="ixv">
+              <div class="collapsible-section first">
+                <h3 class="collapsible-header"><button aria-expanded="true">First</button></h3>
+                <div class="collapsible-body">First body</div>
+              </div>
+              <div class="collapsible-section second">
+                <h3 class="collapsible-header"><button aria-expanded="true">Second</button></h3>
+                <div class="collapsible-body">Second body</div>
+              </div>
+            </div>
+        `);
+        insp.initializeCollapsibleSections();
+        return insp;
+    }
+
+    function headerButton(section) {
+        return $(`#ixv .collapsible-section.${section} .collapsible-header button`);
+    }
+
+    beforeAll(() => {
+        $.fx.off = true;
+    });
+
+    afterAll(() => {
+        $.fx.off = false;
+    });
+
+    test("clicking a header collapses that section and flips its aria-expanded", () => {
+        setUpSections();
+
+        headerButton("first").trigger("click");
+
+        expect($("#ixv .collapsible-section.first").hasClass("collapsed")).toBe(true);
+        expect(headerButton("first").attr("aria-expanded")).toBe("false");
+        expect($("#ixv .collapsible-section.first .collapsible-body").css("display")).toBe("none");
+    });
+
+    test("clicking a collapsed header expands it again", () => {
+        setUpSections();
+
+        headerButton("first").trigger("click");
+        headerButton("first").trigger("click");
+
+        expect($("#ixv .collapsible-section.first").hasClass("collapsed")).toBe(false);
+        expect(headerButton("first").attr("aria-expanded")).toBe("true");
+        expect($("#ixv .collapsible-section.first .collapsible-body").css("display")).not.toBe("none");
+    });
+
+    test("clicking a header leaves sibling sections alone", () => {
+        setUpSections();
+
+        headerButton("first").trigger("click");
+
+        expect($("#ixv .collapsible-section.second").hasClass("collapsed")).toBe(false);
+        expect(headerButton("second").attr("aria-expanded")).toBe("true");
+    });
+
+    test("keeps the body shown inline while it slides shut", () => {
+        $.fx.off = false;
+        try {
+            setUpSections();
+
+            headerButton("first").trigger("click");
+
+            const body = $("#ixv .collapsible-section.first .collapsible-body");
+            expect(body.get(0).style.display).toBe("block");
+        }
+        finally {
+            $.fx.off = true;
+        }
+    });
+
+    test("collapsing a section authored expanded leaves no inline display residue on expand", () => {
+        setUpSections();
+
+        headerButton("first").trigger("click");
+        headerButton("first").trigger("click");
+
+        const body = $("#ixv .collapsible-section.first .collapsible-body");
+        expect(body.get(0).style.height).toBe("");
+        expect(body.get(0).style.display).not.toBe("none");
+    });
+});
+
 describe("_populateFileSummary", () => {
     const emptyDocuments = {
         inline: [],

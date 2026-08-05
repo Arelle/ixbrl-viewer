@@ -49,6 +49,13 @@ See COPYRIGHT.md for copyright information
       <section id="inspector" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
 
         <div class="inspector-container fact-inspector">
+          <div class="section section-list-controls">
+            <div class="section-list-title" data-i18n="inspector.fact-groups">Sections</div>
+            <div class="section-list-buttons">
+              <button id="collapse-all-sections" aria-disabled="true" data-i18n="inspector.collapseAllSections">Collapse all</button>
+              <button id="expand-all-sections" aria-disabled="true" data-i18n="inspector.expandAllSections">Expand all</button>
+            </div>
+          </div>
           <div class="inspector-body" tabindex="1">
 
             <div class="no-fact-overlay">
@@ -87,7 +94,7 @@ See COPYRIGHT.md for copyright information
               </div>
               <div class="footnote-mode-off">
                 <div class="collapsible-section">
-                  <h3 class="collapsible-header"><button data-i18n="inspector.labels">Labels</button></h3>
+                  <h3 class="collapsible-header"><button aria-expanded="true" data-i18n="inspector.labels">Labels</button></h3>
                   <div class="collapsible-body labels">
                     <table class="property-table labels">
                       <tbody class="language">
@@ -102,7 +109,7 @@ See COPYRIGHT.md for copyright information
                   </div>
                 </div>
                 <div class="collapsible-section anchoring">
-                  <h3 class="collapsible-header has-tooltip"><button data-i18n="inspector.anchoring">Anchoring</button> <button class="tooltip-icon" data-tooltip-name="anchoring" data-tooltip-glossary-link="#anchoring"></button></h3>
+                  <h3 class="collapsible-header has-tooltip"><button aria-expanded="true" data-i18n="inspector.anchoring">Anchoring</button> <button class="tooltip-icon" data-tooltip-name="anchoring" data-tooltip-glossary-link="#anchoring"></button></h3>
                   <div class="collapsible-body">
                     <table class="property-table">
                       <tbody>
@@ -119,35 +126,35 @@ See COPYRIGHT.md for copyright information
                   </div>
                 </div>
                 <div class="collapsible-section">
-                  <h3 class="collapsible-header has-tooltip"><button data-i18n="inspector.references">References</button> <button class="tooltip-icon" data-tooltip-name="references" data-tooltip-glossary-link="#reference"></button></h3>
+                  <h3 class="collapsible-header has-tooltip"><button aria-expanded="true" data-i18n="inspector.references">References</button> <button class="tooltip-icon" data-tooltip-name="references" data-tooltip-glossary-link="#reference"></button></h3>
                   <div class="collapsible-body references">
                   </div>
                 </div>
                 <div class="collapsible-section">
-                  <h3 class="collapsible-header has-tooltip"><button data-i18n="inspector.calculations">Calculations</button> <button class="tooltip-icon" data-tooltip-name="calculations" data-tooltip-glossary-link="#calculation-tree"></button></h3>
+                  <h3 class="collapsible-header has-tooltip"><button aria-expanded="true" data-i18n="inspector.calculations">Calculations</button> <button class="tooltip-icon" data-tooltip-name="calculations" data-tooltip-glossary-link="#calculation-tree"></button></h3>
                   <div class="collapsible-body calculations">
                     <div class="tree"></div>
                   </div>
                 </div>
                 <div class="collapsible-section">
-                  <h3 class="collapsible-header"><button data-i18n="inspector.footnotes">Footnotes</button></h3>
+                  <h3 class="collapsible-header"><button aria-expanded="true" data-i18n="inspector.footnotes">Footnotes</button></h3>
                   <div class="collapsible-body footnotes fact-list">
                   </div>
                 </div>
                 <div class="collapsible-section footnote-facts-section">
-                  <h3 class="collapsible-header"><button data-i18n="inspector.associatedFacts">Associated Facts</button></h3>
+                  <h3 class="collapsible-header"><button aria-expanded="true" data-i18n="inspector.associatedFacts">Associated Facts</button></h3>
                   <div class="collapsible-body footnote-facts fact-list">
                   </div>
                 </div>
                 <div class="collapsible-section">
-                  <h3 class="collapsible-header"><button data-i18n="inspector.fact-groups">Sections</button></h3>
+                  <h3 class="collapsible-header"><button aria-expanded="true" data-i18n="inspector.fact-groups">Sections</button></h3>
                   <div class="collapsible-body fact-groups fact-list">
                   </div>
                 </div>
               </div>
               <div class="footnote-details footnote-mode-only">
                 <div class="collapsible-section">
-                  <h3 class="collapsible-header"><button data-i18n="inspector.associatedFacts">Associated facts</button></h3>
+                  <h3 class="collapsible-header"><button aria-expanded="true" data-i18n="inspector.associatedFacts">Associated facts</button></h3>
                   <div class="collapsible-body footnote-facts fact-list">
                   </div>
                 </div>
@@ -203,7 +210,7 @@ See COPYRIGHT.md for copyright information
           <div class="inspector-body">
             <div class="body">
               <div class="collapsible-section fact-summary">
-                <h3 class="collapsible-header"><button data-i18n="inspector.summary.aboutCompany.header">About company</button></h3>
+                <h3 class="collapsible-header"><button aria-expanded="true" data-i18n="inspector.summary.aboutCompany.header">About company</button></h3>
                 <div class="collapsible-body">
                   <table class="property-table about">
                     <tbody>
@@ -213,7 +220,7 @@ See COPYRIGHT.md for copyright information
               </div>
 
               <div class="collapsible-section fact-summary">
-                <h3 class="collapsible-header"><button data-i18n="inspector.summary.fact.header">XBRL facts summary</button></h3>
+                <h3 class="collapsible-header"><button aria-expanded="true" data-i18n="inspector.summary.fact.header">XBRL facts summary</button></h3>
                 <div class="collapsible-body">
                   <div class="flex-row">
                     <div class="bordered-section">
@@ -298,7 +305,7 @@ See COPYRIGHT.md for copyright information
               </div>
               <div class="collapsible-section downloads-summary">
                 <h3 class="collapsible-header">
-                  <button data-i18n="inspector.summary.downloads.header">Downloads</button>
+                  <button aria-expanded="true" data-i18n="inspector.summary.downloads.header">Downloads</button>
                 </h3>
                 <div class="collapsible-body">
                   <div class="bordered-section filing-documents">
@@ -316,7 +323,7 @@ See COPYRIGHT.md for copyright information
 
               <div class="collapsible-section files-summary">
                 <h3 class="collapsible-header">
-                  <button data-i18n="inspector.summary.includedDocuments.header">Included documents</button>
+                  <button aria-expanded="true" data-i18n="inspector.summary.includedDocuments.header">Included documents</button>
                 </h3>
 
                 <div class="collapsible-body">
@@ -328,7 +335,7 @@ See COPYRIGHT.md for copyright information
               </div>
               <div class="collapsible-section report-creation">
                 <h3 class="collapsible-header">
-                  <button data-i18n="inspector.summary.reportCreation">Report Creation</button>
+                  <button aria-expanded="true" data-i18n="inspector.summary.reportCreation">Report Creation</button>
                 </h3>
                 <div class="collapsible-body">
                   <ul class="plain-list"></ul>

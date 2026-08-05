@@ -23,6 +23,7 @@ import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_
 import { getTheme, darkModeTheme, lightModeTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
+const SECTION_LIST_SECTIONS = "#inspector .facts-by-group > .collapsible-section";
 const SEARCH_FILTER_MULTISELECTS = {
   visibilityFilter: "search-filter-visibility",
   conceptTypeFilter: "search-filter-concept-type",
@@ -95,24 +96,8 @@ export class Inspector {
             inspector._reportSet = reportSet;
             inspector.i18nInit().then((t) => {
                 
-                // Bind to #ixv and filter as some collapsible sections get added dynamically.
-                $("#ixv").on("click", ".collapsible-header button:first-of-type", function () { 
-                    const d = $(this).closest(".collapsible-section");
-                    d.toggleClass("collapsed"); 
-                    if (d.hasClass("collapsed")) {
-                        d.find(".collapsible-body").slideUp(250);
-                    }
-                    else {
-                        d.find(".collapsible-body").slideDown(250);
-                        if (d.hasClass("collapsible-only")) {
-                            d.siblings('.collapsible-section:not(.collapsed)').each(function() {
-                                const section = $(this);
-                                section.addClass("collapsed");
-                                section.find(".collapsible-body").slideUp(250);
-                            });
-                        }
-                    }
-                });
+                inspector.initializeCollapsibleSections();
+                inspector.initializeSectionListControls();
                 $("#inspector-tabs button").on("click", function () {
                     inspector.inspectorMode($(this).data("mode"));
                 });
@@ -185,6 +170,79 @@ export class Inspector {
                 });
             });
         });
+    }
+
+    initializeCollapsibleSections() {
+        // Bind to #ixv and filter as some collapsible sections get added dynamically.
+        $("#ixv").on("click", ".collapsible-header button:first-of-type", (e) => {
+            const section = $(e.currentTarget).closest(".collapsible-section");
+            this.setSectionCollapsed(section, !section.hasClass("collapsed"), true);
+        });
+    }
+
+    /*
+     * The sole mutation site for a collapsible section's state: the "collapsed"
+     * class, the header button's aria-expanded, and the body's visibility move
+     * together or not at all.  The class is the source of truth - a stylesheet
+     * rule hides the body of a collapsed section - and inline display exists
+     * only while a slide is in flight.
+     *
+     * finish() runs on every path so that a later toggle replaces an in-flight
+     * slide rather than queueing behind it, and so that jQuery's completion
+     * path clears the inline properties it saved.
+     */
+    setSectionCollapsed(section, collapsed, animate) {
+        const body = section.find("> .collapsible-body").finish();
+        if (animate) {
+            if (collapsed) {
+                // Pin the body visible for the duration of the slide: the class
+                // added below would otherwise hide it before it could animate.
+                // jQuery's completion handler replaces this with display: none.
+                body.css("display", body.css("display")).slideUp(250);
+            }
+            else {
+                // Start the slide before toggling the class: jQuery resolves the
+                // target height synchronously, but only while the body is still
+                // hidden, so slideDown() on a visible body silently no-ops.
+                body.slideDown(250);
+            }
+        }
+        else {
+            // Hand authority over visibility back to the class.
+            body.css("display", "");
+        }
+        section.toggleClass("collapsed", collapsed);
+        section.find("> .collapsible-header button:first-of-type")
+            .attr("aria-expanded", String(!collapsed));
+        this.updateBulkToggleAvailability();
+    }
+
+    updateBulkToggleAvailability() {
+        const sections = $(SECTION_LIST_SECTIONS);
+        const collapsed = sections.filter(".collapsed").length;
+        $("#expand-all-sections")
+            .attr("aria-disabled", String(collapsed === 0));
+        $("#collapse-all-sections")
+            .attr("aria-disabled", String(collapsed === sections.length));
+    }
+
+    setAllSectionsCollapsed(collapsed, animate) {
+        $(SECTION_LIST_SECTIONS).each((_, e) => {
+            this.setSectionCollapsed($(e), collapsed, animate);
+        });
+    }
+
+    initializeSectionListControls() {
+        const bindBulkToggle = (selector, collapsed) => {
+            $(selector).on("click", (e) => {
+                if ($(e.currentTarget).attr("aria-disabled") === "true") {
+                    return;
+                }
+                this.setAllSectionsCollapsed(collapsed, true);
+            });
+        };
+        bindBulkToggle("#collapse-all-sections", true);
+        bindBulkToggle("#expand-all-sections", false);
     }
 
     initializeTooltips() {
@@ -325,16 +383,35 @@ export class Inspector {
 
         for (const group of groups) {
             const section = $("<div></div>")
-                .addClass("collapsible-section")
+                .addClass("collapsible-section collapsed")
                 .appendTo(container);
 
             const header = $("<h3></h3>")
                 .addClass("collapsible-header")
                 .appendTo(section);
 
-            $("<button></button>")
-                .text(group.report.getRoleLabelOrURI(group.elr))
+            const button = $("<button></button>")
+                .attr("aria-expanded", "false")
                 .appendTo(header);
+
+            $("<span></span>")
+                .addClass("section-label")
+                .text(group.report.getRoleLabelOrURI(group.elr))
+                .appendTo(button);
+
+            const targetDocument = group.report.targetDocument();
+            if (targetDocument !== null) {
+                $("<span></span>")
+                    .addClass("section-target-document")
+                    .text(targetDocument)
+                    .appendTo(button);
+            }
+
+            $("<span></span>")
+                .addClass("section-fact-count")
+                .attr("aria-label", i18next.t("inspector.sectionFactCount", { count: group.facts.length }))
+                .text(group.facts.length)
+                .appendTo(button);
 
             const body = $("<div></div>")
                 .addClass("collapsible-body")
@@ -343,6 +420,7 @@ export class Inspector {
 
             this.addFactListByGroupFacts(body, group.facts, 0);
         }
+        this.updateBulkToggleAvailability();
     }
 
     handleMessage(event) {

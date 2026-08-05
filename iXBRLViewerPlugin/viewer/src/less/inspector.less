@@ -524,6 +524,66 @@ a {
       }
     }
 
+    &.fact-inspector {
+      .section-list-controls {
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.4rem;
+        padding-top: 1.2rem;
+        padding-bottom: 1.2rem;
+
+        .section-list-title {
+          flex: 1 1 auto;
+          font-weight: bold;
+          color: var(--colour-text-title);
+        }
+
+        .section-list-buttons {
+          display: flex;
+          flex: 0 0 auto;
+          flex-direction: row;
+          gap: 0.8rem;
+
+          button {
+            .secondary-button();
+
+            &[aria-disabled="true"] {
+              color: var(--colour-text-light);
+              border-color: var(--colour-text-light);
+              cursor: default;
+
+              &:hover {
+                background-color: var(--colour-button-secondary-bg);
+              }
+            }
+          }
+        }
+      }
+
+      .facts-by-group .collapsible-header button:first-of-type {
+        display: flex;
+        align-items: baseline;
+        gap: 0.8rem;
+
+        .section-label {
+          flex: 1 1 auto;
+        }
+
+        .section-target-document,
+        .section-fact-count {
+          flex: 0 0 auto;
+          font-weight: normal;
+          color: var(--colour-text-light);
+        }
+
+        .section-fact-count {
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    }
+
     &.search-inspector {
       .search-controls {
         .show-filters & {
@@ -958,7 +1018,7 @@ a {
           position: relative;
           margin: 0 calc(-1 * var(--button-padding-x));
           width: calc(100% + 2 * var(--button-padding-x));
-          padding: var(--button-padding-y) var(--button-padding-x);
+          padding: var(--button-padding-y) calc(var(--button-padding-x) + 2.4rem) var(--button-padding-y) var(--button-padding-x);
           cursor: pointer;
           transition: all 0.25s ease;
 
@@ -984,6 +1044,10 @@ a {
     &.collapsed {
       .collapsible-header button::before {
         transform: rotate(180deg);
+      }
+
+      & > .collapsible-body {
+        display: none;
       }
     }
 
@@ -1126,6 +1190,10 @@ a {
 
   &:not(.show-facts-by-group) {
     .facts-by-group {
+        display: none;
+    }
+
+    .inspector-container.fact-inspector > .section-list-controls {
         display: none;
     }
   }

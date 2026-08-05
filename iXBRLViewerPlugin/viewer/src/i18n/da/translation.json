@@ -67,12 +67,14 @@
     "associatedFacts": "Associerede fakta",
     "calculationDetails": "Beregning detaljer",
     "calculations": "Beregninger",
+    "collapseAllSections": "Fold alle sammen",
     "concealedFact": "Skjult faktum",
     "conceptType": "Begrebstype",
     "contributor": "Bidragyder",
     "datatypes": "Typer",
     "dimensions": "Dimensionstype",
     "documentation": "Dokumentation",
+    "expandAllSections": "Fold alle ud",
     "explicitDimension": "Eksplícitte dimensioner",
     "fact-groups": "Sektioner",
     "factSearch": "Faktasøgning",
@@ -109,6 +111,8 @@
     "scales": "Skalaer",
     "searchReport": "Søg iXBRL rapport",
     "searchResults": "Søgeresultater",
+    "sectionFactCount_one": "{{count}} faktum",
+    "sectionFactCount_other": "{{count}} fakta",
     "settings": {
       "calculationMode": {
         "documentation": "Vælg beregningsevalueringstilstand for ældre beregningsrelationer",

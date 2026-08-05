@@ -923,8 +923,14 @@ a {
     .collapsible-body {
       .panel-indent();
 
+      display: flow-root;
+
       & > * {
         margin-bottom: 1.2rem;
+      }
+
+      & > *:first-child {
+        margin-top: 0;
       }
 
       & > table.property-table:first-child,

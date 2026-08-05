@@ -23,6 +23,7 @@ import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_
 import { getTheme, darkModeTheme, lightModeTheme } from './theme.js';
 
 const SEARCH_PAGE_SIZE = 100
+const SECTION_LIST_SECTIONS = "#inspector .facts-by-group > .collapsible-section";
 const SEARCH_FILTER_MULTISELECTS = {
   visibilityFilter: "search-filter-visibility",
   conceptTypeFilter: "search-filter-concept-type",
@@ -213,19 +214,35 @@ export class Inspector {
         section.toggleClass("collapsed", collapsed);
         section.find("> .collapsible-header button:first-of-type")
             .attr("aria-expanded", String(!collapsed));
+        this.updateBulkToggleAvailability();
+    }
+
+    updateBulkToggleAvailability() {
+        const sections = $(SECTION_LIST_SECTIONS);
+        const collapsed = sections.filter(".collapsed").length;
+        $("#expand-all-sections")
+            .attr("aria-disabled", String(collapsed === 0));
+        $("#collapse-all-sections")
+            .attr("aria-disabled", String(collapsed === sections.length));
     }
 
     setAllSectionsCollapsed(collapsed, animate) {
-        $("#inspector .facts-by-group > .collapsible-section").each((_, e) => {
+        $(SECTION_LIST_SECTIONS).each((_, e) => {
             this.setSectionCollapsed($(e), collapsed, animate);
         });
     }
 
     initializeSectionListControls() {
-        $("#collapse-all-sections")
-            .on("click", () => this.setAllSectionsCollapsed(true, true));
-        $("#expand-all-sections")
-            .on("click", () => this.setAllSectionsCollapsed(false, true));
+        const bindBulkToggle = (selector, collapsed) => {
+            $(selector).on("click", (e) => {
+                if ($(e.currentTarget).attr("aria-disabled") === "true") {
+                    return;
+                }
+                this.setAllSectionsCollapsed(collapsed, true);
+            });
+        };
+        bindBulkToggle("#collapse-all-sections", true);
+        bindBulkToggle("#expand-all-sections", false);
     }
 
     initializeTooltips() {
@@ -385,6 +402,7 @@ export class Inspector {
 
             this.addFactListByGroupFacts(body, group.facts, 0);
         }
+        this.updateBulkToggleAvailability();
     }
 
     handleMessage(event) {

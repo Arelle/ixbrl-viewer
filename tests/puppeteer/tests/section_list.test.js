@@ -52,6 +52,25 @@ describe('ixbrl-viewer:', () => {
         }
     });
 
+    test('Section List Bulk Toggle Availability Test', async () => {
+        const sectionList = viewerPage.sectionList;
+
+        await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
+
+        await sectionList.collapseAll.assertUnavailable();
+        await sectionList.expandAll.assertAvailable();
+
+        await sectionList.expandAll.pressKey('Enter');
+
+        await sectionList.expandAll.assertUnavailable();
+        await sectionList.expandAll.assertFocused();
+        await sectionList.collapseAll.assertAvailable();
+
+        await sectionList.expandAll.pressShiftTab();
+
+        await sectionList.collapseAll.assertFocused();
+    });
+
     test('Section List Toolbar Visibility Test', async () => {
         const sectionList = viewerPage.sectionList;
 

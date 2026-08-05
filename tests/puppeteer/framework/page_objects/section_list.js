@@ -12,10 +12,10 @@ export class SectionList {
         this.#viewerPage = viewerPage;
         this.controls = new Element(viewerPage, CONTROLS_XPATH,
             'Section List Toolbar');
-        this.collapseAll = new Button(viewerPage,
+        this.collapseAll = new BulkToggle(viewerPage,
             '//button[@id="collapse-all-sections"]',
             'Collapse All');
-        this.expandAll = new Button(viewerPage,
+        this.expandAll = new BulkToggle(viewerPage,
             '//button[@id="expand-all-sections"]',
             'Expand All');
         this.factsTab = new Button(viewerPage,
@@ -40,6 +40,16 @@ export class SectionList {
     async getSections() {
         const count = await this.getSectionCount();
         return Array.from({ length: count }, (_, i) => this.getSection(i + 1));
+    }
+}
+
+export class BulkToggle extends Button {
+    async assertAvailable() {
+        await this.assertAttribute('aria-disabled', 'false');
+    }
+
+    async assertUnavailable() {
+        await this.assertAttribute('aria-disabled', 'true');
     }
 }
 

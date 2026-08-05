@@ -34,6 +34,36 @@ export class Element {
         await this.waitForElement();
         await this.waitForElement({ hidden: true });
     }
+
+    async assertAttribute(name, expectedValue) {
+        this.log(
+            `Asserting ${name} of ${this.name} equals "${expectedValue}"`);
+        const elem = await this.waitForElement({ visible: true });
+        const value = await elem.evaluate((e, n) => e.getAttribute(n), name);
+        expect(value).toEqual(expectedValue);
+    }
+
+    async assertFocused() {
+        this.log(`Asserting ${this.name} holds keyboard focus`);
+        const elem = await this.waitForElement({ visible: true });
+        expect(await elem.evaluate(e => e === document.activeElement)).toBe(true);
+    }
+
+    async pressKey(key) {
+        this.log(`Pressing ${key} on ${this.name}`);
+        const elem = await this.waitForElement({ visible: true });
+        await elem.press(key);
+    }
+
+    async pressShiftTab() {
+        this.log(`Pressing Shift+Tab on ${this.name}`);
+        const elem = await this.waitForElement({ visible: true });
+        await elem.focus();
+        const keyboard = this.#viewerPage.page.keyboard;
+        await keyboard.down('Shift');
+        await keyboard.press('Tab');
+        await keyboard.up('Shift');
+    }
 }
 
 export class Text extends Element {

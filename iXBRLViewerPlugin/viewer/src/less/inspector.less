@@ -548,6 +548,16 @@ a {
 
           button {
             .secondary-button();
+
+            &[aria-disabled="true"] {
+              color: var(--colour-text-light);
+              border-color: var(--colour-text-light);
+              cursor: default;
+
+              &:hover {
+                background-color: var(--colour-button-secondary-bg);
+              }
+            }
           }
         }
       }

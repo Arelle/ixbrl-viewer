@@ -467,7 +467,10 @@ describe("Facts by group", () => {
         for (const id of insertionOrder) {
             data.facts[id] = { a: { c: conceptOf(id), p: "2019-01-01" } };
         }
-        const reportSet = new ReportSet(data);
+        return withIXNodes(new ReportSet(data), docOrder);
+    }
+
+    function withIXNodes(reportSet, docOrder) {
         const ixNodeMap = {};
         for (const id of docOrder) {
             ixNodeMap[viewerUniqueId(0, id)] = new IXNode(id, $('<span></span>'));
@@ -497,12 +500,20 @@ describe("Facts by group", () => {
                 targetReport("elr2", "fb", "eg:LineItem2"),
             ] } ]
         });
-        const ixNodeMap = {};
-        for (const id of ["fa", "fb"]) {
-            ixNodeMap[viewerUniqueId(0, id)] = new IXNode(id, $('<span></span>'));
+        return withIXNodes(reportSet, ["fa", "fb"]);
+    }
+
+    function buildParentheticalReportSet() {
+        const data = JSON.parse(JSON.stringify(groupReportData));
+        data.roleDefs = {
+            elr1: { en: "001 Group 1 (Parenthetical)" },
+            elr2: { en: "002 Group 2 (Parenthetical)" },
+        };
+        const ids = ["f1", "f2"];
+        for (const id of ids) {
+            data.facts[id] = { a: { c: conceptOf(id), p: "2019-01-01" } };
         }
-        reportSet.setIXNodeMap(ixNodeMap);
-        return reportSet;
+        return withIXNodes(new ReportSet(data), ids);
     }
 
     function setUpInspector(reportSet) {
@@ -517,8 +528,8 @@ describe("Facts by group", () => {
                   <div class="section section-list-controls">
                     <div class="section-list-title" data-i18n="inspector.fact-groups">Sections</div>
                     <div class="section-list-buttons">
-                      <button id="collapse-all-sections" data-i18n="inspector.collapseAllSections">Collapse all</button>
-                      <button id="expand-all-sections" data-i18n="inspector.expandAllSections">Expand all</button>
+                      <button id="collapse-all-sections" aria-disabled="true" data-i18n="inspector.collapseAllSections">Collapse all</button>
+                      <button id="expand-all-sections" aria-disabled="true" data-i18n="inspector.expandAllSections">Expand all</button>
                     </div>
                   </div>
                   <div class="inspector-body">
@@ -548,6 +559,10 @@ describe("Facts by group", () => {
 
     function bulkButton(action) {
         return $(`#${action}-all-sections`);
+    }
+
+    function ariaDisabled(action) {
+        return bulkButton(action).attr("aria-disabled");
     }
 
     beforeAll(() => {
@@ -683,6 +698,103 @@ describe("Facts by group", () => {
         bulkButton("expand").trigger("click");
 
         expect(collapsedFlags()).toEqual([false, false]);
+    });
+
+    test("a freshly built section list offers Expand all and reports Collapse all as unavailable", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        expect(ariaDisabled("collapse")).toBe("true");
+        expect(ariaDisabled("expand")).toBe("false");
+    });
+
+    test("each bulk toggle reports itself unavailable once it has nothing left to do", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+
+        bulkButton("expand").trigger("click");
+
+        expect(ariaDisabled("expand")).toBe("true");
+        expect(ariaDisabled("collapse")).toBe("false");
+
+        bulkButton("collapse").trigger("click");
+
+        expect(ariaDisabled("collapse")).toBe("true");
+        expect(ariaDisabled("expand")).toBe("false");
+    });
+
+    test("expanding the last collapsed section by hand makes Expand all unavailable", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+
+        headerButton(0).trigger("click");
+
+        expect(ariaDisabled("expand")).toBe("false");
+
+        headerButton(1).trigger("click");
+
+        expect(ariaDisabled("expand")).toBe("true");
+        expect(ariaDisabled("collapse")).toBe("false");
+    });
+
+    test("collapsing the last expanded section by hand makes Collapse all unavailable", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        bulkButton("expand").trigger("click");
+
+        headerButton(0).trigger("click");
+
+        expect(ariaDisabled("collapse")).toBe("false");
+
+        headerButton(1).trigger("click");
+
+        expect(ariaDisabled("collapse")).toBe("true");
+        expect(ariaDisabled("expand")).toBe("false");
+    });
+
+    test("clicking an unavailable bulk button does nothing", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        const setAll = jest.spyOn(insp, "setAllSectionsCollapsed");
+
+        bulkButton("collapse").trigger("click");
+
+        expect(setAll).not.toHaveBeenCalled();
+        expect(collapsedFlags()).toEqual([true, true]);
+    });
+
+    test("toggling a collapsible section outside the section list leaves the bulk buttons alone", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        $("#ixv").append(`
+            <div class="collapsible-section static">
+              <h3 class="collapsible-header"><button aria-expanded="true">Labels</button></h3>
+              <div class="collapsible-body">Labels body</div>
+            </div>
+        `);
+
+        $("#ixv .collapsible-section.static .collapsible-header button").trigger("click");
+
+        expect(ariaDisabled("collapse")).toBe("true");
+        expect(ariaDisabled("expand")).toBe("false");
+    });
+
+    test("both bulk buttons are unavailable when every presentation group is filtered out", () => {
+        const insp = setUpInspector(buildParentheticalReportSet());
+        expect(insp.outline.hasOutline()).toBe(true);
+
+        insp.buildFactListByGroup();
+
+        expect(sections().length).toBe(0);
+        expect(ariaDisabled("collapse")).toBe("true");
+        expect(ariaDisabled("expand")).toBe("true");
     });
 
     test("the bulk buttons cover sections from every report", () => {

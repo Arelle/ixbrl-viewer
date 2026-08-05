@@ -352,7 +352,7 @@ export class Inspector {
 
         for (const group of groups) {
             const section = $("<div></div>")
-                .addClass("collapsible-section")
+                .addClass("collapsible-section collapsed")
                 .appendTo(container);
 
             const header = $("<h3></h3>")
@@ -360,6 +360,7 @@ export class Inspector {
                 .appendTo(section);
 
             $("<button></button>")
+                .attr("aria-expanded", "false")
                 .text(group.report.getRoleLabelOrURI(group.elr))
                 .appendTo(header);
 

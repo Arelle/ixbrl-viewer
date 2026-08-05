@@ -484,10 +484,27 @@ describe("Facts by group", () => {
         const insp = new TestInspector();
         insp._reportSet = reportSet;
         insp.outline = new ReportSetOutline(reportSet);
-        $("#inspector").remove();
-        $(document.body).append('<div id="inspector"><div class="facts-by-group"></div></div>');
+        $("#ixv, #inspector").remove();
+        $(document.body).append('<div id="ixv"><div id="inspector"><div class="facts-by-group"></div></div></div>');
+        insp.initializeCollapsibleSections();
         return insp;
     }
+
+    function sections() {
+        return $("#inspector .facts-by-group .collapsible-section");
+    }
+
+    function headerButton(index) {
+        return sections().eq(index).find("> .collapsible-header button:first-of-type");
+    }
+
+    beforeAll(() => {
+        $.fx.off = true;
+    });
+
+    afterAll(() => {
+        $.fx.off = false;
+    });
 
     test("only renders facts belonging to the specified group, even when fact-array order differs from document order", () => {
         // Insertion order into reportSet.facts() puts f2 (an elr2 fact)
@@ -534,6 +551,45 @@ describe("Facts by group", () => {
 
         expect(body.find(".fact-list-item").length).toBe(ids.length);
         expect(body.find(".show-more").length).toBe(0);
+    });
+
+    test("builds every section collapsed, reporting aria-expanded=false", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        expect(sections().length).toBe(2);
+        sections().each((_, el) => {
+            expect($(el).hasClass("collapsed")).toBe(true);
+        });
+        expect(headerButton(0).attr("aria-expanded")).toBe("false");
+        expect(headerButton(1).attr("aria-expanded")).toBe("false");
+    });
+
+    test("clicking a section header expands that section and only that section", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+
+        headerButton(0).trigger("click");
+
+        expect(sections().eq(0).hasClass("collapsed")).toBe(false);
+        expect(headerButton(0).attr("aria-expanded")).toBe("true");
+        expect(sections().eq(1).hasClass("collapsed")).toBe(true);
+        expect(headerButton(1).attr("aria-expanded")).toBe("false");
+    });
+
+    test("clicking an expanded section header collapses it again", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+
+        headerButton(0).trigger("click");
+        headerButton(0).trigger("click");
+
+        expect(sections().eq(0).hasClass("collapsed")).toBe(true);
+        expect(headerButton(0).attr("aria-expanded")).toBe("false");
     });
 });
 

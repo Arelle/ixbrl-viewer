@@ -480,13 +480,57 @@ describe("Facts by group", () => {
         return id.startsWith("f1") ? "eg:LineItem1" : "eg:LineItem2";
     }
 
+    function buildTwoReportSet() {
+        function targetReport(elr, factId, concept) {
+            const data = JSON.parse(JSON.stringify(groupReportData));
+            for (const other of ["elr1", "elr2"].filter(e => e !== elr)) {
+                delete data.roles[other];
+                delete data.roleDefs[other];
+                delete data.rels.pres[other];
+            }
+            data.facts = { [factId]: { a: { c: concept, p: "2019-01-01" } } };
+            return data;
+        }
+        const reportSet = new ReportSet({
+            sourceReports: [ { targetReports: [
+                targetReport("elr1", "fa", "eg:LineItem1"),
+                targetReport("elr2", "fb", "eg:LineItem2"),
+            ] } ]
+        });
+        const ixNodeMap = {};
+        for (const id of ["fa", "fb"]) {
+            ixNodeMap[viewerUniqueId(0, id)] = new IXNode(id, $('<span></span>'));
+        }
+        reportSet.setIXNodeMap(ixNodeMap);
+        return reportSet;
+    }
+
     function setUpInspector(reportSet) {
         const insp = new TestInspector();
         insp._reportSet = reportSet;
         insp.outline = new ReportSetOutline(reportSet);
         $("#ixv, #inspector").remove();
-        $(document.body).append('<div id="ixv"><div id="inspector"><div class="facts-by-group"></div></div></div>');
+        $(document.body).append(`
+            <div id="ixv">
+              <div id="inspector" class="show-facts-by-group">
+                <div class="inspector-container fact-inspector">
+                  <div class="section section-list-controls">
+                    <div class="section-list-title" data-i18n="inspector.fact-groups">Sections</div>
+                    <div class="section-list-buttons">
+                      <button id="collapse-all-sections" data-i18n="inspector.collapseAllSections">Collapse all</button>
+                      <button id="expand-all-sections" data-i18n="inspector.expandAllSections">Expand all</button>
+                    </div>
+                  </div>
+                  <div class="inspector-body">
+                    <div class="facts-by-group"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        `);
+        $("#ixv").localize();
         insp.initializeCollapsibleSections();
+        insp.initializeSectionListControls();
         return insp;
     }
 
@@ -498,8 +542,17 @@ describe("Facts by group", () => {
         return sections().eq(index).find("> .collapsible-header button:first-of-type");
     }
 
+    function collapsedFlags() {
+        return sections().map((_, el) => $(el).hasClass("collapsed")).get();
+    }
+
+    function bulkButton(action) {
+        return $(`#${action}-all-sections`);
+    }
+
     beforeAll(() => {
         $.fx.off = true;
+        return new TestInspector().i18nInit();
     });
 
     afterAll(() => {
@@ -590,6 +643,102 @@ describe("Facts by group", () => {
 
         expect(sections().eq(0).hasClass("collapsed")).toBe(true);
         expect(headerButton(0).attr("aria-expanded")).toBe("false");
+    });
+
+    test("the toolbar labels its title and its buttons", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        expect(sections().length).toBe(2);
+        expect(bulkButton("collapse").text()).toBe("Collapse all");
+        expect(bulkButton("expand").text()).toBe("Expand all");
+    });
+
+    test("Expand all expands every section, and Collapse all collapses every section", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+
+        bulkButton("expand").trigger("click");
+
+        expect(collapsedFlags()).toEqual([false, false]);
+        expect(headerButton(0).attr("aria-expanded")).toBe("true");
+        expect(headerButton(1).attr("aria-expanded")).toBe("true");
+
+        bulkButton("collapse").trigger("click");
+
+        expect(collapsedFlags()).toEqual([true, true]);
+        expect(headerButton(0).attr("aria-expanded")).toBe("false");
+        expect(headerButton(1).attr("aria-expanded")).toBe("false");
+    });
+
+    test("Expand all expands a section a reader had already expanded by hand", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
+
+        bulkButton("expand").trigger("click");
+
+        expect(collapsedFlags()).toEqual([false, false]);
+    });
+
+    test("the bulk buttons cover sections from every report", () => {
+        const insp = setUpInspector(buildTwoReportSet());
+        insp.buildFactListByGroup();
+
+        expect(sections().length).toBe(2);
+
+        bulkButton("expand").trigger("click");
+
+        expect(collapsedFlags()).toEqual([false, false]);
+
+        bulkButton("collapse").trigger("click");
+
+        expect(collapsedFlags()).toEqual([true, true]);
+    });
+
+    test("alternating bulk clicks replace an in-flight slide rather than stacking animations", () => {
+        $.fx.off = false;
+        try {
+            const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+            const insp = setUpInspector(reportSet);
+            insp.buildFactListByGroup();
+
+            bulkButton("expand").trigger("click");
+            bulkButton("collapse").trigger("click");
+            bulkButton("expand").trigger("click");
+
+            const queued = sections()
+                .map((_, el) => $.queue($(el).find("> .collapsible-body").get(0), "fx").length)
+                .get();
+            expect(queued).toEqual([1, 1]);
+        }
+        finally {
+            sections().find("> .collapsible-body").finish();
+            $.fx.tick();
+            $.fx.off = true;
+        }
+    });
+
+    test("a section paged out with show more keeps every row across a bulk round trip", () => {
+        const ids = [];
+        for (let i = 0; i < FACTS_PER_GROUP + 5; i++) {
+            ids.push(`f1-${i}`);
+        }
+        const reportSet = buildGroupReportSet(ids, ids, () => "eg:LineItem1");
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        body.find(".show-more").trigger("click");
+
+        bulkButton("collapse").trigger("click");
+        bulkButton("expand").trigger("click");
+
+        expect(body.find(".fact-list-item").length).toBe(ids.length);
+        expect(body.find(".show-more").length).toBe(0);
     });
 });
 

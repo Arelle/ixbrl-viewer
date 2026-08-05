@@ -524,6 +524,35 @@ a {
       }
     }
 
+    &.fact-inspector {
+      .section-list-controls {
+        display: flex;
+        flex: 0 0 auto;
+        flex-direction: row;
+        align-items: center;
+        gap: 1.4rem;
+        padding-top: 1.2rem;
+        padding-bottom: 1.2rem;
+
+        .section-list-title {
+          flex: 1 1 auto;
+          font-weight: bold;
+          color: var(--colour-text-title);
+        }
+
+        .section-list-buttons {
+          display: flex;
+          flex: 0 0 auto;
+          flex-direction: row;
+          gap: 0.8rem;
+
+          button {
+            .secondary-button();
+          }
+        }
+      }
+    }
+
     &.search-inspector {
       .search-controls {
         .show-filters & {
@@ -1130,6 +1159,10 @@ a {
 
   &:not(.show-facts-by-group) {
     .facts-by-group {
+        display: none;
+    }
+
+    .inspector-container.fact-inspector > .section-list-controls {
         display: none;
     }
   }

@@ -96,6 +96,7 @@ export class Inspector {
             inspector.i18nInit().then((t) => {
                 
                 inspector.initializeCollapsibleSections();
+                inspector.initializeSectionListControls();
                 $("#inspector-tabs button").on("click", function () {
                     inspector.inspectorMode($(this).data("mode"));
                 });
@@ -212,6 +213,19 @@ export class Inspector {
         section.toggleClass("collapsed", collapsed);
         section.find("> .collapsible-header button:first-of-type")
             .attr("aria-expanded", String(!collapsed));
+    }
+
+    setAllSectionsCollapsed(collapsed, animate) {
+        $("#inspector .facts-by-group > .collapsible-section").each((_, e) => {
+            this.setSectionCollapsed($(e), collapsed, animate);
+        });
+    }
+
+    initializeSectionListControls() {
+        $("#collapse-all-sections")
+            .on("click", () => this.setAllSectionsCollapsed(true, true));
+        $("#expand-all-sections")
+            .on("click", () => this.setAllSectionsCollapsed(false, true));
     }
 
     initializeTooltips() {

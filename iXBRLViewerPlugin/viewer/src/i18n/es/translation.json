@@ -111,6 +111,9 @@
     "scales": "Escalas",
     "searchReport": "Buscar en el informe iXBRL",
     "searchResults": "Resultados de búsqueda",
+    "sectionFactCount_one": "{{count}} hecho",
+    "sectionFactCount_many": "{{count}} hechos",
+    "sectionFactCount_other": "{{count}} hechos",
     "settings": {
       "calculationMode": {
         "documentation": "Seleccione el modo de evaluación de cálculo para las relaciones de cálculo heredadas",

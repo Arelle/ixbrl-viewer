@@ -111,6 +111,10 @@
     "scales": "Масштаби",
     "searchReport": "Пошук у звіті iXBRL",
     "searchResults": "Результати пошуку",
+    "sectionFactCount_one": "{{count}} факт",
+    "sectionFactCount_few": "{{count}} факти",
+    "sectionFactCount_many": "{{count}} фактів",
+    "sectionFactCount_other": "{{count}} факту",
     "settings": {
       "calculationMode": {
         "documentation": "Виберіть режим оцінки обчислення для застарілих зв'язків обчислення",

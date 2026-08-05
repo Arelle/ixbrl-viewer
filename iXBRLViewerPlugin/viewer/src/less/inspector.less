@@ -561,6 +561,23 @@ a {
           }
         }
       }
+
+      .facts-by-group .collapsible-header button:first-of-type {
+        display: flex;
+        align-items: baseline;
+        gap: 0.8rem;
+
+        .section-label {
+          flex: 1 1 auto;
+        }
+
+        .section-fact-count {
+          flex: 0 0 auto;
+          font-weight: normal;
+          color: var(--colour-text-light);
+          font-variant-numeric: tabular-nums;
+        }
+      }
     }
 
     &.search-inspector {
@@ -997,7 +1014,7 @@ a {
           position: relative;
           margin: 0 calc(-1 * var(--button-padding-x));
           width: calc(100% + 2 * var(--button-padding-x));
-          padding: var(--button-padding-y) var(--button-padding-x);
+          padding: var(--button-padding-y) calc(var(--button-padding-x) + 2.4rem) var(--button-padding-y) var(--button-padding-x);
           cursor: pointer;
           transition: all 0.25s ease;
 

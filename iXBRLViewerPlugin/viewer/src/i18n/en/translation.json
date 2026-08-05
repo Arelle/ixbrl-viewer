@@ -111,6 +111,8 @@
     "scales": "Scales",
     "searchReport": "Search iXBRL Report",
     "searchResults": "Search Results",
+    "sectionFactCount_one": "{{count}} fact",
+    "sectionFactCount_other": "{{count}} facts",
     "settings": {
       "calculationMode": {
         "documentation": "Select the calculation evaluation mode for legacy calculation relationships",

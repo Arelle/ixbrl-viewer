@@ -553,6 +553,14 @@ describe("Facts by group", () => {
         return sections().eq(index).find("> .collapsible-header button:first-of-type");
     }
 
+    function sectionLabel(index) {
+        return headerButton(index).find(".section-label");
+    }
+
+    function sectionFactCount(index) {
+        return headerButton(index).find(".section-fact-count");
+    }
+
     function collapsedFlags() {
         return sections().map((_, el) => $(el).hasClass("collapsed")).get();
     }
@@ -658,6 +666,42 @@ describe("Facts by group", () => {
 
         expect(sections().eq(0).hasClass("collapsed")).toBe(true);
         expect(headerButton(0).attr("aria-expanded")).toBe("false");
+    });
+
+    test("a section header shows its role label and its fact count", () => {
+        const reportSet = buildGroupReportSet(["f1", "f1a", "f2"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        expect(sectionLabel(0).text()).toBe("001 Group 1");
+        expect(sectionFactCount(0).text()).toBe("2");
+        expect(sectionFactCount(1).text()).toBe("1");
+    });
+
+    test("the header count is the section's full fact count, not the number of rendered rows", () => {
+        const ids = [];
+        for (let i = 0; i < FACTS_PER_GROUP + 5; i++) {
+            ids.push(`f1-${i}`);
+        }
+        const reportSet = buildGroupReportSet(ids, ids, () => "eg:LineItem1");
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        expect(body.find(".fact-list-item").length).toBe(FACTS_PER_GROUP - 1);
+        expect(sectionFactCount(0).text()).toBe(String(ids.length));
+    });
+
+    test("the header count announces itself as a number of facts", () => {
+        const reportSet = buildGroupReportSet(["f1", "f1a", "f2"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        expect(sectionFactCount(0).attr("aria-label")).toBe("2 facts");
+        expect(sectionFactCount(1).attr("aria-label")).toBe("1 fact");
     });
 
     test("the toolbar labels its title and its buttons", () => {

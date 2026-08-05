@@ -111,6 +111,12 @@
     "scales": "Graddfeydd",
     "searchReport": "Chwilio Adroddiad iXBRL",
     "searchResults": "Canlyniadau Chwilio",
+    "sectionFactCount_zero": "{{count}} ffeithiau",
+    "sectionFactCount_one": "{{count}} ffaith",
+    "sectionFactCount_two": "{{count}} ffeithiau",
+    "sectionFactCount_few": "{{count}} ffeithiau",
+    "sectionFactCount_many": "{{count}} ffeithiau",
+    "sectionFactCount_other": "{{count}} ffeithiau",
     "settings": {
       "calculationMode": {
         "documentation": "Dewiswch y modd gwerthuso cyfrifo ar gyfer perthnasoedd cyfrifo etifeddol",

@@ -111,6 +111,8 @@
     "scales": "Schalen",
     "searchReport": "Zoek iXBRL-rapport",
     "searchResults": "Zoekresultaten",
+    "sectionFactCount_one": "{{count}} feit",
+    "sectionFactCount_other": "{{count}} feiten",
     "settings": {
       "calculationMode": {
         "documentation": "Selecteer de berekeningsevaluatiemodus voor verouderde berekeningsrelaties",

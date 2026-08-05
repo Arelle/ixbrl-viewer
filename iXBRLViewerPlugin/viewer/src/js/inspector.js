@@ -390,10 +390,20 @@ export class Inspector {
                 .addClass("collapsible-header")
                 .appendTo(section);
 
-            $("<button></button>")
+            const button = $("<button></button>")
                 .attr("aria-expanded", "false")
-                .text(group.report.getRoleLabelOrURI(group.elr))
                 .appendTo(header);
+
+            $("<span></span>")
+                .addClass("section-label")
+                .text(group.report.getRoleLabelOrURI(group.elr))
+                .appendTo(button);
+
+            $("<span></span>")
+                .addClass("section-fact-count")
+                .attr("aria-label", i18next.t("inspector.sectionFactCount", { count: group.facts.length }))
+                .text(group.facts.length)
+                .appendTo(button);
 
             const body = $("<div></div>")
                 .addClass("collapsible-body")

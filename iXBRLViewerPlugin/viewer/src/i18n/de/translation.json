@@ -111,6 +111,8 @@
     "scales": "Skalen",
     "searchReport": "iXBRL-Bericht durchsuchen",
     "searchResults": "Suchergebnisse",
+    "sectionFactCount_one": "{{count}} Fakt",
+    "sectionFactCount_other": "{{count}} Fakten",
     "settings": {
       "calculationMode": {
         "documentation": "Wählen Sie den Berechnungsauswertungsmodus für Legacy-Berechnungsbeziehungen",

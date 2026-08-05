@@ -461,8 +461,9 @@ describe("Facts by group", () => {
     // insertionOrder controls the key order of the "facts" object (and thus
     // reportSet.facts() order); docOrder controls the order IXNode objects
     // are constructed in, which determines document order (docOrderindex).
-    function buildGroupReportSet(insertionOrder, docOrder, conceptOf) {
+    function buildGroupReportSet(insertionOrder, docOrder, conceptOf, target) {
         const data = JSON.parse(JSON.stringify(groupReportData));
+        data.target = target ?? null;
         data.facts = {};
         for (const id of insertionOrder) {
             data.facts[id] = { a: { c: conceptOf(id), p: "2019-01-01" } };
@@ -559,6 +560,10 @@ describe("Facts by group", () => {
 
     function sectionFactCount(index) {
         return headerButton(index).find(".section-fact-count");
+    }
+
+    function sectionTargetDocument(index) {
+        return headerButton(index).find(".section-target-document");
     }
 
     function collapsedFlags() {
@@ -702,6 +707,36 @@ describe("Facts by group", () => {
 
         expect(sectionFactCount(0).attr("aria-label")).toBe("2 facts");
         expect(sectionFactCount(1).attr("aria-label")).toBe("1 fact");
+    });
+
+    test("a section header carries its report's target document name", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf, "frs102");
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        expect(sectionTargetDocument(0).text()).toBe("frs102");
+        expect(sectionTargetDocument(1).text()).toBe("frs102");
+    });
+
+    test("a section header of a default-target report has no target document element at all", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        expect(sectionTargetDocument(0).length).toBe(0);
+    });
+
+    test("the target document name sits between the role label and the fact count", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2"], ["f1", "f2"], conceptOf, "frs102");
+        const insp = setUpInspector(reportSet);
+
+        insp.buildFactListByGroup();
+
+        const parts = headerButton(0).children();
+        expect(parts.index(sectionLabel(0))).toBeLessThan(parts.index(sectionTargetDocument(0)));
+        expect(parts.index(sectionTargetDocument(0))).toBeLessThan(parts.index(sectionFactCount(0)));
     });
 
     test("the toolbar labels its title and its buttons", () => {

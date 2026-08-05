@@ -399,6 +399,14 @@ export class Inspector {
                 .text(group.report.getRoleLabelOrURI(group.elr))
                 .appendTo(button);
 
+            const targetDocument = group.report.targetDocument();
+            if (targetDocument !== null) {
+                $("<span></span>")
+                    .addClass("section-target-document")
+                    .text(targetDocument)
+                    .appendTo(button);
+            }
+
             $("<span></span>")
                 .addClass("section-fact-count")
                 .attr("aria-label", i18next.t("inspector.sectionFactCount", { count: group.facts.length }))

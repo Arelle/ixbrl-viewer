@@ -55,7 +55,6 @@ jobs:
       - name: Run puppeteer tests
         run: npm run test:puppeteer
       - uses: actions/upload-artifact@v7.0.1
-        if: failure()
         with:
           name: ${{ github.run_id }}.${{ github.run_attempt }}_${{ matrix.os }}_${{ matrix.node-version }}_${{ matrix.python-version }}_artifacts
           path: tests/puppeteer/artifacts/

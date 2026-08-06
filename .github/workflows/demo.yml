@@ -1,0 +1,42 @@
+name: Generate Demo Viewer
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0 # npm run prod requires tags, sadly this is the only way to get them.
+      - uses: actions/setup-node@v7.0.0
+        with:
+          cache: 'npm'
+          check-latest: true
+          node-version: '26'
+      - name: Install Python 3
+        uses: actions/setup-python@v7.0.0
+        with:
+          cache: 'pip'
+          cache-dependency-path: '**/pyproject.toml'
+          check-latest: true
+          python-version: '3.14'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Install Arelle
+        run: pip install .[arelle]
+      - name: Build viewer js
+        run: make prod
+      - name: Generate test viewers
+        shell: bash
+        run: ./tests/puppeteer/tools/generate.sh
+      - uses: actions/upload-artifact@v7.0.1
+        with:
+          name: demo_${{ github.run_id }}.${{ github.run_attempt }}_artifacts
+          path: tests/puppeteer/artifacts/

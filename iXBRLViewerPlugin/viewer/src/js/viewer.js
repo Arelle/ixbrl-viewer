@@ -305,19 +305,26 @@ export class Viewer {
         if (nodes === undefined) {
             nodes = this._wrapNode(domNode);
         }
-        const allNodes = [];
+        const subNodeLists = [];
         for (const node of nodes) {
-            let hasSubNodes = false;
+            const absoluteSubNodes = [];
+            for (const subNode of node.querySelectorAll("*")) {
+                if (getComputedStyle(subNode).getPropertyValue('position') === "absolute") {
+                    absoluteSubNodes.push(subNode);
+                }
+            }
+            subNodeLists.push(absoluteSubNodes);
+        }
+        const allNodes = [];
+        for (const [i, node] of nodes.entries()) {
+            const absoluteSubNodes = subNodeLists[i];
             allNodes.push(node);
             node.classList.add("ixbrl-element");
-            for (const subNode of node.querySelectorAll("*")) { 
-                if (getComputedStyle(subNode).getPropertyValue('position') === "absolute") { 
-                    subNode.classList.add("ixbrl-sub-element");
-                    allNodes.push(subNode);
-                    hasSubNodes = true;
-                } 
+            for (const subNode of absoluteSubNodes) {
+                subNode.classList.add("ixbrl-sub-element");
+                allNodes.push(subNode);
             }
-            if (hasSubNodes) {
+            if (absoluteSubNodes.length > 0) {
                 node.classList.add("ixbrl-contains-absolute");
             }
         }

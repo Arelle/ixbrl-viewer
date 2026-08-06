@@ -167,10 +167,15 @@ export class iXBRLViewer {
 
     _loadInspectorHTML() {
         /* Insert HTML and CSS styles into body */
-        const footerLogoHtml = this.runtimeConfig.skin?.footerLogoHtml ?? require("../html/footer-logo.html");
+        /* The logo is inlined into the link rather than referenced as an <img>,
+         * so that the stylesheet can reach inside it and lighten the ink for
+         * dark mode. */
+        const defaultFooterLogo = $(require('../html/footer-logo.html'))
+            .append(require("../img/arelle.svg?raw"));
+        const footerLogo = this.runtimeConfig.skin?.footerLogoHtml ?? defaultFooterLogo;
         $(require('../html/inspector.html'))
             .prependTo('body')
-            .find("#footer-logo").html(footerLogoHtml);
+            .find("#footer-logo").append(footerLogo);
         const inspector_css = require('../less/inspector.less').toString(); 
         $('<style id="ixv-style"></style>')
             .prop("type", "text/css")
@@ -181,10 +186,19 @@ export class iXBRLViewer {
                 .attr("href", this.resolveRelativeUrl(this.runtimeConfig.skin.stylesheetUrl))
                 .appendTo('head');
         }
-        const favIconUrl = this.runtimeConfig.skin?.faviconUrl !== undefined ? this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl) : require("../img/favicon.ico");
-        $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-            .attr('href', favIconUrl)
-            .appendTo('head');
+        if (this.runtimeConfig.skin?.faviconUrl !== undefined) {
+            $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+                .attr('href', this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl))
+                .appendTo('head');
+        }
+        else {
+            $('<link id="ixv-favicon" type="image/x-icon" rel="icon" />')
+                .attr('href', require("../img/favicon.ico"))
+                .appendTo('head');
+            $('<link id="ixv-favicon-svg" type="image/svg+xml" rel="icon" />')
+                .attr('href', require("../img/favicon.svg"))
+                .appendTo('head');
+        }
 
         try {
             $('.inspector-foot .version').text(__VERSION__);
@@ -216,7 +230,7 @@ export class iXBRLViewer {
 
 
         $('head')
-            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon").appendTo($(iframe).contents().find('head'));
+            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon, link#ixv-favicon-svg").appendTo($(iframe).contents().find('head'));
 
         $('<title>').text(docTitle).appendTo($('head'));
 

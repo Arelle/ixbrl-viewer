@@ -186,10 +186,19 @@ export class iXBRLViewer {
                 .attr("href", this.resolveRelativeUrl(this.runtimeConfig.skin.stylesheetUrl))
                 .appendTo('head');
         }
-        const favIconUrl = this.runtimeConfig.skin?.faviconUrl !== undefined ? this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl) : require("../img/favicon.ico");
-        $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
-            .attr('href', favIconUrl)
-            .appendTo('head');
+        if (this.runtimeConfig.skin?.faviconUrl !== undefined) {
+            $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+                .attr('href', this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl))
+                .appendTo('head');
+        }
+        else {
+            $('<link id="ixv-favicon" type="image/x-icon" rel="icon" />')
+                .attr('href', require("../img/favicon.ico"))
+                .appendTo('head');
+            $('<link id="ixv-favicon-svg" type="image/svg+xml" rel="icon" />')
+                .attr('href', require("../img/favicon.svg"))
+                .appendTo('head');
+        }
 
         try {
             $('.inspector-foot .version').text(__VERSION__);
@@ -221,7 +230,7 @@ export class iXBRLViewer {
 
 
         $('head')
-            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon").appendTo($(iframe).contents().find('head'));
+            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon, link#ixv-favicon-svg").appendTo($(iframe).contents().find('head'));
 
         $('<title>').text(docTitle).appendTo($('head'));
 

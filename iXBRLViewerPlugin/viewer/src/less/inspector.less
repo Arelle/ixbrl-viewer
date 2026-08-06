@@ -50,6 +50,7 @@
   --colour-table-header-bg: @colour-table-header-bg;
   --colour-icon-grey: @colour-icon-grey;
   --colour-linked-fact: @colour-linked-fact;
+  --colour-logo-ink: @colour-logo-ink;
   --colour-loader: @colour-loader;
   --colour-primary-focus: @colour-primary-focus;
   --colour-primary: @colour-primary;
@@ -96,6 +97,7 @@
   --colour-icon-grey: @colour-icon-grey-d;
   --colour-inactive-bg: @colour-inactive-bg-d;
   --colour-linked-fact: @colour-linked-fact-d;
+  --colour-logo-ink: @colour-logo-ink-d;
   --colour-loader: @colour-loader-d;
   --colour-primary-focus: @colour-primary-focus-d;
   --colour-primary: @colour-primary-d;
@@ -1225,10 +1227,21 @@ a {
     border-top: solid 0.1rem var(--colour-border-grey);
     position: relative;
 
-    img {
+    img,
+    svg {
       box-sizing: border-box;
       height: 3rem;
+      width: auto;
       padding: 0.5rem;
+    }
+
+    .wordmark-letters {
+      stroke: var(--colour-logo-ink);
+    }
+
+    .wordmark-wing-back,
+    .wordmark-trademark {
+      fill: var(--colour-logo-ink);
     }
 
     .version {

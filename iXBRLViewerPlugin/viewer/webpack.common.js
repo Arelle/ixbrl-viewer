@@ -9,7 +9,13 @@ module.exports = {
   module: {
     rules: [
                 {
+                    test: /\.svg$/,
+                    resourceQuery: /raw/,
+                    type: "asset/source"
+                },
+                {
                     test: /\.(woff(2)?|ttf|eot|svg|png|ico)(\?v=\d+\.\d+\.\d+)?$/,
+                    resourceQuery: { not: [/raw/] },
                     use: "base64-inline-loader"
                 },
                 {

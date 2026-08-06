@@ -167,10 +167,15 @@ export class iXBRLViewer {
 
     _loadInspectorHTML() {
         /* Insert HTML and CSS styles into body */
-        const footerLogoHtml = this.runtimeConfig.skin?.footerLogoHtml ?? require("../html/footer-logo.html");
+        /* The logo is inlined into the link rather than referenced as an <img>,
+         * so that the stylesheet can reach inside it and lighten the ink for
+         * dark mode. */
+        const defaultFooterLogo = $(require('../html/footer-logo.html'))
+            .append(require("../img/arelle.svg?raw"));
+        const footerLogo = this.runtimeConfig.skin?.footerLogoHtml ?? defaultFooterLogo;
         $(require('../html/inspector.html'))
             .prependTo('body')
-            .find("#footer-logo").html(footerLogoHtml);
+            .find("#footer-logo").append(footerLogo);
         const inspector_css = require('../less/inspector.less').toString(); 
         $('<style id="ixv-style"></style>')
             .prop("type", "text/css")

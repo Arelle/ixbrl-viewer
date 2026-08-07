@@ -297,6 +297,25 @@ export class iXBRLViewer {
         });
     }
 
+    _mergeFeatures(generationFeatures, runtimeConfigFeatures) {
+        let features = generationFeatures;
+        if (!features) {
+            features = {};
+        }
+        // `features` was previously an array of flag values
+        // Support this for backwards compatability
+        else if (Array.isArray(features)) {
+            features = features.reduce((obj, val) => {
+                obj[val] = true;
+                return obj;
+            }, {});
+        }
+        if (runtimeConfigFeatures !== undefined) {
+            features = {...runtimeConfigFeatures, features};
+        }
+        return features;
+    }
+
     load() {
         const iv = this;
         const inspector = this.inspector;
@@ -320,21 +339,7 @@ export class iXBRLViewer {
             // We need to parse JSON first so that we can determine feature enablement before loading begins.
             const taxonomyData = iv._getTaxonomyData();
             const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
-            let features = parsedTaxonomyData?.features;
-            if (!features) {
-                features = {};
-            }
-            // `features` was previously an array of flag values
-            // Support this for backwards compatability
-            else if (Array.isArray(features)) {
-                features = features.reduce((obj, val) => {
-                    obj[val] = true;
-                    return obj;
-                }, {});
-            }
-            if (this.runtimeConfig.features !== undefined) {
-                features = {...this.runtimeConfig.features, features};
-            }
+            const features = iv._mergeFeatures(parsedTaxonomyData?.features, this.runtimeConfig.features);
             iv.setFeatures(features, window.location.search);
 
             const reportSet = new ReportSet(parsedTaxonomyData);

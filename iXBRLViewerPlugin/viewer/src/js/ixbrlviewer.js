@@ -187,7 +187,7 @@ export class iXBRLViewer {
                 .appendTo('head');
         }
         if (this.runtimeConfig.skin?.faviconUrl !== undefined) {
-            $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+            $('<link id="ixv-favicon" rel="icon" />')
                 .attr('href', this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl))
                 .appendTo('head');
         }

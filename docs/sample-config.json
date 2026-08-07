@@ -1,6 +1,7 @@
 {
     "skin": {
         "stylesheetUrl": "./myskin.css",
+        "titlePrefix": "Demo App",
         "footerLogoHtml": "<b>Footer override</b>"
     },
     "features": {

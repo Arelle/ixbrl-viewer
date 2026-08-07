@@ -220,13 +220,9 @@ export class iXBRLViewer {
         doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
         doc.close();
 
-        let docTitle = $('title').text();
-        if (docTitle !== "") {
-            docTitle = `Inline Viewer - ${docTitle}`;
-        }
-        else {
-            docTitle = "Inline Viewer";
-        }
+        const titlePrefix = this.runtimeConfig.skin?.titlePrefix ?? "Inline Viewer";
+        const reportTitle = $('title').text();
+        const docTitle = reportTitle !== "" ? `${titlePrefix} - ${reportTitle}` : titlePrefix;
 
 
         $('head')

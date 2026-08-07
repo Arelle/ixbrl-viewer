@@ -310,10 +310,7 @@ export class iXBRLViewer {
                 return obj;
             }, {});
         }
-        if (runtimeConfigFeatures !== undefined) {
-            features = {...runtimeConfigFeatures, features};
-        }
-        return features;
+        return {...runtimeConfigFeatures, ...features};
     }
 
     load() {

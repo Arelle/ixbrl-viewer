@@ -112,6 +112,42 @@ describe("Feature enablement", () => {
     });
 });
 
+describe("Feature merging", () => {
+    var viewer = null;
+    beforeAll(() => {
+        viewer = new iXBRLViewer({})
+    });
+
+    test("Config features and generation features are both retained", () => {
+        expect(viewer._mergeFeatures({'a': true}, {'b': true}))
+            .toEqual({'a': true, 'b': true});
+    });
+
+    test("Generation time value wins on collision", () => {
+        expect(viewer._mergeFeatures({'a': '1'}, {'a': '2'}))
+            .toEqual({'a': '1'});
+    });
+
+    test("Legacy array form of generation features is normalised", () => {
+        expect(viewer._mergeFeatures(['a', 'b'], undefined))
+            .toEqual({'a': true, 'b': true});
+    });
+
+    test("Legacy array form merges with config features", () => {
+        expect(viewer._mergeFeatures(['a'], {'b': true}))
+            .toEqual({'a': true, 'b': true});
+    });
+
+    test("No config features leaves generation features untouched", () => {
+        expect(viewer._mergeFeatures({'a': true}, undefined))
+            .toEqual({'a': true});
+    });
+
+    test("No features at either level gives an empty set", () => {
+        expect(viewer._mergeFeatures(undefined, undefined)).toEqual({});
+    });
+});
+
 describe("Review mode enablement", () => {
     var viewer = null;
     beforeAll(() => {

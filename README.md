@@ -317,6 +317,9 @@ parameters, as defined above.
   - `stylesheetUrl` - a URL to additional CSS definitions.
   - `faviconUrl` - a URL to an icon file to be used as the favicon for the viewer.
   - `footerLogoHtml` - a fragment of HTML that will be included in place of the standard footer logo.
+  - `titlePrefix` - a string used in place of `Inline Viewer` in the page title,
+      giving `<titlePrefix> - <report title>`, or just `<titlePrefix>` if the
+      report has no title.
 
 - `taxonomyNames` - a JSON object where:
 

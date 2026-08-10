@@ -187,7 +187,7 @@ export class iXBRLViewer {
                 .appendTo('head');
         }
         if (this.runtimeConfig.skin?.faviconUrl !== undefined) {
-            $('<link id="ixv-favicon" type="image/x-icon" rel="shortcut icon" />')
+            $('<link id="ixv-favicon" rel="icon" />')
                 .attr('href', this.resolveRelativeUrl(this.runtimeConfig.skin.faviconUrl))
                 .appendTo('head');
         }
@@ -220,13 +220,9 @@ export class iXBRLViewer {
         doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
         doc.close();
 
-        let docTitle = $('title').text();
-        if (docTitle !== "") {
-            docTitle = `Inline Viewer - ${docTitle}`;
-        }
-        else {
-            docTitle = "Inline Viewer";
-        }
+        const titlePrefix = this.runtimeConfig.skin?.titlePrefix ?? "Inline Viewer";
+        const reportTitle = $('title').text();
+        const docTitle = reportTitle !== "" ? `${titlePrefix} - ${reportTitle}` : titlePrefix;
 
 
         $('head')
@@ -297,6 +293,22 @@ export class iXBRLViewer {
         });
     }
 
+    _mergeFeatures(generationFeatures, runtimeConfigFeatures) {
+        let features = generationFeatures;
+        if (!features) {
+            features = {};
+        }
+        // `features` was previously an array of flag values
+        // Support this for backwards compatability
+        else if (Array.isArray(features)) {
+            features = features.reduce((obj, val) => {
+                obj[val] = true;
+                return obj;
+            }, {});
+        }
+        return {...runtimeConfigFeatures, ...features};
+    }
+
     load() {
         const iv = this;
         const inspector = this.inspector;
@@ -320,21 +332,7 @@ export class iXBRLViewer {
             // We need to parse JSON first so that we can determine feature enablement before loading begins.
             const taxonomyData = iv._getTaxonomyData();
             const parsedTaxonomyData = taxonomyData && JSON.parse(taxonomyData);
-            let features = parsedTaxonomyData?.features;
-            if (!features) {
-                features = {};
-            }
-            // `features` was previously an array of flag values
-            // Support this for backwards compatability
-            else if (Array.isArray(features)) {
-                features = features.reduce((obj, val) => {
-                    obj[val] = true;
-                    return obj;
-                }, {});
-            }
-            if (this.runtimeConfig.features !== undefined) {
-                features = {...this.runtimeConfig.features, features};
-            }
+            const features = iv._mergeFeatures(parsedTaxonomyData?.features, this.runtimeConfig.features);
             iv.setFeatures(features, window.location.search);
 
             const reportSet = new ReportSet(parsedTaxonomyData);

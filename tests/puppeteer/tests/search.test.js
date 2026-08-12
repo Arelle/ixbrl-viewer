@@ -25,7 +25,7 @@ describe('ixbrl-viewer:', () => {
         const search = viewerPage.search;
 
         await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
-        await viewerPage.waitMilliseconds('3000'); // Give search time to index
+        await viewerPage.page.waitForSelector('#inspector.search-ready');
 
         // // Open search and assert all concepts are shown
         await search.searchButton.select();

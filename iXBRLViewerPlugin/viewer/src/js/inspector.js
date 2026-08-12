@@ -319,7 +319,7 @@ export class Inspector {
     }
 
     postLoadAsync() {
-        runGenerator(this._search.buildSearchIndex(() => this.searchReady()));
+        runGenerator(this._search.buildSearchIndex(), () => this.searchReady());
     }
 
     /*

@@ -1,8 +1,27 @@
 // See COPYRIGHT.md for copyright information
 
-import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel, getIXHiddenLinkStyle } from "./util.js"
+import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel, getIXHiddenLinkStyle, runGenerator } from "./util.js"
 import moment from 'moment';
 import "./moment-jest.js";
+
+describe("runGenerator", () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    test("calls onDone after the generator finishes", () => {
+        const onDone = jest.fn();
+        function* generator() {
+            yield;
+        }
+
+        runGenerator(generator(), onDone);
+        jest.advanceTimersToNextTimer();
+        expect(onDone).not.toHaveBeenCalled();
+
+        jest.advanceTimersToNextTimer();
+        expect(onDone).toHaveBeenCalledTimes(1);
+    });
+});
 
 describe("xbrlDateToMoment", () => {
     test("Untimezoned dates should be treated as UTC", () => {

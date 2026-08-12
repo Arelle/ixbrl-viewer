@@ -8,7 +8,7 @@ export class ReportSearch {
         this.ready = false;
     }
 
-    * buildSearchIndex(doneCallback) {
+    * buildSearchIndex() {
         var docs = [];
         var dims = {};
         var facts = this._reportSet.facts();
@@ -89,7 +89,6 @@ export class ReportSearch {
         }
         this._searchIndex = builder.build();
         this.ready = true;
-        doneCallback();
     }
 
     visibilityFilter(s, item) {

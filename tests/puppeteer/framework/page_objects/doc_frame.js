@@ -11,6 +11,19 @@ export class DocFrame {
         return iframe.contentFrame();
     }
 
+    async countElements(selector) {
+        return this.#viewerPage.page.$$eval(
+            '#ixv #iframe-container iframe',
+            (iframes, reportSelector) => {
+                let count = 0;
+                for (const iframe of iframes) {
+                    count += iframe.contentDocument.querySelectorAll(reportSelector).length;
+                }
+                return count;
+            },
+            selector);
+    }
+
     async getSelectedFact() {
         const iframe = await this.getDocumentIframe();
         return iframe.waitForSelector(

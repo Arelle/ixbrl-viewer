@@ -797,7 +797,9 @@ a {
 
         h2.concept-name-title {
           flex: 1 1 55%;
+          min-width: 0;
           padding: 0;
+          overflow-wrap: anywhere;
         }
 
         .tags {
@@ -905,6 +907,7 @@ a {
     .dimension {
       position: relative;
       margin: 1.5rem 0 1.5rem 1rem;
+      overflow-wrap: anywhere;
 
       &::before {
         .icon-dimension();
@@ -920,6 +923,7 @@ a {
     .dimension-value {
       position: relative;
       margin: 1.5rem 0 1.5rem 3.5rem;
+      overflow-wrap: anywhere;
 
       &::before {
         .icon-dimension-member();
@@ -1462,11 +1466,15 @@ a {
 
     .title {
       .link-style();
+
+      max-width: 100%;
+      overflow-wrap: anywhere;
     }
 
     .dimension {
       color: var(--colour-text);
       margin: 0.6rem 0;
+      overflow-wrap: anywhere;
     }
 
     .datatype {

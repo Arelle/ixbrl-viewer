@@ -933,6 +933,104 @@ describe("Facts by group", () => {
     });
 });
 
+describe("inspectorMode fact details scroll", () => {
+    beforeEach(() => {
+        $("#ixv, #inspector").remove();
+        $(document.body).append(`
+            <div id="ixv">
+              <div id="inspector" class="show-facts-by-group">
+                <div class="inspector-container fact-inspector">
+                  <div class="inspector-body"></div>
+                </div>
+              </div>
+            </div>
+        `);
+    });
+
+    afterEach(() => {
+        $("#ixv, #inspector").remove();
+    });
+
+    test("opening fact details resets the inspector body to the top", () => {
+        const insp = new TestInspector();
+        expect(insp._factListScrollTop).toBeUndefined();
+        const body = $("#inspector .fact-inspector > .inspector-body");
+        body.scrollTop(500);
+        expect(body.scrollTop()).toBe(500);
+
+        insp.inspectorMode("fact-mode", true);
+
+        expect(body.scrollTop()).toBe(0);
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(false);
+    });
+
+    test("returning to the fact list does not reset inspector body scroll", () => {
+        const insp = new TestInspector();
+        insp.outline = { hasOutline: () => true };
+        const body = $("#inspector .fact-inspector > .inspector-body");
+        body.scrollTop(500);
+
+        insp.inspectorMode("fact-mode", false);
+
+        expect(body.scrollTop()).toBe(500);
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(true);
+    });
+
+    test("returning to the fact list restores the scroll saved when opening details", () => {
+        const insp = new TestInspector();
+        insp.outline = { hasOutline: () => true };
+        insp._curInspectorMode = "fact-mode";
+        const body = $("#inspector .fact-inspector > .inspector-body");
+        body.scrollTop(500);
+
+        insp.inspectorMode("fact-mode", true);
+        expect(body.scrollTop()).toBe(0);
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(false);
+
+        insp.inspectorMode("fact-mode");
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(true);
+        expect(body.scrollTop()).toBe(500);
+        expect(insp._factListScrollTop).toBeUndefined();
+    });
+
+    test("search then XBRL facts returns to details at the top; a second XBRL facts click restores the list scroll", () => {
+        const insp = new TestInspector();
+        insp.outline = { hasOutline: () => true };
+        insp._curInspectorMode = "fact-mode";
+        const body = $("#inspector .fact-inspector > .inspector-body");
+        body.scrollTop(500);
+
+        insp.inspectorMode("fact-mode", true);
+        insp.inspectorMode("search-mode");
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(false);
+        expect(body.scrollTop()).toBe(0);
+
+        insp.inspectorMode("fact-mode");
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(false);
+        expect(body.scrollTop()).toBe(0);
+
+        insp.inspectorMode("fact-mode");
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(true);
+        expect(body.scrollTop()).toBe(500);
+    });
+
+    test("clicking XBRL facts while already on the list does not restore a stale list scroll", () => {
+        const insp = new TestInspector();
+        insp.outline = { hasOutline: () => true };
+        insp._curInspectorMode = "fact-mode";
+        const body = $("#inspector .fact-inspector > .inspector-body");
+        body.scrollTop(500);
+
+        insp.inspectorMode("fact-mode", true);
+        insp.inspectorMode("fact-mode");
+        body.scrollTop(800);
+        insp.inspectorMode("fact-mode");
+
+        expect($("#inspector").hasClass("show-facts-by-group")).toBe(true);
+        expect(body.scrollTop()).toBe(800);
+    });
+});
+
 describe("Collapsible sections", () => {
     function setUpSections() {
         const insp = new TestInspector();

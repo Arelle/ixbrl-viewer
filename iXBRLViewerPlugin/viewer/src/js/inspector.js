@@ -48,6 +48,7 @@ export class Inspector {
         this._curInspectorMode = undefined;
         this._prevInspectorMode = undefined;
         this._searchReady = false;
+        this._factListScrollTop = undefined;
     }
 
     i18nInit() {
@@ -351,7 +352,7 @@ export class Inspector {
         else {
             this.inspectorMode("fact-mode");
             if (this.outline.hasOutline()) {
-                $("#inspector").addClass("show-facts-by-group");
+                this._showFactList();
             }
         }
     }
@@ -622,12 +623,34 @@ export class Inspector {
         $("#ixv").removeClass("show-filters");
         $("#ixv").removeClass(allModes.filter(m => m !== mode)).addClass(mode);
         if (focusInspector === true) {
-            $("#inspector").removeClass("show-facts-by-group");
+            this._showFactDetails();
         }
         else if ((focusInspector === false || this._curInspectorMode === "fact-mode" && mode === "fact-mode") && this.outline.hasOutline()) {
-            $("#inspector").addClass("show-facts-by-group");
+            this._showFactList();
         }
         this._curInspectorMode = mode;
+    }
+
+    _factInspectorBody() {
+        return $("#inspector .fact-inspector > .inspector-body");
+    }
+
+    _showFactDetails() {
+        const body = this._factInspectorBody();
+        if ($("#inspector").hasClass("show-facts-by-group")) {
+            this._factListScrollTop = body.scrollTop();
+        }
+        $("#inspector").removeClass("show-facts-by-group");
+        body.scrollTop(0);
+    }
+
+    _showFactList() {
+        const wasShowingList = $("#inspector").hasClass("show-facts-by-group");
+        $("#inspector").addClass("show-facts-by-group");
+        if (!wasShowingList && this._factListScrollTop !== undefined) {
+            this._factInspectorBody().scrollTop(this._factListScrollTop);
+            this._factListScrollTop = undefined;
+        }
     }
 
     toggleSettingsMode() {
@@ -1845,7 +1868,7 @@ export class Inspector {
             $('#inspector').removeClass('footnote-mode');
             $('#inspector').addClass('no-fact-selected');
             if (this.outline.hasOutline()) {
-                $('#inspector').addClass('show-facts-by-group');
+                this._showFactList();
             }
         } 
         else { 

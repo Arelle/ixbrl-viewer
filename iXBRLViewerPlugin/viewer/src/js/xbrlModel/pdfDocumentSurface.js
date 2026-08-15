@@ -417,7 +417,7 @@ export class PdfDocumentSurface {
         const ixn = viewer._getOrCreateIXNode(vuid, $([]), 0, false);
         ixn.isHidden = true;
         ixn._htmlHiddenCache = false;
-        viewer._docOrderItemIndex.addItem(vuid, 0);
+        viewer.docOrderItemIndex.addItem(vuid, 0);
         viewer.itemContinuationMap[vuid] = [];
         applyFactValue(factData, ixn, "");
     }
@@ -482,7 +482,7 @@ export class PdfDocumentSurface {
         viewer._addIdToNodes(nodes, vuid);
         const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
         ixn._htmlHiddenCache = false; // PDF overlays are positioned divs, never html-hidden -- skip the costly layout probe
-        viewer._docOrderItemIndex.addItem(vuid, 0);
+        viewer.docOrderItemIndex.addItem(vuid, 0);
         viewer.itemContinuationMap[vuid] = [];
         // Value: the OIM fact value if present, else the form field's own value.
         applyFactValue(facts[key], ixn, fieldValue != null ? String(fieldValue) : "");
@@ -512,7 +512,7 @@ export class PdfDocumentSurface {
         viewer._addIdToNodes(nodes, vuid);
         const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
         ixn._htmlHiddenCache = false; // PDF overlays are positioned divs, never html-hidden -- skip the costly layout probe
-        viewer._docOrderItemIndex.addItem(vuid, 0);
+        viewer.docOrderItemIndex.addItem(vuid, 0);
         viewer.itemContinuationMap[vuid] = [];
         // Value comes from the OIM (numeric facts) or the mapped MCID text.
         applyFactValue(factData, ixn, textParts.join(" "));
@@ -535,7 +535,7 @@ export class PdfDocumentSurface {
             viewer._addIdToNodes(nodes, vuid);
             const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
             ixn._htmlHiddenCache = false; // PDF overlays are positioned divs, never html-hidden -- skip the costly layout probe
-            viewer._docOrderItemIndex.addItem(vuid, 0);
+            viewer.docOrderItemIndex.addItem(vuid, 0);
             viewer.itemContinuationMap[vuid] = [];
             // Image facts carry an explicit OIM value (the chart has no text).
             applyFactValue(facts[key], ixn, "");

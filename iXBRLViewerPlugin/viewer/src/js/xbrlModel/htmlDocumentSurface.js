@@ -77,7 +77,7 @@ export class HtmlDocumentSurface {
             const vuid = viewerUniqueId(reportIndex, spanId);
             viewer._addIdToNodes(nodes, vuid);
             const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
-            viewer._docOrderItemIndex.addItem(vuid, 0);
+            viewer.docOrderItemIndex.addItem(vuid, 0);
             viewer.itemContinuationMap[vuid] = [];
             nodes.addClass(factData.a.u !== undefined ? "ixbrl-element-nonfraction" : "ixbrl-element-nonnumeric");
 

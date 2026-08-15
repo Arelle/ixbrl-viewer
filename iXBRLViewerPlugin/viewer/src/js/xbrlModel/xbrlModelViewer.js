@@ -23,4 +23,27 @@ export class XbrlModelViewer extends Viewer {
         return this._iv.setProgress("Binding XbrlModel facts")
             .then(() => this._surface.bind(this));
     }
+
+    // The base Viewer.initialize() runs iXBRL-specific post-processing after
+    // _processDocuments -- per-iframe _preProcessiXBRL, _setContinuationMaps, the
+    // preProcessiXBRL plugin promise, and (in review mode) _wrapUntaggedNumbers.
+    // None of that applies to a document whose facts are bound by the surface, and
+    // scanning a large plain-HTML/PDF body for untagged numbers is pathologically
+    // slow (it appears to hang at "Binding XbrlModel facts"). Bind, then run only
+    // the format-agnostic tail (styles, handlers, document-set tabs).
+    initialize() {
+        return new Promise((resolve, reject) => {
+            this._processDocuments()
+                .then(() => this._iv.setProgress("Preparing document"))
+                .then(() => {
+                    this._reportSet.setIXNodeMap(this._ixNodeMap);
+                    this._applyStyles();
+                    this._bindHandlers();
+                    this.scale = 1;
+                    this._addDocumentSetTabs();
+                    resolve();
+                })
+                .catch(err => reject(err));
+        });
+    }
 }

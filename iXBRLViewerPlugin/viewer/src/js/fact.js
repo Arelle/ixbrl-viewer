@@ -351,7 +351,9 @@ export class Fact {
     }
 
     identifier() {
-        return this.report.qname(this.f.a.e);
+        // The entity dimension may be absent (permitted by OIM); iXBRL facts
+        // always have one.
+        return this.f.a.e === undefined ? undefined : this.report.qname(this.f.a.e);
     }
 
     escaped() {

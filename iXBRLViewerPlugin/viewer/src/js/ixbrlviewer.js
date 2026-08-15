@@ -7,6 +7,11 @@ import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
 import { initializeTheme } from './theme.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
+import { XbrlModelViewer } from './xbrlModel/xbrlModelViewer.js';
+import { HtmlDocumentSurface } from './xbrlModel/htmlDocumentSurface.js';
+import { PdfDocumentSurface } from './xbrlModel/pdfDocumentSurface.js';
+import { buildReportData } from './xbrlModel/adapter.js';
+import { showXbrlModelChooser } from './xbrlModel/xbrlModelChooser.js';
 import { FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK, USER_GUIDE_URL, moveNonAppAttributes } from "./util";
 
 const featureFalsyValues = new Set([undefined, null, '', 'false', false]);
@@ -317,6 +322,18 @@ export class iXBRLViewer {
             this.runtimeConfig = runtimeConfig;
             initializeTheme();
 
+            // XbrlModel mode: reads an OIM (compiled) model / factset + a plain
+            // document instead of the embedded inline-XBRL JSON.  Activated by an
+            // `xbrlModel` config block, or by an `?xbrlModel=<url>` argument on
+            // the viewer URL (which also lets a plain viewer bundle open a model
+            // with no config file).  The embedded-iXBRL path below is unchanged
+            // and used whenever neither is present.
+            const hasXbrlModelParam = new URLSearchParams(window.location.search).has("xbrlModel");
+            if (this.runtimeConfig.xbrlModel !== undefined || hasXbrlModelParam) {
+                iv.loadXbrlModel();
+                return;
+            }
+
             const stubViewer = $('body').hasClass('ixv-stub-viewer');
 
             // If viewer is disabled, but not in stub viewer mode, just abort
@@ -443,6 +460,228 @@ export class iXBRLViewer {
                 }, 250);
             });
         }, 0);
+    }
+
+    /*
+     * XbrlModel load path.
+     *
+     * Driven by runtimeConfig.xbrlModel, which must provide at least:
+     *   { "factset": "<url>" }
+     * and optionally "document" and "taxonomy" URLs.  When omitted, the
+     * document and taxonomy URLs are resolved from the factset's own
+     * documentInfo (sourceMappings + importMapping), relative to the factset.
+     *
+     * The factset + taxonomy are converted to the internal report-data shape by
+     * the adapter, and the plain document is loaded into an iframe and bound by
+     * a document surface (HTML now; PDF as a future surface).
+     */
+    loadXbrlModel() {
+        const iv = this;
+        const cfg = this.runtimeConfig.xbrlModel ?? {};
+
+        iv._loadInspectorHTML();
+
+        // Model source, in priority order:
+        //   1. ?xbrlModel=<url> query argument on the viewer URL,
+        //   2. config "model" (a single compiled factset-with-taxonomy) or
+        //      "factset" (facts only; taxonomy resolved separately).
+        // With no source, offer a local-file chooser.
+        const params = new URLSearchParams(window.location.search);
+        const modelRel = params.get("xbrlModel") || cfg.model || cfg.factset;
+
+        if (!modelRel) {
+            return showXbrlModelChooser(iv);
+        }
+
+        const modelUrl = iv.resolveRelativeUrl(modelRel);
+        return iv.setProgress("Loading XbrlModel data")
+            .then(() => fetch(modelUrl))
+            .then((resp) => {
+                if (!resp.ok) {
+                    throw new Error(`Could not load model (${resp.status})`);
+                }
+                return resp.json();
+            })
+            .then((modelDoc) => iv._loadXbrlModelDoc(modelDoc, modelUrl, cfg))
+            .catch((err) => {
+                console.log(err);
+                iv._showLoadError("Error loading XbrlModel: " + (err.message ?? err));
+            });
+    }
+
+    /*
+     * Build and display the viewer from a parsed XbrlModel document.
+     *
+     * `modelDoc` may be a "compiled" model (taxonomy structures + facts in one
+     * document) or a factset (facts only, taxonomy resolved separately).
+     * `documentSource`, when provided (e.g. by the file chooser), supplies the
+     * source document content directly ({text}|{data}); otherwise the document is
+     * fetched from the model's sourceMappings / config, relative to `baseUrl`.
+     */
+    async _loadXbrlModelDoc(modelDoc, baseUrl, cfg, documentSource) {
+        const iv = this;
+        const inspector = this.inspector;
+        const m = modelDoc.xbrlModel ?? {};
+        const di = modelDoc.documentInfo ?? {};
+        // URL arguments can override the config for the document and taxonomy (as ?xbrlModel=
+        // overrides the model), so a plain viewer bundle can be pointed at specific files:
+        //   index.html?xbrlModel=model.json&document=report.pdf[&taxonomy=tax.json]
+        const params = new URLSearchParams(window.location.search);
+
+        // A compiled model carries taxonomy structures alongside its facts.
+        const isCompiled = m.concepts !== undefined || m.labels !== undefined || m.cubes !== undefined;
+
+        let taxonomyDoc;
+        if (isCompiled) {
+            taxonomyDoc = modelDoc;
+        }
+        else {
+            // Factset: resolve its converted taxonomy (config, else the
+            // importMapping entry matching the document namespace prefix),
+            // relative to the model URL.
+            let taxonomyRel = params.get("taxonomy") ?? cfg.taxonomy;
+            if (!taxonomyRel) {
+                const nsPrefix = di.documentNamespacePrefix;
+                for (const [key, url] of Object.entries(di.importMapping ?? {})) {
+                    if (key.split(":")[0] === nsPrefix) {
+                        taxonomyRel = url;
+                        break;
+                    }
+                }
+            }
+            taxonomyDoc = null;
+            if (taxonomyRel && baseUrl) {
+                try {
+                    const tResp = await fetch(new URL(taxonomyRel, baseUrl).href);
+                    if (tResp.ok) {
+                        taxonomyDoc = await tResp.json();
+                    }
+                }
+                catch (e) {
+                    console.log("XbrlModel taxonomy load failed: " + e);
+                }
+            }
+        }
+
+        // Does the model locate facts in a PDF?  This is authoritative for
+        // document and surface selection: a factset may list several
+        // sourceMappings (e.g. an html source plus the pdf), so pick by fact
+        // locators rather than assuming the first mapping.
+        const hasPdfFacts = (m.facts ?? []).some(f => (f.factValues ?? []).some(fv =>
+            [...(fv.valueSources ?? []), ...(fv.valueAnchors ?? [])].some(vs =>
+                (vs.properties ?? []).some(p => (p.property ?? "").startsWith("xbrl:pdf")))));
+
+        // Resolve the source document: content from the chooser, else the
+        // sourceMapping/config URL matching the intended surface.
+        const mappings = di.sourceMappings ?? [];
+        const wantsExt = hasPdfFacts ? /\.pdf(\?|#|$)/i : /\.html?(\?|#|$)/i;
+        let docSource = documentSource;
+        let documentFile;
+        if (docSource) {
+            documentFile = docSource.filename;
+        }
+        else {
+            const documentRel = params.get("document")
+                ?? cfg.document
+                ?? mappings.find(sm => sm.url && wantsExt.test(sm.url))?.url
+                ?? mappings.find(sm => sm.url)?.url;
+            if (!documentRel) {
+                throw new Error("No source document specified in the model, config, or chooser");
+            }
+            const documentUrl = new URL(documentRel, baseUrl).href;
+            documentFile = documentRel.split("/").pop();
+            docSource = { url: documentUrl, baseUrl: documentUrl };
+        }
+
+        const reportData = buildReportData(modelDoc, taxonomyDoc, { documentFile });
+        iv.setFeatures(reportData.features ?? {}, window.location.search);
+
+        const reportSet = new ReportSet(reportData);
+        reportSet.taxonomyNamer = new TaxonomyNamer(new Map(Object.entries(this.runtimeConfig.taxonomyNames ?? {})));
+
+        // Select the document surface: explicit chooser type / config, else
+        // whether the model has PDF-located facts, else the document extension.
+        const isPdf = docSource.isPdf
+            ?? (/pdf/i.test(cfg.documentType ?? "") || hasPdfFacts || /\.pdf(\?|#|$)/i.test(docSource.url ?? documentFile ?? ""));
+        let surface;
+        if (isPdf) {
+            // PDF.js needs its standard_fonts/ and cmaps/ folders served to render
+            // fonts correctly.  Default to resolving them next to the config;
+            // override with xbrlModel.pdfResourcesUrl.
+            const resourcesBase = iv.resolveRelativeUrl(cfg.pdfResourcesUrl ?? "./");
+            const factPages = new Set();
+            for (const factData of Object.values(reportData.sourceReports[0].targetReports[0].facts)) {
+                for (const loc of factData.pdf ?? []) {
+                    factPages.add(loc.page);
+                }
+            }
+            const disableRange = cfg.pdfDisableRange ?? true;
+            surface = new PdfDocumentSurface({ resourcesBase, factPages, disableRange });
+        }
+        else {
+            surface = new HtmlDocumentSurface();
+        }
+
+        const iframe = $('<iframe title="XbrlModel document view" tabindex="0"/>')
+            .data("report-index", 0)
+            .appendTo($('#ixv #iframe-container'))[0];
+        const iframes = $(iframe);
+
+        await surface.prepareDocument(iframe, docSource, iv);
+
+        const viewer = new XbrlModelViewer(iv, iframes, reportSet, surface);
+        iv.viewer = viewer;
+        await viewer.initialize();
+        await inspector.initialize(reportSet, viewer);
+        iv._setupInspectorResize();
+        $('#ixv .loader').remove();
+        viewer.postLoadAsync();
+        inspector.postLoadAsync();
+    }
+
+    _showLoadError(msg) {
+        $('#ixv .loader .text').text(msg);
+        $('#ixv .loader').removeClass("loading");
+    }
+
+    /* Prepare a fetched document for display in an iframe: set a <base> so
+     * relative resources resolve against the document's own location, and strip
+     * scripts so the document can't run code in the viewer. */
+    _prepareDocumentHtml(html, baseUrl) {
+        const stripped = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+        const baseTag = `<base href="${baseUrl}">`;
+        if (/<head[^>]*>/i.test(stripped)) {
+            return stripped.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`);
+        }
+        return baseTag + stripped;
+    }
+
+    /* Wire up the draggable divider between the document view and the inspector.
+     * Shared by the XbrlModel load path; the embedded-iXBRL path has its own
+     * inline copy so that path stays untouched. */
+    _setupInspectorResize() {
+        interact('#viewer-pane').resizable({
+            edges: { left: false, right: ".resize", bottom: false, top: false },
+            restrictEdges: {
+                outer: 'parent',
+                endOnly: true,
+            },
+            restrictSize: {
+                min: { width: 100 }
+            },
+        })
+        .on('resizestart', () =>
+            $('#ixv').css("pointer-events", "none")
+        )
+        .on('resizemove', (event) => {
+            const target = event.target;
+            const w = 100 * event.rect.width / $(target).parent().width();
+            target.style.width = `${w}%`;
+            $('#inspector').css('width', `${100 - w}%`);
+        })
+        .on('resizeend', (event) =>
+            $('#ixv').css("pointer-events", "auto")
+        );
     }
 
     /* Update the progress message during initial load.  Returns a Promise which

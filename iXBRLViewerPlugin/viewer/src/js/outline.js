@@ -115,12 +115,22 @@ export class DocumentOutline {
         for (const elr of groups) {
             this.dimensionMap[elr] = {};
             for (const root of this.report.relationshipGroupRoots("pres", elr)) {
-                this.buildDimensionMapFromSubTree("pres", elr, null, root);
+                this.buildDimensionMapFromSubTree("pres", elr, null, root, new Set());
             }
         }
     }
 
-    buildDimensionMapFromSubTree(arcrole, elr, dimension, conceptName) {
+    buildDimensionMapFromSubTree(arcrole, elr, dimension, conceptName, visited) {
+        // Guard against cycles in the relationship tree (e.g. a concept that is
+        // its own ancestor), which would otherwise recurse until the stack
+        // overflows.  Keyed by dimension context so a concept legitimately
+        // appearing under different dimensions is still traversed.
+        const visitKey = dimension + "" + conceptName;
+        if (visited.has(visitKey)) {
+            return;
+        }
+        visited.add(visitKey);
+
         const c = this.report.getConcept(conceptName);
         if (c.isTypedDimension()) {
             this.dimensionMap[elr][conceptName] = { typed: true };
@@ -143,7 +153,7 @@ export class DocumentOutline {
                     this.dimensionMap[elr][dimension].members[rel.t] = true;
                 }
             }
-            this.buildDimensionMapFromSubTree(arcrole, elr, dimension, rel.t);
+            this.buildDimensionMapFromSubTree(arcrole, elr, dimension, rel.t, visited);
         }
     }
 

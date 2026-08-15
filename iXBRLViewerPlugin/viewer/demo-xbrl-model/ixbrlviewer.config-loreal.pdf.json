@@ -1,0 +1,7 @@
+{
+  "xbrlModel": {
+    "factset": "loreal-2025-12-31-factset-pdf.json",
+    "document": "loreal-2025-12-31.pdf",
+    "taxonomy": "full_ifrs_entry_point_2024-03-27.json"
+  }
+}

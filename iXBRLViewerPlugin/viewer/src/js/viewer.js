@@ -54,15 +54,10 @@ export class Viewer {
     }
 
     initialize() {
-        return new Promise(async (resolve, reject) => {
-            const viewer = this;
-            viewer._buildContinuationMaps();
-            viewer._checkContinuationCount()
-                .catch(err => { throw err })
-                .then(() => viewer._iv.setProgress("Pre-processing document"))
+        return new Promise((resolve, reject) => {
+            this._processDocuments()
                 .then(() => {
-
-                    viewer._iframes.each(function (docIndex) { 
+                    viewer._iframes.each(function (docIndex) {
                         $(this).data("selected", docIndex == viewer._currentDocumentIndex);
                         const reportIndex = $(this).data("report-index");
                         viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex, false);
@@ -103,6 +98,52 @@ export class Viewer {
                 })
                 .catch(err => reject(err));
         });
+    }
+
+    // Discover the facts in the source document(s), building the IXNode map and
+    // adding wrapper nodes/classes for each tagged element.  This is the only
+    // document-format-specific step: the default implementation scans the
+    // inline-XBRL DOM, and alternative document surfaces (e.g. XbrlModel)
+    // override it to bind facts by other means.  Everything after this step
+    // (styling, handlers, navigation) is format-agnostic.
+    _processDocuments() {
+        const viewer = this;
+        viewer._buildContinuationMaps();
+        return viewer._checkContinuationCount()
+            .then(() => viewer._iv.setProgress("Pre-processing document"))
+            .then(() => {
+
+                viewer._iframes.each(function (docIndex) {
+                    $(this).data("selected", docIndex == viewer._currentDocumentIndex);
+                    const reportIndex = $(this).data("report-index");
+                    viewer._preProcessiXBRL($(this).contents().find("body").get(0), reportIndex, docIndex, false);
+                });
+
+                viewer._setContinuationMaps();
+
+                /* Call plugin promise for each document in turn */
+                return (async function () {
+                    for (const [docIndex, iframe] of viewer._iframes.toArray().entries()) {
+                        const body = $(iframe).contents().find("body").get(0);
+                        await viewer._iv.pluginPromise('preProcessiXBRL', body, docIndex);
+                        if (viewer._iv.isReviewModeEnabled()) {
+                            await new Promise((resolve, _) => {
+                                viewer._iv.setProgress("Finding untagged numbers and dates").then(() => {
+                                    // Temporarily hide all children of "body" to avoid constant
+                                    // re-layouts when wrapping untagged numbers
+                                    const children = $(body).children().filter((i, e) => !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length));
+                                    children.hide();
+                                    $(body).addClass("review");
+                                    viewer._wrapUntaggedNumbers($(body), docIndex, false);
+                                    children.show();
+                                    resolve();
+                                });
+                            });
+                        }
+                    }
+                })()
+                    .then(() => viewer._iv.setProgress("Preparing document"));
+            });
     }
 
     _addDocumentSetTabs() {
@@ -774,6 +815,15 @@ export class Viewer {
         const reportSet = this._reportSet;
         const viewer = this;
         if (on) {
+            // The colour group is a property of the fact's concept namespace, so compute it once
+            // per fact id and cache it -- a document-surface fact can span thousands of overlay
+            // elements (one per glyph rect), and recomputing getItemById()/conceptQName() for each
+            // was O(elements) new Fact objects + QName parses (tens of thousands), the dominant
+            // cost of enabling highlight-on-startup for a large PDF (e.g. L'Oreal, ~26k overlays).
+            // Each element is coloured directly (it is the current .ixbrl-element in the iteration,
+            // and every coloured element is itself iterated), so primaryElementsForItemIds is not
+            // needed.
+            const colourForId = {}; // ixn.id -> colour index (or null when its namespace has none)
             $(".ixbrl-element", this._contents)
                 .addClass("ixbrl-highlight")
                 .each(function () {
@@ -782,15 +832,17 @@ export class Viewer {
                     // highlight color for an element that is double tagged in a
                     // table cell.
                     const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
-                    if (ixn !== undefined ) {
+                    if (ixn === undefined) {
+                        return;
+                    }
+                    let i = colourForId[ixn.id];
+                    if (i === undefined) {
                         const item = reportSet.getItemById(ixn.id);
-                        if (item !== undefined) {
-                            const elements = viewer.primaryElementsForItemIds(ixn.chainIXIds());
-                            const i = groups[item.conceptQName().prefix];
-                            if (i !== undefined) {
-                                elements.addClass("ixbrl-highlight-" + i);
-                            }
-                        }
+                        i = (item !== undefined) ? (groups[item.conceptQName().prefix] ?? null) : null;
+                        colourForId[ixn.id] = i;
+                    }
+                    if (i !== null) {
+                        this.classList.add("ixbrl-highlight-" + i);
                     }
             });
         }

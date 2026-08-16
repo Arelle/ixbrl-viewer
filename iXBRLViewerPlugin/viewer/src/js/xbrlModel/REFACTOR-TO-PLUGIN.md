@@ -54,9 +54,10 @@ structure navigation — but that is close to what `d6v` already does with the
 existing hooks and is **not** the core blocker. The rest of this doc, §2 onward, is
 the proposed solution.)*
 
-### Upstream delta (reviewed against `origin/master` @ 2026-08-06, +142 commits)
+### Upstream delta / rebase outcome (rebased onto `master` @ 2026-08-13, +142 commits)
 
-Re-checked after resyncing the fork to upstream. Net effect on this proposal:
+The overlay has since been **rebased onto current master**. Net effect on this
+proposal, and how the rebase actually went:
 
 - **No extension points were added upstream** — still no report-data,
   document-surface, or inspector-mode hook (`firstPluginResult` doesn't exist).
@@ -74,9 +75,16 @@ Re-checked after resyncing the fork to upstream. Net effect on this proposal:
     `summary.hiddenFacts`, `fact.isHidden` (→ `ixNode.isHidden`), `visibilityFilter`.
     The Cubes data path and hidden-fact surfacing still work; only the injection
     point moved. (Re-verify against upstream's "Fix inspector summary visibility bugs".)
-  - The XbrlModel inspector edits (see the code inventory, §5) will **conflict
-    heavily** on rebase — which is itself an argument for the refactor: stop
-    carrying core-inspector patches.
+  - **Rebase outcome (done):** conflicts landed exactly where predicted —
+    `inspector.js`/`.html`/`.less`, `outline.js`, `viewer.js`. Resolved by taking
+    master's redesigned inspector **wholesale** (so the **Cubes panel is
+    temporarily removed, pending re-integration** as a `cubes-mode`), re-applying
+    the `outline.js` cycle guard, and taking master's `initialize()`. Two runtime
+    API drifts surfaced and were fixed: master renamed
+    `Viewer._docOrderItemIndex` → `Viewer.docOrderItemIndex` (surface call sites
+    updated), and master's `initialize()` now runs heavy iXBRL-only post-processing,
+    so `XbrlModelViewer` overrides `initialize()` to skip it. This churn is itself
+    the argument for the refactor — stop carrying core-inspector patches.
 - **General fixes remain relevant upstream:** the `outline.js` change did *not* add a
   cycle guard; jQuery `:hidden`/`:visible` are still used (`ixnode.js`, `tableExport.js`,
   `viewer.js`). The compat/perf fixes (see *Open questions*, §4) are still valid
@@ -149,7 +157,8 @@ async surface.bindFacts(viewer) → void
 These become the documented, stable "surface API" of `Viewer`:
 `_findOrCreateWrapperNode(el, inHidden)`, `_addIdToNodes(nodes, vuid)`,
 `_getOrCreateIXNode(vuid, nodes, docIndex, isHidden)`,
-`_docOrderItemIndex.addItem(vuid, docIndex)`, plus the `viewerUniqueId(reportIndex, id)`
+`docOrderItemIndex.addItem(vuid, docIndex)` (renamed from `_docOrderItemIndex` in
+the 2026-08 redesign), plus the `viewerUniqueId(reportIndex, id)`
 util. Recommend documenting these (or providing thin public aliases) so surfaces
 don't depend on private internals by accident.
 
@@ -242,6 +251,17 @@ This is the current `loadXbrlModel()` generalised: the XbrlModel-specific logic
 # Part II — Implementation & continuation notes (not for the issue)
 
 ## 5. Current code inventory (what moves where)
+
+> **Post-rebase note (2026-08).** The table below describes the edits as authored
+> before the master rebase. After the rebase: `inspector.{js,html,less}` are now
+> **master's redesigned files** (the Cubes-panel edits were *not* re-applied — the
+> Cubes panel is pending re-integration as a `cubes-mode`; its `createCubes`
+> renderer lives on branch `hf-xbrl-model-prerebase`). `viewer.js` kept only the
+> `highlightAllTags` perf cache (master's `initialize()`/`:visible` were taken as-is);
+> the surface-binding/init overrides moved into `XbrlModelViewer` (which now
+> overrides `_processDocuments` **and** `initialize()`). The `outline.js` cycle
+> guard was re-applied cleanly. The general fixes in `ixnode.js`/`tableExport.js`/
+> `fact.js` carried through the rebase.
 
 ### Core files currently modified (to be reverted once extension points exist)
 | File | Current change | Destination |

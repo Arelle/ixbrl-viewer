@@ -74,9 +74,14 @@ seams were added:
      selection code.
 
 `XbrlModelViewer` (`xbrlModelViewer.js`) is a thin `Viewer` subclass that
-overrides only the fact-discovery step (`Viewer._processDocuments`) to delegate
-to a document surface.  Everything after discovery — styling, event handlers,
-navigation, the inspector — is shared and unmodified.
+overrides the fact-discovery step (`Viewer._processDocuments`) to delegate to a
+document surface.  It also overrides `Viewer.initialize()` to run only the
+format-agnostic tail (styles, handlers, document-set tabs) after binding: the
+base `initialize()` runs iXBRL-only post-processing (`_preProcessiXBRL`,
+`_setContinuationMaps`, and review-mode untagged-number wrapping) that does not
+apply to a surface-bound document and is pathologically slow on a large plain-HTML
+body.  Everything else — selection, highlighting, navigation, the inspector — is
+shared and unmodified.
 
 `iXBRLViewer.loadXbrlModel` resolves the model source (URL argument → config
 `model`/`factset` → chooser) and hands the parsed model to `_loadXbrlModelDoc`,
@@ -305,8 +310,11 @@ first-page-fast loading:
   the inspector shows unit, accuracy (decimals) and scale.  The `transformation`
   (format) is captured but not shown — surfacing it needs a row in the shared
   `fact-details.html` template.
-- Only located facts (with an `xbrl:htmlElementId` or `xbrl:pdfPage`/`xbrl:pdfMcid`
-  locator) are shown; hidden facts are not yet surfaced.
+- Facts not located on the document — an html-fallback fact whose id isn't in the
+  PDF, or an `ix:hidden` fact (e.g. `dei:EntityCentralIndexKey`) never linked to
+  display text — are registered as **hidden** IXNodes (no overlay, `isHidden=true`)
+  so they flow through the core's existing hidden-fact UI: counted in the summary,
+  browsable via its click-through fact list, and badged in search.
 - The PDF surface prepares every page's layout + fact overlays up front (so
   navigation, values and highlighting work everywhere immediately) but rasterizes
   page canvases **lazily** as they scroll into view, releasing the pixel memory
@@ -321,6 +329,15 @@ first-page-fast loading:
   Facts whose concept isn't in a loaded taxonomy fall back to the concept QName.
 
 ## Cubes panel (reporting-structure section tree)
+
+> **Post-rebase status (2026-08).** After rebasing onto upstream master (which
+> redesigned the inspector), the inspector's redesigned files were taken wholesale,
+> so the **inspector-side Cubes panel is temporarily removed and pending
+> re-integration** (a `cubes-mode` in master's new `#inspector-tabs`
+> `[data-mode]` system). The **data side is intact** — `adapter.buildSections`,
+> `XBRLReport.cubes()`/`sections()`, `ReportSet.hasCubes()`/`conceptFactsIndex()`
+> and the `createCubes` renderer (preserved on branch `hf-xbrl-model-prerebase`).
+> The description below is the intended behaviour once re-wired.
 
 The inspector has a native **Cubes** navigation panel (a mode button next to
 Document Outline).  The adapter reads the taxonomy's cubes, resolving each cube's

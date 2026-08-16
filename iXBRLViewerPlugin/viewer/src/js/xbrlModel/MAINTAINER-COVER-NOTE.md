@@ -10,8 +10,14 @@ An "XbrlModel" overlay for the viewer that reads an **OIM factset + converted
 taxonomy + a plain HTML or PDF document** (instead of embedded iXBRL JSON +
 inline XBRL), binds facts by `xbrl:htmlElementId` / `xbrl:pdfMcid`, and adds a
 **Cubes** navigation panel. It reuses the existing report model and inspector.
-Working today against Apple's 10-K (HTML and PDF) and L'Oreal's 452-page PDF,
-with lazy PDF rendering.
+Working today against Apple's 10-K (HTML and PDF), L'Oreal's 452-page PDF, and
+large multi-fund SEC N-CSRs, with lazy PDF rendering.
+
+**Status (2026-08):** the overlay has since been **rebased onto current master**
+(+142 commits, including the inspector redesign) and runs correctly at runtime
+(HTML, PDF, and the large N-CSRs). The Cubes panel is mid-re-integration onto the
+redesigned inspector; everything else works. Details in `REFACTOR-TO-PLUGIN.md`
+§1 (*Upstream delta / rebase outcome*).
 
 ## The one architectural point
 
@@ -21,10 +27,11 @@ can do so much without touching core. XbrlModel instead **replaces** three
 stages: the data source, the document, and fact discovery. There's no hook for
 that yet, so the current implementation edits core files.
 
-The Cubes panel is already fully plugin-able with no core changes (d6v proves the
-pattern). The data-source + document-surface half needs a small set of
-**general-purpose** extension points — useful for any alternative-data-source
-plugin, not just this one.
+The Cubes panel was close to plugin-able via d6v-style DOM injection, but the
+2026-08 inspector redesign removed the toolbar anchor it used, so a first-class
+`inspector.registerMode({…})` API is now the cleaner route. The data-source +
+document-surface half needs a small set of **general-purpose** extension points —
+useful for any alternative-data-source plugin, not just this one.
 
 ## Proposed extension points (detail in §3 of the design doc)
 
@@ -41,7 +48,9 @@ When no plugin provides data, the stock iXBRL viewer path is unchanged.
 
 ## Decisions I need from you
 
-- **EP3:** DOM-injection hook, or a first-class `registerMode` API?
+- **EP3:** DOM-injection hook, or a first-class `registerMode` API? (The 2026-08
+  inspector redesign removed the DOM anchor injection used, so `registerMode` now
+  looks like the cleaner, more durable choice.)
 - **Exports:** keep the surface contract as the only seam, or export
   `ReportSet` / `Viewer` for advanced plugins?
 - **Stable contract:** is the internal `reportData` shape OK to document as the

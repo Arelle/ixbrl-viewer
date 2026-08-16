@@ -157,6 +157,7 @@ export class Inspector {
                 reportSet.viewerOptions = inspector._viewerOptions;
                 inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
+                inspector.createCubes()
                 inspector.outline = new ReportSetOutline(reportSet);
                 inspector.initializeZoom();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
@@ -615,7 +616,7 @@ export class Inspector {
     }
 
     inspectorMode(mode, focusInspector) {
-        const allModes = ["fact-mode", "search-mode", "overview-mode", "settings-mode"];
+        const allModes = ["fact-mode", "search-mode", "overview-mode", "cubes-mode", "settings-mode"];
         $("#inspector-tabs button")
             .removeClass("selected")
             .filter((i, e) => $(e).data("mode") === mode)
@@ -1125,6 +1126,101 @@ export class Inspector {
                     e.stopPropagation();
                 });
 
+        }
+    }
+
+    /*
+     * Build the Cubes navigation panel from the report's XBRL Model cubes.
+     * Each cube lists as a button showing its label and the number of its
+     * line-item facts present in the document; clicking navigates to the first
+     * such fact.  The Cubes tab is only shown when the report has cubes, so
+     * the plain iXBRL viewer is unaffected.
+     */
+    createCubes() {
+        const hasCubes = this._reportSet.hasCubes();
+        $('#ixv').toggleClass('has-cubes', hasCubes);
+        if (!hasCubes) {
+            return;
+        }
+
+        const conceptFacts = this._reportSet.conceptFactsIndex();
+        const cubesByName = {};
+        for (const c of this._reportSet.cubes()) {
+            cubesByName[c.name] = c;
+        }
+        const cubeFacts = (name) =>
+            (cubesByName[name]?.concepts ?? []).flatMap(c => conceptFacts[c] ?? []);
+
+        // A single cube, rendered as a clickable row (label + line-item fact count).
+        // labelOverride lets a collapsed single-cube section show the section's name.
+        const renderCubeLeaf = (cube, facts, container, labelOverride) => {
+            const item = $('<button class="fact-list-item cube-leaf"></button>')
+                .on("click", () => this.selectItem(facts[0].vuid))
+                .on("mousedown", (e) => { if (e.detail > 1) { e.preventDefault(); } })
+                .appendTo(container);
+            $('<span class="cube-label"></span>').text(labelOverride ?? cube.label).appendTo(item);
+            $('<span class="cube-count"></span>').text(facts.length).appendTo(item);
+        };
+
+        const body = $('.cubes-inspector .body').empty();
+        const sections = this._reportSet.sections();
+
+        if (sections) {
+            // Hierarchical: the reporting-structure tree (OIM groupTree) with cubes as leaves.
+            // A section is rendered only when its subtree contains at least one cube that has
+            // facts in the document, so empty sections are hidden.  Returns the subtree fact count.
+            const renderNode = (node, container) => {
+                const leaves = node.cubes
+                    .map(n => ({ cube: cubesByName[n], facts: cubeFacts(n) }))
+                    .filter(l => l.cube && l.facts.length > 0);
+                const childWrap = $('<div class="section-children"></div>');
+                let childTotal = 0;
+                for (const child of node.children) {
+                    childTotal += renderNode(child, childWrap);
+                }
+                const hasChildren = childWrap.children().length > 0;
+                if (leaves.length === 0 && !hasChildren) {
+                    return 0; // empty section -- hide it
+                }
+                // Collapse a section whose only content is a single cube into that cube (shown
+                // with the section's name), avoiding a redundant "section > single cube" level.
+                if (leaves.length === 1 && !hasChildren) {
+                    renderCubeLeaf(leaves[0].cube, leaves[0].facts, container, node.label);
+                    return leaves[0].facts.length;
+                }
+                const total = leaves.reduce((s, l) => s + l.facts.length, 0) + childTotal;
+                const section = $('<div class="section-node"></div>').appendTo(container);
+                const header = $('<button class="section-header"></button>')
+                    .on("click", () => section.toggleClass("collapsed"))
+                    .appendTo(section);
+                $('<span class="section-twisty"></span>').appendTo(header);
+                $('<span class="section-label"></span>').text(node.label).appendTo(header);
+                $('<span class="cube-count"></span>').text(total).appendTo(header);
+                const content = $('<div class="section-content"></div>').appendTo(section);
+                for (const { cube, facts } of leaves) {
+                    renderCubeLeaf(cube, facts, content);
+                }
+                childWrap.appendTo(content);
+                return total;
+            };
+            const container = $('<div class="section-tree"></div>').appendTo(body);
+            let shown = 0;
+            for (const root of sections) {
+                shown += renderNode(root, container);
+            }
+            $('.cubes-inspector .no-cubes-overlay').toggle(shown === 0);
+        }
+        else {
+            // Flat fallback: report has no group tree -- list cubes by descending fact count.
+            const cubes = this._reportSet.cubes()
+                .map(cube => ({ cube, facts: cubeFacts(cube.name) }))
+                .filter(c => c.facts.length > 0)
+                .sort((a, b) => b.facts.length - a.facts.length);
+            $('.cubes-inspector .no-cubes-overlay').toggle(cubes.length === 0);
+            const container = $('<div class="fact-list"></div>').appendTo(body);
+            for (const { cube, facts } of cubes) {
+                renderCubeLeaf(cube, facts, container);
+            }
         }
     }
 

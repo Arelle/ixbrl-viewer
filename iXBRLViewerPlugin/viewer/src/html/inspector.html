@@ -45,6 +45,7 @@ See COPYRIGHT.md for copyright information
         <button data-mode="fact-mode" data-i18n="inspector.tabs.xbrlFacts" class="always-selectable">XBRL facts</button>
         <button data-mode="search-mode" data-i18n="inspector.tabs.search">Search</button>
         <button data-mode="overview-mode" data-i18n="inspector.tabs.overview">Overview</button>
+        <button data-mode="cubes-mode" data-i18n="inspector.tabs.cubes" class="cubes-button">Cubes</button>
       </nav>
       <section id="inspector" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
 
@@ -344,6 +345,17 @@ See COPYRIGHT.md for copyright information
             </div>
           </div> <!-- inspector-body -->
         </div> <!-- summary -->
+
+        <div class="inspector-container cubes-inspector">
+          <div class="inspector-body">
+            <div class="no-cubes-overlay">
+              <div class="no-cubes-overlay-icon"></div>
+              <p class="title" data-i18n="inspector.cubesUnavailable">No Cubes</p>
+            </div>
+            <div class="body">
+            </div>
+          </div>
+        </div>
 
         <div class="inspector-container settings-inspector">
           <div class="modal-inspector">

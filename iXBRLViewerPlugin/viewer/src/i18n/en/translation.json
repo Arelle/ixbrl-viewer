@@ -171,6 +171,7 @@
     },
     "summation": "Summation",
     "tabs": {
+      "cubes": "Cubes",
       "overview": "Overview",
       "search": "Search",
       "xbrlFacts": "XBRL facts"

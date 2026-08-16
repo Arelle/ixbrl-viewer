@@ -1439,6 +1439,116 @@ a {
     }
   }
 
+  &.cubes-mode {
+    .cubes-inspector {
+      display: flex;
+    }
+  }
+
+  // The Cubes tab only applies to XBRL Model reports (which carry cubes).
+  &:not(.has-cubes) .cubes-button {
+    display: none;
+  }
+
+  .cubes-inspector {
+    .no-cubes-overlay {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      text-align: center;
+      color: var(--colour-text-light);
+
+      .no-cubes-overlay-icon::before {
+        .icon-dimension();
+
+        font-size: 10rem;
+        line-height: normal;
+      }
+
+      .title {
+        font-size: x-large;
+        line-height: normal;
+      }
+    }
+
+    .fact-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.8rem;
+
+      // The row is a <button>, whose centred text would otherwise ragged-centre
+      // a cube label that wraps onto a second line.
+      .cube-label {
+        flex: 1;
+        text-align: left;
+      }
+
+      .cube-count {
+        .text-sm();
+
+        flex-shrink: 0;
+        color: var(--colour-text-light);
+      }
+    }
+
+    // Reporting-structure section tree (OIM groupTree) in the Cubes panel:
+    // expandable section headers with cubes nested as leaves.
+    .section-tree {
+      .section-header {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.6rem 0.8rem;
+        background: none;
+        border: none;
+        text-align: left;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--colour-text);
+
+        &:hover {
+          background: var(--colour-row-hover);
+        }
+
+        .section-twisty::before {
+          .icon-chevron-down();
+
+          display: inline-block;
+          font-size: 0.9em;
+          transition: transform 0.1s ease;
+        }
+
+        .section-label {
+          flex: 1;
+        }
+
+        .cube-count {
+          .text-sm();
+
+          flex-shrink: 0;
+          color: var(--colour-text-light);
+        }
+      }
+
+      .section-content {
+        padding-left: 1.4rem;
+      }
+
+      .section-node.collapsed > .section-header .section-twisty::before {
+        transform: rotate(-90deg);
+      }
+
+      .section-node.collapsed > .section-content {
+        display: none;
+      }
+    }
+  }
+
   &.settings-mode {
     .settings-inspector {
       display: flex;

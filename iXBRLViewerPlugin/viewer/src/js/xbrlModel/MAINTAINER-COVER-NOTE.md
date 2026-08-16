@@ -15,9 +15,10 @@ large multi-fund SEC N-CSRs, with lazy PDF rendering.
 
 **Status (2026-08):** the overlay has since been **rebased onto current master**
 (+142 commits, including the inspector redesign) and runs correctly at runtime
-(HTML, PDF, and the large N-CSRs). The Cubes panel is mid-re-integration onto the
-redesigned inspector; everything else works. Details in `REFACTOR-TO-PLUGIN.md`
-§1 (*Upstream delta / rebase outcome*).
+(HTML, PDF, and the large N-CSRs). The Cubes panel has been **re-integrated** as a
+`cubes-mode` tab in the redesigned inspector; the overlay is feature-complete
+against its pre-rebase state. Details in `REFACTOR-TO-PLUGIN.md` §1 (*Upstream
+delta / rebase outcome*).
 
 ## The one architectural point
 
@@ -29,9 +30,16 @@ that yet, so the current implementation edits core files.
 
 The Cubes panel was close to plugin-able via d6v-style DOM injection, but the
 2026-08 inspector redesign removed the toolbar anchor it used, so a first-class
-`inspector.registerMode({…})` API is now the cleaner route. The data-source +
-document-surface half needs a small set of **general-purpose** extension points —
-useful for any alternative-data-source plugin, not just this one.
+`inspector.registerMode({…})` API is now the cleaner route. Re-integrating the
+panel by hand made the case concrete: a mode has to touch `#inspector-tabs`, add a
+`<mode>-inspector` container, register itself in `allModes`, add its own
+`&.<mode>-mode` display rule, and hang its availability class on whichever
+ancestor happens to span both the tab bar and the panel — `#ixv` after the
+redesign moved the nav out of `#inspector`. Every one of those is a coupling to
+core DOM structure that a `registerMode` API would absorb, and the gate anchor in
+particular broke silently on rebase. The data-source + document-surface half needs
+a small set of **general-purpose** extension points — useful for any
+alternative-data-source plugin, not just this one.
 
 ## Proposed extension points (detail in §3 of the design doc)
 

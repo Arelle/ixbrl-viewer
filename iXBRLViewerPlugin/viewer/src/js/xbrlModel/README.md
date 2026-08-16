@@ -330,22 +330,26 @@ first-page-fast loading:
 
 ## Cubes panel (reporting-structure section tree)
 
-> **Post-rebase status (2026-08).** After rebasing onto upstream master (which
-> redesigned the inspector), the inspector's redesigned files were taken wholesale,
-> so the **inspector-side Cubes panel is temporarily removed and pending
-> re-integration** (a `cubes-mode` in master's new `#inspector-tabs`
-> `[data-mode]` system). The **data side is intact** — `adapter.buildSections`,
-> `XBRLReport.cubes()`/`sections()`, `ReportSet.hasCubes()`/`conceptFactsIndex()`
-> and the `createCubes` renderer (preserved on branch `hf-xbrl-model-prerebase`).
-> The description below is the intended behaviour once re-wired.
+> **Post-rebase status (2026-08).** Re-integrated into master's redesigned
+> inspector as a `cubes-mode` (commit `98668cdb`); the panel is live again on
+> both the HTML and PDF paths. Two things moved in the port:
+>
+> - the panel container is `.cubes-inspector`, following master's
+>   `<mode>-inspector` convention, not the old `.cubes`;
+> - the `has-cubes` gate is on **`#ixv`**, not `#inspector`. Master moved the tab
+>   bar out of the `#inspector` section — `<nav id="inspector-tabs">` is now a
+>   sibling of `<section id="inspector">` — so `#inspector` can no longer reach
+>   the tab button. `#ixv` is the nearest common ancestor.
 
-The inspector has a native **Cubes** navigation panel (a mode button next to
-Document Outline).  The adapter reads the taxonomy's cubes, resolving each cube's
-`xbrl:concept` dimension domain network into its line-item concepts
-(`XBRLReport.cubes()`); the inspector lists each cube with the number of its
-facts present in the document and navigates to them on click
-(`ReportSet.conceptFactsIndex()`).  The button is gated on `ReportSet.hasCubes()`,
-so it only appears for XBRL Model reports and the iXBRL viewer is unaffected.
+The inspector has a native **Cubes** navigation panel (a tab in `#inspector-tabs`,
+alongside XBRL facts / Search / Overview).  The adapter reads the taxonomy's cubes,
+resolving each cube's `xbrl:concept` dimension domain network into its line-item
+concepts (`XBRLReport.cubes()`); the inspector lists each cube with the number of
+its facts present in the document and navigates to them on click
+(`ReportSet.conceptFactsIndex()`).  `createCubes()` runs from `Inspector.initialize()`
+next to `createSummary()`, and sets `has-cubes` on `#ixv` from
+`ReportSet.hasCubes()`; a stylesheet rule hides the tab when the class is absent,
+so the panel only appears for XBRL Model reports and the iXBRL viewer is unaffected.
 
 When the model carries a **group tree** (the OIM `groupTree` — the reporting
 structure the legacy loader infers from SEC/IFRS role conventions, see

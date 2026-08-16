@@ -77,14 +77,25 @@ proposal, and how the rebase actually went:
     point moved. (Re-verify against upstream's "Fix inspector summary visibility bugs".)
   - **Rebase outcome (done):** conflicts landed exactly where predicted —
     `inspector.js`/`.html`/`.less`, `outline.js`, `viewer.js`. Resolved by taking
-    master's redesigned inspector **wholesale** (so the **Cubes panel is
-    temporarily removed, pending re-integration** as a `cubes-mode`), re-applying
+    master's redesigned inspector **wholesale** (dropping the Cubes panel), re-applying
     the `outline.js` cycle guard, and taking master's `initialize()`. Two runtime
     API drifts surfaced and were fixed: master renamed
     `Viewer._docOrderItemIndex` → `Viewer.docOrderItemIndex` (surface call sites
     updated), and master's `initialize()` now runs heavy iXBRL-only post-processing,
     so `XbrlModelViewer` overrides `initialize()` to skip it. This churn is itself
     the argument for the refactor — stop carrying core-inspector patches.
+  - **Cubes re-integrated (done, `98668cdb`):** re-added in master's idiom — a
+    `cubes-mode` tab button, a `.cubes-inspector` container mirroring the overview
+    one, `"cubes-mode"` in `allModes`, an `&.cubes-mode` display rule, and
+    `createCubes()` called from `initialize()`. `createCubes` and its section-tree
+    `renderNode` ported from `hf-xbrl-model-prerebase` essentially verbatim; only
+    the container selectors changed (`.cubes` → `.cubes-inspector`).
+    A **third API drift** surfaced here: the `has-cubes` gate had to move from
+    `#inspector` to `#ixv`, because master moved `<nav id="inspector-tabs">` out of
+    `<section id="inspector">`, leaving the two without a shared ancestor below
+    `#ixv`. That one fails *silently* — the selector simply stops matching and the
+    tab is always visible, including in the plain iXBRL viewer. A `registerMode`
+    API owning its own visibility would remove the whole class of breakage.
 - **General fixes remain relevant upstream:** the `outline.js` change did *not* add a
   cycle guard; jQuery `:hidden`/`:visible` are still used (`ixnode.js`, `tableExport.js`,
   `viewer.js`). The compat/perf fixes (see *Open questions*, §4) are still valid
@@ -175,7 +186,15 @@ evidence the surface seam is at the right level.
 Two options. **(b) is now recommended** — see *Upstream delta* (§1): the 2026-08
 inspector redesign removed the `#inspector-head nav.controls` anchor that (a) relied
 on and shows the inspector DOM is unstable, so a first-class API is safer than
-DOM injection:
+DOM injection.
+
+The hand re-integration in `98668cdb` is a worked example of what (a) costs. A mode
+had to touch five separate places in core (`#inspector-tabs`, a container in
+`inspector.html`, `allModes` in `inspectorMode()`, a display rule and panel styles
+in `inspector.less`, a call in `initialize()`), and its availability gate had to be
+re-anchored from `#inspector` to `#ixv` because the redesign moved the tab bar out
+of the inspector section. `registerMode` would own all five, and — more importantly
+— own the gate, which is the piece that fails silently rather than loudly:
 
 - **(b) Structured panel API (recommended).** Core adds
   `inspector.registerMode({ id, iconClass, title, isAvailable(), render(container) })`
@@ -254,9 +273,9 @@ This is the current `loadXbrlModel()` generalised: the XbrlModel-specific logic
 
 > **Post-rebase note (2026-08).** The table below describes the edits as authored
 > before the master rebase. After the rebase: `inspector.{js,html,less}` are now
-> **master's redesigned files** (the Cubes-panel edits were *not* re-applied — the
-> Cubes panel is pending re-integration as a `cubes-mode`; its `createCubes`
-> renderer lives on branch `hf-xbrl-model-prerebase`). `viewer.js` kept only the
+> **master's redesigned files plus the re-integrated Cubes panel** (`98668cdb`) —
+> a `cubes-mode` tab, a `.cubes-inspector` container, `createCubes()` called from
+> `initialize()`, and the `has-cubes` gate on `#ixv`. `viewer.js` kept only the
 > `highlightAllTags` perf cache (master's `initialize()`/`:visible` were taken as-is);
 > the surface-binding/init overrides moved into `XbrlModelViewer` (which now
 > overrides `_processDocuments` **and** `initialize()`). The `outline.js` cycle
@@ -270,7 +289,7 @@ This is the current `loadXbrlModel()` generalised: the XbrlModel-specific logic
 | `viewer.js` | `_processDocuments()` extract-method seam; **also** `highlightAllTags` perf (cache colour per fact id — 14 s → 25 ms on a 26 k-overlay PDF) and a jQuery-4 `:visible` fix | **Core:** the seam becomes the EP2 fact-binding delegation point (keep); the perf/compat fixes are general (keep/upstream). |
 | `outline.js` | cycle guard in `buildDimensionMapFromSubTree` | **Core:** keep — general robustness fix (cyclic presentation data), not XbrlModel-specific. Upstream as a bugfix. |
 | `ixnode.js`, `tableExport.js`, `fact.js` | jQuery-4 pseudo-selector compat (`:hidden`/`:visible` are Sizzle-only and throw under jQuery 4 → native layout test), `htmlHidden` result caching (avoids a forced reflow per fact during search), and an OIM-permitted absent-entity guard | **Core:** keep/upstream — general fixes independent of XbrlModel, same category as the `outline.js` guard. |
-| `inspector.{js,html,less}`, `report.js`, `reportset.js`, `i18n/en/translation.json` | Cubes panel (button, mode, panel, `cubes()`, `hasCubes()`, `conceptFactsIndex()`), now a **groupTree-driven section tree** with numeric-code section sort | **Plugin:** re-implement d6v-style (Half A). `report.cubes()` / section-tree data comes from the plugin-provided `reportData` (`buildSections`/`buildCubes` in `adapter.js`, self-contained). |
+| `inspector.{js,html,less}`, `report.js`, `reportset.js`, `i18n/en/translation.json` | Cubes panel (`cubes-mode` tab, `.cubes-inspector` container, `allModes` entry, display rule + panel styles, `createCubes()` in `initialize()`, `has-cubes` gate on `#ixv`, `inspector.tabs.cubes` label; `cubes()`, `hasCubes()`, `conceptFactsIndex()`), a **groupTree-driven section tree** with numeric-code section sort | **Plugin:** re-implement via EP3 (b) `registerMode` — the five core touch-points above are exactly what that API would own. `report.cubes()` / section-tree data comes from the plugin-provided `reportData` (`buildSections`/`buildCubes` in `adapter.js`, self-contained). |
 
 ### Self-contained `xbrlModel/` modules (move as-is into the plugin package)
 `adapter.js`, `htmlDocumentSurface.js`, `pdfDocumentSurface.js`,

@@ -82,3 +82,73 @@ export const FACT_VALUE_DERIVATION = {
 export const SUPPORTED_TYPES = new Set([
     'text', 'number', 'integer', 'checkbox', 'select', 'qname', 'sqname', 'uri', 'textarea',
 ]);
+
+const byKey = key => FACT_VALUE_DERIVATION.scalar.find(f => f.key === key);
+
+/*
+ * The derivation fields a particular capture puts in play, as a descriptor
+ * subset the renderer can take unchanged.
+ *
+ * The bind card shows only these rather than the whole descriptor.  Rendering
+ * all five every time would bury the verdict under form furniture, and most of
+ * them are irrelevant to any one capture.  Subsetting costs nothing because the
+ * renderer takes whatever descriptor it is handed.
+ *
+ * Returning null is a real answer, and in two cases it is the important one:
+ *
+ *   unrelated  the two numbers have no scaling relationship, so the capture is
+ *              on the wrong content.  Offering a scale box here would invite
+ *              someone to adjust it until a bad bind looked acceptable, which
+ *              is exactly what the unrelated verdict exists to prevent.
+ *   coarse     the captured run contains the value plus more.  That is a
+ *              capture problem, fixed by Widen or a narrower click, not by
+ *              anything in the derivation chain.
+ */
+export function derivationFieldsFor(verdict, derivation) {
+    if (verdict === 'agree' || verdict === 'coarse') {
+        return null;
+    }
+    const kind = derivation?.kind;
+    if (kind === 'solved') {
+        const first = derivation.solutions[0] ?? {};
+        const keys = [];
+        if (first.scale != null) {
+            keys.push('scale');
+        }
+        if (first.sign) {
+            keys.push('sign');
+        }
+        if (!keys.length) {
+            return null;
+        }
+        return {
+            descriptor: { scalar: keys.map(byKey).filter(Boolean), arrays: [] },
+            values: { scale: first.scale ?? undefined, sign: first.sign ?? undefined },
+            // More than one derivation reproduces the value -- "01/02/2025" is
+            // genuinely ambiguous -- so the alternatives are surfaced rather
+            // than silently dropped in favour of the first.
+            alternatives: derivation.solutions.slice(1),
+        };
+    }
+    if (kind === 'shortlist') {
+        const base = byKey('transformation');
+        if (!base) {
+            return null;
+        }
+        return {
+            descriptor: {
+                scalar: [{
+                    ...base,
+                    type: 'select',
+                    options: ['', ...derivation.solutions.map(s => s.transformation)],
+                    hint: base.hint + ' Candidates match the text by pattern; none has been '
+                        + 'verified to reproduce the value.',
+                }],
+                arrays: [],
+            },
+            values: {},
+            alternatives: [],
+        };
+    }
+    return null;
+}

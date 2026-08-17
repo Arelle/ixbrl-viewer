@@ -3,6 +3,8 @@
 import $ from 'jquery';
 import { BindSession, BIND_STATE } from "./bindSession.js";
 import { TaggingJournal, VERDICT } from "./journal.js";
+import { derivationFieldsFor } from "./descriptors.js";
+import { renderForm } from "./formRenderer.js";
 
 /*
  * Wires the bind card in the inspector to a BindSession and the active document
@@ -176,10 +178,52 @@ export class TaggerController {
 
         card.find(".bind-derivation").text(shown ? this._derivationText(shown.derivation) : "");
         card.find(".bind-unverified").text(shown?.unverified ?? "");
+        this._renderDerivationForm(shown);
 
         card.find(".bind-widen").prop("disabled", !shown?.widenTo);
         card.find(".bind-retry").prop("disabled", s.state !== BIND_STATE.CAPTURED);
         card.find(".bind-accept").prop("disabled", !s.canAccept());
+    }
+
+    /*
+     * Render the derivation fields this capture puts in play, if any.
+     *
+     * Re-rendered only when the implicated field set changes, not on every
+     * state emission: rebuilding the DOM under the user's cursor would discard
+     * a half-typed scale and move focus out of the box they are typing into.
+     */
+    _renderDerivationForm(shown) {
+        const host = this._card.find(".bind-derivation-form").get(0);
+        if (!host) {
+            return;
+        }
+        const fields = shown ? derivationFieldsFor(shown.verdict, shown.derivation) : null;
+        const signature = fields
+            ? fields.descriptor.scalar.map(f => f.key).join(",") + "|" + JSON.stringify(fields.values)
+            : "";
+        if (signature === this._derivationSignature) {
+            return;
+        }
+        this._derivationSignature = signature;
+        if (!fields) {
+            host.textContent = "";
+            this._derivationForm = null;
+            $(host).hide();
+            return;
+        }
+        $(host).show();
+        this._derivationForm = renderForm(host, fields.descriptor, { values: fields.values });
+        if (fields.alternatives?.length) {
+            const alt = this._card.find(".bind-derivation-alt").get(0);
+            if (alt) {
+                alt.textContent = "also fits: " + fields.alternatives.map(s =>
+                    [s.scale != null ? `scale ${s.scale}` : null,
+                     s.sign ? "negated" : null].filter(Boolean).join(" + ")).join("; ");
+            }
+        }
+        else {
+            this._card.find(".bind-derivation-alt").text("");
+        }
     }
 
     _verdictText(verdict) {
@@ -223,7 +267,12 @@ export class TaggerController {
      * export button, an end-to-end test -- observes that a bind landed.
      */
     _accept() {
-        const entry = this._session?.accept();
+        // Binding a value and saying how it derives are one decision -- "this
+        // text, derived this way, is the value" -- so they become one journal
+        // entry rather than a bind followed by an edit.
+        const derivation = this._derivationForm?.read();
+        const entry = this._session?.accept(
+            derivation && Object.keys(derivation).length ? { derivation } : {});
         if (!entry) {
             return;
         }

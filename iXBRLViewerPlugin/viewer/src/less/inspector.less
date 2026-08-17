@@ -2037,3 +2037,66 @@ ul.plain-list {
     color: var(--colour-bg);
   }
 }
+
+// Derivation fields inside the bind card.  Only the fields the current capture
+// implicates are rendered, so this stays a row or two rather than the whole
+// factValue descriptor -- the verdict and the buttons must not be pushed out of
+// view by form furniture.
+#ixv .bind-card {
+  .bind-derivation-form {
+    display: none;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    .tagger-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+
+      label {
+        .text-sm();
+
+        font-weight: 600;
+      }
+
+      input, select, textarea {
+        font: inherit;
+        padding: 0.3rem 0.4rem;
+        border: solid 0.1rem var(--colour-border-grey);
+        border-radius: 0.3rem;
+        background: var(--colour-bg);
+        color: var(--colour-text);
+      }
+
+      input.mono {
+        font-family: monospace;
+      }
+    }
+
+    // The hint is the schema's own description; useful, but it must not crowd
+    // out the verdict, so it is quiet and wraps rather than expanding the card.
+    .tagger-field-hint {
+      .text-sm();
+
+      color: var(--colour-text-light);
+    }
+
+    .tagger-field-required {
+      color: var(--colour-error, #b3261e);
+      margin-left: 0.2rem;
+    }
+
+    .tagger-field-unsupported .tagger-field-note {
+      .text-sm();
+
+      color: var(--colour-error, #b3261e);
+    }
+  }
+
+  .bind-derivation-alt {
+    .text-sm();
+
+    color: var(--colour-text-light);
+    font-style: italic;
+  }
+}

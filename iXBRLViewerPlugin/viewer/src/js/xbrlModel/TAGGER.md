@@ -9,8 +9,8 @@ journal-only (no persistence).
 
 ### Build status
 
-The mechanism is built and tested; **none of it is wired to an interface yet**,
-so there is nothing to click.
+Bind and rebind work end to end on both surfaces. What remains is capturing a
+value that spans several runs, and the journal review and export surface.
 
 | | module | verified by |
 |---|---|---|

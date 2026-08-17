@@ -561,7 +561,10 @@ export class PdfDocumentSurface {
 
     /* A hit becomes a candidate in factValueSourceObject property form. */
     _candidateFor(pageNum, pg, entry, { widen = true } = {}) {
-        const text = (pg.mcidText[entry.mcid] ?? "").trim();
+        // Unstripped: the fragment's own whitespace is what makes concatenation
+        // faithful, and trimming it here is what would force a separator to be
+        // invented at the join.  The card trims for display only.
+        const text = pg.mcidText[entry.mcid] ?? "";
         const candidate = {
             locatorType: "xbrl:pdfContentLocatorType",
             properties: [

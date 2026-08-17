@@ -136,7 +136,11 @@ export class HtmlDocumentSurface {
         const candidate = {
             locatorType: "xbrlx:xhtmlPointerLocatorType",
             properties: [{ property: "xbrlx:htmlElementPointer", value: pointer }],
-            text: (el.textContent ?? "").trim().replace(/\s+/g, " "),
+            // Raw, not collapsed: whitespace collapsing belongs to the
+            // transform stage (Arelle does it in rawValue only once a format is
+            // present), and an element's own whitespace is what makes a joined
+            // value faithful.  The card collapses for display only.
+            text: el.textContent ?? "",
             unverified: verified ? undefined : (reason ?? "pointer did not verify"),
             _el: el,
         };

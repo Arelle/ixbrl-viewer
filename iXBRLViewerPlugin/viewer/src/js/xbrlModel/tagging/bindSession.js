@@ -194,10 +194,25 @@ export class BindSession {
         }
         return {
             ...parts[0],
-            // A gap between runs is what the separator was in the first place,
-            // so the fragments rejoin with a space; the comparison normaliser
-            // strips it again when checking against the value.
-            text: parts.map(p => p.text).filter(Boolean).join(" "),
+            /*
+             * Concatenated with nothing between, matching Inline XBRL 1.1
+             * continuations, which factValueSourceObject mirrors: Arelle's
+             * reference implementation joins the continuation chain with
+             * "".join (XmlUtil.innerText) over unstripped text
+             * (ModelInstanceObject.rawValue, strip=False).
+             *
+             * Inventing a separator here would be wrong for adjacent runs that
+             * differ only in styling -- "Rev" + "enue" must not become
+             * "Rev enue" -- and unnecessary where the source really does have
+             * whitespace, because the fragment's own text carries it.  Where a
+             * PDF line break means the whitespace is absent from the extracted
+             * text, that is a property of the extraction, not of the join.
+             *
+             * Whitespace collapsing is deliberately not done here either: in
+             * Arelle it belongs to the transform stage, and the tagger has no
+             * business pre-empting a transform it does not run.
+             */
+            text: parts.map(p => p.text).join(""),
             sources: parts.map(p => ({ properties: p.properties })),
             widenTo: undefined,
         };

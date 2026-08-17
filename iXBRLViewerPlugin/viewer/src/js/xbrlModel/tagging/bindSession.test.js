@@ -169,7 +169,9 @@ describe("joining fragments", () => {
         session.candidate(half("41", "10"));
         session.capture();
         session.addFragment(half("182,5", "11"));
-        expect(session.captured.text).toBe("41 182,5");
+        // concatenated with nothing between, as Inline XBRL 1.1 continuations
+        // are; no separator is invented, and the value still normalises to match
+        expect(session.captured.text).toBe("41182,5");
         expect(session.captured.verdict).toBe(VERDICT.AGREE);
         expect(session.captured.sources.map(s => s.properties[1].value)).toEqual(["10", "11"]);
     });
@@ -233,9 +235,31 @@ describe("joining fragments", () => {
         session.addFragment(half("182,5", "11"));
         expect(session.captured.verdict).toBe(VERDICT.DIFFER);
         session.removeFragment(1);
-        expect(session.captured.text).toBe("41 182,5");
+        expect(session.captured.text).toBe("41182,5");
         expect(session.captured.verdict).toBe(VERDICT.AGREE);
         expect(session.captured.sources.map(s => s.properties[1].value)).toEqual(["10", "11"]);
+    });
+
+    test("keeps whitespace the fragments carry, rather than inventing any", () => {
+        // the source's own spacing is what makes a joined text block faithful:
+        // "the end" must not become "theend", and equally two runs that differ
+        // only in styling must not gain a space that was never there
+        const { session } = newSession({ fact: { id: "f-1", value: "Total assets", dataType: "xs:string" } });
+        session.begin();
+        session.candidate(half("Total ", "10"));
+        session.capture();
+        session.addFragment(half("assets", "11"));
+        expect(session.captured.text).toBe("Total assets");
+    });
+
+    test("adjacent runs differing only in style do not gain a space", () => {
+        const { session } = newSession({ fact: { id: "f-1", value: "Revenue", dataType: "xs:string" } });
+        session.begin();
+        session.candidate(half("Rev", "10"));
+        session.capture();
+        session.addFragment(half("enue", "11"));
+        expect(session.captured.text).toBe("Revenue");
+        expect(session.captured.verdict).toBe(VERDICT.AGREE);
     });
 
     test("removing an out-of-range fragment does nothing", () => {

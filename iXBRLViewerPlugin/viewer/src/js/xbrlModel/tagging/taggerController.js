@@ -197,7 +197,7 @@ export class TaggerController {
         const card = this._card;
         card.find(".bind-hint").toggle(!shown);
         card.find(".bind-captured").toggle(!!shown);
-        card.find(".bind-captured-text").text(shown?.text ?? "");
+        card.find(".bind-captured-text").text(this._forDisplay(shown?.text));
 
         card.find(".bind-verdict")
             .text(shown ? this._verdictText(shown.verdict) : "")
@@ -285,13 +285,24 @@ export class TaggerController {
         // the mistake.
         frags.forEach((f, i) => {
             const chip = $('<span class="bind-fragment"></span>').appendTo(el);
-            $('<span class="bind-fragment-text"></span>').text(f.text || "(empty)").appendTo(chip);
+            $('<span class="bind-fragment-text"></span>')
+                .text(this._forDisplay(f.text) || "(whitespace)").appendTo(chip);
             $('<button class="bind-fragment-remove"></button>')
                 .attr({ title: "Remove this fragment", "aria-label": `Remove fragment ${i + 1}` })
                 .text("\u00d7")
                 .on("click", () => this._session?.removeFragment(i))
                 .appendTo(chip);
         });
+    }
+
+    /*
+     * Collapse whitespace for display only.  The captured text keeps whatever
+     * the document had, because that is what concatenates into the value; a
+     * card that showed the raw text would render a text block's newlines and
+     * indentation as a wall of space.
+     */
+    _forDisplay(text) {
+        return (text ?? "").trim().replace(/\s+/g, " ");
     }
 
     _verdictText(verdict) {

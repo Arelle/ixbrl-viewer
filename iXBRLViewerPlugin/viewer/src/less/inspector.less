@@ -2100,3 +2100,19 @@ ul.plain-list {
     font-style: italic;
   }
 }
+
+// The runs joined into one capture.  Shown only when there is more than one:
+// with a single fragment the captured text is already the whole evidence.
+#ixv .bind-card .bind-fragments {
+  .text-sm();
+
+  color: var(--colour-text-light);
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}
+
+// PARTIAL is a prompt to join rather than an error: the capture is right as far
+// as it goes, so it reads as neutral rather than as a failure.
+#ixv .bind-card .bind-verdict[data-verdict="partial"] {
+  color: var(--colour-text);
+}

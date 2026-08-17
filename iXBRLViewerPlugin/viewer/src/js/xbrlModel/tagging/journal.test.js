@@ -109,11 +109,12 @@ describe("TaggingJournal", () => {
         ...over,
     });
 
-    test("records an entry in factValueSourceObject property form", () => {
+    test("records an entry as an ordered list of factValueSourceObjects", () => {
         const j = new TaggingJournal({ document: "lor.pdf", model: "loreal.json" });
         const e = j.bind(bindArgs());
         expect(e.op).toBe("bindValueSource");
-        expect(e.properties).toEqual(props);
+        // a single properties bag is the one-fragment shorthand, and is wrapped
+        expect(e.sources).toEqual([{ properties: props }]);
         expect(e.verdict).toBe(VERDICT.AGREE);
         expect(e.previous).toBeNull();
         expect(j.length).toBe(1);
@@ -123,7 +124,7 @@ describe("TaggingJournal", () => {
         const j = new TaggingJournal();
         expect(() => j.bind(bindArgs({ factId: null }))).toThrow(/factId/);
         expect(() => j.bind(bindArgs({ locatorType: null }))).toThrow(/locatorType/);
-        expect(() => j.bind(bindArgs({ properties: [] }))).toThrow(/properties/);
+        expect(() => j.bind(bindArgs({ properties: [] }))).toThrow(/sources/);
         expect(j.length).toBe(0);
     });
 
@@ -133,9 +134,9 @@ describe("TaggingJournal", () => {
         const second = j.bind(bindArgs({
             properties: [{ property: "xbrl:pdfPage", value: "292" },
                          { property: "xbrl:pdfMcid", value: "419" }],
-            previous: first.properties,
+            previous: first.sources,
         }));
-        expect(second.previous).toEqual(props);
+        expect(second.previous).toEqual([{ properties: props }]);
         expect(j.currentBinding("f-1")).toBe(second);
     });
 
@@ -186,7 +187,30 @@ describe("TaggingJournal", () => {
         j.bind(bindArgs());
         const back = TaggingJournal.fromJSON(JSON.parse(j.serialise()));
         expect(back.toJSON()).toEqual(j.toJSON());
-        expect(back.currentBinding("f-1").properties).toEqual(props);
+        expect(back.currentBinding("f-1").sources).toEqual([{ properties: props }]);
+    });
+
+    test("keeps several fragments as ordered sources", () => {
+        const j = new TaggingJournal();
+        const a = [{ property: "xbrl:pdfMcid", value: "41" }];
+        const b = [{ property: "xbrl:pdfMcid", value: "42" }];
+        const e = j.bind(bindArgs({ properties: undefined,
+            sources: [{ properties: a }, { properties: b }],
+            capturedText: "41 182,5", factValue: "41182.5" }));
+        expect(e.sources).toEqual([{ properties: a }, { properties: b }]);
+        expect(e.verdict).toBe(VERDICT.AGREE);
+    });
+
+    test("rejects a source without properties", () => {
+        const j = new TaggingJournal();
+        expect(() => j.bind(bindArgs({ properties: undefined, sources: [{}] })))
+            .toThrow(/properties/);
+    });
+
+    test("carries a derivation when one was accepted with the bind", () => {
+        const j = new TaggingJournal();
+        const e = j.bind(bindArgs({ derivation: { scale: 6 } }));
+        expect(e.derivation).toEqual({ scale: 6 });
     });
 
     test("entries() hands out a copy, so callers cannot mutate the journal", () => {

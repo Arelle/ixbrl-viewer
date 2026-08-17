@@ -26,6 +26,7 @@ export const VERDICT = {
     AGREE: "agree",             // captured text matches the fact value
     DIFFER: "differ",           // it does not -- may still be correct
     COARSE: "coarse",           // the captured run contains the value plus more
+    PARTIAL: "partial",         // the captured run is the start of the value
 };
 
 /*
@@ -105,6 +106,20 @@ export function verdictFor(factValue, capturedText) {
             }
         }
     }
+    /*
+     * The capture is the start of the value rather than the whole of it.  This
+     * is the split-number case: a PDF that sets "41 182,5" with the thousands
+     * separator as a gap can put "41" and "182,5" in separate marked-content
+     * runs, so one click can only ever reach half the value.  It is the mirror
+     * of COARSE -- there the run held more than the value, here it holds less --
+     * and it needs the opposite remedy: joining another fragment rather than
+     * narrowing.  Tested as a prefix, not a substring, to keep single digits
+     * from matching most of the values on a page.
+     */
+    const c = normaliseForCompare(capturedText);
+    if (c !== "" && f.startsWith(c)) {
+        return VERDICT.PARTIAL;
+    }
     return VERDICT.DIFFER;
 }
 
@@ -154,25 +169,47 @@ export class TaggingJournal {
      * first bind, the displaced properties for a rebind -- which is what makes
      * an entry reversible without consulting the model.
      */
-    bind({ factId, locatorType, properties, capturedText, factValue, previous = null }) {
+    bind({ factId, locatorType, sources, properties, capturedText, factValue, previous = null,
+           derivation = null }) {
         if (!factId) {
             throw new Error("journal: factId is required");
         }
         if (!locatorType) {
             throw new Error("journal: locatorType is required");
         }
-        if (!Array.isArray(properties) || properties.length === 0) {
-            throw new Error("journal: properties must be a non-empty array");
+        /*
+         * Sources are an ordered list, because a fact value can be assembled
+         * from several fragments of the document -- the spec has valueSources
+         * contribute "by concatenation" -- and a split number needs exactly
+         * that.  A single `properties` bag is accepted as the one-fragment
+         * shorthand and wrapped, so the common case stays terse.
+         *
+         * Each element is shaped as a factValueSourceObject, so applying an
+         * entry is an attach rather than a translation.
+         */
+        // An empty properties array is absent, not a source: [] is truthy, so a
+        // bare `properties ? ...` would wrap it into a source with nothing in it
+        // and fail later with a message about the wrong thing.
+        const list = sources
+            ?? (Array.isArray(properties) && properties.length ? [{ properties }] : null);
+        if (!Array.isArray(list) || list.length === 0) {
+            throw new Error("journal: sources must be a non-empty array");
+        }
+        for (const s of list) {
+            if (!Array.isArray(s?.properties) || s.properties.length === 0) {
+                throw new Error("journal: each source needs a non-empty properties array");
+            }
         }
         const entry = {
             op: "bindValueSource",
             factId,
             previous,
             locatorType,
-            properties,
+            sources: list,
             capturedText: capturedText ?? null,
             factValue: factValue ?? null,
             verdict: verdictFor(factValue, capturedText),
+            ...(derivation ? { derivation } : {}),
         };
         this._entries.push(entry);
         this._emit();

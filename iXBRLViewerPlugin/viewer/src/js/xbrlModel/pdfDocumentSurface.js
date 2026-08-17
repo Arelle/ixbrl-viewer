@@ -616,10 +616,37 @@ export class PdfDocumentSurface {
             this._showBindHighlight(at.pg.container, candidate._rect);
             session.candidate(candidate);
         };
+        /*
+         * Hit-test at the click point rather than trusting the last hover.
+         *
+         * Relying on the hover left a click that landed where the hit-test
+         * found nothing -- a gutter, the space between runs -- swallowing the
+         * event and capturing nothing, so Accept stayed disabled and bind mode
+         * stayed on with no feedback.  Every later click was then intercepted
+         * too, which reads as the document having stopped responding.  The HTML
+         * surface never had this because event.target almost always yields an
+         * element.
+         *
+         * Shift-click joins the run to the capture instead of replacing it,
+         * which is what a value split across marked-content runs needs.
+         */
         this._onBindClick = (e) => {
+            const at = this._pageAt(e.clientX, e.clientY);
+            const hit = at ? hitTestBest(this._indexForPage(at.num), at.x, at.y) : null;
+            if (!hit) {
+                // Nothing here to bind: let the click through rather than
+                // silently eating it, so the mode does not appear frozen.
+                return;
+            }
             e.preventDefault();
             e.stopPropagation();
-            session.capture();
+            const candidate = this._candidateFor(at.num, at.pg, hit);
+            if (e.shiftKey) {
+                session.addFragment(candidate);
+            }
+            else {
+                session.capture(candidate);
+            }
         };
         /*
          * Leaving the document clears the candidate.  Without this the card goes

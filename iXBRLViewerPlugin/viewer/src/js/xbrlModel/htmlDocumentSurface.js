@@ -80,9 +80,25 @@ export class HtmlDocumentSurface {
             session.candidate(this._candidateFor(el, doc));
         };
         this._onBindClick = (e) => {
+            const el = e.target;
+            if (!el || el.nodeType !== 1) {
+                return;
+            }
             e.preventDefault();
             e.stopPropagation();
-            session.capture();
+            const candidate = this._candidateFor(el, doc);
+            if (!candidate) {
+                return;
+            }
+            // Shift-click joins rather than replaces, matching the PDF surface:
+            // a value split across elements concatenates the same way one split
+            // across marked-content runs does.
+            if (e.shiftKey) {
+                session.addFragment(candidate);
+            }
+            else {
+                session.capture(candidate);
+            }
         };
         /*
          * Leaving the document clears the candidate.  Without this the card goes

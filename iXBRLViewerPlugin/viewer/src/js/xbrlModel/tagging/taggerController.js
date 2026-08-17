@@ -176,6 +176,7 @@ export class TaggerController {
             .text(shown ? this._verdictText(shown.verdict) : "")
             .attr("data-verdict", shown?.verdict ?? "");
 
+        this._renderFragments(s, shown);
         card.find(".bind-derivation").text(shown ? this._derivationText(shown.derivation) : "");
         card.find(".bind-unverified").text(shown?.unverified ?? "");
         this._renderDerivationForm(shown);
@@ -226,10 +227,27 @@ export class TaggerController {
         }
     }
 
+    /*
+     * List the joined fragments once there is more than one, so a value
+     * assembled from several runs shows what it was assembled from -- otherwise
+     * the concatenated text is the only evidence, and a wrong fragment is
+     * invisible.
+     */
+    _renderFragments(session, shown) {
+        const frags = session?.fragments ?? [];
+        const el = this._card.find(".bind-fragments");
+        if (frags.length < 2) {
+            el.text("");
+            return;
+        }
+        el.text(`joined from ${frags.length} runs: ` + frags.map(f => f.text).join(" + "));
+    }
+
     _verdictText(verdict) {
         switch (verdict) {
             case VERDICT.AGREE:  return "matches the fact value";
-            case VERDICT.COARSE: return "contains the value, plus more — try Widen’s opposite, or a narrower click";
+            case VERDICT.COARSE: return "contains the value, plus more — try a narrower click";
+            case VERDICT.PARTIAL: return "only the start of the value — shift-click the rest to join it";
             case VERDICT.DIFFER: return "differs from the fact value";
             default: return "";
         }

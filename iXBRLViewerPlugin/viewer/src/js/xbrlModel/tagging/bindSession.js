@@ -52,6 +52,7 @@ export class BindSession {
         this.state = BIND_STATE.IDLE;
         this.current = null;      // the live candidate, or null
         this.captured = null;     // the clicked candidate, or null
+        this.fragments = [];      // the runs joined into that capture, in order
         this._listeners = [];
     }
 
@@ -80,6 +81,7 @@ export class BindSession {
         this.state = BIND_STATE.HOVERING;
         this.current = null;
         this.captured = null;
+        this.fragments = [];
         this.surface?.beginBind?.(this);
         this._emit();
     }
@@ -105,10 +107,79 @@ export class BindSession {
         if (!c || this.state === BIND_STATE.IDLE) {
             return null;
         }
-        this.captured = c.verdict ? c : this._assess(c);
+        this.fragments = [c];
+        this.captured = this._assess(this._joined());
         this.state = BIND_STATE.CAPTURED;
         this._emit();
         return this.captured;
+    }
+
+    /*
+     * Add a fragment to the capture rather than replacing it.
+     *
+     * A PDF that sets "41 182,5" with the thousands separator as a gap can put
+     * "41" and "182,5" in separate marked-content runs, so one click can only
+     * ever reach half the value.  The model already accommodates this -- a
+     * factValue's valueSources are ordered and contribute by concatenation --
+     * so joining fragments needs no new concept, only a gesture.
+     *
+     * Ordered by the order they were added, which is the order they concatenate
+     * in; the surface is responsible for offering them left to right.
+     */
+    addFragment(candidate) {
+        if (!candidate || this.state === BIND_STATE.IDLE) {
+            return null;
+        }
+        if (!this.fragments?.length) {
+            return this.capture(candidate);
+        }
+        // Adding the same run twice is a slip, not an instruction to double it
+        const key = c => JSON.stringify(c.properties);
+        if (this.fragments.some(f => key(f) === key(candidate))) {
+            return this.captured;
+        }
+        this.fragments = [...this.fragments, candidate];
+        this.captured = this._assess(this._joined());
+        this.state = BIND_STATE.CAPTURED;
+        this._emit();
+        return this.captured;
+    }
+
+    /* Drop the last fragment; below one fragment this returns to hovering. */
+    dropFragment() {
+        if (!this.fragments?.length) {
+            return null;
+        }
+        this.fragments = this.fragments.slice(0, -1);
+        if (!this.fragments.length) {
+            this.captured = null;
+            this.state = this.current ? BIND_STATE.CANDIDATE : BIND_STATE.HOVERING;
+            this._emit();
+            return null;
+        }
+        this.captured = this._assess(this._joined());
+        this._emit();
+        return this.captured;
+    }
+
+    /*
+     * The fragments as one candidate: text concatenated in order, and every
+     * fragment's properties kept as its own source.
+     */
+    _joined() {
+        const parts = this.fragments ?? [];
+        if (parts.length === 1) {
+            return { ...parts[0], sources: [{ properties: parts[0].properties }] };
+        }
+        return {
+            ...parts[0],
+            // A gap between runs is what the separator was in the first place,
+            // so the fragments rejoin with a space; the comparison normaliser
+            // strips it again when checking against the value.
+            text: parts.map(p => p.text).filter(Boolean).join(" "),
+            sources: parts.map(p => ({ properties: p.properties })),
+            widenTo: undefined,
+        };
     }
 
     /* Attach the verdict and any solvable derivation to a raw candidate. */
@@ -133,6 +204,7 @@ export class BindSession {
             return;
         }
         this.captured = null;
+        this.fragments = [];
         this.state = this.current ? BIND_STATE.CANDIDATE : BIND_STATE.HOVERING;
         this._emit();
     }
@@ -183,7 +255,7 @@ export class BindSession {
         const entry = this.journal?.bind({
             factId: this.fact?.id,
             locatorType: c.locatorType,
-            properties: c.properties,
+            sources: c.sources ?? [{ properties: c.properties }],
             capturedText: c.text,
             factValue: this.factValue(),
             previous: this.fact?.currentProperties ?? null,
@@ -205,6 +277,7 @@ export class BindSession {
         this.state = BIND_STATE.IDLE;
         this.current = null;
         this.captured = null;
+        this.fragments = [];
         this._emit();
     }
 }

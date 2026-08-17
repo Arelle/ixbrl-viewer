@@ -144,6 +144,97 @@ describe("capture", () => {
     });
 });
 
+describe("joining fragments", () => {
+    // a PDF setting "41 182,5" with the thousands separator as a gap puts the
+    // halves in separate marked-content runs, so one click reaches half a value
+    const half = (text, mcid) => candidate(text, {
+        properties: [{ property: "xbrl:pdfPage", value: "292" },
+                     { property: "xbrl:pdfMcid", value: mcid }],
+    });
+
+    function splitSession() {
+        return newSession({ fact: { id: "f-1", value: "41182.5", dataType: "xs:decimal" } });
+    }
+
+    test("one half of a split number reports as partial, not as wrong", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        expect(session.current.verdict).toBe(VERDICT.PARTIAL);
+    });
+
+    test("joining the halves agrees, and keeps both as ordered sources", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.addFragment(half("182,5", "11"));
+        expect(session.captured.text).toBe("41 182,5");
+        expect(session.captured.verdict).toBe(VERDICT.AGREE);
+        expect(session.captured.sources.map(s => s.properties[1].value)).toEqual(["10", "11"]);
+    });
+
+    test("accepting a joined capture writes both sources to the journal", () => {
+        const { session, journal } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.addFragment(half("182,5", "11"));
+        session.accept();
+        expect(journal.entries()[0].sources).toHaveLength(2);
+        expect(journal.entries()[0].verdict).toBe(VERDICT.AGREE);
+    });
+
+    test("adding the same run twice is a slip, not a doubling", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.addFragment(half("41", "10"));
+        expect(session.captured.sources).toHaveLength(1);
+    });
+
+    test("adding a fragment before any capture starts the capture", () => {
+        const { session } = splitSession();
+        session.begin();
+        expect(session.addFragment(half("41", "10")).text).toBe("41");
+        expect(session.state).toBe(BIND_STATE.CAPTURED);
+    });
+
+    test("dropping the last fragment re-assesses what remains", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.addFragment(half("182,5", "11"));
+        session.dropFragment();
+        expect(session.captured.text).toBe("41");
+        expect(session.captured.verdict).toBe(VERDICT.PARTIAL);
+    });
+
+    test("dropping below one fragment returns to hovering", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.dropFragment();
+        expect(session.captured).toBeNull();
+        expect(session.state).not.toBe(BIND_STATE.CAPTURED);
+    });
+
+    test("retry clears the fragments, so a new capture does not inherit them", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.addFragment(half("182,5", "11"));
+        session.retry();
+        session.candidate(half("41", "10"));
+        session.capture();
+        expect(session.captured.sources).toHaveLength(1);
+    });
+});
+
 describe("derivation", () => {
     test("a scaled value is solved, not merely reported as differing", () => {
         const { session } = newSession({ fact: { id: "f-1", value: "84500000", dataType: "xs:decimal" } });
@@ -201,7 +292,7 @@ describe("accept", () => {
         session.capture();
         const entry = session.accept();
         expect(entry.factId).toBe("f-1");
-        expect(entry.properties).toEqual(candidate("84,5").properties);
+        expect(entry.sources).toEqual([{ properties: candidate("84,5").properties }]);
         expect(entry.verdict).toBe(VERDICT.AGREE);
         expect(journal.length).toBe(1);
         expect(session.state).toBe(BIND_STATE.IDLE);

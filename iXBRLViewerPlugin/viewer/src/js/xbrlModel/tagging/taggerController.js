@@ -29,7 +29,9 @@ export class TaggerController {
 
     initialize() {
         const card = this._card = $("#bind-card");
+        this._bar = $("#bind-bar");
         $("#ixv").on("click", ".locate-in-document", () => this.beginBind());
+        this._bar.find(".bind-bar-cancel").on("click", () => this._session?.cancel());
         card.find(".bind-cancel").on("click", () => this._session?.cancel());
         card.find(".bind-retry").on("click", () => this._session?.retry());
         card.find(".bind-widen").on("click", () => this._session?.widen());
@@ -144,6 +146,10 @@ export class TaggerController {
         catch { /* fall back to the id */ }
         this._card.find(".bind-concept").text(label);
         this._card.find(".bind-expected-value").text(this._factValue(fact));
+        // The bar names the target too: it is the part of the signal that stays
+        // on screen when the card scrolls away, and a mode indicator that does
+        // not say what it is operating on is only half a signal.
+        this._bar.find(".bind-bar-target").text(label);
     }
 
     _render() {

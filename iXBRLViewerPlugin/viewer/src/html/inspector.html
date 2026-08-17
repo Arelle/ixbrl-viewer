@@ -34,6 +34,14 @@ See COPYRIGHT.md for copyright information
         </div>
       </header>
       <section id="viewer-pane" data-i18n="[aria-label]viewer.ixbrlDocumentView" aria-label="iXBRL Document View">
+        <!-- Instance tagger: names the fact being located, and carries the one
+             control that must stay reachable when the bind card is scrolled
+             out of view.  Shown only while a bind is in progress. -->
+        <div id="bind-bar" role="status">
+          <span class="bind-bar-label" data-i18n="tagger.locating">Locating</span>
+          <span class="bind-bar-target"></span>
+          <button class="bind-bar-cancel" data-i18n="tagger.cancelEsc">Cancel (Esc)</button>
+        </div>
         <div class="ixds-tabs"><div class="tab-area"></div></div>
         <div id="iframe-container"></div>
       </section>

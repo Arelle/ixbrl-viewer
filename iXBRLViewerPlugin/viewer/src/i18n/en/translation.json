@@ -173,6 +173,7 @@
     "tagger": {
       "accept": "Accept",
       "cancel": "Cancel",
+      "cancelEsc": "Cancel (Esc)",
       "captured": "Captured",
       "expected": "Expected value",
       "hint": "Hover the document, then click to capture.",

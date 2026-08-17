@@ -1801,7 +1801,12 @@ ul.plain-list {
     padding: 1.2rem;
     border-bottom: solid 0.1rem var(--colour-border-grey);
     background: var(--colour-bg);
-    flex-shrink: 0;
+    // Sits above the mode panels in flow and never grows into them: the panels
+    // below are flex items that must keep their own scroll.
+    flex: 0 0 auto;
+    max-height: 45%;
+    overflow-y: auto;
+    z-index: 1;
   }
 
   // Ordinary fact navigation is suspended during a bind: a click in the
@@ -1833,10 +1838,19 @@ ul.plain-list {
     justify-content: space-between;
     gap: 0.8rem;
 
+    // A text-block fact's value runs to hundreds of words.  Unbounded, it makes
+    // the card taller than the panel and buries the verdict and the buttons --
+    // the two things the card exists to show.  Clamped to a few lines, with the
+    // full value still available in the fact pane behind.
     & > span:last-child {
       font-family: monospace;
       text-align: right;
       overflow-wrap: anywhere;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-height: 5.4rem;
     }
   }
 
@@ -1899,4 +1913,118 @@ ul.plain-list {
 // re-created from its template on every selection.
 #ixv.can-tag .tagger-actions {
   display: block;
+}
+
+// ---- Instance tagger: mode signalling -------------------------------------
+//
+// A mode that intercepts clicks has to be unmistakable, but the conventional
+// scrim is the wrong instrument here: dimming content reads as "this is
+// inactive", which is the opposite of what bind mode means -- the document is
+// the one surface that IS live.  So the document pane is marked as *armed*
+// (accent border plus a bar naming the target) and the inspector is dimmed
+// slightly instead, which points attention the right way.
+//
+// The signal is never colour alone: the bar carries the target's name in text,
+// so it survives both dark mode and colour vision deficiency.
+
+#bind-bar {
+  display: none;
+}
+
+#ixv.bind-mode {
+  #bind-bar {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    padding: 0.6rem 1.2rem;
+    background: var(--colour-primary);
+    color: var(--colour-bg);
+    flex-shrink: 0;
+
+    .bind-bar-label {
+      .text-sm();
+
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.85;
+      flex-shrink: 0;
+    }
+
+    .bind-bar-target {
+      font-weight: 600;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    // The one control that must stay reachable when the bind card is scrolled
+    // out of view.  Esc does the same thing, but is invisible.
+    .bind-bar-cancel {
+      .text-sm();
+
+      flex-shrink: 0;
+      background: none;
+      border: solid 0.1rem currentColor;
+      color: inherit;
+      border-radius: 0.4rem;
+      padding: 0.2rem 0.8rem;
+      cursor: pointer;
+
+      &:hover {
+        background: fade(#ffffff, 18%);
+      }
+    }
+  }
+
+  // The document pane is armed, not disabled.
+  #viewer-pane {
+    outline: solid 0.2rem var(--colour-primary);
+    outline-offset: -0.2rem;
+  }
+
+  // Point attention away from the chrome without hiding it.
+  #pane-right .inspector-container {
+    opacity: 0.75;
+  }
+
+  // ...except the bind card, which is the thing being acted on.
+  #pane-right .bind-card {
+    opacity: 1;
+  }
+}
+
+// The trigger: an icon button carrying the fact's locate action, sized as an
+// affordance rather than as the pane's primary call to action -- the common
+// action in a fact pane is reading the fact, not relocating it.
+#ixv .tagger-actions .locate-in-document {
+  width: auto;
+  padding: 0.4rem;
+  background: none;
+  border: solid 0.1rem var(--colour-border-grey);
+  border-radius: 0.4rem;
+  cursor: pointer;
+
+  &::before {
+    .icon-select();
+
+    font-size: 1.6rem;
+    display: block;
+    color: var(--colour-text);
+  }
+
+  &:hover {
+    background: var(--colour-row-hover);
+  }
+}
+
+// Engaged state: the trigger stays lit while its mode is active, so there is a
+// visible answer to "how did I get into this".
+#ixv.bind-mode .tagger-actions .locate-in-document {
+  background: var(--colour-primary);
+  border-color: var(--colour-primary);
+
+  &::before {
+    color: var(--colour-bg);
+  }
 }

@@ -4,7 +4,29 @@ Turns the XbrlModel overlay from a viewer into an editor: bind a fact in the
 model to the place in the source document its value comes from, without modifying
 the source document.
 
-**Status:** PoC increment 1 — PDF bind/rebind, journal-only (no persistence).
+**Status:** PoC increment 1 — bind/rebind on both the PDF and HTML surfaces,
+journal-only (no persistence).
+
+### Build status
+
+The mechanism is built and tested; **none of it is wired to an interface yet**,
+so there is nothing to click.
+
+| | module | verified by |
+|---|---|---|
+| ✅ | `tagging/journal.js` — the edit journal, verdicts | 25 tests |
+| ✅ | `tagging/derive.js` — solve scale/sign, shortlist transforms | 23 tests |
+| ✅ | `tagging/hitIndex.js` — banded hit-testing for PDF | 18 tests |
+| ✅ | `tagging/elementPointer.js` — XPointer element() for HTML | 17 tests + all 90,908 elements of the L'Oreal filing round-trip |
+| ⬜ | `beginBind(fact, onCandidate)` on both surfaces | — |
+| ⬜ | hover wiring: hit index (PDF), delegated events (HTML) | — |
+| ⬜ | the bind card, including the widen control | — |
+| ⬜ | journal review and export | — |
+
+The four finished modules are deliberately free of DOM, viewer and model
+references, which is why they can be tested without a browser. The remaining
+four items are the ones that cannot, and they need the puppeteer harness against
+the loreal PDF and XHTML rather than unit tests.
 
 ---
 
@@ -12,16 +34,54 @@ the source document.
 
 | in | out (later increments) |
 |---|---|
-| PDF documents (`pdfContentLocatorType`) | HTML documents |
+| PDF documents (`pdfContentLocatorType`, `pdfImageLocatorType`) | — |
+| HTML/XHTML documents (`htmlElementId`, `htmlElementPointer`) | — |
 | Facts already in the model that have **no** location | Creating facts that are not in the model |
-| Re-locating a fact that is located **wrongly** | Creating concepts, dimensions, cubes |
+| Re-locating a fact that is located **wrongly** | Creating concepts, dimensions, members |
+| **Value-derivation** properties: `transformation`, `scale`, `sign`, `escape`, `decimals` | **Fact-identity** properties: `factDimensions`, `factQualifier`, period, entity |
 | Emitting an edit **journal** the user downloads | Writing back to the model / server |
 | One fragment per fact | Multi-fragment (text block) binds |
 
 The deliberate constraint is that increment 1 **cannot create or destroy model
-content**. It only answers "where does this fact's value come from?" for facts the
-model already asserts. That keeps the blast radius small and makes the output
-reviewable: a journal of location assertions, nothing else.
+content**. It only answers "where does this fact's value come from, and how is
+that text converted into the asserted value?" for facts the model already
+asserts. That keeps the blast radius small and makes the output reviewable.
+
+### 1.1 Why both surfaces from the start
+
+An earlier draft scoped increment 1 to PDF alone, on the grounds that the PDF
+seam was readier. That was wrong on two counts.
+
+Practically, `htmlDocumentSurface.js` already exists and the HTML bind gesture is
+*simpler* than the PDF one — the click target is a DOM element rather than a
+hit-tested glyph rectangle.
+
+More importantly, a PDF-only proof of concept invites the work to be dismissed on
+provenance rather than judged on merit. Fact tagging in HTML is the incumbent
+practice; a tool that only does PDF reads as an argument for PDF rather than as a
+tagging tool. Supporting both from the first demo removes that reading entirely,
+and costs little.
+
+### 1.2 Locator types the PoC declares ahead of the spec
+
+Three locator declarations are added to the plugin's `core.json` before the spec
+settles them. Two of them merely declare what already works, and the third is the
+subject of an open proposal:
+
+| declaration | status |
+|---|---|
+| `xbrl:pdfImageLocatorType` (`pdfPage` + `pdfBBox` + optional `pdfImageHash`) | documented, emitted by `alignFactsToPdf`, consumed by `adapter.js` — but never declared |
+| `xbrl:pdfBBox` in `pdfContentLocatorType.allowedProperties` | sub-MCID glyph rectangles the aligner already emits would otherwise fail `allowedProperties` |
+| `xbrl:htmlElementPointer` + `xbrl:xhtmlPointerLocatorType` | proposed in `documentation/proposal-html-element-pointer.md` (OIM repo) |
+
+The first two are corrections: working code has outrun the declared model, and the
+tagger will *generate* these properties rather than only read them, so they have
+to be declarable before it writes anything.
+
+The third is deliberately ahead of the spec. A working demonstration of tagging an
+element that has no `id`, in a document that is never modified, is a far stronger
+argument for the proposal than the proposal document is. It is marked in
+`core.json` as provisional so it can be renamed or withdrawn without ceremony.
 
 ## 2. Why the unlocated facts are the right starting worklist
 

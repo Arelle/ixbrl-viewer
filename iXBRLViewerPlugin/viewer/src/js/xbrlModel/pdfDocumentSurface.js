@@ -621,8 +621,20 @@ export class PdfDocumentSurface {
             e.stopPropagation();
             session.capture();
         };
+        /*
+         * Leaving the document clears the candidate.  Without this the card goes
+         * on showing the last run hovered, and the overlay stays lit, while the
+         * cursor is over the inspector -- which reads as still tracking when it
+         * is in fact frozen, and invites acting on a stale candidate.
+         */
+        this._onBindLeave = () => {
+            this._showBindHighlight(null);
+            session.candidate(null);
+        };
         doc.addEventListener("mousemove", this._onBindMove, true);
         doc.addEventListener("click", this._onBindClick, true);
+        doc.addEventListener("mouseleave", this._onBindLeave, true);
+        doc.defaultView?.addEventListener("blur", this._onBindLeave);
         doc.body?.classList.add("xbrl-bind-mode");
     }
 
@@ -663,6 +675,8 @@ export class PdfDocumentSurface {
         if (doc) {
             doc.removeEventListener("mousemove", this._onBindMove, true);
             doc.removeEventListener("click", this._onBindClick, true);
+            doc.removeEventListener("mouseleave", this._onBindLeave, true);
+            doc.defaultView?.removeEventListener("blur", this._onBindLeave);
             doc.body?.classList.remove("xbrl-bind-mode");
         }
         this._bindHighlight?.remove();

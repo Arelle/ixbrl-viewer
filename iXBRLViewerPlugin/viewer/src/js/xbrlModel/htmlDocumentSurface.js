@@ -84,8 +84,21 @@ export class HtmlDocumentSurface {
             e.stopPropagation();
             session.capture();
         };
+        /*
+         * Leaving the document clears the candidate.  Without this the card goes
+         * on showing the last thing hovered, and the highlight stays lit, while
+         * the cursor is over the inspector -- which reads as still tracking when
+         * it is in fact frozen, and invites acting on a stale candidate.
+         */
+        this._onBindLeave = () => {
+            this._highlighted?.classList.remove("xbrl-bind-candidate");
+            this._highlighted = null;
+            session.candidate(null);
+        };
         doc.addEventListener("mouseover", this._onBindOver, true);
         doc.addEventListener("click", this._onBindClick, true);
+        doc.addEventListener("mouseleave", this._onBindLeave, true);
+        doc.defaultView?.addEventListener("blur", this._onBindLeave);
         doc.body?.classList.add("xbrl-bind-mode");
     }
 
@@ -144,6 +157,8 @@ export class HtmlDocumentSurface {
         if (doc) {
             doc.removeEventListener("mouseover", this._onBindOver, true);
             doc.removeEventListener("click", this._onBindClick, true);
+            doc.removeEventListener("mouseleave", this._onBindLeave, true);
+            doc.defaultView?.removeEventListener("blur", this._onBindLeave);
             doc.body?.classList.remove("xbrl-bind-mode");
         }
         this._highlighted?.classList.remove("xbrl-bind-candidate");

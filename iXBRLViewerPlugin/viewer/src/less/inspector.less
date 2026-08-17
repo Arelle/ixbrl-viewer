@@ -2178,3 +2178,17 @@ ul.plain-list {
     text-decoration: none;
   }
 }
+
+// Journal export.  Hidden until there is something to export, so the plain
+// viewer and an untouched report are unaffected.
+#ixv .tagger-export {
+  display: none;
+
+  &::before {
+    .icon-download();
+  }
+}
+
+#ixv.has-journal .tagger-export {
+  display: inline-block;
+}

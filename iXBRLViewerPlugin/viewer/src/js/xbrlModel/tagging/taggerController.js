@@ -22,6 +22,9 @@ export class TaggerController {
         this._inspector = inspector;
         this._session = null;
         this.journal = new TaggingJournal({});
+        // Named once the document is known, so an exported journal says what it
+        // was tagged against rather than arriving anonymous.
+        this._namedJournal = false;
     }
 
     /* The surface currently rendering the document, or null for plain iXBRL. */
@@ -70,7 +73,44 @@ export class TaggerController {
                 }
             }
         });
+        $("#export-journal").on("click", () => this._export());
+        // The export control appears only once there is something to export,
+        // and its count is the running total, so the journal is visible without
+        // a panel to review it in -- which is still to be built.
+        this.journal.onChange(() => this._updateExport());
+        this._updateExport();
         this._updateFactButton();
+    }
+
+    _updateExport() {
+        const n = this.journal.length;
+        $("#ixv").toggleClass("has-journal", n > 0);
+        $("#export-journal").attr("title",
+            n ? `Export tagging journal (${n} ${n === 1 ? "entry" : "entries"})`
+              : "Export tagging journal");
+    }
+
+    /*
+     * Download the journal.  Deliberately the only way anything leaves the
+     * browser: nothing here writes to the model or the document, so the
+     * non-mutation invariant stays mechanically true rather than merely
+     * intended, and applying the journal is a separate offline step.
+     */
+    _export() {
+        if (!this.journal.length) {
+            return;
+        }
+        const blob = new Blob([this.journal.serialise()], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = (this.journal.toJSON().document ?? "tagging") + ".journal.json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        // Revoked on a later turn of the event loop: revoking synchronously can
+        // race the download the click just started.
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
     }
 
     /*
@@ -145,6 +185,21 @@ export class TaggerController {
             surface,
             journal: this.journal,
         });
+        if (!this._namedJournal) {
+            const params = typeof location !== "undefined"
+                ? new URLSearchParams(location.search) : null;
+            const doc = params?.get("document");
+            const model = params?.get("xbrlModel");
+            if (doc || model) {
+                // Both, so an exported journal states what it was tagged
+                // against as well as what it tagged -- an applier needs the
+                // model to resolve the fact ids, and a reviewer needs the
+                // document to check the locators.
+                this.journal._document = doc ?? this.journal._document;
+                this.journal._model = model ?? this.journal._model;
+                this._namedJournal = true;
+            }
+        }
         this._showAllDerivation = false;
         this._derivationSignature = null;
         this._session.onChange(() => this._render());

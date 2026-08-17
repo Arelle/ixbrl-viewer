@@ -177,6 +177,7 @@
       "cancelEsc": "Cancel (Esc)",
       "captured": "Captured",
       "expected": "Expected value",
+      "exportJournal": "Export tagging journal",
       "hint": "Hover the document, then click to capture.",
       "locate": "Locate in document",
       "locating": "Locating",

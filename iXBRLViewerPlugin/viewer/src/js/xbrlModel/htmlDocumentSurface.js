@@ -128,13 +128,31 @@ export class HtmlDocumentSurface {
      * on the candidate rather than thrown away, so the panel can refuse to
      * accept it instead of the surface failing mutely.
      */
+    /*
+     * Which pointer locator type applies, from how the browser parsed the
+     * document.
+     *
+     * The child sequence in a pointer counts element children of a *tree*, and
+     * the two HTML parse modes build different trees: HTML5 tree construction
+     * inserts a tbody that XHTML's content model leaves optional, and
+     * foster-parents stray content out of tables.  So the locator type carries
+     * the parse mode, and the surface must report the one that actually
+     * applied rather than assume.  document.contentType is the browser's own
+     * answer, which is the tree the pointer was generated against.
+     */
+    _locatorType(doc) {
+        return doc?.contentType === "application/xhtml+xml"
+            ? "xbrlx:xhtmlPointerLocatorType"
+            : "xbrlx:htmlPointerLocatorType";
+    }
+
     _candidateFor(el, doc) {
         const { pointer, verified, reason } = verifiedPointer(el, doc);
         if (pointer === null) {
             return null;
         }
         const candidate = {
-            locatorType: "xbrlx:xhtmlPointerLocatorType",
+            locatorType: this._locatorType(doc),
             properties: [{ property: "xbrlx:htmlElementPointer", value: pointer }],
             // Raw, not collapsed: whitespace collapsing belongs to the
             // transform stage (Arelle does it in rawValue only once a format is

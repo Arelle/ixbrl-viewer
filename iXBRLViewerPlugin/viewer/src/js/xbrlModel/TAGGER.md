@@ -18,15 +18,42 @@ so there is nothing to click.
 | ✅ | `tagging/derive.js` — solve scale/sign, shortlist transforms | 23 tests |
 | ✅ | `tagging/hitIndex.js` — banded hit-testing for PDF | 18 tests |
 | ✅ | `tagging/elementPointer.js` — XPointer element() for HTML | 17 tests + all 90,908 elements of the L'Oreal filing round-trip |
-| ⬜ | `beginBind(fact, onCandidate)` on both surfaces | — |
-| ⬜ | hover wiring: hit index (PDF), delegated events (HTML) | — |
-| ⬜ | the bind card, including the widen control | — |
+| ✅ | `tagging/bindSession.js` — the bind lifecycle, surface-agnostic | 22 tests |
+| ✅ | `beginBind` / `endBind` / `widen` on both surfaces | driven in a browser on the loreal PDF and XHTML |
+| ✅ | the bind card, the trigger, and mode signalling | as above |
+| ⬜ | multi-fragment capture (a value spanning several runs) | — |
 | ⬜ | journal review and export | — |
 
-The four finished modules are deliberately free of DOM, viewer and model
-references, which is why they can be tested without a browser. The remaining
-four items are the ones that cannot, and they need the puppeteer harness against
-the loreal PDF and XHTML rather than unit tests.
+The pure modules are deliberately free of DOM, viewer and model references,
+which is why they can be tested without a browser. The wiring cannot be, and is
+verified with puppeteer against the demo documents instead — which is how three
+faults were found that unit tests could not reach: the trigger never appearing
+because the fact pane is re-rendered from a template, the candidate going stale
+when the cursor left the document, and an unbounded expected value making the
+card taller than the panel.
+
+### Mode signalling
+
+Bind mode intercepts clicks, so it has to be unmistakable. The conventional
+scrim is the wrong instrument: dimming content reads as "this is inactive",
+which is the opposite of what bind mode means — the document is the one surface
+that *is* live. So the document pane is marked as **armed** (accent outline, and
+a bar naming the fact being located) and the inspector is **shaded** instead.
+
+Shaded rather than faded: reducing opacity costs contrast on the fact details
+still being read during a bind, not least the expected value being compared
+against. A background shade marks the surface inactive and leaves text alone.
+
+The signal is never colour alone — the bar states the target in text, so it
+survives dark mode and colour vision deficiency. The bar also carries Cancel,
+the one control that must stay reachable when the card scrolls out of view;
+`Esc` does the same but is invisible.
+
+Accept and Cancel stay in the card rather than moving to a corner in the
+phone-edit-mode idiom. On a phone those live in the nav bar because the mode
+owns the whole screen; here attention is already on the card, which holds the
+captured text and verdict being acted on, and splitting a decision from its
+evidence would be worse.
 
 ---
 

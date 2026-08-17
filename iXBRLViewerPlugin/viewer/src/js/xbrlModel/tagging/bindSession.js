@@ -145,12 +145,33 @@ export class BindSession {
         return this.captured;
     }
 
+    /*
+     * Remove one fragment by position; below one fragment this returns to
+     * hovering.
+     *
+     * Any fragment, not only the last: joins are built left to right, so the
+     * one that was wrong is often not the one added most recently, and making
+     * the user unwind three good fragments to reach a bad one would be worse
+     * than the mistake.
+     */
+    removeFragment(index) {
+        if (!this.fragments?.length || index < 0 || index >= this.fragments.length) {
+            return null;
+        }
+        this.fragments = this.fragments.filter((_, i) => i !== index);
+        return this._afterFragmentChange();
+    }
+
     /* Drop the last fragment; below one fragment this returns to hovering. */
     dropFragment() {
         if (!this.fragments?.length) {
             return null;
         }
         this.fragments = this.fragments.slice(0, -1);
+        return this._afterFragmentChange();
+    }
+
+    _afterFragmentChange() {
         if (!this.fragments.length) {
             this.captured = null;
             this.state = this.current ? BIND_STATE.CANDIDATE : BIND_STATE.HOVERING;

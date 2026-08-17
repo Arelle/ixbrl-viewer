@@ -41,8 +41,28 @@ export class TaggerController {
         // Esc leaves bind mode from anywhere, including with focus in the
         // document iframe, which is where it will usually be.
         $(document).on("keydown.tagger", (e) => {
-            if (e.key === "Escape" && this._session) {
+            if (!this._session) {
+                return;
+            }
+            if (e.key === "Escape") {
                 this._session.cancel();
+                return;
+            }
+            /*
+             * Undo the most recent join.  Guarded on the focused element: the
+             * derivation form has text inputs, and stealing ctrl+z there would
+             * take away the undo the user actually meant -- the one for what
+             * they are typing.
+             */
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) {
+                const tag = (document.activeElement?.tagName || "").toLowerCase();
+                if (tag === "input" || tag === "textarea" || tag === "select") {
+                    return;
+                }
+                if ((this._session.fragments?.length ?? 0) > 1) {
+                    e.preventDefault();
+                    this._session.dropFragment();
+                }
             }
         });
         this._updateFactButton();
@@ -235,12 +255,23 @@ export class TaggerController {
      */
     _renderFragments(session, shown) {
         const frags = session?.fragments ?? [];
-        const el = this._card.find(".bind-fragments");
+        const el = this._card.find(".bind-fragments").empty();
         if (frags.length < 2) {
-            el.text("");
             return;
         }
-        el.text(`joined from ${frags.length} runs: ` + frags.map(f => f.text).join(" + "));
+        // Each fragment is removable, and any of them rather than only the last:
+        // joins are built left to right, so the wrong one is often not the most
+        // recent, and unwinding good fragments to reach a bad one is worse than
+        // the mistake.
+        frags.forEach((f, i) => {
+            const chip = $('<span class="bind-fragment"></span>').appendTo(el);
+            $('<span class="bind-fragment-text"></span>').text(f.text || "(empty)").appendTo(chip);
+            $('<button class="bind-fragment-remove"></button>')
+                .attr({ title: "Remove this fragment", "aria-label": `Remove fragment ${i + 1}` })
+                .text("\u00d7")
+                .on("click", () => this._session?.removeFragment(i))
+                .appendTo(chip);
+        });
     }
 
     _verdictText(verdict) {

@@ -222,6 +222,41 @@ describe("joining fragments", () => {
         expect(session.state).not.toBe(BIND_STATE.CAPTURED);
     });
 
+    test("removes any fragment, not only the last", () => {
+        // joins are built left to right, so the wrong one is often not the most
+        // recent; unwinding good fragments to reach it would be worse
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.addFragment(half("999", "98"));
+        session.addFragment(half("182,5", "11"));
+        expect(session.captured.verdict).toBe(VERDICT.DIFFER);
+        session.removeFragment(1);
+        expect(session.captured.text).toBe("41 182,5");
+        expect(session.captured.verdict).toBe(VERDICT.AGREE);
+        expect(session.captured.sources.map(s => s.properties[1].value)).toEqual(["10", "11"]);
+    });
+
+    test("removing an out-of-range fragment does nothing", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        expect(session.removeFragment(5)).toBeNull();
+        expect(session.fragments).toHaveLength(1);
+    });
+
+    test("removing the only fragment returns to hovering", () => {
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(half("41", "10"));
+        session.capture();
+        session.removeFragment(0);
+        expect(session.captured).toBeNull();
+        expect(session.state).not.toBe(BIND_STATE.CAPTURED);
+    });
+
     test("retry clears the fragments, so a new capture does not inherit them", () => {
         const { session } = splitSession();
         session.begin();

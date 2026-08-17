@@ -2116,3 +2116,45 @@ ul.plain-list {
 #ixv .bind-card .bind-verdict[data-verdict="partial"] {
   color: var(--colour-text);
 }
+
+// Joined fragments, each removable.  Chips rather than a sentence, so the
+// remove control belongs to one fragment unambiguously.
+#ixv .bind-card .bind-fragments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+
+  .bind-fragment {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.1rem 0.2rem 0.1rem 0.5rem;
+    border: solid 0.1rem var(--colour-border-grey);
+    border-radius: 0.8rem;
+    background: var(--colour-bg);
+    max-width: 100%;
+  }
+
+  .bind-fragment-text {
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 14rem;
+  }
+
+  .bind-fragment-remove {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--colour-text-light);
+    line-height: 1;
+    padding: 0.1rem 0.3rem;
+    border-radius: 50%;
+
+    &:hover {
+      background: var(--colour-row-hover);
+      color: var(--colour-text);
+    }
+  }
+}

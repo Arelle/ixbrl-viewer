@@ -63,9 +63,13 @@ export class TaggerController {
         $("#ixv").toggleClass("can-tag", usable);
         if (usable) {
             const bound = this._factIsLocated(fact);
-            $(".locate-in-document").text(
-                bound ? this._t("tagger.relocate", "Re-locate")
-                      : this._t("tagger.locate", "Locate in document"));
+            const label = bound ? this._t("tagger.relocate", "Re-locate")
+                                : this._t("tagger.locate", "Locate in document");
+            // The label goes to the tooltip and the accessible name, never into
+            // the button's content: this is an icon button, and setting text
+            // would render it beside the glyph and turn a compact affordance
+            // back into the full-width block it was moved out of.
+            $(".locate-in-document").attr({ title: label, "aria-label": label });
         }
     }
 

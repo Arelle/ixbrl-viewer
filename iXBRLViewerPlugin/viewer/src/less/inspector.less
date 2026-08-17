@@ -1900,18 +1900,14 @@ ul.plain-list {
 
 // The trigger lives in the fact detail pane, and is hidden unless a document
 // surface is present so the plain iXBRL viewer is unaffected.
-#ixv .tagger-actions {
+// Shown only when a document surface is present and a fact is selected.  Keyed
+// off an ancestor class rather than set inline, because the fact pane is
+// re-rendered on every selection.
+#ixv .locate-in-document {
   display: none;
-
-  .locate-in-document {
-    width: 100%;
-  }
 }
 
-// Shown only when a document surface is present and a fact is selected.  Keyed
-// off an ancestor class rather than set inline, because the fact detail pane is
-// re-created from its template on every selection.
-#ixv.can-tag .tagger-actions {
+#ixv.can-tag .locate-in-document {
   display: block;
 }
 
@@ -1983,21 +1979,34 @@ ul.plain-list {
     outline-offset: -0.2rem;
   }
 
-  // Point attention away from the chrome without hiding it.
-  #pane-right .inspector-container {
-    opacity: 0.75;
+  // Point attention away from the chrome without hiding it.  A background shade
+  // rather than reduced opacity: fading costs contrast on the fact details the
+  // user still needs to read while binding -- not least the expected value --
+  // whereas a shade marks the surface as inactive and leaves the text alone.
+  #pane-right,
+  #pane-right .inspector-container,
+  #inspector-tabs {
+    background: var(--colour-bg-selected);
   }
 
-  // ...except the bind card, which is the thing being acted on.
+  // ...except the bind card, which is the surface being acted on and so keeps
+  // the ordinary background, standing out against the shaded panel.
   #pane-right .bind-card {
-    opacity: 1;
+    background: var(--colour-bg);
   }
 }
 
-// The trigger: an icon button carrying the fact's locate action, sized as an
-// affordance rather than as the pane's primary call to action -- the common
-// action in a fact pane is reading the fact, not relocating it.
-#ixv .tagger-actions .locate-in-document {
+// The trigger: an icon button on the fact's title line, sized as an affordance
+// rather than as the pane's primary call to action -- the common action in a
+// fact pane is reading the fact, not relocating it, and a full row of the panel
+// overstated it.
+#ixv .concept-name-row .locate-in-document {
+  flex: 0 0 auto;
+  align-self: center;
+  margin-left: auto;
+}
+
+#ixv .locate-in-document {
   width: auto;
   padding: 0.4rem;
   background: none;
@@ -2020,7 +2029,7 @@ ul.plain-list {
 
 // Engaged state: the trigger stays lit while its mode is active, so there is a
 // visible answer to "how did I get into this".
-#ixv.bind-mode .tagger-actions .locate-in-document {
+#ixv.bind-mode .locate-in-document {
   background: var(--colour-primary);
   border-color: var(--colour-primary);
 

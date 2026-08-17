@@ -93,6 +93,12 @@ See COPYRIGHT.md for copyright information
               </div>
               <div class="concept-name-row">
                 <h2 class="concept-name-title"></h2>
+                <!-- Instance tagger trigger: on the fact's own title line rather
+                     than occupying a row of its own, since locating is an action
+                     on this fact and not the pane's primary purpose. -->
+                <button class="locate-in-document has-button-tooltip"
+                        data-i18n="[aria-label]tagger.locate;[title]tagger.locate"
+                        aria-label="Locate in document" title="Locate in document"></button>
                 <div class="tags">
                   <div class="target-document-tag"></div>
                   <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>

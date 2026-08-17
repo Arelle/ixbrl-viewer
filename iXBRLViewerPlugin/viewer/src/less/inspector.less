@@ -1785,3 +1785,118 @@ ul.plain-list {
 .sample-5 {
   background: var(--colour-highlight-5);
 }
+
+// Instance tagger bind card.  Shown in the inspector while a bind is in
+// progress, above the mode panels, so the target fact and its expected value
+// stay visible while the user hunts for the content in the document.
+#ixv .bind-card {
+  display: none;
+}
+
+#ixv.bind-mode {
+  .bind-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.2rem;
+    border-bottom: solid 0.1rem var(--colour-border-grey);
+    background: var(--colour-bg);
+    flex-shrink: 0;
+  }
+
+  // Ordinary fact navigation is suspended during a bind: a click in the
+  // document is a capture, not a selection, and offering both invites the
+  // user to lose the bind by navigating away from its target.
+  .fact-inspector .tag-nav {
+    display: none;
+  }
+}
+
+#ixv .bind-card {
+  .bind-heading {
+    .text-sm();
+
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--colour-text-light);
+  }
+
+  .bind-concept {
+    font-weight: 600;
+  }
+
+  .bind-expected,
+  .bind-captured {
+    .text-sm();
+
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+
+    & > span:last-child {
+      font-family: monospace;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .bind-hint {
+    .text-sm();
+
+    color: var(--colour-text-light);
+    font-style: italic;
+  }
+
+  .bind-verdict {
+    .text-sm();
+
+    &[data-verdict="agree"] {
+      color: var(--colour-success, #1a7f37);
+    }
+
+    &[data-verdict="coarse"] {
+      color: var(--colour-warning, #9a6700);
+    }
+
+    &[data-verdict="differ"] {
+      color: var(--colour-error, #b3261e);
+    }
+  }
+
+  .bind-derivation,
+  .bind-unverified {
+    .text-sm();
+
+    color: var(--colour-text-light);
+  }
+
+  .bind-unverified:not(:empty) {
+    color: var(--colour-error, #b3261e);
+  }
+
+  .bind-buttons {
+    display: flex;
+    gap: 0.6rem;
+
+    button {
+      flex: 1;
+    }
+  }
+}
+
+// The trigger lives in the fact detail pane, and is hidden unless a document
+// surface is present so the plain iXBRL viewer is unaffected.
+#ixv .tagger-actions {
+  display: none;
+
+  .locate-in-document {
+    width: 100%;
+  }
+}
+
+// Shown only when a document surface is present and a fact is selected.  Keyed
+// off an ancestor class rather than set inline, because the fact detail pane is
+// re-created from its template on every selection.
+#ixv.can-tag .tagger-actions {
+  display: block;
+}

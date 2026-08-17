@@ -21,6 +21,7 @@ import { CalculationInspector } from './calculationInspector.js';
 import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
 import { getTheme, darkModeTheme, lightModeTheme } from './theme.js';
+import { TaggerController } from './xbrlModel/tagging/taggerController.js';
 
 const SEARCH_PAGE_SIZE = 100
 const SECTION_LIST_SECTIONS = "#inspector .facts-by-group > .collapsible-section";
@@ -158,6 +159,11 @@ export class Inspector {
                 inspector.summary = new DocumentSummary(reportSet);
                 inspector.createSummary()
                 inspector.createCubes()
+                // Instance tagger.  Self-contained in taggerController.js so the
+                // inspector carries a construction and two calls rather than the
+                // whole panel (see xbrlModel/REFACTOR-TO-PLUGIN.md).
+                inspector.tagger = new TaggerController(inspector);
+                inspector.tagger.initialize();
                 inspector.outline = new ReportSetOutline(reportSet);
                 inspector.initializeZoom();
                 inspector._iv.setProgress(i18next.t("inspector.initializing")).then(() => {
@@ -1968,6 +1974,9 @@ export class Inspector {
             }
         } 
         else { 
+            // A bind in progress targets the previously selected fact, so
+            // changing selection abandons it rather than retargeting it.
+            this.tagger?.factChanged();
             $('#inspector').removeClass('no-fact-selected').removeClass("hidden-fact").removeClass("html-hidden-fact");
             $('#inspector .tags').show();
 

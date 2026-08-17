@@ -3,6 +3,7 @@
 import $ from 'jquery';
 import { viewerUniqueId } from '../util.js';
 import { iframeReady, applyFactValue } from './surfaceUtil.js';
+import { elementPointer, verifiedPointer } from './tagging/elementPointer.js';
 
 // A "document surface" binds XbrlModel facts to a rendered document.  It is the
 // only XbrlModel-specific piece that touches the rendered document, so that
@@ -45,7 +46,109 @@ export class HtmlDocumentSurface {
         doc.open();
         doc.write(iv._prepareDocumentHtml(html, src.baseUrl ?? src.url ?? ""));
         doc.close();
+        // Retained so bind mode can attach its listeners to the rendered
+        // document without having to be handed the iframe again.
+        this._doc = doc;
         await iframeReady(iframe);
+    }
+
+    /* ---- bind mode ------------------------------------------------------
+     *
+     * No hit-testing is needed here, in contrast to the PDF surface: the text
+     * is real DOM, so the browser has already resolved what is under the
+     * cursor and event.target is the answer.  Document size is irrelevant --
+     * the L'Oreal filing's 90,908 elements cost the same as a handful.
+     *
+     * The pointer is generated on capture rather than on hover.  Generating
+     * walks up to the root and counts preceding siblings at each level, which
+     * is trivial once but wasteful sixty times a second, and that document has
+     * one parent with 2,036 children.
+     */
+
+    beginBind(session) {
+        const doc = this._bindDoc = this._doc;
+        if (!doc) {
+            return;
+        }
+        this._onBindOver = (e) => {
+            const el = e.target;
+            if (!el || el.nodeType !== 1) {
+                session.candidate(null);
+                return;
+            }
+            this._highlight(el);
+            session.candidate(this._candidateFor(el, doc));
+        };
+        this._onBindClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            session.capture();
+        };
+        doc.addEventListener("mouseover", this._onBindOver, true);
+        doc.addEventListener("click", this._onBindClick, true);
+        doc.body?.classList.add("xbrl-bind-mode");
+    }
+
+    /*
+     * A candidate in factValueSourceObject property form.
+     *
+     * The pointer is verified as it is made -- generated, resolved back, and
+     * checked to land on the same element.  Every way a pointer goes wrong is
+     * silent: it resolves to a real but different element and yields a
+     * plausible value from the wrong place.  An unverified pointer is reported
+     * on the candidate rather than thrown away, so the panel can refuse to
+     * accept it instead of the surface failing mutely.
+     */
+    _candidateFor(el, doc) {
+        const { pointer, verified, reason } = verifiedPointer(el, doc);
+        if (pointer === null) {
+            return null;
+        }
+        const candidate = {
+            locatorType: "xbrlx:xhtmlPointerLocatorType",
+            properties: [{ property: "xbrlx:htmlElementPointer", value: pointer }],
+            text: (el.textContent ?? "").trim().replace(/\s+/g, " "),
+            unverified: verified ? undefined : (reason ?? "pointer did not verify"),
+            _el: el,
+        };
+        // Widening goes to the parent, which is how a click on an inline span
+        // inside a table cell reaches the cell.  Stops at the document element.
+        const parent = el.parentElement;
+        if (parent && parent !== doc.documentElement.parentElement) {
+            candidate.widenTo = { _el: parent };
+        }
+        return candidate;
+    }
+
+    _highlight(el) {
+        if (this._highlighted === el) {
+            return;
+        }
+        this._highlighted?.classList.remove("xbrl-bind-candidate");
+        el.classList.add("xbrl-bind-candidate");
+        this._highlighted = el;
+    }
+
+    /* Re-derive the candidate for the parent element. */
+    widen(from) {
+        const el = from?.widenTo?._el;
+        if (!el || !this._bindDoc) {
+            return null;
+        }
+        this._highlight(el);
+        return this._candidateFor(el, this._bindDoc);
+    }
+
+    endBind() {
+        const doc = this._bindDoc;
+        if (doc) {
+            doc.removeEventListener("mouseover", this._onBindOver, true);
+            doc.removeEventListener("click", this._onBindClick, true);
+            doc.body?.classList.remove("xbrl-bind-mode");
+        }
+        this._highlighted?.classList.remove("xbrl-bind-candidate");
+        this._highlighted = null;
+        this._bindDoc = null;
     }
 
     // Bind the report's facts to the document loaded in the viewer's (single)

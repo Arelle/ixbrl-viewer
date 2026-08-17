@@ -1,0 +1,257 @@
+// See COPYRIGHT.md for copyright information
+
+import { BindSession, BIND_STATE } from "./bindSession.js";
+import { TaggingJournal, VERDICT } from "./journal.js";
+
+/* A surface stand-in: records the calls the session makes, and lets a test
+ * push candidates as if the cursor had moved. */
+function fakeSurface() {
+    const calls = [];
+    return {
+        calls,
+        session: null,
+        beginBind(session) { calls.push("beginBind"); this.session = session; },
+        endBind() { calls.push("endBind"); },
+        widen(from) {
+            calls.push("widen");
+            return from.widenTo ?? null;
+        },
+    };
+}
+
+const candidate = (text, over = {}) => ({
+    locatorType: "xbrl:pdfContentLocatorType",
+    properties: [{ property: "xbrl:pdfPage", value: "292" },
+                 { property: "xbrl:pdfMcid", value: "418" }],
+    text,
+    ...over,
+});
+
+function newSession(over = {}) {
+    const surface = fakeSurface();
+    const journal = new TaggingJournal({ document: "lor.pdf" });
+    const session = new BindSession({
+        fact: { id: "f-1", value: "84.5", dataType: "xs:decimal" },
+        surface, journal, ...over,
+    });
+    return { session, surface, journal };
+}
+
+describe("lifecycle", () => {
+    test("begin puts the surface into bind mode", () => {
+        const { session, surface } = newSession();
+        expect(session.state).toBe(BIND_STATE.IDLE);
+        session.begin();
+        expect(session.state).toBe(BIND_STATE.HOVERING);
+        expect(surface.calls).toEqual(["beginBind"]);
+    });
+
+    test("begin is idempotent, so a double click on the button cannot double-bind", () => {
+        const { session, surface } = newSession();
+        session.begin();
+        session.begin();
+        expect(surface.calls).toEqual(["beginBind"]);
+    });
+
+    test("cancel leaves bind mode and tells the surface to clean up", () => {
+        const { session, surface, journal } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.cancel();
+        expect(session.state).toBe(BIND_STATE.IDLE);
+        expect(session.current).toBeNull();
+        expect(surface.calls).toEqual(["beginBind", "endBind"]);
+        expect(journal.length).toBe(0);
+    });
+
+    test("ending twice does not call the surface twice", () => {
+        const { session, surface } = newSession();
+        session.begin();
+        session.end();
+        session.end();
+        expect(surface.calls.filter(c => c === "endBind")).toHaveLength(1);
+    });
+});
+
+describe("hovering", () => {
+    test("a candidate carries its verdict", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        expect(session.state).toBe(BIND_STATE.CANDIDATE);
+        expect(session.current.verdict).toBe(VERDICT.AGREE);
+    });
+
+    test("moving off content clears the candidate", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.candidate(null);
+        expect(session.current).toBeNull();
+        expect(session.state).toBe(BIND_STATE.HOVERING);
+    });
+
+    test("candidates are ignored before bind mode starts", () => {
+        const { session } = newSession();
+        session.candidate(candidate("84,5"));
+        expect(session.current).toBeNull();
+    });
+
+    test("a coarse capture is reported as such", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("Provisions pour risques 84,5 76,8"));
+        expect(session.current.verdict).toBe(VERDICT.COARSE);
+    });
+});
+
+describe("capture", () => {
+    test("capture freezes the candidate", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        expect(session.state).toBe(BIND_STATE.CAPTURED);
+        expect(session.captured.text).toBe("84,5");
+    });
+
+    test("stray mouse movement cannot overwrite a capture", () => {
+        // after the click the panel shows a decision to confirm; letting the
+        // cursor drift over other content must not silently replace it
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        session.candidate(candidate("1 013,2"));
+        expect(session.captured.text).toBe("84,5");
+    });
+
+    test("retry returns to hovering and discards the capture", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        session.retry();
+        expect(session.captured).toBeNull();
+        expect(session.state).toBe(BIND_STATE.CANDIDATE);
+    });
+
+    test("capture with nothing under the cursor does nothing", () => {
+        const { session } = newSession();
+        session.begin();
+        expect(session.capture()).toBeNull();
+        expect(session.state).toBe(BIND_STATE.HOVERING);
+    });
+});
+
+describe("derivation", () => {
+    test("a scaled value is solved, not merely reported as differing", () => {
+        const { session } = newSession({ fact: { id: "f-1", value: "84500000", dataType: "xs:decimal" } });
+        session.begin();
+        session.candidate(candidate("84,5"));
+        expect(session.current.verdict).toBe(VERDICT.DIFFER);
+        expect(session.current.derivation.kind).toBe("solved");
+        expect(session.current.derivation.solutions[0].scale).toBe(6);
+    });
+
+    test("an unrelated capture is not dressed up as a formatting question", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("1 013,2"));
+        expect(session.current.derivation.kind).toBe("unrelated");
+    });
+});
+
+describe("widen", () => {
+    test("widening re-assesses, so the verdict follows the wider text", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5", {
+            widenTo: candidate("Provisions pour risques 84,5 76,8"),
+        }));
+        expect(session.current.verdict).toBe(VERDICT.AGREE);
+        const wider = session.widen();
+        expect(wider.verdict).toBe(VERDICT.COARSE);
+        expect(session.current.text).toMatch(/Provisions/);
+    });
+
+    test("widening a capture replaces the capture, not the hover", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5", { widenTo: candidate("row 84,5 76,8") }));
+        session.capture();
+        session.widen();
+        expect(session.captured.text).toBe("row 84,5 76,8");
+        expect(session.state).toBe(BIND_STATE.CAPTURED);
+    });
+
+    test("widening does nothing at the top of the ladder", () => {
+        const { session } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        expect(session.widen()).toBeNull();
+    });
+});
+
+describe("accept", () => {
+    test("writes the capture to the journal and leaves bind mode", () => {
+        const { session, journal, surface } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        const entry = session.accept();
+        expect(entry.factId).toBe("f-1");
+        expect(entry.properties).toEqual(candidate("84,5").properties);
+        expect(entry.verdict).toBe(VERDICT.AGREE);
+        expect(journal.length).toBe(1);
+        expect(session.state).toBe(BIND_STATE.IDLE);
+        expect(surface.calls).toContain("endBind");
+    });
+
+    test("a differing capture can still be accepted", () => {
+        // scaling, sign and locale formatting all make a value differ from its
+        // presentation legitimately; refusing would block the corrections a
+        // rebind exists to make
+        const { session, journal } = newSession();
+        session.begin();
+        session.candidate(candidate("1 013,2"));
+        session.capture();
+        expect(session.accept()).not.toBeNull();
+        expect(journal.entries()[0].verdict).toBe(VERDICT.DIFFER);
+    });
+
+    test("a rebind records what it displaced", () => {
+        const previous = [{ property: "xbrl:pdfPage", value: "1" }];
+        const { session, journal } = newSession({
+            fact: { id: "f-1", value: "84.5", dataType: "xs:decimal", currentProperties: previous },
+        });
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        session.accept();
+        expect(journal.entries()[0].previous).toEqual(previous);
+    });
+
+    test("accept without a capture does nothing", () => {
+        const { session, journal } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        expect(session.accept()).toBeNull();
+        expect(journal.length).toBe(0);
+    });
+});
+
+describe("subscribers", () => {
+    test("state changes notify, and unsubscribing stops it", () => {
+        const { session } = newSession();
+        let n = 0;
+        const off = session.onChange(() => { n++; });
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        expect(n).toBe(3);
+        off();
+        session.cancel();
+        expect(n).toBe(3);
+    });
+});

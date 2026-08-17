@@ -170,6 +170,18 @@
       }
     },
     "summation": "Summation",
+    "tagger": {
+      "accept": "Accept",
+      "cancel": "Cancel",
+      "captured": "Captured",
+      "expected": "Expected value",
+      "hint": "Hover the document, then click to capture.",
+      "locate": "Locate in document",
+      "locating": "Locating",
+      "relocate": "Re-locate",
+      "retry": "Retry",
+      "widen": "Widen"
+    },
     "tabs": {
       "cubes": "Cubes",
       "overview": "Overview",

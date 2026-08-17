@@ -346,6 +346,35 @@ See COPYRIGHT.md for copyright information
           </div> <!-- inspector-body -->
         </div> <!-- summary -->
 
+        <!-- Instance tagger: shown in place while a bind is in progress, so the
+             target stays visible while the user hunts for it in the document. -->
+        <div id="bind-card" class="bind-card">
+          <div class="bind-target">
+            <div class="bind-heading" data-i18n="tagger.locating">Locating</div>
+            <div class="bind-concept"></div>
+            <div class="bind-expected">
+              <span data-i18n="tagger.expected">Expected value</span>
+              <span class="bind-expected-value"></span>
+            </div>
+          </div>
+          <div class="bind-candidate">
+            <div class="bind-hint" data-i18n="tagger.hint">Hover the document, then click to capture.</div>
+            <div class="bind-captured">
+              <span data-i18n="tagger.captured">Captured</span>
+              <span class="bind-captured-text"></span>
+            </div>
+            <div class="bind-verdict"></div>
+            <div class="bind-derivation"></div>
+            <div class="bind-unverified"></div>
+          </div>
+          <div class="bind-buttons">
+            <button class="bind-widen" data-i18n="tagger.widen">Widen</button>
+            <button class="bind-retry" data-i18n="tagger.retry">Retry</button>
+            <button class="bind-accept" data-i18n="tagger.accept">Accept</button>
+            <button class="bind-cancel" data-i18n="tagger.cancel">Cancel</button>
+          </div>
+        </div>
+
         <div class="inspector-container cubes-inspector">
           <div class="inspector-body">
             <div class="no-cubes-overlay">

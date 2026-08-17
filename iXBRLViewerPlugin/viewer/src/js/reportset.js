@@ -261,4 +261,44 @@ export class ReportSet {
         return Object.values(this._items).filter(i => i instanceof Fact && i.report == report);
     }
 
+    /* True if any report carries XBRL Model cubes (XbrlModel mode only). */
+    hasCubes() {
+        return this.reports.some(r => r.cubes().length > 0);
+    }
+
+    /* Flat list of cubes across all reports, each tagged with its report. */
+    cubes() {
+        return this.reports.flatMap(r => r.cubes().map(c => ({ ...c, report: r })));
+    }
+
+    /*
+     * Reporting-structure section tree (OIM groupTree) that organizes the cubes, or null when
+     * no report carries a group tree.  XBRL Model reports are single-report, so this returns the
+     * first report's tree.  Used by the Cubes panel to nest cubes under their sections.
+     */
+    sections() {
+        for (const r of this.reports) {
+            const s = r.sections();
+            if (s) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    /*
+     * Map of concept name -> array of Facts present in the report, for
+     * navigating from taxonomy structures (e.g. cubes) to facts.  Lazy-loaded.
+     */
+    conceptFactsIndex() {
+        if (this._conceptFactsIndex === undefined) {
+            const index = {};
+            for (const f of this.facts()) {
+                (index[f.conceptName()] ??= []).push(f);
+            }
+            this._conceptFactsIndex = index;
+        }
+        return this._conceptFactsIndex;
+    }
+
 }

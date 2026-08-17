@@ -172,6 +172,7 @@
     "summation": "Summation",
     "tagger": {
       "accept": "Accept",
+      "allDerivation": "All derivation properties",
       "cancel": "Cancel",
       "cancelEsc": "Cancel (Esc)",
       "captured": "Captured",

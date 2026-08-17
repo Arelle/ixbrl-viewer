@@ -2158,3 +2158,23 @@ ul.plain-list {
     }
   }
 }
+
+// Opens the whole derivation descriptor.  A quiet text control rather than a
+// button in the action row: it changes what the card shows, it does not act on
+// the capture, and it must not compete with Accept.
+#ixv .bind-card .bind-derivation-toggle {
+  .text-sm();
+
+  display: none;
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--colour-primary);
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    text-decoration: none;
+  }
+}

@@ -18,11 +18,15 @@ value that spans several runs, and the journal review and export surface.
 | ✅ | `tagging/derive.js` — solve scale/sign, shortlist transforms | 23 tests |
 | ✅ | `tagging/hitIndex.js` — banded hit-testing for PDF | 18 tests |
 | ✅ | `tagging/elementPointer.js` — XPointer element() for HTML | 17 tests + all 90,908 elements of the L'Oreal filing round-trip |
-| ✅ | `tagging/bindSession.js` — the bind lifecycle, surface-agnostic | 22 tests |
+| ✅ | `tagging/bindSession.js` — the bind lifecycle, surface-agnostic | 33 tests |
+| ✅ | `tagging/formRenderer.js` — forms from a creator-shaped descriptor | 13 tests + all 33 creator object types render |
+| ✅ | `tagging/descriptors.js` — the factValue derivation stand-in, and the per-capture subset | 11 tests |
 | ✅ | `beginBind` / `endBind` / `widen` on both surfaces | driven in a browser on the loreal PDF and XHTML |
 | ✅ | the bind card, the trigger, and mode signalling | as above |
-| ⬜ | multi-fragment capture (a value spanning several runs) | — |
+| ✅ | multi-fragment capture, with per-fragment undo | 11 tests |
+| ⬜ | auto-extend a partial capture to its remaining runs | — |
 | ⬜ | journal review and export | — |
+| ⬜ | the pencil: the full derivation descriptor, outside a bind | — |
 
 The pure modules are deliberately free of DOM, viewer and model references,
 which is why they can be tested without a browser. The wiring cannot be, and is
@@ -67,7 +71,7 @@ evidence would be worse.
 | Re-locating a fact that is located **wrongly** | Creating concepts, dimensions, members |
 | **Value-derivation** properties: `transformation`, `scale`, `sign`, `escape`, `decimals` | **Fact-identity** properties: `factDimensions`, `factQualifier`, period, entity |
 | Emitting an edit **journal** the user downloads | Writing back to the model / server |
-| One fragment per fact | Multi-fragment (text block) binds |
+| Several fragments joined into one value | — |
 
 The deliberate constraint is that increment 1 **cannot create or destroy model
 content**. It only answers "where does this fact's value come from, and how is
@@ -166,7 +170,19 @@ A confirmation strip shows, side by side:
 |---|---|
 | **fact value** | what the model asserts, formatted as the viewer would show it |
 | **captured text** | the text of the marked-content run just clicked |
-| **verdict** | agree / differ / captured run is coarser |
+| **verdict** | one of four |
+
+| verdict | meaning | remedy |
+|---|---|---|
+| `agree` | the capture matches the value | — |
+| `partial` | the capture is the *start* of the value | shift-click the rest to join it |
+| `coarse` | the run holds the value *plus more* | click something narrower |
+| `differ` | neither | re-capture, or set a derivation |
+
+`partial` and `coarse` are mirrors and need opposite remedies, which is why they
+are named separately rather than both reported as a mismatch: a number set with
+the thousands separator as a gap can occupy two marked-content runs, so one
+click reaches half a value and the capture is right as far as it goes.
 
 The verdict is advisory, never blocking — a value can legitimately differ from its
 presentation (scaling, sign, formatting, a `1 234,5` locale form). The user
@@ -204,12 +220,19 @@ model change.
       "factId": "f-00317",
       "previous": null,
       "locatorType": "xbrl:pdfContentLocatorType",
-      "properties": [
-        { "property": "xbrl:pdfPage",  "value": "292" },
-        { "property": "xbrl:pdfMcid",  "value": "418" }
+      "sources": [
+        { "properties": [
+            { "property": "xbrl:pdfPage", "value": "292" },
+            { "property": "xbrl:pdfMcid", "value": "418" }
+        ] },
+        { "properties": [
+            { "property": "xbrl:pdfPage", "value": "292" },
+            { "property": "xbrl:pdfMcid", "value": "419" }
+        ] }
       ],
-      "capturedText": "84,5",
-      "factValue": "84.5",
+      "derivation": { "scale": 6 },
+      "capturedText": "41 182,5",
+      "factValue": "41182500000",
       "verdict": "agree"
     }
   ]
@@ -218,10 +241,15 @@ model change.
 
 Notes on the shape:
 
-- `properties` is already in `factValueSourceObject` form — a bag of
-  `propertyObject`s validated against the locator type's `requiredProperties` /
-  `allowedProperties`. The applier does not have to translate, only to attach.
-- `previous` is `null` for a bind and carries the displaced properties for a
+- `sources` is an **ordered list** of `factValueSourceObject`s, matching
+  `factValue.valueSources`, whose fragments contribute *by concatenation*. A
+  number set with the thousands separator as a gap can occupy two
+  marked-content runs, so one value legitimately has several sources; a single
+  bag is accepted as the one-fragment shorthand and wrapped. Each element is
+  already in model form, so the applier attaches rather than translates.
+- `derivation` is present only where the user accepted one — how the located
+  text becomes the asserted value, as `scale` / `sign` / `transformation`.
+- `previous` is `null` for a bind and carries the displaced sources for a
   rebind, which is what makes an entry reversible.
 - `capturedText`, `factValue` and `verdict` are provenance, not instructions. They
   let a reviewer see why the user accepted a binding without re-running the tool,
@@ -241,10 +269,14 @@ Notes on the shape:
 
 ## 6. Next increments (sketch)
 
-2. **Multi-fragment binds** — shift-click successive runs; `valueSources`
-   concatenate by definition, so text blocks need no new model concept.
-3. **HTML bind** — on `xbrl:htmlElementPointer`, with the round-trip verification
-   the proposal requires.
+2. **Auto-extend** — where a capture is a proper prefix of the value, try the
+   adjacent runs and offer the completion, instead of leaving the user to
+   shift-click each one. The `partial` verdict is the signal it keys off. Worth
+   building only if shift-click proves tedious in practice.
+3. **The pencil** — the complete derivation descriptor from the Properties pane,
+   outside a bind, for a fact that is correctly located and merely has the wrong
+   scale. Better after the descriptor generator is settled, so a descriptor is
+   not hand-maintained twice.
 4. **Propose mode** — run the aligner against a prior-year model and render its
    output as *proposed* bindings the user confirms or corrects, rather than facts
    the user must locate from scratch. The review UI is the one built here; only

@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import { BindSession, BIND_STATE } from "./bindSession.js";
 import { TaggingJournal, VERDICT } from "./journal.js";
-import { derivationFieldsFor } from "./descriptors.js";
+import { derivationFieldsFor, FACT_VALUE_DERIVATION } from "./descriptors.js";
 import { renderForm } from "./formRenderer.js";
 
 /*
@@ -38,6 +38,11 @@ export class TaggerController {
         card.find(".bind-retry").on("click", () => this._session?.retry());
         card.find(".bind-widen").on("click", () => this._session?.widen());
         card.find(".bind-accept").on("click", () => this._accept());
+        card.find(".bind-derivation-toggle").on("click", () => {
+            this._showAllDerivation = !this._showAllDerivation;
+            this._derivationSignature = null;   // force a re-render
+            this._render();
+        });
         // Esc leaves bind mode from anywhere, including with focus in the
         // document iframe, which is where it will usually be.
         $(document).on("keydown.tagger", (e) => {
@@ -140,6 +145,8 @@ export class TaggerController {
             surface,
             journal: this.journal,
         });
+        this._showAllDerivation = false;
+        this._derivationSignature = null;
         this._session.onChange(() => this._render());
         this._session.begin();
         $("#ixv").addClass("bind-mode");
@@ -218,9 +225,22 @@ export class TaggerController {
         if (!host) {
             return;
         }
-        const fields = shown ? derivationFieldsFor(shown.verdict, shown.derivation) : null;
+        /*
+         * By default only the fields this capture implicates.  The toggle opens
+         * the whole descriptor, because the subset answers "what is wrong here"
+         * and cannot answer "I want to set escape anyway" -- an agreeing capture
+         * implicates nothing, and would otherwise offer no way in at all.
+         */
+        const auto = shown ? derivationFieldsFor(shown.verdict, shown.derivation) : null;
+        const fields = !shown ? null
+            : this._showAllDerivation
+                ? { descriptor: FACT_VALUE_DERIVATION, values: auto?.values ?? {}, alternatives: auto?.alternatives ?? [] }
+                : auto;
+        this._card.find(".bind-derivation-toggle").toggle(!!shown)
+            .text(this._showAllDerivation ? "Only what needs correcting" : "All derivation properties");
         const signature = fields
-            ? fields.descriptor.scalar.map(f => f.key).join(",") + "|" + JSON.stringify(fields.values)
+            ? (this._showAllDerivation ? "all|" : "auto|")
+              + fields.descriptor.scalar.map(f => f.key).join(",") + "|" + JSON.stringify(fields.values)
             : "";
         if (signature === this._derivationSignature) {
             return;

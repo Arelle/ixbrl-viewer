@@ -173,7 +173,13 @@ describe("joining fragments", () => {
         // are; no separator is invented, and the value still normalises to match
         expect(session.captured.text).toBe("41182,5");
         expect(session.captured.verdict).toBe(VERDICT.AGREE);
-        expect(session.captured.sources.map(s => s.properties[1].value)).toEqual(["10", "11"]);
+        // one source, with the collection-typed locator carrying both runs in
+        // order -- the shape saveOIMFacts and the compiled models already use
+        expect(session.captured.sources).toHaveLength(1);
+        expect(session.captured.sources[0].properties).toEqual([
+            { property: "xbrl:pdfPage", value: "292" },
+            { property: "xbrl:pdfMcid", value: ["10", "11"] },
+        ]);
     });
 
     test("accepting a joined capture writes both sources to the journal", () => {
@@ -183,8 +189,10 @@ describe("joining fragments", () => {
         session.capture();
         session.addFragment(half("182,5", "11"));
         session.accept();
-        expect(journal.entries()[0].sources).toHaveLength(2);
-        expect(journal.entries()[0].verdict).toBe(VERDICT.AGREE);
+        const e = journal.entries()[0];
+        expect(e.sources).toHaveLength(1);
+        expect(e.sources[0].properties[1].value).toEqual(["10", "11"]);
+        expect(e.verdict).toBe(VERDICT.AGREE);
     });
 
     test("adding the same run twice is a slip, not a doubling", () => {
@@ -236,8 +244,8 @@ describe("joining fragments", () => {
         expect(session.captured.verdict).toBe(VERDICT.DIFFER);
         session.removeFragment(1);
         expect(session.captured.text).toBe("41182,5");
+        expect(session.captured.sources[0].properties[1].value).toEqual(["10", "11"]);
         expect(session.captured.verdict).toBe(VERDICT.AGREE);
-        expect(session.captured.sources.map(s => s.properties[1].value)).toEqual(["10", "11"]);
     });
 
     test("keeps whitespace the fragments carry, rather than inventing any", () => {
@@ -260,6 +268,23 @@ describe("joining fragments", () => {
         session.addFragment(half("enue", "11"));
         expect(session.captured.text).toBe("Revenue");
         expect(session.captured.verdict).toBe(VERDICT.AGREE);
+    });
+
+    test("fragments on different pages cannot share a source", () => {
+        // xbrl:pdfPage is xs:integer, not a collection, so a value spanning a
+        // page break is genuinely two contiguous fragments
+        const onPage = (text, page, mcid) => candidate(text, {
+            properties: [{ property: "xbrl:pdfPage", value: page },
+                         { property: "xbrl:pdfMcid", value: mcid }],
+        });
+        const { session } = splitSession();
+        session.begin();
+        session.candidate(onPage("41", "292", "10"));
+        session.capture();
+        session.addFragment(onPage("182,5", "293", "1"));
+        expect(session.captured.sources).toHaveLength(2);
+        expect(session.captured.sources[0].properties[0].value).toBe("292");
+        expect(session.captured.sources[1].properties[0].value).toBe("293");
     });
 
     test("removing an out-of-range fragment does nothing", () => {

@@ -35,6 +35,69 @@ export const BIND_STATE = {
     CAPTURED: "captured",     // clicked; awaiting accept or retry
 };
 
+
+/*
+ * Locator properties declared as collections in core.json, which may therefore
+ * hold an ordered list of fragments within one source.  Anything else is scalar
+ * and must match for two fragments to share a source.
+ */
+const COLLECTION_PROPERTIES = new Set([
+    "xbrl:htmlElementId",
+    "xbrl:pdfMcid",
+    "xbrlx:htmlElementPointer",
+]);
+
+function propMap(properties) {
+    const m = new Map();
+    for (const p of properties ?? []) {
+        m.set(p.property, p.value);
+    }
+    return m;
+}
+
+/* The scalar properties of a fragment, as a comparable key. */
+function scalarKey(properties) {
+    return JSON.stringify([...propMap(properties)]
+        .filter(([k]) => !COLLECTION_PROPERTIES.has(k))
+        .sort(([a], [b]) => a.localeCompare(b)));
+}
+
+/*
+ * Merge fragments into as few sources as their scalar properties allow,
+ * preserving order, and gathering collection-typed values into arrays.
+ */
+export function mergeSources(parts) {
+    const out = [];
+    let group = null;
+    for (const part of parts) {
+        const key = scalarKey(part.properties);
+        if (!group || group.key !== key) {
+            group = { key, order: [], values: new Map() };
+            out.push(group);
+        }
+        for (const p of part.properties ?? []) {
+            if (!group.values.has(p.property)) {
+                group.order.push(p.property);
+                group.values.set(p.property, []);
+            }
+            const v = group.values.get(p.property);
+            for (const one of Array.isArray(p.value) ? p.value : [p.value]) {
+                v.push(one);
+            }
+        }
+    }
+    return out.map(g => ({
+        properties: g.order.map(name => {
+            const vals = g.values.get(name);
+            // A collection property keeps every fragment's value in order; a
+            // scalar one is the same across the group by construction, so it is
+            // written once rather than as a one-element array.
+            return { property: name,
+                     value: COLLECTION_PROPERTIES.has(name) ? vals : vals[0] };
+        }),
+    }));
+}
+
 export class BindSession {
 
     /*
@@ -187,6 +250,26 @@ export class BindSession {
      * The fragments as one candidate: text concatenated in order, and every
      * fragment's properties kept as its own source.
      */
+    /*
+     * The fragments as one candidate: text concatenated in order, and the
+     * fragments' locators merged the way the rest of the pipeline expresses
+     * multi-fragment content.
+     *
+     * That is NOT one source per fragment.  The locator properties that can
+     * carry several fragments are declared as collections in core.json --
+     * xbrl:htmlElementId and xbrl:pdfMcid are both xbrlr:stringCollection --
+     * and both saveOIMFacts and the existing compiled models use them that way:
+     * L'Oreal carries "xbrl:pdfMcid": [2,3,...,12], eleven marked-content runs
+     * in a single valueSource, and an inline continuation chain arrives as
+     * "xbrl:htmlElementId": ["F_...cd49", "F_...cd49_1"].  Emitting one source
+     * per fragment would have produced journal entries no existing consumer
+     * reads.
+     *
+     * Fragments merge into one source only while their scalar properties agree.
+     * xbrl:pdfPage is xs:integer, so runs on two different pages cannot share a
+     * source and correctly become two -- which is also the honest reading of
+     * factValueSourceObject as "a single contiguous fragment".
+     */
     _joined() {
         const parts = this.fragments ?? [];
         if (parts.length === 1) {
@@ -201,19 +284,13 @@ export class BindSession {
              * "".join (XmlUtil.innerText) over unstripped text
              * (ModelInstanceObject.rawValue, strip=False).
              *
-             * Inventing a separator here would be wrong for adjacent runs that
-             * differ only in styling -- "Rev" + "enue" must not become
-             * "Rev enue" -- and unnecessary where the source really does have
-             * whitespace, because the fragment's own text carries it.  Where a
-             * PDF line break means the whitespace is absent from the extracted
-             * text, that is a property of the extraction, not of the join.
-             *
-             * Whitespace collapsing is deliberately not done here either: in
-             * Arelle it belongs to the transform stage, and the tagger has no
-             * business pre-empting a transform it does not run.
+             * Inventing a separator would be wrong for adjacent runs that differ
+             * only in styling -- "Rev" + "enue" must not become "Rev enue" --
+             * and unnecessary where the source really does have whitespace,
+             * because the fragment's own text carries it.
              */
             text: parts.map(p => p.text).join(""),
-            sources: parts.map(p => ({ properties: p.properties })),
+            sources: mergeSources(parts),
             widenTo: undefined,
         };
     }

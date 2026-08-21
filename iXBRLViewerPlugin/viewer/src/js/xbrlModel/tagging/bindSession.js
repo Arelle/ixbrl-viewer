@@ -45,6 +45,16 @@ const COLLECTION_PROPERTIES = new Set([
     "xbrl:htmlElementId",
     "xbrl:pdfMcid",
     "xbrlx:htmlElementPointer",
+    // The refinement properties are collections too, and their arrays run
+    // parallel to the pointer's: fragment i is pointer[i] / offset[i] /
+    // quote[i].  Omitting them here does not fail loudly -- mergeSources keeps
+    // vals[0] and silently drops every fragment after the first, so a value
+    // split across elements would be journalled with its first piece only and a
+    // locator that still resolves.
+    "xbrlx:htmlTextOffset",
+    "xbrlx:htmlTextQuote",
+    "xbrlx:pdfTextOffset",
+    "xbrlx:pdfTextQuote",
 ]);
 
 function propMap(properties) {

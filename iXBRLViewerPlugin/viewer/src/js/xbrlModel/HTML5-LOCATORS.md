@@ -98,6 +98,70 @@ escaped into `<body>`, nothing in the tree marks its origin.
 If pointers ever appear to be off by one within a container, this is the first thing to
 check.
 
+### This is observed, not theoretical
+
+Both demonstration documents leak, and what leaks is ordinary analytics boilerplate:
+
+| Document | Elements | Leaked |
+|---|---:|---|
+| `loreal-ar25-html5.html` | 1435 → 1434 | Google Tag Manager `<iframe>` |
+| `msft-ar25-html5.html` | 8383 → 8381 | Webtrends tracking pixel (`<div>` + `<img>`) |
+
+```html
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-…"
+          height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+```
+
+That is the significant part. A GTM container snippet and a `DCSIMG` pixel are not one
+publisher's quirk — they are what ordinary web publishing puts in nearly every document.
+Any real HTML5 report is likely to carry something equivalent, so the normalization is
+load-bearing rather than defensive. Both leaks sit near the top of `<body>`, which is the
+worst position: every sibling index after them shifts.
+
+### Do not implement this normalization as a regex
+
+The obvious one-line version is unsafe and **corrupts documents**:
+
+```python
+# WRONG -- do not use
+re.compile(rb'(<noscript[^>]*>)(.*?)(</noscript\s*>)', re.I|re.S)
+```
+
+Three verified corruption modes:
+
+- `>` inside a quoted attribute (`<noscript data-x="a>b">`) ends the "open tag"
+  mid-attribute, so everything up to the real close is eaten.
+- A `<noscript>` **literal** inside `<script>`, plus any real noscript later — `.*?` spans
+  from the string literal to the real close tag, destroying everything between.
+- The same via `<!-- <noscript> -->`.
+
+The last two are not exotic; commented-out noscript blocks and noscript strings inside
+analytics JS are common in exactly the uncontrolled documents this runs on.
+
+The semantic point that makes a regex inadequate: with scripting **on**, noscript content
+is RAWTEXT — comments are not comments and scripts are not scripts inside it. So
+comment/rawtext context determines whether a `<noscript>` *start* tag is real, but the
+matching close is simply the next literal `</noscript>`. That asymmetry needs a linear
+scanner over {comment, rawtext element, noscript open}, not a pattern match.
+
+An unclosed `<noscript>` must blank to EOF — verified against real Chrome and WebKit,
+which both yield `html/head/body/noscript` for `<body><noscript><p>h</p><div id=a></div>`,
+since the remainder of the document is rawtext.
+
+Measured against real Safari over the 1,600-case html5lib-tests corpus:
+
+| | Agreement |
+|---|---:|
+| lexbor, no normalization | 1556 / 1600 (97.25%) |
+| naive regex above | 1574 / 1600 (98.38%) — *corrupts documents* |
+| context-aware scanner | **1575 / 1600 (98.44%)** |
+
+98.44% is exactly Safari↔Chrome's own agreement rate, and the residual 25 cases are all
+`<select>` — the genuine browser interop gap. Noscript residual is zero.
+
+Because both the aligner and the tagger must agree on the tree, this normalization should
+live in one shared place rather than being implemented twice.
+
 ## Still open
 
 With 0.9% of elements in real HTML5 carrying an `id`, pointers land in documents that can

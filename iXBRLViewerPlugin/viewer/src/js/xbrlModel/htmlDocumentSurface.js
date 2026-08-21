@@ -4,6 +4,7 @@ import $ from 'jquery';
 import { viewerUniqueId } from '../util.js';
 import { iframeReady, applyFactValue } from './surfaceUtil.js';
 import { elementPointer, verifiedPointer } from './tagging/elementPointer.js';
+import { describeRange } from './tagging/resolveLocator.js';
 
 const XHTML_MEDIA_TYPE = "application/xhtml+xml";
 
@@ -220,7 +221,7 @@ export class HtmlDocumentSurface {
             }
             e.preventDefault();
             e.stopPropagation();
-            const candidate = this._candidateFor(el, doc);
+            const candidate = this._candidateFor(el, doc, this._rangeAtClick(doc, e));
             if (!candidate) {
                 return;
             }
@@ -253,6 +254,83 @@ export class HtmlDocumentSurface {
     }
 
     /*
+     * What the user actually pointed at, as a Range.
+     *
+     * An explicit selection wins: dragging across "41 182,5" is an unambiguous
+     * statement of extent.  Otherwise the click is a caret position, which on
+     * its own selects nothing, so it is grown to the run of non-space characters
+     * around it -- clicking a number in a sentence should capture the number.
+     *
+     * Returns null when there is no usable text under the cursor, and the caller
+     * then falls back to the whole element, which is the correct answer on a
+     * legacy inline document where every fact has its own ix: element.
+     */
+    _rangeAtClick(doc, e) {
+        const sel = doc.defaultView?.getSelection?.();
+        if (sel && sel.rangeCount && !sel.isCollapsed) {
+            const r = sel.getRangeAt(0);
+            if (r.toString().trim()) {
+                return r;
+            }
+        }
+        const caret = this._caretRange(doc, e.clientX, e.clientY);
+        return caret ? this._expandToToken(caret) : null;
+    }
+
+    /*
+     * caretRangeFromPoint is the WebKit/Blink spelling and caretPositionFromPoint
+     * the standard one Gecko implements; neither is universal, so both are tried
+     * before giving up.
+     */
+    _caretRange(doc, x, y) {
+        if (doc.caretRangeFromPoint) {
+            return doc.caretRangeFromPoint(x, y);
+        }
+        if (doc.caretPositionFromPoint) {
+            const pos = doc.caretPositionFromPoint(x, y);
+            if (!pos) {
+                return null;
+            }
+            const r = doc.createRange();
+            r.setStart(pos.offsetNode, pos.offset);
+            r.collapse(true);
+            return r;
+        }
+        return null;
+    }
+
+    /*
+     * Grow a collapsed caret to the surrounding run of non-space characters.
+     *
+     * Deliberately whitespace-delimited rather than number-aware: "41 182,5" is
+     * one number written with a space, so a numeric pattern would capture half
+     * of it, and the user can always drag to say otherwise.  Punctuation is kept
+     * for the same reason -- "(1,646)" is a value, parentheses included.
+     */
+    _expandToToken(caret) {
+        const node = caret.startContainer;
+        if (node.nodeType !== 3) {
+            return null;
+        }
+        const text = node.nodeValue;
+        let start = caret.startOffset;
+        let end = start;
+        while (start > 0 && !/\s/.test(text[start - 1])) {
+            start--;
+        }
+        while (end < text.length && !/\s/.test(text[end])) {
+            end++;
+        }
+        if (start === end) {
+            return null;
+        }
+        const r = node.ownerDocument.createRange();
+        r.setStart(node, start);
+        r.setEnd(node, end);
+        return r;
+    }
+
+    /*
      * A candidate in factValueSourceObject property form.
      *
      * The pointer is verified as it is made -- generated, resolved back, and
@@ -280,21 +358,38 @@ export class HtmlDocumentSurface {
             : "xbrlx:htmlPointerLocatorType";
     }
 
-    _candidateFor(el, doc) {
-        const { pointer, verified, reason } = verifiedPointer(el, doc);
+    _candidateFor(el, doc, range = null) {
+        /*
+         * A range, where there is one, retargets the pointer at the text node's
+         * immediate parent and adds an offset and a quote.  That is what makes a
+         * number inside prose addressable: 27% of the numbers in the Microsoft
+         * annual report share an element with another number -- one <p> holds
+         * fourteen -- so a pointer alone cannot say which one is the fact.
+         *
+         * Without a range the whole element is the fragment, which is exact on a
+         * legacy inline document where every fact has its own ix: element.
+         */
+        const described = range ? describeRange(range) : null;
+        const target = described?.element ?? el;
+        const { pointer, verified, reason } = verifiedPointer(target, doc);
         if (pointer === null) {
             return null;
         }
+        const properties = [{ property: "xbrlx:htmlElementPointer", value: pointer }];
+        if (described) {
+            properties.push({ property: "xbrlx:htmlTextOffset", value: described.offset });
+            properties.push({ property: "xbrlx:htmlTextQuote", value: described.quote });
+        }
         const candidate = {
             locatorType: this._locatorType(doc),
-            properties: [{ property: "xbrlx:htmlElementPointer", value: pointer }],
+            properties,
             // Raw, not collapsed: whitespace collapsing belongs to the
             // transform stage (Arelle does it in rawValue only once a format is
             // present), and an element's own whitespace is what makes a joined
             // value faithful.  The card collapses for display only.
-            text: el.textContent ?? "",
+            text: described ? described.quote : (el.textContent ?? ""),
             unverified: verified ? undefined : (reason ?? "pointer did not verify"),
-            _el: el,
+            _el: target,
         };
         // Widening goes to the parent, which is how a click on an inline span
         // inside a table cell reaches the cell.  Stops at the document element.

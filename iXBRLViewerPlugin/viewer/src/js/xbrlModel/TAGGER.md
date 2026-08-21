@@ -9,8 +9,9 @@ journal-only (no persistence).
 
 ### Build status
 
-Bind and rebind work end to end on both surfaces. What remains is capturing a
-value that spans several runs, and the journal review and export surface.
+Bind and rebind work end to end on both surfaces, a captured locator can be read
+back, and the journal can be exported. What remains is a review surface for the
+journal and the editing work listed below.
 
 | | module | verified by |
 |---|---|---|
@@ -24,8 +25,11 @@ value that spans several runs, and the journal review and export surface.
 | ✅ | `beginBind` / `endBind` / `widen` on both surfaces | driven in a browser on the loreal PDF and XHTML |
 | ✅ | the bind card, the trigger, and mode signalling | as above |
 | ✅ | multi-fragment capture, with per-fragment undo | 11 tests |
+| ✅ | `tagging/resolveLocator.js` — read a stored locator back to a DOM Range | 22 tests + a live round trip on the Microsoft HTML5 report |
+| ✅ | capture a number *inside* prose, via the click's Range | as above |
+| ✅ | journal export (download) | driven in a browser |
 | ⬜ | auto-extend a partial capture to its remaining runs | — |
-| ⬜ | journal review and export | — |
+| ⬜ | journal *review* — list, inspect and undo entries in a panel | — |
 | ⬜ | the pencil: the full derivation descriptor, outside a bind | — |
 
 The pure modules are deliberately free of DOM, viewer and model references,
@@ -35,6 +39,30 @@ faults were found that unit tests could not reach: the trigger never appearing
 because the fact pane is re-rendered from a template, the candidate going stale
 when the cursor left the document, and an unbounded expected value making the
 card taller than the panel.
+
+### Reading a locator back
+
+A locator is only half useful if nothing consumes it. `tagging/resolveLocator.js`
+resolves a stored one to a DOM Range, which is what lets a model carrying pointer
+locators be *viewed* rather than only written.
+
+A pointer alone is not enough on HTML5: 27% of the numbers in Microsoft's annual
+report share an element with another number, one `<p>` holding fourteen. So a
+locator carries three parallel arrays — fragment *i* is `pointer[i]` /
+`offset[i]` / `quote[i]` — where the pointer names the text node's immediate
+parent, the offset is 0-based into that element's `textContent`, and the quote is
+the exact source text.
+
+The quote is checked before highlighting and a mismatch **refuses**. That is why
+it is stored: a document regenerated since the model was written still resolves
+its pointer to a real element, and highlighting it would assert a fact sits
+somewhere it does not.
+
+Capture is the same convention in reverse. A click captures the run of non-space
+characters around the caret rather than the whole element — whitespace-delimited
+rather than number-aware, because "41 182,5" is one number written with a space
+and "(1,646)" is a value including its parentheses — and dragging states an
+explicit extent.
 
 ### Mode signalling
 

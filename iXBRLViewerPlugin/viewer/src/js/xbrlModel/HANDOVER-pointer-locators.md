@@ -27,6 +27,25 @@ Checked before writing this, because the risk here is silent divergence:
 
 ## 2. What does not agree yet
 
+> **Done 2026-08-21** (commit `42a0b5df`), by the session this note was addressed
+> to. All three items below are closed; the section is kept because the reasoning
+> is what the code now depends on.
+>
+> - 2.1 the four refinement properties are in `COLLECTION_PROPERTIES`;
+> - 2.2 `tagging/resolveLocator.js` resolves a stored locator to a DOM Range,
+>   walking `children[i]` and offering `resolveAll()` for pristine-tree
+>   resolution;
+> - 2.3 `_candidateFor` takes the click's Range, so a number inside prose is
+>   addressable — verified on `msft-ar25-html5.html`, where a paragraph holds
+>   four numbers and clicking the second yielded pointer
+>   `shareholder-letter/3/3`, offset 81, quote `"15"`, which resolves back to
+>   exactly `"15"`.
+>
+> Not done: the corpus was used as *input* only. Nothing was added to
+> `expected-pointers.json`, which §5 describes as a mirror of the Arelle copy —
+> so offset/quote expectations, if they should be shared cross-language too, still
+> have to start from the Arelle-side generator.
+
 ### 2.1 `COLLECTION_PROPERTIES` is missing the new properties
 
 `tagging/bindSession.js` has:

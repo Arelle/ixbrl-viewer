@@ -328,6 +328,48 @@ first-page-fast loading:
   handles that (entity shows "n/a", it no longer assumes an entity is present).
   Facts whose concept isn't in a loaded taxonomy fall back to the concept QName.
 
+## Pointer locators (`xbrlx:htmlElementPointer`)
+
+The two HTML locator types in `core.json` both require the source document to
+carry an attribute on the target — an `id` or a data attribute. Most elements in
+a real report have neither: Microsoft's public annual report carries 42 `id`
+attributes across 8,383 elements, all navigation anchors, so nothing in its 66
+tables is addressable. Injecting ids means rewriting a document that may be
+signed, checksummed, or simply not yours.
+
+A pointer addresses any element without the document saying anything about it —
+an XPointer `element()` child sequence written without the `element(...)` wrapper:
+`currentAssets`, `/1/14`, `financial-review/2/1`.
+
+| file | role |
+|---|---|
+| `tagging/elementPointer.js` | generate, resolve, verify. A port-mate of Arelle's `HtmlElementPointer.py`; the two must agree or they address different elements silently |
+| `tagging/resolveLocator.js` | read a *stored* locator back to a DOM Range |
+| `tagging/corpus/` | the shared cross-language fixture, SHA-pinned on both sides |
+
+Generation prefers the shortest robust form: the element's own id, else a
+sequence from the nearest usable ancestor id (the hybrid form), else a full
+sequence from the root. An id is only usable if it addresses exactly one element
+— duplicate ids occur in filings, and `getElementById` silently returns the
+first.
+
+Two rules govern resolution, both measured (see `HTML5-LOCATORS.md`):
+
+- Walk `children[i]`; never hand a child sequence to a selector. 0.78 µs against
+  43.8 s on a 1.08 M-element document, because a trailing `*:nth-child` has no
+  selectivity.
+- Resolve against the **pristine** tree, before decoration. Injected wrappers
+  shift child indices; overlaying, as the PDF surface does, does not.
+  `resolveAll()` exists so a surface can resolve everything in one pass first.
+
+The locator type records which tree the sequence counted —
+`xbrlx:xhtmlPointerLocatorType` for the XML infoset,
+`xbrlx:htmlPointerLocatorType` for the HTML5 tree — because the two differ.
+On Microsoft's filed 10-K, 85 tables with no `tbody` in source, only **6.8%** of
+pointers survive a parse-mode swap. `htmlDocumentSurface` keys this off
+`document.contentType`, which is why an XHTML source is loaded through an
+XML-typed blob URL rather than `document.write`.
+
 ## Cubes panel (reporting-structure section tree)
 
 > **Post-rebase status (2026-08).** Re-integrated into master's redesigned

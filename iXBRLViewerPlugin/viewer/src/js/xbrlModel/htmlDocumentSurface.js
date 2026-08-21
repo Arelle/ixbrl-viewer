@@ -170,6 +170,22 @@ export class HtmlDocumentSurface {
         }
     }
 
+    /*
+     * A fact with no location in this document: register an IXNode with no
+     * wrapper nodes and isHidden = true, so it appears in the fact list, the
+     * search results and the hidden-fact count, with nothing to highlight on
+     * the page.  Mirrors PdfDocumentSurface._bindHiddenFact.
+     */
+    _bindHiddenFact(viewer, reportIndex, key, factData) {
+        const vuid = viewerUniqueId(reportIndex, key);
+        const ixn = viewer._getOrCreateIXNode(vuid, $([]), 0, false);
+        ixn.isHidden = true;
+        ixn._htmlHiddenCache = false;
+        viewer.docOrderItemIndex.addItem(vuid, 0);
+        viewer.itemContinuationMap[vuid] = [];
+        applyFactValue(factData, ixn, "");
+    }
+
     /* ---- bind mode ------------------------------------------------------
      *
      * No hit-testing is needed here, in contrast to the PDF surface: the text
@@ -341,9 +357,21 @@ export class HtmlDocumentSurface {
                 el = null;
             }
             if (el === null) {
-                // No element for this locator - remove so we don't create a
-                // Fact that can't be shown or navigated to.
-                delete facts[spanId];
+                /*
+                 * The locator names nothing in this document.  Retained as a
+                 * hidden fact rather than dropped, matching the PDF surface.
+                 *
+                 * Dropping it was reasonable while the viewer was read-only --
+                 * a fact that cannot be shown cannot be navigated to either.
+                 * It is wrong for tagging: an unlocated fact is precisely the
+                 * thing the tagger exists to locate, and the unlocated set is
+                 * its worklist.  Dropping them also made the same model report
+                 * different fact counts depending on which surface rendered it,
+                 * and made the interesting case -- pointing a model at a
+                 * document it was not tagged against -- produce an empty viewer
+                 * instead of a full worklist.
+                 */
+                this._bindHiddenFact(viewer, reportIndex, spanId, factData);
                 continue;
             }
 

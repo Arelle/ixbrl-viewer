@@ -38,12 +38,23 @@ function isUsableAnchor(el, doc) {
     if (!/^[A-Za-z_][\w.\-]*$/.test(id)) {
         return false;   // not an NCName; not expressible as a shorthand pointer
     }
-    try {
-        return doc.querySelectorAll(`[id="${CSS.escape(id)}"]`).length === 1;
-    }
-    catch {
-        return doc.getElementById(id) === el;
-    }
+    /*
+     * No CSS.escape, and no try/catch around this.  The id has already passed
+     * the NCName test above, so it holds only [A-Za-z0-9_.-] -- none of which
+     * needs escaping inside a quoted attribute selector.  The escape was
+     * therefore doing nothing except pulling in a global that jsdom does not
+     * implement, which made CSS.escape throw and ran the catch branch instead:
+     *
+     *     catch { return doc.getElementById(id) === el; }
+     *
+     * That fallback returns TRUE for the first element carrying a duplicated
+     * id, which is precisely the case this guard exists to reject -- so the
+     * guard was inverted wherever it was reached.  And it was reached in every
+     * jest run, since the suite is jsdom: `<div id="dup">` first-of-three
+     * yielded "dup" under test and "/1/2/1" in a browser.  A fallback that
+     * silently disagrees with the real path is worse than no fallback.
+     */
+    return doc.querySelectorAll(`[id="${id}"]`).length === 1;
 }
 
 function childIndex(el) {

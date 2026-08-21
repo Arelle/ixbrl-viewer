@@ -43,6 +43,25 @@ describe("elementPointer", () => {
         expect(resolvePointer(p, doc)).toBe(second);
     });
 
+    test("does not anchor on the FIRST element carrying a duplicated id", () => {
+        /*
+         * The sibling test above asserts on the SECOND duplicate, which is
+         * rejected by any implementation -- getElementById does not return it.
+         * The first is the discriminating case: an implementation that asks
+         * "is getElementById(id) === el?" answers yes and anchors to an id
+         * that addresses three elements.  That is what this file's fixture
+         * ran for real until the CSS.escape fallback was removed, because
+         * jsdom implements no CSS, so every jest run took the catch branch
+         * while browsers took the querySelectorAll one -- the suite green,
+         * the shipped behaviour different, and the Python port disagreeing.
+         */
+        const doc = docFrom(
+            `<body><div id="dup">first</div><div id="dup">second</div><p id="dup">third</p></body>`);
+        const first = doc.querySelectorAll(`[id="dup"]`)[0];
+        expect(elementPointer(first, doc)).toBe("/1/2/1");
+        expect(resolvePointer("/1/2/1", doc)).toBe(first);
+    });
+
     test("does not anchor on an id that is not an NCName", () => {
         const doc = docFrom(`<body><div id="3:bad"><span>x</span></div></body>`);
         const span = doc.querySelector("span");

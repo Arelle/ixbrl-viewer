@@ -5,6 +5,8 @@ import { viewerUniqueId } from '../util.js';
 import { iframeReady, applyFactValue } from './surfaceUtil.js';
 import { elementPointer, verifiedPointer } from './tagging/elementPointer.js';
 
+const XHTML_MEDIA_TYPE = "application/xhtml+xml";
+
 // A "document surface" binds XbrlModel facts to a rendered document.  It is the
 // only XbrlModel-specific piece that touches the rendered document, so that
 // alternative renderings can be added without changing the report model, the
@@ -32,6 +34,7 @@ export class HtmlDocumentSurface {
     async prepareDocument(iframe, documentSource, iv) {
         const src = typeof documentSource === "string" ? { url: documentSource } : documentSource;
         let html;
+        let served = null;
         if (src.text !== undefined) {
             html = src.text;
         }
@@ -40,16 +43,131 @@ export class HtmlDocumentSurface {
             if (!resp.ok) {
                 throw new Error(`Could not load document (${resp.status})`);
             }
+            served = resp.headers.get("content-type");
             html = await resp.text();
+        }
+        const prepared = iv._prepareDocumentHtml(html, src.baseUrl ?? src.url ?? "");
+        const mediaType = this._mediaTypeFor(served, html, src.url ?? src.baseUrl);
+
+        if (mediaType === XHTML_MEDIA_TYPE) {
+            const ok = await this._loadAsXml(iframe, prepared);
+            if (ok) {
+                return;
+            }
+            // Not well-formed after all.  A browser renders an XML parse error
+            // as a yellow error page and nothing binds, which is a far worse
+            // outcome than parsing it the way a browser would have anyway.
+            console.warn("XbrlModel: document declared XHTML but is not well-formed XML; "
+                         + "falling back to HTML parsing");
         }
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
-        doc.write(iv._prepareDocumentHtml(html, src.baseUrl ?? src.url ?? ""));
+        doc.write(prepared);
         doc.close();
         // Retained so bind mode can attach its listeners to the rendered
         // document without having to be handed the iframe again.
         this._doc = doc;
         await iframeReady(iframe);
+    }
+
+    /*
+     * Which media type the document should be parsed as.
+     *
+     * This decides which of two different trees the browser builds, and
+     * therefore which pointer locator type the tagger can honestly record:
+     * HTML5 tree construction inserts a tbody that XHTML's content model leaves
+     * optional, and foster-parents stray content out of tables, so the same
+     * bytes yield different child sequences under the two modes.
+     *
+     * The server's Content-Type wins, because that is what a browser would obey
+     * for the document in its published form.  Only where nothing was served --
+     * a local file chosen in the GUI -- is the content consulted, and then only
+     * for an XML declaration or an XHTML namespace, which are statements by the
+     * author rather than guesses about the markup.
+     */
+    _mediaTypeFor(servedContentType, html, url) {
+        if (servedContentType) {
+            return /xhtml|xml/i.test(servedContentType) ? XHTML_MEDIA_TYPE : "text/html";
+        }
+        if (/^\s*<\?xml[\s?]/.test(html) || /<html[^>]*xmlns\s*=\s*["']http:\/\/www\.w3\.org\/1999\/xhtml/i.test(html)) {
+            return XHTML_MEDIA_TYPE;
+        }
+        return /\.xhtml?$/i.test(url ?? "") && /\.xhtml$/i.test(url ?? "") ? XHTML_MEDIA_TYPE : "text/html";
+    }
+
+    /*
+     * Repair the one thing the shared document preparation does that is legal
+     * HTML but not well-formed XML.
+     *
+     * _prepareDocumentHtml injects `<base href="...">` -- a void element left
+     * unclosed, which an HTML parser accepts and an XML parser rejects
+     * outright, taking the whole document with it.  A single tag is therefore
+     * enough to turn a conformant Inline XBRL 1.1 filing into a parser error
+     * page.  Repaired here rather than in the core file, which the XbrlModel
+     * work is trying to stop patching, and because the HTML path wants the
+     * unclosed form.
+     *
+     * The href is escaped as well: an unescaped & in a query string is the
+     * other way an injected attribute breaks well-formedness.
+     */
+    _xmlWellFormed(html) {
+        return html.replace(/<base\s+href="([^"]*)"\s*\/?>/i,
+            (m, href) => `<base href="${href.replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);)/gi, "&amp;")}"/>`);
+    }
+
+    /*
+     * Load through a blob URL typed as XHTML, so the browser uses its XML
+     * parser.  document.write cannot do this: a written document is always
+     * parsed by the HTML parser, which is why an Inline XBRL 1.1 filing was
+     * previously reported as text/html inside the viewer.
+     *
+     * The blob keeps iv._prepareDocumentHtml's work -- the injected <base> and
+     * the stripped scripts -- which setting iframe.src to the original URL
+     * would discard.  Relative URLs still resolve, because that <base> is what
+     * they resolve against rather than the blob URL.
+     *
+     * Returns false if the document turns out not to be well-formed, leaving
+     * the caller to fall back.
+     */
+    async _loadAsXml(iframe, prepared) {
+        const blob = new Blob([this._xmlWellFormed(prepared)], { type: XHTML_MEDIA_TYPE });
+        const url = URL.createObjectURL(blob);
+        try {
+            const loaded = new Promise((resolve) => {
+                iframe.addEventListener("load", resolve, { once: true });
+            });
+            iframe.setAttribute("src", url);
+            await loaded;
+            await iframeReady(iframe);
+            /*
+             * A browser reports an XML well-formedness failure as a document
+             * containing <parsererror>, not by throwing.  Checked only once the
+             * document has settled: the load event can fire while
+             * iframe.contentDocument still refers to the previous about:blank,
+             * so an immediate check sees a clean document and lets a parser
+             * error through -- which left the viewer showing an error page with
+             * nothing bound and no fallback taken.
+             */
+            for (let i = 0; i < 40; i++) {
+                const d = iframe.contentDocument;
+                if (d && d.readyState === "complete" && d.documentElement) {
+                    break;
+                }
+                await new Promise(r => setTimeout(r, 50));
+            }
+            const doc = iframe.contentDocument;
+            if (!doc || !doc.documentElement
+                || doc.getElementsByTagName("parsererror").length > 0) {
+                return false;
+            }
+            this._doc = doc;
+            return true;
+        }
+        finally {
+            // Revoked on a later turn: revoking synchronously can race the load
+            // the src assignment just started.
+            setTimeout(() => URL.revokeObjectURL(url), 30000);
+        }
     }
 
     /* ---- bind mode ------------------------------------------------------

@@ -89,9 +89,47 @@ case, where a total is followed by components known to be only part of it.
 Precedence is relationship, then network, then model object, then the
 specification default.
 
-### 2.4 Recompute, or show the processor's verdict?
+### 2.4 Recompute, or show the processor's verdict? — DECIDED: carry it
 
-Open design question, and worth deciding before writing code.
+**Decided 2026-08-29: carry the processor's verdict.** The reasoning is not the
+one this section originally offered.
+
+The argument that settles it is temporal, and comes from how EDGAR works.
+Validation happens **on receipt**; disseminated artifacts are then viewed without
+revalidating. A viewer that recomputes is not producing a second opinion on the
+same question — it is answering a *different* question, because standards, rules
+and implementations change between the moment a filing was received and any later
+moment it is read. The same report would show different results over time, with
+nothing to say which reading was authoritative or when the difference appeared.
+
+Duplication in a second language is the lesser reason, though it is real: adding
+`summationRelation` alone meant re-deciding, in JS, interval-bound semantics that
+`ValidateCalculations.py` had already settled and had conformance-tested against
+66 of 68 suite variations. Tolerance, rounding mode and cube scoping are three
+more of the same.
+
+What this needs, which does not exist yet:
+
+- **`SaveModel` emits per-binding results** — which binding, consistent or not,
+  and the `oimtc:` code where not.
+- **Provenance travels with them.** A carried verdict without a record of when it
+  was produced, by what processor version, and against which rule set is no more
+  interpretable than a recomputed one; the point of carrying it is to be able to
+  say *this is what validation concluded, then*.
+- **A fallback for a model that carries no results at all** — a locally built or
+  hand-edited model. Showing nothing is honest; silently recomputing is not,
+  because it would look identical to a carried verdict.
+
+Consequence for §2.2: **cube scoping becomes a producer change, not a viewer
+change.** The viewer stops deciding what binds and displays what the processor
+decided, so §2.2's semantic gap closes on the Arelle side.
+
+The remaining viewer work is display: render a carried verdict, distinguish
+"validated, consistent", "validated, inconsistent — code", and "not validated",
+and never present the third as either of the first two.
+
+Where the workflow has to offer this as a step, see
+`arelle/plugin/XbrlModel/HANDOVER-model-workflow.md` §5.
 
 `calculation.js` reimplements Calculations 1.1 interval arithmetic in JS
 (`interval.js`, `decimal.js`). The plugin now computes the same thing and reports

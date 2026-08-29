@@ -159,5 +159,17 @@ to the viewer at runtime.
 - `loreal-ar25-html5.html` does not align: a 1346-token summary page against a
   347543-token filing, overlapping in 192 tokens, whose figures match only after
   scale and rounding. A different problem, recorded in `§8` of the Arelle note.
-- The PDF emitter for `xbrlx:pdfTextOffset` is not written yet; it waits on a
-  marked-content text fix in `PdfTextExtractor.py` being done separately.
+- The PDF emitter for `xbrlx:pdfTextOffset` is not written yet. The
+  marked-content text fix it was waiting on has landed (commit 40afce203, a
+  q/Q graphics-state bug in `PdfTextExtractor.py`), taking PDF fact location
+  from 84% to 93%. Re-measured after it, **772 of 1034 row placements (75%)**
+  are cases that text-offset addressing dissolves rather than whole-MCID
+  addressing, so the PDF surface will lean on offsets at least as heavily as
+  the HTML5 one.
+- One invariant to assert rather than assume when writing either resolver: a
+  text offset is only meaningful if the string the emitter counted and the
+  string the viewer resolves are the same string. On the PDF side this was
+  checked -- every invisible (`Tr 3`) run lies outside BDC and every in-MCID run
+  is visible, so no hidden layer is interleaved into the text those offsets are
+  counted over. On the HTML side the equivalent is `textContent` with comments
+  contributing nothing, which is what section 3 specifies.

@@ -554,10 +554,37 @@ function buildNetworks(taxonomy) {
     for (const net of taxonomy.networks ?? []) {
         const elr = net.name;
         const relationships = net.relationships ?? [];
-        const isCalc = relationships.some(r =>
-            (r.properties ?? []).some(p => p.property === "xbrl:weight"));
+        /*
+         * The model states the kind directly, so ask it rather than infer.
+         *
+         * The weight heuristic below was the original test, and on a well-formed
+         * taxonomy the two agree exactly -- 23 of 96 networks either way on the
+         * Apple demo.  They part company on a taxonomy under repair: a
+         * summation-item network whose relationships have lost their weights
+         * carries no weight anywhere, so the heuristic silently reclassifies it
+         * as presentation and it disappears from the calculation inspector
+         * instead of showing up as broken.  It is kept only as a fallback for a
+         * network that omits relationshipTypeName.
+         */
+        const isCalc = net.relationshipTypeName !== undefined
+            ? net.relationshipTypeName === "xbrl:summation-item"
+            : relationships.some(r =>
+                (r.properties ?? []).some(p => p.property === "xbrl:weight"));
         const arcrole = isCalc ? "calc11" : "pres";
         const group = setDefault(setDefault(rels, arcrole, {}), elr, {});
+        /*
+         * xbrl:summationRelation says what the components are to the total:
+         * "equal" (the default and the only thing Calculations 1.1 could say),
+         * "atMost" for an of-which breakdown where the components are known to
+         * be only part of it, or "atLeast".
+         *
+         * Precedence is relationship, then network, then model object, then the
+         * specification default; the network level is read here and the
+         * relationship level below, which covers the two that appear in a
+         * network document.
+         */
+        const netRelation = (net.properties ?? []).find(
+            p => p.property === "xbrl:summationRelation")?.value;
         for (const r of relationships) {
             if (!r.source || !r.target || r.source === r.target) {
                 // Skip self-referential edges: some taxonomies (e.g. IFRS
@@ -576,9 +603,15 @@ function buildNetworks(taxonomy) {
                 if (p.property === "xbrl:weight") {
                     rel.w = Number(p.value);
                 }
+                if (p.property === "xbrl:summationRelation") {
+                    rel.sr = p.value;
+                }
             }
             if (arcrole === "calc11" && rel.w === undefined) {
                 rel.w = 1;
+            }
+            if (arcrole === "calc11" && rel.sr === undefined && netRelation !== undefined) {
+                rel.sr = netRelation;
             }
             setDefault(group, r.source, []).push(rel);
         }

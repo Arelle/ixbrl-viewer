@@ -18,3 +18,7 @@ iXBRLViewerPlugin/viewer/src/less/generated/
 iXBRLViewerPlugin/_version.py
 /ixbrl-viewer*.tgz
 ixbrl_viewer.egg-info
+
+# Handover notes are communication between working sessions, not project
+# documentation: what a maintainer needs is in README.md.
+HANDOVER-*.md

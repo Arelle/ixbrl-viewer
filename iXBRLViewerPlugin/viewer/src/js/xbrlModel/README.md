@@ -362,6 +362,24 @@ Two rules govern resolution, both measured (see `HTML5-LOCATORS.md`):
   shift child indices; overlaying, as the PDF surface does, does not.
   `resolveAll()` exists so a surface can resolve everything in one pass first.
 
+A pointer addresses an element; a value inside prose needs a character range
+within it, so Arelle emits three properties per fragment and the viewer reads
+them as a contract — a drift between the two mis-highlights silently:
+
+| property | value |
+|---|---|
+| `xbrlx:htmlElementPointer` | pointer to the text node's **immediate parent** element |
+| `xbrlx:htmlTextOffset` | 0-based character offset into that element's `textContent` |
+| `xbrlx:htmlTextQuote` | the exact source text, unstripped and uncollapsed |
+
+`textContent` means what the DOM means: all descendant text in document order,
+comments contributing nothing, and the value ends at `offset + quote.length`.
+Text is never stripped or whitespace-collapsed — collapsing belongs to the
+transform stage. Resolution walks the element's text nodes accumulating lengths
+until the offset falls inside one, then **verifies against the quote and refuses
+to highlight on mismatch**: the quote exists so a regenerated document is
+detected rather than silently mis-addressed (`tagging/resolveLocator.js`).
+
 The locator type records which tree the sequence counted —
 `xbrlx:xhtmlPointerLocatorType` for the XML infoset,
 `xbrlx:htmlPointerLocatorType` for the HTML5 tree — because the two differ.
@@ -491,6 +509,27 @@ The last row keeps every iXBRL report working: there is no producer verdict to
 displace, and the local computation has always been its only source.  Provenance
 (`derivation` — processor, date, rule sets) is shown beside every carried
 verdict, including *Not validated*, where it says which run skipped the binding.
+
+**What the viewer's own calculation cannot honour.** This applies only to the
+fallback path — a report carrying no `derivedContent`, where `calculation.js`
+computes locally. The specification makes the parameters of a check properties of
+the model or network rather than processor settings, and three do not reach the
+viewer:
+
+| property | effect if ignored |
+|---|---|
+| `xbrl:roundingMode` (`roundToNearest` \| `truncation`) | a truncated report shows spurious inconsistencies; the viewer always assumes round-to-nearest |
+| `xbrl:tolerance` | a report whose framework allows slack shows inconsistencies the processor does not |
+| `xbrla:reconciliation` | display only — marks a relationship that deliberately crosses the debit/credit divide |
+
+`xbrl:summationRelation` (`equal` / `atMost` / `atLeast`) **is** read, taken from
+the relationship, else the network, else the specification default. It was the
+most visible of the four: without it an "of which" breakdown, where a total is
+followed by components known to be only part of it, shows an inconsistency on
+every report.
+
+Carrying the producer's verdict is what makes these three matter less than they
+did — the processor honoured them when it validated.
 
 **Matching a fact to a result.** A result lists only the aspects its binding
 constrains, so comparison is a subset test — and on a dimensional report several

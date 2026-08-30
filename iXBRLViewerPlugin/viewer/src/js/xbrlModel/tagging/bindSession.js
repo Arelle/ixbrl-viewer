@@ -378,7 +378,7 @@ export class BindSession {
         const entry = this.journal?.bind({
             factId: this.fact?.id,
             factName: this.fact?.name,
-            factValueName: this.fact?.valueName,
+            factValueNames: this.fact?.valueNames,
             locatorType: c.locatorType,
             sources: c.sources ?? [{ properties: c.properties }],
             capturedText: c.text,

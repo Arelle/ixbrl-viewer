@@ -128,12 +128,26 @@ describe("TaggingJournal", () => {
         const e = j.bind(bindArgs({
             factId: "pf-3",
             factName: "msft:fs_F_bc502677",
-            factValueName: "msft:F_bc502677_val",
+            factValueNames: ["msft:F_bc502677_val"],
         }));
         expect(e.factId).toBe("pf-3");
         expect(e.factName).toBe("msft:fs_F_bc502677");
-        expect(e.factValueName).toBe("msft:F_bc502677_val");
+        expect(e.factValueNames).toEqual(["msft:F_bc502677_val"]);
         expect(JSON.parse(j.serialise()).entries[0].factName).toBe("msft:fs_F_bc502677");
+    });
+
+    test("a fact occurring several times names every occurrence", () => {
+        // Microsoft's total revenue is on pages 49, 84 (twice) and 85. The viewer
+        // fact stands for all four, so naming one would assert a choice it did
+        // not make; which occurrence the binding belongs to is the applier's.
+        const e = new TaggingJournal().bind(bindArgs({
+            factId: "pf-3",
+            factName: "msft:fs_F_54f7ed46",
+            factValueNames: ["msft:F_54f7ed46_val", "msft:F_f1293a51_val",
+                             "msft:F_0e21da0e_val", "msft:F_0c259ef1_val"],
+        }));
+        expect(e.factValueNames).toHaveLength(4);
+        expect(JSON.parse(new TaggingJournal().serialise()).entries).toEqual([]);
     });
 
     test("a report with no model behind it names what it can", () => {
@@ -141,7 +155,7 @@ describe("TaggingJournal", () => {
         // valid, and an applier is told there is no name rather than guessing
         const e = new TaggingJournal().bind(bindArgs());
         expect(e.factName).toBeNull();
-        expect(e.factValueName).toBeNull();
+        expect(e.factValueNames).toBeNull();
     });
 
     test("rejects entries missing their required parts", () => {

@@ -184,7 +184,7 @@ export class TaggerController {
                 // not survive re-rendering the document -- which is the case a
                 // journal is most wanted for, where every fact starts unlocated.
                 name: fact.f?.n,
-                valueName: fact.f?.fvn,
+                valueNames: fact.f?.fvn,
                 value: this._factValue(fact),
                 dataType: this._factDataType(fact),
             },

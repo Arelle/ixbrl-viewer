@@ -169,7 +169,7 @@ export class TaggingJournal {
      * first bind, the displaced properties for a rebind -- which is what makes
      * an entry reversible without consulting the model.
      */
-    bind({ factId, factName = null, factValueName = null, locatorType, sources, properties,
+    bind({ factId, factName = null, factValueNames = null, locatorType, sources, properties,
            capturedText, factValue, previous = null, derivation = null }) {
         if (!factId) {
             throw new Error("journal: factId is required");
@@ -212,14 +212,18 @@ export class TaggingJournal {
              * document, where every fact starts unlocated -- so an entry that
              * named only the viewer id would not survive it.
              *
-             * factValueName is given only where the model's fact has exactly one
-             * factValue.  A viewer fact merges them all into one value, so where
-             * there are several it has no basis for naming one, and the applier
-             * has to choose.  Both are null for a report with no model behind it
-             * (the plain iXBRL path), where there is no name to give.
+             * factValueNames lists every factValue the model's fact carries, in
+             * model order.  A factValue is one occurrence of the fact in the
+             * document rather than one value of it -- Microsoft's total revenue
+             * has four, agreeing on the value while differing in presentation --
+             * and a viewer fact stands for all of them at once, so naming one
+             * would assert a choice the viewer did not make.  Which occurrence a
+             * binding belongs to is therefore the applier's to decide, on
+             * evidence this entry does not carry.  Both are null for a report
+             * with no model behind it (the plain iXBRL path).
              */
             factName,
-            factValueName,
+            factValueNames,
             previous,
             locatorType,
             sources: list,

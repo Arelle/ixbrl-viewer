@@ -505,14 +505,20 @@ function buildFacts(factset) {
                 factData.n = fact.name;
             }
             /*
-             * The factValue name, only where the model gives exactly one.  A
-             * viewer fact merges every factValue of a model fact into a single
-             * value, so where there are several it has no basis for naming one
-             * of them, and an applier must decide for itself.
+             * Every factValue name the model's fact carries, in model order.
+             *
+             * A factValue is one occurrence of the fact in the document, not one
+             * value of it: Microsoft's total revenue has four, on pages 49, 84
+             * (twice) and 85, and they agree on the value while differing in how
+             * it is presented -- CommercialPaper is scale 6 in one place and
+             * scale 9 in another.  All of them are given because this viewer
+             * fact stands for all of them at once (see the merge below), so
+             * naming one would assert a choice it did not make.
              */
-            const factValues = fact.factValues ?? [];
-            if (factValues.length === 1 && factValues[0].name !== undefined) {
-                factData.fvn = factValues[0].name;
+            const factValueNames = (fact.factValues ?? [])
+                .map(fv => fv.name).filter(n => n !== undefined);
+            if (factValueNames.length > 0) {
+                factData.fvn = factValueNames;
             }
             if (decimals !== undefined) {
                 factData.d = decimals;

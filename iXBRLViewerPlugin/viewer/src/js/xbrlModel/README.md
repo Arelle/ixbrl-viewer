@@ -387,8 +387,14 @@ The inspector has a native **Cubes** navigation panel (a tab in `#inspector-tabs
 alongside XBRL facts / Search / Overview).  The adapter reads the taxonomy's cubes,
 resolving each cube's `xbrl:concept` dimension domain network into its line-item
 concepts (`XBRLReport.cubes()`); the inspector lists each cube with the number of
-its facts present in the document and navigates to them on click
-(`ReportSet.conceptFactsIndex()`).  `createCubes()` runs from `Inspector.initialize()`
+its facts present in the document and navigates to them on click.  Which facts
+those are comes from the model where it states them
+(`ReportSet.cubeFactsIndex()`, reading `derivedContent.cubeContents` — see
+[Derived content](#derived-content)) and otherwise from a concept match
+(`ReportSet.conceptFactsIndex()`), which over-counts: it takes every fact of a
+concept the cube mentions, including facts whose dimensions place them in a
+different cube.  On Microsoft's FY2025 10-K that inflates 9 of 112 cubes and is
+never short.  `createCubes()` runs from `Inspector.initialize()`
 next to `createSummary()`, and sets `has-cubes` on `#ixv` from
 `ReportSet.hasCubes()`; a stylesheet rule hides the tab when the class is absent,
 so the panel only appears for XBRL Model reports and the iXBRL viewer is unaffected.
@@ -419,6 +425,50 @@ the UI's empty-section hiding is then only a safety net.
 
 (A separate Networks panel was intentionally not added — the Document Outline,
 built from the presentation/parent-child networks, already covers that.)
+
+## Derived content
+
+A compiled model may carry a **`derivedContent`** object beside `documentInfo`
+and `xbrlModel`, holding what processing concluded rather than what the filer
+reported.  `derivedContent.js` reads two parts of it.  The producer side is
+`arelle/plugin/XbrlModel`; the format is specified in `oim-taxonomy-derived.md`
+(`oim` repo, branch `spec-dev-1`), still a PWD.
+
+The two parts differ in what the viewer may do when one is absent:
+
+- **`cubeContents`** — which facts fall in which cube — is *derivable*: the model
+  implies it and a dimensional match reproduces it.  Absence is not a finding, so
+  the Cubes panel falls back to its concept match.
+- **`calculationResults`** — the per-binding calculation verdicts — is *not*.  It
+  records what a processor did, and nothing in the model reproduces it.
+
+That second point is why the calculation panel shows the carried verdict rather
+than its own arithmetic.  Rules, standards and implementations move between the
+moment a report is received and any later moment it is read, so a locally
+computed answer sitting where the producer's verdict belongs answers a different
+question while being indistinguishable to the reader.  The panel distinguishes:
+
+| The model | Shown |
+| --- | --- |
+| carries a result for this binding | *Consistent* / *Inconsistent (as validated)*, with the `oimtc:` code |
+| was validated, but has no result for this binding | *Not validated* — never a local answer |
+| carries several equally specific results that disagree | *Validated, verdicts disagree* |
+| carries no `derivedContent` at all | the viewer's own `calculation.js` result, as before |
+
+The last row keeps every iXBRL report working: there is no producer verdict to
+displace, and the local computation has always been its only source.  Provenance
+(`derivation` — processor, date, rule sets) is shown beside every carried
+verdict, including *Not validated*, where it says which run skipped the binding.
+
+**Matching a fact to a result.** A result lists only the aspects its binding
+constrains, so comparison is a subset test — and on a dimensional report several
+results describe one fact at once.  Microsoft's 10-K carries verdicts on the
+un-dimensioned total, the asset-class total *and* the fully dimensioned one;
+treated as equal candidates, 11 of its 183 results read as disagreements when
+nothing disagreed.  The most specific match wins: a result constraining fewer
+aspects is a verdict on a *different* binding, not a looser opinion on this one.
+That tiebreak is not yet in the specification text — see
+[HANDOVER-derived-content.md](HANDOVER-derived-content.md).
 
 ## Planned refactor: move this overlay into a standalone plugin
 

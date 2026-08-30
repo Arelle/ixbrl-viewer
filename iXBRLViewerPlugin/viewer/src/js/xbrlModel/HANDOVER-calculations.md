@@ -128,6 +128,12 @@ The remaining viewer work is display: render a carried verdict, distinguish
 "validated, consistent", "validated, inconsistent — code", and "not validated",
 and never present the third as either of the first two.
 
+**Done 2026-08-30** (commit `091da61e`). All three prerequisites above landed on
+the producer side, and the display reads them: `derivedContent.js` +
+`Report.calculationVerdict()`, rendered by `updateCalculation()` with the
+`derivation` shown beside every verdict. See [Derived content](README.md#derived-content)
+for what the panel shows and when it still computes locally.
+
 Where the workflow has to offer this as a step, see
 `arelle/plugin/XbrlModel/HANDOVER-model-workflow.md` §5.
 

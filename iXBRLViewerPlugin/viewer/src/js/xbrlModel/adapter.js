@@ -550,6 +550,12 @@ function buildFacts(factset) {
     return facts;
 }
 
+/*
+ * The synthetic source the model uses to mark a network's roots.  It is not a
+ * concept and never carries a weight.
+ */
+const XBRL_ROOT_SOURCE = "xbrl:rootSource";
+
 function buildNetworks(taxonomy) {
     // OIM networks -> the viewer's ELR-keyed relationship map.
     // Parent-child networks become presentation ("pres") relationships, which
@@ -593,6 +599,18 @@ function buildNetworks(taxonomy) {
         const netRelation = (net.properties ?? []).find(
             p => p.property === "xbrl:summationRelation")?.value;
         for (const r of relationships) {
+            /*
+             * xbrl:rootSource marks which concepts a network starts from; the
+             * edge is structural and carries no weight.  In a presentation
+             * network it is the tree root and is wanted.  In a summation-item
+             * network it is not a contribution, and defaulting a weight onto it
+             * below would make every network's total a summand of a synthetic
+             * concept -- 28 of them on Microsoft's FY2025 10-K, each then
+             * reported as a calculation contributor.
+             */
+            if (arcrole === "calc11" && r.source === XBRL_ROOT_SOURCE) {
+                continue;
+            }
             if (!r.source || !r.target || r.source === r.target) {
                 // Skip self-referential edges: some taxonomies (e.g. IFRS
                 // parent-child networks) include a concept related to itself,

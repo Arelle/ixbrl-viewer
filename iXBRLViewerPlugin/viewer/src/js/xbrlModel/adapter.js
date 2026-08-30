@@ -493,6 +493,13 @@ function buildFacts(factset) {
 
         const makeFactData = () => {
             const factData = { a: { ...a }, v: jsonValue };
+            // The model's own name for this fact.  Facts are keyed here by
+            // document element id, which derivedContent does not use; carrying
+            // the name is what lets cubeContents address them (see
+            // ReportSet.cubeFactsIndex).
+            if (fact.name !== undefined) {
+                factData.n = fact.name;
+            }
             if (decimals !== undefined) {
                 factData.d = decimals;
             }
@@ -679,6 +686,16 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
     const cubes = buildCubes(taxonomy, labelsByObject);
     const sections = buildSections(taxonomy, labelsByObject);
 
+    /*
+     * What processing concluded about this report, carried unchanged.  Either
+     * document may hold it: a compiled model carries its own, and a factset
+     * paired with a taxonomy carries it on whichever was validated.  Stored raw
+     * rather than indexed so report data stays plain JSON; Report indexes it on
+     * first use.  See derivedContent.js for why a viewer carries these verdicts
+     * instead of recomputing them.
+     */
+    const derivedContent = factsetDoc?.derivedContent ?? taxonomyDoc?.derivedContent;
+
     const documentFile = options.documentFile;
     const reportData = {
         concepts,
@@ -687,6 +704,7 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
         roleDefs,
         cubes,
         sections,
+        ...(derivedContent ? { derivedContent } : {}),
         localDocs: documentFile ? { [documentFile]: ["inline"] } : {},
     };
 

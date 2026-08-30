@@ -22,6 +22,7 @@ import { ReportSetOutline } from './outline.js';
 import { DIMENSIONS_KEY, DocumentSummary, MEMBERS_KEY, PRIMARY_ITEMS_KEY, TOTAL_KEY } from './summary.js';
 import { getTheme, darkModeTheme, lightModeTheme } from './theme.js';
 import { TaggerController } from './xbrlModel/tagging/taggerController.js';
+import { CALC_STATE } from "./xbrlModel/derivedContent.js";
 
 const SEARCH_PAGE_SIZE = 100
 const SECTION_LIST_SECTIONS = "#inspector .facts-by-group > .collapsible-section";
@@ -1089,8 +1090,34 @@ export class Inspector {
                 .addClass("narrow-header")
                 .appendTo(content);
 
+            /*
+             * Where the model records what validation concluded, show that
+             * rather than a fresh local computation, and show who concluded it
+             * and when -- a verdict without its provenance invites the reader to
+             * assume it is current.
+             *
+             * A report carrying no derived content at all (every iXBRL report,
+             * and any model produced without validation) keeps the viewer's own
+             * arithmetic below: there is no producer verdict to displace, and
+             * that has always been where this number came from.  What must not
+             * happen is the middle case -- a model that WAS validated, for a
+             * binding its results do not cover.  There a local answer would sit
+             * exactly where the producer's verdict belongs and read as though it
+             * were one, so the panel says the binding was not validated instead.
+             */
+            const verdict = report.calculationVerdict(fact, rCalc.elr);
+            const carried = verdict.state !== CALC_STATE.NOT_VALIDATED
+                            || verdict.reason !== "model carries no derived content";
+
             let statusText = "";
-            if (rCalc.binds()) {
+            if (carried) {
+                statusText = {
+                    [CALC_STATE.CONSISTENT]: i18next.t('calculation.carriedConsistent'),
+                    [CALC_STATE.INCONSISTENT]: i18next.t('calculation.carriedInconsistent'),
+                    [CALC_STATE.AMBIGUOUS]: i18next.t('calculation.carriedAmbiguous'),
+                }[verdict.state] ?? i18next.t('calculation.carriedNotValidated');
+            }
+            else if (rCalc.binds()) {
                 if (rCalc.isConsistent()) {
                     statusText = i18next.t('factDetails.calculationValuesMatch');
                 }
@@ -1109,7 +1136,31 @@ export class Inspector {
 
             const statusRow = $("<tr></tr>").appendTo(statusTable);
             $("<th></th>").text(i18next.t("calculation.status")).appendTo(statusRow);
-            $("<td></td>").text(statusText).appendTo(statusRow);
+            $("<td></td>")
+                .addClass(carried ? `calc-verdict-${verdict.state}` : "")
+                .text(statusText)
+                .appendTo(statusRow);
+
+            /*
+             * Provenance, shown wherever a carried verdict is shown -- including
+             * on "not validated", where it says what the run that skipped this
+             * binding did cover.
+             */
+            if (carried && verdict.derivation !== undefined) {
+                const d = verdict.derivation;
+                const provenance = [
+                    ["calculation.validatedBy", d.processor],
+                    ["calculation.validatedOn", d.derived],
+                    ["calculation.ruleSets", (d.ruleSets ?? []).join(", ")],
+                ];
+                for (const [key, value] of provenance) {
+                    if (value) {
+                        const r = $("<tr></tr>").appendTo(statusTable);
+                        $("<th></th>").text(i18next.t(key)).appendTo(r);
+                        $("<td></td>").text(value).appendTo(r);
+                    }
+                }
+            }
             const detailsLinkRow = $("<tr></tr>").appendTo(statusTable);
             $("<th></th>").appendTo(detailsLinkRow);
             const detailsCell = $("<td></td>")
@@ -1154,8 +1205,16 @@ export class Inspector {
         for (const c of this._reportSet.cubes()) {
             cubesByName[c.name] = c;
         }
+        /*
+         * Where the model states which facts are in each cube, use that; the
+         * concept match below is an approximation that counts facts whose
+         * dimensions place them in another cube.  See ReportSet.cubeFactsIndex.
+         */
+        const statedCubeFacts = this._reportSet.cubeFactsIndex();
         const cubeFacts = (name) =>
-            (cubesByName[name]?.concepts ?? []).flatMap(c => conceptFacts[c] ?? []);
+            statedCubeFacts !== null
+                ? (statedCubeFacts.get(name) ?? [])
+                : (cubesByName[name]?.concepts ?? []).flatMap(c => conceptFacts[c] ?? []);
 
         // A single cube, rendered as a clickable row (label + line-item fact count).
         // labelOverride lets a collapsed single-cube section show the section's name.

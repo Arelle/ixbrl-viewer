@@ -287,6 +287,47 @@ export class ReportSet {
     }
 
     /*
+     * Map of cube name -> the Facts the model states are in that cube, or null
+     * where no report states it.
+     *
+     * Which facts fall in a cube is derivable -- a dimensional match against the
+     * cube reproduces it -- so this is a shortcut, not an authority, and a model
+     * that omits it is not deficient.  It is worth taking where offered because
+     * the concept-level fallback in the Cubes panel is only an approximation: it
+     * counts every fact of a concept the cube mentions, including facts whose
+     * dimensions put them in a different cube entirely.  On Microsoft's FY2025
+     * 10-K it over-counts 9 of 112 cubes and is never short -- INCOME STATEMENTS
+     * shows 171 facts against the 141 the model places there.
+     *
+     * Where a report does state the association, it states it in full, so a cube
+     * missing from it has no facts rather than falling back to the concept match.
+     */
+    cubeFactsIndex() {
+        if (this._cubeFactsIndex === undefined) {
+            let index = null;
+            for (const report of this.reports) {
+                const byCube = report.cubeFactNames();
+                if (byCube === null) {
+                    continue;
+                }
+                const byName = {};
+                for (const f of report.facts()) {
+                    if (f.f.n !== undefined) {
+                        (byName[f.f.n] ??= []).push(f);
+                    }
+                }
+                index ??= new Map();
+                for (const [cubeName, factNames] of byCube) {
+                    const facts = factNames.flatMap(n => byName[n] ?? []);
+                    index.set(cubeName, (index.get(cubeName) ?? []).concat(facts));
+                }
+            }
+            this._cubeFactsIndex = index;
+        }
+        return this._cubeFactsIndex;
+    }
+
+    /*
      * Map of concept name -> array of Facts present in the report, for
      * navigating from taxonomy structures (e.g. cubes) to facts.  Lazy-loaded.
      */

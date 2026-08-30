@@ -1062,6 +1062,24 @@ a {
     }
 
     .calculations {
+      /*
+       * A carried verdict, styled by what it says.  "Not validated" is
+       * deliberately muted rather than alarming: it is the absence of a finding,
+       * not a finding of a problem.
+       */
+      .calc-verdict-inconsistent {
+        color: @colour-warning;
+      }
+
+      .calc-verdict-ambiguous {
+        color: @colour-warning;
+      }
+
+      .calc-verdict-not-validated {
+        color: @colour-text-light;
+        font-style: italic;
+      }
+
       .calculation-row {
         display: flex;
         flex-direction: row;

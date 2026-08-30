@@ -169,7 +169,7 @@ export class TaggingJournal {
      * first bind, the displaced properties for a rebind -- which is what makes
      * an entry reversible without consulting the model.
      */
-    bind({ factId, factName = null, factValueNames = null, locatorType, sources, properties,
+    bind({ factId, factName = null, factValueName = null, locatorType, sources, properties,
            capturedText, factValue, previous = null, derivation = null }) {
         if (!factId) {
             throw new Error("journal: factId is required");
@@ -212,18 +212,17 @@ export class TaggingJournal {
              * document, where every fact starts unlocated -- so an entry that
              * named only the viewer id would not survive it.
              *
-             * factValueNames lists every factValue the model's fact carries, in
-             * model order.  A factValue is one occurrence of the fact in the
-             * document rather than one value of it -- Microsoft's total revenue
-             * has four, agreeing on the value while differing in presentation --
-             * and a viewer fact stands for all of them at once, so naming one
-             * would assert a choice the viewer did not make.  Which occurrence a
-             * binding belongs to is therefore the applier's to decide, on
-             * evidence this entry does not carry.  Both are null for a report
-             * with no model behind it (the plain iXBRL path).
+             * factValueName is the occurrence being bound.  A factValue is one
+             * occurrence of the fact in the document rather than one value of it
+             * -- Microsoft's total revenue has four, agreeing on the value while
+             * differing in presentation -- and the adapter builds one viewer fact
+             * per occurrence, so there is exactly one to name and no choice left
+             * for the applier to make.  Null for an unlocated fact the model gave
+             * no factValue, and for a report with no model behind it (the plain
+             * iXBRL path).
              */
             factName,
-            factValueNames,
+            factValueName,
             previous,
             locatorType,
             sources: list,

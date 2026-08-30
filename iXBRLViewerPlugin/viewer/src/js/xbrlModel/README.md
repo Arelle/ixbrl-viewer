@@ -436,6 +436,28 @@ the UI's empty-section hiding is then only a safety net.
 (A separate Networks panel was intentionally not added — the Document Outline,
 built from the presentation/parent-child networks, already covers that.)
 
+## Facts occurring more than once
+
+A model fact can occur in several places in the document, and each occurrence is
+a `factValue` carrying the scaling and accuracy of the text where it is
+displayed.  Microsoft's total revenue is on pages 49, 84 (twice) and 85;
+`us-gaap:CommercialPaper` is printed in millions in one place and billions in
+another.  They are **consistent duplicates** in the specification's sense — one
+fact, agreeing on value, presented differently — which is the structure the
+viewer's existing duplicate handling already expects.
+
+`buildFacts` therefore emits **one viewer fact per located occurrence**, as the
+iXBRL path has always done for a repeated tag.  It previously merged a PDF
+fact's occurrences into one, taking the last one's scale: that is not merely
+imprecise, because barely any `factValue` carries an explicit value (27 of 1,829
+in the Microsoft PDF factset) and the surface computes it from the located text
+and that occurrence's scale.  One merged scale applied to text printed in
+different units gives a **wrong value**, not just a wrong accuracy label — 5
+facts in that filing.  Splitting also gives each viewer fact exactly one
+`factValue` name, which is what lets a tagging journal say which occurrence a
+binding belongs to, and what makes `derivedContent.factValues` — keyed by
+`factValueName` — resolvable to a single value per fact.
+
 ## Derived content
 
 A compiled model may carry a **`derivedContent`** object beside `documentInfo`

@@ -388,13 +388,13 @@ describe("accept", () => {
         // order; an applier needs the name the model knows the fact by
         const { session, journal } = newSession({ fact: {
             id: "pf-3", value: "84.5", dataType: "xs:decimal",
-            name: "msft:fs_F_bc502677", valueNames: ["msft:F_bc502677_val"] } });
+            name: "msft:fs_F_bc502677", valueName: "msft:F_bc502677_val" } });
         session.begin();
         session.candidate(candidate("84,5"));
         session.capture();
         const entry = session.accept();
         expect(entry.factName).toBe("msft:fs_F_bc502677");
-        expect(entry.factValueNames).toEqual(["msft:F_bc502677_val"]);
+        expect(entry.factValueName).toBe("msft:F_bc502677_val");
         expect(journal.entries()[0].factName).toBe("msft:fs_F_bc502677");
     });
 

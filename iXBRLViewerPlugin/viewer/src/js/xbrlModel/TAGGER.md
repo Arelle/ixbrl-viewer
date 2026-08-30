@@ -247,7 +247,7 @@ model change.
       "op": "bindValueSource",
       "factId": "f-00317",
       "factName": "msft:fs_F_bc502677-3104-4ca9-95e8-829c07f0ef75",
-      "factValueNames": ["msft:F_bc502677-3104-4ca9-95e8-829c07f0ef75_val"],
+      "factValueName": "msft:F_bc502677-3104-4ca9-95e8-829c07f0ef75_val",
       "previous": null,
       "locatorType": "xbrl:pdfContentLocatorType",
       "sources": [
@@ -285,20 +285,17 @@ Notes on the shape:
   fact starts unlocated, so an entry names the fact as the *model* names it.
   `factId` stays, because within a session it is what the viewer's own undo and
   rebind lookups use.
-- `factValueNames` lists **every** `factValue` the model's fact carries, in model
-  order. A `factValue` is one *occurrence* of the fact in the document rather
-  than one value of it: Microsoft's total revenue has four, on pages 49, 84
-  (twice) and 85. They agree on the value — as they must, being one fact — while
-  differing in how it is presented, and `us-gaap:CommercialPaper` appears at
-  scale 6 in one place and scale 9 in another. 103 of the 1,421 PDF-placed facts
-  in the Microsoft demo have more than one.
+- `factValueName` is the **occurrence** being bound. A `factValue` is one
+  occurrence of the fact in the document rather than one value of it: Microsoft's
+  total revenue has four, on pages 49, 84 (twice) and 85. They agree on the
+  value — as they must, being one fact — while differing in how it is presented,
+  and `us-gaap:CommercialPaper` is printed in millions in one place and billions
+  in another. These are *consistent duplicates* in the specification's sense.
 
-  A viewer fact stands for all of a model fact's occurrences at once, so naming
-  one of them would assert a choice the viewer did not make. **Which occurrence a
-  binding belongs to is therefore the applier's to decide, and this entry does
-  not carry the evidence for it** — see the known limitation in §5. Both names
-  are `null` for a report with no model behind it (the plain iXBRL path), which
-  tells an applier there is no name rather than leaving it to guess.
+  The adapter builds one viewer fact per occurrence, so there is exactly one
+  factValue to name and no choice left for the applier to make. Both names are
+  `null` for a report with no model behind it (the plain iXBRL path), which tells
+  an applier there is no name rather than leaving it to guess.
 - `derivation` is present only where the user accepted one — how the located
   text becomes the asserted value, as `scale` / `sign` / `transformation`.
 - `previous` is `null` for a bind and carries the displaced sources for a

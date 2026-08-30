@@ -468,30 +468,32 @@ function buildFacts(factset) {
             a.u = unit;
         }
 
-        let jsonValue = null;
-        let decimals;
-        let scale;
-        let sign;
-        let transformation;
-        for (const fv of fact.factValues ?? []) {
-            if (fv.value !== undefined) {
-                jsonValue = fv.value;
-            }
-            if (fv.decimals !== undefined) {
-                decimals = fv.decimals;
-            }
-            if (fv.scale !== undefined) {
-                scale = fv.scale;
-            }
-            if (fv.sign !== undefined) {
-                sign = fv.sign;
-            }
-            if (fv.transformation !== undefined) {
-                transformation = fv.transformation;
-            }
-        }
+        /*
+         * A model fact can occur in several places in the document, and each
+         * occurrence is a factValue carrying the scaling and accuracy of the
+         * text where it is displayed -- Microsoft's total revenue is on pages
+         * 49, 84 (twice) and 85, and us-gaap:CommercialPaper is printed in
+         * millions in one place and billions in another.  They are consistent
+         * duplicates in the specification's sense: one fact, agreeing on value,
+         * presented differently.
+         *
+         * So the presentation is read per occurrence rather than merged.  Merging
+         * was not merely imprecise: barely any factValue carries an explicit
+         * value (27 of 1,829 in the Microsoft PDF factset), the surface computing
+         * it instead from the located text and that occurrence's scale, so one
+         * merged scale applied to text printed in different units gives a wrong
+         * value, not just a wrong accuracy.
+         */
+        const presentationOf = (fv) => ({
+            value: fv?.value ?? null,
+            decimals: fv?.decimals,
+            scale: fv?.scale,
+            sign: fv?.sign,
+            transformation: fv?.transformation,
+        });
 
-        const makeFactData = () => {
+        const makeFactData = (fv) => {
+            const { value: jsonValue, decimals, scale, sign, transformation } = presentationOf(fv);
             const factData = { a: { ...a }, v: jsonValue };
             /*
              * The model's own name for this fact.  Facts are keyed here by
@@ -505,20 +507,14 @@ function buildFacts(factset) {
                 factData.n = fact.name;
             }
             /*
-             * Every factValue name the model's fact carries, in model order.
-             *
-             * A factValue is one occurrence of the fact in the document, not one
-             * value of it: Microsoft's total revenue has four, on pages 49, 84
-             * (twice) and 85, and they agree on the value while differing in how
-             * it is presented -- CommercialPaper is scale 6 in one place and
-             * scale 9 in another.  All of them are given because this viewer
-             * fact stands for all of them at once (see the merge below), so
-             * naming one would assert a choice it did not make.
+             * The occurrence this viewer fact stands for, named as the model
+             * names it.  One name, because one viewer fact is now one occurrence
+             * -- which is also what makes derivedContent.factValues, keyed by
+             * factValueName, resolvable to a single value here.  A fact with no
+             * factValue at all (an unlocated one) has none to give.
              */
-            const factValueNames = (fact.factValues ?? [])
-                .map(fv => fv.name).filter(n => n !== undefined);
-            if (factValueNames.length > 0) {
-                factData.fvn = factValueNames;
+            if (fv?.name !== undefined) {
+                factData.fvn = fv.name;
             }
             if (decimals !== undefined) {
                 factData.d = decimals;
@@ -530,42 +526,55 @@ function buildFacts(factset) {
             return factData;
         };
 
-        // PDF surface first: a fact located in the PDF carries content (MCID)
-        // and/or image (bbox) locators; keyed by a synthesised id, with its
-        // locators attached for the document surface to place overlay boxes.
-        const pdfContent = pdfLocatorsForFact(fact);
-        const pdfImage = pdfImageLocatorsForFact(fact);
-        const pdfFormField = pdfFormFieldsForFact(fact);
-        if (pdfContent.length > 0 || pdfImage.length > 0 || pdfFormField.length > 0) {
-            const factData = makeFactData();
-            if (pdfContent.length > 0) {
-                factData.pdf = pdfContent;
-            }
-            if (pdfImage.length > 0) {
-                factData.pdfImage = pdfImage;
-            }
-            if (pdfFormField.length > 0) {
-                factData.pdfFormField = pdfFormField;
-            }
-            facts["pf-" + (pdfKeyCounter++)] = factData;
-            continue;
-        }
+        /*
+         * One viewer fact per located occurrence.  The locator helpers read a
+         * whole fact, so each occurrence is passed as a fact of its own; that
+         * keeps them single-purpose rather than teaching all four to take either.
+         */
+        let located = false;
+        for (const fv of fact.factValues ?? []) {
+            const occurrence = { ...fact, factValues: [fv] };
 
-        // HTML fallback: facts not located in the PDF keep their retained html
-        // source.  One viewer fact per html element id (repeated ids become
-        // duplicates, as for repeated iXBRL tags).
-        const elementIds = htmlElementIdsForFact(fact);
-        if (elementIds.length > 0) {
-            for (const elementId of elementIds) {
-                facts[elementId] = makeFactData();
+            // PDF surface first: an occurrence located in the PDF carries content
+            // (MCID) and/or image (bbox) locators; keyed by a synthesised id, with
+            // its locators attached for the surface to place overlay boxes.
+            const pdfContent = pdfLocatorsForFact(occurrence);
+            const pdfImage = pdfImageLocatorsForFact(occurrence);
+            const pdfFormField = pdfFormFieldsForFact(occurrence);
+            if (pdfContent.length > 0 || pdfImage.length > 0 || pdfFormField.length > 0) {
+                const factData = makeFactData(fv);
+                if (pdfContent.length > 0) {
+                    factData.pdf = pdfContent;
+                }
+                if (pdfImage.length > 0) {
+                    factData.pdfImage = pdfImage;
+                }
+                if (pdfFormField.length > 0) {
+                    factData.pdfFormField = pdfFormField;
+                }
+                facts["pf-" + (pdfKeyCounter++)] = factData;
+                located = true;
+                continue;
             }
+
+            // HTML fallback: an occurrence not located in the PDF keeps its
+            // retained html source.  One viewer fact per html element id
+            // (repeated ids become duplicates, as for repeated iXBRL tags).
+            for (const elementId of htmlElementIdsForFact(occurrence)) {
+                facts[elementId] = makeFactData(fv);
+                located = true;
+            }
+        }
+        if (located) {
             continue;
         }
 
         // No document locator at all -- an ix:hidden fact (e.g. dei:EntityCentralIndexKey)
         // never linked to display text. Keep it so the surface can register it as a
-        // hidden fact (browsable in the fact list) rather than dropping it.
-        facts["hf-" + (pdfKeyCounter++)] = makeFactData();
+        // hidden fact (browsable in the fact list) rather than dropping it.  Its
+        // presentation comes from its first factValue, there being no located
+        // occurrence to prefer.
+        facts["hf-" + (pdfKeyCounter++)] = makeFactData((fact.factValues ?? [])[0]);
     }
     return facts;
 }

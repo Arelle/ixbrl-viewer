@@ -394,7 +394,17 @@ those are comes from the model where it states them
 (`ReportSet.conceptFactsIndex()`), which over-counts: it takes every fact of a
 concept the cube mentions, including facts whose dimensions place them in a
 different cube.  On Microsoft's FY2025 10-K that inflates 9 of 112 cubes and is
-never short.  `createCubes()` runs from `Inspector.initialize()`
+never short.
+
+> A legacy instance imported into the model gets a synthetic **all-facts cube**,
+> which exists so that facts have a cube home and legacy calculations apply
+> report-wide; it is an import artifact, not a reporting structure, and should
+> not be listed.  It is not in the group tree, so the hierarchical panel drops it
+> — but that is the only thing keeping it out.  Nothing in the model marks it
+> (it is an ordinary `xbrl:reportCube`, distinguished only by a name in the
+> report's own namespace), so the flat fallback below would list it, and sorting
+> by fact count would put it first.  No model to hand hits that: every one
+> carrying an all-facts cube also carries a group tree.  `createCubes()` runs from `Inspector.initialize()`
 next to `createSummary()`, and sets `has-cubes` on `#ixv` from
 `ReportSet.hasCubes()`; a stylesheet rule hides the tab when the class is absent,
 so the panel only appears for XBRL Model reports and the iXBRL viewer is unaffected.

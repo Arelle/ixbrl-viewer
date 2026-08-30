@@ -135,6 +135,16 @@ Match a binding on (`cubeName`, `networkName`, `total`, `aspects`). `aspects`
 omits any aspect the binding does not constrain, so compare on the aspects
 present rather than requiring equality of the whole set.
 
+**The specificity rule is now normative**, following the reply from this side: a
+result *applies to* a binding when its cube, network and total are the binding's
+and every aspect it records has the same value there; **where several apply, the
+one recording the most aspects applies**. A producer must not publish two of
+equal specificity for one binding (`oimde:ambiguousCalculationResult`). Measured
+on the Microsoft filing, 17 of 184 results are matched by a more specific
+sibling and one genuinely disagrees — a total inconsistent across the whole
+report and consistent within each of its dimensional breakdowns — so a consumer
+without the rule shows the wrong verdict on that binding.
+
 Show `derivation` wherever a verdict is shown. *This is what validation
 concluded, then* is the whole claim; without when, by what, and under which rule
 sets, a carried verdict is no more interpretable than a recomputed one.
@@ -155,10 +165,27 @@ resolved, instead of the surface falling back to raw document text.
 
 ## 5. What is not there yet
 
-* **`basis: "bound"`** — a value bound to a location by hand, which is what the
-  tagger produces. The plugin emits only `resolved`. Applying a tagging journal
-  is the natural producer for `bound`, and is still unbuilt on the Arelle side
-  (`HANDOVER-model-workflow.md` §4).
+*(Updated after the workflow session picked up items 1 and 2 of the reply.)*
+
+* ~~**`basis: "bound"`**~~ — **now produced.** `ApplyTaggingJournal.py` applies a
+  tagging journal, and `--taggingJournalInto derivedContent` (the default)
+  records each binding as a derived fact value with a `basis` of `bound`,
+  carrying the tagger's own `sources` and `capturedText`, beside a model left
+  exactly as filed. `--taggingJournalInto model` is the other party's path: a
+  *preparer* tagging a report they are authoring, whose bindings are the
+  filing's own content and produce no derived content at all. See
+  `HANDOVER-model-workflow.md` §8.4 and §8.5.
+
+  **One thing this needs from the viewer side.** A journal entry names its fact
+  by the viewer's fact id. For a located fact that is
+  `<reportIndex>-<htmlElementId>`, which resolves against the model. For a fact
+  the viewer could not locate, or placed on a PDF, it is a synthetic `hf-N` /
+  `pf-N` — a position in the order `buildFacts` happened to emit, not an
+  identity — so the applier reports those entries unapplied rather than guessing.
+  That is precisely the re-rendering case the journal is most wanted for: tagging
+  a prior filing onto a PDF or HTML5 surface it was never tagged against, where
+  every fact starts unlocated. A stable identifier for such a fact — the model's
+  own factValue QName would do — would close it.
 * **`sourceModelChecksum`** — specified, not emitted, because the compiled-model
   checksum mechanism it depends on is itself unsettled. Until it exists, derived
   content cannot be shown to be current for the model it accompanies; treat a

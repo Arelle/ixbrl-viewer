@@ -493,12 +493,26 @@ function buildFacts(factset) {
 
         const makeFactData = () => {
             const factData = { a: { ...a }, v: jsonValue };
-            // The model's own name for this fact.  Facts are keyed here by
-            // document element id, which derivedContent does not use; carrying
-            // the name is what lets cubeContents address them (see
-            // ReportSet.cubeFactsIndex).
+            /*
+             * The model's own name for this fact.  Facts are keyed here by
+             * document element id or, where there is none, by position -- neither
+             * of which the model uses -- so this is the only stable identity a
+             * built fact carries.  It is what lets cubeContents address them
+             * (see ReportSet.cubeFactsIndex) and what a tagging journal names its
+             * subject by, so an applier can find the fact in the model.
+             */
             if (fact.name !== undefined) {
                 factData.n = fact.name;
+            }
+            /*
+             * The factValue name, only where the model gives exactly one.  A
+             * viewer fact merges every factValue of a model fact into a single
+             * value, so where there are several it has no basis for naming one
+             * of them, and an applier must decide for itself.
+             */
+            const factValues = fact.factValues ?? [];
+            if (factValues.length === 1 && factValues[0].name !== undefined) {
+                factData.fvn = factValues[0].name;
             }
             if (decimals !== undefined) {
                 factData.d = decimals;

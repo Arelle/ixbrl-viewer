@@ -383,6 +383,21 @@ describe("accept", () => {
         expect(surface.calls).toContain("endBind");
     });
 
+    test("carries the model's names through to the entry", () => {
+        // the viewer id of a PDF-placed or unlocated fact is a position in build
+        // order; an applier needs the name the model knows the fact by
+        const { session, journal } = newSession({ fact: {
+            id: "pf-3", value: "84.5", dataType: "xs:decimal",
+            name: "msft:fs_F_bc502677", valueName: "msft:F_bc502677_val" } });
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        const entry = session.accept();
+        expect(entry.factName).toBe("msft:fs_F_bc502677");
+        expect(entry.factValueName).toBe("msft:F_bc502677_val");
+        expect(journal.entries()[0].factName).toBe("msft:fs_F_bc502677");
+    });
+
     test("a differing capture can still be accepted", () => {
         // scaling, sign and locale formatting all make a value differ from its
         // presentation legitimately; refusing would block the corrections a

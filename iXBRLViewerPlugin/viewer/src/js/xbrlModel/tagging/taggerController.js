@@ -179,6 +179,12 @@ export class TaggerController {
         this._session = new BindSession({
             fact: {
                 id: fact.vuid,
+                // The model's names for what is being tagged.  The viewer id is
+                // a document element id or a position in build order, so it does
+                // not survive re-rendering the document -- which is the case a
+                // journal is most wanted for, where every fact starts unlocated.
+                name: fact.f?.n,
+                valueName: fact.f?.fvn,
                 value: this._factValue(fact),
                 dataType: this._factDataType(fact),
             },

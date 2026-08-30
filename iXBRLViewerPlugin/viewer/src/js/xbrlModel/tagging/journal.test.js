@@ -120,6 +120,30 @@ describe("TaggingJournal", () => {
         expect(j.length).toBe(1);
     });
 
+    test("names the fact as the model names it, not only as the viewer does", () => {
+        // pf-3 is a position in build order, not an identity: it does not
+        // survive re-rendering the document, which is the case the journal is
+        // most wanted for
+        const j = new TaggingJournal();
+        const e = j.bind(bindArgs({
+            factId: "pf-3",
+            factName: "msft:fs_F_bc502677",
+            factValueName: "msft:F_bc502677_val",
+        }));
+        expect(e.factId).toBe("pf-3");
+        expect(e.factName).toBe("msft:fs_F_bc502677");
+        expect(e.factValueName).toBe("msft:F_bc502677_val");
+        expect(JSON.parse(j.serialise()).entries[0].factName).toBe("msft:fs_F_bc502677");
+    });
+
+    test("a report with no model behind it names what it can", () => {
+        // the plain iXBRL path has no model fact to name; the entry is still
+        // valid, and an applier is told there is no name rather than guessing
+        const e = new TaggingJournal().bind(bindArgs());
+        expect(e.factName).toBeNull();
+        expect(e.factValueName).toBeNull();
+    });
+
     test("rejects entries missing their required parts", () => {
         const j = new TaggingJournal();
         expect(() => j.bind(bindArgs({ factId: null }))).toThrow(/factId/);

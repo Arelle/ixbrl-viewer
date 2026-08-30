@@ -169,8 +169,8 @@ export class TaggingJournal {
      * first bind, the displaced properties for a rebind -- which is what makes
      * an entry reversible without consulting the model.
      */
-    bind({ factId, locatorType, sources, properties, capturedText, factValue, previous = null,
-           derivation = null }) {
+    bind({ factId, factName = null, factValueName = null, locatorType, sources, properties,
+           capturedText, factValue, previous = null, derivation = null }) {
         if (!factId) {
             throw new Error("journal: factId is required");
         }
@@ -203,6 +203,23 @@ export class TaggingJournal {
         const entry = {
             op: "bindValueSource",
             factId,
+            /*
+             * The model's name for the fact, which is what an applier resolves
+             * against.  `factId` is the viewer's: a document element id for a
+             * located fact, and for one the viewer could not locate or placed on
+             * a PDF, a position in build order rather than an identity.  That is
+             * exactly the case a journal is most wanted for -- re-rendering a
+             * document, where every fact starts unlocated -- so an entry that
+             * named only the viewer id would not survive it.
+             *
+             * factValueName is given only where the model's fact has exactly one
+             * factValue.  A viewer fact merges them all into one value, so where
+             * there are several it has no basis for naming one, and the applier
+             * has to choose.  Both are null for a report with no model behind it
+             * (the plain iXBRL path), where there is no name to give.
+             */
+            factName,
+            factValueName,
             previous,
             locatorType,
             sources: list,

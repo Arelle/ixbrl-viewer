@@ -299,7 +299,11 @@ Notes on the shape:
 - `derivation` is present only where the user accepted one — how the located
   text becomes the asserted value, as `scale` / `sign` / `transformation`.
 - `previous` is `null` for a bind and carries the displaced sources for a
-  rebind, which is what makes an entry reversible.
+  rebind, which is what makes an entry reversible. It is in the same shape as
+  `sources` — the model's own `factValueSourceObject`s — so reversing an entry is
+  a swap rather than a translation. A binding made earlier in the same session
+  takes precedence over the model's original, being what is actually in force;
+  reversing to the model's would undo more than the entry did.
 - `capturedText`, `factValue` and `verdict` are provenance, not instructions. They
   let a reviewer see why the user accepted a binding without re-running the tool,
   and they let the applier warn if the document has changed since.

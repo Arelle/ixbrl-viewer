@@ -185,6 +185,9 @@ export class TaggerController {
                 // journal is most wanted for, where every fact starts unlocated.
                 name: fact.f?.n,
                 valueName: fact.f?.fvn,
+                // What this occurrence is bound to in the model, so a rebind can
+                // record what it displaced.
+                currentSources: fact.f?.vs,
                 value: this._factValue(fact),
                 dataType: this._factDataType(fact),
             },

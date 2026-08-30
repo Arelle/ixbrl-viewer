@@ -383,11 +383,31 @@ export class BindSession {
             sources: c.sources ?? [{ properties: c.properties }],
             capturedText: c.text,
             factValue: this.factValue(),
-            previous: this.fact?.currentProperties ?? null,
+            previous: this._displaced(),
             ...(derivation ? { derivation } : {}),
         }) ?? null;
         this.end();
         return entry;
+    }
+
+    /*
+     * What this bind displaces, in the model's own source shape, or null when it
+     * displaces nothing.
+     *
+     * A binding already made in this session wins over the model's: it is what is
+     * currently in force, and reversing to the model's original would undo more
+     * than the entry did.  Recording this is what lets an applier reverse an
+     * entry without consulting the model, and what distinguishes a rebind from a
+     * first bind -- the field was previously read from a property nothing ever
+     * set, so every entry claimed to be a first bind.
+     */
+    _displaced() {
+        const inSession = this.journal?.currentBinding(this.fact?.id);
+        if (inSession?.sources) {
+            return inSession.sources;
+        }
+        const fromModel = this.fact?.currentSources;
+        return Array.isArray(fromModel) && fromModel.length > 0 ? fromModel : null;
     }
 
     cancel() {

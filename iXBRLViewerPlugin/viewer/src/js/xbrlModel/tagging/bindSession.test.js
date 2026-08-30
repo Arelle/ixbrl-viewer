@@ -410,16 +410,50 @@ describe("accept", () => {
         expect(journal.entries()[0].verdict).toBe(VERDICT.DIFFER);
     });
 
-    test("a rebind records what it displaced", () => {
-        const previous = [{ property: "xbrl:pdfPage", value: "1" }];
+    test("a rebind records the model sources it displaced", () => {
+        // shaped as the model holds them -- factValueSourceObjects, matching
+        // `sources` -- so reversing an entry is a swap rather than a translation
+        const previous = [{ properties: [{ property: "xbrl:pdfPage", value: "1" }] }];
         const { session, journal } = newSession({
-            fact: { id: "f-1", value: "84.5", dataType: "xs:decimal", currentProperties: previous },
+            fact: { id: "f-1", value: "84.5", dataType: "xs:decimal", currentSources: previous },
         });
         session.begin();
         session.candidate(candidate("84,5"));
         session.capture();
         session.accept();
         expect(journal.entries()[0].previous).toEqual(previous);
+    });
+
+    test("a fact bound to nothing displaces nothing", () => {
+        const { session, journal } = newSession();
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        session.accept();
+        expect(journal.entries()[0].previous).toBeNull();
+    });
+
+    test("rebinding twice displaces the binding in force, not the model's", () => {
+        // the first entry is what is currently in force; reversing to the
+        // model's original would undo more than the second entry did
+        const modelSources = [{ properties: [{ property: "xbrl:pdfPage", value: "1" }] }];
+        const { session, journal } = newSession({
+            fact: { id: "f-1", value: "84.5", dataType: "xs:decimal",
+                    currentSources: modelSources },
+        });
+        session.begin();
+        session.candidate(candidate("84,5"));
+        session.capture();
+        session.accept();
+
+        session.begin();
+        session.candidate(candidate("84,6"));
+        session.capture();
+        session.accept();
+
+        const [first, second] = journal.entries();
+        expect(first.previous).toEqual(modelSources);
+        expect(second.previous).toEqual(first.sources);
     });
 
     test("accept without a capture does nothing", () => {

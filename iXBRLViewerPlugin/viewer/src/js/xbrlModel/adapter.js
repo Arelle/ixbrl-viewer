@@ -516,6 +516,19 @@ function buildFacts(factset) {
             if (fv?.name !== undefined) {
                 factData.fvn = fv.name;
             }
+            /*
+             * The occurrence's existing sources, kept in the model's own shape.
+             *
+             * This is what a rebind displaces, and a journal entry records it so
+             * the entry can be reversed without consulting the model.  Held by
+             * reference rather than copied: the parsed factset is alive for the
+             * session anyway, so this keeps a subtree rather than duplicating
+             * one (223 KB of 1.1 MB were it copied, on the Microsoft PDF
+             * factset).
+             */
+            if (Array.isArray(fv?.valueSources) && fv.valueSources.length > 0) {
+                factData.vs = fv.valueSources;
+            }
             if (decimals !== undefined) {
                 factData.d = decimals;
             }

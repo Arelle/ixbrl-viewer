@@ -519,6 +519,24 @@ displace, and the local computation has always been its only source.  Provenance
 (`derivation` — processor, date, rule sets) is shown beside every carried
 verdict, including *Not validated*, where it says which run skipped the binding.
 
+**Resolved fact values.** `derivedContent.factValues` carries what processing
+resolved each occurrence to, keyed by `factValueName` — one-to-one against the
+viewer's facts, since one viewer fact is one occurrence.  A `bound` value
+supersedes a `resolved` one for the same occurrence: it came from an applied
+tagging journal, the model's own sources having failed to locate it on that
+surface.
+
+It is used **only as a fallback**, where the surface cannot reconstruct a value
+from the document text — a transformation the viewer does not implement, such as
+`ixt-sec:numwordsen` and the fifteen others SEC defines, where it would otherwise
+show raw text.  Not as an override, deliberately: reconstructing from the located
+text is what makes a mis-bound locator visible, since a fact reading the wrong
+text shows the wrong value.  Preferring the resolved value everywhere would show
+the right value at the wrong place, which is the harder defect to notice.  An
+explicit value in the model outranks both (`surfaceUtil.parseNumericValue`).
+
+Numeric facts only; a textual fact still shows what the document says.
+
 **What the viewer's own calculation cannot honour.** This applies only to the
 fallback path — a report carrying no `derivedContent`, where `calculation.js`
 computes locally. The specification makes the parameters of a check properties of

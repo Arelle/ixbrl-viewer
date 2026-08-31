@@ -59,3 +59,38 @@ describe("the legacy accommodation cube", () => {
         expect(cubesOffered(doc)).toEqual(["eg:Statement"]);
     });
 });
+
+describe("resolved values from derived content", () => {
+    const docWith = (factValues, fvName = "eg:F1_fv") => ({
+        documentInfo: { namespaces: { eg: "http://www.example.com" } },
+        xbrlModel: { facts: [{
+            name: "eg:F1",
+            factDimensions: { "xbrl:concept": "eg:Revenue", "xbrl:unit": "iso4217:USD" },
+            factValues: [{ name: fvName, valueSources: [{ properties: [
+                { property: "xbrl:htmlElementId", value: ["e1"] }] }] }],
+        }] },
+        derivedContent: { factValues },
+    });
+    const built = (doc) => Object.values(
+        buildReportData(doc, {}, {}).sourceReports[0].targetReports[0].facts)[0];
+
+    test("reach the fact keyed by factValueName", () => {
+        const f = built(docWith([{ factValueName: "eg:F1_fv", basis: "resolved", value: "100" }]));
+        expect(f.num.derivedValue).toBe("100");
+    });
+
+    test("a bound value supersedes a resolved one for the same occurrence", () => {
+        // bound came from an applied tagging journal, the model's own sources
+        // having failed to locate it on that surface
+        const f = built(docWith([
+            { factValueName: "eg:F1_fv", basis: "resolved", value: "100" },
+            { factValueName: "eg:F1_fv", basis: "bound", value: "250" },
+        ]));
+        expect(f.num.derivedValue).toBe("250");
+    });
+
+    test("a fact the derived content does not mention carries none", () => {
+        const f = built(docWith([{ factValueName: "eg:Other_fv", basis: "resolved", value: "100" }]));
+        expect(f.num.derivedValue).toBeUndefined();
+    });
+});

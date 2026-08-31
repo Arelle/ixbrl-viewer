@@ -453,7 +453,26 @@ function pdfFormFieldsForFact(fact) {
     return names;
 }
 
-function buildFacts(factset) {
+/*
+ * derivedContent.factValues, keyed by factValueName -- the resolved value of one
+ * occurrence.  `bound` supersedes `resolved` for the same occurrence: a bound
+ * value came from a tagging journal, applied because the model's own sources did
+ * not locate it on that surface.
+ */
+function resolvedValuesByFactValue(doc) {
+    const byName = {};
+    for (const rv of doc?.derivedContent?.factValues ?? []) {
+        if (rv?.factValueName === undefined) {
+            continue;
+        }
+        if (byName[rv.factValueName] === undefined || rv.basis === "bound") {
+            byName[rv.factValueName] = rv.value;
+        }
+    }
+    return byName;
+}
+
+function buildFacts(factset, resolvedValues = {}) {
     const facts = {};
     let pdfKeyCounter = 0;
     for (const fact of factset.facts ?? []) {
@@ -557,6 +576,22 @@ function buildFacts(factset) {
             // Numeric metadata for the surface to compute the value/scale.
             if (unit !== undefined) {
                 factData.num = { scale, sign, transformation, explicitValue: jsonValue };
+                /*
+                 * What processing resolved this occurrence to, used only where
+                 * the surface cannot reconstruct a value from the document text
+                 * -- a transformation the viewer does not implement, such as the
+                 * sixteen SEC defines, where it would otherwise show raw text.
+                 *
+                 * Deliberately a fallback rather than an override.  Reconstructing
+                 * from the located text is what makes a mis-bound locator visible:
+                 * a fact reading the wrong text shows the wrong value.  Preferring
+                 * the resolved value everywhere would show the right value at the
+                 * wrong place, which is the harder defect to notice.
+                 */
+                const resolved = resolvedValues[fv?.name];
+                if (resolved !== undefined) {
+                    factData.num.derivedValue = resolved;
+                }
             }
             return factData;
         };
@@ -733,7 +768,10 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
     const labelsByObject = buildLabelsByObject(taxonomy);
     const dimensionConcepts = collectDimensionConcepts(taxonomy);
     const concepts = buildConcepts(taxonomy, labelsByObject, dimensionConcepts);
-    const facts = buildFacts(factset);
+    const facts = buildFacts(factset, {
+        ...resolvedValuesByFactValue(taxonomyDoc),
+        ...resolvedValuesByFactValue(factsetDoc),
+    });
     // Ensure every fact's concept is registered so the inspector falls back to
     // the concept QName (not "<no label>") when no taxonomy/labels are loaded.
     for (const factData of Object.values(facts)) {

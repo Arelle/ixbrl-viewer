@@ -57,7 +57,7 @@ seams were added:
        Report pattern) — all those facts share one overlay (their vuids all land in
        its `ivids`), selecting any highlights the chart and clicking it surfaces the
        set; and a **sub-MCID text value** whose bbox is its own glyph rectangle
-       (emitted by `alignFactsToPdf` when a fact is only a portion of a coarse
+       (emitted by `alignFactsToSurface` when a fact is only a portion of a coarse
        row-grained MCID) gives **per-value** highlighting — its bbox is unique, so it
        gets its own overlay. The viewer treats both identically; only the granularity
        of the source bbox differs.

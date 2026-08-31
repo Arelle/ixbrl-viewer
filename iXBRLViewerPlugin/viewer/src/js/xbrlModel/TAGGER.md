@@ -129,7 +129,7 @@ subject of an open proposal:
 
 | declaration | status |
 |---|---|
-| `xbrl:pdfImageLocatorType` (`pdfPage` + `pdfBBox` + optional `pdfImageHash`) | documented, emitted by `alignFactsToPdf`, consumed by `adapter.js` — but never declared |
+| `xbrl:pdfImageLocatorType` (`pdfPage` + `pdfBBox` + optional `pdfImageHash`) | documented, emitted by `alignFactsToSurface`, consumed by `adapter.js` — but never declared |
 | `xbrl:pdfBBox` in `pdfContentLocatorType.allowedProperties` | sub-MCID glyph rectangles the aligner already emits would otherwise fail `allowedProperties` |
 | `xbrl:htmlElementPointer` + `xbrl:xhtmlPointerLocatorType` | proposed in `documentation/proposal-html-element-pointer.md` (OIM repo) |
 
@@ -157,7 +157,7 @@ Two populations end up there, and the UI should distinguish them:
 - **Genuinely unlocatable** — `ix:hidden` facts such as `dei:EntityCentralIndexKey`,
   which have no display text by design. These should be dismissible, not tagged.
 - **Failed to locate** — a fact whose value does appear in the document, but which
-  `alignFactsToPdf` could not match. These are the tagging targets.
+  `alignFactsToSurface` could not match. These are the tagging targets.
 
 ## 3. User operation
 
@@ -218,7 +218,7 @@ accepts, retries, or cancels. Accepting appends to the journal and immediately
 re-renders the fact as located, so the effect is visible on the page.
 
 The comparison reuses the same normalisation the aligner uses for its token
-strategy, so what the tagger calls "agree" matches what `alignFactsToPdf` would
+strategy, so what the tagger calls "agree" matches what `alignFactsToSurface` would
 have called a hit.
 
 ### 3.4 Reviewing and exporting

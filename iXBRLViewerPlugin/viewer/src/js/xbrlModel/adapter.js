@@ -160,6 +160,25 @@ function buildSections(taxonomy, labelsByObject) {
     return roots.length ? roots : null;
 }
 
+/*
+ * The cube type a legacy translation gives itself.
+ *
+ * A legacy XBRL 2.1 instance has no notion of cube membership, so a model that
+ * requires one has to accommodate it: the translation generates a cube for
+ * facts to belong to and translated calculations to bind in.  It corresponds to
+ * nothing the filer authored and is not a reporting structure, so it is dropped
+ * here rather than listed in the Cubes panel.
+ *
+ * Not to be confused with ESEF's "[999999] Line items not dimensionally
+ * qualified", which a filer authors and which does belong in a navigator.
+ *
+ * Matched on the local name because the type is model-defined -- each
+ * translated model declares its own, in its own namespace, deriving from
+ * xbrl:reportCube.  Should a reserved type be specified later, the models will
+ * derive from it and this becomes a QName match.
+ */
+const LEGACY_ACCOMMODATION_CUBE_TYPE = "legacyAccommodationCubeType";
+
 // Cubes (hypercubes/tables) are the semantic structures of the XBRL model.  A
 // cube's xbrl:concept dimension points to a domain network whose members are the
 // cube's line-item concepts; those drive navigation to the cube's facts.  Cubes
@@ -172,6 +191,9 @@ function buildCubes(taxonomy, labelsByObject) {
 
     const cubes = [];
     for (const cube of taxonomy.cubes ?? []) {
+        if (localName(cube.cubeType) === LEGACY_ACCOMMODATION_CUBE_TYPE) {
+            continue;
+        }
         let conceptDomainNet = null;
         const dimensions = [];
         for (const cd of cube.cubeDimensions ?? []) {

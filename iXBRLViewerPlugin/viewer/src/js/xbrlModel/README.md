@@ -414,15 +414,24 @@ concept the cube mentions, including facts whose dimensions place them in a
 different cube.  On Microsoft's FY2025 10-K that inflates 9 of 112 cubes and is
 never short.
 
-> A legacy instance imported into the model gets a synthetic **all-facts cube**,
-> which exists so that facts have a cube home and legacy calculations apply
-> report-wide; it is an import artifact, not a reporting structure, and should
-> not be listed.  It is not in the group tree, so the hierarchical panel drops it
-> — but that is the only thing keeping it out.  Nothing in the model marks it
-> (it is an ordinary `xbrl:reportCube`, distinguished only by a name in the
-> report's own namespace), so the flat fallback below would list it, and sorting
-> by fact count would put it first.  No model to hand hits that: every one
-> carrying an all-facts cube also carries a group tree.  `createCubes()` runs from `Inspector.initialize()`
+> A legacy XBRL 2.1 instance has no notion of cube membership, so a model that
+> requires one has to **accommodate** it: the translation generates a cube for
+> facts to belong to and translated calculations to bind in.  It corresponds to
+> nothing the filer authored and is not a reporting structure, so `buildCubes`
+> drops it and no panel lists it.
+>
+> It is recognised by its **cube type**, whose local name is
+> `legacyAccommodationCubeType` — model-defined, so each translated model
+> declares its own in its own namespace deriving from `xbrl:reportCube`.  Should
+> a reserved type be specified later, models will derive from it and this becomes
+> a QName match.  Matching the type rather than the name matters: an earlier
+> build dropped the cube only because it was absent from the group tree, which
+> held for every model to hand but was incidental, and would not have held for
+> the flat fallback below — which sorts by fact count and would have put it
+> first.
+>
+> Not to be confused with ESEF's *[999999] Line items not dimensionally
+> qualified*, which a filer authors and which does belong in a navigator.  `createCubes()` runs from `Inspector.initialize()`
 next to `createSummary()`, and sets `has-cubes` on `#ixv` from
 `ReportSet.hasCubes()`; a stylesheet rule hides the tab when the class is absent,
 so the panel only appears for XBRL Model reports and the iXBRL viewer is unaffected.

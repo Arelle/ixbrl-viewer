@@ -11,6 +11,25 @@ import Decimal from 'decimal.js';
 // The document shows the *scaled* presentation value (e.g. revenue "391,035" in
 // millions); the reported value is that times 10^scale, matching iXBRL, where
 // the stored value is the full value and scale is a display hint.
+/*
+ * What processing resolved this occurrence to, for the cases the document text
+ * cannot give: a transformation the viewer does not implement (ixt-sec:numwordsen
+ * and the fifteen others SEC defines) leaves text no arithmetic here can read.
+ * Reached only after reconstruction has failed, so a value the viewer can derive
+ * itself is still derived -- see the note in adapter.js on why this is a fallback.
+ */
+function derivedFallback(meta) {
+    if (meta.derivedValue === null || meta.derivedValue === undefined) {
+        return null;
+    }
+    try {
+        return new Decimal(meta.derivedValue).toFixed();
+    }
+    catch (e) {
+        return null;
+    }
+}
+
 export function parseNumericValue(text, meta = {}) {
     // An explicit OIM value always wins.
     if (meta.explicitValue !== null && meta.explicitValue !== undefined && meta.explicitValue !== "") {
@@ -22,11 +41,11 @@ export function parseNumericValue(text, meta = {}) {
         }
     }
     if (text === null || text === undefined) {
-        return null;
+        return derivedFallback(meta);
     }
     let s = String(text).trim();
     if (!s) {
-        return null;
+        return derivedFallback(meta);
     }
 
     // Negativity can come from the OIM sign, parentheses, or a leading minus.
@@ -48,7 +67,7 @@ export function parseNumericValue(text, meta = {}) {
     // Keep magnitude digits and a decimal point only.
     s = s.replace(/[^\d.]/g, "");
     if (s === "" || s === ".") {
-        return null;
+        return derivedFallback(meta);
     }
 
     let num;
@@ -56,7 +75,7 @@ export function parseNumericValue(text, meta = {}) {
         num = new Decimal(s);
     }
     catch (e) {
-        return null;
+        return derivedFallback(meta);
     }
     if (negative && !num.isZero()) {
         num = num.negated();

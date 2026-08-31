@@ -197,3 +197,40 @@ div.ixbrl-table-handle {
     }
   }
 }
+
+// Bind mode (instance tagger).  Applied inside the rendered document while a
+// bind is in progress: the cursor becomes a crosshair, and the run or element
+// under it is outlined so the target is visible before it is committed.
+//
+// The candidate outline is deliberately distinct from the ixbrl-element hover
+// outline -- during a bind the user is choosing new content, not inspecting
+// content that is already tagged, and the two must not look alike.
+.xbrl-bind-mode {
+  cursor: crosshair;
+
+  // Suppress the ordinary hover affordance: an already-tagged element is not a
+  // more likely bind target than any other, and two competing outlines under
+  // one cursor is unreadable.
+  .ixbrl-element:not(.ixbrl-no-highlight):hover,
+  .ixbrl-sub-element:not(.ixbrl-no-highlight):hover {
+    outline: none;
+  }
+}
+
+.xbrl-bind-candidate {
+  outline: solid 0.1875em var(--colour-primary);
+  outline-offset: 0.0625em;
+  background-color: fade(#2b7de9, 18%);
+
+  td&, th& {
+    outline-offset: -0.0625em;
+  }
+}
+
+// On the PDF surface the candidate is a positioned div over the page canvas
+// rather than a wrapped element, since the page text is painted, not DOM.
+div.xbrl-bind-candidate {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}

@@ -160,6 +160,25 @@ function buildSections(taxonomy, labelsByObject) {
     return roots.length ? roots : null;
 }
 
+/*
+ * The cube type a legacy translation gives itself.
+ *
+ * A legacy XBRL 2.1 instance has no notion of cube membership, so a model that
+ * requires one has to accommodate it: the translation generates a cube for
+ * facts to belong to and translated calculations to bind in.  It corresponds to
+ * nothing the filer authored and is not a reporting structure, so it is dropped
+ * here rather than listed in the Cubes panel.
+ *
+ * Not to be confused with ESEF's "[999999] Line items not dimensionally
+ * qualified", which a filer authors and which does belong in a navigator.
+ *
+ * Matched on the local name because the type is model-defined -- each
+ * translated model declares its own, in its own namespace, deriving from
+ * xbrl:reportCube.  Should a reserved type be specified later, the models will
+ * derive from it and this becomes a QName match.
+ */
+const LEGACY_ACCOMMODATION_CUBE_TYPE = "legacyAccommodationCubeType";
+
 // Cubes (hypercubes/tables) are the semantic structures of the XBRL model.  A
 // cube's xbrl:concept dimension points to a domain network whose members are the
 // cube's line-item concepts; those drive navigation to the cube's facts.  Cubes
@@ -172,6 +191,9 @@ function buildCubes(taxonomy, labelsByObject) {
 
     const cubes = [];
     for (const cube of taxonomy.cubes ?? []) {
+        if (localName(cube.cubeType) === LEGACY_ACCOMMODATION_CUBE_TYPE) {
+            continue;
+        }
         let conceptDomainNet = null;
         const dimensions = [];
         for (const cd of cube.cubeDimensions ?? []) {
@@ -431,7 +453,26 @@ function pdfFormFieldsForFact(fact) {
     return names;
 }
 
-function buildFacts(factset) {
+/*
+ * derivedContent.factValues, keyed by factValueName -- the resolved value of one
+ * occurrence.  `bound` supersedes `resolved` for the same occurrence: a bound
+ * value came from a tagging journal, applied because the model's own sources did
+ * not locate it on that surface.
+ */
+function resolvedValuesByFactValue(doc) {
+    const byName = {};
+    for (const rv of doc?.derivedContent?.factValues ?? []) {
+        if (rv?.factValueName === undefined) {
+            continue;
+        }
+        if (byName[rv.factValueName] === undefined || rv.basis === "bound") {
+            byName[rv.factValueName] = rv.value;
+        }
+    }
+    return byName;
+}
+
+function buildFacts(factset, resolvedValues = {}) {
     const facts = {};
     let pdfKeyCounter = 0;
     for (const fact of factset.facts ?? []) {
@@ -468,80 +509,151 @@ function buildFacts(factset) {
             a.u = unit;
         }
 
-        let jsonValue = null;
-        let decimals;
-        let scale;
-        let sign;
-        let transformation;
-        for (const fv of fact.factValues ?? []) {
-            if (fv.value !== undefined) {
-                jsonValue = fv.value;
-            }
-            if (fv.decimals !== undefined) {
-                decimals = fv.decimals;
-            }
-            if (fv.scale !== undefined) {
-                scale = fv.scale;
-            }
-            if (fv.sign !== undefined) {
-                sign = fv.sign;
-            }
-            if (fv.transformation !== undefined) {
-                transformation = fv.transformation;
-            }
-        }
+        /*
+         * A model fact can occur in several places in the document, and each
+         * occurrence is a factValue carrying the scaling and accuracy of the
+         * text where it is displayed -- Microsoft's total revenue is on pages
+         * 49, 84 (twice) and 85, and us-gaap:CommercialPaper is printed in
+         * millions in one place and billions in another.  They are consistent
+         * duplicates in the specification's sense: one fact, agreeing on value,
+         * presented differently.
+         *
+         * So the presentation is read per occurrence rather than merged.  Merging
+         * was not merely imprecise: barely any factValue carries an explicit
+         * value (27 of 1,829 in the Microsoft PDF factset), the surface computing
+         * it instead from the located text and that occurrence's scale, so one
+         * merged scale applied to text printed in different units gives a wrong
+         * value, not just a wrong accuracy.
+         */
+        const presentationOf = (fv) => ({
+            value: fv?.value ?? null,
+            decimals: fv?.decimals,
+            scale: fv?.scale,
+            sign: fv?.sign,
+            transformation: fv?.transformation,
+        });
 
-        const makeFactData = () => {
+        const makeFactData = (fv) => {
+            const { value: jsonValue, decimals, scale, sign, transformation } = presentationOf(fv);
             const factData = { a: { ...a }, v: jsonValue };
+            /*
+             * The model's own name for this fact.  Facts are keyed here by
+             * document element id or, where there is none, by position -- neither
+             * of which the model uses -- so this is the only stable identity a
+             * built fact carries.  It is what lets cubeContents address them
+             * (see ReportSet.cubeFactsIndex) and what a tagging journal names its
+             * subject by, so an applier can find the fact in the model.
+             */
+            if (fact.name !== undefined) {
+                factData.n = fact.name;
+            }
+            /*
+             * The occurrence this viewer fact stands for, named as the model
+             * names it.  One name, because one viewer fact is now one occurrence
+             * -- which is also what makes derivedContent.factValues, keyed by
+             * factValueName, resolvable to a single value here.  A fact with no
+             * factValue at all (an unlocated one) has none to give.
+             */
+            if (fv?.name !== undefined) {
+                factData.fvn = fv.name;
+            }
+            /*
+             * The occurrence's existing sources, kept in the model's own shape.
+             *
+             * This is what a rebind displaces, and a journal entry records it so
+             * the entry can be reversed without consulting the model.  Held by
+             * reference rather than copied: the parsed factset is alive for the
+             * session anyway, so this keeps a subtree rather than duplicating
+             * one (223 KB of 1.1 MB were it copied, on the Microsoft PDF
+             * factset).
+             */
+            if (Array.isArray(fv?.valueSources) && fv.valueSources.length > 0) {
+                factData.vs = fv.valueSources;
+            }
             if (decimals !== undefined) {
                 factData.d = decimals;
             }
             // Numeric metadata for the surface to compute the value/scale.
             if (unit !== undefined) {
                 factData.num = { scale, sign, transformation, explicitValue: jsonValue };
+                /*
+                 * What processing resolved this occurrence to, used only where
+                 * the surface cannot reconstruct a value from the document text
+                 * -- a transformation the viewer does not implement, such as the
+                 * sixteen SEC defines, where it would otherwise show raw text.
+                 *
+                 * Deliberately a fallback rather than an override.  Reconstructing
+                 * from the located text is what makes a mis-bound locator visible:
+                 * a fact reading the wrong text shows the wrong value.  Preferring
+                 * the resolved value everywhere would show the right value at the
+                 * wrong place, which is the harder defect to notice.
+                 */
+                const resolved = resolvedValues[fv?.name];
+                if (resolved !== undefined) {
+                    factData.num.derivedValue = resolved;
+                }
             }
             return factData;
         };
 
-        // PDF surface first: a fact located in the PDF carries content (MCID)
-        // and/or image (bbox) locators; keyed by a synthesised id, with its
-        // locators attached for the document surface to place overlay boxes.
-        const pdfContent = pdfLocatorsForFact(fact);
-        const pdfImage = pdfImageLocatorsForFact(fact);
-        const pdfFormField = pdfFormFieldsForFact(fact);
-        if (pdfContent.length > 0 || pdfImage.length > 0 || pdfFormField.length > 0) {
-            const factData = makeFactData();
-            if (pdfContent.length > 0) {
-                factData.pdf = pdfContent;
-            }
-            if (pdfImage.length > 0) {
-                factData.pdfImage = pdfImage;
-            }
-            if (pdfFormField.length > 0) {
-                factData.pdfFormField = pdfFormField;
-            }
-            facts["pf-" + (pdfKeyCounter++)] = factData;
-            continue;
-        }
+        /*
+         * One viewer fact per located occurrence.  The locator helpers read a
+         * whole fact, so each occurrence is passed as a fact of its own; that
+         * keeps them single-purpose rather than teaching all four to take either.
+         */
+        let located = false;
+        for (const fv of fact.factValues ?? []) {
+            const occurrence = { ...fact, factValues: [fv] };
 
-        // HTML fallback: facts not located in the PDF keep their retained html
-        // source.  One viewer fact per html element id (repeated ids become
-        // duplicates, as for repeated iXBRL tags).
-        const elementIds = htmlElementIdsForFact(fact);
-        if (elementIds.length > 0) {
-            for (const elementId of elementIds) {
-                facts[elementId] = makeFactData();
+            // PDF surface first: an occurrence located in the PDF carries content
+            // (MCID) and/or image (bbox) locators; keyed by a synthesised id, with
+            // its locators attached for the surface to place overlay boxes.
+            const pdfContent = pdfLocatorsForFact(occurrence);
+            const pdfImage = pdfImageLocatorsForFact(occurrence);
+            const pdfFormField = pdfFormFieldsForFact(occurrence);
+            if (pdfContent.length > 0 || pdfImage.length > 0 || pdfFormField.length > 0) {
+                const factData = makeFactData(fv);
+                if (pdfContent.length > 0) {
+                    factData.pdf = pdfContent;
+                }
+                if (pdfImage.length > 0) {
+                    factData.pdfImage = pdfImage;
+                }
+                if (pdfFormField.length > 0) {
+                    factData.pdfFormField = pdfFormField;
+                }
+                facts["pf-" + (pdfKeyCounter++)] = factData;
+                located = true;
+                continue;
             }
+
+            // HTML fallback: an occurrence not located in the PDF keeps its
+            // retained html source.  One viewer fact per html element id
+            // (repeated ids become duplicates, as for repeated iXBRL tags).
+            for (const elementId of htmlElementIdsForFact(occurrence)) {
+                facts[elementId] = makeFactData(fv);
+                located = true;
+            }
+        }
+        if (located) {
             continue;
         }
 
         // No document locator at all -- an ix:hidden fact (e.g. dei:EntityCentralIndexKey)
         // never linked to display text. Keep it so the surface can register it as a
-        // hidden fact (browsable in the fact list) rather than dropping it.
-        facts["hf-" + (pdfKeyCounter++)] = makeFactData();
+        // hidden fact (browsable in the fact list) rather than dropping it.  Its
+        // presentation comes from its first factValue, there being no located
+        // occurrence to prefer.
+        facts["hf-" + (pdfKeyCounter++)] = makeFactData((fact.factValues ?? [])[0]);
     }
     return facts;
 }
+
+/*
+ * The synthetic source the model uses to mark a network's roots.  It is not a
+ * concept and never carries a weight.
+ */
+const XBRL_ROOT_SOURCE = "xbrl:rootSource";
 
 function buildNetworks(taxonomy) {
     // OIM networks -> the viewer's ELR-keyed relationship map.
@@ -554,11 +666,50 @@ function buildNetworks(taxonomy) {
     for (const net of taxonomy.networks ?? []) {
         const elr = net.name;
         const relationships = net.relationships ?? [];
-        const isCalc = relationships.some(r =>
-            (r.properties ?? []).some(p => p.property === "xbrl:weight"));
+        /*
+         * The model states the kind directly, so ask it rather than infer.
+         *
+         * The weight heuristic below was the original test, and on a well-formed
+         * taxonomy the two agree exactly -- 23 of 96 networks either way on the
+         * Apple demo.  They part company on a taxonomy under repair: a
+         * summation-item network whose relationships have lost their weights
+         * carries no weight anywhere, so the heuristic silently reclassifies it
+         * as presentation and it disappears from the calculation inspector
+         * instead of showing up as broken.  It is kept only as a fallback for a
+         * network that omits relationshipTypeName.
+         */
+        const isCalc = net.relationshipTypeName !== undefined
+            ? net.relationshipTypeName === "xbrl:summation-item"
+            : relationships.some(r =>
+                (r.properties ?? []).some(p => p.property === "xbrl:weight"));
         const arcrole = isCalc ? "calc11" : "pres";
         const group = setDefault(setDefault(rels, arcrole, {}), elr, {});
+        /*
+         * xbrl:summationRelation says what the components are to the total:
+         * "equal" (the default and the only thing Calculations 1.1 could say),
+         * "atMost" for an of-which breakdown where the components are known to
+         * be only part of it, or "atLeast".
+         *
+         * Precedence is relationship, then network, then model object, then the
+         * specification default; the network level is read here and the
+         * relationship level below, which covers the two that appear in a
+         * network document.
+         */
+        const netRelation = (net.properties ?? []).find(
+            p => p.property === "xbrl:summationRelation")?.value;
         for (const r of relationships) {
+            /*
+             * xbrl:rootSource marks which concepts a network starts from; the
+             * edge is structural and carries no weight.  In a presentation
+             * network it is the tree root and is wanted.  In a summation-item
+             * network it is not a contribution, and defaulting a weight onto it
+             * below would make every network's total a summand of a synthetic
+             * concept -- 28 of them on Microsoft's FY2025 10-K, each then
+             * reported as a calculation contributor.
+             */
+            if (arcrole === "calc11" && r.source === XBRL_ROOT_SOURCE) {
+                continue;
+            }
             if (!r.source || !r.target || r.source === r.target) {
                 // Skip self-referential edges: some taxonomies (e.g. IFRS
                 // parent-child networks) include a concept related to itself,
@@ -576,9 +727,15 @@ function buildNetworks(taxonomy) {
                 if (p.property === "xbrl:weight") {
                     rel.w = Number(p.value);
                 }
+                if (p.property === "xbrl:summationRelation") {
+                    rel.sr = p.value;
+                }
             }
             if (arcrole === "calc11" && rel.w === undefined) {
                 rel.w = 1;
+            }
+            if (arcrole === "calc11" && rel.sr === undefined && netRelation !== undefined) {
+                rel.sr = netRelation;
             }
             setDefault(group, r.source, []).push(rel);
         }
@@ -611,7 +768,10 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
     const labelsByObject = buildLabelsByObject(taxonomy);
     const dimensionConcepts = collectDimensionConcepts(taxonomy);
     const concepts = buildConcepts(taxonomy, labelsByObject, dimensionConcepts);
-    const facts = buildFacts(factset);
+    const facts = buildFacts(factset, {
+        ...resolvedValuesByFactValue(taxonomyDoc),
+        ...resolvedValuesByFactValue(factsetDoc),
+    });
     // Ensure every fact's concept is registered so the inspector falls back to
     // the concept QName (not "<no label>") when no taxonomy/labels are loaded.
     for (const factData of Object.values(facts)) {
@@ -646,6 +806,16 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
     const cubes = buildCubes(taxonomy, labelsByObject);
     const sections = buildSections(taxonomy, labelsByObject);
 
+    /*
+     * What processing concluded about this report, carried unchanged.  Either
+     * document may hold it: a compiled model carries its own, and a factset
+     * paired with a taxonomy carries it on whichever was validated.  Stored raw
+     * rather than indexed so report data stays plain JSON; Report indexes it on
+     * first use.  See derivedContent.js for why a viewer carries these verdicts
+     * instead of recomputing them.
+     */
+    const derivedContent = factsetDoc?.derivedContent ?? taxonomyDoc?.derivedContent;
+
     const documentFile = options.documentFile;
     const reportData = {
         concepts,
@@ -654,6 +824,7 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
         roleDefs,
         cubes,
         sections,
+        ...(derivedContent ? { derivedContent } : {}),
         localDocs: documentFile ? { [documentFile]: ["inline"] } : {},
     };
 

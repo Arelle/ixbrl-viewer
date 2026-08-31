@@ -93,7 +93,8 @@ export class Calculation {
         const resolvedCalculation = new resolvedCalcClass(elr, this.fact, version);
         for (const r of rels) {
             const factset = calcFacts[r.t] ?? new FactSet();
-            resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
+            resolvedCalculation.addRow(
+                new CalculationContribution(report.getConcept(r.t), r.w, factset, r.sr));
         }
         return resolvedCalculation;
     }
@@ -101,10 +102,13 @@ export class Calculation {
 
 class CalculationContribution {
 
-    constructor(concept, weight, facts) {
+    constructor(concept, weight, facts, summationRelation) {
         this.concept = concept;
         this.weight = weight;
         this.facts = facts;
+        // What this contribution is to the total, where the model says so.
+        // Undefined for every legacy calculation, which can only mean "equal".
+        this.summationRelation = summationRelation;
 
         if (weight == 1) {
             this.weightSign = '+';
@@ -168,12 +172,58 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
     }
 
     /*
-     * Is the calculation consistent under Calculations v1.1 rules?
+     * What the contributions are to the total: "equal", "atMost" or "atLeast".
+     *
+     * Calculations 1.1 can only say "equal", so that stays the default and this
+     * returns it for every legacy calculation.  The XBRL Model summation-item
+     * proposal adds the other two; the adapter carries the value onto each
+     * relationship as `sr`, having already applied network-level precedence.
+     *
+     * Taken from the rows rather than held on the calculation because that is
+     * where the adapter can put it without a second channel; they agree by
+     * construction, and the first one that states anything wins.
+     */
+    summationRelation() {
+        for (const row of this.rows) {
+            if (row.summationRelation) {
+                return row.summationRelation;
+            }
+        }
+        return "equal";
+    }
+
+    /*
+     * Is the calculation consistent?
+     *
+     * "Consistent" means the reported total is not provably wrong given the
+     * contributions -- both sides are intervals, so the test is whether some
+     * pair of values within them satisfies the relation, not whether the
+     * midpoints do.
+     *
+     *   equal    the intervals intersect, which is the Calculations 1.1 test
+     *   atMost   some contribution total is <= some reported total, i.e. the
+     *            contributions' low end does not exceed the total's high end
+     *   atLeast  the mirror
+     *
+     * atMost is the of-which case: a total followed by components known to be
+     * only part of it.  Judged as "equal" it reports an inconsistency on every
+     * report that uses the pattern, which is the whole reason the property
+     * exists.
      */
     isConsistent() {
         const cti = this.calculatedTotalInterval();
         const ti = this.totalFactSet.valueIntersection();
-        return cti !== undefined && cti.intersection(ti) !== undefined;
+        if (cti === undefined || ti === undefined) {
+            return false;
+        }
+        switch (this.summationRelation()) {
+            case "atMost":
+                return !cti.a.greaterThan(ti.b);
+            case "atLeast":
+                return !cti.b.lessThan(ti.a);
+            default:
+                return cti.intersection(ti) !== undefined;
+        }
     }
 }
 

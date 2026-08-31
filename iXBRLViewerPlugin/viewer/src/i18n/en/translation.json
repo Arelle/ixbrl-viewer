@@ -3,6 +3,13 @@
     "calculated-total": "Calculated",
     "calculationIsConsistent": "Calculation is consistent",
     "calculationIsInconsistent": "Calculation is inconsistent",
+    "carriedAmbiguous": "Validated, verdicts disagree",
+    "carriedConsistent": "Consistent (as validated)",
+    "carriedInconsistent": "Inconsistent (as validated)",
+    "carriedNotValidated": "Not validated",
+    "ruleSets": "Rule sets",
+    "validatedBy": "Validated by",
+    "validatedOn": "Validated on",
     "concept": "Concept",
     "consistent-duplicate-facts-present": "{{nfacts}} consistent duplicate facts present",
     "does-not-bind": "Calculation does not bind",
@@ -170,7 +177,23 @@
       }
     },
     "summation": "Summation",
+    "tagger": {
+      "accept": "Accept",
+      "allDerivation": "All derivation properties",
+      "cancel": "Cancel",
+      "cancelEsc": "Cancel (Esc)",
+      "captured": "Captured",
+      "expected": "Expected value",
+      "exportJournal": "Export tagging journal",
+      "hint": "Hover the document, then click to capture.",
+      "locate": "Locate in document",
+      "locating": "Locating",
+      "relocate": "Re-locate",
+      "retry": "Retry",
+      "widen": "Widen"
+    },
     "tabs": {
+      "cubes": "Cubes",
       "overview": "Overview",
       "search": "Search",
       "xbrlFacts": "XBRL facts"

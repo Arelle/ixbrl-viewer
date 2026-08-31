@@ -57,7 +57,7 @@ seams were added:
        Report pattern) — all those facts share one overlay (their vuids all land in
        its `ivids`), selecting any highlights the chart and clicking it surfaces the
        set; and a **sub-MCID text value** whose bbox is its own glyph rectangle
-       (emitted by `alignFactsToPdf` when a fact is only a portion of a coarse
+       (emitted by `alignFactsToSurface` when a fact is only a portion of a coarse
        row-grained MCID) gives **per-value** highlighting — its bbox is unique, so it
        gets its own overlay. The viewer treats both identically; only the granularity
        of the source bbox differs.
@@ -328,24 +328,113 @@ first-page-fast loading:
   handles that (entity shows "n/a", it no longer assumes an entity is present).
   Facts whose concept isn't in a loaded taxonomy fall back to the concept QName.
 
+## Pointer locators (`xbrlx:htmlElementPointer`)
+
+The two HTML locator types in `core.json` both require the source document to
+carry an attribute on the target — an `id` or a data attribute. Most elements in
+a real report have neither: Microsoft's public annual report carries 42 `id`
+attributes across 8,383 elements, all navigation anchors, so nothing in its 66
+tables is addressable. Injecting ids means rewriting a document that may be
+signed, checksummed, or simply not yours.
+
+A pointer addresses any element without the document saying anything about it —
+an XPointer `element()` child sequence written without the `element(...)` wrapper:
+`currentAssets`, `/1/14`, `financial-review/2/1`.
+
+| file | role |
+|---|---|
+| `tagging/elementPointer.js` | generate, resolve, verify. A port-mate of Arelle's `HtmlElementPointer.py`; the two must agree or they address different elements silently |
+| `tagging/resolveLocator.js` | read a *stored* locator back to a DOM Range |
+| `tagging/corpus/` | the shared cross-language fixture, SHA-pinned on both sides |
+
+Generation prefers the shortest robust form: the element's own id, else a
+sequence from the nearest usable ancestor id (the hybrid form), else a full
+sequence from the root. An id is only usable if it addresses exactly one element
+— duplicate ids occur in filings, and `getElementById` silently returns the
+first.
+
+Two rules govern resolution, both measured (see `HTML5-LOCATORS.md`):
+
+- Walk `children[i]`; never hand a child sequence to a selector. 0.78 µs against
+  43.8 s on a 1.08 M-element document, because a trailing `*:nth-child` has no
+  selectivity.
+- Resolve against the **pristine** tree, before decoration. Injected wrappers
+  shift child indices; overlaying, as the PDF surface does, does not.
+  `resolveAll()` exists so a surface can resolve everything in one pass first.
+
+A pointer addresses an element; a value inside prose needs a character range
+within it, so Arelle emits three properties per fragment and the viewer reads
+them as a contract — a drift between the two mis-highlights silently:
+
+| property | value |
+|---|---|
+| `xbrlx:htmlElementPointer` | pointer to the text node's **immediate parent** element |
+| `xbrlx:htmlTextOffset` | 0-based character offset into that element's `textContent` |
+| `xbrlx:htmlTextQuote` | the exact source text, unstripped and uncollapsed |
+
+`textContent` means what the DOM means: all descendant text in document order,
+comments contributing nothing, and the value ends at `offset + quote.length`.
+Text is never stripped or whitespace-collapsed — collapsing belongs to the
+transform stage. Resolution walks the element's text nodes accumulating lengths
+until the offset falls inside one, then **verifies against the quote and refuses
+to highlight on mismatch**: the quote exists so a regenerated document is
+detected rather than silently mis-addressed (`tagging/resolveLocator.js`).
+
+The locator type records which tree the sequence counted —
+`xbrlx:xhtmlPointerLocatorType` for the XML infoset,
+`xbrlx:htmlPointerLocatorType` for the HTML5 tree — because the two differ.
+On Microsoft's filed 10-K, 85 tables with no `tbody` in source, only **6.8%** of
+pointers survive a parse-mode swap. `htmlDocumentSurface` keys this off
+`document.contentType`, which is why an XHTML source is loaded through an
+XML-typed blob URL rather than `document.write`.
+
 ## Cubes panel (reporting-structure section tree)
 
-> **Post-rebase status (2026-08).** After rebasing onto upstream master (which
-> redesigned the inspector), the inspector's redesigned files were taken wholesale,
-> so the **inspector-side Cubes panel is temporarily removed and pending
-> re-integration** (a `cubes-mode` in master's new `#inspector-tabs`
-> `[data-mode]` system). The **data side is intact** — `adapter.buildSections`,
-> `XBRLReport.cubes()`/`sections()`, `ReportSet.hasCubes()`/`conceptFactsIndex()`
-> and the `createCubes` renderer (preserved on branch `hf-xbrl-model-prerebase`).
-> The description below is the intended behaviour once re-wired.
+> **Post-rebase status (2026-08).** Re-integrated into master's redesigned
+> inspector as a `cubes-mode` (commit `98668cdb`); the panel is live again on
+> both the HTML and PDF paths. Two things moved in the port:
+>
+> - the panel container is `.cubes-inspector`, following master's
+>   `<mode>-inspector` convention, not the old `.cubes`;
+> - the `has-cubes` gate is on **`#ixv`**, not `#inspector`. Master moved the tab
+>   bar out of the `#inspector` section — `<nav id="inspector-tabs">` is now a
+>   sibling of `<section id="inspector">` — so `#inspector` can no longer reach
+>   the tab button. `#ixv` is the nearest common ancestor.
 
-The inspector has a native **Cubes** navigation panel (a mode button next to
-Document Outline).  The adapter reads the taxonomy's cubes, resolving each cube's
-`xbrl:concept` dimension domain network into its line-item concepts
-(`XBRLReport.cubes()`); the inspector lists each cube with the number of its
-facts present in the document and navigates to them on click
-(`ReportSet.conceptFactsIndex()`).  The button is gated on `ReportSet.hasCubes()`,
-so it only appears for XBRL Model reports and the iXBRL viewer is unaffected.
+The inspector has a native **Cubes** navigation panel (a tab in `#inspector-tabs`,
+alongside XBRL facts / Search / Overview).  The adapter reads the taxonomy's cubes,
+resolving each cube's `xbrl:concept` dimension domain network into its line-item
+concepts (`XBRLReport.cubes()`); the inspector lists each cube with the number of
+its facts present in the document and navigates to them on click.  Which facts
+those are comes from the model where it states them
+(`ReportSet.cubeFactsIndex()`, reading `derivedContent.cubeContents` — see
+[Derived content](#derived-content)) and otherwise from a concept match
+(`ReportSet.conceptFactsIndex()`), which over-counts: it takes every fact of a
+concept the cube mentions, including facts whose dimensions place them in a
+different cube.  On Microsoft's FY2025 10-K that inflates 9 of 112 cubes and is
+never short.
+
+> A legacy XBRL 2.1 instance has no notion of cube membership, so a model that
+> requires one has to **accommodate** it: the translation generates a cube for
+> facts to belong to and translated calculations to bind in.  It corresponds to
+> nothing the filer authored and is not a reporting structure, so `buildCubes`
+> drops it and no panel lists it.
+>
+> It is recognised by its **cube type**, whose local name is
+> `legacyAccommodationCubeType` — model-defined, so each translated model
+> declares its own in its own namespace deriving from `xbrl:reportCube`.  Should
+> a reserved type be specified later, models will derive from it and this becomes
+> a QName match.  Matching the type rather than the name matters: an earlier
+> build dropped the cube only because it was absent from the group tree, which
+> held for every model to hand but was incidental, and would not have held for
+> the flat fallback below — which sorts by fact count and would have put it
+> first.
+>
+> Not to be confused with ESEF's *[999999] Line items not dimensionally
+> qualified*, which a filer authors and which does belong in a navigator.  `createCubes()` runs from `Inspector.initialize()`
+next to `createSummary()`, and sets `has-cubes` on `#ixv` from
+`ReportSet.hasCubes()`; a stylesheet rule hides the tab when the class is absent,
+so the panel only appears for XBRL Model reports and the iXBRL viewer is unaffected.
 
 When the model carries a **group tree** (the OIM `groupTree` — the reporting
 structure the legacy loader infers from SEC/IFRS role conventions, see
@@ -373,6 +462,111 @@ the UI's empty-section hiding is then only a safety net.
 
 (A separate Networks panel was intentionally not added — the Document Outline,
 built from the presentation/parent-child networks, already covers that.)
+
+## Facts occurring more than once
+
+A model fact can occur in several places in the document, and each occurrence is
+a `factValue` carrying the scaling and accuracy of the text where it is
+displayed.  Microsoft's total revenue is on pages 49, 84 (twice) and 85;
+`us-gaap:CommercialPaper` is printed in millions in one place and billions in
+another.  They are **consistent duplicates** in the specification's sense — one
+fact, agreeing on value, presented differently — which is the structure the
+viewer's existing duplicate handling already expects.
+
+`buildFacts` therefore emits **one viewer fact per located occurrence**, as the
+iXBRL path has always done for a repeated tag.  It previously merged a PDF
+fact's occurrences into one, taking the last one's scale: that is not merely
+imprecise, because barely any `factValue` carries an explicit value (27 of 1,829
+in the Microsoft PDF factset) and the surface computes it from the located text
+and that occurrence's scale.  One merged scale applied to text printed in
+different units gives a **wrong value**, not just a wrong accuracy label — 5
+facts in that filing.  Splitting also gives each viewer fact exactly one
+`factValue` name, which is what lets a tagging journal say which occurrence a
+binding belongs to, and what makes `derivedContent.factValues` — keyed by
+`factValueName` — resolvable to a single value per fact.
+
+## Derived content
+
+A compiled model may carry a **`derivedContent`** object beside `documentInfo`
+and `xbrlModel`, holding what processing concluded rather than what the filer
+reported.  `derivedContent.js` reads two parts of it.  The producer side is
+`arelle/plugin/XbrlModel`; the format is specified in `oim-taxonomy-derived.md`
+(`oim` repo, branch `spec-dev-1`), still a PWD.
+
+The two parts differ in what the viewer may do when one is absent:
+
+- **`cubeContents`** — which facts fall in which cube — is *derivable*: the model
+  implies it and a dimensional match reproduces it.  Absence is not a finding, so
+  the Cubes panel falls back to its concept match.
+- **`calculationResults`** — the per-binding calculation verdicts — is *not*.  It
+  records what a processor did, and nothing in the model reproduces it.
+
+That second point is why the calculation panel shows the carried verdict rather
+than its own arithmetic.  Rules, standards and implementations move between the
+moment a report is received and any later moment it is read, so a locally
+computed answer sitting where the producer's verdict belongs answers a different
+question while being indistinguishable to the reader.  The panel distinguishes:
+
+| The model | Shown |
+| --- | --- |
+| carries a result for this binding | *Consistent* / *Inconsistent (as validated)*, with the `oimtc:` code |
+| was validated, but has no result for this binding | *Not validated* — never a local answer |
+| carries several equally specific results that disagree | *Validated, verdicts disagree* |
+| carries no `derivedContent` at all | the viewer's own `calculation.js` result, as before |
+
+The last row keeps every iXBRL report working: there is no producer verdict to
+displace, and the local computation has always been its only source.  Provenance
+(`derivation` — processor, date, rule sets) is shown beside every carried
+verdict, including *Not validated*, where it says which run skipped the binding.
+
+**Resolved fact values.** `derivedContent.factValues` carries what processing
+resolved each occurrence to, keyed by `factValueName` — one-to-one against the
+viewer's facts, since one viewer fact is one occurrence.  A `bound` value
+supersedes a `resolved` one for the same occurrence: it came from an applied
+tagging journal, the model's own sources having failed to locate it on that
+surface.
+
+It is used **only as a fallback**, where the surface cannot reconstruct a value
+from the document text — a transformation the viewer does not implement, such as
+`ixt-sec:numwordsen` and the fifteen others SEC defines, where it would otherwise
+show raw text.  Not as an override, deliberately: reconstructing from the located
+text is what makes a mis-bound locator visible, since a fact reading the wrong
+text shows the wrong value.  Preferring the resolved value everywhere would show
+the right value at the wrong place, which is the harder defect to notice.  An
+explicit value in the model outranks both (`surfaceUtil.parseNumericValue`).
+
+Numeric facts only; a textual fact still shows what the document says.
+
+**What the viewer's own calculation cannot honour.** This applies only to the
+fallback path — a report carrying no `derivedContent`, where `calculation.js`
+computes locally. The specification makes the parameters of a check properties of
+the model or network rather than processor settings, and three do not reach the
+viewer:
+
+| property | effect if ignored |
+|---|---|
+| `xbrl:roundingMode` (`roundToNearest` \| `truncation`) | a truncated report shows spurious inconsistencies; the viewer always assumes round-to-nearest |
+| `xbrl:tolerance` | a report whose framework allows slack shows inconsistencies the processor does not |
+| `xbrla:reconciliation` | display only — marks a relationship that deliberately crosses the debit/credit divide |
+
+`xbrl:summationRelation` (`equal` / `atMost` / `atLeast`) **is** read, taken from
+the relationship, else the network, else the specification default. It was the
+most visible of the four: without it an "of which" breakdown, where a total is
+followed by components known to be only part of it, shows an inconsistency on
+every report.
+
+Carrying the producer's verdict is what makes these three matter less than they
+did — the processor honoured them when it validated.
+
+**Matching a fact to a result.** A result lists only the aspects its binding
+constrains, so comparison is a subset test — and on a dimensional report several
+results describe one fact at once.  Microsoft's 10-K carries verdicts on the
+un-dimensioned total, the asset-class total *and* the fully dimensioned one;
+treated as equal candidates, 11 of its 183 results read as disagreements when
+nothing disagreed.  The most specific match wins: a result constraining fewer
+aspects is a verdict on a *different* binding, not a looser opinion on this one.
+That tiebreak is not yet in the specification text — see
+[HANDOVER-derived-content.md](HANDOVER-derived-content.md).
 
 ## Planned refactor: move this overlay into a standalone plugin
 

@@ -3,6 +3,7 @@
 import $ from 'jquery';
 import { viewerUniqueId } from '../util.js';
 import { applyFactValue } from './surfaceUtil.js';
+import { buildHitIndex, hitTestBest, mcidBounds } from './tagging/hitIndex.js';
 
 // Document surface that renders a PDF with PDF.js and binds XbrlModel facts to
 // it using xbrl:pdfPage / xbrl:pdfMcid locators.
@@ -55,6 +56,9 @@ export class PdfDocumentSurface {
         doc.open();
         doc.write(this._skeletonHtml());
         doc.close();
+        // Retained so bind mode can attach its listeners to the rendered
+        // document without having to be handed the iframe again.
+        this._doc = doc;
         const pagesEl = doc.getElementById("pdf-pages");
 
         // ownerDocument must be the iframe's document: PDF.js injects @font-face
@@ -521,6 +525,195 @@ export class PdfDocumentSurface {
     // One overlay div for the whole chart region, shared by all its facts:
     // selecting any fact highlights the region, and clicking the region surfaces
     // all of them (they all appear in the div's "ivids" list).
+    /* ---- bind mode ------------------------------------------------------
+     *
+     * The content bind mode targets is exactly the content with nothing to
+     * receive a mouse event: page text is painted onto canvas, and only facts
+     * that are already bound carry overlay divs.  So the cursor is tested
+     * against the marked-content rectangles through a banded index, built per
+     * page on first use rather than at render time -- a reader who never tags
+     * should not pay for it.
+     */
+
+    _indexForPage(num) {
+        this._hitIndexes ??= {};
+        if (this._hitIndexes[num] === undefined) {
+            const pg = this._pages[num];
+            this._hitIndexes[num] = pg ? buildHitIndex(pg.mcidRects) : null;
+        }
+        return this._hitIndexes[num];
+    }
+
+    /* Which rendered page is under the cursor, with container-relative coords. */
+    _pageAt(clientX, clientY) {
+        for (const [num, pg] of Object.entries(this._pages)) {
+            if (!pg.container) {
+                continue;
+            }
+            const box = pg.container.getBoundingClientRect();
+            if (clientX >= box.left && clientX <= box.right
+                && clientY >= box.top && clientY <= box.bottom) {
+                return { num: Number(num), pg, x: clientX - box.left, y: clientY - box.top };
+            }
+        }
+        return null;
+    }
+
+    /* A hit becomes a candidate in factValueSourceObject property form. */
+    _candidateFor(pageNum, pg, entry, { widen = true } = {}) {
+        // Unstripped: the fragment's own whitespace is what makes concatenation
+        // faithful, and trimming it here is what would force a separator to be
+        // invented at the join.  The card trims for display only.
+        const text = pg.mcidText[entry.mcid] ?? "";
+        const candidate = {
+            locatorType: "xbrl:pdfContentLocatorType",
+            properties: [
+                { property: "xbrl:pdfPage", value: String(pageNum) },
+                { property: "xbrl:pdfMcid", value: String(entry.mcid).replace(/^p\d+R_mc/, "") },
+            ],
+            text,
+            _page: pageNum,
+            _mcid: entry.mcid,
+            _rect: entry.rect,
+        };
+        // The next rung of the ladder is the whole marked-content run: the
+        // clicked rectangle is one line of it, and a value split across lines
+        // needs the union.  Offered only when the run really is wider than the
+        // rectangle, so the control does not appear when it would do nothing.
+        if (widen) {
+            const bounds = mcidBounds(this._indexForPage(pageNum), entry.mcid);
+            if (bounds && (bounds.height > entry.rect.height + 1 || bounds.width > entry.rect.width + 1)) {
+                candidate.widenTo = {
+                    ...candidate,
+                    _rect: bounds,
+                    widenTo: undefined,
+                };
+            }
+        }
+        return candidate;
+    }
+
+    beginBind(session) {
+        const doc = this._bindDoc = this._doc;
+        if (!doc) {
+            return;
+        }
+        this._bindHighlight = doc.createElement("div");
+        this._bindHighlight.className = "xbrl-bind-candidate";
+        this._bindHighlight.style.display = "none";
+
+        this._onBindMove = (e) => {
+            const at = this._pageAt(e.clientX, e.clientY);
+            if (!at) {
+                this._showBindHighlight(null);
+                session.candidate(null);
+                return;
+            }
+            const hit = hitTestBest(this._indexForPage(at.num), at.x, at.y);
+            if (!hit) {
+                this._showBindHighlight(null);
+                session.candidate(null);
+                return;
+            }
+            const candidate = this._candidateFor(at.num, at.pg, hit);
+            this._showBindHighlight(at.pg.container, candidate._rect);
+            session.candidate(candidate);
+        };
+        /*
+         * Hit-test at the click point rather than trusting the last hover.
+         *
+         * Relying on the hover left a click that landed where the hit-test
+         * found nothing -- a gutter, the space between runs -- swallowing the
+         * event and capturing nothing, so Accept stayed disabled and bind mode
+         * stayed on with no feedback.  Every later click was then intercepted
+         * too, which reads as the document having stopped responding.  The HTML
+         * surface never had this because event.target almost always yields an
+         * element.
+         *
+         * Shift-click joins the run to the capture instead of replacing it,
+         * which is what a value split across marked-content runs needs.
+         */
+        this._onBindClick = (e) => {
+            const at = this._pageAt(e.clientX, e.clientY);
+            const hit = at ? hitTestBest(this._indexForPage(at.num), at.x, at.y) : null;
+            if (!hit) {
+                // Nothing here to bind: let the click through rather than
+                // silently eating it, so the mode does not appear frozen.
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            const candidate = this._candidateFor(at.num, at.pg, hit);
+            if (e.shiftKey) {
+                session.addFragment(candidate);
+            }
+            else {
+                session.capture(candidate);
+            }
+        };
+        /*
+         * Leaving the document clears the candidate.  Without this the card goes
+         * on showing the last run hovered, and the overlay stays lit, while the
+         * cursor is over the inspector -- which reads as still tracking when it
+         * is in fact frozen, and invites acting on a stale candidate.
+         */
+        this._onBindLeave = () => {
+            this._showBindHighlight(null);
+            session.candidate(null);
+        };
+        doc.addEventListener("mousemove", this._onBindMove, true);
+        doc.addEventListener("click", this._onBindClick, true);
+        doc.addEventListener("mouseleave", this._onBindLeave, true);
+        doc.defaultView?.addEventListener("blur", this._onBindLeave);
+        doc.body?.classList.add("xbrl-bind-mode");
+    }
+
+    _showBindHighlight(container, rect) {
+        const h = this._bindHighlight;
+        if (!h) {
+            return;
+        }
+        if (!container || !rect) {
+            h.style.display = "none";
+            return;
+        }
+        if (h.parentNode !== container) {
+            container.appendChild(h);
+        }
+        h.style.display = "block";
+        h.style.left = rect.left + "px";
+        h.style.top = rect.top + "px";
+        h.style.width = rect.width + "px";
+        h.style.height = rect.height + "px";
+    }
+
+    /* Re-derive a candidate one rung wider, re-reading the text at that scope. */
+    widen(from) {
+        if (!from?.widenTo) {
+            return null;
+        }
+        const pg = this._pages[from._page];
+        const wider = from.widenTo;
+        if (pg) {
+            this._showBindHighlight(pg.container, wider._rect);
+        }
+        return wider;
+    }
+
+    endBind() {
+        const doc = this._bindDoc;
+        if (doc) {
+            doc.removeEventListener("mousemove", this._onBindMove, true);
+            doc.removeEventListener("click", this._onBindClick, true);
+            doc.removeEventListener("mouseleave", this._onBindLeave, true);
+            doc.defaultView?.removeEventListener("blur", this._onBindLeave);
+            doc.body?.classList.remove("xbrl-bind-mode");
+        }
+        this._bindHighlight?.remove();
+        this._bindHighlight = null;
+        this._bindDoc = null;
+    }
+
     _bindImageRegion(viewer, doc, reportIndex, region, facts) {
         const div = doc.createElement("div");
         div.className = "ixbrl-element ixbrl-element-nonnumeric xbrl-image-region";

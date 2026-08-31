@@ -540,23 +540,40 @@ Numeric facts only; a textual fact still shows what the document says.
 **What the viewer's own calculation cannot honour.** This applies only to the
 fallback path — a report carrying no `derivedContent`, where `calculation.js`
 computes locally. The specification makes the parameters of a check properties of
-the model or network rather than processor settings, and three do not reach the
+the model or network rather than processor settings, and two do not reach the
 viewer:
 
 | property | effect if ignored |
 |---|---|
 | `xbrl:roundingMode` (`roundToNearest` \| `truncation`) | a truncated report shows spurious inconsistencies; the viewer always assumes round-to-nearest |
-| `xbrl:tolerance` | a report whose framework allows slack shows inconsistencies the processor does not |
 | `xbrla:reconciliation` | display only — marks a relationship that deliberately crosses the debit/credit divide |
 
-`xbrl:summationRelation` (`equal` / `atMost` / `atLeast`) **is** read, taken from
-the relationship, else the network, else the specification default. It was the
-most visible of the four: without it an "of which" breakdown, where a total is
-followed by components known to be only part of it, shows an inconsistency on
-every report.
+`xbrl:tolerance` and `xbrl:summationRelation` appeared in an earlier draft of the
+proposal and have both been **withdrawn**. The "of which" case that
+`summationRelation` expressed — a total followed by components known to be only
+part of it — is now a relationship type of its own, `xbrl:greater-lesser`.
 
-Carrying the producer's verdict is what makes these three matter less than they
-did — the processor honoured them when it validated.
+Carrying the producer's verdict is what makes these matter less than they did —
+the processor honoured them when it validated.
+
+**Relationship types, and a rename in flight.** A calculation network declares
+`xbrl:summation-concept`, renamed from `xbrl:summation-item`. The adapter accepts
+**both**, because artifacts exist on both sides of the rename: every converted
+taxonomy and demo model to hand still says `summation-item`, while the plugin now
+emits `summation-concept`. Keying on either name alone silently reclassifies the
+other half as presentation — the failure the explicit type check existed to
+prevent. A network stating no type at all still falls back to the weight
+heuristic.
+
+`xbrl:greater-lesser` is an ordering between two concepts — source ≥ target at the
+same dimensional position, as in `PPEGross → PPENet` — checked like a calculation
+but carrying no weights and having no total. Because an "of which" breakdown is
+now written this way, it is **no longer written as a calculation at all**. The
+adapter gives it its own arcrole so it cannot fall through to presentation, where
+a bound between two concepts would read as a containment the model does not
+state. **No renderer reads that arcrole yet**, so an ordering network is carried
+and not shown; displaying it in the calculation inspector as a bound rather than
+a sum is the outstanding work.
 
 **Matching a fact to a result.** A result lists only the aspects its binding
 constrains, so comparison is a subset test — and on a dimensional report several

@@ -94,7 +94,7 @@ export class Calculation {
         for (const r of rels) {
             const factset = calcFacts[r.t] ?? new FactSet();
             resolvedCalculation.addRow(
-                new CalculationContribution(report.getConcept(r.t), r.w, factset, r.sr));
+                new CalculationContribution(report.getConcept(r.t), r.w, factset));
         }
         return resolvedCalculation;
     }
@@ -102,13 +102,12 @@ export class Calculation {
 
 class CalculationContribution {
 
-    constructor(concept, weight, facts, summationRelation) {
+    constructor(concept, weight, facts) {
         this.concept = concept;
         this.weight = weight;
         this.facts = facts;
         // What this contribution is to the total, where the model says so.
         // Undefined for every legacy calculation, which can only mean "equal".
-        this.summationRelation = summationRelation;
 
         if (weight == 1) {
             this.weightSign = '+';
@@ -171,26 +170,6 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
         return total;
     }
 
-    /*
-     * What the contributions are to the total: "equal", "atMost" or "atLeast".
-     *
-     * Calculations 1.1 can only say "equal", so that stays the default and this
-     * returns it for every legacy calculation.  The XBRL Model summation-item
-     * proposal adds the other two; the adapter carries the value onto each
-     * relationship as `sr`, having already applied network-level precedence.
-     *
-     * Taken from the rows rather than held on the calculation because that is
-     * where the adapter can put it without a second channel; they agree by
-     * construction, and the first one that states anything wins.
-     */
-    summationRelation() {
-        for (const row of this.rows) {
-            if (row.summationRelation) {
-                return row.summationRelation;
-            }
-        }
-        return "equal";
-    }
 
     /*
      * Is the calculation consistent?
@@ -216,14 +195,7 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
         if (cti === undefined || ti === undefined) {
             return false;
         }
-        switch (this.summationRelation()) {
-            case "atMost":
-                return !cti.a.greaterThan(ti.b);
-            case "atLeast":
-                return !cti.b.lessThan(ti.a);
-            default:
-                return cti.intersection(ti) !== undefined;
-        }
+        return cti.intersection(ti) !== undefined;
     }
 }
 

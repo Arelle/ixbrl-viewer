@@ -655,6 +655,28 @@ function buildFacts(factset, resolvedValues = {}) {
  */
 const XBRL_ROOT_SOURCE = "xbrl:rootSource";
 
+/*
+ * The relationship types a calculation network can declare.
+ *
+ * xbrl:summation-item was renamed to xbrl:summation-concept in the calculation
+ * proposal.  Both are accepted because artifacts exist on both sides of the
+ * rename: every converted taxonomy and demo model to hand still says
+ * summation-item, while the plugin now emits summation-concept.  Keying on
+ * either name alone silently reclassifies the other half as presentation.
+ */
+const CALCULATION_RELATIONSHIP_TYPES = new Set([
+    "xbrl:summation-concept",
+    "xbrl:summation-item",
+]);
+
+/*
+ * An ordering between two concepts -- source >= target at the same dimensional
+ * position, as in PPEGross -> PPENet.  It replaced the withdrawn
+ * xbrl:summationRelation as the way an "of which" breakdown is expressed, and is
+ * checked like a calculation but carries no weights and has no total.
+ */
+const ORDERING_RELATIONSHIP_TYPE = "xbrl:greater-lesser";
+
 function buildNetworks(taxonomy) {
     // OIM networks -> the viewer's ELR-keyed relationship map.
     // Parent-child networks become presentation ("pres") relationships, which
@@ -672,31 +694,28 @@ function buildNetworks(taxonomy) {
          * The weight heuristic below was the original test, and on a well-formed
          * taxonomy the two agree exactly -- 23 of 96 networks either way on the
          * Apple demo.  They part company on a taxonomy under repair: a
-         * summation-item network whose relationships have lost their weights
+         * calculation network whose relationships have lost their weights
          * carries no weight anywhere, so the heuristic silently reclassifies it
          * as presentation and it disappears from the calculation inspector
          * instead of showing up as broken.  It is kept only as a fallback for a
          * network that omits relationshipTypeName.
          */
-        const isCalc = net.relationshipTypeName !== undefined
-            ? net.relationshipTypeName === "xbrl:summation-item"
+        const typeName = net.relationshipTypeName;
+        const isCalc = typeName !== undefined
+            ? CALCULATION_RELATIONSHIP_TYPES.has(typeName)
             : relationships.some(r =>
                 (r.properties ?? []).some(p => p.property === "xbrl:weight"));
-        const arcrole = isCalc ? "calc11" : "pres";
-        const group = setDefault(setDefault(rels, arcrole, {}), elr, {});
         /*
-         * xbrl:summationRelation says what the components are to the total:
-         * "equal" (the default and the only thing Calculations 1.1 could say),
-         * "atMost" for an of-which breakdown where the components are known to
-         * be only part of it, or "atLeast".
-         *
-         * Precedence is relationship, then network, then model object, then the
-         * specification default; the network level is read here and the
-         * relationship level below, which covers the two that appear in a
-         * network document.
+         * An ordering network is checked like a calculation but is not one, and it
+         * must not fall through to presentation: putting a bound between two
+         * concepts into the outline would state a containment the model does not.
+         * It gets its own arcrole, which no renderer reads yet, so for now it is
+         * carried rather than shown.
          */
-        const netRelation = (net.properties ?? []).find(
-            p => p.property === "xbrl:summationRelation")?.value;
+        const arcrole = isCalc ? "calc11"
+            : typeName === ORDERING_RELATIONSHIP_TYPE ? "greater-lesser"
+            : "pres";
+        const group = setDefault(setDefault(rels, arcrole, {}), elr, {});
         for (const r of relationships) {
             /*
              * xbrl:rootSource marks which concepts a network starts from; the
@@ -727,15 +746,9 @@ function buildNetworks(taxonomy) {
                 if (p.property === "xbrl:weight") {
                     rel.w = Number(p.value);
                 }
-                if (p.property === "xbrl:summationRelation") {
-                    rel.sr = p.value;
-                }
             }
             if (arcrole === "calc11" && rel.w === undefined) {
                 rel.w = 1;
-            }
-            if (arcrole === "calc11" && rel.sr === undefined && netRelation !== undefined) {
-                rel.sr = netRelation;
             }
             setDefault(group, r.source, []).push(rel);
         }

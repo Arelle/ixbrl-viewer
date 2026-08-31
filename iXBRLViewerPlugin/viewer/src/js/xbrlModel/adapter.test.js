@@ -94,3 +94,46 @@ describe("resolved values from derived content", () => {
         expect(f.num.derivedValue).toBeUndefined();
     });
 });
+
+describe("network relationship types", () => {
+    const netDoc = (networks) => ({
+        documentInfo: { namespaces: { eg: "http://www.example.com" } },
+        xbrlModel: { networks },
+    });
+    const rels = (doc) => buildReportData({}, doc, {})
+        .sourceReports[0].targetReports[0].rels;
+    const net = (name, relationshipTypeName, properties = []) => ({
+        name, relationshipTypeName,
+        relationships: [{ source: "eg:Total", target: "eg:Part", properties }],
+    });
+
+    test("both names for a calculation network are accepted", () => {
+        /*
+         * xbrl:summation-item was renamed to xbrl:summation-concept. Artifacts
+         * exist on both sides of the rename -- every converted taxonomy and demo
+         * model to hand still says summation-item -- so keying on either alone
+         * reclassifies the other half as presentation.
+         */
+        for (const typeName of ["xbrl:summation-concept", "xbrl:summation-item"]) {
+            const r = rels(netDoc([net("eg:CalcNet", typeName)]));
+            expect(Object.keys(r.calc11 ?? {})).toEqual(["eg:CalcNet"]);
+            expect(r.pres?.["eg:CalcNet"]).toBeUndefined();
+        }
+    });
+
+    test("an ordering network is not presentation", () => {
+        // a bound between two concepts is not a containment; putting it in the
+        // outline would state something the model does not
+        const r = rels(netDoc([net("eg:OrderNet", "xbrl:greater-lesser")]));
+        expect(r.pres?.["eg:OrderNet"]).toBeUndefined();
+        expect(r.calc11?.["eg:OrderNet"]).toBeUndefined();
+        expect(r["greater-lesser"]?.["eg:OrderNet"]).toBeDefined();
+    });
+
+    test("a network stating no type falls back to the weight heuristic", () => {
+        const weighted = net("eg:CalcNet", undefined, [{ property: "xbrl:weight", value: "1" }]);
+        expect(Object.keys(rels(netDoc([weighted])).calc11 ?? {})).toEqual(["eg:CalcNet"]);
+        expect(Object.keys(rels(netDoc([net("eg:PresNet", undefined)])).pres ?? {}))
+            .toEqual(["eg:PresNet"]);
+    });
+});

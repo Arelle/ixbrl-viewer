@@ -294,7 +294,6 @@ describe("Consistent duplicate contributor", () => {
 
 });
 
-
 describe("Single contributor", () => {
     const reportSet = testReportSet({
         "f1": testFact({"c": "eg:Total", "u": "iso2417:GBP"}, 10000, -3),
@@ -375,87 +374,3 @@ describe("Weights", () => {
     });
 });
 
-/*
- * xbrl:summationRelation — the XBRL Model summation-item proposal's answer to
- * "what are the contributions to the total?".  Calculations 1.1 can only say
- * "equal"; the of-which pattern needs "atMost", where the components are known
- * to be only part of the total.
- */
-describe("summationRelation", () => {
-    const relationData = (sr) => {
-        const d = JSON.parse(JSON.stringify(testReportData));
-        d.rels.calc11 = {
-            "group": {
-                "eg:Total": [
-                    {"t": "eg:Item1", "w": 1, ...(sr ? {"sr": sr} : {})},
-                    {"t": "eg:Item2", "w": 1, ...(sr ? {"sr": sr} : {})},
-                ],
-            },
-        };
-        delete d.rels.calc;
-        return d;
-    };
-
-    // components sum to 30; the reported total is 100, so the components are
-    // only part of it -- an of-which breakdown
-    const ofWhich = {
-        "f1": testFact({"c": "eg:Total", "u": "iso4217:USD", "p": "2018-01-01/2019-01-01"}, "100", 0),
-        "f2": testFact({"c": "eg:Item1", "u": "iso4217:USD", "p": "2018-01-01/2019-01-01"}, "10", 0),
-        "f3": testFact({"c": "eg:Item2", "u": "iso4217:USD", "p": "2018-01-01/2019-01-01"}, "20", 0),
-    };
-
-    function consistency(facts, sr) {
-        const rs = testReportSet(facts, relationData(sr));
-        const calcs = new Calculation(getFact(rs, "f1"), true).resolvedCalculations();
-        expect(calcs.length).toBe(1);
-        return calcs[0];
-    }
-
-    test("without the property, an of-which breakdown is inconsistent — the 1.1 answer", () => {
-        expect(consistency(ofWhich, undefined).isConsistent()).toBe(false);
-    });
-
-    test("atMost makes it consistent, because the components may be part of the total", () => {
-        expect(consistency(ofWhich, "atMost").isConsistent()).toBe(true);
-        expect(consistency(ofWhich, "atMost").summationRelation()).toBe("atMost");
-    });
-
-    test("atMost is still inconsistent when the components EXCEED the total", () => {
-        // 10 + 20 = 30 against a reported 5: no pair of values satisfies <=
-        const over = {...ofWhich,
-            "f1": testFact({"c": "eg:Total", "u": "iso4217:USD", "p": "2018-01-01/2019-01-01"}, "5", 0)};
-        expect(consistency(over, "atMost").isConsistent()).toBe(false);
-    });
-
-    test("atLeast is the mirror", () => {
-        expect(consistency(ofWhich, "atLeast").isConsistent()).toBe(false);
-        const under = {...ofWhich,
-            "f1": testFact({"c": "eg:Total", "u": "iso4217:USD", "p": "2018-01-01/2019-01-01"}, "5", 0)};
-        expect(consistency(under, "atLeast").isConsistent()).toBe(true);
-    });
-
-    test("an exact sum is consistent under every relation", () => {
-        const exact = {...ofWhich,
-            "f1": testFact({"c": "eg:Total", "u": "iso4217:USD", "p": "2018-01-01/2019-01-01"}, "30", 0)};
-        for (const sr of [undefined, "equal", "atMost", "atLeast"]) {
-            expect(`${sr}: ${consistency(exact, sr).isConsistent()}`).toBe(`${sr}: true`);
-        }
-    });
-
-    test("the relation is compared on interval bounds, not midpoints", () => {
-        /*
-         * Rounded values are intervals, so "atMost" asks whether SOME pair of
-         * values satisfies the relation.  10 and 20 at decimals 0 span
-         * [9.5,10.5] and [19.5,20.5], summing to [29,31]; a total reported as 29
-         * spans [28.5,29.5], whose high end 29.5 is not below the sum's low end
-         * 29 -- so it is possible and must not be called inconsistent.
-         */
-        const boundary = {...ofWhich,
-            "f1": testFact({"c": "eg:Total", "u": "iso4217:USD", "p": "2018-01-01/2019-01-01"}, "29", 0)};
-        expect(consistency(boundary, "atMost").isConsistent()).toBe(true);
-    });
-
-    test("defaults to equal when nothing says otherwise", () => {
-        expect(consistency(ofWhich, undefined).summationRelation()).toBe("equal");
-    });
-});

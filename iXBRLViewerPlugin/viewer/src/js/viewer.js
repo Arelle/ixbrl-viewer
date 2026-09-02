@@ -768,7 +768,8 @@ export class Viewer {
     }
 
     highlightAllTags(on, namespaceGroups) {
-        if (on && !this._highlightAllPrepared) {
+        const reviewMode = this._iv?.isReviewModeEnabled?.() === true;
+        if (on && !this._highlightAllPrepared && !reviewMode) {
             const groups = new Map(namespaceGroups.map((ns, i) => [ns, i % HIGHLIGHT_COLORS]));
             this._applyHighlightToFactWrappers(groups);
             this._highlightAllPrepared = true;

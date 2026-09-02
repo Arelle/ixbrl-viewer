@@ -63,17 +63,9 @@ body.ixbrl-highlight-all .ixbrl-highlight {
   background-color: var(--colour-highlight-2);
 }
 
-.review.ixbrl-highlight-all .ixbrl-highlight {
-  &:not(.ixbrl-no-highlight).ixbrl-highlight-1, 
-  &:not(.ixbrl-no-highlight).ixbrl-highlight-2, 
-  &:not(.ixbrl-no-highlight).ixbrl-highlight-3, 
-  &:not(.ixbrl-no-highlight).ixbrl-highlight-4, 
-  &:not(.ixbrl-no-highlight).ixbrl-highlight-5, 
-  &.ixbrl-highlight-1 .ixbrl-sub-element:not(.ixbrl-no-highlight),
-  &.ixbrl-highlight-2 .ixbrl-sub-element:not(.ixbrl-no-highlight),
-  &.ixbrl-highlight-3 .ixbrl-sub-element:not(.ixbrl-no-highlight),
-  &.ixbrl-highlight-4 .ixbrl-sub-element:not(.ixbrl-no-highlight),
-  &.ixbrl-highlight-5 .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+.review.ixbrl-highlight-all {
+  .ixbrl-element:not(.ixbrl-no-highlight),
+  .ixbrl-sub-element:not(.ixbrl-no-highlight) {
     background-color: var(--colour-highlight-default) !important; // Override inline styles
   }
 

@@ -71,8 +71,8 @@ describe("highlightAllTags", () => {
         document.body.innerHTML = "";
     });
 
-    test.each([false, true])("toggles report-body highlighting in %s mode", (reviewMode) => {
-        const { viewer, wrapper, doc } = makeHighlightViewer(reviewMode);
+    test("non-review mode toggles report-body highlighting", () => {
+        const { viewer, wrapper, doc } = makeHighlightViewer(false);
         const groups = viewer._reportSet.namespaceGroups();
 
         viewer.highlightAllTags(true, groups);
@@ -88,8 +88,25 @@ describe("highlightAllTags", () => {
         expect(wrapper.classList.contains("ixbrl-highlight-0")).toBe(true);
     });
 
-    test.each([false, true])("prepares node classes only once in %s mode", (reviewMode) => {
-        const { viewer } = makeHighlightViewer(reviewMode);
+    test("review mode toggles report body highlighting without node classes", () => {
+        const { viewer, wrapper, doc } = makeHighlightViewer(true);
+        const applyHighlightToFactWrappers = jest.spyOn(viewer, "_applyHighlightToFactWrappers");
+        const groups = viewer._reportSet.namespaceGroups();
+
+        viewer.highlightAllTags(true, groups);
+
+        expect(doc.body.classList.contains("ixbrl-highlight-all")).toBe(true);
+        expect(wrapper.classList.contains("ixbrl-highlight")).toBe(false);
+        expect(wrapper.classList.contains("ixbrl-highlight-0")).toBe(false);
+        expect(applyHighlightToFactWrappers).not.toHaveBeenCalled();
+
+        viewer.highlightAllTags(false, groups);
+
+        expect(doc.body.classList.contains("ixbrl-highlight-all")).toBe(false);
+    });
+
+    test("non-review mode prepares node classes only once", () => {
+        const { viewer } = makeHighlightViewer(false);
         const applyHighlightToFactWrappers = jest.spyOn(viewer, "_applyHighlightToFactWrappers");
         const groups = viewer._reportSet.namespaceGroups();
 
@@ -98,6 +115,18 @@ describe("highlightAllTags", () => {
         viewer.highlightAllTags(true, groups);
 
         expect(applyHighlightToFactWrappers).toHaveBeenCalledTimes(1);
+    });
+
+    test("review mode never prepares node classes", () => {
+        const { viewer } = makeHighlightViewer(true);
+        const applyHighlightToFactWrappers = jest.spyOn(viewer, "_applyHighlightToFactWrappers");
+        const groups = viewer._reportSet.namespaceGroups();
+
+        viewer.highlightAllTags(true, groups);
+        viewer.highlightAllTags(false, groups);
+        viewer.highlightAllTags(true, groups);
+
+        expect(applyHighlightToFactWrappers).not.toHaveBeenCalled();
     });
 
     test("toggles highlighting on every report iframe body", () => {

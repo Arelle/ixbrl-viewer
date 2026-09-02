@@ -33,6 +33,7 @@ export class Viewer {
         this._ixNodeMap = {};
         this.docOrderItemIndex = new DocOrderIndex();
         this._currentDocumentIndex = 0;
+        this._highlightAllPrepared = false;
     }
 
     _checkContinuationCount() {
@@ -767,14 +768,18 @@ export class Viewer {
     }
 
     highlightAllTags(on, namespaceGroups) {
-        if (on) {
+        if (on && !this._highlightAllPrepared) {
             const groups = new Map(namespaceGroups.map((ns, i) => [ns, i % HIGHLIGHT_COLORS]));
             this._applyHighlightToFactWrappers(groups);
+            this._highlightAllPrepared = true;
         }
-        else {
-            $(".ixbrl-element", this._contents).removeClass(
-                (i, className) => (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ')
-            );
+        this._toggleHighlightAll(on);
+    }
+
+    _toggleHighlightAll(on) {
+        for (const iframe of this._iframes.get()) {
+            const body = iframe.contentDocument?.body;
+            body?.classList.toggle("ixbrl-highlight-all", !!on);
         }
     }
 

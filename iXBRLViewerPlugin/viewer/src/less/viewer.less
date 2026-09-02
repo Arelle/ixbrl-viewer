@@ -23,7 +23,7 @@
 // To ensure highlighting takes place, !important is used to override inline styles.
 // For example: overrides highlighting applied inline to alternate table rows.
 
-.ixbrl-highlight {
+body.ixbrl-highlight-all .ixbrl-highlight {
   &:not(.ixbrl-no-highlight),
   & .ixbrl-sub-element:not(.ixbrl-no-highlight) {
       background-color: var(--colour-highlight-default) !important; // Override inline styles
@@ -63,7 +63,7 @@
   background-color: var(--colour-highlight-2);
 }
 
-.review .ixbrl-highlight {
+.review.ixbrl-highlight-all .ixbrl-highlight {
   &:not(.ixbrl-no-highlight).ixbrl-highlight-1, 
   &:not(.ixbrl-no-highlight).ixbrl-highlight-2, 
   &:not(.ixbrl-no-highlight).ixbrl-highlight-3, 

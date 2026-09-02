@@ -71,19 +71,50 @@ describe("highlightAllTags", () => {
         document.body.innerHTML = "";
     });
 
-    test.each([false, true])("preserves highlight behavior in %s mode", (reviewMode) => {
-        const { viewer, wrapper } = makeHighlightViewer(reviewMode);
+    test.each([false, true])("toggles report-body highlighting in %s mode", (reviewMode) => {
+        const { viewer, wrapper, doc } = makeHighlightViewer(reviewMode);
         const groups = viewer._reportSet.namespaceGroups();
 
         viewer.highlightAllTags(true, groups);
 
+        expect(doc.body.classList.contains("ixbrl-highlight-all")).toBe(true);
         expect(wrapper.classList.contains("ixbrl-highlight")).toBe(true);
         expect(wrapper.classList.contains("ixbrl-highlight-0")).toBe(true);
 
         viewer.highlightAllTags(false, groups);
 
-        expect(wrapper.classList.contains("ixbrl-highlight")).toBe(false);
-        expect(wrapper.classList.contains("ixbrl-highlight-0")).toBe(false);
+        expect(doc.body.classList.contains("ixbrl-highlight-all")).toBe(false);
+        expect(wrapper.classList.contains("ixbrl-highlight")).toBe(true);
+        expect(wrapper.classList.contains("ixbrl-highlight-0")).toBe(true);
+    });
+
+    test.each([false, true])("prepares node classes only once in %s mode", (reviewMode) => {
+        const { viewer } = makeHighlightViewer(reviewMode);
+        const applyHighlightToFactWrappers = jest.spyOn(viewer, "_applyHighlightToFactWrappers");
+        const groups = viewer._reportSet.namespaceGroups();
+
+        viewer.highlightAllTags(true, groups);
+        viewer.highlightAllTags(false, groups);
+        viewer.highlightAllTags(true, groups);
+
+        expect(applyHighlightToFactWrappers).toHaveBeenCalledTimes(1);
+    });
+
+    test("toggles highlighting on every report iframe body", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const secondIframe = document.createElement("iframe");
+        document.body.appendChild(secondIframe);
+        viewer._iframes = $([viewer._iframes.get(0), secondIframe]);
+
+        viewer.highlightAllTags(true, viewer._reportSet.namespaceGroups());
+
+        expect(doc.body.classList.contains("ixbrl-highlight-all")).toBe(true);
+        expect(secondIframe.contentDocument.body.classList.contains("ixbrl-highlight-all")).toBe(true);
+
+        viewer.highlightAllTags(false, viewer._reportSet.namespaceGroups());
+
+        expect(doc.body.classList.contains("ixbrl-highlight-all")).toBe(false);
+        expect(secondIframe.contentDocument.body.classList.contains("ixbrl-highlight-all")).toBe(false);
     });
 
     test("keeps namespace colors on primary fact wrappers", () => {

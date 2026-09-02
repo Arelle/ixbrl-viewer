@@ -767,11 +767,8 @@ export class Viewer {
     }
 
     highlightAllTags(on, namespaceGroups) {
-        const groups = {};
-        $.each(namespaceGroups, function (i, ns) {
-            groups[ns] = i % HIGHLIGHT_COLORS;
-        });
         if (on) {
+            const groups = new Map(namespaceGroups.map((ns, i) => [ns, i % HIGHLIGHT_COLORS]));
             this._applyHighlightToFactWrappers(groups);
         }
         else {
@@ -782,23 +779,21 @@ export class Viewer {
     }
 
     _applyHighlightToFactWrappers(groups) {
-        const reportSet = this._reportSet;
-        const viewer = this;
         $(".ixbrl-element", this._contents)
             .addClass("ixbrl-highlight")
-            .each(function () {
+            .each((_i, element) => {
                 // Find the first ixn for this element that isn't a footnote.
                 // Choosing the first means that we're arbitrarily choosing a
                 // highlight color for an element that is double tagged in a
                 // table cell.
-                const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
+                const ixn = $(element).data('ivids').map(id => this._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
                 if (ixn !== undefined ) {
-                    const item = reportSet.getItemById(ixn.id);
+                    const item = this._reportSet.getItemById(ixn.id);
                     if (item !== undefined) {
-                        const elements = viewer.primaryElementsForItemIds(ixn.chainIXIds());
-                        const i = groups[item.conceptQName().prefix];
-                        if (i !== undefined) {
-                            elements.addClass("ixbrl-highlight-" + i);
+                        const color = groups.get(item.conceptQName().prefix);
+                        if (color !== undefined) {
+                            const elements = this.primaryElementsForItemIds(ixn.chainIXIds());
+                            elements.addClass(`ixbrl-highlight-${color}`);
                         }
                     }
                 }

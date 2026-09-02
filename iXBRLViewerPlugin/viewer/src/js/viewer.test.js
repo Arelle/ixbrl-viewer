@@ -158,8 +158,6 @@ describe("highlightAllTags", () => {
             (reportDoc) => {
                 const first = appendHighlightWrapper(reportDoc);
                 const second = appendHighlightWrapper(reportDoc);
-                $(first).data("ivids", [f1]);
-                $(second).data("ivids", [f2]);
                 return {
                     [f1]: new IXNode(f1, $(first), 0),
                     [f2]: new IXNode(f2, $(second), 0),
@@ -183,8 +181,6 @@ describe("highlightAllTags", () => {
             (reportDoc) => {
                 const headWrapper = appendHighlightWrapper(reportDoc);
                 const continuationWrapper = appendHighlightWrapper(reportDoc);
-                $(headWrapper).data("ivids", [f1]);
-                $(continuationWrapper).data("ivids", [f1]);
                 const head = new IXNode(f1, $(headWrapper), 0);
                 const continuation = new IXNode(c1, $(continuationWrapper), 0);
                 head.continuations = [continuation];
@@ -200,6 +196,33 @@ describe("highlightAllTags", () => {
         expect(elements[1].classList.contains("ixbrl-highlight-0")).toBe(true);
     });
 
+    test("prepares each mapped chain node once", () => {
+        const f1 = viewerUniqueId(0, "f1");
+        const f2 = viewerUniqueId(0, "f2");
+        const c1 = viewerUniqueId(0, "c1");
+        const { viewer } = makeHighlightViewer(
+            false,
+            {
+                f1: highlightFact("eg:Concept1"),
+                f2: highlightFact("other:Concept2"),
+            },
+            (reportDoc) => {
+                const first = new IXNode(f1, $(appendHighlightWrapper(reportDoc)), 0);
+                const second = new IXNode(f2, $(appendHighlightWrapper(reportDoc)), 0);
+                const continuation = new IXNode(c1, $(appendHighlightWrapper(reportDoc)), 0);
+                first.continuations = [continuation];
+                second.continuations = [continuation];
+                return { [f1]: first, [f2]: second, [c1]: continuation };
+            }
+        );
+        viewer.continuationOfMap = { [c1]: f1 };
+        const highlightPrimaryWrappers = jest.spyOn(viewer, "_highlightPrimaryWrappers");
+
+        viewer.highlightAllTags(true, viewer._reportSet.namespaceGroups());
+
+        expect(highlightPrimaryWrappers).toHaveBeenCalledTimes(3);
+    });
+
     test("does not color sub-elements as primary wrappers", () => {
         const f1 = viewerUniqueId(0, "f1");
         let subElement;
@@ -209,7 +232,6 @@ describe("highlightAllTags", () => {
             (reportDoc) => {
                 const primary = appendHighlightWrapper(reportDoc);
                 subElement = appendHighlightWrapper(reportDoc, "ixbrl-sub-element");
-                $(primary).data("ivids", [f1]);
                 return { [f1]: new IXNode(f1, $(primary).add(subElement), 0) };
             }
         );
@@ -233,7 +255,6 @@ describe("highlightAllTags", () => {
             },
             (reportDoc) => {
                 const wrapper = appendHighlightWrapper(reportDoc);
-                $(wrapper).data("ivids", [f1, f2]);
                 const wrappedNode = $(wrapper);
                 return {
                     [f1]: new IXNode(f1, wrappedNode, 0),

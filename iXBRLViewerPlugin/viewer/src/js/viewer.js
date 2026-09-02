@@ -785,25 +785,47 @@ export class Viewer {
     }
 
     _applyHighlightToFactWrappers(groups) {
-        $(".ixbrl-element", this._contents)
-            .addClass("ixbrl-highlight")
-            .each((_i, element) => {
-                // Find the first ixn for this element that isn't a footnote.
-                // Choosing the first means that we're arbitrarily choosing a
-                // highlight color for an element that is double tagged in a
-                // table cell.
-                const ixn = $(element).data('ivids').map(id => this._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
-                if (ixn !== undefined ) {
-                    const item = this._reportSet.getItemById(ixn.id);
-                    if (item !== undefined) {
-                        const color = groups.get(item.conceptQName().prefix);
-                        if (color !== undefined) {
-                            const elements = this.primaryElementsForItemIds(ixn.chainIXIds());
-                            elements.addClass(`ixbrl-highlight-${color}`);
-                        }
-                    }
+        const seenIds = new Set();
+        const coloredElements = new Set();
+        for (const [vuid, ixn] of Object.entries(this._ixNodeMap)) {
+            if (this.continuationOfMap?.[vuid] !== undefined) {
+                continue;
+            }
+            const color = this._namespaceHighlightColor(ixn, groups);
+            for (const id of ixn.chainIXIds()) {
+                if (seenIds.has(id)) {
+                    continue;
                 }
-        });
+                seenIds.add(id);
+                const chainNode = this._ixNodeMap[id];
+                if (chainNode !== undefined) {
+                    this._highlightPrimaryWrappers(chainNode, color, coloredElements);
+                }
+            }
+        }
+    }
+
+    _namespaceHighlightColor(ixn, groups) {
+        if (ixn.footnote) {
+            return undefined;
+        }
+        const item = this._reportSet.getItemById(ixn.id);
+        if (item === undefined) {
+            return undefined;
+        }
+        return groups.get(item.conceptQName().prefix);
+    }
+
+    _highlightPrimaryWrappers(ixn, color, coloredElements) {
+        const primaryElements = this.primaryElementsForItemIds([ixn.id]).get();
+        for (const element of primaryElements) {
+            const classes = ["ixbrl-highlight"];
+            if (color !== undefined && !coloredElements.has(element)) {
+                classes.push(`ixbrl-highlight-${color}`);
+                coloredElements.add(element);
+            }
+            element.classList.add(...classes);
+        }
     }
 
     zoom(pct) {

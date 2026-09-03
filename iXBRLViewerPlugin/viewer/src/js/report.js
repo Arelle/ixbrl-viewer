@@ -3,6 +3,8 @@
 import { Concept } from "./concept.js";
 import { setDefault, CALC_ARCROLES } from "./util.js";
 import i18next from "i18next";
+import { indexCalculationResults, calculationVerdict as derivedCalculationVerdict,
+         cubeFactsFromDerived } from "./xbrlModel/derivedContent.js";
 
 // Class to represent the XBRL data from a single target document in a single
 // Inline XBRL Document or Document Set.
@@ -204,6 +206,57 @@ export class XBRLReport {
             return {}
         }
         return this._reportData.localDocs;
+    }
+
+    /*
+     * Returns the XBRL Model cubes (hypercubes/tables) for this report, or an
+     * empty array.  Only populated for reports loaded from an XBRL Model
+     * (the iXBRL path does not carry cubes).  Each cube is
+     * { name, label, concepts: [conceptName], dimensions: [dimName] }.
+     */
+    cubes() {
+        return this._reportData.cubes ?? [];
+    }
+
+    /*
+     * The verdict processing recorded for one calculation binding: this fact as
+     * the total of the summation network `elr`.
+     *
+     * The viewer reports what validation concluded rather than checking the
+     * arithmetic itself.  Rules, standards and implementations move between the
+     * moment a report is received and any later moment it is read, so a locally
+     * computed answer sitting where the producer's verdict belongs would be a
+     * different claim, indistinguishable to the reader.  Where nothing was
+     * carried this returns a NOT_VALIDATED state, which the caller says out loud.
+     *
+     * @return {Object} { state, result, derivation, reason } -- see derivedContent.js
+     */
+    calculationVerdict(fact, elr) {
+        this._derivedCalcs ??= indexCalculationResults(
+            { derivedContent: this._reportData.derivedContent });
+        return derivedCalculationVerdict(this._derivedCalcs, {
+            networkName: elr,
+            total: fact.conceptName(),
+            factAspects: fact.f.a,
+        });
+    }
+
+    /*
+     * Map of cube name -> the model's names for the facts in that cube, or null
+     * where the report does not state it.  See ReportSet.cubeFactsIndex.
+     */
+    cubeFactNames() {
+        return cubeFactsFromDerived({ derivedContent: this._reportData.derivedContent });
+    }
+
+    /*
+     * Returns the reporting-structure section tree (OIM groupTree) that organizes this
+     * report's cubes, or null when the report carries no group tree (the Cubes panel then
+     * falls back to a flat cube list).  Each node is
+     * { name, label, cubes: [cubeName], children: [node] }.
+     */
+    sections() {
+        return this._reportData.sections ?? null;
     }
 
     qname(v) {

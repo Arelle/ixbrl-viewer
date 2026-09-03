@@ -355,3 +355,58 @@ describe("Fetching software credit", () => {
         expect(softwareCredits).toEqual(["Example credit text A", "Example credit text B", "Example credit text C"]);
     });
 });
+
+/*
+ * Which facts are in a cube: stated by the model where it says so, approximated
+ * by a concept match where it does not.  Report data shaped as the XbrlModel
+ * adapter's buildReportData emits it.
+ */
+function cubeTestReportSet(derivedContent) {
+    const rs = new ReportSet({
+        "features": [],
+        "languages": { "en": "English" },
+        "prefixes": { "eg": "http://www.example.com", "iso4217": NAMESPACE_ISO4217 },
+        "roles": {},
+        "sourceReports": [{ "targetReports": [{
+            "roleDefs": {},
+            "concepts": {
+                "eg:Total": { "labels": { "std": { "en": "Total" } } },
+                "eg:Part": { "labels": { "std": { "en": "Part" } } },
+            },
+            "rels": {},
+            "facts": {
+                // two facts of one concept; the model puts only one in the cube
+                "f1": { "n": "ex:F_1", "a": { "c": "eg:Total", "u": "iso4217:USD" }, "v": 10 },
+                "f2": { "n": "ex:F_2", "a": { "c": "eg:Total", "u": "iso4217:USD",
+                                              "eg:Axis": "eg:Member" }, "v": 4 },
+                "f3": { "n": "ex:F_3", "a": { "c": "eg:Part", "u": "iso4217:USD" }, "v": 6 },
+            },
+            "cubes": [{ "name": "eg:Cube", "label": "Cube",
+                        "concepts": ["eg:Total", "eg:Part"] }],
+            ...(derivedContent ? { "derivedContent": derivedContent } : {}),
+        }] }],
+    });
+    rs.setIXNodeMap({});
+    return rs;
+}
+
+describe("cube membership", () => {
+    test("is taken from the model where the model states it", () => {
+        const rs = cubeTestReportSet({
+            cubeContents: [{ cubeName: "eg:Cube", facts: ["ex:F_1", "ex:F_3"] }] });
+        expect(rs.cubeFactsIndex().get("eg:Cube").map(f => f.f.n))
+            .toEqual(["ex:F_1", "ex:F_3"]);
+    });
+
+    test("a cube the model omits has no facts, rather than falling back", () => {
+        // the association is stated in full, so silence about a cube is a claim
+        const rs = cubeTestReportSet({
+            cubeContents: [{ cubeName: "eg:Other", facts: ["ex:F_1"] }] });
+        expect(rs.cubeFactsIndex().get("eg:Cube")).toBeUndefined();
+    });
+
+    test("is null where no report states it, so the caller approximates", () => {
+        expect(cubeTestReportSet(null).cubeFactsIndex()).toBeNull();
+        expect(cubeTestReportSet({ calculationResults: [] }).cubeFactsIndex()).toBeNull();
+    });
+});

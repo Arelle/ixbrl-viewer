@@ -294,7 +294,6 @@ describe("Consistent duplicate contributor", () => {
 
 });
 
-
 describe("Single contributor", () => {
     const reportSet = testReportSet({
         "f1": testFact({"c": "eg:Total", "u": "iso2417:GBP"}, 10000, -3),
@@ -374,3 +373,4 @@ describe("Weights", () => {
         expect(rCalc.isConsistent()).toBe(true);
     });
 });
+

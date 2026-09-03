@@ -30,10 +30,30 @@ See COPYRIGHT.md for copyright information
             </div>
           </div>
           <button id="print" title="Print Document" data-i18n="[title]inspector.printDocument"></button>
+          <!-- Instance tagger: the journal is the tagger's only output, so it
+               needs a way out of the browser.  Shown once there is anything to
+               export. -->
+          <!-- Reachable in every inspector mode.  The title-line trigger sits
+               inside the fact pane, which search, overview and settings modes
+               hide, so it is unavailable exactly when a user has just found the
+               fact they want to tag. -->
+          <button id="locate-in-document-top" class="locate-in-document"
+                  data-i18n="[aria-label]tagger.locate;[title]tagger.locate"
+                  aria-label="Locate in document" title="Locate in document"></button>
+          <button id="export-journal" class="tagger-export"
+                  data-i18n="[title]tagger.exportJournal" title="Export tagging journal"></button>
           <button data-i18n="[title]inspector.settingsButton" title="Settings" id="settings-button"></button>
         </div>
       </header>
       <section id="viewer-pane" data-i18n="[aria-label]viewer.ixbrlDocumentView" aria-label="iXBRL Document View">
+        <!-- Instance tagger: names the fact being located, and carries the one
+             control that must stay reachable when the bind card is scrolled
+             out of view.  Shown only while a bind is in progress. -->
+        <div id="bind-bar" role="status">
+          <span class="bind-bar-label" data-i18n="tagger.locating">Locating</span>
+          <span class="bind-bar-target"></span>
+          <button class="bind-bar-cancel" data-i18n="tagger.cancelEsc">Cancel (Esc)</button>
+        </div>
         <div class="ixds-tabs"><div class="tab-area"></div></div>
         <div id="iframe-container"></div>
       </section>
@@ -45,6 +65,7 @@ See COPYRIGHT.md for copyright information
         <button data-mode="fact-mode" data-i18n="inspector.tabs.xbrlFacts" class="always-selectable">XBRL facts</button>
         <button data-mode="search-mode" data-i18n="inspector.tabs.search">Search</button>
         <button data-mode="overview-mode" data-i18n="inspector.tabs.overview">Overview</button>
+        <button data-mode="cubes-mode" data-i18n="inspector.tabs.cubes" class="cubes-button">Cubes</button>
       </nav>
       <section id="inspector" data-i18n="[aria-label]inspector.ixbrlInspector" aria-label="iXBRL Inspector">
 
@@ -84,6 +105,12 @@ See COPYRIGHT.md for copyright information
               </div>
               <div class="concept-name-row">
                 <h2 class="concept-name-title"></h2>
+                <!-- Instance tagger trigger: on the fact's own title line rather
+                     than occupying a row of its own, since locating is an action
+                     on this fact and not the pane's primary purpose. -->
+                <button class="locate-in-document has-button-tooltip"
+                        data-i18n="[aria-label]tagger.locate;[title]tagger.locate"
+                        aria-label="Locate in document" title="Locate in document"></button>
                 <div class="tags">
                   <div class="target-document-tag"></div>
                   <div class="hidden-fact-tag" data-i18n="inspector.hiddenFact">Hidden Fact</div>
@@ -344,6 +371,52 @@ See COPYRIGHT.md for copyright information
             </div>
           </div> <!-- inspector-body -->
         </div> <!-- summary -->
+
+        <!-- Instance tagger: shown in place while a bind is in progress, so the
+             target stays visible while the user hunts for it in the document. -->
+        <div id="bind-card" class="bind-card">
+          <div class="bind-target">
+            <div class="bind-heading" data-i18n="tagger.locating">Locating</div>
+            <div class="bind-concept"></div>
+            <div class="bind-expected">
+              <span data-i18n="tagger.expected">Expected value</span>
+              <span class="bind-expected-value"></span>
+            </div>
+          </div>
+          <div class="bind-candidate">
+            <div class="bind-hint" data-i18n="tagger.hint">Hover the document, then click to capture.</div>
+            <div class="bind-captured">
+              <span data-i18n="tagger.captured">Captured</span>
+              <span class="bind-captured-text"></span>
+            </div>
+            <div class="bind-verdict"></div>
+            <div class="bind-fragments"></div>
+            <div class="bind-derivation"></div>
+            <!-- Only the derivation fields this capture puts in play; empty and
+                 hidden when the capture needs no correction. -->
+            <button class="bind-derivation-toggle" data-i18n="tagger.allDerivation">All derivation properties</button>
+            <div class="bind-derivation-form"></div>
+            <div class="bind-derivation-alt"></div>
+            <div class="bind-unverified"></div>
+          </div>
+          <div class="bind-buttons">
+            <button class="bind-widen" data-i18n="tagger.widen">Widen</button>
+            <button class="bind-retry" data-i18n="tagger.retry">Retry</button>
+            <button class="bind-accept" data-i18n="tagger.accept">Accept</button>
+            <button class="bind-cancel" data-i18n="tagger.cancel">Cancel</button>
+          </div>
+        </div>
+
+        <div class="inspector-container cubes-inspector">
+          <div class="inspector-body">
+            <div class="no-cubes-overlay">
+              <div class="no-cubes-overlay-icon"></div>
+              <p class="title" data-i18n="inspector.cubesUnavailable">No Cubes</p>
+            </div>
+            <div class="body">
+            </div>
+          </div>
+        </div>
 
         <div class="inspector-container settings-inspector">
           <div class="modal-inspector">

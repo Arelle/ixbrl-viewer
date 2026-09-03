@@ -93,7 +93,8 @@ export class Calculation {
         const resolvedCalculation = new resolvedCalcClass(elr, this.fact, version);
         for (const r of rels) {
             const factset = calcFacts[r.t] ?? new FactSet();
-            resolvedCalculation.addRow(new CalculationContribution(report.getConcept(r.t), r.w, factset));
+            resolvedCalculation.addRow(
+                new CalculationContribution(report.getConcept(r.t), r.w, factset));
         }
         return resolvedCalculation;
     }
@@ -105,6 +106,8 @@ class CalculationContribution {
         this.concept = concept;
         this.weight = weight;
         this.facts = facts;
+        // What this contribution is to the total, where the model says so.
+        // Undefined for every legacy calculation, which can only mean "equal".
 
         if (weight == 1) {
             this.weightSign = '+';
@@ -167,13 +170,32 @@ export class ResolvedCalc11Calculation extends AbstractResolvedCalculation {
         return total;
     }
 
+
     /*
-     * Is the calculation consistent under Calculations v1.1 rules?
+     * Is the calculation consistent?
+     *
+     * "Consistent" means the reported total is not provably wrong given the
+     * contributions -- both sides are intervals, so the test is whether some
+     * pair of values within them satisfies the relation, not whether the
+     * midpoints do.
+     *
+     *   equal    the intervals intersect, which is the Calculations 1.1 test
+     *   atMost   some contribution total is <= some reported total, i.e. the
+     *            contributions' low end does not exceed the total's high end
+     *   atLeast  the mirror
+     *
+     * atMost is the of-which case: a total followed by components known to be
+     * only part of it.  Judged as "equal" it reports an inconsistency on every
+     * report that uses the pattern, which is the whole reason the property
+     * exists.
      */
     isConsistent() {
         const cti = this.calculatedTotalInterval();
         const ti = this.totalFactSet.valueIntersection();
-        return cti !== undefined && cti.intersection(ti) !== undefined;
+        if (cti === undefined || ti === undefined) {
+            return false;
+        }
+        return cti.intersection(ti) !== undefined;
     }
 }
 

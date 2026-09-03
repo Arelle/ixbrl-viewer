@@ -33,6 +33,7 @@ export class Viewer {
         this._ixNodeMap = {};
         this.docOrderItemIndex = new DocOrderIndex();
         this._currentDocumentIndex = 0;
+        this._highlightAllPrepared = false;
     }
 
     _checkContinuationCount() {
@@ -767,37 +768,63 @@ export class Viewer {
     }
 
     highlightAllTags(on, namespaceGroups) {
-        const groups = {};
-        $.each(namespaceGroups, function (i, ns) {
-            groups[ns] = i % HIGHLIGHT_COLORS;
-        });
-        const reportSet = this._reportSet;
-        const viewer = this;
-        if (on) {
-            $(".ixbrl-element", this._contents)
-                .addClass("ixbrl-highlight")
-                .each(function () {
-                    // Find the first ixn for this element that isn't a footnote.
-                    // Choosing the first means that we're arbitrarily choosing a
-                    // highlight color for an element that is double tagged in a
-                    // table cell.
-                    const ixn = $(this).data('ivids').map(id => viewer._ixNodeMap[id]).filter(ixn => !ixn.footnote)[0];
-                    if (ixn !== undefined ) {
-                        const item = reportSet.getItemById(ixn.id);
-                        if (item !== undefined) {
-                            const elements = viewer.primaryElementsForItemIds(ixn.chainIXIds());
-                            const i = groups[item.conceptQName().prefix];
-                            if (i !== undefined) {
-                                elements.addClass("ixbrl-highlight-" + i);
-                            }
-                        }
-                    }
-            });
+        const reviewMode = this._iv?.isReviewModeEnabled?.() === true;
+        if (on && !this._highlightAllPrepared && !reviewMode) {
+            const groups = new Map(namespaceGroups.map((ns, i) => [ns, i % HIGHLIGHT_COLORS]));
+            this._applyHighlightToFactWrappers(groups);
+            this._highlightAllPrepared = true;
         }
-        else {
-            $(".ixbrl-element", this._contents).removeClass(
-                (i, className) => (className.match (/(^|\s)ixbrl-highlight\S*/g) || []).join(' ')
-            );
+        this._toggleHighlightAll(on);
+    }
+
+    _toggleHighlightAll(on) {
+        for (const iframe of this._iframes.get()) {
+            const body = iframe.contentDocument?.body;
+            body?.classList.toggle("ixbrl-highlight-all", !!on);
+        }
+    }
+
+    _applyHighlightToFactWrappers(groups) {
+        const seenIds = new Set();
+        const coloredElements = new Set();
+        for (const [vuid, ixn] of Object.entries(this._ixNodeMap)) {
+            if (this.continuationOfMap?.[vuid] !== undefined) {
+                continue;
+            }
+            const color = this._namespaceHighlightColor(ixn, groups);
+            for (const id of ixn.chainIXIds()) {
+                if (seenIds.has(id)) {
+                    continue;
+                }
+                seenIds.add(id);
+                const chainNode = this._ixNodeMap[id];
+                if (chainNode !== undefined) {
+                    this._highlightPrimaryWrappers(chainNode, color, coloredElements);
+                }
+            }
+        }
+    }
+
+    _namespaceHighlightColor(ixn, groups) {
+        if (ixn.footnote) {
+            return undefined;
+        }
+        const item = this._reportSet.getItemById(ixn.id);
+        if (item === undefined) {
+            return undefined;
+        }
+        return groups.get(item.conceptQName().prefix);
+    }
+
+    _highlightPrimaryWrappers(ixn, color, coloredElements) {
+        const primaryElements = this.primaryElementsForItemIds([ixn.id]).get();
+        for (const element of primaryElements) {
+            const classes = ["ixbrl-highlight"];
+            if (color !== undefined && !coloredElements.has(element)) {
+                classes.push(`ixbrl-highlight-${color}`);
+                coloredElements.add(element);
+            }
+            element.classList.add(...classes);
         }
     }
 

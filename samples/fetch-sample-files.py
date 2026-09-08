@@ -60,9 +60,7 @@ with open(filename, "r") as f:
             missing_checksums.append("%s %s %s" % (subdir, url, actual_fhash))
         else:
             if actual_fhash != fhash:
-                print("Checksum does not match for %s (expected: %s, got: %s)" % (target, fhash, actual_fhash)) 
+                print("Checksum does not match for %s (expected: %s, got: %s)" % (target, fhash, actual_fhash))
 
 if len(missing_checksums) > 0:
     print("\n".join(missing_checksums))
-
-

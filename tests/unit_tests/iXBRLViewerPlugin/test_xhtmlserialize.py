@@ -257,13 +257,13 @@ class TestXHTMLSerializer:
 <div><br/><span></span></div>"""
             ),
             (
-                r"""<?xml version="1.0" standalone="yes" ?> 
+                r"""<?xml version="1.0" standalone="yes" ?>
 <div></div>""",
                 r"""<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <div></div>""",
             ),
             (
-                r"""<?xml version="1.1" standalone="no" ?> 
+                r"""<?xml version="1.1" standalone="no" ?>
 <div></div>""",
                 r"""<?xml version="1.1" encoding="utf-8"?>
 <div></div>""",

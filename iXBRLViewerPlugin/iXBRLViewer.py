@@ -66,7 +66,7 @@ class NamespaceMap:
         self._nsmap: dict[str, str] = {}
         self._reportNsMap: dict[str, str] = {}
 
-    @property    
+    @property
     def prefixmap(self) -> dict[str, str]:
         """
         Get the current prefix map (prefix to namespace URI).
@@ -413,7 +413,7 @@ class IXBRLViewerBuilder:
                 for qn in qnEnums:
                     self.addConcept(report, report.qnameConcepts.get(qn))
         else:
-            factData["v"] = f.value 
+            factData["v"] = f.value
             if f.value == INVALIDixVALUE:
                 factData["err"] = "INVALID_IX_VALUE"
 

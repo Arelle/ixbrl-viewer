@@ -19,7 +19,7 @@ class XHTMLSerializer:
 
     # From https://www.w3.org/TR/html401/index/elements.html
     SELF_CLOSABLE = (
-        "area", "base", "basefont", "br", "col", "frame", "hr", "img", 
+        "area", "base", "basefont", "br", "col", "frame", "hr", "img",
         "input", "isindex", "link", "meta", "param"
     )
 

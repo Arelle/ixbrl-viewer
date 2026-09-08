@@ -11,7 +11,7 @@ def qname_effect(prefix, namespaceURI, localName):
 
 def mrs_effect(dts, reltype):
     return Mock(
-        fromModelObject = lambda source: []  
+        fromModelObject = lambda source: []
     )
 
 def inferredDecimals_effect(fact):

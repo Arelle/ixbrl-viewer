@@ -644,7 +644,7 @@ class TestIXBRLViewer:
     def test_createViewerWithValidation(self):
         js_uri = "ixbrlviewer.js"
 
-        error1 = logging.LogRecord("arelle", logging.ERROR, "", 0, "Error message", {}, None)    
+        error1 = logging.LogRecord("arelle", logging.ERROR, "", 0, "Error message", {}, None)
         error1.messageCode = "code1"
         self.logRecordBuffer.append(error1)
 
@@ -945,7 +945,7 @@ class TestIXBRLViewer:
         """
         Attempt to enable an undefined feature
         """
-        with pytest.raises(AssertionError, match=rf"^Given feature name `unknown` does not match any defined features"):
+        with pytest.raises(AssertionError, match=r"^Given feature name `unknown` does not match any defined features"):
             IXBRLViewerBuilder(Mock(), features={"unknown": True})
 
     def test_xhtmlNamespaceHandling(self):

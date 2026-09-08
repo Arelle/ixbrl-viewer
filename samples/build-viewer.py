@@ -39,7 +39,7 @@ class CntlrCreateViewer(Cntlr.Cntlr):
             else:
                 self.addToLog("Failed to load package", messageCode="error", file=p)
         PackageManager.rebuildRemappings(self)
-    
+
     def createViewer(self, f, scriptUrl=None, outPath=None, useStubViewer=False):
         if os.path.isdir(f):
             files = glob.glob(os.path.join(f, "*.xhtml")) + glob.glob(os.path.join(f, "*.html")) + glob.glob(os.path.join(f, "*.htm"))

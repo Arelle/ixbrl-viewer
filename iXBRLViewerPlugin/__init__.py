@@ -49,7 +49,7 @@ from .plugin import IXBRLViewerPluginData
 
 _: TypeGetText
 
-PLUGIN_NAME = 'ixbrl-viewer'
+PLUGIN_NAME = "ixbrl-viewer"
 
 #
 # GUI operation:
@@ -125,7 +125,7 @@ def iXBRLViewerCommandLineOptionExtender(parser: OptionParser, *args: Any, **kwa
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
     for featureConfig in FEATURE_CONFIGS:
-        arg = f'--viewer-feature-{featureConfig.key}'.replace('_', '-')
+        arg = f"--viewer-feature-{featureConfig.key}".replace("_", "-")
         featureGroup.add_option(
             arg,
             arg.lower(),
@@ -160,8 +160,8 @@ def processModel(cntlr: Cntlr, modelXbrl: ModelXbrl) -> None:
             messageCode=EXCEPTION_MESSAGE_CODE,
             level=logging.ERROR,
             messageArgs={
-                'ex': ex,
-                'traceback': tb,
+                "ex": ex,
+                "traceback": tb,
             },
         )
 
@@ -240,7 +240,7 @@ def getFeaturesFromOptions(options: argparse.Namespace | OptionParser) -> dict[s
     features = {}
     for featureConfig in FEATURE_CONFIGS:
         key = featureConfig.key
-        option = f'viewer_feature_{key}'
+        option = f"viewer_feature_{key}"
         value = getattr(options, option, None)
         if value is not None:
             features[key] = value
@@ -375,7 +375,7 @@ def guiRun(cntlr: CntlrWinMain, modelXbrl: ModelXbrl, attach: Any, *args: Any, *
         viewer_file_name = DEFAULT_OUTPUT_NAME
         features: dict[str, bool] = {}
         for featureConfig in FEATURE_CONFIGS:
-            if cntlr.config.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', False):
+            if cntlr.config.setdefault(f"{CONFIG_FEATURE_PREFIX}{featureConfig.key}", False):
                 features[featureConfig.key] = True
         pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer=True, features=features)
         processModel(cntlr, modelXbrl)
@@ -388,7 +388,7 @@ def guiRun(cntlr: CntlrWinMain, modelXbrl: ModelXbrl, attach: Any, *args: Any, *
         if Path(tempViewerDir, viewer_file_name).exists():
             localViewer = iXBRLViewerLocalViewer("iXBRL Viewer", os.path.dirname(__file__))
             localhost = localViewer.init(cntlr, tempViewerDir)
-            webbrowser.open(f'{localhost}/{viewer_file_name}')
+            webbrowser.open(f"{localhost}/{viewer_file_name}")
     except Exception as ex:
         modelXbrl.error(
             EXCEPTION_MESSAGE_CODE,
@@ -402,18 +402,18 @@ def load_plugin_url() -> str:
 
 
 __pluginInfo__ = {
-    'name': PLUGIN_NAME,
-    'aliases': [
-        'iXBRLViewerPlugin',
+    "name": PLUGIN_NAME,
+    "aliases": [
+        "iXBRLViewerPlugin",
     ],
-    'version': '0.1',
-    'description': "iXBRL Viewer creator",
-    'license': 'License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)',
-    'author': 'Paul Warren',
-    'copyright': 'Copyright :: Workiva Inc. :: 2019',
-    'CntlrCmdLine.Options': commandLineOptionExtender,
-    'CntlrCmdLine.Xbrl.Run': commandLineRun,
-    'CntlrCmdLine.Filing.End': commandLineFilingEnd,
-    'CntlrWinMain.Menu.Tools': toolsMenuExtender,
-    'CntlrWinMain.Xbrl.Loaded': guiRun,
+    "version": "0.1",
+    "description": "iXBRL Viewer creator",
+    "license": "License :: OSI Approved :: Apache License, Version 2.0 (Apache-2.0)",
+    "author": "Paul Warren",
+    "copyright": "Copyright :: Workiva Inc. :: 2019",
+    "CntlrCmdLine.Options": commandLineOptionExtender,
+    "CntlrCmdLine.Xbrl.Run": commandLineRun,
+    "CntlrCmdLine.Filing.End": commandLineFilingEnd,
+    "CntlrWinMain.Menu.Tools": toolsMenuExtender,
+    "CntlrWinMain.Xbrl.Loaded": guiRun,
 }

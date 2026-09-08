@@ -8,8 +8,8 @@ from typing import IO
 
 from lxml import etree
 
-XHTML_NS = 'http://www.w3.org/1999/xhtml'
-XML_NS = 'http://www.w3.org/XML/1998/namespace'
+XHTML_NS = "http://www.w3.org/1999/xhtml"
+XML_NS = "http://www.w3.org/XML/1998/namespace"
 
 class EscapeMode(Enum):
     DEFAULT = 0
@@ -19,24 +19,24 @@ class XHTMLSerializer:
 
     # From https://www.w3.org/TR/html401/index/elements.html
     SELF_CLOSABLE = (
-        'area', 'base', 'basefont', 'br', 'col', 'frame', 'hr', 'img', 
-        'input', 'isindex', 'link', 'meta', 'param'
+        "area", "base", "basefont", "br", "col", "frame", "hr", "img",
+        "input", "isindex", "link", "meta", "param"
     )
 
     ESCAPES = {
-        ']]>': ']]&gt;',
-        '>': '&gt;',
-        '<': '&lt;',
-        '"': '&quot;',
-        '&': '&amp;'
+        "]]>": "]]&gt;",
+        ">": "&gt;",
+        "<": "&lt;",
+        '"': "&quot;",
+        "&": "&amp;"
         }
 
-    MUST_ESCAPE_CHARS = r'<&\u0001-\u0008\u000B\u000C\u000E\u001F\u007F-\u009F'
-    CDATA_END = r']]>'
+    MUST_ESCAPE_CHARS = r"<&\u0001-\u0008\u000B\u000C\u000E\u001F\u007F-\u009F"
+    CDATA_END = r"]]>"
 
-    ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>])')
-    ATTR_ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + '>"])')
-    STYLE_ESCAPE_RE = re.compile('([' + MUST_ESCAPE_CHARS + ']|' + CDATA_END + ')')
+    ESCAPE_RE = re.compile("([" + MUST_ESCAPE_CHARS + ">])")
+    ATTR_ESCAPE_RE = re.compile("([" + MUST_ESCAPE_CHARS + '>"])')
+    STYLE_ESCAPE_RE = re.compile("([" + MUST_ESCAPE_CHARS + "]|" + CDATA_END + ")")
 
     def __init__(self, fout: IO[bytes], xml_declaration: bool = True, assume_xhtml: bool = True) -> None:
         self.fout = fout
@@ -48,7 +48,7 @@ class XHTMLSerializer:
         self.fout.write(s.encode(self.encoding))
 
     def prefix_sort(self, p: str | None) -> str:
-        return p if p is not None else '0'
+        return p if p is not None else "0"
 
     def qname_for_node(self, node: etree._Element) -> str:
         qname = etree.QName(node)
@@ -67,7 +67,7 @@ class XHTMLSerializer:
         if qname.namespace is None:
             return qname.localname
         if qname.namespace == XML_NS:
-            prefix = 'xml'
+            prefix = "xml"
         else:
             prefix = next(iter(sorted((p for p, ns in nsmap.items() if ns == qname.namespace and p is not None), key = self.prefix_sort)))
         return f"{prefix}:{qname.localname}"
@@ -93,7 +93,7 @@ class XHTMLSerializer:
         return sorted(self.xmlns_declaration(p, new_nsmap[p]) for p in changed)
 
     def escape_str(self, c: str) -> str:
-        return self.ESCAPES.get(c, f'&#x{ord(c[0]):02X};')
+        return self.ESCAPES.get(c, f"&#x{ord(c[0]):02X};")
 
     def write_escape_text(self, s: str | None, escape_mode: EscapeMode) -> None:
         if s is None:
@@ -113,17 +113,17 @@ class XHTMLSerializer:
         for qname, value in sorted((self.qname_for_attr(k, node.nsmap), v) for k, v in node.items()):
             self.write(f' {qname}="')
             self.write(self.escape_attr(value))
-            self.write("\"")
+            self.write('"')
 
     def write_comment(self, n: etree._Comment, escape_mode: EscapeMode) -> None:
-        self.write('<!--' + n.text + '-->')
+        self.write("<!--" + n.text + "-->")
         self.write_escape_text(n.tail, escape_mode)
 
     def write_processing_instruction(self, n: etree._ProcessingInstruction, escape_mode: EscapeMode) -> None:
-        self.write( '<?' + n.target )
-        if n.text != '':
-            self.write(' ' + n.text)
-        self.write('?>')
+        self.write( "<?" + n.target )
+        if n.text != "":
+            self.write(" " + n.text)
+        self.write("?>")
         self.write_escape_text(n.tail, escape_mode)
 
     def write_node(
@@ -153,19 +153,19 @@ class XHTMLSerializer:
         qname = etree.QName(n)
         selfclose = len(n) == 0 and n.text is None and self.is_selfclosable(n)
         parts = [ name ] + self.namespace_declarations(n.nsmap, parent_nsmap)
-        self.write('<' + ' '.join(parts))
+        self.write("<" + " ".join(parts))
         self.write_attributes(n)
 
-        inner_escape_mode = EscapeMode.STYLE if qname.localname == 'style' else escape_mode
+        inner_escape_mode = EscapeMode.STYLE if qname.localname == "style" else escape_mode
 
         if selfclose:
-            self.write('/>')
+            self.write("/>")
         else:
-            self.write('>')
+            self.write(">")
             self.write_escape_text(n.text, inner_escape_mode)
             for child in n.iterchildren():
                 self.write_node(child, n.nsmap, inner_escape_mode)
-            self.write(f'</{name}>')
+            self.write(f"</{name}>")
 
         self.write_escape_text(n.tail, escape_mode)
 

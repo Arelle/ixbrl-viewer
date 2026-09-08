@@ -319,9 +319,21 @@ describe("_findOrCreateWrapperNode", () => {
         expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
     });
 
-    test("wraps an empty element that is the only content of a table cell", () => {
+    test("uses the table cell as the wrapper for an empty element that is its only content", () => {
         const { viewer, doc } = makeHighlightViewer(false);
-        const ixElement = appendIXElement(doc, '<table><tr><td><ix:nonFraction id="f1"></ix:nonFraction></td></tr></table>');
+        const ixElement = appendIXElement(doc, '<table><tr><td>$ <ix:nonFraction id="f1"></ix:nonFraction></td></tr></table>');
+
+        const nodes = viewer._findOrCreateWrapperNode(ixElement, false);
+
+        expect(nodes.length).toBe(1);
+        expect(nodes.get(0)).toBe(ixElement.parentNode);
+        expect(nodes.get(0).tagName).toBe("TD");
+        expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+    });
+
+    test("wraps an empty element in a table cell with other content", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const ixElement = appendIXElement(doc, '<table><tr><td>Cash: <ix:nonFraction id="f1"></ix:nonFraction></td></tr></table>');
 
         const nodes = viewer._findOrCreateWrapperNode(ixElement, false);
 

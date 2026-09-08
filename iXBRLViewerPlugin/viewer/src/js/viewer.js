@@ -288,7 +288,7 @@ export class Viewer {
         const tableNode = domNode.closest("td,th");
         let nodes;
         const innerText = $(domNode).text();
-        if (tableNode !== null && getComputedStyle(tableNode).display === 'table-cell' && innerText.length > 0) {
+        if (tableNode !== null && getComputedStyle(tableNode).display === 'table-cell') {
             // Use indexOf rather than a single regex because innerText may
             // be too long for the regex engine 
             const outerText = $(tableNode).text();

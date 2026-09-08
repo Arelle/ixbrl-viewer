@@ -38,17 +38,17 @@ from .constants import (
 )
 from .xhtmlserialize import XHTMLSerializer
 
-REPORT_TYPE_EXTENSIONS = ('.xbrl', '.xhtml', '.html', '.htm', '.json')
-UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = 'unrecognizedLinkbase'
+REPORT_TYPE_EXTENSIONS = (".xbrl", ".xhtml", ".html", ".htm", ".json")
+UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = "unrecognizedLinkbase"
 LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
-    XbrlConst.qnLinkCalculationLink: 'calcLinkbase',
-    XbrlConst.qnLinkDefinitionLink: 'defLinkbase',
-    XbrlConst.qnLinkLabelLink: 'labelLinkbase',
-    XbrlConst.qnLinkPresentationLink: 'presLinkbase',
-    XbrlConst.qnLinkReferenceLink: 'refLinkbase',
+    XbrlConst.qnLinkCalculationLink: "calcLinkbase",
+    XbrlConst.qnLinkDefinitionLink: "defLinkbase",
+    XbrlConst.qnLinkLabelLink: "labelLinkbase",
+    XbrlConst.qnLinkPresentationLink: "presLinkbase",
+    XbrlConst.qnLinkReferenceLink: "refLinkbase",
 }
 
-WIDER_NARROWER_ARCROLE = 'http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower'
+WIDER_NARROWER_ARCROLE = "http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower"
 
 
 def isInlineDoc(doc: ModelDocument | None) -> bool:
@@ -147,7 +147,7 @@ class IXBRLViewerBuilder:
         featureNames = {c.key for c in FEATURE_CONFIGS}
         for featureName in features:
             assert featureName in featureNames, \
-                f'Given feature name `{featureName}` does not match any defined features: {featureNames}'
+                f"Given feature name `{featureName}` does not match any defined features: {featureNames}"
         self.reportZip: str | None = None
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
@@ -296,7 +296,7 @@ class IXBRLViewerBuilder:
                     refData.append(ref)
 
             if len(refData) > 0:
-                conceptData['r'] = refData
+                conceptData["r"] = refData
 
             if dimensionType is not None:
                 conceptData["d"] = dimensionType
@@ -305,19 +305,19 @@ class IXBRLViewerBuilder:
                 conceptData["e"] = True
 
             if concept.isTextBlock:
-                conceptData['t'] = True
+                conceptData["t"] = True
 
             if concept.balance is not None:
-                conceptData['b'] = concept.balance
+                conceptData["b"] = concept.balance
 
             if concept.type is not None and concept.type.qname is not None:
-                conceptData['dt'] = self.nsmap.qname(concept.type.qname)
+                conceptData["dt"] = self.nsmap.qname(concept.type.qname)
 
             if concept.isTypedDimension:
                 typedDomainElement = concept.typedDomainElement
                 if isinstance(typedDomainElement, ModelConcept) and typedDomainElement.qname is not None:
                     typedDomainName = self.nsmap.qname(typedDomainElement.qname)
-                    conceptData['td'] = typedDomainName
+                    conceptData["td"] = typedDomainName
                     self.addConcept(report, typedDomainElement)
 
             self.currentTargetReport["concepts"][conceptName] = conceptData
@@ -353,7 +353,7 @@ class IXBRLViewerBuilder:
                         "t": self.nsmap.qname(r.toModelObject.qname),
                     }
                     if r.weight is not None:
-                        rel['w'] = r.weight
+                        rel["w"] = r.weight
                     rr.setdefault(fromKey, []).append(rel)
                     self.addConcept(report, r.toModelObject)
                     self.addConcept(report, r.fromModelObject)
@@ -405,7 +405,7 @@ class IXBRLViewerBuilder:
             qnEnums = f.xValue
             if qnEnums is None:
                 factData["v"] = f.value
-                factData["err"] = 'INVALID_IX_VALUE'
+                factData["err"] = "INVALID_IX_VALUE"
             else:
                 if not isinstance(qnEnums, list):
                     qnEnums = (qnEnums,)
@@ -415,14 +415,14 @@ class IXBRLViewerBuilder:
         else:
             factData["v"] = f.value 
             if f.value == INVALIDixVALUE:
-                factData["err"] = 'INVALID_IX_VALUE'
+                factData["err"] = "INVALID_IX_VALUE"
 
         if f.format is not None:
             factData["f"] = str(f.format)
 
         if f.isNumeric:
             if f.unit is not None and len(f.unit.measures[0]):
-                aspects['u'] = self.oimUnitString(f.unit)
+                aspects["u"] = self.oimUnitString(f.unit)
             else:
                 # The presence of the unit aspect is used by the viewer to
                 # identify numeric facts.  If the fact has no unit (invalid
@@ -469,9 +469,9 @@ class IXBRLViewerBuilder:
         :return: String representation of unit (OIM format)
         """
         numerators, denominators = unit.measures
-        numeratorsString = '*'.join(self.nsmap.qname(x) for x in sorted(numerators))
+        numeratorsString = "*".join(self.nsmap.qname(x) for x in sorted(numerators))
         if denominators:
-            denominatorsString = '*'.join(self.nsmap.qname(x) for x in sorted(denominators))
+            denominatorsString = "*".join(self.nsmap.qname(x) for x in sorted(denominators))
             if len(denominators) > 1:
                 if len(numerators) > 1:
                     return f"({numeratorsString})/({denominatorsString})"
@@ -486,9 +486,9 @@ class IXBRLViewerBuilder:
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 
         for child in viewerFile.xmlDocument.getroot():
-            if child.tag == '{http://www.w3.org/1999/xhtml}body':
+            if child.tag == "{http://www.w3.org/1999/xhtml}body":
                 for body_child in child:
-                    if body_child.tag == '{http://www.w3.org/1999/xhtml}script' and body_child.get('type', '') == 'application/x.ixbrl-viewer+json':
+                    if body_child.tag == "{http://www.w3.org/1999/xhtml}script" and body_child.get("type", "") == "application/x.ixbrl-viewer+json":
                         self.cntlr.addToLog("File already contains iXBRL viewer", messageCode="error")
                         return False
 
@@ -502,7 +502,7 @@ class IXBRLViewerBuilder:
                 e.set("type", "text/javascript")
                 e.set("src", scriptUrl)
                 # Don't self close
-                e.text = ''
+                e.text = ""
 
                 # Putting this in the header can interfere with character set
                 # auto detection due to its length
@@ -594,9 +594,9 @@ class IXBRLViewerBuilder:
             if isHttpUrl(path) or doc.type == Type.INLINEXBRLDOCUMENTSET:
                 continue
             if doc.type == Type.INLINEXBRL:
-                localDocs[doc.basename].add('inline')
+                localDocs[doc.basename].add("inline")
             elif doc.type == Type.SCHEMA:
-                localDocs[doc.basename].add('schema')
+                localDocs[doc.basename].add("schema")
             elif doc.type == Type.LINKBASE:
                 linkbaseIdentifed = False
                 for child in doc.xmlRootElement.iterchildren():
@@ -623,7 +623,7 @@ class IXBRLViewerBuilder:
             filelist = report.fileSource.fs.filelist
             for file in filelist:
                 directory, asset = os.path.split(file.filename)
-                if "reports" in directory and asset != '' and not asset.lower().endswith(REPORT_TYPE_EXTENSIONS):
+                if "reports" in directory and asset != "" and not asset.lower().endswith(REPORT_TYPE_EXTENSIONS):
                     self.assets.append(file.filename)
             if self.assets:
                 self.reportZip = report.fileSource.fs.filename
@@ -659,7 +659,7 @@ class IXBRLViewerBuilder:
         if len(self.iv.files) == 1:
             # If there is only a single report, call the output file "xbrlviewer.html"
             # We should probably preserve the source file extension here.
-            self.iv.files[0].filename = 'xbrlviewer.html'
+            self.iv.files[0].filename = "xbrlviewer.html"
         if self.assets:
             self.iv.addReportAssets(self.assets)
         if self.reportZip:
@@ -716,17 +716,17 @@ class iXBRLViewer:
         if isinstance(destination, io.BytesIO) or zipOutput: # zip output stream
             # zipfile may be cumulatively added to by inline extraction, EdgarRenderer etc
             filepath: io.BytesIO | str
-            fileMode: Literal['a', 'w']
+            fileMode: Literal["a", "w"]
             if isinstance(destination, io.BytesIO):
                 filepath = destination
-                fileMode = 'a'
+                fileMode = "a"
                 destination = os.sep
             elif os.path.isdir(destination):
                 filepath = os.path.join(
                     destination,
-                    f'{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip',
+                    f"{os.path.splitext(os.path.basename(self.files[0].filename))[0]}.zip",
                 )
-                fileMode = 'w'
+                fileMode = "w"
             elif destination.endswith(os.sep):
                 # Looks like a directory, but isn't one
                 self.cntlr.addToLog(
@@ -741,7 +741,7 @@ class iXBRLViewer:
                     messageCode=ERROR_MESSAGE_CODE,
                 )
                 return
-            elif not destination.endswith('.zip'):
+            elif not destination.endswith(".zip"):
                 # File extension isn't a zip
                 self.cntlr.addToLog(
                     f"File extension {os.path.splitext(destination)[0]} is not a zip",
@@ -750,7 +750,7 @@ class iXBRLViewer:
                 return
             else:
                 filepath = destination
-                fileMode = 'w'
+                fileMode = "w"
 
             with zipfile.ZipFile(filepath, fileMode, zipfile.ZIP_DEFLATED, allowZip64=True) as zout:
                 for f in self.files:
@@ -784,7 +784,7 @@ class iXBRLViewer:
                         fileName = os.path.basename(asset)
                         path = os.path.join(destination, fileName)
                         self.cntlr.addToLog(f"Writing {asset}", messageCode=INFO_MESSAGE_CODE)
-                        with z.open(asset) as zf, open(path, 'wb') as assetFile:
+                        with z.open(asset) as zf, open(path, "wb") as assetFile:
                             shutil.copyfileobj(zf, assetFile)
 
             if copyScriptPath is not None:

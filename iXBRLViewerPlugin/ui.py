@@ -25,7 +25,7 @@ from .constants import (
 
 _: TypeGetText
 
-UNSET_SCRIPT_URL = ''
+UNSET_SCRIPT_URL = ""
 
 class BaseViewerDialog(Toplevel):
     """
@@ -39,7 +39,7 @@ class BaseViewerDialog(Toplevel):
         self._features: dict[str, BooleanVar] = {}
         for featureConfig in GUI_FEATURE_CONFIGS:
             featureVar = BooleanVar()
-            featureVar.set(self._cntlrConfig.setdefault(f'{CONFIG_FEATURE_PREFIX}{featureConfig.key}', featureConfig.guiDefault))
+            featureVar.set(self._cntlrConfig.setdefault(f"{CONFIG_FEATURE_PREFIX}{featureConfig.key}", featureConfig.guiDefault))
             self._features[featureConfig.key] = featureVar
         self._scriptUrl = StringVar()
         self._scriptUrl.set(self._cntlrConfig.setdefault(CONFIG_SCRIPT_URL, UNSET_SCRIPT_URL))
@@ -268,7 +268,7 @@ class SettingsDialog(BaseViewerDialog):
         self._cntlrConfig[CONFIG_SCRIPT_URL] = self._scriptUrl.get()
         self._cntlrConfig[CONFIG_COPY_SCRIPT] = self._copyScript.get()
         for key, var in self._features.items():
-            self._cntlrConfig[f'{CONFIG_FEATURE_PREFIX}{key}'] = var.get()
+            self._cntlrConfig[f"{CONFIG_FEATURE_PREFIX}{key}"] = var.get()
         self.cntlr.saveConfig()
         self.close()
 

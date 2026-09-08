@@ -16,4 +16,4 @@ def test_import_without_tkinter() -> None:
         import iXBRLViewerPlugin
         assert 'name' in iXBRLViewerPlugin.__pluginInfo__
     """)
-    subprocess.run([sys.executable, '-c', code], check=True)
+    subprocess.run([sys.executable, "-c", code], check=True)

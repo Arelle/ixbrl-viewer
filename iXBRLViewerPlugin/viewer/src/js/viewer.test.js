@@ -270,3 +270,64 @@ describe("highlightAllTags", () => {
         expect(element.classList.contains("ixbrl-highlight-1")).toBe(false);
     });
 });
+
+describe("_findOrCreateWrapperNode", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    function appendIXElement(doc, html) {
+        const container = doc.createElement("div");
+        container.innerHTML = html;
+        doc.body.appendChild(container);
+        return container.querySelector("[id]");
+    }
+
+    test("wraps an element containing text", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const ixElement = appendIXElement(doc, '<span>Cash: <ix:nonFraction id="f1">123</ix:nonFraction></span>');
+
+        const nodes = viewer._findOrCreateWrapperNode(ixElement, false);
+
+        expect(nodes.length).toBe(1);
+        expect(nodes.get(0)).toBe(ixElement.parentNode);
+        expect(nodes.get(0).tagName).toBe("SPAN");
+        expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+    });
+
+    test("uses element children of an element with no text as wrappers", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const ixElement = appendIXElement(doc, '<ix:nonNumeric id="f1"> <p>A</p> <p>B</p> </ix:nonNumeric>');
+
+        const nodes = viewer._findOrCreateWrapperNode(ixElement, false);
+
+        expect(nodes.length).toBe(2);
+        expect(nodes.get(0)).toBe(ixElement.children[0]);
+        expect(nodes.get(1)).toBe(ixElement.children[1]);
+        expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+    });
+
+    test("wraps an empty element", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const ixElement = appendIXElement(doc, '<span>nil &gt; <ix:nonFraction id="f1"></ix:nonFraction> &lt; nil</span>');
+
+        const nodes = viewer._findOrCreateWrapperNode(ixElement, false);
+
+        expect(nodes.length).toBe(1);
+        expect(nodes.get(0)).toBe(ixElement.parentNode);
+        expect(nodes.get(0).tagName).toBe("SPAN");
+        expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+    });
+
+    test("wraps an empty element that is the only content of a table cell", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const ixElement = appendIXElement(doc, '<table><tr><td><ix:nonFraction id="f1"></ix:nonFraction></td></tr></table>');
+
+        const nodes = viewer._findOrCreateWrapperNode(ixElement, false);
+
+        expect(nodes.length).toBe(1);
+        expect(nodes.get(0)).toBe(ixElement.parentNode);
+        expect(nodes.get(0).tagName).toBe("SPAN");
+        expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+    });
+});

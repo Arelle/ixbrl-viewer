@@ -128,7 +128,9 @@ export class Viewer {
     // children, use those nodes as the wrappers.
     //
     // Otherwise, insert a wrapper node around the element.  If the node or any
-    // descendent has display: block, a div is used, otherwise a span.  
+    // descendent has display: block, a div is used, otherwise a span.  This
+    // includes elements with no content at all (e.g. nil facts), which would
+    // otherwise have no wrapper and so could not be highlighted or located.
     //
     // We want to avoid adding wrapper nodes around inline-block children, as
     // wrapping in block or inline-block can interfere with layout (e.g. some
@@ -137,7 +139,10 @@ export class Viewer {
     // Returns an array of the chosen nodes as DOM nodes.
     //
     _wrapNode(n) {
-        if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue) )) {
+        const childNodes = Array.from(n.childNodes);
+        const elementChildren = childNodes.filter(n => n.nodeType === Node.ELEMENT_NODE);
+        const hasText = childNodes.some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue));
+        if (hasText || elementChildren.length === 0) {
             let wrapper = "<span>";
             if (getComputedStyle(n).getPropertyValue("display") === "block") {
                 wrapper = '<div>';
@@ -155,7 +160,7 @@ export class Viewer {
             return [n.parentNode];
         }
         else {
-            return Array.from(n.childNodes).filter(n => n.nodeType === Node.ELEMENT_NODE);
+            return elementChildren;
         }
     }
 

@@ -293,6 +293,7 @@ describe("_findOrCreateWrapperNode", () => {
         expect(nodes.get(0)).toBe(ixElement.parentNode);
         expect(nodes.get(0).tagName).toBe("SPAN");
         expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+        expect(nodes.get(0).classList.contains("ixbrl-no-content")).toBe(false);
     });
 
     test("uses element children of an element with no text as wrappers", () => {
@@ -317,6 +318,7 @@ describe("_findOrCreateWrapperNode", () => {
         expect(nodes.get(0)).toBe(ixElement.parentNode);
         expect(nodes.get(0).tagName).toBe("SPAN");
         expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+        expect(nodes.get(0).classList.contains("ixbrl-no-content")).toBe(true);
     });
 
     test("uses the table cell as the wrapper for an empty element that is its only content", () => {
@@ -329,6 +331,7 @@ describe("_findOrCreateWrapperNode", () => {
         expect(nodes.get(0)).toBe(ixElement.parentNode);
         expect(nodes.get(0).tagName).toBe("TD");
         expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+        expect(nodes.get(0).classList.contains("ixbrl-no-content")).toBe(false);
     });
 
     test("wraps an empty element in a table cell with other content", () => {
@@ -341,5 +344,6 @@ describe("_findOrCreateWrapperNode", () => {
         expect(nodes.get(0)).toBe(ixElement.parentNode);
         expect(nodes.get(0).tagName).toBe("SPAN");
         expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+        expect(nodes.get(0).classList.contains("ixbrl-no-content")).toBe(true);
     });
 });

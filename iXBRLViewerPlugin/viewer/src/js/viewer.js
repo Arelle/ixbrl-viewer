@@ -157,6 +157,9 @@ export class Viewer {
                 }
             }
             $(n).wrap(wrapper);
+            if (!hasText) {
+                n.parentNode.classList.add("ixbrl-no-content");
+            }
             return [n.parentNode];
         }
         else {
@@ -401,8 +404,14 @@ export class Viewer {
     //   .ixbrl-element-hidden an ix: element inside ix:hidden
     //
     // Additional classes:
-    //   .ixbrl-no-highlight   a zero-height .ixbrl-element - no highlighting or 
-    //                         borders applied
+    //   .ixbrl-no-highlight   a zero-height .ixbrl-element whose content is
+    //                         absolutely positioned and highlighted via
+    //                         .ixbrl-sub-element - no highlighting or borders
+    //                         applied to the wrapper itself
+    //   .ixbrl-no-content     a wrapper inserted around an element with no
+    //                         content (e.g. a nil fact), so there is nothing
+    //                         else to highlight - given a marker so that it
+    //                         can be seen and clicked
     //   .ixbrl-element-nonfraction,
     //   .ixbrl-element-nonnumeric,
     //   .ixbrl-continuation, 

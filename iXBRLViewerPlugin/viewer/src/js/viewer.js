@@ -128,7 +128,9 @@ export class Viewer {
     // children, use those nodes as the wrappers.
     //
     // Otherwise, insert a wrapper node around the element.  If the node or any
-    // descendent has display: block, a div is used, otherwise a span.  
+    // descendent has display: block, a div is used, otherwise a span.  This
+    // includes elements with no content at all (e.g. nil facts), which would
+    // otherwise have no wrapper and so could not be highlighted or located.
     //
     // We want to avoid adding wrapper nodes around inline-block children, as
     // wrapping in block or inline-block can interfere with layout (e.g. some
@@ -137,7 +139,10 @@ export class Viewer {
     // Returns an array of the chosen nodes as DOM nodes.
     //
     _wrapNode(n) {
-        if (Array.from(n.childNodes).some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue) )) {
+        const childNodes = Array.from(n.childNodes);
+        const elementChildren = childNodes.filter(n => n.nodeType === Node.ELEMENT_NODE);
+        const hasText = childNodes.some(n => n.nodeType === Node.TEXT_NODE && !/^\s*$/.test(n.nodeValue));
+        if (hasText || elementChildren.length === 0) {
             let wrapper = "<span>";
             if (getComputedStyle(n).getPropertyValue("display") === "block") {
                 wrapper = '<div>';
@@ -152,10 +157,13 @@ export class Viewer {
                 }
             }
             $(n).wrap(wrapper);
+            if (!hasText) {
+                n.parentNode.classList.add("ixbrl-no-content");
+            }
             return [n.parentNode];
         }
         else {
-            return Array.from(n.childNodes).filter(n => n.nodeType === Node.ELEMENT_NODE);
+            return elementChildren;
         }
     }
 
@@ -283,7 +291,7 @@ export class Viewer {
         const tableNode = domNode.closest("td,th");
         let nodes;
         const innerText = $(domNode).text();
-        if (tableNode !== null && getComputedStyle(tableNode).display === 'table-cell' && innerText.length > 0) {
+        if (tableNode !== null && getComputedStyle(tableNode).display === 'table-cell') {
             // Use indexOf rather than a single regex because innerText may
             // be too long for the regex engine 
             const outerText = $(tableNode).text();
@@ -396,8 +404,14 @@ export class Viewer {
     //   .ixbrl-element-hidden an ix: element inside ix:hidden
     //
     // Additional classes:
-    //   .ixbrl-no-highlight   a zero-height .ixbrl-element - no highlighting or 
-    //                         borders applied
+    //   .ixbrl-no-highlight   a zero-height .ixbrl-element whose content is
+    //                         absolutely positioned and highlighted via
+    //                         .ixbrl-sub-element - no highlighting or borders
+    //                         applied to the wrapper itself
+    //   .ixbrl-no-content     a wrapper inserted around an element with no
+    //                         content (e.g. a nil fact), so there is nothing
+    //                         else to highlight - given a marker so that it
+    //                         can be seen and clicked
     //   .ixbrl-element-nonfraction,
     //   .ixbrl-element-nonnumeric,
     //   .ixbrl-continuation, 

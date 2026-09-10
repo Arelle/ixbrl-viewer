@@ -130,6 +130,31 @@ body.ixbrl-highlight-all .ixbrl-highlight {
   }
 }
 
+// Empty elements (e.g. nil facts) have no content, so their wrapper has zero
+// width. The highlight background has no area, the outline collapses to a
+// hairline, and there is nothing to hover or click.  Push the outline out to
+// form a small box, and fill the box with an absolutely positioned
+// pseudo element.  The pseudo element takes no space in the document flow, so
+// the layout of the document is unchanged.  It inherits the wrapper's
+// highlight background, and provides the hit area for hover and click.
+@no-content-marker-inset: 0.2em;
+
+.ixbrl-no-content:not(.ixbrl-no-highlight) {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -@no-content-marker-inset;
+    background-color: inherit;
+  }
+
+  &,
+  &:hover {
+    outline-offset: @no-content-marker-inset;
+  }
+}
+
 div.ixbrl-table-handle {
   @export-handle-size: 0.4rem;
 

@@ -253,3 +253,37 @@ describe("Guide link enablement", () => {
         expect(viewer.getGuideLinkUrl()).toEqual('/guide');
     });
 });
+
+describe("Document reparenting", () => {
+    let viewer;
+    beforeEach(() => {
+        document.head.innerHTML = '<title>Report</title><meta name="viewport" content="width=1200">';
+        document.body.innerHTML = '<div id="ixv"><div id="iframe-container"></div></div><p id="report-content">Report</p>';
+        viewer = new iXBRLViewer({});
+        viewer.runtimeConfig = {};
+    });
+
+    afterEach(() => {
+        document.head.innerHTML = '';
+        document.body.innerHTML = '';
+    });
+
+    test("Shell gets its own viewport meta and the report keeps its own", () => {
+        const iframe = viewer._reparentDocument();
+        viewer._addViewportMeta();
+        const iframeDoc = iframe.contentDocument;
+
+        expect(iframeDoc.querySelector('meta[name="viewport"]').getAttribute("content")).toEqual("width=1200");
+        expect(iframeDoc.getElementById("report-content")).not.toBeNull();
+
+        const shellMetas = document.head.querySelectorAll('meta[name="viewport"]');
+        expect(shellMetas.length).toEqual(1);
+        expect(shellMetas[0].getAttribute("content")).toEqual("width=device-width, initial-scale=1");
+    });
+
+    test("Viewport meta is not duplicated", () => {
+        viewer._addViewportMeta();
+        viewer._addViewportMeta();
+        expect(document.head.querySelectorAll('meta[name="viewport"]').length).toEqual(1);
+    });
+});

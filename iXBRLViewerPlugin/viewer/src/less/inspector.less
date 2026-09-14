@@ -336,6 +336,16 @@ a {
 
       font-size: 2rem;
     }
+
+    #inspector-toggle {
+      display: none;
+
+      &::before {
+        .icon-summary();
+
+        font-size: 2rem;
+      }
+    }
   }
 }
 
@@ -377,7 +387,21 @@ a {
     }
 
   }
+
+  #inspector-close {
+    display: none;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0 1.4rem;
+    font-size: 3rem;
+    color: var(--colour-text);
+
+    &::before {
+      content: "\00d7";
+    }
+  }
 }
+
 
 #inspector {
   display: flex;
@@ -1674,4 +1698,48 @@ ul.plain-list {
 
 .sample-5 {
   background: var(--colour-highlight-5);
+}
+
+// Below the breakpoint the inspector becomes a full screen overlay that is
+// opened from the top bar and closed from its tab bar.
+// The query must match MOBILE_MEDIA_QUERY in util.js.
+@media (width <= 767px) {
+  #pane-left {
+    // interact.js leaves an inline width and flex-grow behind after a resize
+    width: auto !important;
+    flex-grow: 1 !important;
+
+    .resize,
+    .resize-spacer {
+      display: none;
+    }
+  }
+
+  #pane-right {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: auto;
+    border-left: none;
+    background-color: var(--colour-bg);
+    z-index: 12;
+
+    #ixv.inspector-open & {
+      display: flex;
+    }
+  }
+
+  #top-bar .top-bar-controls #inspector-toggle {
+    display: inline-block;
+  }
+
+  #inspector-tabs {
+    button {
+      margin: 0 0.6rem;
+    }
+
+    #inspector-close {
+      display: block;
+    }
+  }
 }

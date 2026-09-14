@@ -1,3 +1,6 @@
 {
-  "testEnvironment": "jsdom"
+  "testEnvironment": "jsdom",
+  "setupFiles": [
+    "<rootDir>/iXBRLViewerPlugin/viewer/src/js/jest.setup.js"
+  ]
 }

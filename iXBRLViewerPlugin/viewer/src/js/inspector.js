@@ -3,7 +3,7 @@
 import $ from 'jquery'
 import i18next from 'i18next';
 import jqueryI18next from 'jquery-i18next';
-import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION, ZOOM_LEVELS, FACTS_PER_GROUP} from "./util.js";
+import {formatNumber, wrapLabel, truncateLabel, runGenerator, SHOW_FACT, HIGHLIGHT_COLORS, viewerUniqueId, GLOSSARY_URL, FEATURE_HOME_LINK_URL, FEATURE_HOME_LINK_LABEL, FEATURE_SEARCH_ON_STARTUP, FEATURE_HIGHLIGHT_FACTS_ON_STARTUP, STORAGE_APP_LANGUAGE, STORAGE_HIGHLIGHT_FACTS, STORAGE_HOME_LINK_QUERY, FEATURE_HIDE_CALCULATION_MODE_OPTION, ZOOM_LEVELS, FACTS_PER_GROUP, MOBILE_MEDIA_QUERY} from "./util.js";
 import { ReportSearch } from "./search.js";
 import { IXBRLChart } from './chart.js';
 import { ViewerOptions } from './viewerOptions.js';
@@ -99,9 +99,10 @@ export class Inspector {
                 
                 inspector.initializeCollapsibleSections();
                 inspector.initializeSectionListControls();
-                $("#inspector-tabs button").on("click", function () {
+                $("#inspector-tabs button[data-mode]").on("click", function () {
                     inspector.inspectorMode($(this).data("mode"));
                 });
+                inspector.initializeMobileLayout();
                 $("#settings-button").on("click", () => inspector.toggleSettingsMode());
                 $(".settings-inspector .close").on("click", () => inspector.closeSettingsMode());
 
@@ -297,6 +298,40 @@ export class Inspector {
         this._viewer.onMouseLeave.add(id => this.viewerMouseLeave(id));
         $('.tag-nav-all-facts .next-tag').on("click", () => this._viewer.selectNextTag(this._currentItem));
         $('.tag-nav-all-facts .prev-tag').on("click", () => this._viewer.selectPrevTag(this._currentItem));
+    }
+
+    initializeMobileLayout() {
+        this._mobileLayoutQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+        this._mobileLayoutQuery.addEventListener("change", (e) => {
+            if (!e.matches) {
+                this.closePane();
+            }
+        });
+        $("#inspector-toggle").on("click", () => this.togglePane());
+        $("#inspector-close").on("click", () => this.closePane());
+    }
+
+    isMobileLayout() {
+        return this._mobileLayoutQuery?.matches === true;
+    }
+
+    openPane() {
+        if (this.isMobileLayout()) {
+            $("#ixv").addClass("inspector-open");
+        }
+    }
+
+    closePane() {
+        $("#ixv").removeClass("inspector-open");
+    }
+
+    togglePane() {
+        if ($("#ixv").hasClass("inspector-open")) {
+            this.closePane();
+        }
+        else {
+            this.openPane();
+        }
     }
 
     initializeZoom() {

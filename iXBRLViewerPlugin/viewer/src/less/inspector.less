@@ -1763,6 +1763,12 @@ ul.plain-list {
     text-align: left;
   }
 
+  // Below 16px iOS Safari zooms the page when a field gets focus
+  input[type="text"],
+  select {
+    font-size: 1.6rem;
+  }
+
   #inspector-tabs {
     button {
       margin: 0 0.6rem;

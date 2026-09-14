@@ -691,7 +691,9 @@ export class Inspector {
     toggleSettingsMode() {
         if (this._curInspectorMode !== "settings-mode") {
             this._prevInspectorMode = this._curInspectorMode;
+            this._paneOpenedForSettings = !$("#ixv").hasClass("inspector-open");
             this.inspectorMode("settings-mode");
+            this.openPane();
         }
         else {
             this.closeSettingsMode();
@@ -700,6 +702,9 @@ export class Inspector {
 
     closeSettingsMode() {
         this.inspectorMode(this._prevInspectorMode);
+        if (this._paneOpenedForSettings) {
+            this.closePane();
+        }
     }
 
 
@@ -2005,6 +2010,9 @@ export class Inspector {
         this.switchItem(vuid, noScroll);
         if (!noInspectorReset) {
             this.inspectorMode("fact-mode", vuid !== null);
+        }
+        if (vuid !== null) {
+            this.openPane();
         }
     }
 

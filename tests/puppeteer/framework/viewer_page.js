@@ -24,13 +24,15 @@ export class ViewerPage {
     #logMsgs = [];
     #recorder;
 
-    async buildPage() {
+    static MOBILE_VIEWPORT = { width: 390, height: 844, isMobile: true, hasTouch: true };
+
+    async buildPage(viewport = { width: 1440, height: 821 }) {
         // Launch the browser
         this.browser = await puppeteer.launch({
             channel: 'chrome',
             headless: this.#isCi ? 'new' : false,
             args: [`--window-size=1440,900`],
-            defaultViewport: { width: 1440, height: 821 },
+            defaultViewport: viewport,
         });
         this.page = await this.browser.newPage();
         this.docFrame = new DocFrame(this);

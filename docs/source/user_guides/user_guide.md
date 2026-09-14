@@ -45,6 +45,18 @@ viewer pane when a hidden fact is selected.
 
 ![image](../_images/user_guides/viewing_the_report.png)
 
+### Small Screens
+
+On phones and other narrow screens the XBRL inspector is hidden and the
+viewer pane fills the screen. Tapping a fact opens the inspector over
+the document, showing the details of that fact. The close button at the
+top right of the inspector returns to the document, and the inspector
+button at the right of the toolbar reopens it. The settings menu also
+opens in the inspector.
+
+The report document itself is shown as filed and is not reflowed for
+small screens.
+
 ### Highlighting Facts
 
 The "Highlight XBRL Elements" checkbox on the toolbar can be used to

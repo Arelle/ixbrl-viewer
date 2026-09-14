@@ -1708,6 +1708,7 @@ ul.plain-list {
     // interact.js leaves an inline width and flex-grow behind after a resize
     width: auto !important;
     flex-grow: 1 !important;
+    min-width: 0;
 
     .resize,
     .resize-spacer {
@@ -1729,8 +1730,37 @@ ul.plain-list {
     }
   }
 
+  #top-bar {
+    .logo {
+      display: none;
+    }
+
+    .home-link {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .zoom-controls {
+      margin-left: 0.6rem;
+
+      #zoom {
+        display: none;
+      }
+    }
+
+    .top-bar-controls {
+      gap: 0.2rem;
+      margin-right: 0.4rem;
+    }
+  }
+
   #top-bar .top-bar-controls #inspector-toggle {
     display: inline-block;
+  }
+
+  #inspector .powered-by {
+    text-align: left;
   }
 
   #inspector-tabs {

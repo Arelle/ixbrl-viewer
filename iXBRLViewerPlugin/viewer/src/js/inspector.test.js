@@ -1406,6 +1406,31 @@ describe("Mobile inspector pane", () => {
         expect($("#ixv").hasClass("inspector-open")).toBe(true);
     });
 
+    test("overlay follows the visual viewport while pinched", () => {
+        const insp = mobileInspector(true);
+        $("#ixv").append('<div id="pane-right"></div>');
+        const realVisualViewport = window.visualViewport;
+        window.visualViewport = { offsetTop: 100, offsetLeft: 40, width: 195, height: 422, addEventListener: () => {} };
+        const pane = $("#pane-right").get(0);
+
+        // A closed pane is left alone
+        insp.positionPane();
+        expect(pane.style.top).toBe("");
+
+        insp.openPane();
+        expect(pane.style.top).toBe("100px");
+        expect(pane.style.left).toBe("40px");
+        expect(pane.style.width).toBe("195px");
+        expect(pane.style.height).toBe("422px");
+
+        // Back on the desktop layout the stylesheet takes over again
+        mediaMatches = false;
+        insp.positionPane();
+        expect(pane.style.top).toBe("");
+        expect(pane.style.width).toBe("");
+        window.visualViewport = realVisualViewport;
+    });
+
     test("pane closes when the layout returns to desktop width", () => {
         const insp = mobileInspector(true);
         insp.openPane();

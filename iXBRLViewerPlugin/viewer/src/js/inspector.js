@@ -306,9 +306,28 @@ export class Inspector {
             if (!e.matches) {
                 this.closePane();
             }
+            this.positionPane();
         });
+        window.visualViewport.addEventListener("resize", () => this.positionPane());
+        window.visualViewport.addEventListener("scroll", () => this.positionPane());
         $("#inspector-toggle").on("click", () => this.togglePane());
         $("#inspector-close").on("click", () => this.closePane());
+    }
+
+    // Pinch zoom shrinks the visual viewport without moving fixed elements,
+    // so the overlay is sized to the visible area rather than the page.
+    positionPane() {
+        const pane = $("#pane-right");
+        if (!this.isMobileLayout()) {
+            pane.css({ top: "", left: "", width: "", height: "" });
+            return;
+        }
+        // Panning while pinched fires every frame, so only a visible pane is moved
+        if (!$("#ixv").hasClass("inspector-open")) {
+            return;
+        }
+        const vv = window.visualViewport;
+        pane.css({ top: vv.offsetTop, left: vv.offsetLeft, width: vv.width, height: vv.height });
     }
 
     isMobileLayout() {
@@ -318,6 +337,7 @@ export class Inspector {
     openPane() {
         if (this.isMobileLayout()) {
             $("#ixv").addClass("inspector-open");
+            this.positionPane();
         }
     }
 

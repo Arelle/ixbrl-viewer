@@ -10,4 +10,13 @@ if (typeof window !== "undefined") {
         addEventListener: () => {},
         removeEventListener: () => {},
     });
+
+    window.visualViewport = {
+        offsetTop: 0,
+        offsetLeft: 0,
+        width: 1024,
+        height: 768,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+    };
 }

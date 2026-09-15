@@ -305,6 +305,7 @@ export class Viewer {
         if (nodes === undefined) {
             nodes = this._wrapNode(domNode);
         }
+        // Batch style reads before applying class updates to avoid repeated layout recalculation.
         const subNodeLists = [];
         for (const node of nodes) {
             const absoluteSubNodes = [];

@@ -66,6 +66,7 @@
   --top-bar-height: @top-bar-height;
   --button-padding-x: 0.8rem;
   --button-padding-y: 0.8rem;
+  --pane-right-width: 400px;
 
   .only-dark {
     display: none;
@@ -180,7 +181,8 @@ a {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  width: 400px;
+  min-width: var(--pane-right-width);
+  width: var(--pane-right-width);
   border-left: solid 0.1rem var(--colour-border-grey);
 }
 

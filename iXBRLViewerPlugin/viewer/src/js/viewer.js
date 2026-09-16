@@ -84,7 +84,7 @@ export class Viewer {
                                         const children = $(body).children(':visible');
                                         children.hide();
                                         $(body).addClass("review");
-                                        viewer._wrapUntaggedNumbers($(body), docIndex, false);
+                                        viewer._wrapUntaggedNumbers($(body));
                                         children.show();
                                         resolve();
                                     });
@@ -168,9 +168,10 @@ export class Viewer {
     }
 
 
-    _wrapUntaggedNumbers(n, docIndex, ignoreFullMatch) {
+    _wrapUntaggedNumbers(n) {
         const viewer = this;
         const ixHiddenStyleRE = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
+        const ignoreFullMatch = localName(n.get(0).nodeName.toUpperCase()) === 'NONNUMERIC';
 
         n.contents().each(function () {
             if (this.nodeType === Node.ELEMENT_NODE) {
@@ -194,7 +195,7 @@ export class Viewer {
                         (name === 'NONNUMERIC' && this.getAttribute('format') !== null) ||
                         (this.hasAttribute('style') && this.getAttribute('style').match(ixHiddenStyleRE))
                 )) {
-                    viewer._wrapUntaggedNumbers($(this), docIndex, name === 'NONNUMERIC');
+                    viewer._wrapUntaggedNumbers($(this));
                 }
             }
             else if (this.nodeType === Node.TEXT_NODE) {
@@ -205,8 +206,8 @@ export class Viewer {
                     if (m.index > pos) {
                         output.append(document.createTextNode(input.substring(pos, m.index)));
                     }
-                    // If "ignoreFullMatch" is specified, we ignore a match which
-                    // covers the whole of n's text content.
+                    // A match covering the whole of a nonNumeric's text content
+                    // is considered tagged.
                     if (do_not_want ||
                             (ignoreFullMatch && m.index === 0 && m.index + m[0].length === input.length && input === n.text())) {
                         output.append(document.createTextNode(m[0]));

@@ -79,13 +79,8 @@ export class Viewer {
                             if (viewer._iv.isReviewModeEnabled()) {
                                 await new Promise((resolve, _) => {
                                     viewer._iv.setProgress("Finding untagged numbers and dates").then(() => {
-                                        // Temporarily hide all children of "body" to avoid constant
-                                        // re-layouts when wrapping untagged numbers
-                                        const children = $(body).children(':visible');
-                                        children.hide();
                                         $(body).addClass("review");
                                         viewer._wrapUntaggedNumbers(body);
-                                        children.show();
                                         resolve();
                                     });
                                 });

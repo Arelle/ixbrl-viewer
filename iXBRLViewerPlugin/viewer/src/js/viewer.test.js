@@ -283,6 +283,18 @@ describe("_findOrCreateWrapperNode", () => {
         return container.querySelector("[id]");
     }
 
+    function appendMarkup(doc, markup) {
+        const host = doc.createElement("div");
+        host.innerHTML = markup;
+        doc.body.appendChild(host);
+        return host;
+    }
+
+    function absolutelyPosition(element) {
+        element.style.position = "absolute";
+        return element;
+    }
+
     test("wraps an element containing text", () => {
         const { viewer, doc } = makeHighlightViewer(false);
         const ixElement = appendIXElement(doc, '<span>Cash: <ix:nonFraction id="f1">123</ix:nonFraction></span>');
@@ -345,5 +357,84 @@ describe("_findOrCreateWrapperNode", () => {
         expect(nodes.get(0).tagName).toBe("SPAN");
         expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
         expect(nodes.get(0).classList.contains("ixbrl-no-content")).toBe(true);
+    });
+
+    test("returns only the inserted wrapper when no descendant is absolute", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const host = appendMarkup(doc, '<span id="ix">1.0 <b id="child">x</b></span>');
+
+        const nodes = viewer._findOrCreateWrapperNode(host.querySelector("#ix"), false);
+
+        expect(nodes.get().length).toBe(1);
+        expect(nodes.get(0)).toBe(host.querySelector("#ix").parentNode);
+        expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+        expect(nodes.get(0).classList.contains("ixbrl-contains-absolute")).toBe(false);
+        expect(host.querySelector("#child").classList.contains("ixbrl-sub-element")).toBe(false);
+    });
+
+    test("classes absolute descendants and returns them after their wrapper", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const host = appendMarkup(doc, '<span id="ix">t<i id="a"></i><i id="plain"></i><i id="b"></i></span>');
+        absolutelyPosition(host.querySelector("#a"));
+        absolutelyPosition(host.querySelector("#b"));
+
+        const nodes = viewer._findOrCreateWrapperNode(host.querySelector("#ix"), false);
+
+        expect(nodes.get().map(node => node.id)).toEqual(["", "a", "b"]);
+        expect(nodes.get(0).classList.contains("ixbrl-element")).toBe(true);
+        expect(nodes.get(0).classList.contains("ixbrl-contains-absolute")).toBe(true);
+        expect(nodes.get(1).classList.contains("ixbrl-sub-element")).toBe(true);
+        expect(nodes.get(2).classList.contains("ixbrl-sub-element")).toBe(true);
+        expect(host.querySelector("#plain").classList.contains("ixbrl-sub-element")).toBe(false);
+    });
+
+    test("interleaves each wrapper with its own absolute descendants", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const host = appendMarkup(
+            doc,
+            '<div id="ix"><p id="p1"><i id="a1"></i></p><p id="p2"><i id="a2"></i></p></div>'
+        );
+        absolutelyPosition(host.querySelector("#a1"));
+        absolutelyPosition(host.querySelector("#a2"));
+
+        const nodes = viewer._findOrCreateWrapperNode(host.querySelector("#ix"), false);
+
+        expect(nodes.get().map(node => node.id)).toEqual(["p1", "a1", "p2", "a2"]);
+        expect(nodes.get().map(node => node.classList.contains("ixbrl-element"))).toEqual(
+            [true, false, true, false]
+        );
+        expect(nodes.get().map(node => node.classList.contains("ixbrl-sub-element"))).toEqual(
+            [false, true, false, true]
+        );
+        expect(nodes.get().map(node => node.classList.contains("ixbrl-contains-absolute"))).toEqual(
+            [true, false, true, false]
+        );
+    });
+
+    test("marks only wrappers that contain absolute descendants", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const host = appendMarkup(
+            doc,
+            '<div id="ix"><p id="p1"><i id="a1"></i></p><p id="p2"><i id="plain"></i></p></div>'
+        );
+        absolutelyPosition(host.querySelector("#a1"));
+
+        const nodes = viewer._findOrCreateWrapperNode(host.querySelector("#ix"), false);
+
+        expect(nodes.get().map(node => node.id)).toEqual(["p1", "a1", "p2"]);
+        expect(host.querySelector("#p1").classList.contains("ixbrl-contains-absolute")).toBe(true);
+        expect(host.querySelector("#p2").classList.contains("ixbrl-contains-absolute")).toBe(false);
+    });
+
+    test("returns a hidden element without scanning its descendants", () => {
+        const { viewer, doc } = makeHighlightViewer(false);
+        const host = appendMarkup(doc, '<span id="ix"><i id="a"></i></span>');
+        absolutelyPosition(host.querySelector("#a"));
+
+        const nodes = viewer._findOrCreateWrapperNode(host.querySelector("#ix"), true);
+
+        expect(nodes.get().map(node => node.id)).toEqual(["ix"]);
+        expect(nodes.get(0).classList.contains("ixbrl-element-hidden")).toBe(true);
+        expect(host.querySelector("#a").classList.contains("ixbrl-sub-element")).toBe(false);
     });
 });

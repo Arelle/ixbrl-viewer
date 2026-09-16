@@ -188,11 +188,14 @@ export function setDefault(obj, key, def) {
     return obj[key];
 }
 
-export function runGenerator(generator) {
+export function runGenerator(generator, onDone) {
     function resume() {
         const res = generator.next();
         if (!res.done) {
             setTimeout(resume, 0);
+        }
+        else if (onDone !== undefined) {
+            onDone();
         }
         return;
     }

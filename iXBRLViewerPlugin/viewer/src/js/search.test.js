@@ -18,7 +18,7 @@ const testReportData = {
 
 function getReportSearch(report) {
     const reportSearch = new ReportSearch(report);
-    const searchIndex = reportSearch.buildSearchIndex(() => {});
+    const searchIndex = reportSearch.buildSearchIndex();
     for (const _ of searchIndex) {}
     return reportSearch;
 }

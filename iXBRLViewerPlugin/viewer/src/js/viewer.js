@@ -932,13 +932,19 @@ export class Viewer {
                     yield;
                 }
             }
+            // Collect before adding classes so each write does not force the
+            // next height read to flush layout.
+            const noHighlight = [];
             for (const [i, e] of elts.entries()) {
                 if (getComputedStyle(e).getPropertyValue("display") !== 'inline' && e.getBoundingClientRect().height == 0) {
-                    e.classList.add("ixbrl-no-highlight");
+                    noHighlight.push(e);
                 }
                 if (i % 100 === 0) {
                     yield;
                 }
+            }
+            for (const e of noHighlight) {
+                e.classList.add("ixbrl-no-highlight");
             }
         }
     }

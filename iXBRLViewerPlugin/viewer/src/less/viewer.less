@@ -99,15 +99,18 @@ body.ixbrl-highlight-all .ixbrl-highlight {
 
 // Apply dashed outline to iXBRL elements on hover
 // Should override previous rule
-.ixbrl-element:not(.ixbrl-no-highlight),
-.ixbrl-sub-element:not(.ixbrl-no-highlight) {
-  &:hover {
-    outline: dashed 0.1875em var(--colour-primary-focus);
-    outline-offset: 0.0625em;
-    cursor: pointer;
+// Touch screens have no hover, and a tap would leave the outline stuck
+@media (hover: hover) {
+  .ixbrl-element:not(.ixbrl-no-highlight),
+  .ixbrl-sub-element:not(.ixbrl-no-highlight) {
+    &:hover {
+      outline: dashed 0.1875em var(--colour-primary-focus);
+      outline-offset: 0.0625em;
+      cursor: pointer;
 
-    td&, th& {
-      outline-offset: -0.0625em;
+      td&, th& {
+        outline-offset: -0.0625em;
+      }
     }
   }
 }

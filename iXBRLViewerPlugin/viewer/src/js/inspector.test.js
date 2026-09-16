@@ -1306,3 +1306,137 @@ describe("_populateDownloadsSummary", () => {
         expect(summaryDom.find(".downloads-summary").css("display")).toBe("none");
     });
 });
+
+describe("Mobile inspector pane", () => {
+    const realMatchMedia = window.matchMedia;
+    let mediaListeners;
+    let mediaMatches;
+
+    function mockMatchMedia(matches) {
+        mediaMatches = matches;
+        mediaListeners = [];
+        window.matchMedia = jest.fn(() => ({
+            get matches() { return mediaMatches; },
+            addEventListener: (type, listener) => mediaListeners.push(listener),
+        }));
+    }
+
+    function mobileInspector(matches) {
+        mockMatchMedia(matches);
+        const insp = new TestInspector();
+        insp._reportSet = { getItemById: jest.fn(() => ({})) };
+        insp._viewer = {
+            showItemById: jest.fn(),
+            highlightItem: jest.fn(),
+            clearHighlighting: jest.fn(),
+        };
+        insp.update = jest.fn();
+        insp.outline = { hasOutline: () => false };
+        insp.initializeMobileLayout();
+        return insp;
+    }
+
+    beforeEach(() => {
+        $(document.body).append(`
+            <div id="ixv">
+              <button id="inspector-toggle"></button>
+              <nav id="inspector-tabs"><button id="inspector-close"></button></nav>
+              <div id="inspector"></div>
+            </div>
+        `);
+    });
+
+    afterEach(() => {
+        $("#ixv").remove();
+        window.matchMedia = realMatchMedia;
+    });
+
+    test("toggle and close buttons open and close the pane on mobile", () => {
+        mobileInspector(true);
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+        $("#inspector-toggle").trigger("click");
+        expect($("#ixv").hasClass("inspector-open")).toBe(true);
+        $("#inspector-toggle").trigger("click");
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+        $("#inspector-toggle").trigger("click");
+        $("#inspector-close").trigger("click");
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+    });
+
+    test("openPane is a no op on the desktop layout", () => {
+        const insp = mobileInspector(false);
+        insp.openPane();
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+        $("#inspector-toggle").trigger("click");
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+    });
+
+    test("selecting an item opens the pane, deselecting does not", () => {
+        const insp = mobileInspector(true);
+        insp.selectItem(null);
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+        insp.selectItem("0-f1");
+        expect($("#ixv").hasClass("inspector-open")).toBe(true);
+    });
+
+    test("selecting an item from inside the open pane keeps it open", () => {
+        const insp = mobileInspector(true);
+        insp.openPane();
+        insp.selectItem("0-f1", undefined, undefined, true);
+        expect($("#ixv").hasClass("inspector-open")).toBe(true);
+    });
+
+    test("settings cog opens the pane and closing settings returns to the document", () => {
+        const insp = mobileInspector(true);
+        insp.inspectorMode("fact-mode");
+        insp.toggleSettingsMode();
+        expect($("#ixv").hasClass("inspector-open")).toBe(true);
+        expect($("#ixv").hasClass("settings-mode")).toBe(true);
+        insp.closeSettingsMode();
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+        expect($("#ixv").hasClass("fact-mode")).toBe(true);
+    });
+
+    test("closing settings keeps the pane open if it was already open", () => {
+        const insp = mobileInspector(true);
+        insp.inspectorMode("fact-mode");
+        insp.openPane();
+        insp.toggleSettingsMode();
+        insp.closeSettingsMode();
+        expect($("#ixv").hasClass("inspector-open")).toBe(true);
+    });
+
+    test("overlay follows the visual viewport while pinched", () => {
+        const insp = mobileInspector(true);
+        $("#ixv").append('<div id="pane-right"></div>');
+        const realVisualViewport = window.visualViewport;
+        window.visualViewport = { offsetTop: 100, offsetLeft: 40, width: 195, height: 422, addEventListener: () => {} };
+        const pane = $("#pane-right").get(0);
+
+        // A closed pane is left alone
+        insp.positionPane();
+        expect(pane.style.top).toBe("");
+
+        insp.openPane();
+        expect(pane.style.top).toBe("100px");
+        expect(pane.style.left).toBe("40px");
+        expect(pane.style.width).toBe("195px");
+        expect(pane.style.height).toBe("422px");
+
+        // Back on the desktop layout the stylesheet takes over again
+        mediaMatches = false;
+        insp.positionPane();
+        expect(pane.style.top).toBe("");
+        expect(pane.style.width).toBe("");
+        window.visualViewport = realVisualViewport;
+    });
+
+    test("pane closes when the layout returns to desktop width", () => {
+        const insp = mobileInspector(true);
+        insp.openPane();
+        expect($("#ixv").hasClass("inspector-open")).toBe(true);
+        mediaMatches = false;
+        mediaListeners.forEach(l => l({ matches: false }));
+        expect($("#ixv").hasClass("inspector-open")).toBe(false);
+    });
+});

@@ -249,6 +249,12 @@ export class iXBRLViewer {
         return iframe;
     }
 
+    _addViewportMeta() {
+        if ($('head meta[name="viewport"]').length === 0) {
+            $('<meta name="viewport" content="width=device-width, initial-scale=1">').appendTo('head');
+        }
+    }
+
     _getTaxonomyData() {
         for (let i = document.body.children.length - 1; i >= 0; i--) {
             const elt = document.body.children[i];
@@ -353,6 +359,7 @@ export class iXBRLViewer {
             if (!stubViewer) {
                 iframes = $(iv._reparentDocument());
             } 
+            iv._addViewportMeta();
             const ds = reportSet.reportFiles();
             let hasExternalIframe = false;
             for (let i = stubViewer ? 0 : 1; i < ds.length; i++) {

@@ -123,8 +123,11 @@ input:disabled {
   padding: 0.8rem;
   border: none;
 
-  &:hover {
-    background-color: var(--colour-row-hover);
+  // The hover colour matches the checked colour, so a tap must not leave it on
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--colour-row-hover);
+    }
   }
 
   &.checked {

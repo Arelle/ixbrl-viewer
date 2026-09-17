@@ -84,7 +84,7 @@ export class Viewer {
                                         const children = $(body).children(':visible');
                                         children.hide();
                                         $(body).addClass("review");
-                                        viewer._wrapUntaggedNumbers($(body));
+                                        viewer._wrapUntaggedNumbers(body);
                                         children.show();
                                         resolve();
                                     });
@@ -171,9 +171,9 @@ export class Viewer {
     _wrapUntaggedNumbers(n) {
         const viewer = this;
         const ixHiddenStyleRE = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
-        const ignoreFullMatch = localName(n.get(0).nodeName.toUpperCase()) === 'NONNUMERIC';
+        const ignoreFullMatch = localName(n.nodeName.toUpperCase()) === 'NONNUMERIC';
 
-        n.contents().each(function () {
+        $(n).contents().each(function () {
             if (this.nodeType === Node.ELEMENT_NODE) {
                 const name = localName(this.nodeName.toUpperCase());
                 /*
@@ -195,7 +195,7 @@ export class Viewer {
                         (name === 'NONNUMERIC' && this.getAttribute('format') !== null) ||
                         (this.hasAttribute('style') && this.getAttribute('style').match(ixHiddenStyleRE))
                 )) {
-                    viewer._wrapUntaggedNumbers($(this));
+                    viewer._wrapUntaggedNumbers(this);
                 }
             }
             else if (this.nodeType === Node.TEXT_NODE) {

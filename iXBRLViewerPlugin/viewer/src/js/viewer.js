@@ -202,7 +202,7 @@ export class Viewer {
                 const input = this.nodeValue;
                 const output = $("<div></div>");
                 let pos = 0;
-                numberMatchSearch(input, function (m, do_not_want, is_date) {
+                numberMatchSearch(input, (m, do_not_want, is_date) => {
                     if (m.index > pos) {
                         output.append(document.createTextNode(input.substring(pos, m.index)));
                     }

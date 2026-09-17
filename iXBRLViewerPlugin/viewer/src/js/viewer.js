@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import $ from 'jquery'
-import { numberMatchSearch } from './number-matcher.js'
+import { isNumberOrDate, numberMatchSearch } from './number-matcher.js'
 import { TableExport } from './tableExport.js'
 import { IXNode } from './ixnode.js';
 import { getIXHiddenLinkStyle, runGenerator, viewerUniqueId, HIGHLIGHT_COLORS } from './util.js';
@@ -165,7 +165,6 @@ export class Viewer {
 
     _wrapUntaggedNumbers(n) {
         const ixHiddenStyleRE = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
-        const ignoreFullMatch = localName(n.nodeName.toUpperCase()) === 'NONNUMERIC';
 
         for (let node = n.firstChild, next; node !== null; node = next) {
             // Capture the next sibling first because wrapping replaces text nodes.
@@ -180,36 +179,31 @@ export class Viewer {
                  *  2. nonNumerics with a format (mostly dates, not a text block)
                  *  3. an element with a -sec-ix-hidden style.  This shouldn't be
                  *     used on a text block, so we assume it's a more specific tag.
-                 *
-                 *  When we continue searching, if the element is a nonNumeric tag
-                 *  and it's entire contents match the number matcher, we consider
-                 *  that tagged.
+                 *  4. a nonNumeric whose entire content is a single number or
+                 *     date, which is a tagged value rather than a text block.
                  *
                  */
                 if (!(
                         name === 'NONFRACTION' ||
-                        (name === 'NONNUMERIC' && node.getAttribute('format') !== null) ||
+                        (name === 'NONNUMERIC' && (node.getAttribute('format') !== null || isNumberOrDate(node.textContent.trim()))) ||
                         (node.hasAttribute('style') && node.getAttribute('style').match(ixHiddenStyleRE))
                 )) {
                     this._wrapUntaggedNumbers(node);
                 }
             }
             else if (node.nodeType === Node.TEXT_NODE) {
-                this._wrapUntaggedTextNode(node, ignoreFullMatch);
+                this._wrapUntaggedTextNode(node);
             }
         }
     }
 
-    _wrapUntaggedTextNode(node, ignoreFullMatch) {
+    _wrapUntaggedTextNode(node) {
         const input = node.nodeValue;
         const doc = node.ownerDocument;
         let output = null;
         let pos = 0;
         numberMatchSearch(input, (m, do_not_want, is_date) => {
-            // A match covering the whole of a nonNumeric's text content
-            // is considered tagged.
-            if (do_not_want ||
-                    (ignoreFullMatch && m.index === 0 && m.index + m[0].length === input.length && input === node.parentNode.textContent)) {
+            if (do_not_want) {
                 return;
             }
             if (output === null) {

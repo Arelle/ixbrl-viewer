@@ -135,14 +135,9 @@ describe("Number match replace", () => {
         numbers.forEach((d) => {
             var out = '';
             var pos = 0;
-            numberMatchSearch(d[0], function (m, dnw, date) { 
+            numberMatchSearch(d[0], function (m) { 
                 out += d[0].substring(pos, m.index);
-                if (dnw) {
-                    out += m[0];
-                }
-                else {
-                    out += '[[' + m[0] + ']]';
-                }
+                out += '[[' + m[0] + ']]';
                 pos = m.index + m[0].length;
             })
             out += d[0].substring(pos, d[0].length);

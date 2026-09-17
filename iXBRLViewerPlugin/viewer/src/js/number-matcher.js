@@ -153,18 +153,20 @@ export function isNumberOrDate(s) {
 
 /* Search for numbers/dates in s, calling f on each match:
  *
- * f(match, do_not_want, is_date) 
+ * f(match, is_date) 
  *
  * match       - the return from Regex.exec 
- * do_not_want - true if the match is for something which should not be
- *               considered a number or date
  * is_date     - true if the match is a date 
+ *
+ * Matches for things which should not be considered a number or date,
+ * such as section references, are skipped.
  */
 export function numberMatchSearch(s, f) {
     var m;
     while ((m = numberMatchRegex.exec(s)) !== null) {
-        var do_not_want = m[2] !== undefined;
-        var is_date = m[1] !== undefined;
-        f(m, do_not_want, is_date);
+        if (m[2] !== undefined) {
+            continue;
+        }
+        f(m, m[1] !== undefined);
     }
 }

@@ -202,10 +202,7 @@ export class Viewer {
         const doc = node.ownerDocument;
         let output = null;
         let pos = 0;
-        numberMatchSearch(input, (m, do_not_want, is_date) => {
-            if (do_not_want) {
-                return;
-            }
+        numberMatchSearch(input, (m, is_date) => {
             if (output === null) {
                 output = doc.createDocumentFragment();
             }

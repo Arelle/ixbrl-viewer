@@ -207,31 +207,35 @@ export class Viewer {
 
     _wrapUntaggedTextNode(node, ignoreFullMatch) {
         const input = node.nodeValue;
-        const output = $("<div></div>");
+        const doc = node.ownerDocument;
+        let output = null;
         let pos = 0;
         numberMatchSearch(input, (m, do_not_want, is_date) => {
-            if (m.index > pos) {
-                output.append(document.createTextNode(input.substring(pos, m.index)));
-            }
             // A match covering the whole of a nonNumeric's text content
             // is considered tagged.
             if (do_not_want ||
                     (ignoreFullMatch && m.index === 0 && m.index + m[0].length === input.length && input === node.parentNode.textContent)) {
-                output.append(document.createTextNode(m[0]));
+                return;
             }
-            else {
-                const c = is_date ? 'review-untagged-date' : 'review-untagged-number';
-                $('<span></span>')
-                        .text(m[0])
-                        .addClass(c)
-                        .appendTo(output);
+            if (output === null) {
+                output = doc.createDocumentFragment();
             }
+            if (m.index > pos) {
+                output.appendChild(doc.createTextNode(input.substring(pos, m.index)));
+            }
+            const span = doc.createElement('span');
+            span.className = is_date ? 'review-untagged-date' : 'review-untagged-number';
+            span.textContent = m[0];
+            output.appendChild(span);
             pos = m.index + m[0].length;
         });
-        if (pos < input.length) {
-            output.append(document.createTextNode(input.substring(pos, input.length)));
+        if (output === null) {
+            return;
         }
-        $(node).replaceWith(output.contents());
+        if (pos < input.length) {
+            output.appendChild(doc.createTextNode(input.substring(pos)));
+        }
+        node.replaceWith(output);
     }
 
     /*

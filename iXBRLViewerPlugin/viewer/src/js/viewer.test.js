@@ -438,3 +438,60 @@ describe("_findOrCreateWrapperNode", () => {
         expect(host.querySelector("#a").classList.contains("ixbrl-sub-element")).toBe(false);
     });
 });
+
+describe("_wrapUntaggedNumbers", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    function wrap(markup) {
+        const { viewer, doc } = makeHighlightViewer(true);
+        const root = doc.createElement("div");
+        root.innerHTML = markup;
+        viewer._wrapUntaggedNumbers(root);
+        return root;
+    }
+
+    test("leaves a text node without a match in place", () => {
+        const { viewer, doc } = makeHighlightViewer(true);
+        const root = doc.createElement("div");
+        root.innerHTML = "just some words";
+        const text = root.firstChild;
+
+        viewer._wrapUntaggedNumbers(root);
+
+        expect(root.firstChild).toBe(text);
+    });
+
+    test("splits text around each match", () => {
+        const root = wrap("Revenue was 1,000 in 2020");
+
+        expect(root.innerHTML).toBe(
+            'Revenue was <span class="review-untagged-number">1,000</span>' +
+            ' in <span class="review-untagged-date">2020</span>'
+        );
+    });
+
+    test("keeps a rejected match in the surrounding text", () => {
+        const root = wrap("abcd topic 37 93 abcd");
+
+        expect(root.innerHTML).toBe(
+            'abcd topic 37 <span class="review-untagged-number">93</span> abcd'
+        );
+        expect(root.childNodes.length).toBe(3);
+    });
+
+    test("treats a nonNumeric whose whole content matches as tagged", () => {
+        const root = wrap("<ix:nonnumeric>2020</ix:nonnumeric>");
+
+        expect(root.innerHTML).toBe("<ix:nonnumeric>2020</ix:nonnumeric>");
+    });
+
+    test("wraps a match inside a nonNumeric with other content", () => {
+        const root = wrap("<ix:nonnumeric>in 2020</ix:nonnumeric>");
+
+        expect(root.innerHTML).toBe(
+            '<ix:nonnumeric>in <span class="review-untagged-date">2020</span></ix:nonnumeric>'
+        );
+    });
+});

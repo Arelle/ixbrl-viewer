@@ -199,34 +199,38 @@ export class Viewer {
                 }
             }
             else if (this.nodeType === Node.TEXT_NODE) {
-                const input = this.nodeValue;
-                const output = $("<div></div>");
-                let pos = 0;
-                numberMatchSearch(input, (m, do_not_want, is_date) => {
-                    if (m.index > pos) {
-                        output.append(document.createTextNode(input.substring(pos, m.index)));
-                    }
-                    // A match covering the whole of a nonNumeric's text content
-                    // is considered tagged.
-                    if (do_not_want ||
-                            (ignoreFullMatch && m.index === 0 && m.index + m[0].length === input.length && input === n.text())) {
-                        output.append(document.createTextNode(m[0]));
-                    }
-                    else {
-                        const c = is_date ? 'review-untagged-date' : 'review-untagged-number';
-                        $('<span></span>')
-                                .text(m[0])
-                                .addClass(c)
-                                .appendTo(output);
-                    }
-                    pos = m.index + m[0].length;
-                });
-                if (pos < input.length) {
-                    output.append(document.createTextNode(input.substring(pos, input.length)));
-                }
-                $(this).replaceWith(output.contents());
+                viewer._wrapUntaggedTextNode(this, ignoreFullMatch);
             }
         });
+    }
+
+    _wrapUntaggedTextNode(node, ignoreFullMatch) {
+        const input = node.nodeValue;
+        const output = $("<div></div>");
+        let pos = 0;
+        numberMatchSearch(input, (m, do_not_want, is_date) => {
+            if (m.index > pos) {
+                output.append(document.createTextNode(input.substring(pos, m.index)));
+            }
+            // A match covering the whole of a nonNumeric's text content
+            // is considered tagged.
+            if (do_not_want ||
+                    (ignoreFullMatch && m.index === 0 && m.index + m[0].length === input.length && input === node.parentNode.textContent)) {
+                output.append(document.createTextNode(m[0]));
+            }
+            else {
+                const c = is_date ? 'review-untagged-date' : 'review-untagged-number';
+                $('<span></span>')
+                        .text(m[0])
+                        .addClass(c)
+                        .appendTo(output);
+            }
+            pos = m.index + m[0].length;
+        });
+        if (pos < input.length) {
+            output.append(document.createTextNode(input.substring(pos, input.length)));
+        }
+        $(node).replaceWith(output.contents());
     }
 
     /*

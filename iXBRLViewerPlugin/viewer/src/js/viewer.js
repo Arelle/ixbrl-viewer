@@ -169,13 +169,14 @@ export class Viewer {
 
 
     _wrapUntaggedNumbers(n) {
-        const viewer = this;
         const ixHiddenStyleRE = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
         const ignoreFullMatch = localName(n.nodeName.toUpperCase()) === 'NONNUMERIC';
 
-        $(n).contents().each(function () {
-            if (this.nodeType === Node.ELEMENT_NODE) {
-                const name = localName(this.nodeName.toUpperCase());
+        // Capture the next sibling first because wrapping replaces text nodes.
+        for (let node = n.firstChild, next; node !== null; node = next) {
+            next = node.nextSibling;
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const name = localName(node.nodeName.toUpperCase());
                 /*
                  * Content in text tags should not be considered tagged, so carry
                  * on searching if it's not:
@@ -192,16 +193,16 @@ export class Viewer {
                  */
                 if (!(
                         name === 'NONFRACTION' ||
-                        (name === 'NONNUMERIC' && this.getAttribute('format') !== null) ||
-                        (this.hasAttribute('style') && this.getAttribute('style').match(ixHiddenStyleRE))
+                        (name === 'NONNUMERIC' && node.getAttribute('format') !== null) ||
+                        (node.hasAttribute('style') && node.getAttribute('style').match(ixHiddenStyleRE))
                 )) {
-                    viewer._wrapUntaggedNumbers(this);
+                    this._wrapUntaggedNumbers(node);
                 }
             }
-            else if (this.nodeType === Node.TEXT_NODE) {
-                viewer._wrapUntaggedTextNode(this, ignoreFullMatch);
+            else if (node.nodeType === Node.TEXT_NODE) {
+                this._wrapUntaggedTextNode(node, ignoreFullMatch);
             }
-        });
+        }
     }
 
     _wrapUntaggedTextNode(node, ignoreFullMatch) {

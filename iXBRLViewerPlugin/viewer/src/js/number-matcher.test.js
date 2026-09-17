@@ -1,6 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
-import { numberMatch, numberMatchRegex, numberMatchSearch, dateMatch } from './number-matcher.js';
+import { isNumberOrDate, numberMatch, numberMatchRegex, numberMatchSearch, dateMatch } from './number-matcher.js';
 
 describe("Number matcher", () => {
     var date_re = new RegExp('^' + dateMatch + '$', 'i');
@@ -150,4 +150,20 @@ describe("Number match replace", () => {
         });
     });
 
+});
+
+describe("isNumberOrDate", () => {
+    test("accepts a value with nothing around it", () => {
+        expect(isNumberOrDate("1,000")).toBe(true);
+        expect(isNumberOrDate("April 30, 2022")).toBe(true);
+    });
+
+    test("rejects text that only contains a value", () => {
+        expect(isNumberOrDate("in 2020")).toBe(false);
+        expect(isNumberOrDate("1,000 2,000")).toBe(false);
+    });
+
+    test("rejects a match that is not wanted", () => {
+        expect(isNumberOrDate("Note 5")).toBe(false);
+    });
 });

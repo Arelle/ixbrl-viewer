@@ -81,11 +81,12 @@ describe("Find untagged numbers pre-process", () => {
 
         for (const t of tests) {
             nms.numberMatchSearch = jest.fn();
-            var html = $("<div>" + t.input + "</div>");
-            viewer._wrapUntaggedNumbers(html);
+            const root = document.createElement("div");
+            root.innerHTML = t.input;
+            viewer._wrapUntaggedNumbers(root);
             // Create an array of the first argument to each call to
             // numberMatchSearch
-            var matches = $.map(nms.numberMatchSearch.mock.calls, (e) => e[0]);
+            const matches = nms.numberMatchSearch.mock.calls.map((e) => e[0]);
             expect(matches).toEqual(t.search)
         }
     });

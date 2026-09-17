@@ -167,8 +167,8 @@ export class Viewer {
         const ixHiddenStyleRE = /(?:^|\s|;)-(?:sec|esef)-ix-hidden:\s*([^\s;]+)/;
         const ignoreFullMatch = localName(n.nodeName.toUpperCase()) === 'NONNUMERIC';
 
-        // Capture the next sibling first because wrapping replaces text nodes.
         for (let node = n.firstChild, next; node !== null; node = next) {
+            // Capture the next sibling first because wrapping replaces text nodes.
             next = node.nextSibling;
             if (node.nodeType === Node.ELEMENT_NODE) {
                 const name = localName(node.nodeName.toUpperCase());

@@ -599,7 +599,7 @@ class IXBRLViewerBuilder:
                 localDocs[doc.basename].add("schema")
             elif doc.type == Type.LINKBASE:
                 linkbaseIdentifed = False
-                for child in doc.xmlRootElement.iterchildren():
+                for child in doc.xmlRootElement.iterchildren(etree.Element):
                     linkbaseLocalDocumentsKey = LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE.get(child.qname)
                     if linkbaseLocalDocumentsKey is not None:
                         localDocs[doc.basename].add(linkbaseLocalDocumentsKey)

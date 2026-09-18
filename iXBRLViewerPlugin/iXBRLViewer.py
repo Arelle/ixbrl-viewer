@@ -627,6 +627,35 @@ class IXBRLViewerBuilder:
                     self.assets.append(file.filename)
             if self.assets:
                 self.reportZip = report.fileSource.fs.filename
+        self.addReferencedAssets(report)
+
+    def addReferencedAssets(self, report: ModelXbrl) -> None:
+        """
+        Collect local files (such as images) referenced by the report's inline
+        documents, so that they can be written alongside the viewer output.
+        References are read through the report's FileSource, so this works whether
+        the report was loaded from a directory or from inside an archive.  Only
+        relative references that stay within the document's own directory tree are
+        collected; they are written to the same relative path in the output.
+        """
+        for doc in report.urlDocs.values():
+            if doc.type != Type.INLINEXBRL or doc.xmlRootElement is None or isHttpUrl(doc.filepath):
+                continue
+            for img in doc.xmlRootElement.iter(f"{{{XbrlConst.xhtml}}}img"):
+                src = img.get("src")
+                if not src:
+                    continue
+                url = urllib.parse.urlparse(src.strip())
+                if url.scheme or url.netloc or not url.path:
+                    continue  # data:, http(s): etc. need no local copy
+                relPath = os.path.normpath(urllib.parse.unquote(url.path))
+                if os.path.isabs(relPath) or relPath.split(os.sep)[0] == os.pardir or relPath in self.iv.referencedAssets:
+                    continue
+                sourcePath = os.path.join(os.path.dirname(doc.filepath), relPath)
+                if not report.fileSource.exists(sourcePath):
+                    continue
+                with report.fileSource.file(sourcePath, binary=True)[0] as fh:
+                    self.iv.referencedAssets[relPath] = fh.read()
 
     def createViewer(
             self,
@@ -690,6 +719,8 @@ class iXBRLViewer:
         self.filingDocuments: str | None = None
         self.cntlr = cntlr
         self.assets: list[str] = []
+        # relative output path -> content, for files referenced by the inline documents
+        self.referencedAssets: dict[str, bytes] = {}
 
     def addReportAssets(self, assets: list[str]) -> None:
         self.assets.extend(assets)
@@ -762,6 +793,9 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     zout.write(self.filingDocuments, filename)
+                for relPath, content in self.referencedAssets.items():
+                    self.cntlr.addToLog(f"Writing {relPath}", messageCode=INFO_MESSAGE_CODE)
+                    zout.writestr(Path(relPath).as_posix(), content)
                 if copyScriptPath is not None:
                     self.cntlr.addToLog(f"Writing script from {copyScriptPath}", messageCode=INFO_MESSAGE_CODE)
                     zout.write(copyScriptPath, copyScriptPath.name)
@@ -786,6 +820,7 @@ class iXBRLViewer:
                         self.cntlr.addToLog(f"Writing {asset}", messageCode=INFO_MESSAGE_CODE)
                         with z.open(asset) as zf, open(path, "wb") as assetFile:
                             shutil.copyfileobj(zf, assetFile)
+            self._writeReferencedAssets(destination)
 
             if copyScriptPath is not None:
                 self._copyScript(Path(destination), copyScriptPath)
@@ -816,9 +851,18 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(destination), filename))
+                self._writeReferencedAssets(os.path.dirname(os.path.abspath(destination)))
                 if copyScriptPath is not None:
                     outDirectory = Path(destination).parent
                     self._copyScript(outDirectory, copyScriptPath)
+
+    def _writeReferencedAssets(self, destDirectory: str) -> None:
+        for relPath, content in self.referencedAssets.items():
+            path = os.path.join(destDirectory, relPath)
+            self.cntlr.addToLog(f"Writing {path}", messageCode=INFO_MESSAGE_CODE)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "wb") as fout:
+                fout.write(content)
 
     def _copyScript(self, destDirectory: Path, scriptPath: Path) -> None:
         scriptDest = destDirectory / scriptPath.name

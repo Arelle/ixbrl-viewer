@@ -142,21 +142,31 @@ const formatted_number = r_or([
 /* Group 2 = do_not_want */
 export const numberMatch = begin_guard + r_or(['(' + dateMatch + ')', '(' + do_not_want + ')', month_suffixed, formatted_number ]) + end_guard;
 const numberMatchRegex = new RegExp(numberMatch, 'gi');
+const wholeNumberMatchRegex = new RegExp('^' + numberMatch + '$', 'i');
+
+/* Returns true if the whole of s is a single number or date. Anchoring
+ * lets the regex give up as soon as the text stops looking like one. */
+export function isNumberOrDate(s) {
+    const m = wholeNumberMatchRegex.exec(s);
+    return m !== null && m[2] === undefined;
+}
 
 /* Search for numbers/dates in s, calling f on each match:
  *
- * f(match, do_not_want, is_date) 
+ * f(match, is_date) 
  *
  * match       - the return from Regex.exec 
- * do_not_want - true if the match is for something which should not be
- *               considered a number or date
  * is_date     - true if the match is a date 
+ *
+ * Matches for things which should not be considered a number or date,
+ * such as section references, are skipped.
  */
 export function numberMatchSearch(s, f) {
     var m;
     while ((m = numberMatchRegex.exec(s)) !== null) {
-        var do_not_want = m[2] !== undefined;
-        var is_date = m[1] !== undefined;
-        f(m, do_not_want, is_date);
+        if (m[2] !== undefined) {
+            continue;
+        }
+        f(m, m[1] !== undefined);
     }
 }

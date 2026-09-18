@@ -494,4 +494,39 @@ describe("_wrapUntaggedNumbers", () => {
             '<ix:nonnumeric>in <span class="review-untagged-date">2020</span></ix:nonnumeric>'
         );
     });
+
+    test("treats a nonNumeric whose value is inside markup as tagged", () => {
+        const root = wrap("<ix:nonnumeric><span>2020</span></ix:nonnumeric>");
+
+        expect(root.innerHTML).toBe("<ix:nonnumeric><span>2020</span></ix:nonnumeric>");
+    });
+
+    test("treats a nonNumeric whose value spans text nodes as tagged", () => {
+        const root = wrap("<ix:nonnumeric><b>April</b> 30, 2022</ix:nonnumeric>");
+
+        expect(root.innerHTML).toBe("<ix:nonnumeric><b>April</b> 30, 2022</ix:nonnumeric>");
+    });
+
+    test("treats a nonNumeric whose value has surrounding whitespace as tagged", () => {
+        const root = wrap("<ix:nonnumeric> 2020 </ix:nonnumeric>");
+
+        expect(root.innerHTML).toBe("<ix:nonnumeric> 2020 </ix:nonnumeric>");
+    });
+
+    test("wraps a match inside markup in a nonNumeric text block", () => {
+        const root = wrap("<ix:nonnumeric>Revenue was <span>1,000</span> this year.</ix:nonnumeric>");
+
+        expect(root.innerHTML).toBe(
+            '<ix:nonnumeric>Revenue was <span><span class="review-untagged-number">1,000</span></span> this year.</ix:nonnumeric>'
+        );
+    });
+
+    test("checks a nonNumeric nested in a text block on its own", () => {
+        const root = wrap("<ix:nonnumeric>Revenue in <ix:nonnumeric>2020</ix:nonnumeric> was 1,000.</ix:nonnumeric>");
+
+        expect(root.innerHTML).toBe(
+            '<ix:nonnumeric>Revenue in <ix:nonnumeric>2020</ix:nonnumeric>' +
+            ' was <span class="review-untagged-number">1,000</span>.</ix:nonnumeric>'
+        );
+    });
 });

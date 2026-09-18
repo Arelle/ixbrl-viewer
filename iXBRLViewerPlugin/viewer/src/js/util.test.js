@@ -2,24 +2,89 @@
 
 import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel, getIXHiddenLinkStyle, runGenerator } from "./util.js"
 import moment from 'moment';
+import { MessageChannel as NodeMessageChannel } from 'worker_threads';
 import "./moment-jest.js";
 
 describe("runGenerator", () => {
-    beforeEach(() => jest.useFakeTimers());
-    afterEach(() => jest.useRealTimers());
+    // jsdom has no MessageChannel, so use the Node implementation.
+    const savedMessageChannel = global.MessageChannel;
+    let channels;
 
-    test("calls onDone after the generator finishes", () => {
-        const onDone = jest.fn();
-        function* generator() {
+    beforeEach(() => {
+        channels = [];
+        global.MessageChannel = jest.fn(() => {
+            const channel = new NodeMessageChannel();
+            jest.spyOn(channel.port1, "close");
+            jest.spyOn(channel.port2, "close");
+            channels.push(channel);
+            return channel;
+        });
+    });
+
+    afterEach(() => {
+        // Open ports keep the Node event loop alive.
+        channels.forEach(c => { c.port1.close(); c.port2.close(); });
+        global.MessageChannel = savedMessageChannel;
+    });
+
+    function* slices(log, name, count, done) {
+        for (let i = 0; i < count; i++) {
+            log.push(name + i);
             yield;
         }
+        done();
+    }
 
-        runGenerator(generator(), onDone);
-        jest.advanceTimersToNextTimer();
+    function drainTasks() {
+        return new Promise(resolve => setTimeout(() => setTimeout(resolve, 0), 0));
+    }
+
+    test("Calls onDone after the generator finishes", async () => {
+        let resolveRun;
+        const run = new Promise(resolve => { resolveRun = resolve; });
+        const onDone = jest.fn();
+        onDone.mockImplementation(resolveRun);
+
+        runGenerator(slices([], "a", 1, () => {}), onDone);
+
         expect(onDone).not.toHaveBeenCalled();
-
-        jest.advanceTimersToNextTimer();
+        await run;
         expect(onDone).toHaveBeenCalledTimes(1);
+    });
+
+    test("Runs every slice, in order", async () => {
+        const log = [];
+        await new Promise(resolve => runGenerator(slices(log, "a", 4, resolve)));
+        expect(log).toEqual(["a0", "a1", "a2", "a3"]);
+    });
+
+    test("No slice runs synchronously", async () => {
+        const log = [];
+        const run = new Promise(resolve => runGenerator(slices(log, "a", 2, resolve)));
+        expect(log).toEqual([]);
+        await run;
+        expect(log).toEqual(["a0", "a1"]);
+    });
+
+    test("Two generators in flight at once both complete, on channels of their own", async () => {
+        const log = [];
+        await Promise.all([
+            new Promise(resolve => runGenerator(slices(log, "a", 3, resolve))),
+            new Promise(resolve => runGenerator(slices(log, "b", 3, resolve))),
+        ]);
+        expect(log.filter(s => s.startsWith("a"))).toEqual(["a0", "a1", "a2"]);
+        expect(log.filter(s => s.startsWith("b"))).toEqual(["b0", "b1", "b2"]);
+        expect(global.MessageChannel).toHaveBeenCalledTimes(2);
+        expect(channels[0]).not.toBe(channels[1]);
+    });
+
+    test("A generator with no slices terminates without asking for another", async () => {
+        const next = jest.fn(() => ({ done: true, value: undefined }));
+        runGenerator({ next });
+        await drainTasks();
+        expect(next).toHaveBeenCalledTimes(1);
+        expect(channels[0].port1.close).toHaveBeenCalledTimes(1);
+        expect(channels[0].port2.close).toHaveBeenCalledTimes(1);
     });
 });
 

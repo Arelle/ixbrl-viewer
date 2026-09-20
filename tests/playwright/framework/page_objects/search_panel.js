@@ -1,5 +1,5 @@
 import { Button, TextInput } from '../core_elements.js';
-import { getTextContent } from '../utils.js';
+import { expect } from '@playwright/test';
 
 export class Search {
     #viewerPage;
@@ -17,38 +17,29 @@ export class Search {
     }
 
     async getSearchResults() {
-        const elements = await this.#viewerPage.page.$$('.search-results .fact-list-item .title');
-        return Promise.all(elements.map(async (e) => {
-            return getTextContent(e);
-        }));
+        return this.#viewerPage.page.locator('.search-results .fact-list-item .title').allTextContents();
     }
 
-    async assertSearchResultsContain(concepts) {
-        this.#viewerPage.log(`Asserting search results contain ${concepts}`);
-        const results = await this.getSearchResults();
-        for (const concept of concepts) {
-            expect(results).toContain(concept);
-        }
-    }
-
-    async assertSearchResultsDoNotContain(concepts) {
-        this.#viewerPage.log(
-            `Asserting search results do not contain ${concepts}`);
-        const results = await this.getSearchResults();
-        for (const concept of concepts) {
-            expect(results).not.toContain(concept);
-        }
+    async assertSearchResults(included, excluded = []) {
+        this.#viewerPage.log(`Asserting search results include ${included} and exclude ${excluded}`);
+        await expect(async () => {
+            const results = await this.getSearchResults();
+            expect(results).toEqual(expect.arrayContaining(included));
+            for (const concept of excluded) {
+                expect(results).not.toContain(concept);
+            }
+        }).toPass({ timeout: 5000 });
     }
 
     async filterConceptType(option) {
-        const checkbox = await this.#viewerPage.page
-            .waitForSelector(`#search-filter-concept-type input[value = "${option}"]`);
+        const checkbox = this.#viewerPage.page
+            .locator(`#search-filter-concept-type input[value = "${option}"]`);
         await checkbox.click();
     }
 
     async filterPeriod(option) {
-        const checkbox = await this.#viewerPage.page
-            .waitForSelector(`#search-filter-period input[value = "${option}"]`);
+        const checkbox = this.#viewerPage.page
+            .locator(`#search-filter-period input[value = "${option}"]`);
         await checkbox.click();
     }
 

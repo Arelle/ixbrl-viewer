@@ -1,5 +1,5 @@
 import { Button, Text } from '../core_elements.js';
-import { getTextContent } from '../utils.js';
+import { expect } from '@playwright/test';
 
 export class FactDetailsPanel {
     #viewerPage;
@@ -40,9 +40,9 @@ export class FactDetailsPanel {
                 '//tr[contains(@class,"namespace")]//td/span[contains(@class, "text")]',
                 'Source (Namespace)');
         this.nextFact = new Button(this.#viewerPage,
-                '//button[contains(@class, "next-tag")]', 'Next Fact');
+                '//nav[contains(@class, "tag-nav-all-facts")]//button[contains(@class, "next-tag")]', 'Next Fact');
         this.previousFact = new Button(this.#viewerPage,
-                '//button[contains(@class, "prev-tag")]', 'Previous Fact');
+                '//nav[contains(@class, "tag-nav-all-facts")]//button[contains(@class, "prev-tag")]', 'Previous Fact');
     }
 
     // Asserts the calculation contributors listed in the fact details panel
@@ -51,14 +51,10 @@ export class FactDetailsPanel {
     async assertCalculation(sectionTitle, expectedCalculations) {
         this.#viewerPage.log(`Asserting Calculations for section ${sectionTitle}`);
 
-        // Pull the title elements and assert the section exists
-        const titleElems = await this.#viewerPage.page.$$('.calculations h4');
-
-        const titles = await Promise.all(titleElems.map(async (e) => await getTextContent(e)));
-        expect(titles).toContain(sectionTitle)
+        await expect(this.#viewerPage.page.locator('.calculations h4').filter({ hasText: sectionTitle })).toHaveText(sectionTitle);
 
         // Pull the concepts from the expected section
-        const calc = await this.#viewerPage.page.evaluate((sectionTitle) => {
+        await expect.poll(() => this.#viewerPage.page.evaluate((sectionTitle) => {
             const conceptElemsXPath = `
                 //*[contains(@class,"calculations")]//h4[text()="${sectionTitle}"]
                 //ancestor::div//*[contains(@class,"content")]//*[contains(@class,"calculation-row")]
@@ -84,21 +80,17 @@ export class FactDetailsPanel {
             }
 
             return calculations;
-        }, sectionTitle);
-
-        expect(calc).toEqual(expectedCalculations);
+        }, sectionTitle)).toEqual(expectedCalculations);
     }
 
     async assertFootnotes(expectedFootnotes) {
         this.#viewerPage.log('Asserting footnotes');
-        const conceptElems = await this.#viewerPage.page.$$('.footnotes .block-list-item');
-        const footnotes = await Promise.all(conceptElems.map(async (e) => await getTextContent(e)));
-        expect(footnotes).toEqual(expectedFootnotes);
+        await expect(this.#viewerPage.page.locator('.footnotes .block-list-item')).toHaveText(expectedFootnotes);
     }
 
     // Returns the width of the fact details panel
     async getPanelWidth() {
-        const inspectorPanel = await this.#viewerPage.page.waitForSelector('#inspector');
+        const inspectorPanel = this.#viewerPage.page.locator('#inspector');
         const boundingBox = await inspectorPanel.boundingBox();
         return boundingBox.width;
     }
@@ -108,8 +100,8 @@ export class FactDetailsPanel {
     // move left
     async resizePanel(horizontalMovement) {
         this.#viewerPage.log('Resizing fact details panel by ' + horizontalMovement + ' pixels');
-        const resizer = await this.#viewerPage.page
-            .waitForSelector('#viewer-resize-handle', { visible: true });
+        const resizer = this.#viewerPage.page.locator('#viewer-resize-handle');
+        await expect(resizer).toBeVisible();
         const box = await resizer.boundingBox();
 
         // Start the drag action

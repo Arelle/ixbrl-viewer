@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 export class DocFrame {
     #viewerPage;
 
@@ -5,15 +7,12 @@ export class DocFrame {
         this.#viewerPage = viewerPage;
     }
 
-    async getDocumentIframe() {
-        const iframe = await this.#viewerPage.page.waitForSelector(
-            'xpath/' + '//iframe[@title="iXBRL document view"]');
-        return iframe.contentFrame();
+    getDocumentIframe() {
+        return this.#viewerPage.page.frameLocator('iframe[title="iXBRL document view"]');
     }
 
     async countElements(selector) {
-        return this.#viewerPage.page.$$eval(
-            '#ixv #iframe-container iframe',
+        return this.#viewerPage.page.locator('#ixv #iframe-container iframe').evaluateAll(
             (iframes, reportSelector) => {
                 let count = 0;
                 for (const iframe of iframes) {
@@ -26,17 +25,14 @@ export class DocFrame {
 
     async getSelectedFact() {
         const iframe = await this.getDocumentIframe();
-        return iframe.waitForSelector(
-            'xpath/' + '//*[contains(@class,"ixbrl-selected")]');
+        return iframe.locator('.ixbrl-selected');
     }
 
-    // Selects a fact in the document based on name
-    // Ex: "dei:DocumentType"
+    // Duplicate facts share a name. Start with the first occurrence.
     async selectFact(name) {
         this.#viewerPage.log(`Selecting fact ${name}`);
         const iframe = await this.getDocumentIframe();
-        const fact = await iframe.waitForSelector(
-            'xpath/' + `//*[@name="${name}"]`);
+        const fact = iframe.locator(`[name="${name}"]`).first();
         return fact.click();
     }
 
@@ -46,12 +42,11 @@ export class DocFrame {
         for (const highlight of highlights) {
             this.#viewerPage.log(
                 `Asserting the value "${highlight.docContent}" to be highlighted with ${highlight.property} ${highlight.color}`);
-            const element = await contentFrame.waitForSelector(
-                'xpath/' + highlight.locator);
-            const style = await contentFrame.evaluate(
-                (element, property) => getComputedStyle(element)
-                    .getPropertyValue(property), element, highlight.property);
-            expect(style).toEqual(highlight.color);
+            const elements = contentFrame.locator('xpath=' + highlight.locator);
+            await expect(elements).not.toHaveCount(0);
+            for (const element of await elements.all()) {
+                await expect(element).toHaveCSS(highlight.property, highlight.color);
+            }
         }
     }
 }
@@ -77,41 +72,42 @@ export class Highlight {
 
     static fact(docContent, active = true) {
         const color = active ? this.green : this.transparent;
-        const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
+        const locator = `//*[text()="${docContent}"]//ancestor::*[contains(@class,"ixbrl-element")]`;
         return new Highlight(color, locator, this.propBgColor, docContent);
     };
 
     static factNamespace2(docContent, active = true) {
         const color = active ? this.purple : this.transparent;
-        const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
+        const locator = `//*[text()="${docContent}"]//ancestor::*[contains(@class,"ixbrl-element")]`;
         return new Highlight(color, locator, this.propBgColor, docContent);
     };
 
     static searchHover(docContent, active = true) {
         const color = active ? `${this.darkBlue} dashed 3px` : 'none';
         const property = active ? this.propOutline : this.propOutlineStyle;
-        const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
+        const locator = `//*[text()="${docContent}"]//ancestor::*[contains(@class,"ixbrl-element")]`;
         return new Highlight(color, locator, property, docContent);
     };
 
-    static selectedFact(docContent, active = true) {
+    static selectedFact(docContent, active = true, conceptName) {
         const color = active ? `${this.primaryBlue} solid 3px` : 'none';
         const property = active ? this.propOutline : this.propOutlineStyle;
-        const locator = `//*[contains(text(),"${docContent}")]//ancestor::*[contains(@class,"ixbrl-element")]`;
+        const concept = conceptName ? `@name="${conceptName}" and ` : '';
+        const locator = `//*[${concept}text()="${docContent}"]//ancestor::*[contains(@class,"ixbrl-element")]`;
         return new Highlight(color, locator, property, docContent);
     };
 
     static untaggedDate(docContent, active = true) {
         const color = active ? this.yellow : this.transparent;
         const locator =
-                `//*[contains(@class,"review-untagged-date") and contains(text(),"${docContent}")]`;
+                `//*[contains(@class,"review-untagged-date") and text()="${docContent}"]`;
         return new Highlight(color, locator, this.propBgColor, docContent)
     }
 
     static untaggedNumber(docContent, active = true) {
         const color = active ? this.purple : this.transparent;
         const locator =
-            `//*[contains(@class,"review-untagged-number") and contains(text(),"${docContent}")]`;
+            `//*[contains(@class,"review-untagged-number") and text()="${docContent}"]`;
         return new Highlight(color, locator, this.propBgColor, docContent);
     }
 }

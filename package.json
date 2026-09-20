@@ -11,12 +11,14 @@
   ],
   "scripts": {
     "test": "jest --roots=iXBRLViewerPlugin",
-    "test:puppeteer": "jest --roots=tests/playwright --env=node",
+    "test:integration": "npm run test:integrationInstall && npm run test:integrationBuild && npm run test:integrationTest",
+    "test:integrationBuild": "npm run font && npm run prod && bash tests/playwright/tools/generate.sh",
+    "test:integrationInstall": "npx playwright install --with-deps chromium",
+    "test:integrationTest": "playwright test",
     "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
     "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
     "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js",
-    "puppeteerServe": "npm run font && npm run prod && ./tests/playwright/tools/generate.sh && npx http-server .",
     "font": "node iXBRLViewerPlugin/viewer/tools/build-font.js"
   },
   "repository": {
@@ -63,8 +65,6 @@
     "i18next-parser": "^9.0.0",
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
-    "puppeteer-core": "24.43.1",
-    "puppeteer-screen-recorder": "3.0.3",
     "stylelint": "^17.0.0",
     "stylelint-config-standard": "^40.0.0",
     "webfont": "^12.5.0",

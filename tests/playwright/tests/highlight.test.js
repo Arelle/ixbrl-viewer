@@ -1,11 +1,7 @@
-import { ViewerPage } from '../framework/viewer_page.js';
+import { test } from '../framework/fixtures.js';
 import { Highlight } from '../framework/page_objects/doc_frame.js';
 
-jest.setTimeout(60000);
-
-describe('ixbrl-viewer:', () => {
-    let viewerPage;
-
+test.describe('ixbrl-viewer:', () => {
     const gaapFactValues = [
         'Feb 2023',
         'March 2023',
@@ -30,7 +26,7 @@ describe('ixbrl-viewer:', () => {
         '33,445', // ₱33,445
         '88,123', // ₨88,123
         '99,192', // kr99,192
-        '123,234', // Fr.123,234
+        'Fr.123,234', // Fr.123,234
         '84,234', // RM84,234
         '11,234', // R$11,234
         '93,383', // R93,383
@@ -105,16 +101,7 @@ describe('ixbrl-viewer:', () => {
     const  inactiveUntaggedNumberHighlights = untaggedNumbers
         .map((entry) => Highlight.untaggedNumber(entry, false));
 
-    beforeEach(async () => {
-        viewerPage = new ViewerPage();
-        await viewerPage.buildPage();
-    });
-
-    afterEach(async () => {
-        await viewerPage.tearDown();
-    });
-
-    test('Highlight Test', async () => {
+    test('Highlight Test', async ({ viewerPage }) => {
         await viewerPage.navigateToViewer('highlights.zip');
 
         // Assert on load values are not highlighted
@@ -134,7 +121,7 @@ describe('ixbrl-viewer:', () => {
             ...inactiveGaapFactHighlights, ...inactiveDeiFactHighlights]);
     });
 
-    test('Highlight Test - Review', async () => {
+    test('Highlight Test - Review', async ({ viewerPage }) => {
         await viewerPage.navigateToViewer('highlights.zip', '?review=true');
 
         // Assert on load values are not highlighted
@@ -171,9 +158,7 @@ describe('ixbrl-viewer:', () => {
 
         // Disable highlights
         await viewerPage.toolbar.unTaggedDateHighlight.select();
-        await viewerPage.waitMilliseconds(100);
         await viewerPage.toolbar.unTaggedNumberHighlight.select();
-        await viewerPage.waitMilliseconds(100);
         await viewerPage.toolbar.xbrlElementHighlight.select();
 
         // Assert values are no longer highlighted

@@ -55,6 +55,7 @@
   "devDependencies": {
     "@babel/core": "^8.0.0",
     "@babel/preset-env": "^8.0.0",
+    "@playwright/test": "1.63.0",
     "babel-jest": "^30.0.2",
     "base64-inline-loader": "^2.0.1",
     "html-loader": "^5.0.0",

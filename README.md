@@ -401,7 +401,7 @@ All commands should be run from repository root
 
     - IDE:
       - Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
-      ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
+      ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/tests/playwright/puppeteer_test_run_via_intellij.jpg)
       - Debug runs with breakpoints are also typically supported.
 
 ## 👥 Contributors

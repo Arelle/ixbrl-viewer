@@ -16,7 +16,7 @@ export class ViewerPage {
     sectionList;
     toolbar;
 
-    #artifactDirectory = './tests/puppeteer/artifacts';
+    #artifactDirectory = './tests/playwright/artifacts';
     #cleanedTestName = expect.getState()
         .currentTestName
         .replaceAll(/[^a-zA-Z0-9-]/g, '_');
@@ -59,7 +59,7 @@ export class ViewerPage {
     async navigateToViewer(filingZipName, args = '') {
 
         const filingName = filingZipName.replace('.zip', '');
-        const url = `http://localhost:8080/tests/puppeteer/artifacts/generated_output/${filingName}.htm${args}`;
+        const url = `http://localhost:8080/tests/playwright/artifacts/generated_output/${filingName}.htm${args}`;
         this.log(`Navigating to ${url}`);
         await this.page.goto(url, { waitUntil: 'networkidle0' });
         await this.page.waitForSelector(

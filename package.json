@@ -11,12 +11,12 @@
   ],
   "scripts": {
     "test": "jest --roots=iXBRLViewerPlugin",
-    "test:puppeteer": "jest --roots=tests/puppeteer --env=node",
+    "test:puppeteer": "jest --roots=tests/playwright --env=node",
     "dev": "webpack --config iXBRLViewerPlugin/viewer/webpack.dev.js",
     "prod": "webpack --config iXBRLViewerPlugin/viewer/webpack.prod.js",
     "stylelint": "stylelint iXBRLViewerPlugin/viewer/src/less/*.less",
     "i18n": "i18next -c iXBRLViewerPlugin/viewer/i18next-parser.config.js",
-    "puppeteerServe": "npm run font && npm run prod && ./tests/puppeteer/tools/generate.sh && npx http-server .",
+    "puppeteerServe": "npm run font && npm run prod && ./tests/playwright/tools/generate.sh && npx http-server .",
     "font": "node iXBRLViewerPlugin/viewer/tools/build-font.js"
   },
   "repository": {

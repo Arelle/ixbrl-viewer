@@ -2,8 +2,8 @@
 
 set -e
 
-testFilingDir=tests/puppeteer/test_filings
-genDir=tests/puppeteer/artifacts/generated_output
+testFilingDir=tests/playwright/test_filings
+genDir=tests/playwright/artifacts/generated_output
 mkdir -p $genDir
 
 for file in "$testFilingDir"/*.zip; do

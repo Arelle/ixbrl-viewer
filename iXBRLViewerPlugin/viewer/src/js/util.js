@@ -192,7 +192,8 @@ export function setDefault(obj, key, def) {
 }
 
 export function runGenerator(generator, onDone) {
-    // MessageChannel avoids the 4 ms minimum delay imposed on nested timers.
+    // Use MessageChannel rather than setTimeout to implement yielding since browsers impose a 4 ms
+    // minimum delay on nested timers.
     const channel = new MessageChannel();
     channel.port1.onmessage = () => {
         const res = generator.next();

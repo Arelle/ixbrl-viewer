@@ -192,17 +192,23 @@ export function setDefault(obj, key, def) {
 }
 
 export function runGenerator(generator, onDone) {
-    function resume() {
+    // Use MessageChannel rather than setTimeout to implement yielding since browsers impose a 4 ms
+    // minimum delay on nested timers.
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
         const res = generator.next();
         if (!res.done) {
-            setTimeout(resume, 0);
+            channel.port2.postMessage(0);
         }
-        else if (onDone !== undefined) {
-            onDone();
+        else {
+            channel.port1.close();
+            channel.port2.close();
+            if (onDone !== undefined) {
+                onDone();
+            }
         }
-        return;
-    }
-    setTimeout(resume, 0);
+    };
+    channel.port2.postMessage(0);
 }
 
 /**

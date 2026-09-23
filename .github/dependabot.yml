@@ -2,7 +2,7 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directories:
-      - /**
+      - "**/*"
     schedule:
       interval: weekly
     groups:
@@ -16,7 +16,7 @@ updates:
     cooldown:
       default-days: 3
     directories:
-      - /**
+      - "**/*"
     schedule:
       interval: weekly
     allow:
@@ -41,7 +41,7 @@ updates:
     cooldown:
       default-days: 3
     directories:
-      - /**
+      - "**/*"
     insecure-external-code-execution: allow
     schedule:
       interval: weekly

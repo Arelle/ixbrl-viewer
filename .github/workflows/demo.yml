@@ -39,7 +39,7 @@ jobs:
           mkdir demo
           arelleCmdLine \
             --plugins "ixbrl-viewer" \
-            -f "tests/puppeteer/test_filings/filing_documents_smoke_test.zip" \
+            -f "tests/playwright/test_filings/filing_documents_smoke_test.zip" \
             --save-viewer "demo" \
             --viewer-url "iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js"
       - uses: actions/upload-artifact@v7.0.1

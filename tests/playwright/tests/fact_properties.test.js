@@ -1,27 +1,13 @@
-import { ViewerPage } from '../framework/viewer_page.js';
-import { getTextContent } from '../framework/utils.js';
+import { test, expect } from '../framework/fixtures.js';
 
-jest.setTimeout(60000);
-
-describe('ixbrl-viewer',() => {
-        let viewerPage;
-
-        beforeEach(async () => {
-                viewerPage = new ViewerPage();
-                await viewerPage.buildPage();
-        })
-
-        afterEach(async () => {
-                await viewerPage.tearDown();
-        });
-
-        test('Fact Properties', async () => {
+test.describe('ixbrl-viewer',() => {
+        test('Fact Properties', async ({ viewerPage }) => {
                 const detailsPanel = viewerPage.factDetailsPanel;
                 const documentType = '10-K';
 
                 await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
 
-                await expect(await viewerPage.page.title()).toContain('Inline Viewer');
+                await expect(viewerPage.page).toHaveTitle(/Inline Viewer/);
 
                 // Click on the Document Type fact
                 await viewerPage.docFrame.selectFact('dei:DocumentType');
@@ -66,7 +52,7 @@ describe('ixbrl-viewer',() => {
                 await detailsPanel.duplicateText.assertText('1 of 2');
                 const oldFact = await viewerPage.docFrame.getSelectedFact();
                 const oldFactBox = await oldFact.boundingBox();
-                const oldFactText = await getTextContent(oldFact);
+                const oldFactText = await oldFact.textContent();
                 expect(oldFactText).toEqual(documentType);
 
                 // Duplicate Facts - Test navigation to fact 2
@@ -74,14 +60,13 @@ describe('ixbrl-viewer',() => {
                 await detailsPanel.duplicateText.assertText('2 of 2');
                 const newFact = await viewerPage.docFrame.getSelectedFact();
                 const newFactBox = await newFact.boundingBox();
-                const newFactText = await getTextContent(newFact);
+                const newFactText = await newFact.textContent();
                 expect(newFactText).toEqual(documentType);
                 expect(newFactBox).not.toEqual(oldFactBox);
 
                 // Test panel resizing
                 const startingWidth = await detailsPanel.getPanelWidth();
                 await detailsPanel.resizePanel(-100);
-                const endWidth = await detailsPanel.getPanelWidth();
-                expect(endWidth).toBeGreaterThan(startingWidth);
+                await expect.poll(() => detailsPanel.getPanelWidth()).toBeGreaterThan(startingWidth);
         });
 });

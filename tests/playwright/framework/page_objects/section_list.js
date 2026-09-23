@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { Button, Element, Text } from '../core_elements.js';
 
 const FACT_INSPECTOR_XPATH = '//*[@id="inspector"]//*[contains(@class,"inspector-container") and contains(@class,"fact-inspector")]';
@@ -23,14 +24,13 @@ export class SectionList {
     }
 
     async getSectionCount() {
-        const sections = await this.#viewerPage.page.$$('xpath/' + SECTIONS_XPATH);
-        return sections.length;
+        return this.#viewerPage.page.locator('xpath=' + SECTIONS_XPATH).count();
     }
 
     async assertSectionCount(expectedCount) {
         this.#viewerPage.log(
             `Asserting section list holds ${expectedCount} sections`);
-        expect(await this.getSectionCount()).toEqual(expectedCount);
+        await expect.poll(() => this.getSectionCount()).toEqual(expectedCount);
     }
 
     getSection(position) {

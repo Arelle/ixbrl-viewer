@@ -34,7 +34,7 @@
   - [Running tests](#running-tests)
     - [Running unit tests](#running-unit-tests)
     - [Linting with Ruff](#linting-with-ruff)
-    - [Running Puppeteer tests](#running-puppeteer-tests)
+    - [Running Playwright tests](#running-playwright-tests)
   - [👥 Contributors](#-contributors)
   - [License](#license)
 
@@ -373,36 +373,43 @@ to apply blindly.
 
 [ruff]: https://docs.astral.sh/ruff/
 
-### Running Puppeteer tests
+### Running Playwright tests
 
-All commands should be run from repository root
+Run these commands from the repository root. Viewer generation requires Python,
+Arelle, and Bash in addition to the Node.js build tools.
 
-1. Install the npm requirements(instructions under [Building the javascript locally](#building-the-javascript-locally)).
-2. Install Arelle
+1. Install the npm dependencies and Arelle:
 
     ```shell
+    npm ci
     pip install .[arelle]
     ```
 
-3. [Terminal 1] Start the puppeteer serve
+2. Install Chromium, build the viewer, generate the test filings, and run the tests:
 
     ```shell
-    npm run puppeteerServe 
+    npm run test:integration
     ```
 
-    - This command generates the `ixbrlviewer.js`, uses Arelle to generate several test files, then serves the files via a nodejs http-server.
-    - Currently changes to application code require restarting this step to take effect.
-4. Start the puppeteer tests
-    - [Terminal 2]:
+    Playwright starts the HTTP server on port 8080 and stops it after the tests.
+    Outside CI, it can reuse an existing server serving the generated filings.
+    Tests run headlessly by default. To watch the browser, use
+    `npm run test:integrationTest -- --headed`. To debug interactively, use
+    `npm run test:integrationTest -- --ui`.
 
-       ```shell
-       npm run test:puppeteer
-       ```
+    Each run installs the Chromium version required by the locally installed
+    Playwright, rebuilds the viewer, and regenerates the filings. `npm run
+    test:integrationBuild` prepares these on their own, and `npm run
+    test:integrationTest` reruns the tests without rebuilding. To install only
+    Chromium and its system dependencies, use `npm run test:integrationInstall`.
 
-    - IDE:
-      - Many of the IDE's on the market can run tests via the UI.  The following is an example configuration for intellij.  Once set you can right-click on the test name or file and select the run option.
-      ![ixbrl-viewer](https://raw.githubusercontent.com/Arelle/ixbrl-viewer/master/tests/puppeteer/puppeteer_test_run_via_intellij.jpg)
-      - Debug runs with breakpoints are also typically supported.
+Reports and test results are written to `tests/playwright/artifacts/`, alongside
+but separate from the generated filings. Failed tests retain screenshots, videos,
+and traces. Browser logs are attached to each test in the report. Open it with:
+
+```shell
+npx playwright show-report tests/playwright/artifacts/report
+```
 
 ## 👥 Contributors
 

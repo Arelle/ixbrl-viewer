@@ -1,20 +1,7 @@
-import { ViewerPage } from '../framework/viewer_page.js';
+import { test } from '../framework/fixtures.js';
 
-jest.setTimeout(60000);
-
-describe('ixbrl-viewer:', () => {
-    let viewerPage;
-
-    beforeEach(async () => {
-        viewerPage = new ViewerPage();
-        await viewerPage.buildPage();
-    });
-
-    afterEach(async () => {
-        await viewerPage.tearDown();
-    });
-
-    test('Section List Test', async () => {
+test.describe('ixbrl-viewer:', () => {
+    test('Section List Test', async ({ viewerPage }) => {
         const sectionList = viewerPage.sectionList;
 
         await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
@@ -34,7 +21,7 @@ describe('ixbrl-viewer:', () => {
         await first.body.assertNotVisible();
     });
 
-    test('Section List Bulk Toggle Test', async () => {
+    test('Section List Bulk Toggle Test', async ({ viewerPage }) => {
         const sectionList = viewerPage.sectionList;
 
         await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
@@ -52,7 +39,7 @@ describe('ixbrl-viewer:', () => {
         }
     });
 
-    test('Section List Bulk Toggle Availability Test', async () => {
+    test('Section List Bulk Toggle Availability Test', async ({ viewerPage }) => {
         const sectionList = viewerPage.sectionList;
 
         await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
@@ -71,7 +58,7 @@ describe('ixbrl-viewer:', () => {
         await sectionList.collapseAll.assertFocused();
     });
 
-    test('Section List Toolbar Visibility Test', async () => {
+    test('Section List Toolbar Visibility Test', async ({ viewerPage }) => {
         const sectionList = viewerPage.sectionList;
 
         await viewerPage.navigateToViewer('filing_documents_smoke_test.zip');
@@ -81,7 +68,6 @@ describe('ixbrl-viewer:', () => {
         const [first] = await sectionList.getSections();
         await first.header.select();
         await first.body.assertVisible();
-        await viewerPage.waitMilliseconds(500);
         await first.firstFact.doubleClick();
         await sectionList.controls.assertNotVisible();
 

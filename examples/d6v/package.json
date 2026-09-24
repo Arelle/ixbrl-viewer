@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "ixbrl-viewer": "^1.5.6",
-    "jquery": "^3.7.1"
+    "jquery": "^4.0.0"
   },
   "engines": {
     "node": ">=22"

@@ -683,6 +683,38 @@ describe("Search visibility filter", () => {
     });
 });
 
+describe("Empty search", () => {
+    const report = testReport(
+            {
+                "concepts": {
+                    ...createSimpleConcept("a:Item1"),
+                    ...createSimpleConcept("a:Item2"),
+                    ...createSimpleConcept("a:Item3"),
+                    ...createSimpleConcept("a:Item4"),
+                },
+                "facts": {
+                    ...createSimpleFact("visible1", "a:Item1"),
+                    ...createSimpleFact("hidden1", "a:Item2"),
+                    ...createSimpleFact("visible2", "a:Item3"),
+                    ...createSimpleFact("hidden2", "a:Item4"),
+                }
+            },
+            {
+                "visible1": { "isHidden": false },
+                "hidden1": { "isHidden": true },
+                "visible2": { "isHidden": false },
+                "hidden2": { "isHidden": true },
+            }
+    )
+    const reportSearch = getReportSearch(report);
+
+    test("Empty search returns every fact, visible facts first", () => {
+        const results = reportSearch.search(testSearchSpec())
+            .map(r => r.fact.localId());
+        expect(results).toEqual(['visible1', 'visible2', 'hidden1', 'hidden2']);
+    });
+});
+
 describe("Unparseable search", () => {
     const report = testReport(
             {

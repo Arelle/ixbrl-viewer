@@ -15,13 +15,21 @@ export const SEARCH_FIELDS = [
     'widerConcept',
 ];
 
-export function createIndexBuilder() {
+function isPopulated(value) {
+    return value !== null && value !== undefined && value !== '';
+}
+
+export function createIndexBuilder(docs) {
     const builder = new lunr.Builder();
     builder.pipeline.add(lunr.trimmer, lunr.stopWordFilter, lunr.stemmer);
     builder.searchPipeline.add(lunr.stemmer);
     builder.ref('id');
+    // lunr does per document work for every declared field, and a field no
+    // fact populates can never match.
     for (const field of SEARCH_FIELDS) {
-        builder.field(field);
+        if (docs.some(doc => isPopulated(doc[field]))) {
+            builder.field(field);
+        }
     }
     return builder;
 }
@@ -82,7 +90,7 @@ export class ReportSearch {
                 }
             }
         }
-        const builder = createIndexBuilder();
+        const builder = createIndexBuilder(docs);
 
         for (const [i, doc] of docs.entries()) {
             builder.add(doc);

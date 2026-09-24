@@ -2,6 +2,30 @@
 
 import lunr from 'lunr'
 
+// lunr reports and scores fields in declaration order.
+export const SEARCH_FIELDS = [
+    'label',
+    'concept',
+    'startDate',
+    'date',
+    'doc',
+    'ref',
+    'widerLabel',
+    'widerDoc',
+    'widerConcept',
+];
+
+export function createIndexBuilder() {
+    const builder = new lunr.Builder();
+    builder.pipeline.add(lunr.trimmer, lunr.stopWordFilter, lunr.stemmer);
+    builder.searchPipeline.add(lunr.stemmer);
+    builder.ref('id');
+    for (const field of SEARCH_FIELDS) {
+        builder.field(field);
+    }
+    return builder;
+}
+
 export class ReportSearch {
     constructor(reportSet) {
         this._reportSet = reportSet;
@@ -58,28 +82,7 @@ export class ReportSearch {
                 }
             }
         }
-        const builder = new lunr.Builder();
-        builder.pipeline.add(
-          lunr.trimmer,
-          lunr.stopWordFilter,
-          lunr.stemmer
-        )
-
-        builder.searchPipeline.add(
-          lunr.stemmer
-        )
-
-        builder.ref('id');
-        builder.field('label');
-        builder.field('concept');
-        builder.field('startDate');
-        builder.field('date');
-        builder.field('doc');
-        builder.field('ref');
-        builder.field('widerLabel');
-        builder.field('widerDoc');
-        builder.field('widerConcept');
-
+        const builder = createIndexBuilder();
 
         for (const [i, doc] of docs.entries()) {
             builder.add(doc);

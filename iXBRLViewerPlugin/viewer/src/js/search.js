@@ -2,6 +2,38 @@
 
 import lunr from 'lunr'
 
+// lunr reports and scores fields in declaration order.
+export const SEARCH_FIELDS = [
+    'label',
+    'concept',
+    'startDate',
+    'date',
+    'doc',
+    'ref',
+    'widerLabel',
+    'widerDoc',
+    'widerConcept',
+];
+
+function isPopulated(value) {
+    return value !== null && value !== undefined && value !== '';
+}
+
+export function createIndexBuilder(docs) {
+    const builder = new lunr.Builder();
+    builder.pipeline.add(lunr.trimmer, lunr.stopWordFilter, lunr.stemmer);
+    builder.searchPipeline.add(lunr.stemmer);
+    builder.ref('id');
+    // lunr does per document work for every declared field, and a field no
+    // fact populates can never match.
+    for (const field of SEARCH_FIELDS) {
+        if (docs.some(doc => isPopulated(doc[field]))) {
+            builder.field(field);
+        }
+    }
+    return builder;
+}
+
 export class ReportSearch {
     constructor(reportSet) {
         this._reportSet = reportSet;
@@ -58,28 +90,7 @@ export class ReportSearch {
                 }
             }
         }
-        const builder = new lunr.Builder();
-        builder.pipeline.add(
-          lunr.trimmer,
-          lunr.stopWordFilter,
-          lunr.stemmer
-        )
-
-        builder.searchPipeline.add(
-          lunr.stemmer
-        )
-
-        builder.ref('id');
-        builder.field('label');
-        builder.field('concept');
-        builder.field('startDate');
-        builder.field('date');
-        builder.field('doc');
-        builder.field('ref');
-        builder.field('widerLabel');
-        builder.field('widerDoc');
-        builder.field('widerConcept');
-
+        const builder = createIndexBuilder(docs);
 
         for (const [i, doc] of docs.entries()) {
             builder.add(doc);
@@ -195,7 +206,18 @@ export class ReportSearch {
         if (!this.ready) {
             return;
         }
-        const rr = this._searchIndex.search(s.searchString);
+        let rr;
+        try {
+            rr = this._searchIndex.search(s.searchString);
+        }
+        catch (e) {
+            if (!(e instanceof lunr.QueryParseError)) {
+                throw e;
+            }
+            // lunr throws for malformed queries and unknown field names. Show
+            // them as finding nothing so the pane doesn't keep stale results.
+            return [];
+        }
         const results = []
         const searchIndex = this;
 

@@ -198,7 +198,18 @@ export class ReportSearch {
         if (!this.ready) {
             return;
         }
-        const rr = this._searchIndex.search(s.searchString);
+        let rr;
+        try {
+            rr = this._searchIndex.search(s.searchString);
+        }
+        catch (e) {
+            if (!(e instanceof lunr.QueryParseError)) {
+                throw e;
+            }
+            // lunr throws for malformed queries and unknown field names. Show
+            // them as finding nothing so the pane doesn't keep stale results.
+            return [];
+        }
         const results = []
         const searchIndex = this;
 

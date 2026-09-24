@@ -683,6 +683,32 @@ describe("Search visibility filter", () => {
     });
 });
 
+describe("Unparseable search", () => {
+    const report = testReport(
+            {
+                "concepts": {
+                    ...createSimpleConcept("a:Cash", "Cash"),
+                },
+                "facts": {
+                    ...createSimpleFact("cash1", "a:Cash"),
+                }
+            }
+    )
+    const reportSearch = getReportSearch(report);
+
+    test.each(['+', 'Cash^', 'Cash~', 'unknownField:Cash'])(
+            "Search for %p returns no matches", (searchString) => {
+        expect(reportSearch.search(testSearchSpec(searchString))).toEqual([]);
+    });
+
+    test("A parseable search still works after an unparseable one", () => {
+        reportSearch.search(testSearchSpec('+'));
+        const results = reportSearch.search(testSearchSpec('Cash'))
+            .map(r => r.fact.localId());
+        expect(results).toEqual(['cash1']);
+    });
+});
+
 describe("Search mandatory facts filter", () => {
     const facts = {
         ...createSimpleFact("mandatory1", "a:Item1"),

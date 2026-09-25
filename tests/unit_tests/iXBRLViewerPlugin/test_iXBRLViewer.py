@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import os
+import zipfile
 from collections import defaultdict
 from unittest.mock import Mock, patch
 
@@ -17,7 +18,7 @@ from .mock_arelle import mock_arelle
 mock_arelle()
 
 from iXBRLViewerPlugin.constants import MANDATORY_FACTS
-from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewerFile
+from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewer, iXBRLViewerFile
 
 class TestNamespaceMap:
 
@@ -500,7 +501,8 @@ class TestIXBRLViewer:
                     iterchildren=Mock(
                         return_value=[
                             Mock(qname=linkQName)] if linkQName else []
-                    )
+                    ),
+                    iter=Mock(return_value=[]),
                 )
             )
 
@@ -994,3 +996,73 @@ class TestIXBRLViewer:
             assert body[2].prefix is None
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
             assert body[3].text == "END IXBRL VIEWER EXTENSIONS"
+
+    def test_addReferencedAssets(self):
+        """
+        Relative image references in inline documents are collected via the
+        report's FileSource; remote, data:, parent-directory and missing
+        references are skipped.
+        """
+        root = etree.fromstring(b"""
+            <html xmlns="http://www.w3.org/1999/xhtml"><body>
+                <img src="logo.jpg"/>
+                <img src="images/chart%201.png"/>
+                <img src="logo.jpg"/>
+                <img src="https://example.com/remote.jpg"/>
+                <img src="data:image/png;base64,AAAA"/>
+                <img src="../outside.jpg"/>
+                <img src="missing.jpg"/>
+                <img/>
+            </body></html>
+        """)
+        files = {
+            "/filing.zip/logo.jpg": b"logo",
+            os.path.join("/filing.zip", "images", "chart 1.png"): b"chart",
+            "/outside.jpg": b"outside",
+        }
+        report = Mock(
+            urlDocs={
+                "/filing.zip/report.htm": Mock(type=Type.INLINEXBRL, filepath="/filing.zip/report.htm", xmlRootElement=root),
+                "/filing.zip/report.xsd": Mock(type=Type.SCHEMA, filepath="/filing.zip/report.xsd"),
+            },
+            fileSource=Mock(
+                exists=lambda path: path in files,
+                file=lambda path, binary: (io.BytesIO(files[path]),),
+            ),
+        )
+        builder = IXBRLViewerBuilder(self.cntlr_mock)
+        builder.addReferencedAssets(report)
+        assert builder.iv.referencedAssets == {
+            "logo.jpg": b"logo",
+            os.path.join("images", "chart 1.png"): b"chart",
+        }
+
+    def test_save_writes_referenced_assets(self, tmp_path):
+        """
+        Referenced assets are written relative to the viewer output, for
+        directory, single file and zip destinations.
+        """
+        xml = etree.ElementTree(etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"/>'))
+        imagePath = os.path.join("images", "chart.png")
+
+        def newViewer():
+            iv = iXBRLViewer(self.cntlr_mock)
+            iv.addFile(iXBRLViewerFile("xbrlviewer.html", xml))
+            iv.referencedAssets = {"logo.jpg": b"logo", imagePath: b"chart"}
+            return iv
+
+        outDir = tmp_path / "dir"
+        outDir.mkdir()
+        newViewer().save(str(outDir))
+        assert (outDir / "logo.jpg").read_bytes() == b"logo"
+        assert (outDir / imagePath).read_bytes() == b"chart"
+
+        newViewer().save(str(tmp_path / "single.html"))
+        assert (tmp_path / "logo.jpg").read_bytes() == b"logo"
+        assert (tmp_path / imagePath).read_bytes() == b"chart"
+
+        zipPath = tmp_path / "viewer.zip"
+        newViewer().save(str(zipPath), zipOutput=True)
+        with zipfile.ZipFile(zipPath) as z:
+            assert z.read("logo.jpg") == b"logo"
+            assert z.read("images/chart.png") == b"chart"

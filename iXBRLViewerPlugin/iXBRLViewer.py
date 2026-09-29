@@ -148,7 +148,6 @@ class IXBRLViewerBuilder:
         for featureName in features:
             assert featureName in featureNames, \
                 f"Given feature name `{featureName}` does not match any defined features: {featureNames}"
-        self.reportZip: str | None = None
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.taxonomyData: dict[str, Any] = {
@@ -176,7 +175,6 @@ class IXBRLViewerBuilder:
 
         self.fromSingleZIP: bool | None = None
         self.reportCount = 0
-        self.assets: list[str] = []
 
     def outputFilename(self, filename: str) -> str:
         (base, ext) = os.path.splitext(filename)
@@ -619,43 +617,74 @@ class IXBRLViewerBuilder:
                 self.filingDocZipPath = os.path.dirname(report.modelDocument.filepath)
         else:
             self.fromSingleZIP = False
-        if report.fileSource.isArchive and isinstance(report.fileSource.fs, zipfile.ZipFile):
-            filelist = report.fileSource.fs.filelist
-            for file in filelist:
-                directory, asset = os.path.split(file.filename)
-                if "reports" in directory and asset != "" and not asset.lower().endswith(REPORT_TYPE_EXTENSIONS):
-                    self.assets.append(file.filename)
-            if self.assets:
-                self.reportZip = report.fileSource.fs.filename
-        self.addReferencedAssets(report)
+        self.addAssets(report)
 
-    def addReferencedAssets(self, report: ModelXbrl) -> None:
+    def addAssets(self, report: ModelXbrl) -> None:
         """
-        Collect local files (such as images) referenced by the report's inline
-        documents, so that they can be written alongside the viewer output.
-        References are read through the report's FileSource, so this works whether
-        the report was loaded from a directory or from inside an archive.  Only
-        relative references that stay within the document's own directory tree are
-        collected; they are written to the same relative path in the output.
+        Collect the local files (images, stylesheets, fonts, ...) that have to be
+        written alongside the viewer output, keyed by the path to write them to,
+        relative to the viewer document.
+
+        Files referenced by the inline documents are collected first, read through
+        the report's FileSource so that reports loaded from a directory and reports
+        loaded from an archive are handled alike.  For an archive, any remaining
+        non-report file in a "reports" directory is collected as well, as it may be
+        referenced from somewhere that isn't scanned, such as a stylesheet.
         """
+        inlineDocDirs = set()
         for doc in report.urlDocs.values():
             if doc.type != Type.INLINEXBRL or doc.xmlRootElement is None or isHttpUrl(doc.filepath):
                 continue
+            docDir = os.path.dirname(doc.filepath)
+            inlineDocDirs.add(docDir)
             for img in doc.xmlRootElement.iter(f"{{{XbrlConst.xhtml}}}img"):
                 src = img.get("src")
                 if not src:
                     continue
-                url = urllib.parse.urlparse(src.strip())
-                if url.scheme or url.netloc or not url.path:
-                    continue  # data:, http(s): etc. need no local copy
-                relPath = os.path.normpath(urllib.parse.unquote(url.path))
-                if os.path.isabs(relPath) or relPath.split(os.sep)[0] == os.pardir or relPath in self.iv.referencedAssets:
+                relPath = self.assetRelativePath(src)
+                if relPath is None or relPath in self.iv.assets:
                     continue
-                sourcePath = os.path.join(os.path.dirname(doc.filepath), relPath)
+                sourcePath = os.path.join(docDir, relPath)
                 if not report.fileSource.exists(sourcePath):
                     continue
                 with report.fileSource.file(sourcePath, binary=True)[0] as fh:
-                    self.iv.referencedAssets[relPath] = fh.read()
+                    self.iv.assets[relPath] = fh.read()
+        if report.fileSource.isArchive and isinstance(report.fileSource.fs, zipfile.ZipFile):
+            basefile = report.fileSource.basefile
+            for file in report.fileSource.fs.filelist:
+                directory, asset = os.path.split(file.filename)
+                if "reports" not in directory or asset == "" or asset.lower().endswith(REPORT_TYPE_EXTENSIONS):
+                    continue
+                # Write the file to its path relative to the inline document that
+                # may reference it, rather than to the output directory's root, so
+                # that references into subdirectories keep working.
+                filePath = os.path.join(basefile, *file.filename.split("/"))
+                relPath = None
+                for docDir in inlineDocDirs:
+                    if filePath.startswith(docDir + os.sep):
+                        relPath = filePath[len(docDir) + 1:]
+                        break
+                if relPath is None:
+                    relPath = asset
+                if relPath not in self.iv.assets:
+                    self.iv.assets[relPath] = report.fileSource.fs.read(file.filename)
+
+    @staticmethod
+    def assetRelativePath(src: str) -> str | None:
+        """
+        Convert a reference from an inline document into the path to write the
+        referenced file to, relative to that document, or None if the reference
+        needs no local copy.  URLs with a scheme (`data:`, `http(s):`, ...),
+        absolute paths, and paths reaching outside the document's own directory
+        tree are all skipped.
+        """
+        url = urllib.parse.urlparse(src.strip())
+        if url.scheme or url.netloc or not url.path:
+            return None
+        relPath = os.path.normpath(urllib.parse.unquote(url.path))
+        if os.path.isabs(relPath) or relPath.split(os.sep)[0] == os.pardir:
+            return None
+        return relPath
 
     def createViewer(
             self,
@@ -689,10 +718,6 @@ class IXBRLViewerBuilder:
             # If there is only a single report, call the output file "xbrlviewer.html"
             # We should probably preserve the source file extension here.
             self.iv.files[0].filename = "xbrlviewer.html"
-        if self.assets:
-            self.iv.addReportAssets(self.assets)
-        if self.reportZip:
-            self.iv.reportZip = self.reportZip
         return self.iv
 
 
@@ -714,16 +739,11 @@ class iXBRLViewerFile:
 class iXBRLViewer:
 
     def __init__(self, cntlr: Cntlr) -> None:
-        self.reportZip: str | None = None
         self.filesByFilename: dict[str, iXBRLViewerFile] = {}
         self.filingDocuments: str | None = None
         self.cntlr = cntlr
-        self.assets: list[str] = []
-        # relative output path -> content, for files referenced by the inline documents
-        self.referencedAssets: dict[str, bytes] = {}
-
-    def addReportAssets(self, assets: list[str]) -> None:
-        self.assets.extend(assets)
+        # output path, relative to the viewer document -> content
+        self.assets: dict[str, bytes] = {}
 
     def addFile(self, ivf: iXBRLViewerFile) -> None:
         # Overwrite previous occurrences of the same document, because it may
@@ -793,7 +813,7 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     zout.write(self.filingDocuments, filename)
-                for relPath, content in self.referencedAssets.items():
+                for relPath, content in self.assets.items():
                     self.cntlr.addToLog(f"Writing {relPath}", messageCode=INFO_MESSAGE_CODE)
                     zout.writestr(Path(relPath).as_posix(), content)
                 if copyScriptPath is not None:
@@ -812,15 +832,7 @@ class iXBRLViewer:
                 filename = os.path.basename(self.filingDocuments)
                 self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
-            if self.assets and self.reportZip is not None:
-                with zipfile.ZipFile(self.reportZip) as z:
-                    for asset in self.assets:
-                        fileName = os.path.basename(asset)
-                        path = os.path.join(destination, fileName)
-                        self.cntlr.addToLog(f"Writing {asset}", messageCode=INFO_MESSAGE_CODE)
-                        with z.open(asset) as zf, open(path, "wb") as assetFile:
-                            shutil.copyfileobj(zf, assetFile)
-            self._writeReferencedAssets(destination)
+            self._writeAssets(destination)
 
             if copyScriptPath is not None:
                 self._copyScript(Path(destination), copyScriptPath)
@@ -851,13 +863,13 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(destination), filename))
-                self._writeReferencedAssets(os.path.dirname(os.path.abspath(destination)))
+                self._writeAssets(os.path.dirname(os.path.abspath(destination)))
                 if copyScriptPath is not None:
                     outDirectory = Path(destination).parent
                     self._copyScript(outDirectory, copyScriptPath)
 
-    def _writeReferencedAssets(self, destDirectory: str) -> None:
-        for relPath, content in self.referencedAssets.items():
+    def _writeAssets(self, destDirectory: str) -> None:
+        for relPath, content in self.assets.items():
             path = os.path.join(destDirectory, relPath)
             self.cntlr.addToLog(f"Writing {path}", messageCode=INFO_MESSAGE_CODE)
             os.makedirs(os.path.dirname(path), exist_ok=True)

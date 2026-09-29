@@ -497,6 +497,7 @@ class TestIXBRLViewer:
                 creationSoftwareMatches=creationSoftwareMatches_effect,
                 type=docType,
                 basename=os.path.basename(path),
+                filepath=path,
                 xmlRootElement=Mock(
                     iterchildren=Mock(
                         return_value=[
@@ -997,7 +998,7 @@ class TestIXBRLViewer:
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
             assert body[3].text == "END IXBRL VIEWER EXTENSIONS"
 
-    def test_addReferencedAssets(self):
+    def test_addAssets_collects_references(self):
         """
         Relative image references in inline documents are collected via the
         report's FileSource; remote, data:, parent-directory and missing
@@ -1026,21 +1027,68 @@ class TestIXBRLViewer:
                 "/filing.zip/report.xsd": Mock(type=Type.SCHEMA, filepath="/filing.zip/report.xsd"),
             },
             fileSource=Mock(
+                isArchive=False,
                 exists=lambda path: path in files,
                 file=lambda path, binary: (io.BytesIO(files[path]),),
             ),
         )
         builder = IXBRLViewerBuilder(self.cntlr_mock)
-        builder.addReferencedAssets(report)
-        assert builder.iv.referencedAssets == {
+        builder.addAssets(report)
+        assert builder.iv.assets == {
             "logo.jpg": b"logo",
             os.path.join("images", "chart 1.png"): b"chart",
         }
 
-    def test_save_writes_referenced_assets(self, tmp_path):
+    def test_addAssets_collects_report_package_files(self, tmp_path):
         """
-        Referenced assets are written relative to the viewer output, for
-        directory, single file and zip destinations.
+        Non-report files in a report package's reports directory are collected
+        even when nothing references them, at their path relative to the inline
+        document, and a file already collected from a reference is not re-read.
+        """
+        packagePath = tmp_path / "package.zip"
+        with zipfile.ZipFile(packagePath, "w") as z:
+            z.writestr("package/META-INF/reportPackage.json", "{}")
+            z.writestr("package/reports/report.xhtml", "<html/>")
+            z.writestr("package/reports/report.xsd", "<schema/>")
+            z.writestr("package/reports/logo.jpg", "logo")
+            z.writestr("package/reports/styles/report.css", "css")
+            z.writestr("package/reports/styles/font.woff", "font")
+        reportsDir = os.path.join(str(packagePath), "package", "reports")
+        root = etree.fromstring(b"""
+            <html xmlns="http://www.w3.org/1999/xhtml"><body><img src="logo.jpg"/></body></html>
+        """)
+        with zipfile.ZipFile(packagePath) as fs:
+            report = Mock(
+                urlDocs={
+                    "report.xhtml": Mock(
+                        type=Type.INLINEXBRL,
+                        filepath=os.path.join(reportsDir, "report.xhtml"),
+                        xmlRootElement=root,
+                    ),
+                },
+                fileSource=Mock(
+                    isArchive=True,
+                    fs=fs,
+                    basefile=str(packagePath),
+                    exists=lambda path: True,
+                    file=lambda path, binary: (io.BytesIO(b"referenced logo"),),
+                ),
+            )
+            builder = IXBRLViewerBuilder(self.cntlr_mock)
+            builder.addAssets(report)
+        assert builder.iv.assets == {
+            # kept from the reference, not re-read from the archive
+            "logo.jpg": b"referenced logo",
+            # .xsd isn't a report extension, so the sweep takes it, as before
+            "report.xsd": b"<schema/>",
+            os.path.join("styles", "report.css"): b"css",
+            os.path.join("styles", "font.woff"): b"font",
+        }
+
+    def test_save_writes_assets(self, tmp_path):
+        """
+        Assets are written relative to the viewer output, for directory, single
+        file and zip destinations.
         """
         xml = etree.ElementTree(etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"/>'))
         imagePath = os.path.join("images", "chart.png")
@@ -1048,7 +1096,7 @@ class TestIXBRLViewer:
         def newViewer():
             iv = iXBRLViewer(self.cntlr_mock)
             iv.addFile(iXBRLViewerFile("xbrlviewer.html", xml))
-            iv.referencedAssets = {"logo.jpg": b"logo", imagePath: b"chart"}
+            iv.assets = {"logo.jpg": b"logo", imagePath: b"chart"}
             return iv
 
         outDir = tmp_path / "dir"

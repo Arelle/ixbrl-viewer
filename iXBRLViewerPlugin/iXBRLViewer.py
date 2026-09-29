@@ -648,9 +648,10 @@ class IXBRLViewerBuilder:
                 if not report.fileSource.exists(sourcePath):
                     continue
                 with report.fileSource.file(sourcePath, binary=True)[0] as fh:
-                    self.iv.assets[relPath] = fh.read()
-        if report.fileSource.isArchive and isinstance(report.fileSource.fs, zipfile.ZipFile):
-            basefile = report.fileSource.basefile
+                    self.iv.assets[relPath] = cast(bytes, fh.read())
+        basefile = report.fileSource.basefile
+        if (report.fileSource.isArchive and isinstance(report.fileSource.fs, zipfile.ZipFile)
+                and isinstance(basefile, str)):
             for file in report.fileSource.fs.filelist:
                 directory, asset = os.path.split(file.filename)
                 if "reports" not in directory or asset == "" or asset.lower().endswith(REPORT_TYPE_EXTENSIONS):

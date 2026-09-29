@@ -1016,15 +1016,17 @@ class TestIXBRLViewer:
                 <img/>
             </body></html>
         """)
+        archiveDir = os.path.join(os.sep, "filing.zip")
+        reportPath = os.path.join(archiveDir, "report.htm")
         files = {
-            "/filing.zip/logo.jpg": b"logo",
-            os.path.join("/filing.zip", "images", "chart 1.png"): b"chart",
-            "/outside.jpg": b"outside",
+            os.path.join(archiveDir, "logo.jpg"): b"logo",
+            os.path.join(archiveDir, "images", "chart 1.png"): b"chart",
+            os.path.join(os.sep, "outside.jpg"): b"outside",
         }
         report = Mock(
             urlDocs={
-                "/filing.zip/report.htm": Mock(type=Type.INLINEXBRL, filepath="/filing.zip/report.htm", xmlRootElement=root),
-                "/filing.zip/report.xsd": Mock(type=Type.SCHEMA, filepath="/filing.zip/report.xsd"),
+                reportPath: Mock(type=Type.INLINEXBRL, filepath=reportPath, xmlRootElement=root),
+                "report.xsd": Mock(type=Type.SCHEMA, filepath=os.path.join(archiveDir, "report.xsd")),
             },
             fileSource=Mock(
                 isArchive=False,

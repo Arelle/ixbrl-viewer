@@ -895,7 +895,12 @@ class iXBRLViewer:
         for relPath, content in self.assets.items():
             path = os.path.realpath(os.path.join(root, relPath))
             # never write outside the output directory, whatever the report asked for
-            if path == root or os.path.commonpath([root, path]) != root:
+            try:
+                isInsideRoot = path != root and os.path.commonpath([root, path]) == root
+            except ValueError:
+                # commonpath raises for paths on different Windows drives
+                isInsideRoot = False
+            if not isInsideRoot:
                 self.cntlr.addToLog(
                     f"Skipping {relPath} because it is outside {destDirectory}",
                     messageCode=INFO_MESSAGE_CODE,

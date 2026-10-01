@@ -1148,6 +1148,21 @@ class TestIXBRLViewer:
         with zipfile.ZipFile(zipPath) as z:
             assert sorted(z.namelist()) == ["logo.jpg", "xbrlviewer.html"]
 
+    def test_save_skips_assets_on_unrelated_paths(self, tmp_path):
+        """
+        A destination and an asset path that cannot be compared, as happens on
+        Windows for paths on different drives, is skipped rather than raising.
+        """
+        xml = etree.ElementTree(etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"/>'))
+        iv = iXBRLViewer(self.cntlr_mock)
+        iv.addFile(iXBRLViewerFile("xbrlviewer.html", xml))
+        iv.assets = {"logo.jpg": b"logo"}
+        outDir = tmp_path / "dir"
+        outDir.mkdir()
+        with patch("os.path.commonpath", side_effect=ValueError("paths don't have the same drive")):
+            iv.save(str(outDir))
+        assert sorted(p.name for p in outDir.rglob("*") if p.is_file()) == ["xbrlviewer.html"]
+
     def test_save_writes_assets(self, tmp_path):
         """
         Assets are written relative to the viewer output, for directory, single

@@ -1087,6 +1087,67 @@ class TestIXBRLViewer:
             os.path.join("styles", "font.woff"): b"font",
         }
 
+    def test_addAssets_skips_report_package_path_traversal(self, tmp_path):
+        """
+        A zip entry whose name climbs out of the reports directory is not
+        collected, so that a crafted report cannot reach outside the output.
+        """
+        packagePath = tmp_path / "evil.zip"
+        with zipfile.ZipFile(packagePath, "w") as z:
+            z.writestr("package/reports/report.xhtml", "<html/>")
+            z.writestr("package/reports/logo.jpg", "logo")
+            z.writestr("package/reports/../../../../.bashrc", "pwned")
+        reportsDir = os.path.join(str(packagePath), "package", "reports")
+        root = etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"><body/></html>')
+        with zipfile.ZipFile(packagePath) as fs:
+            report = Mock(
+                urlDocs={
+                    "report.xhtml": Mock(
+                        type=Type.INLINEXBRL,
+                        filepath=os.path.join(reportsDir, "report.xhtml"),
+                        xmlRootElement=root,
+                    ),
+                },
+                fileSource=Mock(isArchive=True, fs=fs, basefile=str(packagePath)),
+            )
+            builder = IXBRLViewerBuilder(self.cntlr_mock)
+            builder.addAssets(report)
+        assert builder.iv.assets == {"logo.jpg": b"logo"}
+
+    def test_save_skips_assets_outside_destination(self, tmp_path):
+        """
+        An asset path that resolves outside the output is never written, for
+        directory, single file and zip destinations.
+        """
+        xml = etree.ElementTree(etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"/>'))
+        escapes = {
+            os.path.join(os.pardir, "escaped.txt"): b"escaped",
+            os.path.join("images", os.pardir, os.pardir, "escaped-too.txt"): b"escaped",
+            os.path.join(os.sep, "absolute.txt"): b"escaped",
+        }
+
+        def newViewer():
+            iv = iXBRLViewer(self.cntlr_mock)
+            iv.addFile(iXBRLViewerFile("xbrlviewer.html", xml))
+            iv.assets = {"logo.jpg": b"logo", **escapes}
+            return iv
+
+        outDir = tmp_path / "out" / "dir"
+        outDir.mkdir(parents=True)
+        newViewer().save(str(outDir))
+        assert (outDir / "logo.jpg").read_bytes() == b"logo"
+        assert sorted(p.name for p in outDir.parent.rglob("*") if p.is_file()) == ["logo.jpg", "xbrlviewer.html"]
+
+        singleDir = tmp_path / "out" / "single"
+        singleDir.mkdir()
+        newViewer().save(str(singleDir / "viewer.html"))
+        assert sorted(p.name for p in singleDir.rglob("*") if p.is_file()) == ["logo.jpg", "viewer.html"]
+
+        zipPath = tmp_path / "out" / "viewer.zip"
+        newViewer().save(str(zipPath), zipOutput=True)
+        with zipfile.ZipFile(zipPath) as z:
+            assert sorted(z.namelist()) == ["logo.jpg", "xbrlviewer.html"]
+
     def test_save_writes_assets(self, tmp_path):
         """
         Assets are written relative to the viewer output, for directory, single

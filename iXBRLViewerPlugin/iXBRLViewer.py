@@ -39,6 +39,19 @@ from .constants import (
 from .xhtmlserialize import XHTMLSerializer
 
 REPORT_TYPE_EXTENSIONS = (".xbrl", ".xhtml", ".html", ".htm", ".json")
+
+
+def outputRelativePath(path: str) -> str | None:
+    """
+    Normalize a path that an asset will be written to, relative to the viewer
+    document, or return None if it is absolute or reaches outside the document's
+    own directory tree.  Asset paths come from the report, so a crafted report
+    must not be able to write outside the viewer output.
+    """
+    relPath = os.path.normpath(path)
+    if os.path.isabs(relPath) or relPath.split(os.sep)[0] == os.pardir:
+        return None
+    return relPath
 UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = "unrecognizedLinkbase"
 LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
     XbrlConst.qnLinkCalculationLink: "calcLinkbase",
@@ -665,8 +678,14 @@ class IXBRLViewerBuilder:
                     if filePath.startswith(docDir + os.sep):
                         relPath = filePath[len(docDir) + 1:]
                         break
+                relPath = asset if relPath is None else outputRelativePath(relPath)
                 if relPath is None:
-                    relPath = asset
+                    # a zip entry whose name climbs out of the reports directory
+                    self.cntlr.addToLog(
+                        f"Skipping {file.filename} because it is outside the report",
+                        messageCode=INFO_MESSAGE_CODE,
+                    )
+                    continue
                 if relPath not in self.iv.assets:
                     self.iv.assets[relPath] = report.fileSource.fs.read(file.filename)
 
@@ -675,17 +694,13 @@ class IXBRLViewerBuilder:
         """
         Convert a reference from an inline document into the path to write the
         referenced file to, relative to that document, or None if the reference
-        needs no local copy.  URLs with a scheme (`data:`, `http(s):`, ...),
-        absolute paths, and paths reaching outside the document's own directory
-        tree are all skipped.
+        needs no local copy.  URLs with a scheme (`data:`, `http(s):`, ...) are
+        skipped, as are paths that don't stay inside the document's own tree.
         """
         url = urllib.parse.urlparse(src.strip())
         if url.scheme or url.netloc or not url.path:
             return None
-        relPath = os.path.normpath(urllib.parse.unquote(url.path))
-        if os.path.isabs(relPath) or relPath.split(os.sep)[0] == os.pardir:
-            return None
-        return relPath
+        return outputRelativePath(urllib.parse.unquote(url.path))
 
     def createViewer(
             self,
@@ -815,6 +830,12 @@ class iXBRLViewer:
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     zout.write(self.filingDocuments, filename)
                 for relPath, content in self.assets.items():
+                    if outputRelativePath(relPath) is None:
+                        self.cntlr.addToLog(
+                            f"Skipping {relPath} because it is outside the viewer output",
+                            messageCode=INFO_MESSAGE_CODE,
+                        )
+                        continue
                     self.cntlr.addToLog(f"Writing {relPath}", messageCode=INFO_MESSAGE_CODE)
                     zout.writestr(Path(relPath).as_posix(), content)
                 if copyScriptPath is not None:
@@ -870,8 +891,16 @@ class iXBRLViewer:
                     self._copyScript(outDirectory, copyScriptPath)
 
     def _writeAssets(self, destDirectory: str) -> None:
+        root = os.path.realpath(destDirectory)
         for relPath, content in self.assets.items():
-            path = os.path.join(destDirectory, relPath)
+            path = os.path.realpath(os.path.join(root, relPath))
+            # never write outside the output directory, whatever the report asked for
+            if path == root or os.path.commonpath([root, path]) != root:
+                self.cntlr.addToLog(
+                    f"Skipping {relPath} because it is outside {destDirectory}",
+                    messageCode=INFO_MESSAGE_CODE,
+                )
+                continue
             self.cntlr.addToLog(f"Writing {path}", messageCode=INFO_MESSAGE_CODE)
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "wb") as fout:

@@ -12,7 +12,7 @@ from iXBRLViewerPlugin.xhtmlserialize import XHTMLSerializer
 class TestXHTMLSerializer:
 
     def _html(self, s):
-        return '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>%s</body></html>' % s
+        return f'<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>{s}</body></html>'
 
     def _serialiseToString(self, xml, xml_declaration = False):
         buf = io.BytesIO()

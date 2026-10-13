@@ -23,13 +23,13 @@ basedir = os.path.dirname(os.path.realpath(__file__))
 filename = os.path.join(basedir, "sample-files.list")
 missing_checksums = []
 
-with open(filename, "r") as f:
+with open(filename) as f:
     for l in f.readlines():
         if re.match(r"^\s*(#.*)?$", l) is not None:
             continue
         m = re.match(r"^(\S*)\s+(\S+)\s*(?:\s+(\S+))?$",l)
         if m is None:
-            print("Unexpected line: %s" % l)
+            print(f"Unexpected line: {l}")
             sys.exit(1)
         (subdir, url, fhash) = (m[1], m[2], m[3])
         if subdir == "":
@@ -42,25 +42,25 @@ with open(filename, "r") as f:
             o = urlparse(url)
             m = re.search(r"[^/]+$", o.path)
             if m is None:
-                print("Could not get filename from: %s" % o.path)
+                print(f"Could not get filename from: {o.path}")
             filepart = m[0]
 
         target_dir = os.path.join(basedir, subdir)
         target = os.path.join(target_dir, filepart)
         if not os.path.exists(target):
             if not os.path.exists(target_dir):
-                print("Creating %s" % target_dir)
+                print(f"Creating {target_dir}")
                 os.makedirs(target_dir)
 
-            print("Downloading %s to %s" % (url, target))
+            print(f"Downloading {url} to {target}")
             urlretrieve(url, target)
 
         actual_fhash = sha256sum(target)
         if fhash is None:
-            missing_checksums.append("%s %s %s" % (subdir, url, actual_fhash))
+            missing_checksums.append(f"{subdir} {url} {actual_fhash}")
         else:
             if actual_fhash != fhash:
-                print("Checksum does not match for %s (expected: %s, got: %s)" % (target, fhash, actual_fhash))
+                print(f"Checksum does not match for {target} (expected: {fhash}, got: {actual_fhash})")
 
 if len(missing_checksums) > 0:
     print("\n".join(missing_checksums))

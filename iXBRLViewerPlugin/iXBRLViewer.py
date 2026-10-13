@@ -482,7 +482,7 @@ class IXBRLViewerBuilder:
                 return f"{numeratorsString}/{denominatorsString}"
         return numeratorsString
 
-    def addViewerData(self, viewerFile: 'iXBRLViewerFile', scriptUrl: str) -> bool:
+    def addViewerData(self, viewerFile: iXBRLViewerFile, scriptUrl: str) -> bool:
         taxonomyDataJSON = self.escapeJSONForScriptTag(json.dumps(self.taxonomyData, indent=1, allow_nan=False))
 
         for child in viewerFile.xmlDocument.getroot():

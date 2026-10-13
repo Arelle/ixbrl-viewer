@@ -22,7 +22,7 @@ SUPPORTED_URL_PROTOCOLS = ("http:", "https:")
 
 
 def elt_name(e):
-    return "{%s}%s" % (UTR_NS, e)
+    return f"{{{UTR_NS}}}{e}"
 
 
 match len(sys.argv):
@@ -53,7 +53,7 @@ units = {
     "_source": {
         "url": utr_url,
         "sha256": hashlib.sha256(bytes).hexdigest(),
-        "timestamp": datetime.datetime.now(datetime.timezone.utc)
+        "timestamp": datetime.datetime.now(datetime.UTC)
         .replace(microsecond=0)
         .isoformat(),
     }
@@ -84,4 +84,4 @@ with open(path, "w") as fout:
     json.dump(units, fout, indent=2, sort_keys=True)
     fout.write("\n")
 
-print("Wrote %d entries written to %s" % (n, path))
+print(f"Wrote {n} entries written to {path}")

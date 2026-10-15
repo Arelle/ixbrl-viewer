@@ -26,8 +26,10 @@ seams were added:
    taxonomy document; for a **compiled model** (facts and taxonomy in one file)
    the same document is passed as both.  Facts are keyed by a document locator:
    `xbrl:htmlElementId` for the HTML surface (legacy `xbrl:htmlSpanId` is still
-   accepted), or a synthesised id carrying `xbrl:pdfPage`/`xbrl:pdfMcid` locators
-   for the PDF surface.  OIM networks become the viewer's ELR-keyed `pres`/`calc11`
+   accepted), or a synthesised id carrying the locators themselves:
+   `xbrl:pdfPage`/`xbrl:pdfMcid` for the PDF surface (`pf-N`), and positional
+   `xbrlx:htmlElementPointer` locators for an HTML document without ids (`xf-N`; see
+   [Pointer locators](#pointer-locators-xbrlxhtmlelementpointer)).  OIM networks become the viewer's ELR-keyed `pres`/`calc11`
    relationships; explicit vs typed dimensions are classified from whether a cube
    dimension has a `domainNetwork`; and the OIM `groupTree` becomes a
    reporting-structure section tree that organises the Cubes panel (see
@@ -43,7 +45,9 @@ seams were added:
    relies on, so nothing downstream is surface-specific:
 
    - `HtmlDocumentSurface` matches each fact's `htmlElementId` to an element id in
-     a plain-HTML document and wraps the matched element.
+     a plain-HTML document and wraps the matched element. A fact with positional
+     locators is resolved to its text run first, on the pristine tree, and each
+     run is wrapped in a span of its own.
    - `PdfDocumentSurface` handles the PDF locator types defined by the spec
      (`factValue.source` → `factSource` → `factMap` → `factLocatorType`):
      - **content** (`xbrl:pdfContentLocatorType`: `xbrl:pdfPage` + `xbrl:pdfMcid`)
@@ -173,8 +177,9 @@ There are four ways to point the viewer at a model:
    ```json
    { "xbrlModel": { "model": "aapl-compiled.json" } }
    ```
-   The document is resolved from the model's `sourceMappings` (or an explicit
-   `document`).  (A *compiled model* is auto-detected: it carries `concepts` /
+   The document is resolved from the model (or an explicit `document`): the
+   rendering named by `derivedContent.reportSource`, when the model carries facts
+   placed on one, else its `sourceMappings`.  (A *compiled model* is auto-detected: it carries `concepts` /
    `labels` / `cubes` alongside its `facts`.)
 3. **URL arguments** — `…/index.html?xbrlModel=<url>` opens a model (compiled or
    factset) with **no config file at all**, so a plain viewer bundle can be
@@ -188,7 +193,10 @@ There are four ways to point the viewer at a model:
    Each argument is a URL relative to `index.html` (an absolute `http(s)://…` URL
    works too, e.g. a PDF served elsewhere).  A URL argument overrides the same key
    in the config; the document otherwise falls back to the config's `document`,
-   then the model's own `sourceMappings`.
+   then the rendering named by the model's `derivedContent.reportSource`, then the
+   model's own `sourceMappings`. Derived content comes before the source mappings
+   because placing the filed facts on that rendering is why it was made; the
+   filed document stays one `&document=` away.
 4. **A local-file chooser** — with an `xbrlModel` block but no `model`/`factset`
    and no URL argument (e.g. `{ "xbrlModel": {} }`), the viewer shows a chooser.
    Pick a compiled model `.json` from disk, and — when its source document (HTML
@@ -380,6 +388,17 @@ until the offset falls inside one, then **verifies against the quote and refuses
 to highlight on mismatch**: the quote exists so a regenerated document is
 detected rather than silently mis-addressed (`tagging/resolveLocator.js`).
 
+**Showing them.** `htmlDocumentSurface` binds a fact by its pointer locators when
+they were made for the document being viewed: the fact's own, where its
+`reportSource` names that document (or names none), or else a `bound` entry in
+`derivedContent.factValues` whose `derivedContent.reportSource` is that document.
+That second form is how somebody other than the filer records where the filed
+facts appear on, say, the company's web page, while the model stays as filed. All
+pointers are resolved before any text is wrapped. A fact whose quote no longer
+matches is bound as hidden rather than highlighted, and the console reports how
+many were refused, by reason. On Microsoft's FY2025 annual report page 1,729 of the
+10-K's 1,800 fact values are placed this way, as 2,634 wrapped runs.
+
 The locator type records which tree the sequence counted —
 `xbrlx:xhtmlPointerLocatorType` for the XML infoset,
 `xbrlx:htmlPointerLocatorType` for the HTML5 tree — because the two differ.
@@ -523,8 +542,11 @@ verdict, including *Not validated*, where it says which run skipped the binding.
 resolved each occurrence to, keyed by `factValueName` — one-to-one against the
 viewer's facts, since one viewer fact is one occurrence.  A `bound` value
 supersedes a `resolved` one for the same occurrence: it came from an applied
-tagging journal, the model's own sources having failed to locate it on that
-surface.
+tagging journal or an alignment, the model's own sources having failed to locate
+it on that surface. A `bound` entry can also carry `valueSources`, pointer
+locators placing the occurrence on the rendering that `derivedContent.reportSource`
+names; the HTML surface binds the fact by them when that rendering is the
+document viewed (see [Pointer locators](#pointer-locators-xbrlxhtmlelementpointer)).
 
 It is used **only as a fallback**, where the surface cannot reconstruct a value
 from the document text — a transformation the viewer does not implement, such as

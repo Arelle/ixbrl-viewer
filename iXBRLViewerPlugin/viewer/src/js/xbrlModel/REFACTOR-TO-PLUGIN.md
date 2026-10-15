@@ -26,7 +26,7 @@ Inline XBRL document**:
 2. **Document** — the thing being annotated is a **plain HTML file or a PDF**, not
    an Inline XBRL document.
 3. **Fact binding** — facts are located by **explicit locators carried in the data**
-   (`xbrl:htmlElementId`, `xbrl:pdfMcid` / `xbrl:pdfBBox`), not by scanning the
+   (`xbrl:htmlElementId`, `xbrlx:htmlElementPointer`, `xbrl:pdfMcid` / `xbrl:pdfBBox`), not by scanning the
    document for `ix:`-tagged elements.
 
 Every current plugin (`example_plugin`, `d6v`) calls `iv.load()`, which

@@ -316,9 +316,10 @@ Notes on the shape:
   intended.
 - **No concept creation.** A fact with no matching concept is out of scope; that
   needs the schema-driven object forms and belongs with the creator work.
-- **No HTML.** The HTML path needs `xbrl:htmlElementPointer` to land first,
-  because binding to an element that has no `id` is exactly the case the current
-  locator types cannot express without modifying the source.
+- ~~**No HTML.**~~ *Superseded:* the HTML path landed with `elementPointer.js`, and binding
+  works on both surfaces (see Build status, above). At the time, the HTML path needed `xbrl:htmlElementPointer`
+  first, because binding to an element that has no `id` is exactly the case the then
+  locator types could not express without modifying the source.
 
 ## 6. Next increments (sketch)
 

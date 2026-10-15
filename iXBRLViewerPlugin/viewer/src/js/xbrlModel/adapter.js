@@ -454,6 +454,65 @@ function pdfFormFieldsForFact(fact) {
 }
 
 /*
+ * Positional HTML locators (xbrlx:htmlPointerLocatorType / xhtmlPointerLocatorType):
+ * the value sources of an occurrence that carry xbrlx:htmlElementPointer, kept in the
+ * model's own shape for the surface to resolve (tagging/resolveLocator.js).  They
+ * address a document with no per-fact element ids -- a company's published HTML5
+ * report -- by an element child sequence plus a text offset and quote.
+ */
+const HTML_ELEMENT_POINTER = "xbrlx:htmlElementPointer";
+
+function isPointerSource(vs) {
+    return (vs?.properties ?? []).some(p => p.property === HTML_ELEMENT_POINTER);
+}
+
+function pointerSourcesForFactValue(fv) {
+    return factLocators(fv ?? {}).filter(isPointerSource);
+}
+
+function baseName(url) {
+    return String(url ?? "").split(/[?#]/)[0].split("/").pop();
+}
+
+/*
+ * Whether a locator that names its report source applies to the document being
+ * viewed.  A model can locate the same fact in several renderings -- the filed
+ * inline document and the company's web page -- and a pointer counted against one
+ * tree names a different (but real) element in another, so a locator is only used
+ * on the document it was made for.  Unknown on either side means no constraint.
+ */
+function sourceMatchesDocument(sourceUrl, documentFile) {
+    return !sourceUrl || !documentFile || baseName(sourceUrl) === baseName(documentFile);
+}
+
+/*
+ * Pointer locators recorded as derived content: `bound` derived fact values whose
+ * derivedContent.reportSource is the document being viewed, keyed by factValueName.
+ *
+ * This is the form an alignment takes when whoever ran it is not the filer
+ * (README, "--alignInto"): the model stays exactly as filed, and where its facts
+ * appear on somebody else's rendering is recorded beside it.  The viewer shows
+ * them on that rendering just as it shows the model's own locators on the filed one.
+ */
+function boundPointerSourcesByFactValue(doc, documentFile) {
+    const derived = doc?.derivedContent;
+    const byName = {};
+    if (!derived || !sourceMatchesDocument(derived.reportSource?.url, documentFile)) {
+        return byName;
+    }
+    for (const dv of derived.factValues ?? []) {
+        if (dv?.basis !== "bound" || dv.factValueName === undefined) {
+            continue;
+        }
+        const sources = (dv.valueSources ?? []).filter(isPointerSource);
+        if (sources.length > 0) {
+            byName[dv.factValueName] = sources;
+        }
+    }
+    return byName;
+}
+
+/*
  * derivedContent.factValues, keyed by factValueName -- the resolved value of one
  * occurrence.  `bound` supersedes `resolved` for the same occurrence: a bound
  * value came from a tagging journal, applied because the model's own sources did
@@ -472,9 +531,11 @@ function resolvedValuesByFactValue(doc) {
     return byName;
 }
 
-function buildFacts(factset, resolvedValues = {}) {
+function buildFacts(factset, resolvedValues = {}, pointerContext = {}) {
+    const { boundPointers = {}, sourceUrls = {}, documentFile } = pointerContext;
     const facts = {};
     let pdfKeyCounter = 0;
+    let pointerKeyCounter = 0;
     for (const fact of factset.facts ?? []) {
         const dims = fact.factDimensions ?? {};
         const concept = dims["xbrl:concept"];
@@ -623,6 +684,21 @@ function buildFacts(factset, resolvedValues = {}) {
                     factData.pdfFormField = pdfFormField;
                 }
                 facts["pf-" + (pdfKeyCounter++)] = factData;
+                located = true;
+                continue;
+            }
+
+            // Positional HTML locators, the model's own (when made for this
+            // document) or bound as derived content.  Keyed by a synthesised id,
+            // like the PDF facts, since the target has no element id to key by;
+            // the surface resolves them before it decorates the document.
+            const ownPointers = sourceMatchesDocument(sourceUrls[fv?.reportSource], documentFile)
+                ? pointerSourcesForFactValue(fv) : [];
+            const pointerSources = ownPointers.length > 0 ? ownPointers : (boundPointers[fv?.name] ?? []);
+            if (pointerSources.length > 0) {
+                const factData = makeFactData(fv);
+                factData.html = pointerSources;
+                facts["xf-" + (pointerKeyCounter++)] = factData;
                 located = true;
                 continue;
             }
@@ -781,9 +857,24 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
     const labelsByObject = buildLabelsByObject(taxonomy);
     const dimensionConcepts = collectDimensionConcepts(taxonomy);
     const concepts = buildConcepts(taxonomy, labelsByObject, dimensionConcepts);
+    const documentFile = options.documentFile;
+    const sourceUrls = {};
+    for (const sm of [...(taxonomyDoc?.documentInfo?.sourceMappings ?? []),
+                      ...(factsetDoc?.documentInfo?.sourceMappings ?? [])]) {
+        if (sm?.sourceName !== undefined) {
+            sourceUrls[sm.sourceName] = sm.url;
+        }
+    }
     const facts = buildFacts(factset, {
         ...resolvedValuesByFactValue(taxonomyDoc),
         ...resolvedValuesByFactValue(factsetDoc),
+    }, {
+        boundPointers: {
+            ...boundPointerSourcesByFactValue(taxonomyDoc, documentFile),
+            ...boundPointerSourcesByFactValue(factsetDoc, documentFile),
+        },
+        sourceUrls,
+        documentFile,
     });
     // Ensure every fact's concept is registered so the inspector falls back to
     // the concept QName (not "<no label>") when no taxonomy/labels are loaded.
@@ -829,7 +920,6 @@ export function buildReportData(factsetDoc, taxonomyDoc, options = {}) {
      */
     const derivedContent = factsetDoc?.derivedContent ?? taxonomyDoc?.derivedContent;
 
-    const documentFile = options.documentFile;
     const reportData = {
         concepts,
         facts,

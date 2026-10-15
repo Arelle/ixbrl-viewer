@@ -137,3 +137,52 @@ describe("network relationship types", () => {
             .toEqual(["eg:PresNet"]);
     });
 });
+
+describe("positional HTML locators", () => {
+    const pointer = (p, offset, quote) => ({ properties: [
+        { property: "xbrlx:htmlElementPointer", value: [p] },
+        { property: "xbrlx:htmlTextOffset", value: [offset] },
+        { property: "xbrlx:htmlTextQuote", value: [quote] },
+    ] });
+    const idSource = (id) => ({ properties: [{ property: "xbrl:htmlElementId", value: [id] }] });
+    const fact = (fvName, fv) => ({
+        name: "eg:" + fvName,
+        factDimensions: { "xbrl:concept": "eg:Revenue", "xbrl:unit": "iso4217:USD" },
+        factValues: [{ name: fvName, value: "281724000000", ...fv }],
+    });
+    const factsOf = (doc, documentFile) =>
+        buildReportData(doc, doc, { documentFile }).sourceReports[0].targetReports[0].facts;
+
+    test("a fact's own pointer locator is kept for the surface to resolve", () => {
+        const doc = { xbrlModel: { facts: [fact("fv1", { valueAnchors: [pointer("/1/2", 14, "281,724")] })] } };
+        const facts = factsOf(doc, "ar.html");
+        expect(Object.keys(facts)).toEqual(["xf-0"]);
+        expect(facts["xf-0"].html[0].properties[0].value).toEqual(["/1/2"]);
+    });
+
+    test("a pointer made for another document is not used on this one", () => {
+        const doc = {
+            documentInfo: { sourceMappings: [
+                { sourceName: "eg:filed", url: "filed.htm" },
+                { sourceName: "eg:web", url: "ar.html" }] },
+            xbrlModel: { facts: [fact("fv1", { reportSource: "eg:web",
+                                              valueAnchors: [pointer("/1/2", 14, "281,724")] })] },
+        };
+        expect(Object.keys(factsOf(doc, "ar.html"))).toEqual(["xf-0"]);
+        expect(Object.keys(factsOf(doc, "filed.htm"))).toEqual(["hf-0"]);
+    });
+
+    test("a bound derived locator places the filed fact on the derived surface", () => {
+        const doc = {
+            xbrlModel: { facts: [fact("fv1", { valueAnchors: [idSource("F_1")] })] },
+            derivedContent: {
+                reportSource: { url: "ar.html", factLocatorType: "xbrlx:htmlPointerLocatorType" },
+                factValues: [{ factValueName: "fv1", basis: "bound",
+                               valueSources: [pointer("/1/2", 14, "281,724")] }],
+            },
+        };
+        expect(Object.keys(factsOf(doc, "ar.html"))).toEqual(["xf-0"]);
+        // on the filed document the model's own element id still applies
+        expect(Object.keys(factsOf(doc, "filed.htm"))).toEqual(["F_1"]);
+    });
+});

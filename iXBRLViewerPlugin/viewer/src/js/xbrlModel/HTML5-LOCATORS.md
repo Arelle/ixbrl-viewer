@@ -4,8 +4,13 @@ How `valueSource` locators resolve when the source document is plain HTML5 rathe
 legacy inline XBRL (XHTML). Companion to the spec-side note,
 `oim/specifications/oim-taxonomy/documentation/HTML5_LOCATOR_PARSING.md`.
 
-**Status:** investigation complete, no viewer change required yet. The conclusions below
-become actionable when positional pointers land alongside `xbrl:htmlElementId`.
+**Status:** implemented. `htmlDocumentSurface.js` resolves positional pointers
+(`xbrlx:htmlElementPointer` + `htmlTextOffset` + `htmlTextQuote`) through
+`tagging/resolveLocator.js`, all before it decorates the document (rule 2 below), and wraps
+each resolved text run in a span of its own. A quote that no longer matches is not shown.
+The pointers come from the facts' own locators made for the document being viewed, or from
+`bound` derived fact values whose `derivedContent.reportSource` is that document (the form
+an alignment takes when whoever ran it is not the filer).
 
 ---
 

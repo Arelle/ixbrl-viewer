@@ -4,7 +4,7 @@ import $ from 'jquery';
 import { viewerUniqueId } from '../util.js';
 import { iframeReady, applyFactValue } from './surfaceUtil.js';
 import { elementPointer, verifiedPointer } from './tagging/elementPointer.js';
-import { describeRange } from './tagging/resolveLocator.js';
+import { describeRange, resolveValueSource, RESOLUTION } from './tagging/resolveLocator.js';
 
 const XHTML_MEDIA_TYPE = "application/xhtml+xml";
 
@@ -433,6 +433,110 @@ export class HtmlDocumentSurface {
         this._bindDoc = null;
     }
 
+    /* ---- positional locators -------------------------------------------
+     *
+     * A fact located by xbrlx:htmlElementPointer (+ htmlTextOffset /
+     * htmlTextQuote) names a run of text, not an element: in a published HTML5
+     * report one <p> can hold fourteen numbers.  Each run is wrapped in a span
+     * of its own, which then serves as the fact's wrapper node exactly as an
+     * ix: element's wrapper does, so selection, highlighting and navigation
+     * need nothing new.
+     *
+     * Every pointer is resolved before anything is wrapped.  A pointer counts
+     * element children, and wrapping inserts elements, so resolving after any
+     * decoration would address a different element -- silently.  The resolved
+     * Ranges are reduced to (text node, start, end) runs up front for the same
+     * reason, and the runs are then wrapped from the end of each text node
+     * backwards, so splitting a node never moves a run not yet wrapped.
+     */
+
+    // The text-node runs a Range covers, each { node, start, end }.
+    _textRuns(range) {
+        const doc = range.startContainer.ownerDocument;
+        const root = range.commonAncestorContainer;
+        const runs = [];
+        const push = (node) => {
+            const start = node === range.startContainer ? range.startOffset : 0;
+            const end = node === range.endContainer ? range.endOffset : node.nodeValue.length;
+            if (end > start && /\S/.test(node.nodeValue.slice(start, end))) {
+                runs.push({ node, start, end });
+            }
+        };
+        if (root.nodeType === 3) {
+            push(root);
+            return runs;
+        }
+        const walker = doc.createTreeWalker(root, 0x04 /* NodeFilter.SHOW_TEXT */);
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+            if (range.intersectsNode(n)) {
+                push(n);
+            }
+        }
+        return runs;
+    }
+
+    // Resolve the pointer facts and wrap their text; returns key -> { spans, text }.
+    _bindPointerFacts(doc, facts) {
+        const located = new Map();
+        const runsByNode = new Map();
+        const failed = {};
+        for (const [key, factData] of Object.entries(facts)) {
+            if (!factData.html) {
+                continue;
+            }
+            const results = factData.html.map(src => resolveValueSource(doc, src));
+            const bad = results.find(r => r.status !== RESOLUTION.OK);
+            if (bad) {
+                // A quote mismatch means the page changed since the model was
+                // written: the pointer still names a real element, and
+                // highlighting it would place the fact where it is not.
+                failed[bad.status] = (failed[bad.status] ?? 0) + 1;
+                continue;
+            }
+            const entry = { spans: [], text: results.map(r => r.text).join("") };
+            located.set(key, entry);
+            for (const result of results) {
+                for (const fragment of result.fragments) {
+                    for (const run of this._textRuns(fragment.range)) {
+                        if (!runsByNode.has(run.node)) {
+                            runsByNode.set(run.node, []);
+                        }
+                        runsByNode.get(run.node).push({ ...run, entry });
+                    }
+                }
+            }
+        }
+        for (const [node, runs] of runsByNode) {
+            runs.sort((a, b) => b.start - a.start || b.end - a.end);
+            let floor = Infinity; // start of the run wrapped last, in this node
+            let last = null;
+            for (const run of runs) {
+                if (last && run.start === last.start && run.end === last.end) {
+                    // Duplicate facts on the same text share one span.
+                    run.entry.spans.push(last.span);
+                    continue;
+                }
+                if (run.end > floor) {
+                    continue; // partial overlap with a run already wrapped; left unwrapped
+                }
+                if (run.end < node.nodeValue.length) {
+                    node.splitText(run.end);
+                }
+                const target = run.start > 0 ? node.splitText(run.start) : node;
+                const span = doc.createElement("span");
+                target.parentNode.insertBefore(span, target);
+                span.appendChild(target);
+                run.entry.spans.push(span);
+                floor = run.start;
+                last = { start: run.start, end: run.end, span };
+            }
+        }
+        if (Object.keys(failed).length) {
+            console.warn("XbrlModel: positional locators not shown", failed);
+        }
+        return located;
+    }
+
     // Bind the report's facts to the document loaded in the viewer's (single)
     // iframe.  Facts whose span id is not present in the document are dropped
     // from the report data so that no unlocated Fact objects are created.
@@ -443,7 +547,32 @@ export class HtmlDocumentSurface {
         const body = iframe.contents().find("body").get(0);
         const facts = viewer._reportSet.reportsData()[0].facts;
 
+        // Positional locators first, while the tree is still pristine.
+        const pointerFacts = this._bindPointerFacts(body.ownerDocument, facts);
+        for (const [key, factData] of Object.entries(facts)) {
+            if (!factData.html) {
+                continue;
+            }
+            const entry = pointerFacts.get(key);
+            if (!entry || entry.spans.length === 0) {
+                this._bindHiddenFact(viewer, reportIndex, key, factData);
+                continue;
+            }
+            const nodes = $(entry.spans);
+            nodes.addClass("ixbrl-element");
+            const vuid = viewerUniqueId(reportIndex, key);
+            viewer._addIdToNodes(nodes, vuid);
+            const ixn = viewer._getOrCreateIXNode(vuid, nodes, 0, false);
+            viewer.docOrderItemIndex.addItem(vuid, 0);
+            viewer.itemContinuationMap[vuid] = [];
+            nodes.addClass(factData.a.u !== undefined ? "ixbrl-element-nonfraction" : "ixbrl-element-nonnumeric");
+            applyFactValue(factData, ixn, entry.text);
+        }
+
         for (const [spanId, factData] of Object.entries(facts)) {
+            if (factData.html) {
+                continue;
+            }
             let el = null;
             try {
                 el = body.querySelector("#" + CSS.escape(spanId));

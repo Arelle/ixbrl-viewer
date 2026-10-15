@@ -581,9 +581,15 @@ export class iXBRLViewer {
             documentFile = docSource.filename;
         }
         else {
+            // A rendering located only as derived content -- somebody else's
+            // alignment of the filed facts onto, say, the company's web page --
+            // is deliberately absent from the model's sourceMappings, and is
+            // named by derivedContent.reportSource instead.
+            const derivedRel = modelDoc.derivedContent?.reportSource?.url;
             const documentRel = params.get("document")
                 ?? cfg.document
                 ?? mappings.find(sm => sm.url && wantsExt.test(sm.url))?.url
+                ?? (derivedRel && wantsExt.test(derivedRel) ? derivedRel : undefined)
                 ?? mappings.find(sm => sm.url)?.url;
             if (!documentRel) {
                 throw new Error("No source document specified in the model, config, or chooser");

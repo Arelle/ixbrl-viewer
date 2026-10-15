@@ -37,7 +37,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
           cache: 'npm'
           check-latest: true
@@ -60,13 +60,13 @@ jobs:
       - name: Build Python package
         run: python -m build
       - name: Upload source distribution artifact
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ixbrl-viewer.tar.gz
           if-no-files-found: error
           path: dist/*.tar.gz
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ixbrl-viewer.whl
           if-no-files-found: error

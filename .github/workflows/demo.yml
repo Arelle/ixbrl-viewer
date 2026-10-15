@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-node@v7.0.0
+      - uses: actions/setup-node@v7.1.0
         with:
           cache: 'npm'
           check-latest: true
@@ -46,7 +46,7 @@ jobs:
             -f "tests/playwright/test_filings/filing_documents_smoke_test.zip" \
             --save-viewer "demo" \
             --viewer-url "iXBRLViewerPlugin/viewer/dist/ixbrlviewer.js"
-      - uses: actions/upload-artifact@v7.0.1
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: demo_${{ github.run_id }}.${{ github.run_attempt }}
           path: demo

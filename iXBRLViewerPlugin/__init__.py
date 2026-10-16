@@ -369,6 +369,11 @@ def guiRun(cntlr: CntlrWinMain, modelXbrl: ModelXbrl, attach: Any, *args: Any, *
     if not cntlr.config.setdefault(CONFIG_LAUNCH_ON_LOAD, DEFAULT_LAUNCH_ON_LOAD):
         # Don't run on launch if the option has been disabled
         return
+    if type(modelXbrl).__name__ == "XbrlCompiledModel":
+        # A model loaded by the XbrlModel plugin has no inline document set for this builder, which
+        # would report "No inline XBRL documents loaded" as an error on every load. That plugin opens
+        # this viewer's XbrlModel overlay itself when the model has a document to show.
+        return
     try:
         tempViewerDir = tempfile.mkdtemp()
         atexit.register(shutil.rmtree, tempViewerDir, ignore_errors=True)

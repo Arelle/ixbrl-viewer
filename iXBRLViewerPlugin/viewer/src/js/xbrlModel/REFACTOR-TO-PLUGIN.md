@@ -162,7 +162,9 @@ async surface.bindFacts(viewer) → void
   }
   ```
 - **XbrlModel use:** `HtmlDocumentSurface` / `PdfDocumentSurface` (already written;
-  lazy PDF rendering, `disableRange`, font/cmap handling, etc.).
+  lazy PDF rendering, `disableRange`, font/cmap handling, etc.), and
+  `TableDocumentSurface`, whose `loadDocuments` generates the document from the
+  model's grid layouts instead of loading one.
 
 #### Surface ↔ Viewer contract (the Viewer methods a surface may call in `bindFacts`)
 These become the documented, stable "surface API" of `Viewer`:
@@ -292,7 +294,7 @@ This is the current `loadXbrlModel()` generalised: the XbrlModel-specific logic
 | `inspector.{js,html,less}`, `report.js`, `reportset.js`, `i18n/en/translation.json` | Cubes panel (`cubes-mode` tab, `.cubes-inspector` container, `allModes` entry, display rule + panel styles, `createCubes()` in `initialize()`, `has-cubes` gate on `#ixv`, `inspector.tabs.cubes` label; `cubes()`, `hasCubes()`, `conceptFactsIndex()`), a **groupTree-driven section tree** with numeric-code section sort | **Plugin:** re-implement via EP3 (b) `registerMode` — the five core touch-points above are exactly what that API would own. `report.cubes()` / section-tree data comes from the plugin-provided `reportData` (`buildSections`/`buildCubes` in `adapter.js`, self-contained). |
 
 ### Self-contained `xbrlModel/` modules (move as-is into the plugin package)
-`adapter.js`, `htmlDocumentSurface.js`, `pdfDocumentSurface.js`,
+`adapter.js`, `htmlDocumentSurface.js`, `pdfDocumentSurface.js`, `tableDocumentSurface.js`, `gridLayout.js`,
 `xbrlModelViewer.js`, `surfaceUtil.js`, `pdfjsLoader.js`, `xbrlModelChooser.js`.
 
 The model-source resolution and document-content handling added to
@@ -314,6 +316,8 @@ xbrl-model-plugin/
 │   ├── adapter.js
 │   ├── htmlDocumentSurface.js
 │   ├── pdfDocumentSurface.js
+│   ├── tableDocumentSurface.js
+│   ├── gridLayout.js
 │   ├── surfaceUtil.js
 │   ├── pdfjsLoader.js
 │   └── cubesPanel.js     # d6v-style inspector panel (from the inspector.* edits)
@@ -365,7 +369,7 @@ targets the current inspector.
 - Demos: `iXBRLViewerPlugin/viewer/demo-xbrl-model/` (symlinked bundle + data;
   HTML/PDF/L'Oreal + SEC N-CSR configs). Build with a throwaway git tag
   (`version.js` runs `git describe --tags`). node/npm at `/usr/local/bin`.
-- Working features to preserve: HTML & PDF surfaces, lazy PDF rendering + memory
+- Working features to preserve: HTML, PDF & table surfaces, lazy PDF rendering + memory
   cap, numeric value reconstruction (`surfaceUtil.parseNumericValue`), the Cubes
   panel as a **groupTree-driven section tree** with numeric-code (`[NNNNNN]`)
   section sort and single-cube-section collapse, **hidden/unlocated-fact

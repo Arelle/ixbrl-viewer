@@ -10,7 +10,9 @@ An "XbrlModel" overlay for the viewer that reads an **OIM factset + converted
 taxonomy + a plain HTML or PDF document** (instead of embedded iXBRL JSON +
 inline XBRL), binds facts by `xbrl:htmlElementId` / `xbrl:pdfMcid` (and, for an HTML
 document with no ids, by positional `xbrlx:htmlElementPointer` locators), and adds a
-**Cubes** navigation panel. It reuses the existing report model and inspector.
+**Cubes** navigation panel. A report with no document (a prudential report is its
+templates) is shown in the grid layouts of its model's data tables, a third surface
+generated from the model. It reuses the existing report model and inspector.
 Working today against Apple's 10-K (HTML and PDF), L'Oreal's 452-page PDF, and
 large multi-fund SEC N-CSRs, with lazy PDF rendering.
 

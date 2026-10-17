@@ -3,7 +3,9 @@
 This directory adds an **alternative load path** for the viewer that reads an
 XbrlModel OIM model — a **compiled factset-with-taxonomy**, or a separate
 **factset** + **converted taxonomy** — plus a **plain document** (HTML or PDF),
-instead of the embedded inline-XBRL JSON.  The existing embedded-iXBRL path is
+instead of the embedded inline-XBRL JSON.  A report with no document of its own,
+such as a prudential report (which *is* its templates), is shown in the grid
+layouts of the model's data tables instead (see [Table surface](#table-surface-grid-layouts)).  The existing embedded-iXBRL path is
 completely unchanged; the XbrlModel path is taken when the runtime config
 contains an `xbrlModel` block **or** the viewer URL has an `?xbrlModel=<url>`
 argument.  The model can come from a served URL, a compiled single file, or a
@@ -30,8 +32,9 @@ seams were added:
    `xbrl:pdfPage`/`xbrl:pdfMcid` for the PDF surface (`pf-N`), and positional
    `xbrlx:htmlElementPointer` locators for an HTML document without ids (`xf-N`; see
    [Pointer locators](#pointer-locators-xbrlxhtmlelementpointer)).  OIM networks become the viewer's ELR-keyed `pres`/`calc11`
-   relationships; explicit vs typed dimensions are classified from whether a cube
-   dimension has a `domainNetwork`; and the OIM `groupTree` becomes a
+   relationships; a dimension is typed when a cube gives it a `domainDataType` or its
+   domain class allows a datatype, and explicit otherwise (an optional report-cube
+   dimension may have no `domainNetwork` and still take members); and the OIM `groupTree` becomes a
    reporting-structure section tree that organises the Cubes panel (see
    [Cubes panel](#cubes-panel-reporting-structure-section-tree)).
 
@@ -39,7 +42,7 @@ seams were added:
    (`prepareDocument`) and binds facts to it (`bind`).  `prepareDocument` accepts
    a document *source* — either `{ url }` (fetched) or already-loaded content
    (`{ text }` for HTML, `{ data }` ArrayBuffer for PDF) so a local file picked in
-   the chooser can be rendered without a server.  Both surfaces produce the exact
+   the chooser can be rendered without a server.  Every surface produces the exact
    DOM decorations (`.ixbrl-element` + `ivids`, and an `IXNode` in the viewer's
    map) that the existing `Viewer` selection/highlight/navigation code already
    relies on, so nothing downstream is surface-specific:
@@ -76,6 +79,10 @@ seams were added:
      One IXNode per fact, overlay div(s) as wrapper nodes.  Selection,
      highlighting and navigation work unchanged — there is no PDF-specific
      selection code.
+   - `TableDocumentSurface` has no document to load: `prepareDocument` *generates*
+     one from the model's `gridLayout` data tables (`gridLayout.js` places the
+     facts), and `bind` wraps each placed fact's cell.  See
+     [Table surface](#table-surface-grid-layouts).
 
 `XbrlModelViewer` (`xbrlModelViewer.js`) is a thin `Viewer` subclass that
 overrides the fact-discovery step (`Viewer._processDocuments`) to delegate to a
@@ -90,7 +97,8 @@ shared and unmodified.
 `iXBRLViewer.loadXbrlModel` resolves the model source (URL argument → config
 `model`/`factset` → chooser) and hands the parsed model to `_loadXbrlModelDoc`,
 which builds the report data and chooses the surface from the factset's
-`factLocatorType` (or the document extension / a `documentType` config value).
+`factLocatorType` (or the document extension / a `documentType` config value);
+a model with grid layouts that names no document gets the table surface.
 The GUI file picker lives in `xbrlModelChooser.js`.
 
 ### PDF.js packaging
@@ -204,6 +212,12 @@ There are four ways to point the viewer at a model:
    server round-trip for the document), so this works for fully local models.
 
 Priority when several are present: `?xbrlModel=` argument → `model` → `factset`.
+
+A model that has `gridLayout` data tables and names **no document** (no
+`document` argument or config, no `derivedContent.reportSource`, no
+`sourceMappings` URL) opens on the [table surface](#table-surface-grid-layouts).
+`?surface=table` (or `"surface": "table"` in the `xbrlModel` config) asks for it
+even when the model does name a document.
 
 ### Quick test with the built-in HTTP server
 
@@ -336,6 +350,54 @@ first-page-fast loading:
   handles that (entity shows "n/a", it no longer assumes an entity is present).
   Facts whose concept isn't in a loaded taxonomy fall back to the concept QName.
 
+## Table surface (grid layouts)
+
+A prudential report — a Solvency II or CRD return — has no document: its templates
+are the report.  Its model's `layouts` hold one `gridLayout` data table per
+template, and `TableDocumentSurface` shows the facts in those tables, so the
+inspector, search, the Cubes panel and next/previous work as on a document:
+clicking a cell selects its fact; selecting a fact anywhere selects and scrolls to
+its cell.
+
+`gridLayout.js` interprets a data table without the DOM — model and table in, a
+grid of header cells (with spans) and data cells (with dimensions and placed fact
+names) out — so it can be shared with other renderers (the Tavi PWD demo's model
+viewer draws the same tables).  The rules, as that viewer reads the layout objects:
+
+- A data cell's dimensions are those of its x and y axis items, its z axis item,
+  and any `tablePoints` entry at its (1-based) grid coordinates.
+- A fact is in a cell when it has every one of the cell's dimensions with the same
+  value and **no other** dimension than period, entity, unit and language.  A fact
+  with a further dimension belongs to another table that shares the concept.
+- An `axisGroup` with no `axisNetwork` leaves its dimension to the facts.  On the
+  x axis it is a key column of an **open table**, whose rows are the facts' distinct
+  key values (in fact order).  On the z axis it is a selectable dimension; every
+  combination of z axis item and z group values that the facts use is drawn as its
+  own sheet, so every placed fact has a cell.
+- `gridHeaders` are read in document order: a header is followed by the headers
+  beneath it (lower `labelLevel`), except one with `rollUpLocation: "end"`, which
+  follows them.  A header has a row or column of its own unless its
+  `rollUpLocation` is `"none"`, or it has children and no `rollUpLocation`.  `span`
+  is not relied on: the specification's example counts only the children, while
+  generated layouts count the header's own row too.
+- A cell whose dimensions lie in one of the cube's `excludeCubes` is drawn blocked
+  (grey).
+
+The surface draws every table with at least one placed fact (a report shows the
+templates it reports), with a contents list at the top.  Facts are matched to cells
+by the model's fact name (`factData.n`): an unlocated fact is keyed `hf-N` by the
+adapter, and a fact in no cell stays a hidden fact.  On EIOPA's 2.10.0 workbook
+with its annual sample facts — 383 tables, 733 sheets, 21,703 cells — the viewer
+is ready in about 2.7 s (Mac M4).
+
+On the Arelle side (Arelle/Arelle#2418), `--saveXbrlModelViewer` and the GUI's
+viewer launch stage a model that has grid layouts and no document on its own, and
+the viewer chooses this surface.
+
+Not covered: `cubeLayout` data tables, and z selections as controls (each is a
+sheet); the generated document is not a rendering of anything filed, so there is
+nothing to tag.
+
 ## Pointer locators (`xbrlx:htmlElementPointer`)
 
 The two HTML locator types in `core.json` both require the source document to
@@ -423,7 +485,8 @@ XML-typed blob URL rather than `document.write`.
 The inspector has a native **Cubes** navigation panel (a tab in `#inspector-tabs`,
 alongside XBRL facts / Search / Overview).  The adapter reads the taxonomy's cubes,
 resolving each cube's `xbrl:concept` dimension domain network into its line-item
-concepts (`XBRLReport.cubes()`); the inspector lists each cube with the number of
+concepts (`XBRLReport.cubes()`; a `negativeCube`, which holds no facts but only
+excludes them from the cubes that name it, is not listed); the inspector lists each cube with the number of
 its facts present in the document and navigates to them on click.  Which facts
 those are comes from the model where it states them
 (`ReportSet.cubeFactsIndex()`, reading `derivedContent.cubeContents` — see

@@ -10,6 +10,7 @@ import { TaxonomyNamer } from './taxonomynamer.js';
 import { XbrlModelViewer } from './xbrlModel/xbrlModelViewer.js';
 import { HtmlDocumentSurface } from './xbrlModel/htmlDocumentSurface.js';
 import { PdfDocumentSurface } from './xbrlModel/pdfDocumentSurface.js';
+import { TableDocumentSurface } from './xbrlModel/tableDocumentSurface.js';
 import { buildReportData } from './xbrlModel/adapter.js';
 import { showXbrlModelChooser } from './xbrlModel/xbrlModelChooser.js';
 import { FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK, USER_GUIDE_URL, moveNonAppAttributes } from "./util";
@@ -571,6 +572,18 @@ export class iXBRLViewer {
             [...(fv.valueSources ?? []), ...(fv.valueAnchors ?? [])].some(vs =>
                 (vs.properties ?? []).some(p => (p.property ?? "").startsWith("xbrl:pdf")))));
 
+        // A report with no document of its own, such as a prudential report, is shown in the
+        // grid layouts of its data tables: when the model has some and names no document, or
+        // when asked (?surface=table, or "surface": "table" in the config).  A factset's
+        // layouts are its taxonomy's.
+        const layoutModel = { ...(taxonomyDoc?.xbrlModel ?? {}), ...m, facts: m.facts ?? [] };
+        if (!m.layouts && taxonomyDoc?.xbrlModel?.layouts) {
+            layoutModel.layouts = taxonomyDoc.xbrlModel.layouts;
+        }
+        const hasGridLayouts = (layoutModel.layouts ?? []).some(l =>
+            (l.dataTables ?? []).some(t => t.tableType === "gridLayout"));
+        const wantsTables = hasGridLayouts && (params.get("surface") ?? cfg.surface) === "table";
+
         // Resolve the source document: content from the chooser, else the
         // sourceMapping/config URL matching the intended surface.
         const mappings = di.sourceMappings ?? [];
@@ -579,6 +592,9 @@ export class iXBRLViewer {
         let documentFile;
         if (docSource) {
             documentFile = docSource.filename;
+        }
+        else if (wantsTables) {
+            docSource = { tables: true, model: layoutModel };
         }
         else {
             // A rendering located only as derived content -- somebody else's
@@ -593,12 +609,17 @@ export class iXBRLViewer {
                 ?? (derivedRel && wantsExt.test(derivedRel) ? derivedRel : undefined)
                 ?? mappings.find(sm => sm.url && wantsExt.test(sm.url))?.url
                 ?? mappings.find(sm => sm.url)?.url;
-            if (!documentRel) {
+            if (documentRel) {
+                const documentUrl = new URL(documentRel, baseUrl).href;
+                documentFile = documentRel.split("/").pop();
+                docSource = { url: documentUrl, baseUrl: documentUrl };
+            }
+            else if (hasGridLayouts) {
+                docSource = { tables: true, model: layoutModel };
+            }
+            else {
                 throw new Error("No source document specified in the model, config, or chooser");
             }
-            const documentUrl = new URL(documentRel, baseUrl).href;
-            documentFile = documentRel.split("/").pop();
-            docSource = { url: documentUrl, baseUrl: documentUrl };
         }
 
         const reportData = buildReportData(modelDoc, taxonomyDoc, { documentFile });
@@ -609,10 +630,13 @@ export class iXBRLViewer {
 
         // Select the document surface: explicit chooser type / config, else
         // whether the model has PDF-located facts, else the document extension.
-        const isPdf = docSource.isPdf
-            ?? (/pdf/i.test(cfg.documentType ?? "") || hasPdfFacts || /\.pdf(\?|#|$)/i.test(docSource.url ?? documentFile ?? ""));
+        const isPdf = !docSource.tables && (docSource.isPdf
+            ?? (/pdf/i.test(cfg.documentType ?? "") || hasPdfFacts || /\.pdf(\?|#|$)/i.test(docSource.url ?? documentFile ?? "")));
         let surface;
-        if (isPdf) {
+        if (docSource.tables) {
+            surface = new TableDocumentSurface();
+        }
+        else if (isPdf) {
             // PDF.js needs its standard_fonts/ and cmaps/ folders served to render
             // fonts correctly.  Default to resolving them next to the config;
             // override with xbrlModel.pdfResourcesUrl.

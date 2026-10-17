@@ -186,3 +186,35 @@ describe("positional HTML locators", () => {
         expect(Object.keys(factsOf(doc, "filed.htm"))).toEqual(["F_1"]);
     });
 });
+
+describe("a negative cube", () => {
+    test("is not offered: it holds no facts, it only excludes them", () => {
+        const doc = taxonomyWith([
+            cube("eg:Template", "xbrl:reportCube"),
+            cube("eg:TemplateBlockedCells", "xbrl:negativeCube"),
+        ]);
+        expect(cubesOffered(doc)).toEqual(["eg:Template"]);
+    });
+});
+
+describe("typed and explicit dimensions", () => {
+    const dimensionKind = (cubeDimensions, domainClasses = [], dimensions = []) => {
+        const doc = taxonomyWith([{ name: "eg:Cube", cubeType: "xbrl:reportCube",
+            cubeDimensions: [{ dimension: "xbrl:concept", domainNetwork: "eg:LineItems" }, ...cubeDimensions] }]);
+        doc.xbrlModel.domainClasses = domainClasses;
+        doc.xbrlModel.dimensions = dimensions;
+        return buildReportData({}, doc, {}).sourceReports[0].targetReports[0].concepts["eg:Dim"]?.d;
+    };
+
+    test("a dimension with no domainDataType is explicit, with or without a domain network", () => {
+        // an optional report cube dimension need not name a domain network to take members
+        expect(dimensionKind([{ dimension: "eg:Dim", optional: true }])).toBe("e");
+    });
+
+    test("a domainDataType, or a domain class allowing a datatype, makes it typed", () => {
+        expect(dimensionKind([{ dimension: "eg:Dim", domainDataType: "xs:string" }])).toBe("t");
+        expect(dimensionKind([{ dimension: "eg:Dim", optional: true }],
+                             [{ name: "eg:DimCls", allowedDomainItem: "xs:string" }],
+                             [{ name: "eg:Dim", domainClass: "eg:DimCls" }])).toBe("t");
+    });
+});

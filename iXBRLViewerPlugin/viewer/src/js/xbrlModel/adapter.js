@@ -194,6 +194,10 @@ function buildCubes(taxonomy, labelsByObject) {
         if (localName(cube.cubeType) === LEGACY_ACCOMMODATION_CUBE_TYPE) {
             continue;
         }
+        // A negative cube holds no facts: it only excludes them from the cubes that name it.
+        if (localName(cube.cubeType) === "negativeCube") {
+            continue;
+        }
         let conceptDomainNet = null;
         const dimensions = [];
         for (const cd of cube.cubeDimensions ?? []) {
@@ -318,17 +322,23 @@ function buildConcepts(taxonomy, labelsByObject, dimensionConcepts) {
 }
 
 function collectDimensionConcepts(taxonomy) {
-    // A dimension is explicit if any cube references it with a domainNetwork
-    // (i.e. it has a domain of allowed members); otherwise it is typed.
-    const hasDomain = new Set();
+    // A dimension is typed if a cube gives it a domainDataType, or its domain class allows a
+    // datatype rather than member objects; otherwise it is explicit (tavi.md, "Cube dimension
+    // object": typed or explicit is determined by the domainDataType).  A domainNetwork is not
+    // needed: an optional dimension of a report cube may have none and still take members.
+    const typedClasses = new Set((taxonomy.domainClasses ?? [])
+        .filter(dc => dc.allowedDomainItem && !dc.allowedDomainItem.endsWith("Object"))
+        .map(dc => dc.name));
+    const domainClassOf = new Map((taxonomy.dimensions ?? []).map(d => [d.name, d.domainClass]));
+    const isTyped = new Set();
     const allDims = new Set();
     for (const cube of taxonomy.cubes ?? []) {
         for (const cd of cube.cubeDimensions ?? []) {
             const dim = cd.dimension ?? cd.dimensionName;
             if (dim && dim.includes(":") && !CORE_DIMENSIONS.has(dim)) {
                 allDims.add(dim);
-                if (cd.domainNetwork !== undefined || cd.domainName !== undefined) {
-                    hasDomain.add(dim);
+                if (cd.domainDataType !== undefined || typedClasses.has(domainClassOf.get(dim))) {
+                    isTyped.add(dim);
                 }
             }
         }
@@ -336,7 +346,7 @@ function collectDimensionConcepts(taxonomy) {
     const explicit = new Set();
     const typed = new Set();
     for (const dim of allDims) {
-        (hasDomain.has(dim) ? explicit : typed).add(dim);
+        (isTyped.has(dim) ? typed : explicit).add(dim);
     }
     return { explicit, typed };
 }

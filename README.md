@@ -82,7 +82,7 @@ Need help with the Arelle iXBRL Viewer? Go check out [our documentation][read-th
 
 ## Installation
 
-The Python portion of this repo is developed using Python 3.14.
+The Python portion of this repo is developed using Python 3.15.
 
 1. Clone the [iXBRL Viewer git repository][ixbrlviewer-github].
 2. Download and install [Arelle][arelle-download]
@@ -347,14 +347,14 @@ In order to run the javascript unit tests make sure that you have installed all 
 
 Run the following command to run javascript unit tests: `npm run test`
 
-In order to run the python unit tests, install the development dependencies with `pip install ".[arelle,dev]"`.
+In order to run the python unit tests, install the development dependencies with `pip install ".[arelle]" --group dev`
 
 Run the following command to run python unit tests: `pytest tests/unit_tests`
 
 ### Linting with Ruff
 
 ixbrl-viewer uses [Ruff][ruff] to lint the codebase. Make sure you've installed the
-development dependencies (`pip install -r requirements-dev.txt`), then run the
+development dependencies (`pip install --group dev`), then run the
 following from the root of the repository to check your changes:
 
 ```

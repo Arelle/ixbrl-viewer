@@ -21,7 +21,7 @@
     "html-loader": "^5.1.0",
     "jest": "^30.5.2",
     "less-loader": "^13.0.0",
-    "webpack": "^5.112.0",
+    "webpack": "^5.112.2",
     "webpack-cli": "^7.2.3"
   },
   "jest": {

@@ -4,7 +4,8 @@ import $ from 'jquery'
 import { Viewer } from './viewer.js';
 import { IXNode } from './ixnode.js';
 import { TableExport } from './tableExport.js';
-import { viewerUniqueId } from './util.js';
+import { runGenerator, viewerUniqueId } from './util.js';
+import { OffscreenRendering } from './offscreenRendering.js';
 
 const KIND_CLASSES = {
     f: "ixbrl-element-nonfraction",
@@ -15,6 +16,8 @@ const KIND_CLASSES = {
 // Above this size, a cell's untagged padding is not checked for a fact that
 // would use the whole cell as its wrapper.
 const CELL_SCAN_LIMIT = 2000;
+const OFFSCREEN_RESTART_DELAY = 500;
+const OFFSCREEN_LOAD_POLL_INTERVAL = 250;
 
 /*
  * An IXNode whose wrapper nodes are created on first use, from the element
@@ -434,5 +437,59 @@ export class LazyViewer extends Viewer {
 
     * postProcess() {
         // Wrappers are checked for absolutely positioned content as they are created.
+    }
+
+    postLoadAsync() {
+        super.postLoadAsync();
+        if (this._iv.isOffscreenRenderingSkipped()) {
+            this._offscreen = this._iframes.get().map(iframe => this._skipOffscreenRendering(iframe));
+        }
+    }
+
+    // Skipping relies on measured sizes, so it starts once everything that
+    // affects layout has loaded, and restarts when the width changes.
+    _skipOffscreenRendering(iframe) {
+        const doc = iframe.contentDocument;
+        const win = iframe.contentWindow;
+        const offscreen = new OffscreenRendering(doc);
+        let restartTimer;
+        offscreen.restart = () => {
+            offscreen.reset();
+            clearTimeout(restartTimer);
+            restartTimer = setTimeout(() => runGenerator(offscreen.start()), OFFSCREEN_RESTART_DELAY);
+        };
+        const start = () => {
+            let width = win.innerWidth;
+            win.addEventListener("resize", () => {
+                if (win.innerWidth !== width) {
+                    width = win.innerWidth;
+                    offscreen.restart();
+                }
+            });
+            // Containment would stop skipped blocks breaking across pages.
+            win.addEventListener("beforeprint", () => offscreen.reset());
+            win.addEventListener("afterprint", () => offscreen.restart());
+            runGenerator(offscreen.start());
+        };
+        // Stylesheets moved into a reparented document load after it has.
+        const loaded = () => doc.readyState === "complete"
+            && [...doc.querySelectorAll('link[rel~="stylesheet"]')].every(link => link.sheet !== null)
+            && [...doc.images].every(img => img.complete || img.loading === "lazy");
+        const whenLoaded = () => {
+            if (loaded()) {
+                doc.fonts.ready.then(start);
+            }
+            else {
+                setTimeout(whenLoaded, OFFSCREEN_LOAD_POLL_INTERVAL);
+            }
+        };
+        whenLoaded();
+        return offscreen;
+    }
+
+    zoom(pct) {
+        this._offscreen?.forEach(o => o.reset());
+        super.zoom(pct);
+        this._offscreen?.forEach(o => o.restart());
     }
 }

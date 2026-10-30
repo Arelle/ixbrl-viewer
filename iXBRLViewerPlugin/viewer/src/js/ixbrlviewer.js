@@ -162,6 +162,11 @@ export class iXBRLViewer {
         return (urlParams.get('lazy-viewer') ?? 'true') === 'true';
     }
 
+    isOffscreenRenderingSkipped() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return (urlParams.get('skip-offscreen') ?? 'true') === 'true';
+    }
+
     // Resolves URL relative to the config file
     resolveRelativeUrl(url) {
         if (this.options.configUrl === undefined) {

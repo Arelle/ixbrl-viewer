@@ -50,6 +50,18 @@ LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
 
 WIDER_NARROWER_ARCROLE = "http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower"
 
+IX_NAMESPACES = frozenset({
+    "http://www.xbrl.org/2008/inlineXBRL",
+    "http://www.xbrl.org/2013/inlineXBRL",
+})
+IX_HIDDEN_LINK_STYLE_RE = re.compile(r"(?:^|\s|;)(?:-sec|-esef)?-ix-hidden:\s*([^\s;]+)")
+IX_INDEX_KINDS = {
+    "nonFraction": "f",
+    "nonNumeric": "n",
+    "footnote": "t",
+    "continuation": "c",
+}
+
 
 def isInlineDoc(doc: ModelDocument | None) -> bool:
     return doc is not None and doc.type in {Type.INLINEXBRL, Type.INLINEXBRLDOCUMENTSET}
@@ -524,8 +536,8 @@ class IXBRLViewerBuilder:
             "target": target,
         }
 
-    def addSourceReport(self) -> dict[str, list[Any]]:
-        sourceReport: dict[str, list[Any]] = {
+    def addSourceReport(self) -> dict[str, Any]:
+        sourceReport: dict[str, Any] = {
             "targetReports": []
         }
         self.taxonomyData["sourceReports"].append(sourceReport)
@@ -588,6 +600,10 @@ class IXBRLViewerBuilder:
             sourceReport["docSetFiles"] = list(urllib.parse.quote(f) for f in docSetFiles)
 
         sourceReport["targetReports"].append(self.currentTargetReport)
+        # Rebuilt for each target report, as later targets add IDs to the shared documents.
+        sourceReport["ixIndex"] = self.buildDocumentIndex(
+            [self.iv.filesByFilename[f].xmlDocument for f in docSetFiles]
+        )
 
         localDocs = defaultdict(set)
         for path, doc in report.urlDocs.items():
@@ -627,6 +643,89 @@ class IXBRLViewerBuilder:
                     self.assets.append(file.filename)
             if self.assets:
                 self.reportZip = report.fileSource.fs.filename
+
+    def buildDocumentIndex(self, xmlDocuments: list[etree._ElementTree[etree._Element]]) -> dict[str, Any]:
+        """
+        Index the iXBRL elements of each document in a document set, so that
+        the viewer can locate facts without walking the document in the
+        browser.
+
+        Each document's entries are in the order that the viewer would visit
+        them (children before parents), as [kind, id, inHidden, extra] where
+        kind is one of IX_INDEX_KINDS or "l" for an element that links to a
+        hidden fact via -sec-ix-hidden or -esef-ix-hidden.  extra is the
+        scale for nonFraction, 1 for an escaped nonNumeric, and the target
+        fact ID for links.
+
+        Link elements without an ID are given one so that they can be found.
+
+        Returns {"docs": [entries, ...], "continuations": {headId: [ids]}}
+        """
+        nextContinuation: dict[str, str] = {}
+        heads: list[str] = []
+        docs = []
+        for xmlDocument in xmlDocuments:
+            entries: list[list[Any]] = []
+            idsInUse = set()
+            unidentifiedLinks = []
+            hiddenDepth = 0
+            for event, elt in etree.iterwalk(xmlDocument, events=("start", "end")):
+                if not isinstance(elt.tag, str):
+                    continue
+                ns, _, localName = elt.tag[1:].partition("}") if elt.tag.startswith("{") else ("", "", elt.tag)
+                isIx = ns in IX_NAMESPACES
+                if isIx and localName == "hidden":
+                    hiddenDepth += 1 if event == "start" else -1
+                    continue
+                if event == "start":
+                    continue
+                eltId = elt.get("id")
+                if eltId is not None:
+                    idsInUse.add(eltId)
+                kind = IX_INDEX_KINDS.get(localName) if isIx else None
+                if kind is not None:
+                    if eltId is None:
+                        continue
+                    continuedAt = elt.get("continuedAt")
+                    if continuedAt is not None:
+                        nextContinuation[eltId] = continuedAt
+                    if kind != "c":
+                        heads.append(eltId)
+                    entry: list[Any] = [kind, eltId, int(hiddenDepth > 0)]
+                    if kind == "f":
+                        try:
+                            scale = float(elt.get("scale", "0"))
+                        except ValueError:
+                            scale = 0
+                        if scale != 0 and not math.isnan(scale):
+                            entry.append(int(scale) if scale.is_integer() else scale)
+                    elif kind == "n" and elt.get("escape") in ("true", "1"):
+                        entry.append(1)
+                    entries.append(entry)
+                elif (style := elt.get("style")) is not None and (m := IX_HIDDEN_LINK_STYLE_RE.search(style)):
+                    entry = ["l", eltId, int(hiddenDepth > 0), m.group(1)]
+                    entries.append(entry)
+                    if eltId is None:
+                        unidentifiedLinks.append((elt, entry))
+            linkIdGen = 0
+            for elt, entry in unidentifiedLinks:
+                while (linkId := f"ixv-link-{linkIdGen}") in idsInUse:
+                    linkIdGen += 1
+                linkIdGen += 1
+                elt.set("id", linkId)
+                entry[1] = linkId
+            docs.append(entries)
+
+        continuations = {}
+        for head in heads:
+            chain: list[str] = []
+            nextId = nextContinuation.get(head)
+            while nextId is not None and len(chain) < len(nextContinuation):
+                chain.append(nextId)
+                nextId = nextContinuation.get(nextId)
+            if chain:
+                continuations[head] = chain
+        return {"docs": docs, "continuations": continuations}
 
     def createViewer(
             self,

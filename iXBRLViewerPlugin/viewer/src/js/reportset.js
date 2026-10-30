@@ -31,6 +31,7 @@ export class ReportSet {
 
     _initialize() {
         this._items = {};
+        this._namespaceGroups = undefined;
         this.reports = [];
         // Build an array of footnotes IDs in document order so that we can assign
         // numbers to foonotes
@@ -104,13 +105,16 @@ export class ReportSet {
     }
 
     namespaceGroups() {
-        const counts = {};
-        for (const f of this.facts()) {
-            counts[f.conceptQName().prefix] = (counts[f.conceptQName().prefix] || 0) + 1;
+        if (this._namespaceGroups === undefined) {
+            const counts = {};
+            for (const f of this.facts()) {
+                counts[f.conceptQName().prefix] = (counts[f.conceptQName().prefix] || 0) + 1;
+            }
+            const prefixes = Object.keys(counts);
+            prefixes.sort((a, b) => counts[b] - counts[a]);
+            this._namespaceGroups = prefixes;
         }
-        const prefixes = Object.keys(counts);
-        prefixes.sort((a, b) => counts[b] - counts[a]);
-        return prefixes;
+        return this._namespaceGroups;
     }
 
     getUsedConceptPrefixes() {

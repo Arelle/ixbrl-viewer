@@ -31,6 +31,8 @@ export class ReportSet {
 
     _initialize() {
         this._items = {};
+        this._facts = undefined;
+        this._namespaceGroups = undefined;
         this.reports = [];
         // Build an array of footnotes IDs in document order so that we can assign
         // numbers to foonotes
@@ -87,8 +89,11 @@ export class ReportSet {
         return this._ixNodeMap[vuid] || {};
     }
 
+    // Items don't change after initialization, and this is called on every
+    // selection. Returns a copy, as callers such as plugins may modify it.
     facts() {
-        return Object.values(this._items).filter(i => i instanceof Fact);
+        this._facts ??= Object.values(this._items).filter(i => i instanceof Fact);
+        return this._facts.slice();
     }
 
     filingDocuments() {
@@ -104,13 +109,16 @@ export class ReportSet {
     }
 
     namespaceGroups() {
-        const counts = {};
-        for (const f of this.facts()) {
-            counts[f.conceptQName().prefix] = (counts[f.conceptQName().prefix] || 0) + 1;
+        if (this._namespaceGroups === undefined) {
+            const counts = {};
+            for (const f of this.facts()) {
+                counts[f.conceptQName().prefix] = (counts[f.conceptQName().prefix] || 0) + 1;
+            }
+            const prefixes = Object.keys(counts);
+            prefixes.sort((a, b) => counts[b] - counts[a]);
+            this._namespaceGroups = prefixes;
         }
-        const prefixes = Object.keys(counts);
-        prefixes.sort((a, b) => counts[b] - counts[a]);
-        return prefixes;
+        return this._namespaceGroups.slice();
     }
 
     getUsedConceptPrefixes() {

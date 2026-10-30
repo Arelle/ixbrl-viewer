@@ -994,3 +994,84 @@ class TestIXBRLViewer:
             assert body[2].prefix is None
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
             assert body[3].text == "END IXBRL VIEWER EXTENSIONS"
+
+
+DOCUMENT_INDEX_DOC = b"""<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL"><body>
+<ix:header><ix:hidden>
+  <ix:nonNumeric id="h1" name="eg:Hidden1">hidden one</ix:nonNumeric>
+  <ix:nonNumeric id="h2" name="eg:Hidden2">hidden two</ix:nonNumeric>
+</ix:hidden></ix:header>
+<p>Text <ix:nonFraction id="f1" scale="6">1,000</ix:nonFraction> more</p>
+<table>
+  <tr><td><ix:nonFraction id="f2">2</ix:nonFraction></td><td>Label <ix:nonFraction id="f3">3</ix:nonFraction></td></tr>
+  <tr><td><ix:nonFraction id="f4"><ix:nonFraction id="f5">5</ix:nonFraction></ix:nonFraction></td></tr>
+</table>
+<div><ix:nonNumeric id="n1" continuedAt="c1" escape="true"><p>Block start</p></ix:nonNumeric></div>
+<p><span style="-sec-ix-hidden: h1" id="link1">Hidden reference</span></p>
+<ix:continuation id="c1"><p>Block end</p></ix:continuation>
+<p><ix:nonFraction id="nil1"></ix:nonFraction></p>
+<p><a href="other.htm">Other</a></p>
+</body></html>"""
+
+
+class TestBuildDocumentIndex:
+
+    def test_entries_are_in_document_walk_order(self):
+        doc = etree.parse(io.BytesIO(DOCUMENT_INDEX_DOC))
+        index = IXBRLViewerBuilder(Mock()).buildDocumentIndex([doc])
+        assert index == {
+            "docs": [[
+                ["n", "h1", 1],
+                ["n", "h2", 1],
+                ["f", "f1", 0, 6],
+                ["f", "f2", 0],
+                ["f", "f3", 0],
+                ["f", "f5", 0],
+                ["f", "f4", 0],
+                ["n", "n1", 0, 1],
+                ["l", "link1", 0, "h1"],
+                ["c", "c1", 0],
+                ["f", "nil1", 0],
+            ]],
+            "continuations": {"n1": ["c1"]},
+        }
+
+    def test_links_without_ids_are_given_unused_ids(self):
+        doc = etree.parse(io.BytesIO(b"""<html xmlns="http://www.w3.org/1999/xhtml"><body>
+            <span id="ixv-link-0">taken</span>
+            <span style="color: red; -esef-ix-hidden:h1">one</span>
+            <span style="-sec-ix-hidden: h2;">two</span>
+        </body></html>"""))
+        index = IXBRLViewerBuilder(Mock()).buildDocumentIndex([doc])
+        assert index["docs"] == [[
+            ["l", "ixv-link-1", 0, "h1"],
+            ["l", "ixv-link-2", 0, "h2"],
+        ]]
+        spans = doc.getroot().findall(".//{http://www.w3.org/1999/xhtml}span")
+        assert [s.get("id") for s in spans] == ["ixv-link-0", "ixv-link-1", "ixv-link-2"]
+
+    @staticmethod
+    def ixDocument(body):
+        return etree.parse(io.BytesIO(
+            b"""<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL"><body>"""
+            + body
+            + b"""</body></html>"""
+        ))
+
+    def test_continuation_chains_cross_documents(self):
+        first = self.ixDocument(b"""<ix:nonNumeric id="n1" continuedAt="c1">a</ix:nonNumeric>""")
+        second = self.ixDocument(b"""
+            <ix:continuation id="c1" continuedAt="c2">b</ix:continuation>
+            <ix:continuation id="c2">c</ix:continuation>
+        """)
+        index = IXBRLViewerBuilder(Mock()).buildDocumentIndex([first, second])
+        assert index["docs"] == [[["n", "n1", 0]], [["c", "c1", 0], ["c", "c2", 0]]]
+        assert index["continuations"] == {"n1": ["c1", "c2"]}
+
+    def test_continuation_cycles_terminate(self):
+        doc = self.ixDocument(b"""
+            <ix:nonNumeric id="n1" continuedAt="c1">a</ix:nonNumeric>
+            <ix:continuation id="c1" continuedAt="c1">b</ix:continuation>
+        """)
+        index = IXBRLViewerBuilder(Mock()).buildDocumentIndex([doc])
+        assert index["continuations"]["n1"][0] == "c1"

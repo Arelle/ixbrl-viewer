@@ -16,13 +16,22 @@ export class TableExport {
             const table = $(this);
             // Require at least two facts on different rows.
             if (table.find("tr").filter((i, row) => $(row).find(".ixbrl-element").length > 0).length > 1) {
-                table.css("position", "relative");
-                const exporter = new TableExport(table, reportSet);
-                $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
-                    .appendTo(table)
-                    .on("click", () => exporter.exportTable());
+                TableExport.addHandle(table, reportSet);
             }
         });
+    }
+
+    // beforeExport is called before the table is read, to allow fact wrappers
+    // to be created on demand.
+    static addHandle(table, reportSet, beforeExport) {
+        table.css("position", "relative");
+        const exporter = new TableExport(table, reportSet);
+        $('<div class="ixbrl-table-handle"><span>Export table</span></div>')
+            .appendTo(table)
+            .on("click", () => {
+                beforeExport?.();
+                exporter.exportTable();
+            });
     }
 
     _getRawTable() {

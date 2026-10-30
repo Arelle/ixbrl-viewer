@@ -4,6 +4,7 @@ import interact from 'interactjs'
 import $ from 'jquery'
 import { ReportSet } from "./reportset.js";
 import { Viewer, DocumentTooLargeError } from "./viewer.js";
+import { LazyViewer } from "./lazyViewer.js";
 import { Inspector } from "./inspector.js";
 import { initializeTheme } from './theme.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
@@ -154,6 +155,11 @@ export class iXBRLViewer {
     isViewerEnabled() {
         const urlParams = new URLSearchParams(window.location.search);
         return (urlParams.get('disable-viewer') ?? 'false') === 'false';
+    }
+
+    isLazyViewerEnabled() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return (urlParams.get('lazy-viewer') ?? 'true') === 'true';
     }
 
     // Resolves URL relative to the config file
@@ -356,8 +362,17 @@ export class iXBRLViewer {
                 return;
             }
 
+            const lazy = iv.isLazyViewerEnabled() && LazyViewer.documentIndexAvailable(reportSet) && !iv.isReviewModeEnabled();
+            // Each painted progress message costs a layout of the whole
+            // document, which is most of the lazy viewer's loading time.
+            iv._paintProgress = !lazy;
+
             if (!stubViewer) {
                 iframes = $(iv._reparentDocument());
+                if (lazy) {
+                    // Before the first layout of the moved document, so that it is only laid out once.
+                    LazyViewer.applyStyles(iv, iframes);
+                }
             } 
             iv._addViewportMeta();
             const ds = reportSet.reportFiles();
@@ -374,11 +389,18 @@ export class iXBRLViewer {
             const progress = stubViewer ? 'Loading iXBRL Report' : 'Loading iXBRL Viewer';
             iv.setProgress(progress).then(() => {
                 /* Poll for iframe load completing - there doesn't seem to be a reliable event that we can use */
-                const timer = setInterval(() => {
+                let timer;
+                const pollReady = () => {
                     let complete = true;
                     iframes.each((n, iframe) => {
                         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if ((iframeDoc.readyState !== 'complete' && iframeDoc.readyState !== 'interactive') || $(iframe).contents().find("body").children().length === 0) {
+                        if (lazy) {
+                            // The document can still be loading, but must have replaced the initial about:blank one.
+                            if (iframe.hasAttribute("src") && (iframeDoc.URL === 'about:blank' || iframeDoc.body === null)) {
+                                complete = false;
+                            }
+                        }
+                        else if ((iframeDoc.readyState !== 'complete' && iframeDoc.readyState !== 'interactive') || $(iframe).contents().find("body").children().length === 0) {
                             complete = false;
                         }
                     });
@@ -398,7 +420,7 @@ export class iXBRLViewer {
                             }
                         });
 
-                        const viewer = new Viewer(iv, iframes, reportSet);
+                        const viewer = lazy ? new LazyViewer(iv, iframes, reportSet) : new Viewer(iv, iframes, reportSet);
                         iv.viewer = viewer
 
                         viewer.initialize()
@@ -447,7 +469,13 @@ export class iXBRLViewer {
 
                             });
                     }
-                }, 250);
+                };
+                timer = setInterval(pollReady, lazy ? 10 : 250);
+                if (lazy) {
+                    // A reparented document is ready now, and changes made before
+                    // its first layout avoid a second layout of the whole document.
+                    pollReady();
+                }
             });
         }, 0);
     }
@@ -455,6 +483,11 @@ export class iXBRLViewer {
     /* Update the progress message during initial load.  Returns a Promise which
      * resolves once the message is actually displayed */
     setProgress(msg) {
+        if (this._paintProgress === false) {
+            console.log(`%c [Progress] ${msg} `, 'background: #77d1c8; color: black;');
+            $('#ixv .loader .text').text(msg);
+            return Promise.resolve();
+        }
         return new Promise((resolve, reject) => {
             /* We need to do a double requestAnimationFrame, as we need to get the
              * message up before the ensuing thread-blocking work

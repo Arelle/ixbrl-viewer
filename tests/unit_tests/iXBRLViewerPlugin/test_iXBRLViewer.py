@@ -995,20 +995,36 @@ class TestIXBRLViewer:
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
             assert body[3].text == "END IXBRL VIEWER EXTENSIONS"
 
-    def test_addViewerData_hide_document_script(self):
-        doc = rb"""<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Report</title></head><body></body></html>"""
-        for useStubViewer, expected in ((False, True), (True, False)):
+    def test_addViewerData_head(self):
+        doc = rb"""<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Report</title></head><body><p>Report</p></body></html>"""
+        for useStubViewer in (False, True):
             builder = IXBRLViewerBuilder(self.cntlr_mock, useStubViewer=useStubViewer)
             viewer_file = iXBRLViewerFile("test.xhtml", etree.parse(io.BytesIO(doc)))
             assert builder.addViewerData(viewer_file, "ixbrlviewer.js")
-            head = viewer_file.xmlDocument.getroot()[0]
+            head, body = viewer_file.xmlDocument.getroot()
             assert head[0].tag == "{http://www.w3.org/1999/xhtml}title"
-            last = head[-1]
-            hides = last.tag == "{http://www.w3.org/1999/xhtml}script" and "ixv-hide-document" in (last.text or "")
-            assert hides == expected
-            if hides:
-                assert last.prefix is None
-                assert not set("<>&") & set(last.text)
+            parent = body if useStubViewer else head
+            extensions = list(parent)[-4:]
+            assert extensions[0].text == "BEGIN IXBRL VIEWER EXTENSIONS"
+            assert extensions[1].get("src") == "ixbrlviewer.js"
+            assert extensions[2].get("type") == "application/x.ixbrl-viewer+json"
+            assert extensions[3].text == "END IXBRL VIEWER EXTENSIONS"
+            if useStubViewer:
+                assert len(head) == 1
+            else:
+                assert len(head) == 6
+                hide = head[1]
+                assert hide.tag == "{http://www.w3.org/1999/xhtml}script"
+                assert hide.prefix is None
+                assert "ixv-hide-document" in hide.text
+                assert not set("<>&") & set(hide.text)
+                assert [e.tag for e in body] == ["{http://www.w3.org/1999/xhtml}p"]
+
+    def test_addViewerData_already_added(self):
+        doc = rb"""<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Report</title></head><body></body></html>"""
+        viewer_file = iXBRLViewerFile("test.xhtml", etree.parse(io.BytesIO(doc)))
+        assert self.builder_1.addViewerData(viewer_file, "ixbrlviewer.js")
+        assert not self.builder_1.addViewerData(viewer_file, "ixbrlviewer.js")
 
     def test_addViewerData_hide_document_script_without_head(self):
         doc = rb"""<html xmlns="http://www.w3.org/1999/xhtml"><body></body></html>"""

@@ -521,34 +521,41 @@ class IXBRLViewerBuilder:
             taxonomyDataJSON = json.dumps(self.taxonomyData, separators=(",", ":"), allow_nan=False)
         taxonomyDataJSON = self.escapeJSONForScriptTag(taxonomyDataJSON)
 
-        if not self.useStubViewer:
-            self.addHideDocumentScript(viewerFile)
-
-        for child in viewerFile.xmlDocument.getroot():
+        root = viewerFile.xmlDocument.getroot()
+        head = root.find("{http://www.w3.org/1999/xhtml}head")
+        for child in root:
             if child.tag == "{http://www.w3.org/1999/xhtml}body":
-                for body_child in child:
-                    if body_child.tag == "{http://www.w3.org/1999/xhtml}script" and body_child.get("type", "") == "application/x.ixbrl-viewer+json":
+                for existing in (*child, *(head if head is not None else ())):
+                    if existing.tag == "{http://www.w3.org/1999/xhtml}script" and existing.get("type", "") == "application/x.ixbrl-viewer+json":
                         self.cntlr.addToLog("File already contains iXBRL viewer", messageCode="error")
                         return False
 
-                child.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
+                parent = child
+                if not self.useStubViewer:
+                    self.addHideDocumentScript(viewerFile)
+                    # So that the viewer can show the report while the rest of
+                    # it is parsed.
+                    if head is not None:
+                        parent = head
+
+                parent.append(etree.Comment("BEGIN IXBRL VIEWER EXTENSIONS"))
 
                 # Insert <script> tags, and make sure that they are in the
                 # default namespace, so that browsers in HTML mode will find
                 # them.
                 nsmap = { None: "http://www.w3.org/1999/xhtml" }
-                e = etree.SubElement(child, "{http://www.w3.org/1999/xhtml}script", nsmap = nsmap)
+                e = etree.SubElement(parent, "{http://www.w3.org/1999/xhtml}script", nsmap = nsmap)
                 e.set("type", "text/javascript")
                 e.set("src", scriptUrl)
                 # Don't self close
                 e.text = ""
 
-                # Putting this in the header can interfere with character set
-                # auto detection due to its length
-                e = etree.SubElement(child, "{http://www.w3.org/1999/xhtml}script", nsmap = nsmap)
+                # At the end of the head or body, as its length could
+                # otherwise interfere with character set auto detection
+                e = etree.SubElement(parent, "{http://www.w3.org/1999/xhtml}script", nsmap = nsmap)
                 e.set("type", "application/x.ixbrl-viewer+json")
                 e.text = taxonomyDataJSON
-                child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
+                parent.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
                 return True
         return False
 

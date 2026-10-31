@@ -7,6 +7,7 @@ import json
 import logging
 import math
 import os
+import posixpath
 import re
 import shutil
 import urllib.parse
@@ -14,7 +15,7 @@ import zipfile
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Literal, NamedTuple, cast
+from typing import IO, Any, Callable, Literal, NamedTuple, cast
 
 from arelle import XbrlConst
 from arelle.Cntlr import Cntlr
@@ -28,6 +29,18 @@ from arelle.UrlUtil import isHttpUrl
 from arelle.ValidateXbrlCalcs import inferredDecimals
 from lxml import etree
 
+from .assets import (
+    NON_ASSET_EXTENSIONS,
+    AssetReader,
+    AssetSource,
+    ReportAsset,
+    assetPath,
+    assetSource,
+    cssReferences,
+    documentReferences,
+    isInsideDirectory,
+    isSafeAssetPath,
+)
 from .constants import (
     DEFAULT_JS_FILENAME,
     DEFAULT_OUTPUT_NAME,
@@ -38,7 +51,6 @@ from .constants import (
 )
 from .xhtmlserialize import XHTMLSerializer
 
-REPORT_TYPE_EXTENSIONS = (".xbrl", ".xhtml", ".html", ".htm", ".json")
 UNRECOGNIZED_LINKBASE_LOCAL_DOCUMENTS_TYPE = "unrecognizedLinkbase"
 LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
     XbrlConst.qnLinkCalculationLink: "calcLinkbase",
@@ -148,7 +160,6 @@ class IXBRLViewerBuilder:
         for featureName in features:
             assert featureName in featureNames, \
                 f"Given feature name `{featureName}` does not match any defined features: {featureNames}"
-        self.reportZip: str | None = None
         self.nsmap = NamespaceMap()
         self.roleMap = NamespaceMap()
         self.taxonomyData: dict[str, Any] = {
@@ -176,7 +187,6 @@ class IXBRLViewerBuilder:
 
         self.fromSingleZIP: bool | None = None
         self.reportCount = 0
-        self.assets: list[str] = []
 
     def outputFilename(self, filename: str) -> str:
         (base, ext) = os.path.splitext(filename)
@@ -560,26 +570,26 @@ class IXBRLViewerBuilder:
         assert report.modelDocument.xmlDocument is not None
         if report.modelDocument.type == Type.INLINEXBRLDOCUMENTSET:
             # Sort by object index to preserve order in which files were specified.
-            xmlDocsByFilename = {
-                os.path.basename(self.outputFilename(doc.filepath)): doc.xmlDocument
+            docsByFilename = {
+                os.path.basename(self.outputFilename(doc.filepath)): doc
                 for doc in sorted(report.modelDocument.referencesDocument.keys(), key=lambda x: x.objectIndex)
                 if doc.type == Type.INLINEXBRL and doc.xmlDocument is not None
             }
-            docSetFiles = list(xmlDocsByFilename.keys())
+            docSetFiles = list(docsByFilename.keys())
 
-            for filename, docSetXMLDoc in xmlDocsByFilename.items():
-                self.iv.addFile(iXBRLViewerFile(filename, docSetXMLDoc))
+            for filename, docSetDoc in docsByFilename.items():
+                self.addDocument(report, filename, docSetDoc)
 
         elif self.useStubViewer:
             filename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
             docSetFiles = [ filename ]
-            self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+            self.addDocument(report, filename, report.modelDocument)
 
         else:
             srcFilename = self.outputFilename(os.path.basename(report.modelDocument.filepath))
             docSetFiles = [ srcFilename ]
             filename = srcFilename
-            self.iv.addFile(iXBRLViewerFile(filename, report.modelDocument.xmlDocument))
+            self.addDocument(report, filename, report.modelDocument)
         docSetKey = frozenset(docSetFiles)
         sourceReport = self.sourceReportsByFiles.get(docSetKey)
         if sourceReport is None:
@@ -619,14 +629,42 @@ class IXBRLViewerBuilder:
                 self.filingDocZipPath = os.path.dirname(report.modelDocument.filepath)
         else:
             self.fromSingleZIP = False
-        if report.fileSource.isArchive and isinstance(report.fileSource.fs, zipfile.ZipFile):
-            filelist = report.fileSource.fs.filelist
-            for file in filelist:
-                directory, asset = os.path.split(file.filename)
-                if "reports" in directory and asset != "" and not asset.lower().endswith(REPORT_TYPE_EXTENSIONS):
-                    self.assets.append(file.filename)
-            if self.assets:
-                self.reportZip = report.fileSource.fs.filename
+
+    def addDocument(self, report: ModelXbrl, filename: str, doc: ModelDocument) -> None:
+        """Add a report document to the viewer, along with the files it references."""
+        assert doc.xmlDocument is not None
+        viewerFile = iXBRLViewerFile(filename, doc.xmlDocument)
+        self.iv.addFile(viewerFile)
+        source = assetSource(report.fileSource, doc.filepath, doc.uri)
+        if source is None:
+            self.cntlr.addToLog(f"Not copying files referenced by {doc.uri}, as it is not a local file or in a zip", messageCode=INFO_MESSAGE_CODE)
+            return
+        for reference in dict.fromkeys(documentReferences(viewerFile.xmlDocument)):
+            self.addAsset(source, "", reference)
+
+    def addAsset(self, source: AssetSource, baseDirectory: str, reference: str) -> None:
+        path = assetPath(baseDirectory, reference)
+        if path is None or path.lower().endswith(NON_ASSET_EXTENSIONS):
+            return
+        if not isSafeAssetPath(path):
+            self.cntlr.addToLog(f"Not copying {reference}, as it is outside the report's directory", messageCode=INFO_MESSAGE_CODE)
+            return
+        asset = source.find(path)
+        if asset is None:
+            self.cntlr.addToLog(f"Not copying {reference}, as there is no such file in the report's directory", messageCode=INFO_MESSAGE_CODE)
+            return
+        if self.iv.addAsset(asset) and path.lower().endswith(".css"):
+            # Stylesheet references are relative to the stylesheet, not the document.
+            for cssReference in dict.fromkeys(cssReferences(self.readStylesheet(asset))):
+                self.addAsset(source, posixpath.dirname(path), cssReference)
+
+    def readStylesheet(self, asset: ReportAsset) -> str:
+        try:
+            with AssetReader() as reader, reader.open(asset) as stylesheet:
+                return stylesheet.read().decode("utf-8", errors="replace")
+        except (OSError, KeyError, ValueError, zipfile.BadZipFile) as err:
+            self.cntlr.addToLog(f"Unable to read stylesheet {asset.path}: {err}", messageCode=INFO_MESSAGE_CODE)
+            return ""
 
     def createViewer(
             self,
@@ -660,10 +698,6 @@ class IXBRLViewerBuilder:
             # If there is only a single report, call the output file "xbrlviewer.html"
             # We should probably preserve the source file extension here.
             self.iv.files[0].filename = "xbrlviewer.html"
-        if self.assets:
-            self.iv.addReportAssets(self.assets)
-        if self.reportZip:
-            self.iv.reportZip = self.reportZip
         return self.iv
 
 
@@ -685,14 +719,22 @@ class iXBRLViewerFile:
 class iXBRLViewer:
 
     def __init__(self, cntlr: Cntlr) -> None:
-        self.reportZip: str | None = None
         self.filesByFilename: dict[str, iXBRLViewerFile] = {}
         self.filingDocuments: str | None = None
         self.cntlr = cntlr
-        self.assets: list[str] = []
+        self.assetsByPath: dict[str, ReportAsset] = {}
 
-    def addReportAssets(self, assets: list[str]) -> None:
-        self.assets.extend(assets)
+    def addAsset(self, asset: ReportAsset) -> bool:
+        """Add a file to copy into the output, returning False if its path is already used."""
+        existing = self.assetsByPath.setdefault(asset.path, asset)
+        if existing is asset:
+            return True
+        if existing != asset:
+            self.cntlr.addToLog(
+                f"Not copying {asset.source} to {asset.path}, as {existing.source} is already copied there",
+                messageCode=INFO_MESSAGE_CODE,
+            )
+        return False
 
     def addFile(self, ivf: iXBRLViewerFile) -> None:
         # Overwrite previous occurrences of the same document, because it may
@@ -765,6 +807,7 @@ class iXBRLViewer:
                 if copyScriptPath is not None:
                     self.cntlr.addToLog(f"Writing script from {copyScriptPath}", messageCode=INFO_MESSAGE_CODE)
                     zout.write(copyScriptPath, copyScriptPath.name)
+                self._saveAssets(set(zout.namelist()), lambda asset: zout.open(asset.path, "w"))
         elif os.path.isdir(destination):
             # If output is a directory, write each file in the doc set to that
             # directory using its existing filename
@@ -778,15 +821,11 @@ class iXBRLViewer:
                 filename = os.path.basename(self.filingDocuments)
                 self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                 shutil.copy2(self.filingDocuments, os.path.join(destination, filename))
-            if self.assets and self.reportZip is not None:
-                with zipfile.ZipFile(self.reportZip) as z:
-                    for asset in self.assets:
-                        fileName = os.path.basename(asset)
-                        path = os.path.join(destination, fileName)
-                        self.cntlr.addToLog(f"Writing {asset}", messageCode=INFO_MESSAGE_CODE)
-                        with z.open(asset) as zf, open(path, "wb") as assetFile:
-                            shutil.copyfileobj(zf, assetFile)
-
+            assetDirectory = destination
+            self._saveAssets(
+                self._savedFilenames([f.filename for f in self.files], copyScriptPath),
+                lambda asset: self._openAssetFile(assetDirectory, asset),
+            )
             if copyScriptPath is not None:
                 self._copyScript(Path(destination), copyScriptPath)
         else:
@@ -816,9 +855,61 @@ class iXBRLViewer:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
                     shutil.copy2(self.filingDocuments, os.path.join(os.path.dirname(destination), filename))
+                assetDirectory = os.path.dirname(os.path.abspath(destination))
+                self._saveAssets(
+                    self._savedFilenames([os.path.basename(destination)], copyScriptPath),
+                    lambda asset: self._openAssetFile(assetDirectory, asset),
+                )
                 if copyScriptPath is not None:
                     outDirectory = Path(destination).parent
                     self._copyScript(outDirectory, copyScriptPath)
+
+    def _savedFilenames(self, documentFilenames: list[str], copyScriptPath: Path | None) -> set[str]:
+        filenames = set(documentFilenames)
+        if self.filingDocuments:
+            filenames.add(os.path.basename(self.filingDocuments))
+        if copyScriptPath is not None:
+            filenames.add(copyScriptPath.name)
+        return filenames
+
+    def _saveAssets(self, savedFilenames: set[str], openDestination: Callable[[ReportAsset], IO[bytes] | None]) -> None:
+        """
+        Copy the assets into the output, skipping any whose path would replace a
+        file the viewer has already saved.
+        :param savedFilenames: Paths, relative to the output, that the viewer has already saved.
+        :param openDestination: Opens an asset's output for writing, or returns None to skip it.
+        """
+        # Case insensitive filesystems would let "XBRLVIEWER.HTML" replace the viewer.
+        usedPaths = {filename.lower() for filename in savedFilenames}
+        with AssetReader() as reader:
+            for asset in self.assetsByPath.values():
+                if not isSafeAssetPath(asset.path) or asset.path.lower() in usedPaths:
+                    self.cntlr.addToLog(f"Not writing asset {asset.path}, as that path is not available", messageCode=INFO_MESSAGE_CODE)
+                    continue
+                usedPaths.add(asset.path.lower())
+                try:
+                    with reader.open(asset) as fin:
+                        fout = openDestination(asset)
+                        if fout is None:
+                            continue
+                        self.cntlr.addToLog(f"Writing {asset.path}", messageCode=INFO_MESSAGE_CODE)
+                        with fout:
+                            shutil.copyfileobj(fin, fout)
+                except (OSError, KeyError, ValueError, zipfile.BadZipFile) as err:
+                    self.cntlr.addToLog(f"Unable to copy {asset.source} to {asset.path}: {err}", messageCode=ERROR_MESSAGE_CODE)
+
+    def _openAssetFile(self, directory: str, asset: ReportAsset) -> IO[bytes] | None:
+        filepath = os.path.join(directory, *asset.path.split("/"))
+        # A symbolic link in the output directory could point anywhere.
+        if not isInsideDirectory(filepath, directory):
+            self.cntlr.addToLog(f"Not writing asset {asset.path}, as it would be outside {directory}", messageCode=INFO_MESSAGE_CODE)
+            return None
+        # When saving next to the source files, the asset is already in place and
+        # opening it for writing would truncate it.
+        if asset.archive is None and os.path.exists(filepath) and os.path.samefile(filepath, asset.source):
+            return None
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        return open(filepath, "wb")
 
     def _copyScript(self, destDirectory: Path, scriptPath: Path) -> None:
         scriptDest = destDirectory / scriptPath.name

@@ -194,6 +194,9 @@ export class Inspector {
      * path clears the inline properties it saved.
      */
     setSectionCollapsed(section, collapsed, animate) {
+        if (!collapsed) {
+            this._buildSectionRows(section);
+        }
         const body = section.find("> .collapsible-body").finish();
         if (animate) {
             if (collapsed) {
@@ -428,6 +431,26 @@ export class Inspector {
 
     }
 
+    _buildSectionRows(section) {
+        const facts = section.data("facts");
+        if (facts !== undefined && !section.data("rowsBuilt")) {
+            section.data("rowsBuilt", true);
+            this.addFactListByGroupFacts(section.find("> .collapsible-body"), facts, 0);
+        }
+    }
+
+    // Rows are labelled in the language in effect when they are built.
+    _rebuildSectionRows() {
+        $("#inspector .facts-by-group > .collapsible-section").each((_, e) => {
+            const section = $(e);
+            section.data("rowsBuilt", false);
+            section.find("> .collapsible-body").empty();
+            if (!section.hasClass("collapsed")) {
+                this._buildSectionRows(section);
+            }
+        });
+    }
+
     buildFactListByGroup() {
         const container = $("#inspector .facts-by-group");
         if (!this.outline.hasOutline()) {
@@ -469,12 +492,15 @@ export class Inspector {
                 .text(group.facts.length)
                 .appendTo(button);
 
-            const body = $("<div></div>")
+            $("<div></div>")
                 .addClass("collapsible-body")
                 .addClass("fact-list")
                 .appendTo(section);
 
-            this.addFactListByGroupFacts(body, group.facts, 0);
+            // A section's rows are built when it is first expanded, as building
+            // the first rows of every section is a large part of the load time
+            // for large reports, with each row checking whether its fact is shown.
+            section.data("facts", group.facts);
         }
         this.updateBulkToggleAvailability();
     }
@@ -652,6 +678,7 @@ export class Inspector {
     changeApplicationLanguage(lang) {
         localStorage.setItem(STORAGE_APP_LANGUAGE, lang);
         i18next.changeLanguage(lang);
+        this._rebuildSectionRows();
         this.rebuildViewer();
     }
 
@@ -774,6 +801,7 @@ export class Inspector {
 
     factListRow(f) {
         const row = $('<button class="fact-list-item"></button>')
+            .toggleClass("selected", f.vuid === this._currentItem?.vuid)
             // soft focus - highlight the fact, but don't close the search results
             .on("click", () => this.selectItem(f.vuid, undefined, undefined, true))
             .on("dblclick", () => this.selectItem(f.vuid))
@@ -1924,6 +1952,7 @@ export class Inspector {
 
     update() {
         const cf = this._currentItem;
+        $('#inspector .fact-list-item').removeClass('selected');
         if (!cf) {
             $('#inspector').removeClass('footnote-mode');
             $('#inspector').addClass('no-fact-selected');
@@ -1948,7 +1977,6 @@ export class Inspector {
                 this.updateAnchoring(cf);
                 this.updateReferences(cf);
                 this.updateLabels(cf);
-                $('#inspector .fact-list-item').removeClass('selected');
                 $('#inspector .fact-list-item').filter((i, e) => $(e).data('ivid') == cf.vuid).addClass('selected');
 
                 const duplicates = cf.duplicates();
@@ -2090,6 +2118,7 @@ export class Inspector {
 
     setDocumentLanguage(lang) {
         this._viewerOptions.language = lang;
+        this._rebuildSectionRows();
         this.update();
     }
 

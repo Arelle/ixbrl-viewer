@@ -596,6 +596,7 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const groupBodies = $("#inspector .facts-by-group .collapsible-body");
         const elr1Body = groupBodies.eq(0);
@@ -608,10 +609,131 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const elr1Body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         const renderedIds = elr1Body.find(".fact-list-item").map((_, el) => $(el).data("ivid")).get();
         expect(renderedIds).toEqual([viewerUniqueId(0, "f1"), viewerUniqueId(0, "f1a")]);
+    });
+
+    test("builds a section's rows when it is first expanded", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        const elr1Body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        expect(elr1Body.find(".fact-list-item").length).toBe(0);
+
+        headerButton(0).trigger("click");
+        expect(elr1Body.find(".fact-list-item").length).toBe(2);
+
+        headerButton(0).trigger("click");
+        headerButton(0).trigger("click");
+        expect(elr1Body.find(".fact-list-item").length).toBe(2);
+    });
+
+    test("expanding all sections builds the rows of sections not yet expanded", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+
+        bulkButton("expand").trigger("click");
+
+        const bodies = $("#inspector .facts-by-group .collapsible-body");
+        expect(bodies.map((_, el) => $(el).find(".fact-list-item").length).get()).toEqual([2, 1]);
+    });
+
+    test("rows are not shown as selected once their fact is no longer selected", () => {
+        // Rows built later are only marked if their fact is selected, so rows
+        // built earlier must not keep a mark from a previous selection.
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        insp._currentItem = reportSet.getItemById(viewerUniqueId(0, "f1a"));
+        headerButton(0).trigger("click");
+        expect($("#inspector .facts-by-group .fact-list-item.selected").length).toBe(1);
+
+        insp._currentItem = null;
+        insp.update();
+
+        expect($("#inspector .facts-by-group .fact-list-item.selected").length).toBe(0);
+    });
+
+    test("a row built after its fact was selected is shown as selected", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        insp._currentItem = reportSet.getItemById(viewerUniqueId(0, "f1a"));
+
+        headerButton(0).trigger("click");
+
+        const rows = $("#inspector .facts-by-group .collapsible-body").eq(0).find(".fact-list-item");
+        expect(rows.map((_, el) => $(el).hasClass("selected")).get()).toEqual([false, true]);
+    });
+
+    test("doesn't build the rows of sections that haven't been expanded", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+
+        headerButton(0).trigger("click");
+
+        const bodies = $("#inspector .facts-by-group .collapsible-body");
+        expect(bodies.map((_, el) => $(el).find(".fact-list-item").length).get()).toEqual([2, 0]);
+    });
+
+    test("moves the selected mark between rows that are already built", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
+        const selectedIds = () => $("#inspector .fact-list-item.selected").map((_, el) => $(el).data("ivid")).get();
+        // Only the fact list is set up, so leave out the rest of the inspector.
+        for (const part of ["_selectionSummaryAccordian", "updateCalculation", "updateOutline", "updateFootnotes", "updateAnchoring", "updateReferences", "updateLabels", "getPeriodIncrease"]) {
+            jest.spyOn(insp, part).mockImplementation(() => {});
+        }
+        insp._viewer = { docOrderItemIndex: { indexOf: () => -1, length: () => 0 } };
+        const select = (id) => {
+            insp._currentItem = reportSet.getItemById(viewerUniqueId(0, id));
+            insp._currentItemList = [insp._currentItem];
+            insp.update();
+        };
+
+        select("f1");
+        expect(selectedIds()).toEqual([viewerUniqueId(0, "f1")]);
+
+        select("f1a");
+        expect(selectedIds()).toEqual([viewerUniqueId(0, "f1a")]);
+    });
+
+    test("marks a row built after its fact was selected, such as a search result", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp._currentItem = reportSet.getItemById(viewerUniqueId(0, "f1"));
+
+        expect(insp.factListRow(reportSet.getItemById(viewerUniqueId(0, "f1"))).hasClass("selected")).toBe(true);
+        expect(insp.factListRow(reportSet.getItemById(viewerUniqueId(0, "f1a"))).hasClass("selected")).toBe(false);
+    });
+
+    test("rebuilds the rows that have been built in a new document language", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        reportSet._data.concepts["eg:LineItem1"].labels.std.fr = "Poste 1";
+        reportSet._data.concepts["eg:LineItem2"].labels.std.fr = "Poste 2";
+        const insp = setUpInspector(reportSet);
+        reportSet.viewerOptions = insp._viewerOptions;
+        insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
+        headerButton(1).trigger("click");
+        headerButton(1).trigger("click");
+        const bodies = () => $("#inspector .facts-by-group .collapsible-body");
+        const titles = (i) => bodies().eq(i).find(".fact-list-item .title").map((_, el) => $(el).text()).get();
+        expect(titles(0)).toEqual(["Line Item 1", "Line Item 1"]);
+
+        insp.setDocumentLanguage("fr");
+
+        expect(titles(0)).toEqual(["Poste 1", "Poste 1"]);
+        expect(titles(1)).toEqual([]);
+        headerButton(1).trigger("click");
+        expect(titles(1)).toEqual(["Poste 2"]);
     });
 
     test("paginates a group's facts with a show-more button", () => {
@@ -623,6 +745,7 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         expect(body.find(".fact-list-item").length).toBe(FACTS_PER_GROUP - 1);
@@ -693,6 +816,7 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         expect(body.find(".fact-list-item").length).toBe(FACTS_PER_GROUP - 1);
@@ -922,6 +1046,7 @@ describe("Facts by group", () => {
         const reportSet = buildGroupReportSet(ids, ids, () => "eg:LineItem1");
         const insp = setUpInspector(reportSet);
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
         const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         body.find(".show-more").trigger("click");
 

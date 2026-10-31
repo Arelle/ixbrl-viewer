@@ -194,6 +194,9 @@ export class Inspector {
      * path clears the inline properties it saved.
      */
     setSectionCollapsed(section, collapsed, animate) {
+        if (!collapsed) {
+            section.triggerHandler("expand");
+        }
         const body = section.find("> .collapsible-body").finish();
         if (animate) {
             if (collapsed) {
@@ -423,7 +426,9 @@ export class Inspector {
                     .appendTo(container);
                 break;
             }
-            this.factListRow(facts[i]).appendTo(container);
+            this.factListRow(facts[i])
+                .toggleClass("selected", facts[i].vuid === this._currentItem?.vuid)
+                .appendTo(container);
         }
 
     }
@@ -474,7 +479,9 @@ export class Inspector {
                 .addClass("fact-list")
                 .appendTo(section);
 
-            this.addFactListByGroupFacts(body, group.facts, 0);
+            // Building every row up front is a large part of the load time
+            // for large reports, as each row checks whether its fact is shown.
+            section.one("expand", () => this.addFactListByGroupFacts(body, group.facts, 0));
         }
         this.updateBulkToggleAvailability();
     }

@@ -596,6 +596,7 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const groupBodies = $("#inspector .facts-by-group .collapsible-body");
         const elr1Body = groupBodies.eq(0);
@@ -608,10 +609,37 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const elr1Body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         const renderedIds = elr1Body.find(".fact-list-item").map((_, el) => $(el).data("ivid")).get();
         expect(renderedIds).toEqual([viewerUniqueId(0, "f1"), viewerUniqueId(0, "f1a")]);
+    });
+
+    test("builds a section's rows when it is first expanded", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        const elr1Body = $("#inspector .facts-by-group .collapsible-body").eq(0);
+        expect(elr1Body.find(".fact-list-item").length).toBe(0);
+
+        headerButton(0).trigger("click");
+        headerButton(0).trigger("click");
+        bulkButton("expand").trigger("click");
+
+        expect(elr1Body.find(".fact-list-item").length).toBe(2);
+    });
+
+    test("a row built after its fact was selected is shown as selected", () => {
+        const reportSet = buildGroupReportSet(["f1", "f2", "f1a"], ["f1", "f1a", "f2"], conceptOf);
+        const insp = setUpInspector(reportSet);
+        insp.buildFactListByGroup();
+        insp._currentItem = reportSet.getItemById(viewerUniqueId(0, "f1a"));
+
+        headerButton(0).trigger("click");
+
+        const rows = $("#inspector .facts-by-group .collapsible-body").eq(0).find(".fact-list-item");
+        expect(rows.map((_, el) => $(el).hasClass("selected")).get()).toEqual([false, true]);
     });
 
     test("paginates a group's facts with a show-more button", () => {
@@ -623,6 +651,7 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         expect(body.find(".fact-list-item").length).toBe(FACTS_PER_GROUP - 1);
@@ -693,6 +722,7 @@ describe("Facts by group", () => {
         const insp = setUpInspector(reportSet);
 
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
 
         const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         expect(body.find(".fact-list-item").length).toBe(FACTS_PER_GROUP - 1);
@@ -922,6 +952,7 @@ describe("Facts by group", () => {
         const reportSet = buildGroupReportSet(ids, ids, () => "eg:LineItem1");
         const insp = setUpInspector(reportSet);
         insp.buildFactListByGroup();
+        headerButton(0).trigger("click");
         const body = $("#inspector .facts-by-group .collapsible-body").eq(0);
         body.find(".show-more").trigger("click");
 

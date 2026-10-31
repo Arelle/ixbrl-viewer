@@ -234,7 +234,14 @@ export class Viewer {
         if (fragment !== undefined && fragment != "") {
             // As per HTML spec, try fragment, then try %-decoded fragment
             // https://html.spec.whatwg.org/multipage/browsing-the-web.html#the-indicated-part-of-the-document
-            for (const fragment_option of [fragment, decodeURIComponent(fragment)]) {
+            const fragment_options = [fragment];
+            try {
+                fragment_options.push(decodeURIComponent(fragment));
+            }
+            catch {
+                // Fragments that aren't valid percent-encoding can only match as they are
+            }
+            for (const fragment_option of fragment_options) {
                 const f = $.escapeSelector(fragment_option);
                 const ee = this._iframes.eq(docIndex).contents().find('#' + f + ', a[name="' + f + '"]');
                 if (ee.length > 0) {
@@ -261,8 +268,8 @@ export class Viewer {
             const docIndex = this._reportSet.reportFiles().indexOf(file);
             if (!url.includes('/') && docIndex != -1) {
                 $(n).on("click", (e) => { 
-                    this._showDocumentAndElement(docIndex, fragment);
                     e.preventDefault(); 
+                    this._showDocumentAndElement(docIndex, fragment);
                 });
             }
             else if (file) {

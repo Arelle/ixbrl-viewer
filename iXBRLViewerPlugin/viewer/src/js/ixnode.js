@@ -15,6 +15,13 @@ import { isTransparent } from './util.js';
 
 var docOrderindex = 0;
 
+// The same as jQuery's :visible, but checkVisibility only needs the
+// document's styles, not its layout, which is slow to update for a large
+// report.
+function isRendered(e) {
+    return e.checkVisibility?.() ?? $(e).is(':visible');
+}
+
 export class IXNode {
     constructor(id, wrapperNodes, docIndex) {
         this.wrapperNodes = wrapperNodes;
@@ -46,6 +53,6 @@ export class IXNode {
     }
 
     htmlHidden() {
-        return this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is(':hidden') || this.wrapperNodes.is((i,e) => isTransparent($(e).css('color')));
+        return this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is((i, e) => !isRendered(e)) || this.wrapperNodes.is((i,e) => isTransparent($(e).css('color')));
     }
 }

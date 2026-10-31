@@ -294,6 +294,57 @@ describe("_showDocumentAndElement", () => {
     });
 });
 
+describe("_updateLink", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("shows links to files in the document set in the viewer", () => {
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        const reportSet = new ReportSet({ ...highlightReportData({}), docSetFiles: ["a.htm", "b.htm"] });
+        reportSet.setIXNodeMap({});
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframe), reportSet);
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        const doc = iframe.contentDocument;
+        const link = doc.createElement("a");
+        link.setAttribute("href", "b.htm#f1");
+        doc.body.appendChild(link);
+        viewer._updateLink(link, 0);
+
+        const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+        link.dispatchEvent(click);
+
+        expect(show).toHaveBeenCalledWith(1, "f1");
+        expect(click.defaultPrevented).toBe(true);
+        expect(link.hasAttribute("target")).toBe(false);
+    });
+
+    test("shows links to files in the linking report's document set", () => {
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        const reportSet = new ReportSet({
+            ...highlightReportData({}),
+            sourceReports: [
+                { targetReports: [highlightReportData({})], docSetFiles: ["a.htm", "b.htm"] },
+                { targetReports: [highlightReportData({})], docSetFiles: ["b.htm", "c.htm"] },
+            ],
+        });
+        reportSet.setIXNodeMap({});
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframe), reportSet);
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        const doc = iframe.contentDocument;
+        const link = doc.createElement("a");
+        link.setAttribute("href", "b.htm#f1");
+        doc.body.appendChild(link);
+        viewer._updateLink(link, 1);
+
+        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+        expect(show).toHaveBeenCalledWith(2, "f1");
+    });
+});
+
 describe("_findOrCreateWrapperNode", () => {
     afterEach(() => {
         document.body.innerHTML = "";

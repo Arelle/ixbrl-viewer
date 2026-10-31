@@ -261,11 +261,11 @@ export class Viewer {
      * All other links are forced to open in a new tab
      *
      */
-    _updateLink(n) {
+    _updateLink(n, reportIndex) {
         const url = $(n).attr("href");
         if (url !== undefined) {
             const [file, fragment] = url.split('#', 2);
-            const docIndex = this._reportSet.reportFiles().indexOf(file);
+            const docIndex = this._reportSet.reportFiles().findIndex(f => f.index === reportIndex && f.file === file);
             if (!url.includes('/') && docIndex != -1) {
                 $(n).on("click", (e) => { 
                     this._showDocumentAndElement(docIndex, fragment);
@@ -518,7 +518,7 @@ export class Viewer {
                     }
                 }
                 if (name == 'A') {
-                    this._updateLink(n);
+                    this._updateLink(n, reportIndex);
                 }
             }
         }

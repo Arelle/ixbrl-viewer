@@ -445,6 +445,32 @@ describe("_updateLink", () => {
     });
 });
 
+describe("_preProcessiXBRL", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("marks a hidden fact linked to from earlier in the document as hidden", () => {
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        $(iframe).data("report-index", 0);
+        const body = iframe.contentDocument.body;
+        body.innerHTML = `
+<p><span style="-sec-ix-hidden: h1">Hidden reference</span></p>
+<ix:header><ix:hidden>
+  <ix:nonNumeric id="h1" name="eg:Concept1">hidden one</ix:nonNumeric>
+</ix:hidden></ix:header>
+`;
+        const reportSet = new ReportSet(highlightReportData({ h1: { v: "hidden one", a: { c: "eg:Concept1" } } }));
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframe), reportSet);
+        viewer._buildContinuationMaps();
+
+        viewer._preProcessiXBRL(body, 0, 0, false);
+
+        expect(viewer._ixNodeMap[viewerUniqueId(0, "h1")].isHidden).toBe(true);
+    });
+});
+
 describe("_findOrCreateWrapperNode", () => {
     afterEach(() => {
         document.body.innerHTML = "";

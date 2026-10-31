@@ -271,6 +271,29 @@ describe("highlightAllTags", () => {
     });
 });
 
+describe("_showDocumentAndElement", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("shows the element for a fragment that isn't valid percent-encoding", () => {
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        const reportSet = new ReportSet(highlightReportData({}));
+        reportSet.setIXNodeMap({});
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframe), reportSet);
+        jest.spyOn(viewer, "selectDocument").mockImplementation(() => {});
+        const show = jest.spyOn(viewer, "showElement").mockImplementation(() => {});
+        const element = iframe.contentDocument.createElement("p");
+        element.id = "margin%";
+        iframe.contentDocument.body.appendChild(element);
+
+        viewer._showDocumentAndElement(0, "margin%");
+
+        expect(show.mock.calls[0][0].get(0)).toBe(element);
+    });
+});
+
 describe("_findOrCreateWrapperNode", () => {
     afterEach(() => {
         document.body.innerHTML = "";

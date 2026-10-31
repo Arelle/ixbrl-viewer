@@ -5,12 +5,15 @@ import $ from 'jquery'
 import { ReportSet } from "./reportset.js";
 import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { LazyViewer } from "./lazyViewer.js";
+import { ParsedContentMover } from "./parsedContentMover.js";
 import { Inspector } from "./inspector.js";
 import { initializeTheme } from './theme.js';
 import { TaxonomyNamer } from './taxonomynamer.js';
 import { FEATURE_GUIDE_LINK, FEATURE_REVIEW, FEATURE_SUPPORT_LINK, FEATURE_SURVEY_LINK, USER_GUIDE_URL, moveNonAppAttributes } from "./util";
 
 const featureFalsyValues = new Set([undefined, null, '', 'false', false]);
+const PARSED_SCREENS_SHOWN_PROMPTLY = 3;
+const PARSED_CONTENT_MOVE_INTERVAL = 100;
 
 export class iXBRLViewer {
 
@@ -219,8 +222,11 @@ export class iXBRLViewer {
         }
     }
 
+    // If the document is still being parsed, its content is moved as it is
+    // parsed, and the iframe's document is loading until it has all been moved.
     _reparentDocument() {
         const iframeContainer = $('#ixv #iframe-container');
+        const parsing = document.readyState === 'loading';
 
         const iframe = $('<iframe title="iXBRL document view" tabindex="0"/>')
             .data("report-index", 0)
@@ -229,7 +235,9 @@ export class iXBRLViewer {
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
         doc.write("<!DOCTYPE html><html><head><title></title></head><body></body></html>");
-        doc.close();
+        if (!parsing) {
+            doc.close();
+        }
 
         const titlePrefix = this.runtimeConfig.skin?.titlePrefix ?? "Inline Viewer";
         const reportTitle = $('title').text();
@@ -242,8 +250,11 @@ export class iXBRLViewer {
         $('<title>').text(docTitle).appendTo($('head'));
 
         /* Due to self-closing tags, our script tags may not be a direct child of
-         * the body tag in an HTML DOM, so move them so that they are */
-        $('body script').appendTo($('body'));
+         * the body tag in an HTML DOM, so move them so that they are.  They are
+         * in the head if the document is still being parsed. */
+        if (!parsing) {
+            $('body script').appendTo($('body'));
+        }
 
         const html = $('html');
         const body = $('body');
@@ -253,12 +264,50 @@ export class iXBRLViewer {
         moveNonAppAttributes(body.get(0), iframeBody.get(0));
         html.attr('xmlns', 'http://www.w3.org/1999/xhtml');
 
-        body.children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
+        if (parsing) {
+            this._moveWhileParsing(body.get(0), iframeBody.get(0), doc);
+        }
+        else {
+            body.children().not("script").not('#ixv').not(iframeContainer).appendTo(iframeBody);
+            this._showDocument();
+        }
 
         /* Avoid any inline styles on the old body interfering with the inspector */
         body.removeAttr('style');
-        this._showDocument();
         return iframe;
+    }
+
+    // The first screens are moved every frame, so that they are shown as soon
+    // as they are parsed, and the rest less often, as painting the document
+    // every frame slows down parsing it.
+    _moveWhileParsing(body, iframeBody, iframeDoc) {
+        // The same as is left when the document has already been parsed.
+        const keep = n => n.nodeType !== Node.ELEMENT_NODE || n.nodeName.toUpperCase() === 'SCRIPT' || n.id === 'ixv';
+        const mover = new ParsedContentMover(body, iframeBody, keep);
+        let finished = false;
+        const finish = () => {
+            if (!finished) {
+                finished = true;
+                mover.moveAll();
+                iframeDoc.close();
+                this._showDocument();
+            }
+        };
+        let filled = false;
+        const move = () => {
+            if (!finished) {
+                mover.moveParsed();
+                filled ||= iframeDoc.documentElement.scrollHeight > PARSED_SCREENS_SHOWN_PROMPTLY * iframeDoc.defaultView.innerHeight;
+                if (filled) {
+                    setTimeout(() => requestAnimationFrame(move), PARSED_CONTENT_MOVE_INTERVAL);
+                }
+                else {
+                    requestAnimationFrame(move);
+                }
+            }
+        };
+        document.addEventListener("DOMContentLoaded", finish);
+        move();
     }
 
     // Remove the style that hides the report while it is parsed, if the plugin added one.
@@ -273,13 +322,26 @@ export class iXBRLViewer {
     }
 
     _getTaxonomyData() {
-        for (let i = document.body.children.length - 1; i >= 0; i--) {
-            const elt = document.body.children[i];
-            if (elt.tagName.toUpperCase() === 'SCRIPT' && elt.getAttribute("type") === 'application/x.ixbrl-viewer+json') {
-                return elt.innerHTML;
+        for (const parent of [document.head, document.body]) {
+            for (let i = parent.children.length - 1; i >= 0; i--) {
+                const elt = parent.children[i];
+                if (elt.tagName.toUpperCase() === 'SCRIPT' && elt.getAttribute("type") === 'application/x.ixbrl-viewer+json') {
+                    return elt.innerHTML;
+                }
             }
         }
         return null;
+    }
+
+    _whenParsed() {
+        return new Promise(resolve => {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
+            }
+            else {
+                resolve();
+            }
+        });
     }
 
     _checkDocumentSetBrowserSupport() {
@@ -336,7 +398,7 @@ export class iXBRLViewer {
         const iv = this;
         const inspector = this.inspector;
     
-        this._loadRuntimeConfig().then((runtimeConfig) => {
+        this._loadRuntimeConfig().then(async (runtimeConfig) => {
             this.runtimeConfig = runtimeConfig;
             initializeTheme();
 
@@ -381,6 +443,10 @@ export class iXBRLViewer {
             iv._paintProgress = !lazy;
 
             if (!stubViewer) {
+                if (!lazy) {
+                    // Only the lazy viewer can show a document that is still being parsed.
+                    await iv._whenParsed();
+                }
                 iframes = $(iv._reparentDocument());
                 if (lazy) {
                     // Before the first layout of the moved document, so that it is only laid out once.

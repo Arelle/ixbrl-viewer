@@ -399,8 +399,8 @@ export class Viewer {
         if (!ixn) {
             ixn = new IXNode(vuid, nodes, docIndex);
             this._ixNodeMap[vuid] = ixn;
-            ixn.isHidden = isHidden;
         }
+        ixn.isHidden = isHidden;
         return ixn;
     }
 

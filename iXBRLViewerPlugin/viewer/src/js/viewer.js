@@ -19,6 +19,35 @@ function localName(e) {
     }
 }
 
+// Links and the names of the files in a document set, which are
+// percent-encoded, are both resolved against this so that they can be
+// compared however they are written.
+const DOC_SET_DIRECTORY = new URL("http://document-set.invalid/files/");
+
+// The name of the file that url refers to, if it is in the same directory as
+// the document set, or null.
+function docSetFileName(url) {
+    let resolved;
+    try {
+        resolved = new URL(url, DOC_SET_DIRECTORY);
+    }
+    catch {
+        return null;
+    }
+    const name = resolved.pathname.slice(DOC_SET_DIRECTORY.pathname.length);
+    if (resolved.origin !== DOC_SET_DIRECTORY.origin
+            || !resolved.pathname.startsWith(DOC_SET_DIRECTORY.pathname)
+            || name === "" || name.includes("/")) {
+        return null;
+    }
+    try {
+        return decodeURIComponent(name);
+    }
+    catch {
+        return name;
+    }
+}
+
 
 export class Viewer {
     constructor(iv, iframes, reportSet) {
@@ -261,12 +290,12 @@ export class Viewer {
      * All other links are forced to open in a new tab
      *
      */
-    _updateLink(n) {
+    _updateLink(n, reportIndex) {
         const url = $(n).attr("href");
         if (url !== undefined) {
             const [file, fragment] = url.split('#', 2);
-            const docIndex = this._reportSet.reportFiles().indexOf(file);
-            if (!url.includes('/') && docIndex != -1) {
+            const docIndex = this._linkDocIndex(file, reportIndex);
+            if (docIndex != -1) {
                 $(n).on("click", (e) => { 
                     e.preventDefault(); 
                     this._showDocumentAndElement(docIndex, fragment);
@@ -279,6 +308,17 @@ export class Viewer {
                 $(n).attr("target", "_blank");
             }
         }
+    }
+
+    // The index of the document in the report's document set that a link to
+    // file goes to, or -1 if it goes elsewhere.
+    _linkDocIndex(file, reportIndex) {
+        const name = docSetFileName(file);
+        if (name === null) {
+            return -1;
+        }
+        this._docSetFileNames ??= this._reportSet.reportFiles().map(f => ({ index: f.index, name: docSetFileName(f.file) }));
+        return this._docSetFileNames.findIndex(f => f.index === reportIndex && f.name === name);
     }
 
     _findOrCreateWrapperNode(domNode, inHidden) {
@@ -518,7 +558,7 @@ export class Viewer {
                     }
                 }
                 if (name == 'A') {
-                    this._updateLink(n);
+                    this._updateLink(n, reportIndex);
                 }
             }
         }

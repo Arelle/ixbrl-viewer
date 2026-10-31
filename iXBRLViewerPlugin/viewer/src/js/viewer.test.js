@@ -294,6 +294,157 @@ describe("_showDocumentAndElement", () => {
     });
 });
 
+describe("_updateLink", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("shows links to files in the document set in the viewer", () => {
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        const reportSet = new ReportSet({ ...highlightReportData({}), docSetFiles: ["a.htm", "b.htm"] });
+        reportSet.setIXNodeMap({});
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframe), reportSet);
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        const doc = iframe.contentDocument;
+        const link = doc.createElement("a");
+        link.setAttribute("href", "b.htm#f1");
+        doc.body.appendChild(link);
+        viewer._updateLink(link, 0);
+
+        const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+        link.dispatchEvent(click);
+
+        expect(show).toHaveBeenCalledWith(1, "f1");
+        expect(click.defaultPrevented).toBe(true);
+        expect(link.hasAttribute("target")).toBe(false);
+    });
+
+    function makeOverlappingDocSetsViewer() {
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        const reportSet = new ReportSet({
+            ...highlightReportData({}),
+            sourceReports: [
+                { targetReports: [highlightReportData({})], docSetFiles: ["a.htm", "b.htm"] },
+                { targetReports: [highlightReportData({})], docSetFiles: ["b.htm", "c.htm"] },
+            ],
+        });
+        reportSet.setIXNodeMap({});
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframe), reportSet);
+        return { viewer, doc: iframe.contentDocument };
+    }
+
+    test("shows links to files in the linking report's document set", () => {
+        const { viewer, doc } = makeOverlappingDocSetsViewer();
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        const link = doc.createElement("a");
+        link.setAttribute("href", "b.htm#f1");
+        doc.body.appendChild(link);
+        viewer._updateLink(link, 1);
+
+        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+        expect(show).toHaveBeenCalledWith(2, "f1");
+    });
+
+    test("updates the links in a report's documents as they are processed", () => {
+        const { viewer, doc } = makeOverlappingDocSetsViewer();
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        doc.body.innerHTML = '<p><a href="b.htm#f1">In the document set</a> <a href="other.htm">Elsewhere</a></p>';
+        viewer._buildContinuationMaps();
+        viewer._preProcessiXBRL(doc.body, 1, 2, false);
+        const [inDocSet, elsewhere] = doc.querySelectorAll("a");
+
+        const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+        inDocSet.dispatchEvent(click);
+
+        expect(show).toHaveBeenCalledWith(2, "f1");
+        expect(click.defaultPrevented).toBe(true);
+        expect(inDocSet.hasAttribute("target")).toBe(false);
+        expect(elsewhere.getAttribute("target")).toBe("_blank");
+    });
+
+    function makeLinkViewer(nDocs = 1) {
+        const iframes = Array.from({ length: nDocs }, () => document.body.appendChild(document.createElement("iframe")));
+        const reportSet = new ReportSet({ ...highlightReportData({}), docSetFiles: ["a.htm", "b%20c%281%29.htm"] });
+        reportSet.setIXNodeMap({});
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframes), reportSet);
+        return { viewer, docs: iframes.map(f => f.contentDocument) };
+    }
+
+    function addLink(doc, href) {
+        const link = doc.createElement("a");
+        link.setAttribute("href", href);
+        doc.body.appendChild(link);
+        return link;
+    }
+
+    test.each([
+        "b%20c%281%29.htm#f1",
+        "b c(1).htm#f1",
+        "./b c(1).htm#f1",
+        "b%20c(1).htm?page=2#f1",
+    ])("shows a link to %s in the viewer", (href) => {
+        const { viewer, docs } = makeLinkViewer();
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        const link = addLink(docs[0], href);
+        viewer._updateLink(link, 0);
+
+        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+        expect(show).toHaveBeenCalledWith(1, "f1");
+        expect(link.hasAttribute("target")).toBe(false);
+    });
+
+    test.each([
+        "../b%20c%281%29.htm#f1",
+        "sub/b%20c%281%29.htm#f1",
+        "http://example.com/b%20c%281%29.htm#f1",
+    ])("opens a link to %s in a new tab", (href) => {
+        const { viewer, docs } = makeLinkViewer();
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        const link = addLink(docs[0], href);
+        viewer._updateLink(link, 0);
+
+        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+        expect(show).not.toHaveBeenCalled();
+        expect(link.getAttribute("target")).toBe("_blank");
+    });
+
+    test("shows the linked element in the linked document", () => {
+        const { viewer, docs } = makeLinkViewer(2);
+        const select = jest.spyOn(viewer, "selectDocument").mockImplementation(() => {});
+        const showElement = jest.spyOn(viewer, "showElement").mockImplementation(() => {});
+        const target = docs[1].createElement("p");
+        target.id = "f1";
+        docs[1].body.appendChild(target);
+        const link = addLink(docs[0], "b%20c%281%29.htm#f1");
+        viewer._updateLink(link, 0);
+
+        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+        expect(select).toHaveBeenCalledWith(1);
+        expect(showElement.mock.calls[0][0].get(0)).toBe(target);
+    });
+
+    test("keeps the link in the viewer if showing it fails", () => {
+        const { viewer, docs } = makeLinkViewer();
+        jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => { throw new Error("Not shown"); });
+        // jsdom reports exceptions thrown by event listeners as errors.
+        const reportError = jest.spyOn(console, "error").mockImplementation(() => {});
+        const link = addLink(docs[0], "b%20c%281%29.htm#f1");
+        viewer._updateLink(link, 0);
+
+        const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+        link.dispatchEvent(click);
+        reportError.mockRestore();
+
+        expect(click.defaultPrevented).toBe(true);
+    });
+});
+
 describe("_findOrCreateWrapperNode", () => {
     afterEach(() => {
         document.body.innerHTML = "";

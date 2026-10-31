@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
+import hashlib
 import io
 import json
 import logging
@@ -49,6 +52,24 @@ LINK_QNAME_TO_LOCAL_DOCUMENTS_LINKBASE_TYPE = {
 }
 
 WIDER_NARROWER_ARCROLE = "http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower"
+
+EMBEDDED_IMAGE_EXTENSIONS = {
+    "bmp": "bmp",
+    "gif": "gif",
+    "jpeg": "jpg",
+    "jpg": "jpg",
+    "png": "png",
+    "svg+xml": "svg",
+    "webp": "webp",
+}
+EMBEDDED_IMAGE_DATA_URL = r"data:image/([a-z0-9.+-]+);base64,([a-z0-9+/=\s]+)"
+# Strings and comments are matched so that urls within them are left alone.
+EMBEDDED_IMAGE_CSS_URL_RE = re.compile(
+    r"""(?:"(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?|/\*.*?(?:\*/|\Z))"""
+    r"""|url\(\s*(["']?)""" + EMBEDDED_IMAGE_DATA_URL + r"""\1\s*\)""",
+    re.IGNORECASE | re.ASCII | re.DOTALL,
+)
+EMBEDDED_IMAGE_SRC_RE = re.compile(r"\s*" + EMBEDDED_IMAGE_DATA_URL, re.IGNORECASE | re.ASCII)
 
 
 def isInlineDoc(doc: ModelDocument | None) -> bool:
@@ -633,13 +654,17 @@ class IXBRLViewerBuilder:
             scriptUrl: str = DEFAULT_JS_FILENAME,
             showValidations: bool = True,
             packageDownloadURL: str | None = None,
+            extractImages: bool = False,
     ) -> iXBRLViewer | None:
         """
         Create an iXBRL file with XBRL data as a JSON blob, and script tags added.
         :param scriptUrl: The `src` value of the script tag that loads the viewer script.
         :param showValidations: True if validation errors should be included in output taxonomy data.
+        :param extractImages: True if images embedded in the reports should be saved as separate files.
         :return: An iXBRLViewer instance that is ready to be saved.
         """
+        if extractImages:
+            self.iv.extractEmbeddedImages()
 
         self.taxonomyData["prefixes"] = self.nsmap.prefixmap
         self.taxonomyData["roles"] = self.roleMap.prefixmap
@@ -690,6 +715,7 @@ class iXBRLViewer:
         self.filingDocuments: str | None = None
         self.cntlr = cntlr
         self.assets: list[str] = []
+        self.images: dict[str, bytes] = {}
 
     def addReportAssets(self, assets: list[str]) -> None:
         self.assets.extend(assets)
@@ -705,6 +731,49 @@ class iXBRLViewer:
 
     def addFilingDoc(self, filingDocuments: str) -> None:
         self.filingDocuments = filingDocuments
+
+    def extractEmbeddedImages(self) -> None:
+        """
+        Move base64 encoded images out of style sheets, style attributes and
+        img elements into files named by their content, to be saved alongside
+        the documents.  Browsers parse large documents slowly, and these images
+        are often most of their size.
+
+        Documents with a base element are left unchanged, as the image files
+        would not be found relative to them.
+        """
+        def replaceCSSUrl(m: re.Match[str]) -> str:
+            if m.group(2) is None:
+                return m.group(0)
+            name = self._extractImage(m.group(2), m.group(3))
+            return m.group(0) if name is None else f"url({name})"
+
+        for f in self.files:
+            root = f.xmlDocument.getroot()
+            if root.find(".//{http://www.w3.org/1999/xhtml}base") is not None:
+                continue
+            for elt in root.iter(etree.Element):
+                if elt.tag == "{http://www.w3.org/1999/xhtml}style" and elt.text is not None:
+                    elt.text = EMBEDDED_IMAGE_CSS_URL_RE.sub(replaceCSSUrl, elt.text)
+                if (style := elt.get("style")) is not None:
+                    if (newStyle := EMBEDDED_IMAGE_CSS_URL_RE.sub(replaceCSSUrl, style)) != style:
+                        elt.set("style", newStyle)
+                if elt.tag == "{http://www.w3.org/1999/xhtml}img" and (src := elt.get("src")) is not None:
+                    if (m := EMBEDDED_IMAGE_SRC_RE.fullmatch(src)) is not None:
+                        if (name := self._extractImage(m.group(1), m.group(2))) is not None:
+                            elt.set("src", name)
+
+    def _extractImage(self, mediaSubtype: str, data: str) -> str | None:
+        extension = EMBEDDED_IMAGE_EXTENSIONS.get(mediaSubtype.lower())
+        if extension is None:
+            return None
+        try:
+            image = base64.b64decode(re.sub(r"\s", "", data), validate=True)
+        except binascii.Error:
+            return None
+        name = f"ixv-image-{hashlib.sha256(image).hexdigest()[:16]}.{extension}"
+        self.images[name] = image
+        return name
 
     def save(self, destination: io.BytesIO | str, zipOutput: bool = False, copyScriptPath: Path | None = None) -> None:
         """
@@ -758,6 +827,10 @@ class iXBRLViewer:
                     with zout.open(f.filename, "w") as fout:
                         writer = XHTMLSerializer(fout)
                         writer.serialize(f.xmlDocument)
+                if self.images:
+                    self.cntlr.addToLog(f"Saving {len(self.images)} images in output zip", messageCode=INFO_MESSAGE_CODE)
+                    for name, image in self.images.items():
+                        zout.writestr(name, image)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
@@ -774,6 +847,7 @@ class iXBRLViewer:
                 with open(filename, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(f.xmlDocument)
+            self._writeImages(Path(destination))
             if self.filingDocuments:
                 filename = os.path.basename(self.filingDocuments)
                 self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
@@ -812,6 +886,7 @@ class iXBRLViewer:
                 with open(destination, "wb") as fout:
                     writer = XHTMLSerializer(fout)
                     writer.serialize(self.files[0].xmlDocument)
+                self._writeImages(Path(destination).parent)
                 if self.filingDocuments:
                     filename = os.path.basename(self.filingDocuments)
                     self.cntlr.addToLog(f"Writing {filename}", messageCode=INFO_MESSAGE_CODE)
@@ -819,6 +894,13 @@ class iXBRLViewer:
                 if copyScriptPath is not None:
                     outDirectory = Path(destination).parent
                     self._copyScript(outDirectory, copyScriptPath)
+
+    def _writeImages(self, destDirectory: Path) -> None:
+        if not self.images:
+            return
+        self.cntlr.addToLog(f"Writing {len(self.images)} images to {destDirectory}", messageCode=INFO_MESSAGE_CODE)
+        for name, image in self.images.items():
+            (destDirectory / name).write_bytes(image)
 
     def _copyScript(self, destDirectory: Path, scriptPath: Path) -> None:
         scriptDest = destDirectory / scriptPath.name

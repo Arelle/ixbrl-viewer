@@ -1,7 +1,10 @@
+import base64
+import hashlib
 import io
 import json
 import logging
 import os
+import zipfile
 from collections import defaultdict
 from unittest.mock import Mock, patch
 
@@ -17,7 +20,7 @@ from .mock_arelle import mock_arelle
 mock_arelle()
 
 from iXBRLViewerPlugin.constants import MANDATORY_FACTS
-from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewerFile
+from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewer, iXBRLViewerFile
 
 class TestNamespaceMap:
 
@@ -994,3 +997,106 @@ class TestIXBRLViewer:
             assert body[2].prefix is None
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
             assert body[3].text == "END IXBRL VIEWER EXTENSIONS"
+
+
+PNG = b"\x89PNG\r\n\x1a\nimage"
+PNG_BASE64 = base64.b64encode(PNG).decode()
+PNG_NAME = f"ixv-image-{hashlib.sha256(PNG).hexdigest()[:16]}.png"
+GIF = b"GIF89aimage"
+GIF_NAME = f"ixv-image-{hashlib.sha256(GIF).hexdigest()[:16]}.gif"
+
+
+class TestExtractEmbeddedImages:
+
+    @staticmethod
+    def viewer(*documents):
+        iv = iXBRLViewer(Mock())
+        for i, document in enumerate(documents):
+            iv.addFile(iXBRLViewerFile(f"doc{i}.html", etree.parse(io.BytesIO(document.encode()))))
+        return iv
+
+    def test_images_are_extracted(self):
+        iv = self.viewer(f"""<html xmlns="http://www.w3.org/1999/xhtml">
+            <head><style>.a {{ background: url("data:image/png;base64,{PNG_BASE64}") no-repeat }}
+            .b {{ background: URL( 'DATA:image/GIF;base64,{base64.b64encode(GIF).decode()}' ) }}</style></head>
+            <body>
+            <div style="background-image: url(data:image/png;base64,{PNG_BASE64[:8]}
+                {PNG_BASE64[8:]})">x</div>
+            <img src="data:image/png;base64,{PNG_BASE64}"/>
+            </body></html>""")
+        iv.extractEmbeddedImages()
+        root = iv.files[0].xmlDocument.getroot()
+        ns = "{http://www.w3.org/1999/xhtml}"
+        assert root.find(f"{ns}head/{ns}style").text == (
+            f".a {{ background: url({PNG_NAME}) no-repeat }}\n"
+            f"            .b {{ background: url({GIF_NAME}) }}"
+        )
+        assert root.find(f".//{ns}div").get("style") == f"background-image: url({PNG_NAME})"
+        assert root.find(f".//{ns}img").get("src") == PNG_NAME
+        assert iv.images == {PNG_NAME: PNG, GIF_NAME: GIF}
+
+    def test_unsupported_images_are_left_unchanged(self):
+        document = f"""<html xmlns="http://www.w3.org/1999/xhtml"><body>
+            <div style="background: url(data:image/x-unknown;base64,{PNG_BASE64})">x</div>
+            <div style="background: url(data:image/png;base64,not*base64)">x</div>
+            <div style="background: url(data:image/svg+xml,%3Csvg%3E)">x</div>
+            <div style="background: url(other.png)">x</div>
+            <div style="background: url(data:image/png;base64,QUJ\u212a)">x</div>
+            <img src="data:image/png;base64,{PNG_BASE64[1:]}"/>
+            <img src="data:image/png;base64,QUJ\u212a"/>
+            <object data="data:image/png;base64,{PNG_BASE64}"/>
+            </body></html>"""
+        iv = self.viewer(document)
+        iv.extractEmbeddedImages()
+        assert etree.tostring(iv.files[0].xmlDocument) == etree.tostring(etree.parse(io.BytesIO(document.encode())))
+        assert iv.images == {}
+
+    def test_urls_in_css_strings_and_comments_are_left_unchanged(self):
+        unchanged = (
+            f'.a {{ content: "url(data:image/png;base64,{PNG_BASE64})" }}\n'
+            f""".b {{ content: 'it\\'s url(data:image/png;base64,{PNG_BASE64})' }}\n"""
+            f"/* url(data:image/png;base64,{PNG_BASE64}) */\n"
+        )
+        iv = self.viewer(f"""<html xmlns="http://www.w3.org/1999/xhtml">
+            <head><style>{unchanged}.c {{ background: url(data:image/png;base64,{PNG_BASE64}) }}</style></head>
+            <body><div style='content: "url(data:image/png;base64,{PNG_BASE64})"'>x</div></body></html>""")
+        iv.extractEmbeddedImages()
+        root = iv.files[0].xmlDocument.getroot()
+        ns = "{http://www.w3.org/1999/xhtml}"
+        assert root.find(f"{ns}head/{ns}style").text == f"{unchanged}.c {{ background: url({PNG_NAME}) }}"
+        assert root.find(f".//{ns}div").get("style") == f'content: "url(data:image/png;base64,{PNG_BASE64})"'
+        assert iv.images == {PNG_NAME: PNG}
+
+    def test_documents_with_a_base_are_left_unchanged(self):
+        withBase = f"""<html xmlns="http://www.w3.org/1999/xhtml"><head><base href="https://example.com/"/></head>
+            <body><img src="data:image/png;base64,{PNG_BASE64}"/></body></html>"""
+        withoutBase = f"""<html xmlns="http://www.w3.org/1999/xhtml">
+            <body><img src="data:image/gif;base64,{base64.b64encode(GIF).decode()}"/></body></html>"""
+        iv = self.viewer(withBase, withoutBase)
+        iv.extractEmbeddedImages()
+        img = ".//{http://www.w3.org/1999/xhtml}img"
+        assert iv.files[0].xmlDocument.find(img).get("src").startswith("data:")
+        assert iv.files[1].xmlDocument.find(img).get("src") == GIF_NAME
+        assert iv.images == {GIF_NAME: GIF}
+
+    def test_images_are_saved_to_a_directory(self, tmp_path):
+        iv = self.viewer(f"""<html xmlns="http://www.w3.org/1999/xhtml"><body><img src="data:image/png;base64,{PNG_BASE64}"/></body></html>""", "<html/>")
+        iv.extractEmbeddedImages()
+        iv.save(str(tmp_path))
+        assert sorted(p.name for p in tmp_path.iterdir()) == ["doc0.html", "doc1.html", PNG_NAME]
+        assert (tmp_path / PNG_NAME).read_bytes() == PNG
+
+    def test_images_are_saved_alongside_a_file(self, tmp_path):
+        iv = self.viewer(f"""<html xmlns="http://www.w3.org/1999/xhtml"><body><img src="data:image/png;base64,{PNG_BASE64}"/></body></html>""")
+        iv.extractEmbeddedImages()
+        iv.save(str(tmp_path / "viewer.html"))
+        assert sorted(p.name for p in tmp_path.iterdir()) == [PNG_NAME, "viewer.html"]
+        assert (tmp_path / PNG_NAME).read_bytes() == PNG
+
+    def test_images_are_saved_in_a_zip(self, tmp_path):
+        iv = self.viewer(f"""<html xmlns="http://www.w3.org/1999/xhtml"><body><img src="data:image/png;base64,{PNG_BASE64}"/></body></html>""")
+        iv.extractEmbeddedImages()
+        iv.save(str(tmp_path / "viewer.zip"), zipOutput=True)
+        with zipfile.ZipFile(tmp_path / "viewer.zip") as z:
+            assert sorted(z.namelist()) == ["doc0.html", PNG_NAME]
+            assert z.read(PNG_NAME) == PNG

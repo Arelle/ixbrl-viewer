@@ -27,6 +27,7 @@
     - [Preparing an iXBRL document set](#preparing-an-ixbrl-document-set)
     - [Using build-viewer.py](#using-build-viewerpy)
   - [Stub viewer mode](#stub-viewer-mode)
+  - [Extracting embedded images](#extracting-embedded-images)
   - [Optional Features](#optional-features)
     - [Feature: Review Mode](#feature-review-mode)
   - [Runtime config](#runtime-config)
@@ -265,6 +266,14 @@ embedding the JSON data and JavaScript link in the iXBRL report:
 The downside of this mode is that due to browser security restrictions, the
 viewer cannot be loaded directly from files (using `file:` URLs); they must be
 served by a web server.
+
+## Extracting embedded images
+
+Some iXBRL reports embed their images in the report file as base64 encoded
+`data:` URLs, which can make up most of the size of the file.  Browsers take
+longer to load a larger file, so `--viewer-extract-images` can be used to save
+these images as separate files alongside the viewer instead.  The report looks
+the same, but the viewer output is no longer a single file.
 
 ## Optional Features
 

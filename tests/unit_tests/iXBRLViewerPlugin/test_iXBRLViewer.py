@@ -816,6 +816,25 @@ class TestIXBRLViewer:
         assert facts["fact_id2"]["a"]["u"] == "iso4217:USD"
         assert facts["fact_id3"]["a"]["u"] is None
 
+    def test_localDocs_ignores_comments_in_linkbase(self):
+        class QNameElement(etree.ElementBase):
+            @property
+            def qname(self):
+                return qname(self.tag)
+
+        parser = etree.XMLParser()
+        parser.set_element_class_lookup(etree.ElementDefaultClassLookup(element=QNameElement))
+        linkbase = etree.fromstring(
+            b'<linkbase xmlns="http://www.xbrl.org/2003/linkbase"><!-- comment --><presentationLink/></linkbase>',
+            parser,
+        )
+        self.modelXbrl_2.urlDocs = {
+            "/filesystem/pre.xml": Mock(type=Type.LINKBASE, basename="pre.xml", xmlRootElement=linkbase),
+        }
+        builder = IXBRLViewerBuilder(self.cntlr_mock)
+        builder.processModel(self.modelXbrl_2)
+        assert builder.currentTargetReport["localDocs"] == {"pre.xml": ["presLinkbase"]}
+
     def test_MANDATORY_FACTS_companies_house_contains_expected_facts(self):
         """
         MANDATORY_FACTS['companies-house'] should list the FRC-mandated

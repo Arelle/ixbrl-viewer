@@ -697,7 +697,7 @@ export class Viewer {
         // assigned below.
         // We can't just ignore clicks on sub elements altogether because they are
         // likely to be rendered outside the "enclosing" ixbrl-element.
-        if (!e.hasClass(".ixbrl-element")) {
+        if (!e.hasClass("ixbrl-element")) {
             e = e.closest(".ixbrl-element");
         }
         // Now find all iXBRL IDs on all ancestors in document order, making a note

@@ -32,6 +32,7 @@ export class ReportSet {
     _initialize() {
         this._items = {};
         this._facts = undefined;
+        this._factsByConcept = undefined;
         this._namespaceGroups = undefined;
         this.reports = [];
         // Build an array of footnotes IDs in document order so that we can assign
@@ -94,6 +95,32 @@ export class ReportSet {
     facts() {
         this._facts ??= Object.values(this._items).filter(i => i instanceof Fact);
         return this._facts.slice();
+    }
+
+    /*
+     * Returns the facts for any of the given concepts, in the same order as
+     * facts().
+     */
+    factsForConcepts(conceptNames) {
+        if (this._factsByConcept === undefined) {
+            this._factsByConcept = new Map();
+            this._factPositions = new Map();
+            for (const [i, f] of this.facts().entries()) {
+                this._factPositions.set(f, i);
+                const conceptFacts = this._factsByConcept.get(f.conceptName());
+                if (conceptFacts === undefined) {
+                    this._factsByConcept.set(f.conceptName(), [f]);
+                }
+                else {
+                    conceptFacts.push(f);
+                }
+            }
+        }
+        const facts = [...new Set(conceptNames)].flatMap(c => this._factsByConcept.get(c) ?? []);
+        if (conceptNames.length > 1) {
+            facts.sort((a, b) => this._factPositions.get(a) - this._factPositions.get(b));
+        }
+        return facts;
     }
 
     filingDocuments() {

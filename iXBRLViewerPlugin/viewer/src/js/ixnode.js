@@ -45,7 +45,11 @@ export class IXNode {
             .join(" ");
     }
 
+    // checkVisibility gives the same answer as jQuery's :hidden, except that
+    // content inside content-visibility hidden is hidden, but only needs the
+    // document's styles, not its layout, which is slow to update for a large
+    // report.
     htmlHidden() {
-        return this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is(':hidden') || this.wrapperNodes.is((i,e) => isTransparent($(e).css('color')));
+        return this.wrapperNodes.filter(':not(.ixbrl-no-highlight)').is((i, e) => !e.checkVisibility()) || this.wrapperNodes.is((i,e) => isTransparent($(e).css('color')));
     }
 }

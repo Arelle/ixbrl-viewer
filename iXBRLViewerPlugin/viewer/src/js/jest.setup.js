@@ -18,4 +18,19 @@ if (typeof window !== "undefined") {
         addEventListener: () => {},
         removeEventListener: () => {},
     };
+
+    // jsdom doesn't lay documents out, so only elements that aren't in a
+    // document or are inside display none count as not shown.
+    Element.prototype.checkVisibility ??= function () {
+        if (!this.isConnected) {
+            return false;
+        }
+        const view = this.ownerDocument.defaultView;
+        for (let e = this; e !== null; e = e.parentElement) {
+            if (view.getComputedStyle(e).display === "none") {
+                return false;
+            }
+        }
+        return true;
+    };
 }

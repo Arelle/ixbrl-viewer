@@ -281,6 +281,17 @@ describe("Document reparenting", () => {
         expect(shellMetas[0].getAttribute("content")).toEqual("width=device-width, initial-scale=1");
     });
 
+    test("Report hidden while parsing is shown once moved", () => {
+        const style = document.createElement("style");
+        style.id = "ixv-hide-document";
+        document.head.prepend(style);
+        const iframe = viewer._reparentDocument();
+
+        expect(document.getElementById("ixv-hide-document")).toBeNull();
+        expect(iframe.contentDocument.getElementById("ixv-hide-document")).toBeNull();
+        expect(iframe.contentDocument.getElementById("report-content")).not.toBeNull();
+    });
+
     test("Viewport meta is not duplicated", () => {
         viewer._addViewportMeta();
         viewer._addViewportMeta();

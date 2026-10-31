@@ -28,6 +28,7 @@
     - [Using build-viewer.py](#using-build-viewerpy)
   - [Stub viewer mode](#stub-viewer-mode)
   - [Pretty-printed viewer data](#pretty-printed-viewer-data)
+  - [Extracting embedded images](#extracting-embedded-images)
   - [Optional Features](#optional-features)
     - [Feature: Review Mode](#feature-review-mode)
   - [Runtime config](#runtime-config)
@@ -272,6 +273,14 @@ served by a web server.
 The JSON data block is written compactly, without indentation.  For debugging,
 the `--viewer-pretty-json` option writes it indented instead.  The data is the
 same, so the viewer behaves the same.
+
+## Extracting embedded images
+
+Some iXBRL reports embed their images in the report file as base64 encoded
+`data:` URLs, which can make up most of the size of the file.  Browsers take
+longer to load a larger file, so `--viewer-extract-images` can be used to save
+these images as separate files alongside the viewer instead.  The report looks
+the same, but the viewer output is no longer a single file.
 
 ## Optional Features
 

@@ -515,6 +515,26 @@ describe("_preProcessiXBRL", () => {
     });
 });
 
+describe("clearHighlighting", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test.each([
+        "ixbrl-selected",
+        "ixbrl-related",
+        "ixbrl-linked-highlight",
+    ])("removes %s from the report", (highlight) => {
+        const { viewer, wrapper, doc } = makeHighlightViewer(false);
+        const highlighted = appendHighlightWrapper(doc, `ixbrl-element ${highlight}`);
+
+        viewer.clearHighlighting();
+
+        expect(highlighted.className).toBe("ixbrl-element");
+        expect(wrapper.className).toBe("ixbrl-element");
+    });
+});
+
 describe("_findOrCreateWrapperNode", () => {
     afterEach(() => {
         document.body.innerHTML = "";

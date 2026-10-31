@@ -292,6 +292,32 @@ describe("Document reparenting", () => {
         expect(iframe.contentDocument.getElementById("report-content")).not.toBeNull();
     });
 
+    test("Report still being parsed is moved as it is parsed", () => {
+        const readyState = jest.spyOn(Document.prototype, "readyState", "get").mockReturnValue("loading");
+        const style = document.createElement("style");
+        style.id = "ixv-hide-document";
+        document.head.prepend(style);
+        try {
+            const iframe = viewer._reparentDocument();
+            const iframeDoc = iframe.contentDocument;
+            // The parser may still add to the last element.
+            expect(iframeDoc.getElementById("report-content").textContent).toEqual("");
+            expect(document.getElementById("ixv-hide-document")).not.toBeNull();
+
+            document.body.insertAdjacentHTML("beforeend", '<p id="more">More</p>');
+            readyState.mockReturnValue("interactive");
+            document.dispatchEvent(new Event("DOMContentLoaded"));
+
+            expect(iframeDoc.getElementById("report-content").textContent).toEqual("Report");
+            expect(iframeDoc.getElementById("more").textContent).toEqual("More");
+            expect([...document.body.children].map(e => e.id)).toEqual(["ixv"]);
+            expect(document.getElementById("ixv-hide-document")).toBeNull();
+        }
+        finally {
+            readyState.mockRestore();
+        }
+    });
+
     test("Viewport meta is not duplicated", () => {
         viewer._addViewportMeta();
         viewer._addViewportMeta();

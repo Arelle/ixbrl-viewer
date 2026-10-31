@@ -41,12 +41,12 @@ const IX_INDEX = {
 
 const FACT_IDS = ["h1", "h2", "f1", "f2", "f3", "f4", "f5", "n1", "nil1"];
 
-function reportData() {
-    const facts = Object.fromEntries(FACT_IDS.map(id => [id, { v: id, a: { c: "eg:Concept", p: "2017-01-01" } }]));
+function reportData(ixIndex = IX_INDEX, factIds = FACT_IDS) {
+    const facts = Object.fromEntries(factIds.map(id => [id, { v: id, a: { c: "eg:Concept", p: "2017-01-01" } }]));
     return {
         sourceReports: [{
             docSetFiles: ["report.htm"],
-            ixIndex: IX_INDEX,
+            ixIndex: ixIndex,
             targetReports: [{
                 concepts: { "eg:Concept": { labels: { std: { en: "A" } } } },
                 facts,
@@ -60,19 +60,19 @@ function reportData() {
     };
 }
 
-function makeIframe() {
+function makeIframe(body = DOCUMENT) {
     const iframe = document.createElement("iframe");
     document.body.appendChild(iframe);
-    iframe.contentDocument.body.innerHTML = DOCUMENT;
+    iframe.contentDocument.body.innerHTML = body;
     $(iframe).data("report-index", 0);
     return iframe;
 }
 
 const iv = { options: {}, isReviewModeEnabled: () => false, callPluginMethod: () => {} };
 
-function makeFullViewer() {
-    const iframe = makeIframe();
-    const reportSet = new ReportSet(reportData());
+function makeFullViewer(body, ixIndex, factIds) {
+    const iframe = makeIframe(body);
+    const reportSet = new ReportSet(reportData(ixIndex, factIds));
     const viewer = new Viewer(iv, $(iframe), reportSet);
     viewer._buildContinuationMaps();
     viewer._preProcessiXBRL(iframe.contentDocument.body, 0, 0, false);
@@ -81,9 +81,9 @@ function makeFullViewer() {
     return { viewer, doc: iframe.contentDocument };
 }
 
-function makeLazyViewer() {
-    const iframe = makeIframe();
-    const reportSet = new ReportSet(reportData());
+function makeLazyViewer(body, ixIndex, factIds) {
+    const iframe = makeIframe(body);
+    const reportSet = new ReportSet(reportData(ixIndex, factIds));
     const viewer = new LazyViewer(iv, $(iframe), reportSet);
     viewer._buildFromIndex();
     reportSet.setIXNodeMap(viewer._ixNodeMap);
@@ -121,6 +121,19 @@ describe("LazyViewer", () => {
         expect(lazy.docOrderItemIndex._index).toEqual(full.docOrderItemIndex._index);
         expect(lazy.continuationOfMap).toEqual(full.continuationOfMap);
         expect(lazy.itemContinuationMap).toEqual(full.itemContinuationMap);
+    });
+
+    test.each([["full", makeFullViewer], ["lazy", makeLazyViewer]])("%s viewer marks a hidden fact linked to from earlier in the document as hidden", (_, makeViewer) => {
+        const body = `
+<p><span style="-sec-ix-hidden: h1" id="link1">Hidden reference</span></p>
+<ix:header><ix:hidden>
+  <ix:nonNumeric id="h1" name="eg:Hidden1">hidden one</ix:nonNumeric>
+</ix:hidden></ix:header>
+`;
+        const ixIndex = { docs: [[["l", "link1", 0, "h1"], ["n", "h1", 1]]], continuations: {} };
+        const { viewer } = makeViewer(body, ixIndex, ["h1"]);
+
+        expect(viewer._ixNodeMap[viewerUniqueId(0, "h1")].isHidden).toBe(true);
     });
 
     test("does not modify the document until facts are needed", () => {

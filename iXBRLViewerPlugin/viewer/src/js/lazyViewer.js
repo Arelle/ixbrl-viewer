@@ -171,8 +171,8 @@ export class LazyViewer extends Viewer {
         if (!ixn) {
             ixn = new LazyIXNode(vuid, locator, docIndex, this);
             this._ixNodeMap[vuid] = ixn;
-            ixn.isHidden = isHidden;
         }
+        ixn.isHidden = isHidden;
         return ixn;
     }
 

@@ -121,6 +121,12 @@ def iXBRLViewerCommandLineOptionExtender(parser: OptionParser, *args: Any, **kwa
                       default=False,
                       dest="zipViewerOutput",
                       help="Converts the viewer output into a self contained zip")
+    parser.add_option("--viewer-extract-images",
+                      action="store_true",
+                      default=False,
+                      dest="viewerExtractImages",
+                      help="Save base64 encoded images embedded in the iXBRL report as separate files alongside the viewer,"
+                           " so that large reports load faster. The viewer output is then no longer a single file.")
 
     featureGroup = OptionGroup(parser, "Viewer Features",
                             "See viewer README for information on enabling/disabling features.")
@@ -173,6 +179,7 @@ def generateViewer(
         zipViewerOutput: bool = False,
         packageDownloadURL: str | None = None,
         copyScript: bool = True,
+        extractImages: bool = False,
 ) -> None:
     """
     Generate and save an iXBRL viewer at the given destination (file, directory, or in-memory file) with the given viewer script URL.
@@ -185,6 +192,7 @@ def generateViewer(
     :param zipViewerOutput: True if the destination is a zip archive.
     :param packageDownloadURL: Optional URL to use as the report package download URL.
     :param copyScript: Controls if the script referenced by viewerURL is copied into the output directory, or directly set as the 'src' value of the script tag in the HTML iXBRL Viewer.
+    :param extractImages: True if images embedded in the reports should be saved as separate files.
     """
     # extend XBRL-loaded run processing for this option
     abortGenerationMsg = "Skipping iXBRL Viewer generation."
@@ -225,7 +233,12 @@ def generateViewer(
             return
 
     try:
-        iv = bldr.createViewer(scriptUrl=viewerURL, showValidations=showValidationMessages, packageDownloadURL=packageDownloadURL)
+        iv = bldr.createViewer(
+            scriptUrl=viewerURL,
+            showValidations=showValidationMessages,
+            packageDownloadURL=packageDownloadURL,
+            extractImages=extractImages,
+        )
         if iv is not None:
             iv.save(saveViewerDest, zipOutput=zipViewerOutput, copyScriptPath=copyScriptPath)
     except IXBRLViewerBuilderError as ex:
@@ -268,6 +281,7 @@ def iXBRLViewerCommandLineFilingEnd(cntlr: Cntlr, options: argparse.Namespace, *
         showValidationMessages=options.validationMessages,
         zipViewerOutput=options.zipViewerOutput,
         packageDownloadURL=options.packageDownloadURL,
+        extractImages=options.viewerExtractImages,
     )
 
 

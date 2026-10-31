@@ -695,19 +695,7 @@ export class Viewer {
         let itemIDList = [];
         const viewer = this;
         let sameContentAncestorVuid;
-        // If the user clicked on a sub-element (and which is not also a proper
-        // ixbrl-element) treat as if we clicked the first non-sub-element
-        // ancestor in the DOM hierarchy - which would typically be
-        // the corresponding ixbrl-element (or one of the corresponding
-        // ixbrl-elements, in the case of nested tags)
-        // This is important in order to guarantee that sameContentAncestorId gets
-        // assigned below.
-        // We can't just ignore clicks on sub elements altogether because they are
-        // likely to be rendered outside the "enclosing" ixbrl-element.
-        if (!e.hasClass(".ixbrl-element")) {
-            e = e.closest(".ixbrl-element");
-        }
-        // Now find all iXBRL IDs on all ancestors in document order, making a note
+        // Find all iXBRL IDs on all ancestors in document order, making a note
         // of the first one (sameContentAncestorId) that has exactly the same
         // content as "e"
         e.parents(".ixbrl-element").addBack().each(function () { 

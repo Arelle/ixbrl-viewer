@@ -271,6 +271,23 @@ describe("highlightAllTags", () => {
     });
 });
 
+describe("clearHighlighting", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    test("removes every highlight from the report", () => {
+        const { viewer, wrapper, doc } = makeHighlightViewer(false);
+        const other = appendHighlightWrapper(doc, "ixbrl-element ixbrl-related ixbrl-linked-highlight");
+        wrapper.classList.add("ixbrl-selected");
+
+        viewer.clearHighlighting();
+
+        expect(wrapper.className).toBe("ixbrl-element");
+        expect(other.className).toBe("ixbrl-element");
+    });
+});
+
 describe("_findOrCreateWrapperNode", () => {
     afterEach(() => {
         document.body.innerHTML = "";

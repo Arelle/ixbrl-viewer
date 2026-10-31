@@ -215,3 +215,44 @@ describe("Fetching software credit", () => {
         expect(softwareCredits).toEqual([]);
     });
 });
+
+describe("Aligned facts", () => {
+    const fact = (c, p, extra = {}) => ({ v: 1, a: { c, p, u: "iso4217:USD", ...extra } });
+    const testReportSet = new ReportSet({
+        ...testReportData,
+        facts: {
+            a1: fact("eg:Concept1", "2018"),
+            b1: fact("eg:Concept2", "2018"),
+            a2: fact("eg:Concept1", "2019"),
+            c1: fact("eg:Concept3", "2018"),
+            b2: fact("eg:Concept2", "2019"),
+            a3: fact("eg:Concept1", "2018", { "eg:Dim": "eg:Member" }),
+            a4: fact("eg:Concept1", "2018"),
+        },
+    });
+    testReportSet._initialize();
+    const report = testReportSet.reports[0];
+    const ids = (facts) => facts.map(f => f.vuid);
+    const a1 = testReportSet.getItemById("0-a1");
+
+    test("with no covered aspects, are facts with the same aspects", () => {
+        expect(ids(report.getAlignedFacts(a1))).toEqual(["0-a1", "0-a4"]);
+    });
+
+    test("with a covered aspect, are facts with any value for it", () => {
+        expect(ids(report.getAlignedFacts(a1, { p: null }))).toEqual(["0-a1", "0-a2", "0-a4"]);
+    });
+
+    test("with a covered concept, are facts with that concept", () => {
+        expect(ids(report.getAlignedFacts(a1, { c: "eg:Concept2" }))).toEqual(["0-b1"]);
+    });
+
+    test("with covered concepts, are facts with any of them, in report order", () => {
+        expect(ids(report.getAlignedFacts(a1, { c: ["eg:Concept3", "eg:Concept2", "eg:Concept3"], p: null })))
+            .toEqual(["0-b1", "0-c1", "0-b2"]);
+    });
+
+    test("with any concept, are facts with any concept", () => {
+        expect(ids(report.getAlignedFacts(a1, { c: null }))).toEqual(["0-a1", "0-b1", "0-c1", "0-a4"]);
+    });
+});

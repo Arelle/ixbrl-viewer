@@ -116,12 +116,21 @@ export class XBRLReport {
 
     getAlignedFacts(f, coveredAspects) {
         // XXX should filter to current report facts?
-        const all = this.reportSet.facts();
-        const aligned = [];
         if (!coveredAspects) {
             coveredAspects = {};
         }
-        for (const ff of all) {
+        let candidates;
+        if (!coveredAspects.hasOwnProperty("c")) {
+            candidates = this.reportSet.factsForConcepts([f.conceptName()]);
+        }
+        else if (coveredAspects.c === null) {
+            candidates = this.reportSet.facts();
+        }
+        else {
+            candidates = this.reportSet.factsForConcepts([coveredAspects.c].flat());
+        }
+        const aligned = [];
+        for (const ff of candidates) {
             if (ff.isAligned(f, coveredAspects)) {
                 aligned.push(ff);
             }

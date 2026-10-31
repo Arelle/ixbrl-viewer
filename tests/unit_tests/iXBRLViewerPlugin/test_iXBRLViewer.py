@@ -966,6 +966,29 @@ class TestIXBRLViewer:
         assert len(texts[False]) < len(texts[True])
         assert json.loads(texts[True]) == json.loads(texts[False])
 
+    def test_addViewerData_hide_document_script(self):
+        doc = rb"""<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Report</title></head><body></body></html>"""
+        for useStubViewer, expected in ((False, True), (True, False)):
+            builder = IXBRLViewerBuilder(self.cntlr_mock, useStubViewer=useStubViewer)
+            viewer_file = iXBRLViewerFile("test.xhtml", etree.parse(io.BytesIO(doc)))
+            assert builder.addViewerData(viewer_file, "ixbrlviewer.js")
+            head = viewer_file.xmlDocument.getroot()[0]
+            assert head[0].tag == "{http://www.w3.org/1999/xhtml}title"
+            last = head[-1]
+            hides = last.tag == "{http://www.w3.org/1999/xhtml}script" and "ixv-hide-document" in (last.text or "")
+            assert hides == expected
+            if hides:
+                assert last.prefix is None
+                assert not set("<>&") & set(last.text)
+
+    def test_addViewerData_hide_document_script_without_head(self):
+        doc = rb"""<html xmlns="http://www.w3.org/1999/xhtml"><body></body></html>"""
+        viewer_file = iXBRLViewerFile("test.xhtml", etree.parse(io.BytesIO(doc)))
+        assert self.builder_1.addViewerData(viewer_file, "ixbrlviewer.js")
+        root = viewer_file.xmlDocument.getroot()
+        assert len(root) == 1
+        assert "ixv-hide-document" not in etree.tostring(root).decode()
+
 
 DOCUMENT_INDEX_DOC = b"""<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ix="http://www.xbrl.org/2013/inlineXBRL"><body>
 <ix:header><ix:hidden>

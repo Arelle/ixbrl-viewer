@@ -237,7 +237,7 @@ export class iXBRLViewer {
 
 
         $('head')
-            .children().not("script, style#ixv-style, link#ixv-style-skin, link#ixv-favicon, link#ixv-favicon-svg").appendTo($(iframe).contents().find('head'));
+            .children().not("script, style#ixv-style, style#ixv-hide-document, link#ixv-style-skin, link#ixv-favicon, link#ixv-favicon-svg").appendTo($(iframe).contents().find('head'));
 
         $('<title>').text(docTitle).appendTo($('head'));
 
@@ -257,7 +257,13 @@ export class iXBRLViewer {
 
         /* Avoid any inline styles on the old body interfering with the inspector */
         body.removeAttr('style');
+        this._showDocument();
         return iframe;
+    }
+
+    // Remove the style that hides the report while it is parsed, if the plugin added one.
+    _showDocument() {
+        document.getElementById("ixv-hide-document")?.remove();
     }
 
     _addViewportMeta() {
@@ -339,6 +345,7 @@ export class iXBRLViewer {
             // If viewer is disabled, but not in stub viewer mode, just abort
             // loading to leave the iXBRL file as-is
             if (!iv.isViewerEnabled() && !stubViewer) {
+                iv._showDocument();
                 return;
             }
 
@@ -362,6 +369,7 @@ export class iXBRLViewer {
             }
 
             if (parsedTaxonomyData === null) {
+                iv._showDocument();
                 $('#ixv .loader .text').text("Error: Could not find viewer data");
                 $('#ixv .loader').removeClass("loading");
                 return;

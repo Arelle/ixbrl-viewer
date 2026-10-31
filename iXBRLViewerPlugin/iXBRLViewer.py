@@ -61,6 +61,24 @@ IX_INDEX_KINDS = {
     "footnote": "t",
     "continuation": "c",
 }
+# Must not contain characters that are escaped in XML, as script content is
+# not unescaped when parsed as HTML.
+IX_HIDE_DOCUMENT_SCRIPT = r"""
+(function () {
+    var style = document.createElement("style");
+    style.id = "ixv-hide-document";
+    style.textContent = "body \u003e :not(#ixv):not(script) { display: none !important; }";
+    document.head.appendChild(style);
+    var show = function () { style.remove(); };
+    window.addEventListener("error", show);
+    window.addEventListener("unhandledrejection", show);
+    window.addEventListener("load", function () {
+        if (!style.hasAttribute("data-viewer")) {
+            show();
+        }
+    });
+})();
+"""
 
 
 def isInlineDoc(doc: ModelDocument | None) -> bool:
@@ -503,6 +521,9 @@ class IXBRLViewerBuilder:
             taxonomyDataJSON = json.dumps(self.taxonomyData, separators=(",", ":"), allow_nan=False)
         taxonomyDataJSON = self.escapeJSONForScriptTag(taxonomyDataJSON)
 
+        if not self.useStubViewer:
+            self.addHideDocumentScript(viewerFile)
+
         for child in viewerFile.xmlDocument.getroot():
             if child.tag == "{http://www.w3.org/1999/xhtml}body":
                 for body_child in child:
@@ -530,6 +551,24 @@ class IXBRLViewerBuilder:
                 child.append(etree.Comment("END IXBRL VIEWER EXTENSIONS"))
                 return True
         return False
+
+    def addHideDocumentScript(self, viewerFile: iXBRLViewerFile) -> None:
+        """
+        Hide the report while the browser parses it, as laying out a partly
+        parsed report again and again is most of the time taken to parse a
+        large one.  The viewer shows it again once it has moved it into its
+        frame, and it is shown on load if the viewer did not start.
+
+        It goes at the end of the head, so that it does not move any character
+        set declaration out of the part of the file used to detect it.
+        """
+        head = viewerFile.xmlDocument.getroot().find("{http://www.w3.org/1999/xhtml}head")
+        if head is None:
+            return
+        nsmap = { None: "http://www.w3.org/1999/xhtml" }
+        e = etree.SubElement(head, "{http://www.w3.org/1999/xhtml}script", nsmap = nsmap)
+        e.set("type", "text/javascript")
+        e.text = IX_HIDE_DOCUMENT_SCRIPT
 
     def getStubDocument(self) -> etree._ElementTree[etree._Element]:
         with open(os.path.join(os.path.dirname(__file__),"stubviewer.html")) as fin:

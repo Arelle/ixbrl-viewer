@@ -3,14 +3,20 @@
 export class DocOrderIndex {
     constructor() {
         this._index = [];
+        // The first position of each item, as an item that is linked to
+        // from elsewhere in the document is added more than once.
+        this._positions = new Map();
     }
 
     addItem(vuid, docIndex) {
+        if (!this._positions.has(vuid)) {
+            this._positions.set(vuid, this._index.length);
+        }
         this._index.push({vuid: vuid, docIndex: docIndex});
     }
 
     indexOf(vuid) {
-        return this._index.findIndex(n => n.vuid === vuid);
+        return this._positions.get(vuid) ?? -1;
     }
 
     length() {

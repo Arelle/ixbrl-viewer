@@ -258,7 +258,7 @@ export class Viewer {
         const url = $(n).attr("href");
         if (url !== undefined) {
             const [file, fragment] = url.split('#', 2);
-            const docIndex = this._reportSet.reportFiles().indexOf(file);
+            const docIndex = this._reportSet.reportFiles().findIndex(f => f.file === file);
             if (!url.includes('/') && docIndex != -1) {
                 $(n).on("click", (e) => { 
                     this._showDocumentAndElement(docIndex, fragment);

@@ -370,7 +370,7 @@ export class LazyViewer extends Viewer {
     _handleLinkClick(n, e) {
         const url = n.getAttribute("href");
         const [file, fragment] = url.split('#', 2);
-        const docIndex = this._reportSet.reportFiles().indexOf(file);
+        const docIndex = this._reportSet.reportFiles().findIndex(f => f.file === file);
         if (!url.includes('/') && docIndex != -1) {
             this._showDocumentAndElement(docIndex, fragment);
             e.preventDefault();

@@ -166,6 +166,25 @@ describe("LazyViewer", () => {
         expect(link.getAttribute("target")).toBe("_blank");
     });
 
+    test.each([
+        ["full", makeFullViewer, (viewer, link) => viewer._updateLink(link)],
+        ["lazy", makeLazyViewer, () => {}],
+    ])("%s viewer shows links to files in the document set in the viewer", (_, makeViewer, prepareLink) => {
+        const { viewer, doc } = makeViewer();
+        const show = jest.spyOn(viewer, "_showDocumentAndElement").mockImplementation(() => {});
+        const link = doc.createElement("a");
+        link.setAttribute("href", "report.htm#f1");
+        doc.body.appendChild(link);
+        prepareLink(viewer, link);
+
+        const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+        link.dispatchEvent(click);
+
+        expect(show).toHaveBeenCalledWith(0, "f1");
+        expect(click.defaultPrevented).toBe(true);
+        expect(link.hasAttribute("target")).toBe(false);
+    });
+
     test("wrapping one nested fact wraps its enclosing facts in document walk order", () => {
         const full = makeFullViewer();
         const lazy = makeLazyViewer();

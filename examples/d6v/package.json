@@ -10,7 +10,7 @@
     "test:ci": "jest --ci --coverage"
   },
   "dependencies": {
-    "ixbrl-viewer": "^1.5.8",
+    "ixbrl-viewer": "^1.5.9",
     "jquery": "^4.0.0"
   },
   "engines": {
@@ -20,9 +20,9 @@
     "base64-inline-loader": "^2.0.1",
     "html-loader": "^5.1.0",
     "jest": "^30.5.2",
-    "less-loader": "^13.0.0",
+    "less-loader": "^13.1.0",
     "webpack": "^5.112.2",
-    "webpack-cli": "^7.2.3"
+    "webpack-cli": "^7.3.1"
   },
   "jest": {
     "testMatch": [

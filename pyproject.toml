@@ -38,9 +38,9 @@ arelle = [
 
 [dependency-groups]
 dev = [
-    'mypy==2.4.0',
-    'pytest==9.1.1',
-    'ruff==0.17.2',
+    'mypy==2.4.1',
+    'pytest==9.2.0',
+    'ruff==0.17.3',
     'types-lxml==2026.2.16',
     'typing-extensions==4.16.0',
 ]

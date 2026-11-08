@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import os
+import zipfile
 from collections import defaultdict
 from unittest.mock import Mock, patch
 
@@ -17,7 +18,7 @@ from .mock_arelle import mock_arelle
 mock_arelle()
 
 from iXBRLViewerPlugin.constants import MANDATORY_FACTS
-from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewerFile
+from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewer, iXBRLViewerFile
 
 class TestNamespaceMap:
 
@@ -496,11 +497,13 @@ class TestIXBRLViewer:
                 creationSoftwareMatches=creationSoftwareMatches_effect,
                 type=docType,
                 basename=os.path.basename(path),
+                filepath=path,
                 xmlRootElement=Mock(
                     iterchildren=Mock(
                         return_value=[
                             Mock(qname=linkQName)] if linkQName else []
-                    )
+                    ),
+                    iter=Mock(return_value=[]),
                 )
             )
 
@@ -994,3 +997,198 @@ class TestIXBRLViewer:
             assert body[2].prefix is None
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
             assert body[3].text == "END IXBRL VIEWER EXTENSIONS"
+
+    def test_addAssets_collects_references(self):
+        """
+        Relative image references in inline documents are collected via the
+        report's FileSource; remote, data:, parent-directory and missing
+        references are skipped.
+        """
+        root = etree.fromstring(b"""
+            <html xmlns="http://www.w3.org/1999/xhtml"><body>
+                <img src="logo.jpg"/>
+                <img src="images/chart%201.png"/>
+                <img src="logo.jpg"/>
+                <img src="https://example.com/remote.jpg"/>
+                <img src="data:image/png;base64,AAAA"/>
+                <img src="../outside.jpg"/>
+                <img src="missing.jpg"/>
+                <img/>
+            </body></html>
+        """)
+        archiveDir = os.path.join(os.sep, "filing.zip")
+        reportPath = os.path.join(archiveDir, "report.htm")
+        files = {
+            os.path.join(archiveDir, "logo.jpg"): b"logo",
+            os.path.join(archiveDir, "images", "chart 1.png"): b"chart",
+            os.path.join(os.sep, "outside.jpg"): b"outside",
+        }
+        report = Mock(
+            urlDocs={
+                reportPath: Mock(type=Type.INLINEXBRL, filepath=reportPath, xmlRootElement=root),
+                "report.xsd": Mock(type=Type.SCHEMA, filepath=os.path.join(archiveDir, "report.xsd")),
+            },
+            fileSource=Mock(
+                isArchive=False,
+                exists=lambda path: path in files,
+                file=lambda path, binary: (io.BytesIO(files[path]),),
+            ),
+        )
+        builder = IXBRLViewerBuilder(self.cntlr_mock)
+        builder.addAssets(report)
+        assert builder.iv.assets == {
+            "logo.jpg": b"logo",
+            os.path.join("images", "chart 1.png"): b"chart",
+        }
+
+    def test_addAssets_collects_report_package_files(self, tmp_path):
+        """
+        Non-report files in a report package's reports directory are collected
+        even when nothing references them, at their path relative to the inline
+        document, and a file already collected from a reference is not re-read.
+        """
+        packagePath = tmp_path / "package.zip"
+        with zipfile.ZipFile(packagePath, "w") as z:
+            z.writestr("package/META-INF/reportPackage.json", "{}")
+            z.writestr("package/reports/report.xhtml", "<html/>")
+            z.writestr("package/reports/report.xsd", "<schema/>")
+            z.writestr("package/reports/logo.jpg", "logo")
+            z.writestr("package/reports/styles/report.css", "css")
+            z.writestr("package/reports/styles/font.woff", "font")
+        reportsDir = os.path.join(str(packagePath), "package", "reports")
+        root = etree.fromstring(b"""
+            <html xmlns="http://www.w3.org/1999/xhtml"><body><img src="logo.jpg"/></body></html>
+        """)
+        with zipfile.ZipFile(packagePath) as fs:
+            report = Mock(
+                urlDocs={
+                    "report.xhtml": Mock(
+                        type=Type.INLINEXBRL,
+                        filepath=os.path.join(reportsDir, "report.xhtml"),
+                        xmlRootElement=root,
+                    ),
+                },
+                fileSource=Mock(
+                    isArchive=True,
+                    fs=fs,
+                    basefile=str(packagePath),
+                    exists=lambda path: True,
+                    file=lambda path, binary: (io.BytesIO(b"referenced logo"),),
+                ),
+            )
+            builder = IXBRLViewerBuilder(self.cntlr_mock)
+            builder.addAssets(report)
+        assert builder.iv.assets == {
+            # kept from the reference, not re-read from the archive
+            "logo.jpg": b"referenced logo",
+            # .xsd isn't a report extension, so the sweep takes it, as before
+            "report.xsd": b"<schema/>",
+            os.path.join("styles", "report.css"): b"css",
+            os.path.join("styles", "font.woff"): b"font",
+        }
+
+    def test_addAssets_skips_report_package_path_traversal(self, tmp_path):
+        """
+        A zip entry whose name climbs out of the reports directory is not
+        collected, so that a crafted report cannot reach outside the output.
+        """
+        packagePath = tmp_path / "evil.zip"
+        with zipfile.ZipFile(packagePath, "w") as z:
+            z.writestr("package/reports/report.xhtml", "<html/>")
+            z.writestr("package/reports/logo.jpg", "logo")
+            z.writestr("package/reports/../../../../.bashrc", "pwned")
+        reportsDir = os.path.join(str(packagePath), "package", "reports")
+        root = etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"><body/></html>')
+        with zipfile.ZipFile(packagePath) as fs:
+            report = Mock(
+                urlDocs={
+                    "report.xhtml": Mock(
+                        type=Type.INLINEXBRL,
+                        filepath=os.path.join(reportsDir, "report.xhtml"),
+                        xmlRootElement=root,
+                    ),
+                },
+                fileSource=Mock(isArchive=True, fs=fs, basefile=str(packagePath)),
+            )
+            builder = IXBRLViewerBuilder(self.cntlr_mock)
+            builder.addAssets(report)
+        assert builder.iv.assets == {"logo.jpg": b"logo"}
+
+    def test_save_skips_assets_outside_destination(self, tmp_path):
+        """
+        An asset path that resolves outside the output is never written, for
+        directory, single file and zip destinations.
+        """
+        xml = etree.ElementTree(etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"/>'))
+        escapes = {
+            os.path.join(os.pardir, "escaped.txt"): b"escaped",
+            os.path.join("images", os.pardir, os.pardir, "escaped-too.txt"): b"escaped",
+            os.path.join(os.sep, "absolute.txt"): b"escaped",
+        }
+
+        def newViewer():
+            iv = iXBRLViewer(self.cntlr_mock)
+            iv.addFile(iXBRLViewerFile("xbrlviewer.html", xml))
+            iv.assets = {"logo.jpg": b"logo", **escapes}
+            return iv
+
+        outDir = tmp_path / "out" / "dir"
+        outDir.mkdir(parents=True)
+        newViewer().save(str(outDir))
+        assert (outDir / "logo.jpg").read_bytes() == b"logo"
+        assert sorted(p.name for p in outDir.parent.rglob("*") if p.is_file()) == ["logo.jpg", "xbrlviewer.html"]
+
+        singleDir = tmp_path / "out" / "single"
+        singleDir.mkdir()
+        newViewer().save(str(singleDir / "viewer.html"))
+        assert sorted(p.name for p in singleDir.rglob("*") if p.is_file()) == ["logo.jpg", "viewer.html"]
+
+        zipPath = tmp_path / "out" / "viewer.zip"
+        newViewer().save(str(zipPath), zipOutput=True)
+        with zipfile.ZipFile(zipPath) as z:
+            assert sorted(z.namelist()) == ["logo.jpg", "xbrlviewer.html"]
+
+    def test_save_skips_assets_on_unrelated_paths(self, tmp_path):
+        """
+        A destination and an asset path that cannot be compared, as happens on
+        Windows for paths on different drives, is skipped rather than raising.
+        """
+        xml = etree.ElementTree(etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"/>'))
+        iv = iXBRLViewer(self.cntlr_mock)
+        iv.addFile(iXBRLViewerFile("xbrlviewer.html", xml))
+        iv.assets = {"logo.jpg": b"logo"}
+        outDir = tmp_path / "dir"
+        outDir.mkdir()
+        with patch("os.path.commonpath", side_effect=ValueError("paths don't have the same drive")):
+            iv.save(str(outDir))
+        assert sorted(p.name for p in outDir.rglob("*") if p.is_file()) == ["xbrlviewer.html"]
+
+    def test_save_writes_assets(self, tmp_path):
+        """
+        Assets are written relative to the viewer output, for directory, single
+        file and zip destinations.
+        """
+        xml = etree.ElementTree(etree.fromstring(b'<html xmlns="http://www.w3.org/1999/xhtml"/>'))
+        imagePath = os.path.join("images", "chart.png")
+
+        def newViewer():
+            iv = iXBRLViewer(self.cntlr_mock)
+            iv.addFile(iXBRLViewerFile("xbrlviewer.html", xml))
+            iv.assets = {"logo.jpg": b"logo", imagePath: b"chart"}
+            return iv
+
+        outDir = tmp_path / "dir"
+        outDir.mkdir()
+        newViewer().save(str(outDir))
+        assert (outDir / "logo.jpg").read_bytes() == b"logo"
+        assert (outDir / imagePath).read_bytes() == b"chart"
+
+        newViewer().save(str(tmp_path / "single.html"))
+        assert (tmp_path / "logo.jpg").read_bytes() == b"logo"
+        assert (tmp_path / imagePath).read_bytes() == b"chart"
+
+        zipPath = tmp_path / "viewer.zip"
+        newViewer().save(str(zipPath), zipOutput=True)
+        with zipfile.ZipFile(zipPath) as z:
+            assert z.read("logo.jpg") == b"logo"
+            assert z.read("images/chart.png") == b"chart"

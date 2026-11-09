@@ -107,6 +107,11 @@ def iXBRLViewerCommandLineOptionExtender(parser: OptionParser, *args: Any, **kwa
                       action="store_true",
                       dest="useStubViewer",
                       help="Use stub viewer for faster loading of inspector (requires web server)")
+    parser.add_option("--viewer-compact-data",
+                      action="store_true",
+                      default=False,
+                      dest="viewerCompactData",
+                      help="Write the viewer data embedded in the HTML without indentation, which makes the file smaller")
     parser.add_option("--viewer-suffix",
                       action="store",
                       default="",
@@ -256,7 +261,12 @@ def iXBRLViewerCommandLineXbrlRun(
 ) -> None:
     pd = pluginData(cntlr)
     if pd.builder is None:
-        pd.builder = IXBRLViewerBuilder(cntlr, useStubViewer = options.useStubViewer, features=getFeaturesFromOptions(options))
+        pd.builder = IXBRLViewerBuilder(
+            cntlr,
+            useStubViewer = options.useStubViewer,
+            features=getFeaturesFromOptions(options),
+            compactData=getattr(options, "viewerCompactData", False),
+        )
     processModel(cntlr, modelXbrl)
 
 def iXBRLViewerCommandLineFilingEnd(cntlr: Cntlr, options: argparse.Namespace, *args: Any, **kwargs: Any) -> None:

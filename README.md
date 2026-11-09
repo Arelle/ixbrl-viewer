@@ -27,6 +27,7 @@
     - [Preparing an iXBRL document set](#preparing-an-ixbrl-document-set)
     - [Using build-viewer.py](#using-build-viewerpy)
   - [Stub viewer mode](#stub-viewer-mode)
+  - [Compact viewer data](#compact-viewer-data)
   - [Optional Features](#optional-features)
     - [Feature: Review Mode](#feature-review-mode)
   - [Runtime config](#runtime-config)
@@ -265,6 +266,14 @@ embedding the JSON data and JavaScript link in the iXBRL report:
 The downside of this mode is that due to browser security restrictions, the
 viewer cannot be loaded directly from files (using `file:` URLs); they must be
 served by a web server.
+
+## Compact viewer data
+
+By default, the JSON data block is indented, which makes it easier to read but
+larger: for a report with many facts or long text blocks, the whitespace can be
+a quarter of the generated file.  The `--viewer-compact-data` option writes the
+block without indentation.  The data is the same, so the viewer behaves the
+same.
 
 ## Optional Features
 

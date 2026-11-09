@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from collections import defaultdict
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from arelle import XbrlConst
@@ -11,10 +11,6 @@ from arelle.ModelDocument import Type
 from arelle.ModelDtsObject import ModelConcept
 from arelle.ModelValue import qname
 from lxml import etree
-
-from .mock_arelle import mock_arelle
-
-mock_arelle()
 
 from iXBRLViewerPlugin.constants import MANDATORY_FACTS
 from iXBRLViewerPlugin.iXBRLViewer import NamespaceMap, IXBRLViewerBuilder, iXBRLViewerFile
@@ -585,8 +581,6 @@ class TestIXBRLViewer:
         self.builder_doc_set = IXBRLViewerBuilder(self.cntlr_mock)
 
 
-    @patch("arelle.XbrlConst.conceptLabel", "http://www.xbrl.org/2003/arcrole/concept-label")
-    @patch("arelle.XbrlConst.conceptReference", "http://www.xbrl.org/2003/arcrole/concept-reference")
     def test_addConcept_simple_case(self):
         builder = IXBRLViewerBuilder(Mock())
         builder.currentTargetReport = builder.newTargetReport(None)
@@ -594,16 +588,12 @@ class TestIXBRLViewer:
         builder.addConcept(self.modelXbrl_1, self.cash_concept)
         assert builder.taxonomyData["sourceReports"][0]["targetReports"][0].get("concepts").get("us-gaap:Cash")
 
-    @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")
-    @patch("arelle.XbrlConst.summationItem", "http://www.xbrl.org/2003/arcrole/summation-item")
     def test_getRelationships_simple_case(self):
         modelXbrl = Mock(baseSets=defaultdict(list), relationshipSets={})
         builder = IXBRLViewerBuilder(Mock())
         result = builder.getRelationships(modelXbrl)
         assert result == {}
 
-    @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")
-    @patch("arelle.XbrlConst.summationItem", "http://www.xbrl.org/2003/arcrole/summation-item")
     def test_getRelationships_returns_a_rel(self):
         builder = IXBRLViewerBuilder(Mock())
         builder.currentTargetReport = builder.newTargetReport(None)
@@ -634,13 +624,6 @@ class TestIXBRLViewer:
         elrPrefix = builder.roleMap.getPrefix(elr)
         assert builder.currentTargetReport.get("roleDefs").get(elrPrefix).get("en") == "ELR Label"
 
-    @patch("arelle.XbrlConst.conceptLabel", "http://www.xbrl.org/2003/arcrole/concept-label")
-    @patch("arelle.XbrlConst.conceptReference", "http://www.xbrl.org/2003/arcrole/concept-reference")
-    @patch("arelle.XbrlConst.dimensionDefault", "http://xbrl.org/int/dim/arcrole/dimension-default")
-    @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")
-    @patch("arelle.XbrlConst.summationItem", "http://www.xbrl.org/2003/arcrole/summation-item")
-    @patch("arelle.XbrlConst.standardLabel", "http://www.xbrl.org/2003/role/label")
-    @patch("arelle.XbrlConst.documentationLabel", "http://www.xbrl.org/2003/role/documentation")
     def test_createViewerWithValidation(self):
         js_uri = "ixbrlviewer.js"
 
@@ -665,13 +648,6 @@ class TestIXBRLViewer:
         assert set(jsdata["sourceReports"][0]["targetReports"][0]["facts"]) == {"fact_id1", "fact_typed_dimension", "fact_dimension_missing_member"}
         assert jsdata["sourceReports"][0]["targetReports"][0]["softwareCredits"] == ["Example Software Name"]
 
-    @patch("arelle.XbrlConst.conceptLabel", "http://www.xbrl.org/2003/arcrole/concept-label")
-    @patch("arelle.XbrlConst.conceptReference", "http://www.xbrl.org/2003/arcrole/concept-reference")
-    @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")
-    @patch("arelle.XbrlConst.summationItem", "http://www.xbrl.org/2003/arcrole/summation-item")
-    @patch("arelle.XbrlConst.standardLabel", "http://www.xbrl.org/2003/role/label")
-    @patch("arelle.XbrlConst.documentationLabel", "http://www.xbrl.org/2003/role/documentation")
-    @patch("arelle.XbrlConst.dimensionDefault", "http://xbrl.org/int/dim/arcrole/dimension-default")
     def test_createViewer(self):
         js_uri = "ixbrlviewer.js"
         builder = IXBRLViewerBuilder(self.cntlr_mock)
@@ -711,13 +687,6 @@ class TestIXBRLViewer:
 
         assert jsdata["sourceReports"][0]["docSetFiles"] == ["a.html"]
 
-    @patch("arelle.XbrlConst.conceptLabel", "http://www.xbrl.org/2003/arcrole/concept-label")
-    @patch("arelle.XbrlConst.conceptReference", "http://www.xbrl.org/2003/arcrole/concept-reference")
-    @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")
-    @patch("arelle.XbrlConst.summationItem", "http://www.xbrl.org/2003/arcrole/summation-item")
-    @patch("arelle.XbrlConst.standardLabel", "http://www.xbrl.org/2003/role/label")
-    @patch("arelle.XbrlConst.documentationLabel", "http://www.xbrl.org/2003/role/documentation")
-    @patch("arelle.XbrlConst.dimensionDefault", "http://xbrl.org/int/dim/arcrole/dimension-default")
     def test_createStubViewer(self):
         js_uri = "ixbrlviewer.js"
         builder = IXBRLViewerBuilder(self.cntlr_mock, useStubViewer = True)
@@ -757,13 +726,6 @@ class TestIXBRLViewer:
 
         assert jsdata["sourceReports"][0]["docSetFiles"] == [ "a.html" ]
 
-    @patch("arelle.XbrlConst.conceptLabel", "http://www.xbrl.org/2003/arcrole/concept-label")
-    @patch("arelle.XbrlConst.conceptReference", "http://www.xbrl.org/2003/arcrole/concept-reference")
-    @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")
-    @patch("arelle.XbrlConst.summationItem", "http://www.xbrl.org/2003/arcrole/summation-item")
-    @patch("arelle.XbrlConst.standardLabel", "http://www.xbrl.org/2003/role/label")
-    @patch("arelle.XbrlConst.documentationLabel", "http://www.xbrl.org/2003/role/documentation")
-    @patch("arelle.XbrlConst.dimensionDefault", "http://xbrl.org/int/dim/arcrole/dimension-default")
     def test_createViewer_docset(self):
         js_uri = "ixbrlviewer.js"
         self.builder_doc_set.processModel(self.modelXbrlDocSet)
@@ -786,13 +748,6 @@ class TestIXBRLViewer:
             "b.html"
         ]
 
-    @patch("arelle.XbrlConst.conceptLabel", "http://www.xbrl.org/2003/arcrole/concept-label")
-    @patch("arelle.XbrlConst.conceptReference", "http://www.xbrl.org/2003/arcrole/concept-reference")
-    @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")
-    @patch("arelle.XbrlConst.dimensionDefault", "http://xbrl.org/int/dim/arcrole/dimension-default")
-    @patch("arelle.XbrlConst.summationItem", "http://www.xbrl.org/2003/arcrole/summation-item")
-    @patch("arelle.XbrlConst.standardLabel", "http://www.xbrl.org/2003/role/label")
-    @patch("arelle.XbrlConst.documentationLabel", "http://www.xbrl.org/2003/role/documentation")
     def test_createViewer_bad_path(self):
         js_uri = "ixbrlviewer.js"
         builder = IXBRLViewerBuilder(self.cntlr_mock)

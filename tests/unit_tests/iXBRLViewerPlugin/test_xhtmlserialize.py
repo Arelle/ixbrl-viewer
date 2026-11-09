@@ -2,10 +2,6 @@ import io
 
 import lxml
 
-from .mock_arelle import mock_arelle
-
-mock_arelle()
-
 from iXBRLViewerPlugin.xhtmlserialize import XHTMLSerializer
 
 

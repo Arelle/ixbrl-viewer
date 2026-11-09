@@ -718,21 +718,22 @@ class TestIXBRLViewer:
     @patch("arelle.XbrlConst.standardLabel", "http://www.xbrl.org/2003/role/label")
     @patch("arelle.XbrlConst.documentationLabel", "http://www.xbrl.org/2003/role/documentation")
     @patch("arelle.XbrlConst.dimensionDefault", "http://xbrl.org/int/dim/arcrole/dimension-default")
-    def test_createViewerCompactData(self):
+    def test_createViewerPrettyJSON(self):
         js_uri = "ixbrlviewer.js"
         texts = {}
-        for compactData in (False, True):
-            builder = IXBRLViewerBuilder(self.cntlr_mock, compactData=compactData)
+        for prettyJSON in (False, True):
+            builder = IXBRLViewerBuilder(self.cntlr_mock, prettyJSON=prettyJSON)
             builder.processModel(self.modelXbrl_1)
             result = builder.createViewer(js_uri, showValidations = False)
             body = result.files[0].xmlDocument.getroot()[0]
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
-            texts[compactData] = body[2].text
+            texts[prettyJSON] = body[2].text
 
-        assert "\n" in texts[False]
-        assert "\n" not in texts[True]
-        assert len(texts[True]) < len(texts[False])
+        assert "\n" not in texts[False]
+        assert "\n  \"" in texts[True]
+        assert len(texts[False]) < len(texts[True])
         assert json.loads(texts[True]) == json.loads(texts[False])
+
     @patch("arelle.XbrlConst.conceptLabel", "http://www.xbrl.org/2003/arcrole/concept-label")
     @patch("arelle.XbrlConst.conceptReference", "http://www.xbrl.org/2003/arcrole/concept-reference")
     @patch("arelle.XbrlConst.parentChild", "http://www.xbrl.org/2003/arcrole/parent-child")

@@ -65,9 +65,9 @@ parser.add_argument("--out", "-o", help="File or directory to write output to", 
 parser.add_argument("--use-stub-viewer",
                     action="store_true",
                     help="Use stub viewer for faster loading of inspector (requires web server)")
-parser.add_argument("--compact-data",
+parser.add_argument("--pretty-json",
                     action="store_true",
-                    help="Write the viewer data without indentation, which makes the file smaller")
+                    help="Indent the viewer data, for debugging. By default it is written compactly.")
 parser.add_argument("files", metavar="FILES", nargs="+",
                     help="Files to process")
 featureGroup = parser.add_argument_group("Viewer Features")
@@ -78,7 +78,7 @@ for featureConfig in FEATURE_CONFIGS:
 args = parser.parse_args()
 
 cntlr = CntlrCreateViewer()
-pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer = args.use_stub_viewer, compactData = args.compact_data)
+pluginData(cntlr).builder = IXBRLViewerBuilder(cntlr, useStubViewer = args.use_stub_viewer, prettyJSON = args.pretty_json)
 cntlr.startLogging(
     logFileName="logToPrint",
     logFormat="[%(messageCode)s] %(message)s - %(file)s",

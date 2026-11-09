@@ -141,7 +141,7 @@ class IXBRLViewerBuilder:
         basenameSuffix: str = "",
         useStubViewer: bool = False,
         features: dict[str, Any] | None = None,
-        compactData: bool = False,
+        prettyJSON: bool = False,
     ):
         if features is None:
             features = {}
@@ -159,7 +159,7 @@ class IXBRLViewerBuilder:
         self.basenameSuffix = basenameSuffix
         self.currentTargetReport: dict[str, Any] | None = None
         self.useStubViewer = useStubViewer
-        self.compactData = compactData
+        self.prettyJSON = prettyJSON
         self.cntlr = cntlr
 
         self.idGen = 0
@@ -485,10 +485,10 @@ class IXBRLViewerBuilder:
         return numeratorsString
 
     def addViewerData(self, viewerFile: iXBRLViewerFile, scriptUrl: str) -> bool:
-        if self.compactData:
-            taxonomyDataJSON = json.dumps(self.taxonomyData, separators=(",", ":"), allow_nan=False)
+        if self.prettyJSON:
+            taxonomyDataJSON = json.dumps(self.taxonomyData, indent=2, allow_nan=False)
         else:
-            taxonomyDataJSON = json.dumps(self.taxonomyData, indent=1, allow_nan=False)
+            taxonomyDataJSON = json.dumps(self.taxonomyData, separators=(",", ":"), allow_nan=False)
         taxonomyDataJSON = self.escapeJSONForScriptTag(taxonomyDataJSON)
 
         for child in viewerFile.xmlDocument.getroot():

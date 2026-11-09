@@ -384,6 +384,17 @@ describe("Section grouping", () => {
         expect(outline.sectionFacts["elr1"][0].localId()).toEqual("f1");
 
     });
+
+    test("Groups for a fact in a group with only hidden facts", () => {
+        const reportSet = testReportSet(["f1", "f2"]);
+        const f2 = getFact(reportSet, "f2");
+        f2.ixNode.isHidden = true;
+        const outline = new DocumentOutline(reportSet.reports[0]);
+        expect(outline.sectionFacts["elr3"]).toBeUndefined();
+        expect(outline.factInGroup(f2, "elr3")).toBe(true);
+        expect(outline.groupsForFact(f2)).toEqual([]);
+        expect(outline.groupsForFact(getFact(reportSet, "f1")).map(g => g.elr)).toEqual(["elr1"]);
+    });
 });
 
 describe("No presentation", () => {

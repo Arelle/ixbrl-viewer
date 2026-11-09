@@ -27,6 +27,7 @@
     - [Preparing an iXBRL document set](#preparing-an-ixbrl-document-set)
     - [Using build-viewer.py](#using-build-viewerpy)
   - [Stub viewer mode](#stub-viewer-mode)
+  - [Pretty-printed viewer data](#pretty-printed-viewer-data)
   - [Optional Features](#optional-features)
     - [Feature: Review Mode](#feature-review-mode)
   - [Runtime config](#runtime-config)
@@ -265,6 +266,12 @@ embedding the JSON data and JavaScript link in the iXBRL report:
 The downside of this mode is that due to browser security restrictions, the
 viewer cannot be loaded directly from files (using `file:` URLs); they must be
 served by a web server.
+
+## Pretty-printed viewer data
+
+The JSON data block is written compactly, without indentation.  For debugging,
+the `--viewer-pretty-json` option writes it indented instead.  The data is the
+same, so the viewer behaves the same.
 
 ## Optional Features
 

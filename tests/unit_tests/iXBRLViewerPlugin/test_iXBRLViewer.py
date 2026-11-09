@@ -994,3 +994,19 @@ class TestIXBRLViewer:
             assert body[2].prefix is None
             assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
             assert body[3].text == "END IXBRL VIEWER EXTENSIONS"
+
+    def test_createViewerPrettyJSON(self):
+        js_uri = "ixbrlviewer.js"
+        texts = {}
+        for prettyJSON in (False, True):
+            builder = IXBRLViewerBuilder(self.cntlr_mock, prettyJSON=prettyJSON)
+            builder.processModel(self.modelXbrl_1)
+            result = builder.createViewer(js_uri, showValidations = False)
+            body = result.files[0].xmlDocument.getroot()[0]
+            assert body[2].attrib.get("type") == "application/x.ixbrl-viewer+json"
+            texts[prettyJSON] = body[2].text
+
+        assert "\n" not in texts[False]
+        assert '\n  "' in texts[True]
+        assert len(texts[False]) < len(texts[True])
+        assert json.loads(texts[True]) == json.loads(texts[False])

@@ -107,6 +107,11 @@ def iXBRLViewerCommandLineOptionExtender(parser: OptionParser, *args: Any, **kwa
                       action="store_true",
                       dest="useStubViewer",
                       help="Use stub viewer for faster loading of inspector (requires web server)")
+    parser.add_option("--viewer-pretty-json",
+                      action="store_true",
+                      default=False,
+                      dest="viewerPrettyJSON",
+                      help="Indent the viewer data embedded in the HTML, for debugging. By default it is written compactly.")
     parser.add_option("--viewer-suffix",
                       action="store",
                       default="",
@@ -256,7 +261,12 @@ def iXBRLViewerCommandLineXbrlRun(
 ) -> None:
     pd = pluginData(cntlr)
     if pd.builder is None:
-        pd.builder = IXBRLViewerBuilder(cntlr, useStubViewer = options.useStubViewer, features=getFeaturesFromOptions(options))
+        pd.builder = IXBRLViewerBuilder(
+            cntlr,
+            useStubViewer = options.useStubViewer,
+            features=getFeaturesFromOptions(options),
+            prettyJSON=getattr(options, "viewerPrettyJSON", False),
+        )
     processModel(cntlr, modelXbrl)
 
 def iXBRLViewerCommandLineFilingEnd(cntlr: Cntlr, options: argparse.Namespace, *args: Any, **kwargs: Any) -> None:

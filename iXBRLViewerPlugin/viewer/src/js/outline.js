@@ -151,7 +151,7 @@ export class DocumentOutline {
     groupsForFact(fact) {
         const factGroups = [];
         for (const group of this.report.relationshipGroups("pres")) {
-            if (this.factInGroup(fact, group)) {
+            if (group in this.sectionFacts && this.factInGroup(fact, group)) {
                 factGroups.push({ elr: group, fact: this.sectionFacts[group][0], report: this.report});
             }
         }

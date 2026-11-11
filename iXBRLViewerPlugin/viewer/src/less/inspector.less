@@ -932,33 +932,32 @@ a {
     margin-bottom: 1rem;
 
     .dimension {
-      position: relative;
-      margin: 1.5rem 0 1.5rem 1rem;
+      display: grid;
+      grid-template-columns: 2.3rem auto auto 1fr;
+      align-items: center;
+      margin: 1.5rem 0 1.5rem -1.3rem;
       overflow-wrap: anywhere;
 
       &::before {
         .icon-dimension();
 
         color: var(--colour-primary);
-        position: absolute;
-        top: 0;
-        left: -2.3rem;
         font-size: 120%;
       }
     }
 
     .dimension-value {
-      position: relative;
+      display: grid;
+      grid-template-columns: 2.3rem 1fr;
+      grid-column: 1 / -1;
+      align-items: center;
       margin: 1.5rem 0 1.5rem 3.5rem;
       overflow-wrap: anywhere;
 
       &::before {
         .icon-dimension-member();
 
-        position: absolute;
         color: var(--colour-primary);
-        top: 0;
-        left: -2.3rem;
         font-size: 120%;
       }
     }

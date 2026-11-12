@@ -1,6 +1,5 @@
 // See COPYRIGHT.md for copyright information
 
-const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
@@ -54,8 +53,4 @@ module.exports = {
 
 
   },
-  plugins: [
-    // Ignore all locale files of moment.js
-    new webpack.IgnorePlugin({ resourceRegExp: /^\.\/locale$/, contextRegExp: /moment$/ }),
-  ]
 };

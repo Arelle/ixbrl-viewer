@@ -41,8 +41,7 @@ export class Period {
 
 
     /*
-     * Returns the date (instant) or end date (duration) of the period as a moment
-     * object
+     * Returns the date (instant) or end date (duration) of the period as a Date
      */
     to() {
         if (this._p && this._p !== 'f') {
@@ -57,7 +56,7 @@ export class Period {
     }
 
     /*
-     * Returns null (instant) or start date (duration) as a moment object.
+     * Returns null (instant) or start date (duration) as a Date.
      */
     from() {
         if (this._p && this._p.includes('/')) {
@@ -81,8 +80,8 @@ export class Period {
         if (t1 !== 'd') {
             return true;
         }
-        const d1 = op.to().toDate() - op.from().toDate();
-        const d2 = this.to().toDate() - this.from().toDate();
+        const d1 = op.to() - op.from();
+        const d2 = this.to() - this.from();
         if (Math.abs(d1-d2) < 0.1 * (d1+d2)) {
             return true;
         }

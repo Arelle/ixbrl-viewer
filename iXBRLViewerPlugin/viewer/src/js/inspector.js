@@ -1070,7 +1070,7 @@ export class Inspector {
             $(".text", overlay).text(i18next.t("search.tryAgainDifferentKeywords"));
             overlay.show();
         }
-        const totalFacts = this._reportSet.facts().length;
+        const totalFacts = this.summary.totalFacts();
         $("#matching-facts-summary").text(i18next.t("search.matchingFactsSummary", {nMatches: results.length, nTotal: totalFacts}));
         $("#search-filter-match-count").text(results.length);
         /* Don't highlight search results if there's no search string */

@@ -1,6 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
-import { xbrlDateToMoment, momentToHuman } from "./util.js"
+import { xbrlDateToDate, dateToHuman } from "./util.js"
 
 export class Period {
     constructor(p) {
@@ -31,10 +31,10 @@ export class Period {
         }
         else if (!this._p.includes('/')) {
             /* instant */
-            s = momentToHuman(this.to(), true);
+            s = dateToHuman(this.to(), true);
         }
         else {
-            s = momentToHuman(this.from(), false) + " to " + momentToHuman(this.to(), true);
+            s = dateToHuman(this.from(), false) + " to " + dateToHuman(this.to(), true);
         }
         return s;
     }
@@ -46,10 +46,10 @@ export class Period {
     to() {
         if (this._p && this._p !== 'f') {
             if (this._p.includes('/')) {
-                return xbrlDateToMoment(this._p.split('/')[1]);
+                return xbrlDateToDate(this._p.split('/')[1]);
             }
             else {
-                return xbrlDateToMoment(this._p);
+                return xbrlDateToDate(this._p);
             }
         }
         return null;
@@ -60,7 +60,7 @@ export class Period {
      */
     from() {
         if (this._p && this._p.includes('/')) {
-            return xbrlDateToMoment(this._p.split('/')[0]);
+            return xbrlDateToDate(this._p.split('/')[0]);
         }
         return null;
     }

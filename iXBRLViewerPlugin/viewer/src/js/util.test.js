@@ -1,6 +1,6 @@
 // See COPYRIGHT.md for copyright information
 
-import { xbrlDateToMoment, momentToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel, getIXHiddenLinkStyle, runGenerator } from "./util.js"
+import { xbrlDateToDate, dateToHuman, formatNumber, wrapLabel, escapeRegex, truncateLabel, getIXHiddenLinkStyle, runGenerator } from "./util.js"
 import { MessageChannel as NodeMessageChannel } from 'worker_threads';
 
 describe("runGenerator", () => {
@@ -86,91 +86,91 @@ describe("runGenerator", () => {
     });
 });
 
-describe("xbrlDateToMoment", () => {
+describe("xbrlDateToDate", () => {
     test("Untimezoned dates should be treated as UTC", () => {
-        expect(xbrlDateToMoment("2010-06-01")).toEqual(new Date("2010-06-01"));
+        expect(xbrlDateToDate("2010-06-01")).toEqual(new Date("2010-06-01"));
     });
     test("Timezoned dates should be supported", () => {
-        expect(xbrlDateToMoment("2010-06-01Z")).toEqual(new Date("2010-06-01"));
-        expect(xbrlDateToMoment("2010-06-01+00:00")).toEqual(new Date("2010-06-01"));
-        expect(xbrlDateToMoment("2010-06-01+00")).toEqual(new Date("2010-06-01"));
+        expect(xbrlDateToDate("2010-06-01Z")).toEqual(new Date("2010-06-01"));
+        expect(xbrlDateToDate("2010-06-01+00:00")).toEqual(new Date("2010-06-01"));
+        expect(xbrlDateToDate("2010-06-01+00")).toEqual(new Date("2010-06-01"));
     });
 
     test("Timezoned dates are not treated as UTC", () => {
-        expect(xbrlDateToMoment("2010-06-01+01")).toEqual(new Date("2010-05-31T23:00:00Z"));
+        expect(xbrlDateToDate("2010-06-01+01")).toEqual(new Date("2010-05-31T23:00:00Z"));
     });
 
     test("Date with zero time component and no TZ is equal to date in UTC", () => {
-        expect(xbrlDateToMoment("2010-06-01T00:00:00")).toEqual(new Date("2010-06-01"));
+        expect(xbrlDateToDate("2010-06-01T00:00:00")).toEqual(new Date("2010-06-01"));
     });
 
     test("Datetime with zero time component and explicit TZ is equal to date in UTC", () => {
-        expect(xbrlDateToMoment("2010-06-01T00:00:00Z")).toEqual(new Date("2010-06-01"));
+        expect(xbrlDateToDate("2010-06-01T00:00:00Z")).toEqual(new Date("2010-06-01"));
     });
 
     test("Datetime with non-zero time component keeps its time in UTC", () => {
-        expect(xbrlDateToMoment("2010-06-01T02:00:00")).toEqual(new Date("2010-06-01T02:00:00Z"));
-        expect(xbrlDateToMoment("2010-06-01T02:00:00Z")).toEqual(new Date("2010-06-01T02:00:00Z"));
+        expect(xbrlDateToDate("2010-06-01T02:00:00")).toEqual(new Date("2010-06-01T02:00:00Z"));
+        expect(xbrlDateToDate("2010-06-01T02:00:00Z")).toEqual(new Date("2010-06-01T02:00:00Z"));
     });
 
     test("Datetime with time that cancels TZ is equal to date", () => {
-        expect(xbrlDateToMoment("2010-06-01T02:00:00+02")).toEqual(new Date("2010-06-01"));
+        expect(xbrlDateToDate("2010-06-01T02:00:00+02")).toEqual(new Date("2010-06-01"));
     });
 
     test("Offsets with minutes are supported, with or without a colon", () => {
-        expect(xbrlDateToMoment("2018-06-01T02:00:00+05:30")).toEqual(new Date("2018-05-31T20:30:00Z"));
-        expect(xbrlDateToMoment("2018-06-01T02:00:00-0800")).toEqual(new Date("2018-06-01T10:00:00Z"));
+        expect(xbrlDateToDate("2018-06-01T02:00:00+05:30")).toEqual(new Date("2018-05-31T20:30:00Z"));
+        expect(xbrlDateToDate("2018-06-01T02:00:00-0800")).toEqual(new Date("2018-06-01T10:00:00Z"));
     });
 
     test("End of day time rolls over to the next day", () => {
-        expect(xbrlDateToMoment("2018-12-31T24:00:00")).toEqual(new Date("2019-01-01"));
+        expect(xbrlDateToDate("2018-12-31T24:00:00")).toEqual(new Date("2019-01-01"));
     });
 
     test("Fractional seconds and times without seconds are supported", () => {
-        expect(xbrlDateToMoment("2018-06-01T12:30:00.5Z")).toEqual(new Date("2018-06-01T12:30:00.500Z"));
-        expect(xbrlDateToMoment("2018-06-01T02:00")).toEqual(new Date("2018-06-01T02:00:00Z"));
+        expect(xbrlDateToDate("2018-06-01T12:30:00.5Z")).toEqual(new Date("2018-06-01T12:30:00.500Z"));
+        expect(xbrlDateToDate("2018-06-01T02:00")).toEqual(new Date("2018-06-01T02:00:00Z"));
     });
 
     test("Years before 100 are not treated as 20th century years", () => {
-        expect(xbrlDateToMoment("0099-01-01").getUTCFullYear()).toBe(99);
+        expect(xbrlDateToDate("0099-01-01").getUTCFullYear()).toBe(99);
     });
 
     test("Malformed or out of range dates are invalid", () => {
         for (const s of ["garbage", "2021-02-29", "2018-13-01", "2018-06-00", "2018-06-01T24:30:00", "2018-06-01T12:60:00"]) {
-            expect(Number.isNaN(xbrlDateToMoment(s).getTime())).toBe(true);
+            expect(Number.isNaN(xbrlDateToDate(s).getTime())).toBe(true);
         }
     });
 });
 
-describe("momentToHuman", () => {
+describe("dateToHuman", () => {
     test("Simple date with no time (from string)", () => {
-        expect(momentToHuman(new Date("2018-06-01"))).toBe("1 Jun 2018")
+        expect(dateToHuman(new Date("2018-06-01"))).toBe("1 Jun 2018")
     });
 
     test("Simple date with non-GMT timezone but no time (from string)", () => {
         /* I'm not sure that this is what we actually want, but I don't think
          * timezones other than "Z" and "unspecified" are actually in use */
-        expect(momentToHuman(new Date("2018-06-01T00:00:00+03:00"))).toBe("31 May 2018 21:00:00")
+        expect(dateToHuman(new Date("2018-06-01T00:00:00+03:00"))).toBe("31 May 2018 21:00:00")
     });
 
     test("Simple date with time from string", () => {
-        expect(momentToHuman(xbrlDateToMoment("2018-01-01T07:08:00"))).toBe("1 Jan 2018 07:08:00")
+        expect(dateToHuman(xbrlDateToDate("2018-01-01T07:08:00"))).toBe("1 Jan 2018 07:08:00")
     });
 
     test("Simple date with time from string with timezone", () => {
-        expect(momentToHuman(new Date("2018-01-01T07:08:00Z"))).toBe("1 Jan 2018 07:08:00")
+        expect(dateToHuman(new Date("2018-01-01T07:08:00Z"))).toBe("1 Jan 2018 07:08:00")
     });
 
     test("Adjusted date should give previous day", () => {
-        expect(momentToHuman(new Date("2018-01-01"),true)).toBe("31 Dec 2017")
+        expect(dateToHuman(new Date("2018-01-01"),true)).toBe("31 Dec 2017")
     });
 
     test("Adjust does not have any effect if there's a time componetn", () => {
-        expect(momentToHuman(new Date("2018-01-01T09:08:07Z"),true)).toBe("1 Jan 2018 09:08:07")
+        expect(dateToHuman(new Date("2018-01-01T09:08:07Z"),true)).toBe("1 Jan 2018 09:08:07")
     });
 
     test("Invalid dates", () => {
-        expect(momentToHuman(new Date(NaN))).toBe("Invalid date")
+        expect(dateToHuman(new Date(NaN))).toBe("Invalid date")
     });
 });
 

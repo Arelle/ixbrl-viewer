@@ -80,7 +80,7 @@ const MONTH_ABBREVIATIONS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "A
  *      "Jan 1 2018 to Dec 31 2018"
  *
  */
-export function momentToHuman(d, adjust) {
+export function dateToHuman(d, adjust) {
     if (Number.isNaN(d.getTime())) {
         return "Invalid date";
     }
@@ -178,7 +178,7 @@ const XBRL_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\
  *
  * Returns an invalid Date if the string is malformed or out of range.
  */
-export function xbrlDateToMoment(dateString) {
+export function xbrlDateToDate(dateString) {
     const match = XBRL_DATE_RE.exec(dateString);
     if (match === null) {
         return new Date(NaN);

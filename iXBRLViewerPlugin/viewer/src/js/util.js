@@ -1,6 +1,5 @@
 // See COPYRIGHT.md for copyright information
 
-import moment from "moment";
 import Decimal from "decimal.js";
 
 export const SHOW_FACT = 'SHOW_FACT';
@@ -69,24 +68,32 @@ export const ZOOM_LEVELS = [
 
 export const FACTS_PER_GROUP = 20;
 
+const MONTH_ABBREVIATIONS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 /* 
- * Takes a moment.js oject and converts it to a human readable date, or date
- * and time if the time component is not midnight.  Adjust specifies that a
- * date (but not a date time) should be shown as the day before.  This is to
- * satisfy the human convention of describing durations using inclusive dates.
+ * Takes a Date and converts it to a human readable UTC date, or date and time
+ * if the time component is not midnight.  Adjust specifies that a date (but
+ * not a date time) should be shown as the day before.  This is to satisfy the
+ * human convention of describing durations using inclusive dates.
  *
  * i.e. 2018-01-01T00:00:00 to 2019-01-01T00:00:00 is described as
  *      "Jan 1 2018 to Dec 31 2018"
  *
  */
 export function momentToHuman(d, adjust) {
-    if (d.hours() + d.minutes() + d.seconds() === 0) { 
-        if (adjust) {
-            d = d.clone().subtract(1, 'day');
-        }
-        return d.format('D MMM Y');
+    if (Number.isNaN(d.getTime())) {
+        return "Invalid date";
     }
-    return d.format("D MMM Y HH:mm:ss");
+    const pad = n => String(n).padStart(2, "0");
+    const formatDate = date =>
+        `${date.getUTCDate()} ${MONTH_ABBREVIATIONS[date.getUTCMonth()]} ${String(date.getUTCFullYear()).padStart(4, "0")}`;
+    if (d.getUTCHours() + d.getUTCMinutes() + d.getUTCSeconds() === 0) {
+        if (adjust) {
+            d = new Date(d.getTime() - 24 * 60 * 60 * 1000);
+        }
+        return formatDate(d);
+    }
+    return `${formatDate(d)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
 }
 
 /*
@@ -158,26 +165,39 @@ export function truncateLabel(label, length) {
     return t;
 }
 
+const XBRL_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?)?(?:Z|([+-])(\d{2})(?::?(\d{2}))?)?$/;
+
 /* 
- * The JSON format supports datetimes being abbreviated to just xsd:dates.
- * moment.js doesn't support timezoned dates, so fix them to midnight before
- * passing to moment 
+ * Parses a date or datetime from the JSON format into a Date.  The JSON
+ * format supports datetimes being abbreviated to just xsd:dates, and dates
+ * and times without a timezone are treated as UTC.
  *
  * Note that the strings we're working with are not raw XBRL 2.1 dates, and
- * do not apply different conventions for start and aned dates.  A date
+ * do not apply different conventions for start and end dates.  A date
  * with no time part always means T00:00:00.
+ *
+ * Returns an invalid Date if the string is malformed or out of range.
  */
 export function xbrlDateToMoment(dateString) {
-    /* If the string has something after the date part other than a time part,
-     * insert a time part of 'T00:00:00'
-     *
-     * i.e. 2010-01-01Z => 2010-01-01T00:00:00Z
-     */
-    dateString = dateString.replace(
-        /^(\d{4,}-\d{2}-\d{2})(?!T|$)/, 
-        (match, $1) => $1 + 'T00:00:00'
-    );
-    return moment.utc(dateString);
+    const match = XBRL_DATE_RE.exec(dateString);
+    if (match === null) {
+        return new Date(NaN);
+    }
+    const [year, month, day, hour, minute, second] = match.slice(1, 7).map(v => Number(v ?? 0));
+    const millisecond = Number((match[7] ?? "").slice(0, 3).padEnd(3, "0"));
+    const sign = match[8] === "-" ? -1 : 1;
+    const offsetMinutes = sign * (Number(match[9] ?? 0) * 60 + Number(match[10] ?? 0));
+
+    const date = new Date(0);
+    // setUTCFullYear, unlike Date.UTC, does not map years 0 to 99 onto 1900 to 1999.
+    date.setUTCFullYear(year, month - 1, day);
+    const isEndOfDay = hour === 24 && minute === 0 && second === 0 && millisecond === 0;
+    if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day
+        || minute > 59 || second > 59 || (hour > 23 && !isEndOfDay)) {
+        return new Date(NaN);
+    }
+    date.setUTCHours(hour, minute - offsetMinutes, second, millisecond);
+    return date;
 }
 
 export function escapeRegex(text) {

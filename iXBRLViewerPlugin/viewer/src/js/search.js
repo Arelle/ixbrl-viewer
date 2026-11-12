@@ -57,8 +57,9 @@ export class ReportSearch {
                 var l = f.getLabel("std");
                 doc.concept = f.conceptQName().localname;
                 doc.doc = f.getLabel("doc");
-                doc.date = f.periodTo();
-                doc.startDate = f.periodFrom();
+                // Indexed as UTC strings so that matches don't depend on the browser's timezone.
+                doc.date = f.periodTo()?.toUTCString();
+                doc.startDate = f.periodFrom()?.toUTCString();
                 var dims = f.dimensions();
                 for (var d in dims) {
                     if (f.report.getConcept(d).isTypedDimension()) {

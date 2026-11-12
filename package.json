@@ -47,7 +47,6 @@
     "less": "^4.2.0",
     "less-loader": "^13.0.0",
     "lunr": "^2.3.9",
-    "moment": "^2.30.1",
     "postcss-less": "^6.0.0",
     "write-excel-file": "^4.0.2"
   },

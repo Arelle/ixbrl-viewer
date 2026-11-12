@@ -15,6 +15,8 @@ export default defineConfig({
         channel: 'chromium',
         baseURL: 'http://localhost:8080',
         viewport: { width: 1440, height: 821 },
+        // Matches jest.globalSetup.js, so that local time bugs show up on UTC CI runners.
+        timezoneId: 'America/New_York',
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',

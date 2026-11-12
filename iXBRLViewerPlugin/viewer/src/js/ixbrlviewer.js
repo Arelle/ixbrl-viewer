@@ -1,7 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
-import interact from 'interactjs'
 import $ from 'jquery'
+import { makeResizable } from './resizable.js';
 import { ReportSet } from "./reportset.js";
 import { Viewer, DocumentTooLargeError } from "./viewer.js";
 import { Inspector } from "./inspector.js";
@@ -404,29 +404,10 @@ export class iXBRLViewer {
                         viewer.initialize()
                             .then(() => inspector.initialize(reportSet, viewer))
                             .then(() => {
-                                interact('#pane-left').resizable({
-                                    edges: { left: false, right: ".resize", bottom: false, top: false},
-                                    restrictEdges: {
-                                        outer: 'parent',
-                                        endOnly: true,
-                                    },
-                                    restrictSize: {
-                                        min: { width: 100 }
-                                    },
-                                })
-                                .on('resizestart', () => {
-                                    $('#ixv').css("pointer-events", "none");
-                                    $('#pane-left').css("flex-grow", 0);
-                                }
-                                )
-                                .on('resizemove', (event) => {
-                                    const target = event.target;
-                                    const w = 100 * event.rect.width / $(target).parent().width();
-                                    target.style.width = `${w}%`;
-                                })
-                                .on('resizeend', (event) =>
-                                    $('#ixv').css("pointer-events", "auto")
-                                );
+                                makeResizable($('#pane-left')[0], $('#viewer-resize-handle')[0], {
+                                    onStart: () => $('#ixv').css("pointer-events", "none"),
+                                    onEnd: () => $('#ixv').css("pointer-events", "auto"),
+                                });
                                 $('#ixv .loader').remove();
 
                                 /* Focus on fact specified in URL fragment, if any */

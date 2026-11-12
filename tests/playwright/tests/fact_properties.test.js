@@ -68,5 +68,9 @@ test.describe('ixbrl-viewer',() => {
                 const startingWidth = await detailsPanel.getPanelWidth();
                 await detailsPanel.resizePanel(-100);
                 await expect.poll(() => detailsPanel.getPanelWidth()).toBeGreaterThan(startingWidth);
+
+                // The document must take clicks again once the drag ends
+                await viewerPage.docFrame.selectFact('dei:DocumentType');
+                await detailsPanel.duplicateText.assertText('1 of 2');
         });
 });

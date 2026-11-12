@@ -80,7 +80,7 @@ const MONTH_ABBREVIATIONS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "A
  *      "1 Jan 2018 to 31 Dec 2018"
  *
  */
-export function momentToHuman(d, adjust) {
+export function dateToHuman(d, adjust) {
     if (Number.isNaN(d.getTime())) {
         return "Invalid date";
     }
@@ -179,7 +179,7 @@ const XBRL_DATE_RE = /^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2}:\d{2})(?:\.(\d+))?)?(
  * Accepts the forms that Python's isoformat() writes, and returns an invalid
  * Date for anything else.
  */
-export function xbrlDateToMoment(dateString) {
+export function xbrlDateToDate(dateString) {
     const match = XBRL_DATE_RE.exec(dateString);
     if (match === null) {
         return new Date(NaN);

@@ -164,16 +164,8 @@ a {
     right: -5px;
     bottom: 0;
     z-index: 20;
-  }
-
-  /* This spacer stops drag events getting lost to the iframe */
-  .resize-spacer {
-    position: absolute;
-    top: 0;
-    width: 3px;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
+    cursor: ew-resize;
+    touch-action: none;
   }
 }
 
@@ -1709,13 +1701,12 @@ ul.plain-list {
 // The query must match MOBILE_MEDIA_QUERY in util.js.
 @media (width <= 767px) {
   #pane-left {
-    // interact.js leaves an inline width and flex-grow behind after a resize
+    // A desktop resize leaves an inline width and flex-grow behind
     width: auto !important;
     flex-grow: 1 !important;
     min-width: 0;
 
-    .resize,
-    .resize-spacer {
+    .resize {
       display: none;
     }
   }

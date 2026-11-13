@@ -469,6 +469,50 @@ describe("_preProcessiXBRL", () => {
 
         expect(viewer._ixNodeMap[viewerUniqueId(0, "h1")].isHidden).toBe(true);
     });
+
+    function documentOrder(html, ids) {
+        const iframe = document.createElement("iframe");
+        document.body.appendChild(iframe);
+        $(iframe).data("report-index", 0);
+        const body = iframe.contentDocument.body;
+        body.innerHTML = html;
+        const facts = Object.fromEntries(ids.map(id => [id, { v: id, a: { c: "eg:Concept1" } }]));
+        const viewer = new Viewer({ options: {}, isReviewModeEnabled: () => false }, $(iframe), new ReportSet(highlightReportData(facts)));
+        viewer._buildContinuationMaps();
+        viewer._preProcessiXBRL(body, 0, 0, false);
+        const index = viewer.docOrderItemIndex;
+        return Array.from({ length: index.length() }, (_, i) => ids.find(id => index.indexOf(viewerUniqueId(0, id)) === i));
+    }
+
+    test("puts hidden facts where they are referenced after the header", () => {
+        const order = documentOrder(`
+<ix:header><ix:hidden>
+  <ix:nonNumeric id="h1" name="eg:Concept1">h1</ix:nonNumeric>
+  <ix:nonNumeric id="h2" name="eg:Concept1">h2</ix:nonNumeric>
+  <ix:nonNumeric id="h3" name="eg:Concept1">h3</ix:nonNumeric>
+</ix:hidden></ix:header>
+<p><ix:nonNumeric id="f1" name="eg:Concept1">f1</ix:nonNumeric></p>
+<p><span style="-sec-ix-hidden: h2">h2 shown</span></p>
+<p><ix:nonNumeric id="f2" name="eg:Concept1">f2</ix:nonNumeric></p>
+<p><span style="-sec-ix-hidden: h1">h1 shown</span></p>
+`, ["h1", "h2", "h3", "f1", "f2"]);
+
+        expect(order).toEqual(["h3", "f1", "h2", "f2", "h1"]);
+    });
+
+    test("puts hidden facts where they are referenced before the header", () => {
+        const order = documentOrder(`
+<p><span style="-sec-ix-hidden: h1">h1 shown</span></p>
+<p><ix:nonNumeric id="f1" name="eg:Concept1">f1</ix:nonNumeric></p>
+<ix:header><ix:hidden>
+  <ix:nonNumeric id="h1" name="eg:Concept1">h1</ix:nonNumeric>
+  <ix:nonNumeric id="h2" name="eg:Concept1">h2</ix:nonNumeric>
+</ix:hidden></ix:header>
+<p><ix:nonNumeric id="f2" name="eg:Concept1">f2</ix:nonNumeric></p>
+`, ["h1", "h2", "f1", "f2"]);
+
+        expect(order).toEqual(["h1", "f1", "h2", "f2"]);
+    });
 });
 
 describe("_findOrCreateWrapperNode", () => {

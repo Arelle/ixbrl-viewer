@@ -501,8 +501,13 @@ export class Viewer {
                     let nodes = this._findOrCreateWrapperNode(n, inHidden);
 
                     this._addIdToNodes(nodes, vuid);
+                    // A hidden fact is in document order where it is shown, so
+                    // not here if an -ix-hidden reference to it came first.
+                    const shownByReference = vuid in this._ixNodeMap;
                     let ixn = this._getOrCreateIXNode(vuid, nodes, docIndex, inHidden);
-                    this.docOrderItemIndex.addItem(vuid, docIndex);
+                    if (!shownByReference) {
+                        this.docOrderItemIndex.addItem(vuid, docIndex);
+                    }
 
                     if (isNonFraction) {
                         nodes.addClass("ixbrl-element-nonfraction");

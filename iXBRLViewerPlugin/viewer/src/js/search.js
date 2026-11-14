@@ -1,6 +1,7 @@
 // See COPYRIGHT.md for copyright information
 
 import lunr from 'lunr'
+import { dateToHuman } from './util.js';
 
 // lunr reports and scores fields in declaration order.
 export const SEARCH_FIELDS = [
@@ -57,9 +58,11 @@ export class ReportSearch {
                 var l = f.getLabel("std");
                 doc.concept = f.conceptQName().localname;
                 doc.doc = f.getLabel("doc");
-                // Indexed as UTC strings so that matches don't depend on the browser's timezone.
-                doc.date = f.periodTo()?.toUTCString();
-                doc.startDate = f.periodFrom()?.toUTCString();
+                // Indexed as displayed, so that an end date matches the inclusive day users see.
+                const to = f.periodTo();
+                const from = f.periodFrom();
+                doc.date = to && dateToHuman(to, true);
+                doc.startDate = from && dateToHuman(from);
                 var dims = f.dimensions();
                 for (var d in dims) {
                     if (f.report.getConcept(d).isTypedDimension()) {

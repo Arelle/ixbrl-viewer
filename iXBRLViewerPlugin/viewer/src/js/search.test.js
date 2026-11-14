@@ -168,6 +168,31 @@ describe("Search fact value filter", () => {
     });
 });
 
+describe("Search by date", () => {
+    const report = testReport(
+            {
+                'concepts': {
+                    ...createSimpleConcept('test:Item', 'Item')
+                },
+                'facts': {
+                    ...createSimpleFact('instant', 'test:Item', { period: '2019-01-01' }),
+                    ...createSimpleFact('duration', 'test:Item', { period: '2018-01-01/2019-01-01' }),
+                }
+            },
+    )
+    const reportSearch = getReportSearch(report);
+    const search = query => reportSearch.search(testSearchSpec(query)).map(r => r.fact.localId()).sort();
+
+    test("End dates match the inclusive day that is displayed", () => {
+        expect(search('+date:31 +date:dec +date:2018')).toEqual(['duration', 'instant']);
+        expect(search('date:2019')).toEqual([]);
+    });
+
+    test("Start dates match as displayed", () => {
+        expect(search('+startDate:1 +startDate:jan +startDate:2018')).toEqual(['duration']);
+    });
+});
+
 describe("Search calculation filter", () => {
     const report = testReport(
             {

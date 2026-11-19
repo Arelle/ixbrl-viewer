@@ -10,7 +10,7 @@
     "test:ci": "jest --ci --coverage"
   },
   "dependencies": {
-    "ixbrl-viewer": "^1.5.9",
+    "ixbrl-viewer": "^1.5.10",
     "jquery": "^4.0.0"
   },
   "engines": {

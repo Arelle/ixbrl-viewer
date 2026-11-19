@@ -1,5 +1,5 @@
 furo==2025.12.19
-myst-parser==5.1.0
+myst-parser==5.2.0
 sphinx==9.0.4
 sphinx-autobuild==2025.8.25
 sphinx-autodoc2==0.5.0

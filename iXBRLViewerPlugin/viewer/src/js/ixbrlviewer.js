@@ -251,7 +251,7 @@ export class iXBRLViewer {
 
     _addViewportMeta() {
         if ($('head meta[name="viewport"]').length === 0) {
-            $('<meta name="viewport" content="width=device-width, initial-scale=1">').appendTo('head');
+            $('<meta name="viewport" content="width=device-width, initial-scale=1" />').appendTo('head');
         }
     }
 
